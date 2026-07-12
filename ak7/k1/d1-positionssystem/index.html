@@ -977,6 +977,21 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     ]
   };
   var RAM = '../../../ak7-k1-ram.html';
+  // Motorns byggar-funktioner per blad (globala) — används för att återställa till Blad A vid öppning.
+  var BYGGARE = { tiosystemet:'byggTiosystemet', egenskaper:'byggEgenskaper', storlek:'byggStorlek', positionsrakning:'byggPosrak' };
+  function aterstallTillA(bladId){
+    var mount = document.getElementById('blad-' + bladId);
+    if(!mount) return;
+    var bBtn = mount.querySelector('.variant-btn[data-variant="B"], .variant-btn[data-stencil="B"]');
+    if(!(bBtn && bBtn.classList.contains('is-active'))) return;   // redan på A → rör inte
+    var fn = window[BYGGARE[bladId]];
+    if(typeof fn === 'function') fn('A');                          // motorn ritar Blad A färskt (avsnitt 1)
+    var btns = mount.querySelectorAll('.variant-btn');
+    Array.prototype.forEach.call(btns, function(vb){
+      var v = vb.getAttribute('data-variant') || vb.getAttribute('data-stencil');
+      vb.classList.toggle('is-active', v === 'A');
+    });
+  }
 
   // Utbudslista (delad renderare för Öva + Färdighetsträning)
   function post(p, deep){
@@ -991,7 +1006,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     var slot=document.createElement('div'); slot.className='utbud-blad';
     var mount=document.getElementById('blad-'+p.blad);
     if(mount){ mount.hidden=false; slot.appendChild(mount); }
-    b.onclick=function(){ var open=slot.classList.toggle('is-open'); b.classList.toggle('is-open',open); };
+    b.onclick=function(){ var open=slot.classList.toggle('is-open'); b.classList.toggle('is-open',open); if(open) aterstallTillA(p.blad); };
     return {el:b, slot:slot};
   }
   function renderUtbud(el, grupper, deep){
