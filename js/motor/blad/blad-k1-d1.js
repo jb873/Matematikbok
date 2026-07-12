@@ -954,66 +954,66 @@ var TIO_A = {
   titel:'Tiosystemet – Blad A', stegvis:true,
   intro:'Träna på siffrans värde, att bygga tal, utvecklad form och decimaltal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'1. Vilket värde har sjuan i talet?', rader:[
+    {rubrik:'Vilket värde har sjuan i talet?', rader:[
       {typ:'enkel', vansterText:'74',     svar:70},
       {typ:'enkel', vansterText:'67',     svar:7},
       {typ:'enkel', vansterText:'17 523', svar:7000},
       {typ:'enkel', vansterText:'73 508', svar:70000}
     ]},
-    {rubrik:'2. Skriv det tal som består av', rader:[
+    {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'7 hundratal, 6 tiotal och 3 ental', svar:763},
       {typ:'enkel', vansterText:'5 tusental, 4 tiotal och 2 ental',  svar:5042},
       {typ:'enkel', vansterText:'4 tiotusental, 5 hundratal och 2 ental', svar:40502}
     ]},
-    {rubrik:'3. Använd siffrorna 4, 5, 6 och 7 och skriv', rader:[
+    {rubrik:'Använd siffrorna 4, 5, 6 och 7 och skriv', rader:[
       {typ:'enkel', vansterText:'det största talet du kan',     svar:7654},
       {typ:'enkel', vansterText:'det minsta talet du kan',      svar:4567},
       {typ:'enkel', vansterText:'det tal som ligger närmast 6 000', svar:5764},
       {typ:'enkel', vansterText:'det största udda talet du kan', svar:7645}
     ]},
-    {rubrik:'4. Skriv följande tal med siffror', rader:[
+    {rubrik:'Skriv följande tal med siffror', rader:[
       {typ:'enkel', vansterText:'fyrahundra tjugofem',        svar:425},
       {typ:'enkel', vansterText:'sexhundrafem',               svar:605},
       {typ:'enkel', vansterText:'femtusen sjuhundra nittio',  svar:5790},
       {typ:'enkel', vansterText:'fjortontusen fem',           svar:14005}
     ]},
-    {rubrik:'5. Skriv i utvecklad form (t.ex. 500 + 60 + 7)', rader:[
+    {rubrik:'Skriv i utvecklad form (t.ex. 500 + 60 + 7)', rader:[
       {typ:'uttryck', likhet:true, fraga:'567',  svar:'500+60+7', accept:['500+60+7']},
       {typ:'uttryck', likhet:true, fraga:'43',   svar:'40+3',     accept:['40+3']},
       {typ:'uttryck', likhet:true, fraga:'5608', svar:'5000+600+8', accept:['5000+600+8']}
     ]},
-    {rubrik:'6. Vilket värde har trean? (skriv med komma)', rader:[
+    {rubrik:'Vilket värde har trean? (skriv med komma)', rader:[
       {typ:'enkel', vansterText:'703',    svar:3},
       {typ:'enkel', vansterText:'12,03',  svar:0.03},
       {typ:'enkel', vansterText:'14,36',  svar:0.3},
       {typ:'enkel', vansterText:'348,12', svar:300},
       {typ:'enkel', vansterText:'1,003',  svar:0.003}
     ]},
-    {rubrik:'7. Skriv det tal som består av', rader:[
+    {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'3 ental och 2 tiondelar',                 svar:3.2},
       {typ:'enkel', vansterText:'7 tiotal, 5 tiondelar och 8 hundradelar', svar:70.58},
       {typ:'enkel', vansterText:'2 tiondelar och 4 hundradelar',           svar:0.24},
       {typ:'enkel', vansterText:'6 ental, 9 tiondelar och 7 tusendelar',   svar:6.907}
     ]},
-    {rubrik:'8. Vilket värde har trean i talet?', rader:[
+    {rubrik:'Vilket värde har trean i talet?', rader:[
       {typ:'enkel', vansterText:'35,2',  svar:30},
       {typ:'enkel', vansterText:'5,34',  svar:0.3},
       {typ:'enkel', vansterText:'6,036',  svar:0.03},
       {typ:'enkel', vansterText:'7,0837', svar:0.03}
     ]},
-    {rubrik:'9. Skriv som tal (med komma där det behövs)', rader:[
+    {rubrik:'Skriv som tal (med komma där det behövs)', rader:[
       {typ:'enkel', vansterText:'17 tiotal',     svar:170},
       {typ:'enkel', vansterText:'19 hundradelar', svar:0.19},
       {typ:'enkel', vansterText:'23 tiondelar',  svar:2.3}
     ]},
-    {rubrik:'10. Vilket tal ska stå i rutan?', rader:[
+    {rubrik:'Vilket tal ska stå i rutan?', rader:[
       {typ:'enkel', vansterText:'160 = ___ tiotal',        svar:16},
       {typ:'enkel', vansterText:'3 ental = ___ tiondelar', svar:30},
       {typ:'enkel', vansterText:'4 tiondelar = ___ tusendelar', svar:400},
       {typ:'enkel', vansterText:'1,9 = ___ hundradelar',   svar:190},
       {typ:'enkel', vansterText:'14,4 = ___ tiondelar',    svar:144}
     ]},
-    {rubrik:'11. Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
+    {rubrik:'Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
       {typ:'uttryck', likhet:true, fraga:'63,9',   svar:'60+3+0,9',     accept:['60+3+0,9','60+3+0.9']},
       {typ:'uttryck', likhet:true, fraga:'7,63',   svar:'7+0,6+0,03',   accept:['7+0,6+0,03','7+0.6+0.03']},
       {typ:'uttryck', likhet:true, fraga:'70,809', svar:'70+0,8+0,009', accept:['70+0,8+0,009','70+0.8+0.009']}
@@ -1025,66 +1025,66 @@ var TIO_B = {
   titel:'Tiosystemet – Blad B', stegvis:true,
   intro:'Samma slags uppgifter som Blad A, men med andra tal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'1. Vilket värde har femman i talet?', rader:[
+    {rubrik:'Vilket värde har femman i talet?', rader:[
       {typ:'enkel', vansterText:'52',     svar:50},
       {typ:'enkel', vansterText:'85',     svar:5},
       {typ:'enkel', vansterText:'45 217', svar:5000},
       {typ:'enkel', vansterText:'56 304', svar:50000}
     ]},
-    {rubrik:'2. Skriv det tal som består av', rader:[
+    {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'8 hundratal, 3 tiotal och 9 ental', svar:839},
       {typ:'enkel', vansterText:'6 tusental, 7 tiotal och 1 ental',  svar:6071},
       {typ:'enkel', vansterText:'3 tiotusental, 8 hundratal och 4 ental', svar:30804}
     ]},
-    {rubrik:'3. Använd siffrorna 2, 4, 6 och 7 och skriv', rader:[
+    {rubrik:'Använd siffrorna 2, 4, 6 och 7 och skriv', rader:[
       {typ:'enkel', vansterText:'det största talet du kan',     svar:7642},
       {typ:'enkel', vansterText:'det minsta talet du kan',      svar:2467},
       {typ:'enkel', vansterText:'det tal som ligger närmast 5 000', svar:4762},
       {typ:'enkel', vansterText:'det största udda talet du kan', svar:6427}
     ]},
-    {rubrik:'4. Skriv följande tal med siffror', rader:[
+    {rubrik:'Skriv följande tal med siffror', rader:[
       {typ:'enkel', vansterText:'trehundra sextio',          svar:360},
       {typ:'enkel', vansterText:'åttahundrasju',             svar:807},
       {typ:'enkel', vansterText:'sextusen fyrahundra tjugo', svar:6420},
       {typ:'enkel', vansterText:'tjugotusen nio',            svar:20009}
     ]},
-    {rubrik:'5. Skriv i utvecklad form (t.ex. 300 + 80 + 4)', rader:[
+    {rubrik:'Skriv i utvecklad form (t.ex. 300 + 80 + 4)', rader:[
       {typ:'uttryck', likhet:true, fraga:'384',  svar:'300+80+4',   accept:['300+80+4']},
       {typ:'uttryck', likhet:true, fraga:'72',   svar:'70+2',       accept:['70+2']},
       {typ:'uttryck', likhet:true, fraga:'4309', svar:'4000+300+9', accept:['4000+300+9']}
     ]},
-    {rubrik:'6. Vilket värde har sexan? (skriv med komma)', rader:[
+    {rubrik:'Vilket värde har sexan? (skriv med komma)', rader:[
       {typ:'enkel', vansterText:'608',    svar:600},
       {typ:'enkel', vansterText:'23,06',  svar:0.06},
       {typ:'enkel', vansterText:'17,68',  svar:0.6},
       {typ:'enkel', vansterText:'651,29', svar:600},
       {typ:'enkel', vansterText:'2,006',  svar:0.006}
     ]},
-    {rubrik:'7. Skriv det tal som består av', rader:[
+    {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'5 ental och 4 tiondelar',                 svar:5.4},
       {typ:'enkel', vansterText:'8 tiotal, 3 tiondelar och 6 hundradelar', svar:80.36},
       {typ:'enkel', vansterText:'3 tiondelar och 7 hundradelar',           svar:0.37},
       {typ:'enkel', vansterText:'4 ental, 2 tiondelar och 5 tusendelar',   svar:4.205}
     ]},
-    {rubrik:'8. Vilket värde har sexan i talet?', rader:[
+    {rubrik:'Vilket värde har sexan i talet?', rader:[
       {typ:'enkel', vansterText:'6,42',   svar:6},
       {typ:'enkel', vansterText:'902,6',  svar:0.6},
       {typ:'enkel', vansterText:'8,062',  svar:0.06},
       {typ:'enkel', vansterText:'3,0625', svar:0.06}
     ]},
-    {rubrik:'9. Skriv som tal (med komma där det behövs)', rader:[
+    {rubrik:'Skriv som tal (med komma där det behövs)', rader:[
       {typ:'enkel', vansterText:'14 tiotal',      svar:140},
       {typ:'enkel', vansterText:'27 hundradelar', svar:0.27},
       {typ:'enkel', vansterText:'31 tiondelar',   svar:3.1}
     ]},
-    {rubrik:'10. Vilket tal ska stå i rutan?', rader:[
+    {rubrik:'Vilket tal ska stå i rutan?', rader:[
       {typ:'enkel', vansterText:'240 = ___ tiotal',        svar:24},
       {typ:'enkel', vansterText:'5 ental = ___ tiondelar', svar:50},
       {typ:'enkel', vansterText:'7 tiondelar = ___ tusendelar', svar:700},
       {typ:'enkel', vansterText:'2,3 = ___ hundradelar',   svar:230},
       {typ:'enkel', vansterText:'18,6 = ___ tiondelar',    svar:186}
     ]},
-    {rubrik:'11. Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
+    {rubrik:'Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
       {typ:'uttryck', likhet:true, fraga:'48,2',   svar:'40+8+0,2',     accept:['40+8+0,2','40+8+0.2']},
       {typ:'uttryck', likhet:true, fraga:'9,54',   svar:'9+0,5+0,04',   accept:['9+0,5+0,04','9+0.5+0.04']},
       {typ:'uttryck', likhet:true, fraga:'50,607', svar:'50+0,6+0,007', accept:['50+0,6+0,007','50+0.6+0.007']}
@@ -1101,48 +1101,48 @@ var EGEN_A = {
   titel:'Tals egenskaper – Blad A', stegvis:true,
   intro:'Träna på jämna och udda tal, delbarhet, primtal, sammansatta tal och faktorisering. Markera alla tal som stämmer, eller skriv svaret. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'1. Vilka tal är jämna?', rader:[
+    {rubrik:'Vilka tal är jämna?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla jämna tal:', alt:['7','4','16','23','27'], ratt:['4','16']}
     ]},
-    {rubrik:'2. Vilka tal är sammansatta tal?', rader:[
+    {rubrik:'Vilka tal är sammansatta tal?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla sammansatta tal:', alt:['3','9','11','17','25'], ratt:['9','25']}
     ]},
-    {rubrik:'3. Vilka tal är jämnt delbara med …', rader:[
+    {rubrik:'Vilka tal är jämnt delbara med …', rader:[
       {typ:'valruta', flera:true, fraga:'a) … 2', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['72','70','98','100','568','490']},
       {typ:'valruta', flera:true, fraga:'b) … 5', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['70','45','100','125','490']}
     ]},
-    {rubrik:'4. Faktorisera talet i två faktorer (skriv t.ex. 3·5)', rader:[
+    {rubrik:'Faktorisera talet i två faktorer (skriv t.ex. 3·5)', rader:[
       {typ:'uttryck', likhet:true, fraga:'15', svar:'3·5', accept:['3·5','5·3'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'27', svar:'3·9', accept:['3·9','9·3'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'36', svar:'6·6', accept:['6·6','4·9','9·4','3·12','12·3','2·18','18·2'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'12', svar:'3·4', accept:['3·4','4·3','2·6','6·2'], placeholder:'två faktorer'}
     ]},
-    {rubrik:'5. Vilka primfaktorer saknas i faktoriseringen?', rader:[
+    {rubrik:'Vilka primfaktorer saknas i faktoriseringen?', rader:[
       {typ:'uttryck', fraga:'a) 28 = 2 · 2 · ___', svar:'7', accept:['7'], placeholder:'tal'},
       {typ:'uttryck', fraga:'b) 60 = 2 · 2 · ___ · 5', svar:'3', accept:['3'], placeholder:'tal'},
       {typ:'uttryck', fraga:'c) 45 = ___ · ___ · 5  (skriv båda, t.ex. 3·3)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
       {typ:'uttryck', fraga:'d) 90 = 2 · ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'}
     ]},
-    {rubrik:'6. Vilket tal har faktoriserats?', rader:[
+    {rubrik:'Vilket tal har faktoriserats?', rader:[
       {typ:'enkel', vansterText:'2 · 2 · 2 · 2', svar:16},
       {typ:'enkel', vansterText:'2 · 2 · 5 · 5', svar:100},
       {typ:'enkel', vansterText:'2 · 5 · 19',    svar:190}
     ]},
-    {rubrik:'7. Vilka tal är jämnt delbara med 4 och 5?', rader:[
+    {rubrik:'Vilka tal är jämnt delbara med 4 och 5?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 4 och 5:', alt:['35','40','12','120','32','87','80','400','6','115','97','528'], ratt:['40','120','80','400']}
     ]},
-    {rubrik:'8. Vilka tal är primtal?', rader:[
+    {rubrik:'Vilka tal är primtal?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla primtal:', alt:['5','7','15','19','21','25','27','31'], ratt:['5','7','19','31']}
     ]},
-    {rubrik:'9. Vilka tal är jämnt delbara med 3 och 5?', rader:[
+    {rubrik:'Vilka tal är jämnt delbara med 3 och 5?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 3 och 5:', alt:['75','85','93','150','420','5','211'], ratt:['75','150','420']}
     ]},
-    {rubrik:'10. Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
+    {rubrik:'Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
       {typ:'uttryck', likhet:true, fraga:'18', svar:'2·3·3', accept:['2·3·3','3·2·3','3·3·2'], placeholder:'primfaktorer'},
       {typ:'uttryck', likhet:true, fraga:'32', svar:'2·2·2·2·2', accept:['2·2·2·2·2'], placeholder:'primfaktorer'},
       {typ:'uttryck', likhet:true, fraga:'56', svar:'2·2·2·7', accept:['2·2·2·7','7·2·2·2','2·7·2·2','2·2·7·2'], placeholder:'primfaktorer'}
     ]},
-    {rubrik:'11. Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
+    {rubrik:'Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
       {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
       {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
       {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'}
@@ -1154,48 +1154,48 @@ var EGEN_B = {
   titel:'Tals egenskaper – Blad B', stegvis:true,
   intro:'Samma slags uppgifter som Blad A, men med andra tal. Markera alla tal som stämmer, eller skriv svaret. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'1. Vilka tal är jämna?', rader:[
+    {rubrik:'Vilka tal är jämna?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla jämna tal:', alt:['9','12','21','34','45'], ratt:['12','34']}
     ]},
-    {rubrik:'2. Vilka tal är sammansatta tal?', rader:[
+    {rubrik:'Vilka tal är sammansatta tal?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla sammansatta tal:', alt:['5','8','13','21','29'], ratt:['8','21']}
     ]},
-    {rubrik:'3. Vilka tal är jämnt delbara med …', rader:[
+    {rubrik:'Vilka tal är jämnt delbara med …', rader:[
       {typ:'valruta', flera:true, fraga:'a) … 2', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['84','60','200','432','310']},
       {typ:'valruta', flera:true, fraga:'b) … 5', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['55','60','200','135','310']}
     ]},
-    {rubrik:'4. Faktorisera talet i två faktorer (skriv t.ex. 3·7)', rader:[
+    {rubrik:'Faktorisera talet i två faktorer (skriv t.ex. 3·7)', rader:[
       {typ:'uttryck', likhet:true, fraga:'21', svar:'3·7', accept:['3·7','7·3'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'32', svar:'4·8', accept:['4·8','8·4','2·16','16·2'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'24', svar:'4·6', accept:['4·6','6·4','3·8','8·3','2·12','12·2'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'18', svar:'2·9', accept:['2·9','9·2','3·6','6·3'], placeholder:'två faktorer'}
     ]},
-    {rubrik:'5. Vilka primfaktorer saknas i faktoriseringen?', rader:[
+    {rubrik:'Vilka primfaktorer saknas i faktoriseringen?', rader:[
       {typ:'uttryck', fraga:'a) 20 = 2 · 2 · ___', svar:'5', accept:['5'], placeholder:'tal'},
       {typ:'uttryck', fraga:'b) 84 = 2 · 2 · ___ · 7', svar:'3', accept:['3'], placeholder:'tal'},
       {typ:'uttryck', fraga:'c) 63 = ___ · ___ · 7  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
       {typ:'uttryck', fraga:'d) 150 = 2 · 3 · ___ · ___  (skriv båda)', svar:'5·5', accept:['5·5'], placeholder:'två tal'}
     ]},
-    {rubrik:'6. Vilket tal har faktoriserats?', rader:[
+    {rubrik:'Vilket tal har faktoriserats?', rader:[
       {typ:'enkel', vansterText:'2 · 2 · 2 · 3', svar:24},
       {typ:'enkel', vansterText:'3 · 3 · 5 · 5', svar:225},
       {typ:'enkel', vansterText:'2 · 3 · 17',    svar:102}
     ]},
-    {rubrik:'7. Vilka tal är jämnt delbara med 4 och 5?', rader:[
+    {rubrik:'Vilka tal är jämnt delbara med 4 och 5?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 4 och 5:', alt:['45','60','18','160','28','99','140','300','8','135','83','640'], ratt:['60','160','140','300','640']}
     ]},
-    {rubrik:'8. Vilka tal är primtal?', rader:[
+    {rubrik:'Vilka tal är primtal?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla primtal:', alt:['3','9','11','17','23','27','33','37'], ratt:['3','11','17','23','37']}
     ]},
-    {rubrik:'9. Vilka tal är jämnt delbara med 3 och 5?', rader:[
+    {rubrik:'Vilka tal är jämnt delbara med 3 och 5?', rader:[
       {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 3 och 5:', alt:['60','95','81','180','330','5','127'], ratt:['60','180','330']}
     ]},
-    {rubrik:'10. Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
+    {rubrik:'Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
       {typ:'uttryck', likhet:true, fraga:'24', svar:'2·2·2·3', accept:['2·2·2·3','3·2·2·2','2·3·2·2','2·2·3·2'], placeholder:'primfaktorer'},
       {typ:'uttryck', likhet:true, fraga:'40', svar:'2·2·2·5', accept:['2·2·2·5','5·2·2·2','2·5·2·2','2·2·5·2'], placeholder:'primfaktorer'},
       {typ:'uttryck', likhet:true, fraga:'60', svar:'2·2·3·5', accept:['2·2·3·5','2·2·5·3','3·2·2·5','5·2·2·3','2·3·2·5','2·5·2·3'], placeholder:'primfaktorer'}
     ]},
-    {rubrik:'11. Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
+    {rubrik:'Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
       {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
       {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
       {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'}
@@ -1209,15 +1209,15 @@ var STORLEK_A = {
   titel:'Storlek och ordning – Stencil A',
   intro:'Träna på tiohopp, tallinjer, tiondelar och talföljder. Skriv decimaltal med komma. Tryck sedan på Kontrollera. Klara minst 80 % för att låsa upp Stencil B.',
   grupper:[
-    {rubrik:'1. Gör tre 10-hopp framåt för varje tal', rader:[
+    {rubrik:'Gör tre 10-hopp framåt för varje tal', rader:[
       {typ:'talfoljd', termer:[980, null, null, null],  facit:[null,990,1000,1010]},
       {typ:'talfoljd', termer:[4997, null, null, null], facit:[null,5007,5017,5027]}
     ]},
-    {rubrik:'2. Gör tre 10-hopp bakåt för varje tal', rader:[
+    {rubrik:'Gör tre 10-hopp bakåt för varje tal', rader:[
       {typ:'talfoljd', termer:[527, null, null, null],   facit:[null,517,507,497]},
       {typ:'talfoljd', termer:[10025, null, null, null], facit:[null,10015,10005,9995]}
     ]},
-    {rubrik:'3. Vilka tal pekar pilarna på?', rader:[
+    {rubrik:'Vilka tal pekar pilarna på?', rader:[
       {typ:'tallinje', min:0, max:140,
         streck:[{v:0,lang:true,etikett:0},{v:20},{v:40},{v:60},{v:80},{v:100,lang:true,etikett:100},{v:120},{v:140}],
         pilar:[{namn:'A',v:20},{namn:'B',v:60},{namn:'C',v:120}]},
@@ -1225,16 +1225,16 @@ var STORLEK_A = {
         streck:[{v:0,lang:true,etikett:0},{v:20},{v:40},{v:60},{v:80},{v:100,lang:true,etikett:100},{v:120},{v:140},{v:160}],
         pilar:[{namn:'A',v:40},{namn:'B',v:60},{namn:'C',v:120}]}
     ]},
-    {rubrik:'4. Skriv det tal som är en tiondel större än', rader:[
+    {rubrik:'Skriv det tal som är en tiondel större än', rader:[
       {typ:'enkel', vansterText:'46,7',  svar:46.8},
       {typ:'enkel', vansterText:'534',   svar:534.1},
       {typ:'enkel', vansterText:'12,93', svar:13.03}
     ]},
-    {rubrik:'5. Gör tre 0,4-hopp framåt för varje tal', rader:[
+    {rubrik:'Gör tre 0,4-hopp framåt för varje tal', rader:[
       {typ:'talfoljd', termer:[0.35, null, null, null], facit:[null,0.75,1.15,1.55]},
       {typ:'talfoljd', termer:[4.57, null, null, null], facit:[null,4.97,5.37,5.77]}
     ]},
-    {rubrik:'6. Vilka tal pekar pilarna på?', rader:[
+    {rubrik:'Vilka tal pekar pilarna på?', rader:[
       {typ:'tallinje', min:0, max:14,
         streck:[{v:0,lang:true,etikett:0},{v:2},{v:4},{v:6},{v:8},{v:10,lang:true,etikett:10},{v:12},{v:14}],
         pilar:[{namn:'A',v:2},{namn:'B',v:4},{namn:'C',v:13}]},
@@ -1242,17 +1242,17 @@ var STORLEK_A = {
         streck:[{v:0,lang:true,etikett:0},{v:0.2},{v:0.4},{v:0.5,lang:true,etikett:'0,5'},{v:0.6},{v:0.8},{v:1,lang:true,etikett:1},{v:1.2},{v:1.4}],
         pilar:[{namn:'A',v:0.1},{namn:'B',v:0.7},{namn:'C',v:1.1}]}
     ]},
-    {rubrik:'7. Gör tre 0,4-hopp bakåt för varje tal', rader:[
+    {rubrik:'Gör tre 0,4-hopp bakåt för varje tal', rader:[
       {typ:'talfoljd', termer:[30.75, null, null, null], facit:[null,30.35,29.95,29.55]},
       {typ:'talfoljd', termer:[5.72, null, null, null],  facit:[null,5.32,4.92,4.52]}
     ]},
-    {rubrik:'8. Skriv de två talen som kommer i talföljden', rader:[
+    {rubrik:'Skriv de två talen som kommer i talföljden', rader:[
       {typ:'talfoljd', termer:[0.4, 0.6, 0.8, null, null],  facit:[null,null,null,1.0,1.2]},
       {typ:'talfoljd', termer:[3.75, 3.50, 3.25, null, null], facit:[null,null,null,3.0,2.75]},
       {typ:'talfoljd', termer:[0.41, 0.44, 0.47, null, null], facit:[null,null,null,0.50,0.53]},
       {typ:'talfoljd', termer:[0.2, 0.5, 0.8, null, null],  facit:[null,null,null,1.1,1.4]}
     ]},
-    {rubrik:'9. Skriv talen i storleksordning, börja med det minsta', rader:[
+    {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
       {typ:'ordna', tal:[6.5, 6.168, 6.17, 6.105]}
     ]}
   ]
@@ -1262,23 +1262,23 @@ var STORLEK_B = {
   titel:'Storlek och ordning – Stencil B',
   intro:'Lite svårare uppgifter: mindre steg, fler tal att ordna och tal nära varandra. Skriv decimaltal med komma.',
   grupper:[
-    {rubrik:'10. Skriv talen i storleksordning, börja med det minsta', rader:[
+    {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
       {typ:'ordna', tal:[0.46, 0.4, 0.09, 3.895]}
     ]},
-    {rubrik:'11. Vilket tal är en hundradel mindre än', rader:[
+    {rubrik:'Vilket tal är en hundradel mindre än', rader:[
       {typ:'enkel', vansterText:'7',     svar:6.99},
       {typ:'enkel', vansterText:'16,3',  svar:16.29},
       {typ:'enkel', vansterText:'9,206', svar:9.196}
     ]},
-    {rubrik:'12. Ordna talen i storleksordning, börja med det minsta', rader:[
+    {rubrik:'Ordna talen i storleksordning, börja med det minsta', rader:[
       {typ:'ordna', tal:[0.18, 0.1, 0.2, 1.7, 0.15, 2]}
     ]},
-    {rubrik:'13. Vilket tal är en tusendel mindre än', rader:[
+    {rubrik:'Vilket tal är en tusendel mindre än', rader:[
       {typ:'enkel', vansterText:'2',    svar:1.999},
       {typ:'enkel', vansterText:'2000', svar:1999.999},
       {typ:'enkel', vansterText:'0,57', svar:0.569}
     ]},
-    {rubrik:'14. Vilka tal pekar pilarna på?', rader:[
+    {rubrik:'Vilka tal pekar pilarna på?', rader:[
       {typ:'tallinje', min:0, max:0.015,
         streck:[{v:0,lang:true,etikett:0},{v:0.0025},{v:0.005,lang:true,etikett:'0,005'},{v:0.0075},{v:0.01,lang:true,etikett:'0,01'},{v:0.0125},{v:0.015,lang:true,etikett:'0,015'}],
         pilar:[{namn:'A',v:0.001},{namn:'B',v:0.007},{namn:'C',v:0.013}]},
@@ -1286,10 +1286,10 @@ var STORLEK_B = {
         streck:[{v:0.01,lang:true,etikett:'0,01'},{v:0.012},{v:0.014},{v:0.016},{v:0.018},{v:0.02,lang:true,etikett:'0,02'},{v:0.022},{v:0.024},{v:0.026}],
         pilar:[{namn:'A',v:0.012},{namn:'B',v:0.016},{namn:'C',v:0.022}]}
     ]},
-    {rubrik:'15. Ordna talen i storleksordning, börja med det minsta', rader:[
+    {rubrik:'Ordna talen i storleksordning, börja med det minsta', rader:[
       {typ:'ordna', tal:[1.05, 0.457, 0.9, 1.3, 0.10, 0.01]}
     ]},
-    {rubrik:'16. Skriv ett tal som är', rader:[
+    {rubrik:'Skriv ett tal som är', rader:[
       {typ:'intervall', enkelt:true, vansterText:'a) större än 9,9 men mindre än 10',    min:9.9, max:10},
       {typ:'intervall', enkelt:true, vansterText:'b) större än 10 men mindre än 10,01', min:10, max:10.01}
     ]}
@@ -1315,58 +1315,58 @@ var POSRAK_A = {
   titel:'Räkna i positionssystemet – Blad A', stegvis:true,
   intro:'Träna på huvudräkning med tiondelar och hundradelar, platsövergångar och tal som ligger mittemellan. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'1. Skriv två tal inom varje intervall', rader:[
+    {rubrik:'Skriv två tal inom varje intervall', rader:[
       {typ:'intervall', vansterText:'a) mellan 2,5 och 2,7', min:2.5, max:2.7},
       {typ:'intervall', vansterText:'b) mellan 99 och 100',  min:99,  max:100},
       {typ:'intervall', vansterText:'c) mellan 0,28 och 0,29', min:0.28, max:0.29}
     ]},
-    {rubrik:'2. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'0,8 + 0,3',  svar:1.1},
       {typ:'enkel', vansterText:'0,1 + 3,9',  svar:4},
       {typ:'enkel', vansterText:'0,1 + 6,98', svar:7.08}
     ]},
-    {rubrik:'3. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'16,835 − 0,1', svar:16.735},
       {typ:'enkel', vansterText:'1,13 − 0,1',   svar:1.03},
       {typ:'enkel', vansterText:'1,06 − 0,1',   svar:0.96}
     ]},
-    {rubrik:'4. Vilket tal ska stå i rutan?', rader:[
+    {rubrik:'Vilket tal ska stå i rutan?', rader:[
       {typ:'enkel', vansterText:'345 − ___ = 340',   svar:5},
       {typ:'enkel', vansterText:'5678 − ___ = 678',  svar:5000},
       {typ:'enkel', vansterText:'2354 − ___ = 2304', svar:50}
     ]},
-    {rubrik:'5. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'5,235 − 0,01',  svar:5.225},
       {typ:'enkel', vansterText:'0,01 + 3,99',   svar:4},
       {typ:'enkel', vansterText:'0,01 + 6998',   svar:6998.01}
     ]},
-    {rubrik:'6. Vilket tal är 7 tiondelar större än …', rader:[
+    {rubrik:'Vilket tal är 7 tiondelar större än …', rader:[
       {typ:'enkel', vansterText:'11,6', svar:12.3},
       {typ:'enkel', vansterText:'9,57', svar:10.27}
     ]},
-    {rubrik:'7. Vilket tal ska stå i rutan?', rader:[
+    {rubrik:'Vilket tal ska stå i rutan?', rader:[
       {typ:'enkel', vansterText:'5891 − ___ = 5741', svar:150},
       {typ:'enkel', vansterText:'9389 − ___ = 8989', svar:400},
       {typ:'enkel', vansterText:'8576 − ___ = 1200', svar:7376}
     ]},
-    {rubrik:'8. Vilket tal ligger mittemellan …', rader:[
+    {rubrik:'Vilket tal ligger mittemellan …', rader:[
       {typ:'enkel', vansterText:'5,7 och 5,8',   svar:5.75},
       {typ:'enkel', vansterText:'0,13 och 0,14', svar:0.135},
       {typ:'enkel', vansterText:'245 och 246',   svar:245.5}
     ]},
-    {rubrik:'9. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'15,835 − 0,01', svar:15.825},
       {typ:'enkel', vansterText:'13 − 0,01',     svar:12.99},
       {typ:'enkel', vansterText:'1,006 − 0,01',  svar:0.996}
     ]},
-    {rubrik:'10. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'0,6 + 0,55',  svar:1.15},
       {typ:'enkel', vansterText:'1 − 0,2',     svar:0.8},
       {typ:'enkel', vansterText:'3 − 1,7',     svar:1.3},
       {typ:'enkel', vansterText:'0,86 + 1,05', svar:1.91},
       {typ:'enkel', vansterText:'2,75 − 1,3',  svar:1.45}
     ]},
-    {rubrik:'11. Vilket tal ligger mittemellan …', rader:[
+    {rubrik:'Vilket tal ligger mittemellan …', rader:[
       {typ:'enkel', vansterText:'1,45 och 1,4', svar:1.425},
       {typ:'enkel', vansterText:'0,69 och 0,8', svar:0.745}
     ]}
@@ -1377,58 +1377,58 @@ var POSRAK_B = {
   titel:'Räkna i positionssystemet – Blad B', stegvis:true,
   intro:'Samma slags uppgifter som Blad A, men med andra tal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'1. Skriv två tal inom varje intervall', rader:[
+    {rubrik:'Skriv två tal inom varje intervall', rader:[
       {typ:'intervall', vansterText:'a) mellan 3,4 och 3,6', min:3.4, max:3.6},
       {typ:'intervall', vansterText:'b) mellan 49 och 50',   min:49,  max:50},
       {typ:'intervall', vansterText:'c) mellan 0,71 och 0,72', min:0.71, max:0.72}
     ]},
-    {rubrik:'2. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'0,7 + 0,5',  svar:1.2},
       {typ:'enkel', vansterText:'0,1 + 2,9',  svar:3},
       {typ:'enkel', vansterText:'0,1 + 5,97', svar:6.07}
     ]},
-    {rubrik:'3. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'24,617 − 0,1', svar:24.517},
       {typ:'enkel', vansterText:'1,28 − 0,1',   svar:1.18},
       {typ:'enkel', vansterText:'1,04 − 0,1',   svar:0.94}
     ]},
-    {rubrik:'4. Vilket tal ska stå i rutan?', rader:[
+    {rubrik:'Vilket tal ska stå i rutan?', rader:[
       {typ:'enkel', vansterText:'672 − ___ = 670',   svar:2},
       {typ:'enkel', vansterText:'4583 − ___ = 583',  svar:4000},
       {typ:'enkel', vansterText:'3471 − ___ = 3421', svar:50}
     ]},
-    {rubrik:'5. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'7,142 − 0,01',  svar:7.132},
       {typ:'enkel', vansterText:'0,01 + 2,99',   svar:3},
       {typ:'enkel', vansterText:'0,01 + 4997',   svar:4997.01}
     ]},
-    {rubrik:'6. Vilket tal är 7 tiondelar större än …', rader:[
+    {rubrik:'Vilket tal är 7 tiondelar större än …', rader:[
       {typ:'enkel', vansterText:'14,8', svar:15.5},
       {typ:'enkel', vansterText:'8,46', svar:9.16}
     ]},
-    {rubrik:'7. Vilket tal ska stå i rutan?', rader:[
+    {rubrik:'Vilket tal ska stå i rutan?', rader:[
       {typ:'enkel', vansterText:'6742 − ___ = 6532', svar:210},
       {typ:'enkel', vansterText:'8265 − ___ = 7865', svar:400},
       {typ:'enkel', vansterText:'9341 − ___ = 1500', svar:7841}
     ]},
-    {rubrik:'8. Vilket tal ligger mittemellan …', rader:[
+    {rubrik:'Vilket tal ligger mittemellan …', rader:[
       {typ:'enkel', vansterText:'6,3 och 6,4',   svar:6.35},
       {typ:'enkel', vansterText:'0,21 och 0,22', svar:0.215},
       {typ:'enkel', vansterText:'381 och 382',   svar:381.5}
     ]},
-    {rubrik:'9. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'23,914 − 0,01', svar:23.904},
       {typ:'enkel', vansterText:'17 − 0,01',     svar:16.99},
       {typ:'enkel', vansterText:'1,004 − 0,01',  svar:0.994}
     ]},
-    {rubrik:'10. Räkna med huvudräkning', rader:[
+    {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'0,7 + 0,45',  svar:1.15},
       {typ:'enkel', vansterText:'1 − 0,4',     svar:0.6},
       {typ:'enkel', vansterText:'4 − 2,6',     svar:1.4},
       {typ:'enkel', vansterText:'0,78 + 1,04', svar:1.82},
       {typ:'enkel', vansterText:'3,65 − 1,2',  svar:2.45}
     ]},
-    {rubrik:'11. Vilket tal ligger mittemellan …', rader:[
+    {rubrik:'Vilket tal ligger mittemellan …', rader:[
       {typ:'enkel', vansterText:'2,35 och 2,3', svar:2.325},
       {typ:'enkel', vansterText:'0,58 och 0,7', svar:0.64}
     ]}

@@ -810,6 +810,38 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .variant-btn.is-locked:hover{border-color:var(--line,#e5e0d8);}
 .stencil-info{font-size:13px;color:var(--ink-faint,#7a6e65);margin:-6px 0 16px;font-style:italic;}
 .stencil-info.klar{color:#15803d;font-style:normal;}
+
+/* ── VAL-RAD: centrerad brödsmula högst upp i hero (historiebokens mönster) ── */
+.hero .brodsmulor{text-align:center;font-family:var(--cinzel);font-size:12.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;margin-bottom:20px;position:relative;line-height:1.5;}
+.hero .brodsmulor a{color:var(--gold-lt);text-decoration:none;transition:color .15s;}
+.hero .brodsmulor a:hover{text-decoration:underline;}
+.hero .brodsmulor .skiljare{color:rgba(255,255,255,.32);margin:0 .6em;}
+.hero .brodsmulor .aktuell{color:rgba(255,255,255,.92);}
+/* Centrerad flik-rad (historiebokens mönster) */
+.tab-row{justify-content:center;}
+
+/* ── VAL-RAD: platt utbudslista (Öva / Färdighetsträning) ── */
+.utbud{max-width:920px;margin:0 auto;padding:8px 28px 44px;}
+.utbud-intro{font-size:13px;color:var(--ink-faint);line-height:1.6;margin:16px 0 4px;}
+.utbud-grupp{margin-top:24px;}
+.utbud-rubrik{font-family:var(--cinzel);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.utbud-rubrik::after{content:'';flex:1;height:1px;background:var(--paper-dk);}
+.utbud-post{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--paper-lt);border:1px solid var(--paper-dk);border-radius:7px;padding:15px 18px;margin-bottom:8px;text-decoration:none;color:inherit;cursor:pointer;font-family:inherit;transition:box-shadow .15s,transform .15s,border-color .15s;}
+.utbud-post:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateX(3px);border-color:rgba(0,0,0,.12);}
+.utbud-post-body{flex:1;}
+.utbud-post-titel{font-family:var(--serif);font-size:19px;font-weight:500;color:var(--ink);letter-spacing:-.01em;}
+.utbud-post-desc{font-size:12.5px;color:var(--ink-faint);margin-top:2px;}
+.utbud-post-pil{font-family:var(--cinzel);font-size:16px;color:var(--ink-faint);flex-shrink:0;transition:transform .15s,color .15s;}
+.utbud-post.is-open .utbud-post-pil{transform:rotate(90deg);color:var(--blue);}
+.utbud-blad{display:none;padding:4px 2px 20px;}
+.utbud-blad.is-open{display:block;animation:fadeUp .3s ease both;}
+
+/* ── VAL-RAD: Test-platshållare ── */
+.test-note{max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;text-align:center;color:var(--ink-soft);}
+.test-note h3{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--ink);margin-bottom:8px;}
+.test-note p{font-size:14px;line-height:1.6;max-width:480px;margin:0 auto 16px;}
+.test-note a{display:inline-block;font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);background:var(--gold-lt);padding:10px 20px;border-radius:5px;text-decoration:none;transition:background .15s;}
+.test-note a:hover{background:#fff;}
 .steg-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 14px;padding:10px 14px;background:var(--bg-soft,#faf7f1);border:1px solid var(--line,#e5e0d8);border-radius:10px;}
 .steg-btn{font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.06em;padding:8px 16px;border-radius:7px;border:1px solid var(--line,#e5e0d8);background:#fff;color:var(--ink-soft,#3d3630);cursor:pointer;transition:background .15s,border-color .15s,opacity .15s;}
 .steg-btn:hover:not(:disabled){border-color:var(--gold-lt,#c49a40);}
@@ -824,35 +856,34 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
 <nav class="topnav">
   <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
-  <div class="nav-crumbs">
-    <a href="../../../index.html">Matematikbok</a>
-    <span class="crumb-sep">›</span>
-    <a href="../../../ak7.html">Årskurs 7</a>
-    <span class="crumb-sep">›</span>
-    <a href="../../../ak7-k1.html">Kapitel 1</a>
-    <span class="crumb-sep">›</span>
-    <span class="crumb-current">Positionssystem och talförståelse</span>
-  </div>
 </nav>
 
 <header class="hero">
+  <nav class="brodsmulor" aria-label="Brödsmulor">
+    <a href="../../../index.html">Matematik</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <a href="../../../ak7.html">Årskurs 7</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <a href="../../../ak7-k1.html">Kapitel 1</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <span class="aktuell" aria-current="page">Positionssystem och talförståelse</span>
+  </nav>
   <div class="hero-eyebrow">Delkapitel 1 · Kapitel 1</div>
   <h1 class="hero-title">Positionssystem och <em>talförståelse</em></h1>
   <p class="hero-desc">Tiosystemet och hur tal byggs upp av siffror med olika värde. Träna på siffrans värde, att bygga tal, utvecklad form och decimaltal.</p>
   <a class="hero-back" href="../../../ak7-k1.html">← Alla delkapitel</a>
 </header>
 
-<!-- FLIKRAD -->
+<!-- FLIKRAD (val-rad) -->
 <div class="tab-row" id="tab-row">
-  <button class="tab-btn is-active" data-tab="forelasningar">Föreläsningar</button>
-  <button class="tab-btn" data-tab="tiosystemet">Tiosystemet</button>
-  <button class="tab-btn" data-tab="egenskaper">Tals egenskaper</button>
-  <button class="tab-btn" data-tab="storlek">Storlek och ordning</button>
-  <button class="tab-btn" data-tab="positionsrakning">Räkna i positionssystemet</button>
+  <button class="tab-btn" data-tab="forelasningar">Föreläsning</button>
+  <button class="tab-btn is-active" data-tab="ova">Öva</button>
+  <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
+  <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
-<!-- PANEL: FÖRELÄSNINGAR -->
-<section class="tab-panel is-active" data-panel="forelasningar">
+<!-- PANEL: FÖRELÄSNING -->
+<section class="tab-panel" data-panel="forelasningar">
   <div class="lecture-list" id="lecture-list"></div>
   <div class="lecture-player" id="lecture-player">
     <div class="lecture-frame" id="lecture-frame"></div>
@@ -862,45 +893,50 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   </div>
 </section>
 
-<!-- PANEL: TIOSYSTEMET -->
-<section class="tab-panel" data-panel="tiosystemet">
-  <div class="variant-rad">
-    <span class="variant-lbl">Välj blad:</span>
-    <button class="variant-btn is-active" data-sheet="tiosystemet" data-variant="A">Blad A</button>
-    <button class="variant-btn" data-sheet="tiosystemet" data-variant="B">Blad B</button>
+<!-- PANEL: ÖVA (default) -->
+<section class="tab-panel is-active" data-panel="ova">
+  <div class="utbud" id="ova-lista"></div>
+
+  <!-- Statiska blad-mounts: motorn renderar hit vid load; skalet flyttar in dem under rätt post -->
+  <div id="blad-tiosystemet" class="blad-mount" hidden>
+    <div class="variant-rad"><span class="variant-lbl">Välj blad:</span>
+      <button class="variant-btn is-active" data-sheet="tiosystemet" data-variant="A">Blad A</button>
+      <button class="variant-btn" data-sheet="tiosystemet" data-variant="B">Blad B</button></div>
+    <div class="ovn-wrap" id="sheet-tiosystemet"></div>
   </div>
-  <div class="ovn-wrap" id="sheet-tiosystemet"></div>
+  <div id="blad-egenskaper" class="blad-mount" hidden>
+    <div class="variant-rad"><span class="variant-lbl">Välj blad:</span>
+      <button class="variant-btn is-active" data-sheet="egenskaper" data-variant="A">Blad A</button>
+      <button class="variant-btn" data-sheet="egenskaper" data-variant="B">Blad B</button></div>
+    <div class="ovn-wrap" id="sheet-egenskaper"></div>
+  </div>
+  <div id="blad-storlek" class="blad-mount" hidden>
+    <div class="variant-rad"><span class="variant-lbl">Stencil:</span>
+      <button class="variant-btn is-active" id="stencil-btn-A" data-stencil="A">Stencil A</button>
+      <button class="variant-btn is-locked" id="stencil-btn-B" data-stencil="B" disabled>Stencil B 🔒</button></div>
+    <div class="stencil-info" id="stencil-info">Klara minst 80 % på Stencil A för att låsa upp Stencil B.</div>
+    <div class="ovn-wrap" id="sheet-storlek"></div>
+  </div>
+  <div id="blad-positionsrakning" class="blad-mount" hidden>
+    <div class="variant-rad"><span class="variant-lbl">Välj blad:</span>
+      <button class="variant-btn is-active" data-sheet="positionsrakning" data-variant="A">Blad A</button>
+      <button class="variant-btn" data-sheet="positionsrakning" data-variant="B">Blad B</button></div>
+    <div class="ovn-wrap" id="sheet-positionsrakning"></div>
+  </div>
 </section>
 
-<!-- PANEL: TALS EGENSKAPER -->
-<section class="tab-panel" data-panel="egenskaper">
-  <div class="variant-rad">
-    <span class="variant-lbl">Välj blad:</span>
-    <button class="variant-btn is-active" data-sheet="egenskaper" data-variant="A">Blad A</button>
-    <button class="variant-btn" data-sheet="egenskaper" data-variant="B">Blad B</button>
-  </div>
-  <div class="ovn-wrap" id="sheet-egenskaper"></div>
+<!-- PANEL: FÄRDIGHETSTRÄNING -->
+<section class="tab-panel" data-panel="fardighet">
+  <div class="utbud" id="fardighet-lista"></div>
 </section>
 
-<!-- PANEL: STORLEK OCH ORDNING -->
-<section class="tab-panel" data-panel="storlek">
-  <div class="variant-rad">
-    <span class="variant-lbl">Stencil:</span>
-    <button class="variant-btn is-active" id="stencil-btn-A" data-stencil="A">Stencil A</button>
-    <button class="variant-btn is-locked" id="stencil-btn-B" data-stencil="B" disabled>Stencil B 🔒</button>
+<!-- PANEL: TEST -->
+<section class="tab-panel" data-panel="test">
+  <div class="test-note">
+    <h3>Delens test byggs</h3>
+    <p>Det här delkapitlet har ännu inget eget prov. Testa dig via kapitlets provbyggare, eller träna riktat i Färdighetsträningen så länge.</p>
+    <a href="../../../ak7-k1-ram.html?view=test-config">Till kapitlets provbyggare →</a>
   </div>
-  <div class="stencil-info" id="stencil-info">Klara minst 80 % på Stencil A för att låsa upp Stencil B.</div>
-  <div class="ovn-wrap" id="sheet-storlek"></div>
-</section>
-
-<!-- PANEL: RÄKNA I POSITIONSSYSTEMET -->
-<section class="tab-panel" data-panel="positionsrakning">
-  <div class="variant-rad">
-    <span class="variant-lbl">Välj blad:</span>
-    <button class="variant-btn is-active" data-sheet="positionsrakning" data-variant="A">Blad A</button>
-    <button class="variant-btn" data-sheet="positionsrakning" data-variant="B">Blad B</button>
-  </div>
-  <div class="ovn-wrap" id="sheet-positionsrakning"></div>
 </section>
 
 <footer>
@@ -908,7 +944,69 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   <span>Delkapitel 1</span>
 </footer>
 
+<!-- MOTOR (oförändrad) -->
 <script src="../../../js/motor/blad/blad-k1-d1.js"></script>
+
+<!-- SKAL: val-rad, utbudslista, position-visare (data-driven per del) -->
+<script>
+(function(){
+  var DEL = {
+    kapitel:1, del:1, totDelar:10,
+    nasta:{ nr:2, titel:'Fyra räknesätt', href:'../d2-fyraraknesatt/index.html' },
+    ova:[
+      {rubrik:'Begrepp', poster:[
+        {titel:'Tiosystemet', desc:'Siffrans värde, bygga tal, utvecklad form och decimaltal.', blad:'tiosystemet'},
+        {titel:'Tals egenskaper', desc:'Jämnt och udda, delbarhet och hur tal är uppbyggda.', blad:'egenskaper'}
+      ]},
+      {rubrik:'Metoder', poster:[
+        {titel:'Storlek och ordning', desc:'Tallinjer, tiohopp, tiondelar och talföljder.', blad:'storlek'},
+        {titel:'Räkna i positionssystemet', desc:'Addition och subtraktion med positionsvärde.', blad:'positionsrakning'}
+      ]}
+    ],
+    fardighet:[
+      {rubrik:'Begrepp', poster:[
+        {titel:'Siffror och tal', desc:'Grundbegrepp om siffror och tal.', ko:'siffror', formaga:'begrepp'},
+        {titel:'Positionssystemet · begrepp', desc:'Positionsvärde och tiosystemet steg för steg.', ko:'position', formaga:'begrepp'}
+      ]},
+      {rubrik:'Metoder', poster:[
+        {titel:'Positionssystemet · räkna', desc:'Träna räkning med positionsvärde, adaptivt.', ko:'position', formaga:'rakna'}
+      ]},
+      {rubrik:'Problemlösning', poster:[
+        {titel:'Positionssystemet · resonera', desc:'Förklara, jämför och ordna tal och värden.', ko:'position', formaga:'resonera'}
+      ]}
+    ]
+  };
+  var RAM = '../../../ak7-k1-ram.html';
+
+  // Utbudslista (delad renderare för Öva + Färdighetsträning)
+  function post(p, deep){
+    var body='<div class="utbud-post-body"><div class="utbud-post-titel">'+p.titel+'</div>'
+      +'<div class="utbud-post-desc">'+p.desc+'</div></div><span class="utbud-post-pil">'+(deep?'↗':'›')+'</span>';
+    if(deep){
+      var a=document.createElement('a'); a.className='utbud-post'; a.innerHTML=body;
+      a.href=RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(p.formaga);
+      return {el:a};
+    }
+    var b=document.createElement('button'); b.type='button'; b.className='utbud-post'; b.innerHTML=body;
+    var slot=document.createElement('div'); slot.className='utbud-blad';
+    var mount=document.getElementById('blad-'+p.blad);
+    if(mount){ mount.hidden=false; slot.appendChild(mount); }
+    b.onclick=function(){ var open=slot.classList.toggle('is-open'); b.classList.toggle('is-open',open); };
+    return {el:b, slot:slot};
+  }
+  function renderUtbud(el, grupper, deep){
+    if(!el) return;
+    grupper.forEach(function(g){
+      var gr=document.createElement('div'); gr.className='utbud-grupp';
+      var rub=document.createElement('div'); rub.className='utbud-rubrik'; rub.textContent=g.rubrik; gr.appendChild(rub);
+      g.poster.forEach(function(p){ var r=post(p,deep); gr.appendChild(r.el); if(r.slot) gr.appendChild(r.slot); });
+      el.appendChild(gr);
+    });
+  }
+  renderUtbud(document.getElementById('ova-lista'), DEL.ova, false);
+  renderUtbud(document.getElementById('fardighet-lista'), DEL.fardighet, true);
+})();
+</script>
 
 </body>
 </html>

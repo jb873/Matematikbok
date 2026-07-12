@@ -8237,6 +8237,13 @@ function repSkippaPanel(){
     navTo(mv[1]);
     return;
   }
+  // Deeplink till en KO-förmåga (från arbetssidornas Färdighetsträning): ?ko=xxx&formaga=yyy
+  var mk = hs.match(/[?&]ko=([a-z0-9-]+)/i), mf = hs.match(/[?&]formaga=([a-z0-9-]+)/i);
+  if(mk && mf && OVNING_RENDERS[mk[1]] && OVNING_RENDERS[mk[1]][mf[1]]){
+    renderKapitel();
+    navTo('ovning', {koId: mk[1], formaga: mf[1]});
+    return;
+  }
   var m = hs.match(/del=([a-z0-9-]+)/i);
   if(m){
     var delId = m[1];
