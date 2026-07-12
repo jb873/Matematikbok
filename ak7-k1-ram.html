@@ -2624,6 +2624,17 @@ const SKATTNINGSFRAGOR = {
 // ============================================================
 // MATH HELPERS
 // ============================================================
+// ============================================================
+// AI-STRÖMBRYTARE (Joachim: ingen betald AI ännu, 2026)
+// Sätt AI_ENABLED = true för att slå på klient-anropen igen.
+// Funktionerna är kvar; bara nätverksanropet kortsluts.
+// ============================================================
+const AI_ENABLED = false;
+function aiFetch(url, opts){
+  if(!AI_ENABLED) return Promise.reject(new Error('AI avstängd (AI_ENABLED=false)'));
+  return fetch(url, opts);
+}
+
 function isPrime(n){
   if(n<2)return false;
   if(n===2)return true;
@@ -3450,7 +3461,7 @@ där score är 0.0–1.0 baserat på hur väl svaret motsvarar rubricen.`;
 
   const userMsg = `Fråga: ${question}\n\nRubric: ${rubric}\n\nElevens svar: "${answer}"\n\nGe återkoppling och poäng.`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await aiFetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
@@ -4615,7 +4626,7 @@ async function sendTutor(){
   tutorSend.disabled = true;
   const loadingEl = appendTutor('assistant','...');
   try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
+    const res = await aiFetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -9484,7 +9495,7 @@ function renderMultMatris(){
       + 'Nämn också om något inte testats än. Håll det till 4–7 meningar, inga punktlistor.';
 
     try{
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await aiFetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -10701,7 +10712,7 @@ function renderAddMatris(){
       + 'förklara vänligt vad skillnaden kan bero på och ge ett konkret tips på vad eleven kan träna på. '
       + 'Nämn också om något inte testats än. Håll det till 4–7 meningar, inga punktlistor.';
     try{
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await aiFetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -11432,7 +11443,7 @@ function renderSubMatris(){
       + 'Lyft det som stämmer bra, förklara vänligt avvikelser och ge ett konkret träningstips. '
       + 'Nämn om något inte testats. Håll det till 4–7 meningar, inga punktlistor.';
     try{
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await aiFetch('https://api.anthropic.com/v1/messages', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           model:'claude-sonnet-4-20250514', max_tokens:500,
@@ -12828,7 +12839,7 @@ function renderDivMatris(){
       + 'förklara vänligt vad skillnaden kan bero på och ge ett konkret tips på vad eleven kan träna på. '
       + 'Nämn också om något inte testats än. Håll det till 4–7 meningar, inga punktlistor.';
     try{
-      var res = await fetch('https://api.anthropic.com/v1/messages', {
+      var res = await aiFetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -13638,7 +13649,7 @@ function renderPrioMatris(){
       + 'förklara vänligt vad skillnaden kan bero på och ge ett konkret tips på vad eleven kan träna på. '
       + 'Nämn också om något inte testats än. Håll det till 4–7 meningar, inga punktlistor.';
     try{
-      var res = await fetch('https://api.anthropic.com/v1/messages', {
+      var res = await aiFetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -14243,7 +14254,7 @@ function renderNegMatris(){
       + 'förklara vänligt vad skillnaden kan bero på och ge ett konkret tips på vad eleven kan träna på. '
       + 'Nämn också om något inte testats än. Håll det till 4–7 meningar, inga punktlistor.';
     try{
-      var res = await fetch('https://api.anthropic.com/v1/messages', {
+      var res = await aiFetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -14735,7 +14746,7 @@ function renderAvrMatris(){
       + 'förklara vänligt vad skillnaden kan bero på och ge ett konkret tips på vad eleven kan träna på. '
       + 'Nämn också om något inte testats än. Håll det till 4–7 meningar, inga punktlistor.';
     try{
-      var res = await fetch('https://api.anthropic.com/v1/messages', {
+      var res = await aiFetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
