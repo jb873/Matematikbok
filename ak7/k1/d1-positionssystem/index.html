@@ -1005,6 +1005,26 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   }
   renderUtbud(document.getElementById('ova-lista'), DEL.ova, false);
   renderUtbud(document.getElementById('fardighet-lista'), DEL.fardighet, true);
+
+  // Bevara avsnitt-positionen vid blad-byte (A/B). Motorns bug_blad återställer till avsnitt 1
+  // vid varje ombygge; positionsbevarandet är skal-state. Vi läser aktuellt avsnitt i CAPTURE-
+  // fasen (före motorns re-render) och återställer efteråt genom att driva motorns "Nästa avsnitt".
+  document.addEventListener('click', function(e){
+    var btn = (e.target && e.target.closest) ? e.target.closest('.variant-btn[data-sheet], .variant-btn[data-stencil]') : null;
+    if(!btn || btn.disabled) return;
+    var sheetId = btn.getAttribute('data-sheet') || (btn.hasAttribute('data-stencil') ? 'storlek' : null);
+    if(!sheetId) return;
+    var sheetEl = document.getElementById('sheet-' + sheetId);
+    if(!sheetEl) return;
+    var info = sheetEl.querySelector('[data-steg-info]');
+    var idx = 0;
+    if(info){ var m = /Avsnitt\s+(\d+)/.exec(info.textContent || ''); if(m) idx = parseInt(m[1], 10) - 1; }
+    if(idx <= 0) return;                       // redan på avsnitt 1 → inget att göra
+    setTimeout(function(){                     // efter motorns synkrona re-render (avsnitt 1)
+      var next = sheetEl.querySelector('[data-steg="next"]'), guard = 0;
+      while(idx-- > 0 && next && !next.disabled && guard++ < 200){ next.click(); next = sheetEl.querySelector('[data-steg="next"]'); }
+    }, 0);
+  }, true);
 })();
 </script>
 
