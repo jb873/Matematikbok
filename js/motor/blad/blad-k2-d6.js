@@ -773,7 +773,7 @@ function bygg_blad(rotEl, blad){
 
     // Nivå 1 -> nivå 2 låses upp vid högst 2 fel
     if(blad.tvaNivaer && blad.niva === 1 && (totalt - ratt) <= 2 && totalt > 0){
-      lsSet('brak5_naddNiva2_' + blad.tabId, '1');
+      lsSet('brak6_naddNiva2_' + blad.tabId, '1');
       var rad2 = document.createElement('div'); rad2.className = 'niva-vidare';
       var knapp2 = document.createElement('button');
       knapp2.type = 'button'; knapp2.className = 'ovn-kontroll';
@@ -1362,8 +1362,8 @@ var PRAKTIKFLIKAR = ['heltal','brakbrak','storatal','blandad'];
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 
-function markeraKlar(tabId){ lsSet('brak5_klar_' + tabId, '1'); uppdateraLas(); }
-function godkannTest(){ lsSet('brak5_test_godkand', '1'); uppdateraLas(); }
+function markeraKlar(tabId){ lsSet('brak6_klar_' + tabId, '1'); uppdateraLas(); }
+function godkannTest(){ lsSet('brak6_test_godkand', '1'); uppdateraLas(); }
 
 function setLas(tabId, locked){
   var btn = document.querySelector('.tab-btn[data-tab="' + tabId + '"]');
@@ -1374,7 +1374,7 @@ function setLas(tabId, locked){
   if(innehall) innehall.style.display = locked ? 'none' : '';
 }
 function uppdateraLas(){
-  var allaKlara = PRAKTIKFLIKAR.every(function(id){ return lsGet('brak5_klar_' + id) === '1'; });
+  var allaKlara = PRAKTIKFLIKAR.every(function(id){ return lsGet('brak6_klar_' + id) === '1'; });
   setLas('test', !allaKlara);
 }
 
@@ -1387,10 +1387,10 @@ var GENERATORER = {
   storatal: { nivaer: { 1: { grund: GRUND_STORATAL_N1, gen: GEN_STORATAL_N1 }, 2: { grund: GRUND_STORATAL_N2, gen: GEN_STORATAL_N2 } } },
   blandad:  { nivaer: { 1: { grund: GRUND_MBLANDAD_N1, gen: GEN_MBLANDAD_N1 }, 2: { grund: GRUND_MBLANDAD_N2, gen: GEN_MBLANDAD_N2 } } }
 };
-function harBesokt(id){ return lsGet('brak5_besokt_' + id) === '1'; }
-function markeraBesokt(id){ lsSet('brak5_besokt_' + id, '1'); }
-function aktuellNiva(tabId){ return lsGet('brak5_niva_' + tabId) === '2' ? 2 : 1; }
-function byggNiva(tabId, niva){ lsSet('brak5_niva_' + tabId, String(niva)); byggSheet(tabId, true, niva); }
+function harBesokt(id){ return lsGet('brak6_besokt_' + id) === '1'; }
+function markeraBesokt(id){ lsSet('brak6_besokt_' + id, '1'); }
+function aktuellNiva(tabId){ return lsGet('brak6_niva_' + tabId) === '2' ? 2 : 1; }
+function byggNiva(tabId, niva){ lsSet('brak6_niva_' + tabId, String(niva)); byggSheet(tabId, true, niva); }
 
 function byggSheet(sheetId, forstaBesoket, niva){
   var rotEl = document.getElementById('sheet-' + sheetId);
@@ -1407,7 +1407,7 @@ function byggSheet(sheetId, forstaBesoket, niva){
     else { blad = ld.gen(); }
     blad.niva = n;
     blad.tvaNivaer = true;
-    blad.niva2Upplast = (lsGet('brak5_naddNiva2_' + sheetId) === '1') || (n === 2);
+    blad.niva2Upplast = (lsGet('brak6_naddNiva2_' + sheetId) === '1') || (n === 2);
   } else {
     if(forstaBesoket){ blad = def.grund(); }
     else { blad = def.gen(); }
