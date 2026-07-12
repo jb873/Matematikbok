@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Negativa tal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   MATEMATIK · GEMENSAM STIL FÖR NAVIGATIONSSIDORNA
+   Delas av index.html, ak*.html och omrade-*.html
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.6;}
+
+/* ── TOPNAV ── */
+.topnav{
+  position:sticky;top:0;z-index:100;
+  background:var(--navy);border-bottom:1px solid rgba(255,255,255,.07);
+  padding:0 28px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-brand{
+  font-family:var(--cinzel);font-size:13px;font-weight:500;letter-spacing:.14em;
+  color:rgba(255,255,255,.9);text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.nav-brand span{color:var(--gold-lt);letter-spacing:.1em}
+.nav-sep{color:rgba(255,255,255,.2);margin:0 2px}
+.nav-crumbs{
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--cinzel);font-size:11px;letter-spacing:.08em;
+  color:rgba(255,255,255,.45);
+}
+.nav-crumbs a{
+  color:rgba(255,255,255,.6);text-decoration:none;
+  transition:color .15s;
+}
+.nav-crumbs a:hover{color:var(--gold-lt)}
+.nav-crumbs .crumb-sep{color:rgba(255,255,255,.2)}
+.nav-crumbs .crumb-current{color:rgba(255,255,255,.85)}
+
+/* ── HERO ── */
+.hero{
+  background:var(--navy);position:relative;overflow:hidden;
+  padding:64px 28px 56px;text-align:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(135deg, rgba(27,75,138,.15) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px);
+}
+.hero-eyebrow{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;letter-spacing:.22em;
+  color:var(--gold-lt);text-transform:uppercase;margin-bottom:18px;
+  position:relative;display:inline-flex;align-items:center;gap:10px;
+}
+.hero-eyebrow::before,.hero-eyebrow::after{
+  content:'';display:block;width:28px;height:1px;
+  background:var(--gold-lt);opacity:.5;
+}
+h1.hero-title{
+  font-family:var(--serif);font-size:clamp(38px, 6vw, 64px);
+  font-weight:300;line-height:1.1;color:#fff;letter-spacing:-.01em;
+  position:relative;margin-bottom:16px;
+}
+h1.hero-title em{font-style:italic;color:var(--gold-lt);}
+.hero-desc{
+  font-size:16px;font-weight:300;color:rgba(255,255,255,.55);
+  max-width:500px;margin:0 auto;line-height:1.65;position:relative;
+}
+.hero-back{
+  position:relative;margin-top:26px;display:inline-block;
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold-lt);text-decoration:none;
+  padding:7px 16px;border:1px solid rgba(255,255,255,.2);border-radius:4px;
+  transition:background .15s, border-color .15s;
+}
+.hero-back:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4)}
+
+/* ── SEKTIONSRUBRIK ── */
+.section-label{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);
+  display:flex;align-items:center;gap:12px;
+  padding:40px 28px 18px;max-width:920px;margin:0 auto;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--paper-dk);}
+
+/* ── KORT-GRID (områden, årskurser) ── */
+.card-grid{
+  max-width:920px;margin:0 auto;padding:0 28px 56px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.nav-card{
+  display:flex;background:var(--paper-lt);
+  border:1px solid var(--paper-dk);border-radius:4px;overflow:hidden;
+  text-decoration:none;color:inherit;position:relative;
+  transition:box-shadow .18s, transform .18s, border-color .18s;
+  animation:fadeUp .4s ease both;
+}
+.nav-card:hover{
+  box-shadow:0 4px 20px rgba(0,0,0,.09);
+  transform:translateX(3px);border-color:rgba(0,0,0,.12);
+}
+.nav-card.is-soon{opacity:.6;cursor:default;pointer-events:none;}
+.nav-card.is-soon:hover{transform:none;box-shadow:none}
+.nav-card:nth-child(1){animation-delay:.04s}
+.nav-card:nth-child(2){animation-delay:.08s}
+.nav-card:nth-child(3){animation-delay:.12s}
+.nav-card:nth-child(4){animation-delay:.16s}
+.nav-card:nth-child(5){animation-delay:.20s}
+.nav-card:nth-child(6){animation-delay:.24s}
+.nav-card:nth-child(7){animation-delay:.28s}
+.nav-card:nth-child(8){animation-delay:.32s}
+.nav-card:nth-child(9){animation-delay:.36s}
+.nav-card:nth-child(10){animation-delay:.40s}
+
+.card-stripe{width:5px;flex-shrink:0;background:var(--blue);}
+.card-body{
+  flex:1;padding:19px 22px;
+  display:flex;align-items:center;gap:18px;
+}
+.card-num{
+  font-family:var(--cinzel);font-size:12px;font-weight:500;letter-spacing:.1em;
+  color:var(--ink-faint);flex-shrink:0;min-width:74px;
+}
+.card-main{flex:1}
+.card-title{
+  font-family:var(--serif);font-size:21px;font-weight:500;line-height:1.2;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:4px;
+}
+.card-title em{font-style:italic}
+.card-desc{font-size:13px;color:var(--ink-faint);line-height:1.5;}
+.card-arrow{
+  font-size:20px;color:var(--ink-faint);font-family:var(--cinzel);flex-shrink:0;
+  transition:color .15s, transform .15s;
+}
+.nav-card:hover .card-arrow{color:var(--ink);transform:translateX(3px);}
+.card-badge{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 10px;border-radius:2px;flex-shrink:0;
+}
+.card-badge.open{background:rgba(27,75,138,.1);color:var(--blue);}
+.card-badge.soon{background:var(--paper-dk);color:var(--ink-faint);}
+.card-badge.prov{background:rgba(154,114,40,.12);color:var(--gold);}
+
+/* ── VÄGVAL (öva färdigheter / avsnitt) ── */
+.val-grid{
+  max-width:920px;margin:0 auto;padding:0 28px 56px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;
+}
+.val-card{
+  background:var(--paper-lt);border:1px solid var(--paper-dk);border-radius:6px;
+  padding:30px 28px;text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;position:relative;overflow:hidden;
+  transition:box-shadow .18s, transform .18s, border-color .18s;
+  animation:fadeUp .4s ease both;
+}
+.val-card:hover{
+  box-shadow:0 6px 24px rgba(0,0,0,.1);transform:translateY(-3px);
+  border-color:rgba(0,0,0,.12);
+}
+.val-card.is-soon{opacity:.6;cursor:default;pointer-events:none;}
+.val-card.is-soon:hover{transform:none;box-shadow:none}
+.val-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--blue);
+}
+.val-card.accent-green::before{background:var(--green);}
+.val-icon{
+  font-size:30px;margin-bottom:14px;
+}
+.val-title{
+  font-family:var(--serif);font-size:25px;font-weight:500;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:8px;
+}
+.val-desc{font-size:14px;color:var(--ink-faint);line-height:1.6;flex:1;}
+.val-cta{
+  margin-top:18px;font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--blue);
+  display:flex;align-items:center;gap:7px;
+}
+.val-card.accent-green .val-cta{color:var(--green);}
+.val-badge-soon{
+  margin-top:18px;font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+}
+
+/* ── FÄRDIGHETSTRÄNING-BANNER (stor ingång på åk-sidan) ── */
+.train-banner{
+  max-width:920px;margin:0 auto;padding:0 28px;
+}
+.train-card{
+  display:flex;align-items:center;gap:24px;
+  background:linear-gradient(135deg, var(--navy-mid) 0%, var(--navy) 100%);
+  border:1px solid rgba(255,255,255,.08);border-radius:8px;
+  padding:26px 30px;text-decoration:none;position:relative;overflow:hidden;
+  transition:box-shadow .18s, transform .18s;
+  animation:fadeUp .4s ease both;
+}
+.train-card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.022) 40px);
+}
+.train-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.22);transform:translateY(-2px);}
+.train-icon{
+  font-size:34px;flex-shrink:0;position:relative;
+  width:62px;height:62px;border-radius:50%;
+  background:rgba(196,154,64,.14);border:1px solid rgba(196,154,64,.3);
+  display:flex;align-items:center;justify-content:center;
+}
+.train-text{flex:1;position:relative;}
+.train-eyebrow{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold-lt);
+  margin-bottom:6px;
+}
+.train-title{
+  font-family:var(--serif);font-size:26px;font-weight:500;
+  letter-spacing:-.01em;color:#fff;margin-bottom:5px;
+}
+.train-desc{font-size:13px;color:rgba(255,255,255,.55);line-height:1.55;}
+.train-cta{
+  flex-shrink:0;position:relative;
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--navy);
+  background:var(--gold-lt);padding:11px 20px;border-radius:5px;
+  transition:background .15s;
+}
+.train-card:hover .train-cta{background:#fff;}
+
+/* ── KAPITELSIDA: innehållssektioner ── */
+.kapitel-intro{
+  max-width:920px;margin:0 auto;padding:32px 28px 8px;
+}
+.content-block{
+  max-width:920px;margin:0 auto;padding:18px 28px;
+}
+.content-card{
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-radius:6px;padding:26px 28px;
+  animation:fadeUp .4s ease both;
+}
+.content-card h2{
+  font-family:var(--serif);font-size:24px;font-weight:500;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:6px;
+}
+.content-card .ch-sub{
+  font-size:13px;color:var(--ink-faint);line-height:1.55;margin-bottom:18px;
+}
+.placeholder-note{
+  display:flex;gap:13px;align-items:flex-start;
+  background:var(--paper-dk);border-radius:5px;padding:15px 17px;
+  font-size:13px;color:var(--ink-soft);line-height:1.6;
+}
+.placeholder-note .pn-icon{font-size:17px;flex-shrink:0;}
+
+/* ── GENVÄG TILL FÄRDIGHETSTRÄNING (inifrån kapitel) ── */
+.shortcut-link{
+  display:flex;align-items:center;gap:14px;
+  max-width:920px;margin:8px auto 0;padding:18px 28px;
+}
+.shortcut-link a{
+  display:flex;align-items:center;gap:13px;width:100%;
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-left:4px solid var(--green);border-radius:6px;
+  padding:17px 20px;text-decoration:none;color:inherit;
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.shortcut-link a:hover{
+  box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateX(3px);
+}
+.shortcut-icon{font-size:23px;flex-shrink:0;}
+.shortcut-body{flex:1;}
+.shortcut-title{
+  font-family:var(--serif);font-size:18px;font-weight:500;color:var(--ink);
+}
+.shortcut-desc{font-size:12px;color:var(--ink-faint);margin-top:2px;}
+.shortcut-arrow{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--green);
+  flex-shrink:0;
+}
+
+@media(max-width:600px){
+  .train-card{flex-wrap:wrap;gap:16px;}
+  .train-cta{width:100%;text-align:center;}
+}
+
+/* ── FLIKRAD (delkapitlets undersidor) ── */
+.tab-row{
+  max-width:920px;margin:0 auto;padding:28px 28px 0;
+  display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;
+  border-bottom:1px solid var(--paper-dk);
+  -webkit-overflow-scrolling:touch;
+}
+.tab-btn{
+  flex-shrink:0;
+  font-family:var(--cinzel);font-size:12px;font-weight:500;letter-spacing:.06em;
+  color:var(--ink-faint);background:none;border:none;cursor:pointer;
+  padding:13px 17px;border-bottom:3px solid transparent;
+  transition:color .15s, border-color .15s;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.is-active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-panel{display:none;animation:fadeUp .35s ease both;}
+.tab-panel.is-active{display:block;}
+
+/* ── FÖRELÄSNINGSKORT ── */
+.lecture-list{
+  max-width:920px;margin:0 auto;padding:24px 28px 8px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.lecture-card{
+  display:flex;align-items:center;gap:18px;
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-radius:6px;padding:16px 20px;cursor:pointer;
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.lecture-card:hover{
+  box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateX(3px);
+  border-color:rgba(0,0,0,.12);
+}
+.lecture-card.is-playing{
+  border-color:var(--blue);box-shadow:0 4px 18px rgba(27,75,138,.14);
+}
+.lecture-thumb{
+  position:relative;width:108px;height:64px;flex-shrink:0;
+  border-radius:5px;overflow:hidden;background:var(--navy);
+}
+.lecture-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.lecture-play{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(15,30,46,.32);transition:background .15s;
+}
+.lecture-card:hover .lecture-play{background:rgba(15,30,46,.12);}
+.lecture-play span{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.92);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--navy);padding-left:3px;
+}
+.lecture-meta{flex:1;}
+.lecture-title{
+  font-family:var(--serif);font-size:20px;font-weight:500;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:3px;
+}
+.lecture-tag{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+}
+.lecture-state{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--blue);
+  flex-shrink:0;
+}
+/* Inbäddad spelare som fälls ut under kortet */
+.lecture-player{
+  max-width:920px;margin:4px auto 0;padding:0 28px;
+  display:none;
+}
+.lecture-player.is-open{display:block;animation:fadeUp .3s ease both;}
+.lecture-frame{
+  position:relative;width:100%;height:0;
+  padding-bottom:56.25%; /* 16:9 – fungerar i alla webbläsare */
+  border-radius:8px;overflow:hidden;background:#000;
+  border:1px solid var(--paper-dk);
+}
+.lecture-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.lecture-yt-link{
+  display:inline-block;margin-top:11px;
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.06em;color:var(--ink-faint);text-decoration:none;
+  transition:color .15s;
+}
+.lecture-yt-link:hover{color:var(--blue);}
+
+/* ── ÖVNINGSPLATSHÅLLARE I FLIK ── */
+.tab-placeholder{
+  max-width:920px;margin:0 auto;padding:24px 28px;
+}
+
+@media(max-width:600px){
+  .tab-row{padding:20px 16px 0;}
+  .lecture-card{flex-wrap:wrap;}
+  .lecture-thumb{width:92px;height:54px;}
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--paper-dk);padding:26px 28px;
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:920px;margin:0 auto;
+  color:var(--ink-faint);font-size:12px;letter-spacing:.04em;
+}
+footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:600px){
+  .card-body{flex-wrap:wrap;gap:12px}
+  .card-num{min-width:auto}
+  .hero{padding:48px 20px 44px}
+  .topnav{padding:0 16px}
+  .nav-crumbs{display:none}
+}
+/* ============================================================
+   ÖVNINGSBLAD (delat av alla fyra övningsflikar)
+   ============================================================ */
+.ovn-wrap{max-width:920px;margin:0 auto;padding:24px 28px 12px;}
+.ovn-sheet{
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-radius:8px;padding:30px 36px;
+  font-family:'Source Serif 4',Georgia,serif;
+  color:var(--ink);
+}
+.ovn-sheet h2{
+  font-family:var(--serif);font-size:26px;font-weight:500;
+  letter-spacing:-.01em;margin-bottom:6px;
+}
+.ovn-sheet .ovn-intro{
+  font-size:13px;color:var(--ink-faint);line-height:1.6;
+  margin-bottom:24px;
+}
+.ovn-grupp{margin-top:22px;}
+.ovn-grupp:first-of-type{margin-top:6px;}
+.ovn-grupp-rubrik{
+  font-family:'Source Serif 4',Georgia,serif;
+  font-size:21px;font-weight:700;
+  color:var(--ink);margin-bottom:14px;
+  letter-spacing:-.005em;
+}
+.ovn-rad{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 0;font-size:20px;font-family:var(--mono,'Source Serif 4');
+  border-bottom:1px dotted var(--paper-dk);
+}
+.ovn-rad:last-child{border-bottom:none;}
+.ovn-label{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.06em;color:var(--ink-faint);
+  min-width:24px;
+}
+.ovn-text{font-family:'Source Serif 4',Georgia,serif;font-size:21px;}
+/* Bråk-visning: täljare över streck, nämnare under */
+.ovn-brak{
+  display:inline-flex;flex-direction:column;align-items:center;
+  vertical-align:middle;margin:0 4px;
+}
+.ovn-brak-taljare{
+  padding:0 10px 3px;font-family:'Source Serif 4',Georgia,serif;
+  font-size:19px;font-feature-settings:'tnum';white-space:nowrap;
+}
+.ovn-brak-strecket{
+  height:2px;background:var(--ink);width:100%;min-width:60px;
+}
+.ovn-brak-namnare{
+  padding:3px 10px 0;font-family:'Source Serif 4',Georgia,serif;
+  font-size:19px;font-feature-settings:'tnum';white-space:nowrap;
+}
+.ovn-brak-rad{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:1px dotted var(--paper-dk);
+}
+.ovn-brak-rad:last-child{border-bottom:none;}
+.ovn-num{font-feature-settings:'tnum';}
+.ovn-in{
+  width:90px;height:42px;text-align:center;
+  font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;
+  border:2px solid var(--c-rakna);border-radius:6px;
+  background:#fff;color:var(--c-rakna);outline:none;padding:0 6px;
+  font-feature-settings:'tnum';
+  transition:background .2s, border-color .2s, color .2s;
+}
+.ovn-in.lucka{width:80px;border-style:dashed;}
+.ovn-in.bred{width:160px;}
+.ovn-in:focus{box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+.ovn-in.correct{
+  background:#dcfce7;border-color:#16a34a;border-style:solid;color:#15803d;
+  font-weight:700;
+}
+.ovn-in.wrong{
+  background:#fee2e2;border-color:#dc2626;border-style:solid;color:#b91c1c;
+  font-weight:700;
+}
+/* Pulserande blink när rättning sker */
+@keyframes ovn-pulse{
+  0%   { transform:scale(1);   }
+  40%  { transform:scale(1.08);}
+  100% { transform:scale(1);   }
+}
+.ovn-in.correct.just-checked,
+.ovn-in.wrong.just-checked{
+  animation:ovn-pulse .45s ease;
+}
+/* Bock-/kryss-markering bredvid svaret */
+.ovn-mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:50%;
+  font-size:17px;font-weight:700;flex-shrink:0;margin-left:4px;
+  animation:ovn-mark-in .35s cubic-bezier(.5,1.6,.5,1) both;
+}
+@keyframes ovn-mark-in{
+  from{ transform:scale(0); opacity:0; }
+  to  { transform:scale(1); opacity:1; }
+}
+.ovn-mark.ok   { background:#16a34a;color:#fff; }
+.ovn-mark.fel  { background:#dc2626;color:#fff; }
+.ovn-fasit{
+  display:inline-block;
+  background:#fee2e2;color:#991b1b;font-weight:600;
+  border-radius:5px;padding:3px 9px;margin-left:6px;
+  font-family:'Source Serif 4',Georgia,serif;font-size:15px;
+  animation:ovn-mark-in .35s cubic-bezier(.5,1.6,.5,1) both;
+}
+.ovn-exempel{
+  background:var(--bg-warm);border:1px solid var(--paper-dk);
+  border-radius:6px;padding:11px 15px;margin-bottom:8px;
+  font-size:13px;color:var(--ink-soft);
+}
+.ovn-exempel strong{color:var(--ink);font-weight:600;}
+/* Skärmtangentbord – samma stil som öva-delen */
+.ovn-keypad{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
+.ovn-keypad-digits{display:grid;grid-template-columns:repeat(3,46px);gap:6px;}
+.ovn-keypad-ops{display:grid;grid-template-columns:46px;gap:6px;align-content:start;}
+.ovn-kp-key{
+  height:44px;border:1.5px solid var(--line);border-radius:6px;
+  background:var(--bg-card);font-family:var(--mono,'Source Serif 4');
+  font-size:19px;font-weight:600;
+  color:var(--ink);cursor:pointer;
+  transition:transform .08s,background .1s,border-color .1s;
+  display:flex;align-items:center;justify-content:center;user-select:none;
+}
+.ovn-kp-key:hover{background:var(--c-metod-bg, var(--bg-soft));border-color:var(--c-metod, var(--ink-faint));}
+.ovn-kp-key:active{transform:scale(.92);}
+.ovn-kp-key.op{color:var(--c-metod, var(--blue));font-weight:700;}
+.ovn-kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px;}
+.ovn-kp-key.span2{grid-column:span 2;}
+/* På smala skärmar: klistra knappsatsen nedtill så den alltid syns */
+@media(max-width:720px){
+  body{padding-bottom:230px;}
+  .ovn-keypad{
+    position:fixed;bottom:0;left:0;right:0;z-index:100;
+    margin:0;padding:10px 12px;
+    background:var(--bg-warm);
+    border-top:1px solid var(--line);
+    box-shadow:0 -4px 14px rgba(0,0,0,.08);
+  }
+}
+.ovn-kontroll-rad{
+  display:flex;justify-content:center;gap:12px;margin-top:22px;flex-wrap:wrap;
+}
+/* Gemensam grund för alla 3D-knappar */
+.ovn-kontroll,
+.ovn-aterstall,
+.ovn-skriv-ut button{
+  cursor:pointer;
+  font-family:'Source Serif 4',Georgia,serif;
+  border-radius:8px;
+  transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+.ovn-kontroll{
+  background:linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  color:#fff;border:1px solid #15803d;
+  padding:14px 30px;font-size:16px;font-weight:700;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 2px 0 #15803d,
+    0 4px 10px rgba(22,163,74,.3);
+}
+.ovn-kontroll:hover{
+  background:linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 3px 0 #15803d,
+    0 6px 14px rgba(22,163,74,.4);
+}
+.ovn-kontroll:active{
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.2),
+    0 0 0 #15803d;
+}
+.ovn-aterstall{
+  background:linear-gradient(180deg, #fff 0%, #f4f0e8 100%);
+  color:var(--ink);
+  border:1px solid #c9c2b3;
+  padding:13px 24px;font-size:15px;font-weight:600;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 2px 0 #c9c2b3,
+    0 4px 8px rgba(0,0,0,.08);
+}
+.ovn-aterstall:hover{
+  background:linear-gradient(180deg, #faf6ee 0%, #ede6d6 100%);
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 3px 0 #c9c2b3,
+    0 5px 12px rgba(0,0,0,.12);
+}
+.ovn-aterstall:active{
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.1),
+    0 0 0 #c9c2b3;
+}
+.ovn-sammanf{
+  margin-top:18px;padding:16px 20px;border-radius:8px;
+  font-size:15px;text-align:center;
+  background:var(--bg-card);border:1px solid var(--line);
+}
+.ovn-sammanf.ok{
+  background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border:2px solid #16a34a;color:#14532d;
+  padding:22px 24px;font-size:17px;font-weight:600;
+  animation:ovn-mark-in .4s cubic-bezier(.5,1.6,.5,1) both;
+}
+.ovn-sammanf.ok .ovn-sammanf-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:42px;height:42px;border-radius:50%;
+  background:#16a34a;color:#fff;font-size:24px;font-weight:700;
+  margin-bottom:10px;
+}
+.ovn-sammanf.ok .ovn-sammanf-titel{
+  display:block;font-family:var(--serif);font-size:22px;
+  font-weight:500;margin-bottom:4px;
+}
+.ovn-sammanf.delvis{background:var(--bg-warm);border-color:var(--gold);color:var(--gold);}
+
+/* ============================================================
+   KONFETTI – när eleven får alla rätt
+   ============================================================ */
+.konfetti-lager{
+  position:fixed;inset:0;pointer-events:none;
+  overflow:hidden;z-index:9999;
+}
+.konfetti{
+  position:absolute;width:10px;height:14px;top:-30px;
+  border-radius:2px;opacity:0;
+  animation:konfetti-fall linear forwards;
+}
+@keyframes konfetti-fall{
+  0%   { transform:translateY(0) rotate(0deg);   opacity:1; }
+  100% { transform:translateY(110vh) rotate(720deg); opacity:1; }
+}
+.ovn-skriv-ut{
+  text-align:center;margin:20px 0 4px;
+}
+.ovn-skriv-ut button{
+  background:linear-gradient(180deg, #fff 0%, #f4f0e8 100%);
+  color:var(--ink-soft);
+  border:1px solid #c9c2b3;
+  padding:10px 20px;font-size:13px;font-weight:600;
+  letter-spacing:.02em;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 2px 0 #c9c2b3,
+    0 3px 6px rgba(0,0,0,.06);
+}
+.ovn-skriv-ut button:hover{
+  background:linear-gradient(180deg, #faf6ee 0%, #ede6d6 100%);
+  color:var(--ink);
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 3px 0 #c9c2b3,
+    0 5px 10px rgba(0,0,0,.1);
+}
+.ovn-skriv-ut button:active{
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.1),
+    0 0 0 #c9c2b3;
+}
+
+/* ============================================================
+   PROBLEMUPPGIFTER (kladdruta + svar med enhet)
+   ============================================================ */
+.prob-rad{
+  padding:18px 0 20px;
+  border-bottom:1px dotted var(--paper-dk);
+}
+.prob-rad:last-child{border-bottom:none;}
+.prob-fraga{
+  display:flex;gap:10px;align-items:flex-start;
+  font-family:'Source Serif 4',Georgia,serif;font-size:18px;
+  line-height:1.55;color:var(--ink);margin-bottom:12px;
+}
+.prob-fraga .ovn-label{margin-top:2px;}
+.prob-kladd-rubrik{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+  margin:0 0 6px;
+}
+.prob-kladd{
+  width:100%;min-height:90px;
+  border:1.5px solid var(--paper-dk);border-radius:6px;
+  background:#fff;padding:10px 12px;
+  font-family:'Source Serif 4',Georgia,serif;font-size:16px;
+  line-height:1.6;color:var(--ink);
+  resize:vertical;outline:none;
+  font-feature-settings:'tnum';
+}
+.prob-kladd:focus{border-color:var(--c-rakna);box-shadow:0 0 0 3px rgba(22,163,74,.12);}
+.prob-svar-rad{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-top:12px;
+}
+.prob-svar-rad .prob-label{
+  font-family:var(--cinzel);font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
+}
+.ovn-in.enhet{
+  width:90px;font-family:'Source Serif 4',Georgia,serif;font-weight:500;
+  color:var(--ink);border-color:var(--c-metod, var(--ink-faint));
+  background:var(--bg-warm);
+}
+.ovn-in.enhet:focus{box-shadow:0 0 0 3px rgba(180,83,9,.15);}
+.ovn-in.enhet.correct{background:var(--success-bg);border-color:var(--success);color:var(--success);}
+.ovn-in.enhet.wrong{background:var(--error-bg);border-color:var(--error);color:var(--error);}
+
+@media print{
+  .prob-kladd{
+    border:1px solid #aaa !important;background:#fff !important;
+    min-height:120px;
+  }
+  .prob-kladd-rubrik{color:#444 !important;}
+}
+
+/* ============================================================
+   UTSKRIFT: dölj webb-element, behåll papperskänsla
+   ============================================================ */
+@media print{
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+  body{background:#fff;}
+  .topnav,.hero,.tab-row,.lecture-list,.lecture-player,footer,
+  .ovn-keypad,.ovn-kontroll-rad,.ovn-skriv-ut,
+  .konfetti-lager,.ovn-mark{display:none !important;}
+  .tab-panel{display:none !important;}
+  .tab-panel.is-active{display:block !important;}
+  .ovn-wrap{padding:0;}
+  .ovn-sheet{border:none;background:#fff;padding:18px 22px;}
+  .ovn-in,.ovn-in.lucka,.ovn-in.bred{
+    background:#fff !important;color:#000 !important;
+    border:1.5px solid #555 !important;border-style:solid !important;
+  }
+  .ovn-in.correct,.ovn-in.wrong{
+    color:#000 !important;background:#fff !important;border-color:#555 !important;
+  }
+  .ovn-rad{border-bottom:1px solid #eaeaea;}
+  .ovn-exempel{border:1px solid #aaa;background:#f6f6f6;color:#222;}
+}
+/* ── Negativa tal: storleksordna & talföljd ── */
+.ovn-ordna-rad,.ovn-foljd-rad{flex-wrap:wrap;gap:10px;}
+.ovn-ordna-prompt{font-family:'Source Serif 4',Georgia,serif;font-size:16px;color:var(--ink-soft);}
+.ovn-ordna-set{font-family:'Source Serif 4',Georgia,serif;font-size:19px;font-feature-settings:'tnum';
+  background:var(--paper-dk);border-radius:8px;padding:5px 14px;letter-spacing:.02em;}
+.ovn-ordna-svar{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.ovn-ordna-pil{font-size:18px;color:var(--ink-faint);}
+.ovn-ordna-in{width:56px;text-align:center;}
+.ovn-foljd-led{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:20px;}
+.ovn-foljd-tal{font-size:20px;}
+.ovn-foljd-in{width:60px;text-align:center;}
+.ovn-foljd-komma{color:var(--ink-faint);}
+
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="ak7-k1.html">Kapitel 1</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Negativa tal</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow">Delkapitel 3 · Kapitel 1</div>
+  <h1 class="hero-title">Negativa <em>tal</em></h1>
+  <p class="hero-desc">Tal mindre än noll. Börja med föreläsningarna, träna sedan på begrepp och räkning. Övningsbladen går att fylla i digitalt eller skriva ut.</p>
+  <a class="hero-back" href="ak7-k1.html">← Alla delkapitel</a>
+</header>
+
+<!-- FLIKRAD -->
+<div class="tab-row" id="tab-row">
+  <button class="tab-btn is-active" data-tab="forelasningar">Föreläsningar</button>
+  <button class="tab-btn" data-tab="begrepp">Begrepp och förståelse</button>
+  <button class="tab-btn" data-tab="rakna1">Räkna med negativa tal</button>
+  <button class="tab-btn" data-tab="rakna2">Räkna vidare</button>
+  <button class="tab-btn" data-tab="test">Test</button>
+  <button class="tab-btn" data-tab="fordjupning">Fördjupning</button>
+</div>
+
+<!-- PANEL: FÖRELÄSNINGAR -->
+<section class="tab-panel is-active" data-panel="forelasningar">
+  <div class="lecture-list" id="lecture-list"></div>
+  <div class="lecture-player" id="lecture-player">
+    <div class="lecture-frame" id="lecture-frame"></div>
+    <a class="lecture-yt-link" id="lecture-yt-link" href="#" target="_blank" rel="noopener">
+      Filmen startar inte? Öppna den på YouTube ↗
+    </a>
+  </div>
+</section>
+
+<!-- PANEL: BEGREPP -->
+<section class="tab-panel" data-panel="begrepp">
+  <div class="ovn-wrap" id="sheet-begrepp"></div>
+</section>
+
+<!-- PANEL: RÄKNA 1 -->
+<section class="tab-panel" data-panel="rakna1">
+  <div class="ovn-wrap" id="sheet-rakna1"></div>
+</section>
+
+<!-- PANEL: RÄKNA 2 -->
+<section class="tab-panel" data-panel="rakna2">
+  <div class="ovn-wrap" id="sheet-rakna2"></div>
+</section>
+
+<!-- PANEL: TEST -->
+<section class="tab-panel" data-panel="test">
+  <div class="ovn-wrap" id="sheet-test"></div>
+</section>
+
+<!-- PANEL: FÖRDJUPNING -->
+<section class="tab-panel" data-panel="fordjupning">
+  <div class="ovn-wrap" id="sheet-fordjupning"></div>
+</section>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Delkapitel 3</span>
+</footer>
+
+<script>
+// ---- FLIKVÄXLING ----
+var tabRow = document.getElementById('tab-row');
+tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var id = btn.dataset.tab;
+    tabRow.querySelectorAll('.tab-btn').forEach(function(b){
+      b.classList.toggle('is-active', b === btn);
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(p){
+      p.classList.toggle('is-active', p.dataset.panel === id);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+// ---- FÖRELÄSNINGAR ----
+// id = YouTube-videons id. Tumnagel hämtas automatiskt från YouTube.
+var FORELASNINGAR = [
+  // Lägg in negativa tal-föreläsningarna här när YouTube-länkarna är klara,
+  // t.ex. {id:'VIDEO_ID', titel:'Motsatta tal och tallinjen', tag:'Föreläsning'},
+];
+
+var lectureList = document.getElementById('lecture-list');
+var player = document.getElementById('lecture-player');
+var frame = document.getElementById('lecture-frame');
+var ytLink = document.getElementById('lecture-yt-link');
+var aktivKort = null;
+
+FORELASNINGAR.forEach(function(f){
+  var card = document.createElement('div');
+  card.className = 'lecture-card';
+  card.innerHTML =
+      '<div class="lecture-thumb">'
+        + '<img src="https://img.youtube.com/vi/' + f.id + '/mqdefault.jpg" alt="" loading="lazy">'
+        + '<div class="lecture-play"><span>▶</span></div>'
+      + '</div>'
+    + '<div class="lecture-meta">'
+      + '<div class="lecture-title">' + f.titel + '</div>'
+      + '<div class="lecture-tag">' + f.tag + '</div>'
+    + '</div>'
+    + '<div class="lecture-state" data-state>Spela film</div>';
+  card.addEventListener('click', function(){
+    if(aktivKort === card){
+      // klick på samma kort igen -> stäng
+      stopPlayer();
+      return;
+    }
+    if(aktivKort){
+      aktivKort.classList.remove('is-playing');
+      aktivKort.querySelector('[data-state]').textContent = 'Spela film';
+    }
+    aktivKort = card;
+    card.classList.add('is-playing');
+    card.querySelector('[data-state]').textContent = 'Spelas nu';
+    // origin/widget_referrer hjälper YouTube känna igen domänen och
+    // undvika "fel 153". location.origin är tomt vid file://-visning –
+    // då hoppar vi över parametern så inbäddningen inte bryts.
+    var origin = (location.origin && location.origin.indexOf('http') === 0)
+      ? '&origin=' + encodeURIComponent(location.origin)
+        + '&widget_referrer=' + encodeURIComponent(location.origin)
+      : '';
+    frame.innerHTML = '<iframe src="https://www.youtube.com/embed/' + f.id
+      + '?rel=0&playsinline=1&enablejsapi=1' + origin + '" title="' + f.titel
+      + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    ytLink.href = 'https://youtu.be/' + f.id;
+    player.classList.add('is-open');
+    // flytta spelaren direkt under det klickade kortet
+    card.insertAdjacentElement('afterend', player);
+    player.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  lectureList.appendChild(card);
+});
+
+if(FORELASNINGAR.length === 0){
+  lectureList.innerHTML = '<div class="placeholder-note" style="padding:24px;">'
+    + '<span class="pn-icon">📽️</span>'
+    + '<span>Föreläsningar om negativa tal läggs in här när länkarna är klara.</span>'
+  + '</div>';
+}
+
+function stopPlayer(){
+  if(aktivKort){
+    aktivKort.classList.remove('is-playing');
+    aktivKort.querySelector('[data-state]').textContent = 'Spela film';
+    aktivKort = null;
+  }
+  player.classList.remove('is-open');
+  frame.innerHTML = '';
+}
+
+// ============================================================
+// ÖVNINGSMOTOR  – samma motor för alla fyra övningsblad
+// ============================================================
+//
+// Varje övning beskrivs som ett "blad" med en lista av "rader".
+// En rad är antingen:
+//   - {typ:'enkel',  vansterText:'10 · 5 =',  svar:50}
+//   - {typ:'lucka',  delar:['__ · 4,5 = 10'], luckPos:0, svar:???}
+//                    (text med en lucka markerad som '__')
+//   - {typ:'mellan', vansterText:'60 · 0,3 =', mellan:'6·3', svar:18}
+//                    (eleven skriver först mellanled, sedan svar)
+//
+// 'exempel' (valfritt) visas som förinifyllt exempel ovanför rad-listan.
+//
+// Rad-lista grupperas av {grupp:'Beräkna', rader:[...]}.
+
+function jamforTal(a, b){
+  // tillåt komma eller punkt, ignorera mellanslag
+  if(a == null) return false;
+  var s = String(a).replace(/\s/g,'').replace(/\u2212/g,'-').replace(',', '.');
+  if(s === '') return false;
+  var n = parseFloat(s);
+  if(isNaN(n)) return false;
+  return Math.abs(n - b) < 1e-9;
+}
+// Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
+function visaTal(t){
+  var s = String(t).replace('.', ',');
+  return s.replace(/^-/, '\u2212');
+}
+function jamforMellan(a, b){
+  // mellanled får skrivas med eller utan likhetstecken, mellanslag, ·/x/*
+  if(a == null) return false;
+  var s = String(a).toLowerCase()
+    .replace(/[x×*]/g, '·')
+    .replace(/[\s=]/g, '')
+    .replace(',', '.');
+  var bnorm = String(b).toLowerCase()
+    .replace(/[x×*]/g, '·')
+    .replace(/[\s=]/g, '')
+    .replace(',', '.');
+  return s === bnorm;
+}
+function jamforEnhet(a, b){
+  // Enhet rättas flexibelt: utan mellanslag, gemener,
+  // och med vanliga skrivvarianter (kr/sek osv. accepteras).
+  if(a == null) return false;
+  var alias = {
+    'sek':'s', 'sekund':'s', 'sekunder':'s',
+    'kr':'kr', 'kronor':'kr', 'krona':'kr',
+    'meter':'m', 'metrar':'m',
+    'kilometer':'km',
+    'centimeter':'cm',
+    'pase':'påsar', 'påse':'påsar', 'pasar':'påsar', 'påsarna':'påsar',
+    'flaska':'flaskor', 'flaskorna':'flaskor'
+  };
+  function norm(x){
+    var t = String(x).toLowerCase().replace(/\./g,'').replace(/\s/g,'');
+    // ta bort eventuell punkt (m. -> m)
+    return t;
+  }
+  var na = norm(a), nb = norm(b);
+  if(na === nb) return true;
+  // alias åt båda håll
+  if(alias[na] === nb) return true;
+  if(alias[nb] === na) return true;
+  return false;
+}
+
+// ============================================================
+// KONFETTI – när eleven får alla rätt
+// ============================================================
+function visaKonfetti(){
+  // Plocka bort eventuell gammal konfetti
+  var gammal = document.querySelector('.konfetti-lager');
+  if(gammal) gammal.remove();
+  var lager = document.createElement('div');
+  lager.className = 'konfetti-lager';
+  document.body.appendChild(lager);
+  var färger = ['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899','#06b6d4'];
+  var antal = 80;
+  for(var i = 0; i < antal; i++){
+    var b = document.createElement('span');
+    b.className = 'konfetti';
+    b.style.left = (Math.random() * 100) + 'vw';
+    b.style.background = färger[Math.floor(Math.random() * färger.length)];
+    var duration = 2.5 + Math.random() * 2; // 2,5–4,5 sek
+    var delay = Math.random() * 0.8;        // upp till 0,8 sek försening
+    b.style.animationDuration = duration + 's';
+    b.style.animationDelay = delay + 's';
+    b.style.width = (6 + Math.random() * 8) + 'px';
+    b.style.height = (10 + Math.random() * 8) + 'px';
+    lager.appendChild(b);
+  }
+  // Städa upp efter att allt fallit klart
+  setTimeout(function(){ if(lager.parentNode) lager.remove(); }, 6000);
+}
+
+function bladHTML(blad){
+  var html = '<div class="ovn-sheet">'
+    + '<h2>' + blad.titel + '</h2>'
+    + (blad.intro ? '<p class="ovn-intro">' + blad.intro + '</p>' : '');
+
+  if(blad.exempel){
+    html += '<div class="ovn-exempel">' + blad.exempel + '</div>';
+  }
+
+  var radNummer = 0;
+  blad.grupper.forEach(function(grupp, gi){
+    html += '<div class="ovn-grupp">';
+    html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
+    grupp.rader.forEach(function(rad){
+      radNummer++;
+      var bokstav = String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
+      if(rad.typ === 'problemTid'){
+        // Problem med tidssvar: timmar + minuter i två fält
+        html += '<div class="prob-rad" data-rad="' + radNummer + '">';
+        html += '<div class="prob-fraga">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span>' + rad.fraga + '</span>';
+        html += '</div>';
+        html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
+        html += '<textarea class="prob-kladd" rows="3" '
+          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
+        html += '<div class="prob-svar-rad">';
+        html += '<span class="prob-label">Svar:</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.timmar + '" '
+          + 'inputmode="numeric" autocomplete="off" style="width:70px;">';
+        html += '<span class="ovn-text" style="margin:0 2px;">h</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.minuter + '" '
+          + 'inputmode="numeric" autocomplete="off" style="width:70px;">';
+        html += '<span class="ovn-text" style="margin:0 2px;">min</span>';
+        html += '</div>';
+        html += '</div>';
+        return;
+      }
+      if(rad.typ === 'problem'){
+        html += '<div class="prob-fraga">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span>' + rad.fraga + '</span>';
+        html += '</div>';
+        html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
+        html += '<textarea class="prob-kladd" rows="3" '
+          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
+        html += '<div class="prob-svar-rad">';
+        html += '<span class="prob-label">Svar:</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar + '" '
+          + 'inputmode="decimal" autocomplete="off" placeholder="tal">';
+        html += '<input class="ovn-in enhet" data-enhet="' + rad.enhet + '" '
+          + 'inputmode="text" autocomplete="off" placeholder="enhet">';
+        html += '</div>';
+        html += '</div>';
+        return;
+      }
+      // Bråk-uppgifter: täljare/nämnare visas som riktigt bråk
+      if(rad.typ === 'brak' || rad.typ === 'brakLucka'){
+        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        // Bråk-blocket
+        html += '<span class="ovn-brak">';
+        if(rad.typ === 'brakLucka' && rad.luckaPos === 'taljare'){
+          // täljaren innehåller en lucka, t.ex. "706 · __"
+          var tBitar = rad.taljare.split('__');
+          html += '<span class="ovn-brak-taljare">' + tBitar[0]
+            + '<input class="ovn-in lucka" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
+            + (tBitar[1] !== undefined ? tBitar[1] : '') + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
+        } else if(rad.typ === 'brakLucka' && rad.luckaPos === 'namnare'){
+          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          var nBitar = rad.namnare.split('__');
+          html += '<span class="ovn-brak-namnare">' + nBitar[0]
+            + '<input class="ovn-in lucka" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
+            + (nBitar[1] !== undefined ? nBitar[1] : '') + '</span>';
+        } else {
+          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
+        }
+        html += '</span>';
+        html += '<span class="ovn-text">=</span>';
+        if(rad.typ === 'brakLucka'){
+          // facit står efter likhetstecknet (eleven löser luckan i bråket)
+          html += '<span class="ovn-text ovn-num">' + rad.hoger + '</span>';
+        } else {
+          html += '<input class="ovn-in" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off">';
+        }
+        html += '</div>';
+        return;
+      }
+      // Storleksordna: visa talmängden, eleven skriver i ordning i rutor
+      if(rad.typ === 'ordna'){
+        var sorterat = rad.tal.slice().sort(function(a,b){ return rad.fallande ? b-a : a-b; });
+        html += '<div class="ovn-rad ovn-ordna-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-ordna-prompt">' + (rad.fraga || (rad.fallande ? 'Störst till minst:' : 'Minst till störst:')) + '</span>';
+        html += '<span class="ovn-ordna-set">{ ' + rad.tal.map(function(t){ return visaTal(t); }).join(', ') + ' }</span>';
+        html += '<span class="ovn-ordna-svar">';
+        sorterat.forEach(function(v, k){
+          if(k>0) html += '<span class="ovn-ordna-pil">' + (rad.fallande ? '>' : '<') + '</span>';
+          html += '<input class="ovn-in ovn-ordna-in" data-svar="' + v + '" inputmode="text" autocomplete="off">';
+        });
+        html += '</span>';
+        html += '</div>';
+        return;
+      }
+      // Talföljd: vissa termer givna, andra (null) är ifyllnadsrutor
+      if(rad.typ === 'talfoljd'){
+        html += '<div class="ovn-rad ovn-foljd-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-foljd-led">';
+        rad.termer.forEach(function(t, k){
+          if(k>0) html += '<span class="ovn-foljd-komma">,</span>';
+          if(t === null){
+            html += '<input class="ovn-in ovn-foljd-in" data-svar="' + rad.facit[k] + '" inputmode="text" autocomplete="off">';
+          } else {
+            html += '<span class="ovn-text ovn-num ovn-foljd-tal">' + visaTal(t) + '</span>';
+          }
+        });
+        html += '<span class="ovn-foljd-komma">, …</span>';
+        html += '</span>';
+        html += '</div>';
+        return;
+      }
+      // räkna om bokstav per grupp
+      html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+      html += '<span class="ovn-label">' + bokstav + ')</span>';
+      if(rad.typ === 'enkel'){
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off">';
+      } else if(rad.typ === 'text'){
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in bred" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off" placeholder="svar">';
+      } else if(rad.typ === 'term'){
+        // Dela upp ett tal i summa av termer – godtar alla korrekta uppdelningar
+        html += '<span class="ovn-text" style="min-width:140px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in bred" data-term="' + rad.summa + '" data-antal="' + (rad.antal||2)
+          + '" inputmode="text" autocomplete="off" placeholder="t.ex. 10+8">';
+      } else if(rad.typ === 'tvatal'){
+        // Två tal i valfri ordning
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="0" inputmode="decimal" autocomplete="off" style="width:80px;">';
+        html += '<span class="ovn-text">och</span>';
+        html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="1" inputmode="decimal" autocomplete="off" style="width:80px;">';
+      } else if(rad.typ === 'lucka'){
+        // text innehåller '__' där luckan ska sitta
+        var bitar = rad.text.split('__');
+        html += '<span class="ovn-text ovn-num">' + bitar[0] + '</span>';
+        html += '<input class="ovn-in lucka" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off">';
+        if(bitar[1] !== undefined) html += '<span class="ovn-text ovn-num">' + bitar[1] + '</span>';
+      } else if(rad.typ === 'mellan'){
+        // [Vänster]  = [mellanled-input]  = [svar-input]
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<input class="ovn-in bred" data-mellan="' + rad.mellan
+          + '" inputmode="text" autocomplete="off" placeholder="mellanled">';
+        html += '<span class="ovn-text">=</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off">';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    radNummer = 0; // bokstäver räknas om per grupp
+  });
+
+  // räkna om labels per grupp
+  html += '</div>';
+
+  // Knappsats – samma stil som öva-delen
+  html += '<div class="ovn-wrap" style="padding-top:0;">';
+  html += '<div class="ovn-keypad" data-keypad>';
+  // Sifferblock 7-8-9 / 4-5-6 / 1-2-3 / 0(span2) backsteg
+  html += '<div class="ovn-keypad-digits">';
+  ['7','8','9','4','5','6','1','2','3'].forEach(function(d){
+    html += '<button type="button" class="ovn-kp-key" data-key="' + d + '">' + d + '</button>';
+  });
+  html += '<button type="button" class="ovn-kp-key span2" data-key="0">0</button>';
+  html += '<button type="button" class="ovn-kp-key util" data-key="back">\u232B</button>';
+  html += '</div>';
+  // Operator-kolumn: , / · =
+  html += '<div class="ovn-keypad-ops">';
+  [',','/','·','\u2212','='].forEach(function(o){
+    html += '<button type="button" class="ovn-kp-key op" data-key="' + o + '">' + o + '</button>';
+  });
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div class="ovn-kontroll-rad">'
+    + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
+    + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'
+    + (blad.kanGenerera ? '<button type="button" class="ovn-aterstall" data-action="nytt-blad">↻ Nytt blad med andra tal</button>' : '')
+  + '</div>';
+
+  html += '<div class="ovn-sammanf" data-sammanf style="display:none;"></div>';
+
+  html += '<div class="ovn-skriv-ut"><button type="button" data-action="print">↗ Skriv ut bladet</button></div>';
+  html += '</div>';
+  return html;
+}
+
+function bygg_blad(rotEl, blad){
+  rotEl.innerHTML = bladHTML(blad);
+
+  // Räkna om radbokstäver så att varje grupp börjar om från 'a'
+  rotEl.querySelectorAll('.ovn-grupp').forEach(function(g){
+    var bok = 96;
+    g.querySelectorAll('.ovn-label').forEach(function(lbl){
+      bok++;
+      lbl.textContent = String.fromCharCode(bok) + ')';
+    });
+  });
+
+  var inputs = Array.from(rotEl.querySelectorAll('.ovn-in'));
+  var fokus = 0;
+
+  // Tab/Enter -> nästa input. Ångra rättning så fort man ändrar.
+  inputs.forEach(function(inp, i){
+    inp.addEventListener('focus', function(){ fokus = i; });
+    inp.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === 'Tab' && !e.shiftKey){
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          if(i + 1 < inputs.length) inputs[i+1].focus();
+        }
+      }
+    });
+    inp.addEventListener('input', function(){
+      inp.classList.remove('correct','wrong');
+      var f = inp.parentElement.querySelector('.ovn-fasit');
+      if(f) f.remove();
+    });
+  });
+
+  // Knappsats
+  rotEl.querySelectorAll('.ovn-kp-key').forEach(function(btn){
+    btn.addEventListener('mousedown', function(e){
+      e.preventDefault();
+      var k = btn.dataset.key;
+      var aktiv = document.activeElement;
+      if(!aktiv || !aktiv.classList || !aktiv.classList.contains('ovn-in')){
+        if(inputs.length === 0) return;
+        aktiv = inputs[fokus] || inputs[0];
+        aktiv.focus();
+      }
+      if(k === 'back'){
+        aktiv.value = aktiv.value.slice(0, -1);
+      } else {
+        aktiv.value += k;
+      }
+      aktiv.dispatchEvent(new Event('input', {bubbles:true}));
+      aktiv.focus();
+    });
+  });
+
+  // Kontroll / Återställ / Skriv ut
+  var forstaForsoket = true; // 0-1 fel på första försöket -> nytt blad
+  rotEl.querySelector('[data-action="kontroll"]').addEventListener('click', function(){
+    var ratt = 0, totalt = 0;
+    inputs.forEach(function(inp){
+      var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
+      // Ta bort eventuella tidigare fasit-spans och markeringar
+      rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
+      inp.classList.remove('correct','wrong','just-checked');
+      var ok;
+      if(inp.dataset.mellan){
+        ok = jamforMellan(inp.value, inp.dataset.mellan);
+      } else if(inp.dataset.enhet){
+        ok = jamforEnhet(inp.value, inp.dataset.enhet);
+      } else if(inp.dataset.term !== undefined){
+        // dela upp i termer – godtar alla korrekta summor
+        var malSumma = parseFloat(inp.dataset.term);
+        var malAntal = parseInt(inp.dataset.antal, 10);
+        var termer = String(inp.value).replace(/\u2212/g,'-').replace(/\s/g,'').split('+');
+        var summa = 0, giltigt = true;
+        if(termer.length !== malAntal) giltigt = false;
+        termer.forEach(function(t){
+          var v = parseFloat(t.replace(',','.'));
+          if(isNaN(v)) giltigt = false; else summa += v;
+        });
+        ok = giltigt && Math.abs(summa - malSumma) < 1e-9;
+      } else if(inp.dataset.tvatal !== undefined){
+        // två tal i valfri ordning – båda fälten ska tillsammans matcha
+        var malTal = inp.dataset.tvatal.split(',').map(function(x){ return parseFloat(x); });
+        var v = parseFloat(String(inp.value).replace(',','.'));
+        ok = !isNaN(v) && malTal.some(function(m){ return Math.abs(m-v)<1e-9; });
+      } else {
+        ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
+      }
+      totalt++;
+      // Bocken/krysset – stor, syns tydligt
+      var mark = document.createElement('span');
+      mark.className = 'ovn-mark ' + (ok ? 'ok' : 'fel');
+      mark.textContent = ok ? '✓' : '✗';
+      if(ok){
+        inp.classList.add('correct','just-checked');
+        ratt++;
+        inp.insertAdjacentElement('afterend', mark);
+      } else {
+        inp.classList.add('wrong','just-checked');
+        var facit;
+        if(inp.dataset.mellan) facit = inp.dataset.mellan;
+        else if(inp.dataset.enhet) facit = inp.dataset.enhet;
+        else if(inp.dataset.term !== undefined) facit = 'summan ska bli ' + inp.dataset.term.replace('.', ',');
+        else if(inp.dataset.tvatal !== undefined) facit = inp.dataset.tvatal.split(',').join(' och ');
+        else facit = inp.dataset.svar.replace('.', ',');
+        var f = document.createElement('span');
+        f.className = 'ovn-fasit';
+        f.textContent = 'rätt svar: ' + facit;
+        inp.insertAdjacentElement('afterend', mark);
+        mark.insertAdjacentElement('afterend', f);
+      }
+      // Ta bort blink-klassen efter animationen
+      setTimeout(function(){ inp.classList.remove('just-checked'); }, 500);
+    });
+    var sam = rotEl.querySelector('[data-sammanf]');
+    sam.style.display = 'block';
+    sam.classList.remove('ok','delvis');
+    if(ratt === totalt){
+      sam.classList.add('ok');
+      sam.innerHTML = '<div class="ovn-sammanf-icon">✓</div>'
+        + '<span class="ovn-sammanf-titel">Allt rätt!</span>'
+        + ratt + ' av ' + totalt + ' &mdash; jättebra jobbat!';
+      // Konfetti regnar
+      visaKonfetti();
+    } else {
+      sam.classList.add('delvis');
+      sam.textContent = 'Du fick ' + ratt + ' av ' + totalt + ' rätt. Titta på de rödmarkerade rutorna.';
+    }
+    sam.scrollIntoView({behavior:'smooth', block:'center'});
+
+    // Automatiskt nytt blad om eleven klarade 0-1 fel på FÖRSTA försöket
+    // (slarvfel räcker inte för att låsa upp samma blad – men 2+ fel betyder
+    //  att hen bör få rätta och försöka igen utan att bladet byts).
+    var fel = totalt - ratt;
+    if(forstaForsoket && fel <= 1 && blad.kanGenerera && blad.genId){
+      // Visa en mjuk meddelandetext och byt blad efter en kort paus
+      setTimeout(function(){
+        var sam2 = rotEl.querySelector('[data-sammanf]');
+        if(sam2){
+          var info = document.createElement('div');
+          info.style.cssText = 'margin-top:14px;font-size:14px;font-weight:normal;color:#15803d;';
+          info.textContent = 'Nytt blad med andra tal kommer …';
+          sam2.appendChild(info);
+        }
+      }, 1600);
+      setTimeout(function(){
+        // markera att vi börjat en ny "session" på bladet, så nytt blad genereras
+        byggSheet(rotEl.id.replace('sheet-',''), 'A', false);
+      }, 3200);
+    }
+    forstaForsoket = false;
+  });
+
+  rotEl.querySelector('[data-action="reset"]').addEventListener('click', function(){
+    inputs.forEach(function(inp){
+      inp.value = '';
+      inp.classList.remove('correct','wrong','just-checked');
+    });
+    rotEl.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
+    var sam = rotEl.querySelector('[data-sammanf]');
+    sam.style.display = 'none';
+    sam.textContent = '';
+    forstaForsoket = true;
+    if(inputs[0]) inputs[0].focus();
+  });
+
+  var nyttBtn = rotEl.querySelector('[data-action="nytt-blad"]');
+  if(nyttBtn){
+    nyttBtn.addEventListener('click', function(){
+      byggSheet(rotEl.id.replace('sheet-',''), 'B', false);
+    });
+  }
+
+  rotEl.querySelector('[data-action="print"]').addEventListener('click', function(){
+    window.print();
+  });
+
+  if(inputs[0]) inputs[0].focus();
+}
+
+// ============================================================
+// UPPGIFTSDATA – negativa tal
+// ============================================================
+
+// --- 1 · BEGREPP OCH FÖRSTÅELSE ---
+var BLAD_BEGREPP = {
+  titel:'Begrepp och förståelse',
+  intro:'Motsatta tal, att storleksordna och talföljder. Skriv negativa tal med minustecken, t.ex. \u22125. Tryck sedan på Kontrollera.',
+  grupper:[
+    {rubrik:'Skriv det motsatta talet', rader:[
+      {typ:'lucka', text:'Motsatta talet till \u22125 \u00e4r __', svar:5},
+      {typ:'lucka', text:'Motsatta talet till 8 \u00e4r __', svar:-8},
+      {typ:'lucka', text:'Motsatta talet till \u221212 \u00e4r __', svar:12}
+    ]},
+    {rubrik:'Storleksordna talen från minst till störst', rader:[
+      {typ:'ordna', tal:[-3, 5, -8, 1, -1]}
+    ]},
+    {rubrik:'Skriv de två tal som saknas i talföljden', rader:[
+      {typ:'talfoljd', termer:[-8, -6, -4, null, null], facit:[-8,-6,-4,-2,0]},
+      {typ:'talfoljd', termer:[5, 2, -1, null, null], facit:[5,2,-1,-4,-7]}
+    ]},
+    {rubrik:'Storleksordna talen från minst till störst', rader:[
+      {typ:'ordna', tal:[2, -4, 0, -7, 3]}
+    ]},
+    {rubrik:'Skriv de två tal som saknas i talföljden', rader:[
+      {typ:'talfoljd', termer:[-10, -7, -4, null, null], facit:[-10,-7,-4,-1,2]},
+      {typ:'talfoljd', termer:[9, 5, 1, null, null], facit:[9,5,1,-3,-7]}
+    ]}
+  ]
+};
+
+// --- 2 · RÄKNA MED NEGATIVA TAL (bara + och − mellan termerna) ---
+var BLAD_RAKNA1 = {
+  titel:'Räkna med negativa tal',
+  intro:'Addition och subtraktion med negativa tal. Tänk på tallinjen. Skriv svaret med minustecken om det är negativt.',
+  grupper:[
+    {rubrik:'Addition', rader:[
+      {typ:'enkel', vansterText:'\u22123 + 5 =', svar:2},
+      {typ:'enkel', vansterText:'\u22127 + 4 =', svar:-3},
+      {typ:'enkel', vansterText:'\u22122 + 9 =', svar:7},
+      {typ:'enkel', vansterText:'\u22125 + 5 =', svar:0}
+    ]},
+    {rubrik:'Subtraktion', rader:[
+      {typ:'enkel', vansterText:'3 \u2212 8 =', svar:-5},
+      {typ:'enkel', vansterText:'\u22124 \u2212 2 =', svar:-6},
+      {typ:'enkel', vansterText:'6 \u2212 9 =', svar:-3},
+      {typ:'enkel', vansterText:'\u22121 \u2212 7 =', svar:-8}
+    ]},
+    {rubrik:'Blandat', rader:[
+      {typ:'enkel', vansterText:'\u22125 + 8 =', svar:3},
+      {typ:'enkel', vansterText:'2 \u2212 6 =', svar:-4},
+      {typ:'enkel', vansterText:'\u22129 + 3 =', svar:-6},
+      {typ:'enkel', vansterText:'7 \u2212 10 =', svar:-3}
+    ]},
+    {rubrik:'Vilket tal saknas?', rader:[
+      {typ:'lucka', text:'\u22123 + __ = 2', svar:5},
+      {typ:'lucka', text:'__ \u2212 4 = \u22126', svar:-2},
+      {typ:'lucka', text:'5 + __ = \u22121', svar:-6}
+    ]}
+  ]
+};
+
+// --- 3 · RÄKNA VIDARE (större tal + subtrahera/addera negativa: −(−), +(−)) ---
+var BLAD_RAKNA2 = {
+  titel:'Räkna vidare',
+  intro:'Samma sak men med större tal, och nu blandas det in att addera och subtrahera negativa tal: + (\u2212) och \u2212 (\u2212). Kom ihåg: att subtrahera ett negativt tal är samma sak som att addera dess positiva värde.',
+  grupper:[
+    {rubrik:'Addition med negativa tal', rader:[
+      {typ:'enkel', vansterText:'\u221212 + (\u22128) =', svar:-20},
+      {typ:'enkel', vansterText:'15 + (\u22129) =', svar:6},
+      {typ:'enkel', vansterText:'\u221220 + (\u22125) =', svar:-25},
+      {typ:'enkel', vansterText:'\u221214 + 30 =', svar:16}
+    ]},
+    {rubrik:'Subtraktion med negativa tal', rader:[
+      {typ:'enkel', vansterText:'8 \u2212 (\u22126) =', svar:14},
+      {typ:'enkel', vansterText:'\u221210 \u2212 (\u22124) =', svar:-6},
+      {typ:'enkel', vansterText:'12 \u2212 (\u221215) =', svar:27},
+      {typ:'enkel', vansterText:'\u221220 \u2212 (\u221225) =', svar:5}
+    ]},
+    {rubrik:'Blandat med större tal', rader:[
+      {typ:'enkel', vansterText:'\u221218 + (\u221214) =', svar:-32},
+      {typ:'enkel', vansterText:'25 \u2212 (\u221213) =', svar:38},
+      {typ:'enkel', vansterText:'\u221230 \u2212 (\u221212) =', svar:-18},
+      {typ:'enkel', vansterText:'\u221216 + 40 =', svar:24}
+    ]},
+    {rubrik:'Vilket tal saknas?', rader:[
+      {typ:'lucka', text:'13 + __ = 5', svar:-8},
+      {typ:'lucka', text:'__ \u2212 (\u22126) = 10', svar:4},
+      {typ:'lucka', text:'\u221215 \u2212 __ = \u221220', svar:5}
+    ]}
+  ]
+};
+
+// --- 4 · TEST (alla färdigheter) ---
+var BLAD_TEST = {
+  titel:'Test',
+  intro:'Visa vad du kan. Här blandas begrepp, storleksordna, talföljder och räkning med negativa tal.',
+  grupper:[
+    {rubrik:'Begrepp', rader:[
+      {typ:'lucka', text:'Motsatta talet till \u22129 \u00e4r __', svar:9},
+      {typ:'ordna', tal:[-5, 2, -8, 0, 4]},
+      {typ:'talfoljd', termer:[-7, -4, -1, null, null], facit:[-7,-4,-1,2,5]}
+    ]},
+    {rubrik:'Räkna', rader:[
+      {typ:'enkel', vansterText:'\u22126 + 4 =', svar:-2},
+      {typ:'enkel', vansterText:'5 \u2212 9 =', svar:-4},
+      {typ:'enkel', vansterText:'\u22128 + (\u22127) =', svar:-15},
+      {typ:'enkel', vansterText:'10 \u2212 (\u22125) =', svar:15}
+    ]},
+    {rubrik:'Räkna vidare', rader:[
+      {typ:'enkel', vansterText:'\u221214 + (\u221216) =', svar:-30},
+      {typ:'enkel', vansterText:'22 \u2212 (\u22128) =', svar:30},
+      {typ:'enkel', vansterText:'\u221225 \u2212 (\u221225) =', svar:0}
+    ]}
+  ]
+};
+
+// --- 5 · FÖRDJUPNING (multiplikation och division – åk 8-stoff) ---
+var BLAD_FORDJUPNING = {
+  titel:'Fördjupning',
+  intro:'Multiplikation och division med negativa tal. Det här är sådant ni möter mer i åttan \u2013 en utmaning för den som vill mer. Regeln: lika tecken ger plus, olika tecken ger minus.',
+  grupper:[
+    {rubrik:'Multiplikation', rader:[
+      {typ:'enkel', vansterText:'\u22124 \u00b7 3 =', svar:-12},
+      {typ:'enkel', vansterText:'6 \u00b7 (\u22125) =', svar:-30},
+      {typ:'enkel', vansterText:'\u22127 \u00b7 (\u22122) =', svar:14},
+      {typ:'enkel', vansterText:'\u22128 \u00b7 4 =', svar:-32}
+    ]},
+    {rubrik:'Division', rader:[
+      {typ:'enkel', vansterText:'\u221212 / 3 =', svar:-4},
+      {typ:'enkel', vansterText:'20 / (\u22124) =', svar:-5},
+      {typ:'enkel', vansterText:'\u221218 / (\u22126) =', svar:3},
+      {typ:'enkel', vansterText:'\u221224 / 8 =', svar:-3}
+    ]},
+    {rubrik:'Multiplikation och division blandat', rader:[
+      {typ:'enkel', vansterText:'\u22125 \u00b7 4 =', svar:-20},
+      {typ:'enkel', vansterText:'\u221230 / (\u22126) =', svar:5},
+      {typ:'enkel', vansterText:'9 \u00b7 (\u22123) =', svar:-27},
+      {typ:'enkel', vansterText:'\u221228 / 7 =', svar:-4}
+    ]},
+    {rubrik:'Använd prioriteringsregeln', rader:[
+      {typ:'enkel', vansterText:'\u22123 + 4 \u00b7 (\u22122) =', svar:-11},
+      {typ:'enkel', vansterText:'(\u22125) \u00b7 2 \u2212 6 =', svar:-16},
+      {typ:'enkel', vansterText:'10 + (\u221212) / 3 =', svar:6},
+      {typ:'enkel', vansterText:'\u221220 / (\u22124) \u2212 3 =', svar:2}
+    ]},
+    {rubrik:'Flera faktorer', rader:[
+      {typ:'enkel', vansterText:'\u22122 \u00b7 3 \u00b7 (\u22124) =', svar:24},
+      {typ:'enkel', vansterText:'\u22121 \u00b7 (\u22122) \u00b7 (\u22125) =', svar:-10},
+      {typ:'enkel', vansterText:'2 \u00b7 (\u22123) \u00b7 (\u22121) \u00b7 4 =', svar:24},
+      {typ:'enkel', vansterText:'(\u22121) \u00b7 (\u22121) \u00b7 (\u22121) \u00b7 (\u22121) =', svar:1}
+    ]}
+  ]
+};
+
+// ============================================================
+// Bygg upp bladen
+// ============================================================
+bygg_blad(document.getElementById('sheet-begrepp'),     BLAD_BEGREPP);
+bygg_blad(document.getElementById('sheet-rakna1'),      BLAD_RAKNA1);
+bygg_blad(document.getElementById('sheet-rakna2'),      BLAD_RAKNA2);
+bygg_blad(document.getElementById('sheet-test'),        BLAD_TEST);
+bygg_blad(document.getElementById('sheet-fordjupning'), BLAD_FORDJUPNING);
+
+
+</script>
+
+</body>
+</html>

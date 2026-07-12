@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Kapitel 3 · Öva mer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#B45309; --primary-soft:#FED7AA; --primary-bg:#FFF7ED;
+  --success:#16a34a; --success-bg:#dcfce7; --error:#dc2626; --error-bg:#fee2e2;
+  --line:#e5e0d8; --bg-card:#fff; --bg-soft:#f9f5f0; --bg-warm:#fdf6ec;
+  --radius:10px; --radius-sm:6px; --radius-lg:14px;
+  --nav-bg:#0f1e2e; --nav-gold:#c49a40;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --gold:#9a7228; --gold-lt:#c49a40; --k3-color:#7c4a8a;
+  --c-tolka:#2563EB; --c-tolka-bg:#eff6ff;
+  --c-skriva:#16a34a; --c-skriva-bg:#f0fdf4;
+  --c-berakna:#B45309; --c-berakna-bg:#FFF7ED;
+  --c-forenkla:#be185d; --c-forenkla-bg:#fdf2f8;
+  --cinzel:'Cinzel','Times New Roman',serif;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Source Serif 4',Georgia,serif;
+  --mono:'Source Serif 4',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* TOPPNAV */
+.topnav{background:var(--nav-bg);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.nav-brand{font-family:var(--cinzel);font-weight:700;letter-spacing:.08em;font-size:15px;}
+.nav-brand .nav-sep{margin:0 8px;color:var(--nav-gold);}
+.nav-crumbs{font-size:13px;color:rgba(255,255,255,.6);}
+.nav-crumbs a{color:rgba(255,255,255,.75);text-decoration:none;}
+.nav-crumbs a:hover{color:var(--nav-gold);}
+.crumb-sep{margin:0 7px;color:rgba(255,255,255,.3);}
+.crumb-current{color:rgba(255,255,255,.9);}
+
+/* HERO */
+.hero{background:var(--nav-bg);color:#fff;text-align:center;padding:38px 24px 46px;position:relative;}
+.hero-eyebrow{font-family:var(--cinzel);font-size:12px;letter-spacing:.22em;color:var(--nav-gold);text-transform:uppercase;margin-bottom:14px;}
+.hero-title{font-family:var(--serif);font-size:42px;font-weight:500;margin:0 0 12px;letter-spacing:-.01em;}
+.hero-title em{font-style:italic;color:var(--gold-lt);}
+.hero-desc{max-width:560px;margin:0 auto 18px;color:rgba(255,255,255,.72);font-size:15px;}
+.hero-back{display:inline-block;color:var(--nav-gold);text-decoration:none;font-family:var(--cinzel);font-size:12px;letter-spacing:.12em;border:1px solid rgba(196,154,64,.4);padding:8px 18px;border-radius:6px;transition:background .15s;}
+.hero-back:hover{background:rgba(196,154,64,.12);}
+
+/* LAYOUT */
+.wrap{max-width:920px;margin:0 auto;padding:36px 24px 60px;}
+.section-label{font-family:var(--cinzel);font-size:13px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin:34px 0 16px;display:flex;align-items:center;gap:14px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--paper-dk);}
+.section-label:first-child{margin-top:0;}
+
+/* OMRÅDESKORT */
+.area-card{display:flex;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm);}
+.area-stripe{width:6px;flex-shrink:0;}
+.area-body{flex:1;padding:18px 22px;min-width:0;}
+.area-head{display:flex;align-items:baseline;gap:10px;}
+.area-num{font-family:var(--cinzel);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;}
+.area-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);letter-spacing:-.01em;}
+.area-desc{color:var(--ink-faint);font-size:13px;margin:3px 0 14px;}
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px;}
+.sub-card{display:flex;align-items:center;gap:10px;background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;cursor:pointer;text-align:left;font:inherit;transition:transform .12s,box-shadow .12s,border-color .12s;}
+.sub-card:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow);border-color:var(--gold-lt);}
+.sub-card:disabled{cursor:default;opacity:.5;}
+.sub-dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0;}
+.sub-card.soon .sub-dot{background:#c9c2b5;}
+.sub-namn{flex:1;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);line-height:1.2;min-width:0;}
+.sub-arrow{color:var(--ink-faint);font-size:18px;flex-shrink:0;}
+.sub-card-num{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--cinzel);font-size:13px;color:var(--ink-faint);}
+.sub-card-body{flex:1;min-width:0;}
+.sub-card-namn{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);line-height:1.2;}
+.sub-card-status{font-size:11px;font-family:var(--cinzel);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.sub-card.klar .sub-card-status{color:var(--success);}
+.sub-card.soon .sub-card-status{color:var(--ink-faint);}
+.sub-card-arrow{color:var(--ink-faint);font-size:18px;}
+
+/* ÖVNINGSVY */
+.exercise-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:26px 28px;box-shadow:var(--shadow-sm);max-width:680px;margin:0 auto;}
+.ex-header{margin-bottom:18px;}
+.ex-title{font-family:var(--serif);font-size:27px;font-weight:600;color:var(--ink);margin:0 0 4px;}
+.ex-sub{color:var(--ink-soft);font-size:14px;}
+.ex-level{display:inline-block;margin-top:8px;font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:var(--bg-warm);border:1px solid var(--paper-dk);border-radius:20px;padding:3px 12px;}
+.ex-exempel{background:var(--bg-warm);border:1px solid var(--paper-dk);border-radius:var(--radius);padding:12px 16px;font-size:14px;color:var(--ink-soft);margin-bottom:18px;}
+.ex-exempel .ex-rad{display:inline-block;margin-top:4px;font-family:var(--mono);}
+
+/* SCOREBAR */
+.scorebar{display:flex;gap:5px;margin-bottom:18px;}
+.score-dot{flex:1;height:6px;border-radius:3px;background:var(--line);}
+.score-dot.right{background:var(--success);}
+.score-dot.wrong{background:var(--error);}
+.score-dot.current{background:var(--gold-lt);}
+
+/* FRÅGA + SVAR */
+.ex-fraga{font-size:18px;color:var(--ink);margin-bottom:6px;line-height:1.5;}
+.ex-fraga .ex-num{font-family:var(--mono);font-weight:600;}
+.svar-rad{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0;}
+.svar-fast{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--ink);}
+.ex-in{height:42px;min-width:90px;border:2px solid var(--primary);border-radius:8px;padding:0 12px;font-family:var(--mono);font-size:18px;text-align:center;background:var(--bg-soft);color:var(--ink);}
+.ex-in:focus{outline:none;background:#fff;box-shadow:0 0 0 3px rgba(180,83,9,.15);}
+.ex-in.correct{border-color:var(--success);background:var(--success-bg);color:var(--success);}
+.ex-in.wrong{border-color:var(--error);background:var(--error-bg);color:var(--error);}
+.ex-in.bred{min-width:180px;text-align:left;}
+
+/* EMOJI-BILD */
+.emoji-bild{display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start;justify-content:center;padding:18px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;margin:8px 0 4px;}
+.emoji-grupp{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:36px;line-height:1.1;text-align:center;}
+.emoji-text{font-size:13px;font-family:var(--sans);font-style:italic;color:var(--ink-soft);}
+.brak{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;}
+.brak .taljare{border-bottom:1.5px solid currentColor;padding:0 5px;line-height:1.25;}
+.brak .namnare{padding:0 5px;line-height:1.25;}
+
+/* KNAPPVAL */
+.val-rad{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+.val-btn{font-family:var(--serif);font-size:20px;font-weight:600;padding:11px 24px;cursor:pointer;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);transition:background .15s,border-color .15s,color .15s;}
+.val-btn:hover:not(:disabled){border-color:var(--gold-lt);}
+.val-btn.is-vald{background:var(--gold-lt);border-color:var(--gold-lt);color:#fff;}
+.val-btn.correct{background:var(--success);border-color:var(--success);color:#fff;}
+.val-btn.wrong{background:var(--error);border-color:var(--error);color:#fff;}
+.val-btn:disabled{cursor:default;}
+
+/* FEEDBACK */
+.ex-feedback{margin:14px 0;padding:0;font-size:15px;min-height:24px;opacity:0;transition:opacity .2s;}
+.ex-feedback.show{opacity:1;}
+.ex-feedback.correct{color:var(--success);font-weight:600;}
+.ex-feedback.wrong{color:var(--error);}
+
+/* KNAPPRAD */
+.ex-actions{margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.btn{font-family:var(--cinzel);font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:11px 26px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:background .15s,transform .1s;}
+.btn.primary{background:var(--primary);color:#fff;}
+.btn.primary:hover{background:#9a4708;}
+.btn.subtle{background:transparent;color:var(--ink-faint);border-color:var(--line);}
+.btn.subtle:hover{background:var(--bg-soft);color:var(--ink);}
+.btn:disabled{opacity:.5;cursor:default;}
+
+/* KEYPAD */
+.keypad{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0 4px;}
+.kp-btn{width:46px;height:42px;font-family:var(--mono);font-size:19px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;transition:background .12s;}
+.kp-btn:hover{background:var(--bg-soft);}
+
+/* SUMMERINGSKORT */
+.summary{text-align:center;padding:14px 0 6px;}
+.summary-big{font-family:var(--serif);font-size:40px;font-weight:600;color:var(--ink);}
+.summary-txt{color:var(--ink-soft);margin:6px 0 4px;}
+.summary-level{font-size:14px;color:var(--gold);font-family:var(--cinzel);letter-spacing:.06em;}
+
+/* KONFETTI */
+.konfetti-lager{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999;}
+.konfetti{position:absolute;width:10px;height:14px;top:-30px;border-radius:2px;opacity:0;animation:konfetti-fall linear forwards;}
+@keyframes konfetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:1;}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.view{animation:fadeUp .35s ease both;}
+
+footer{text-align:center;padding:30px 20px;color:var(--ink-faint);border-top:1px solid var(--paper-dk);margin-top:30px;}
+footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;}
+
+@media(max-width:600px){
+  .hero-title{font-size:32px;}
+  .sub-grid{grid-template-columns:1fr;}
+  .exercise-card{padding:20px 16px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="ak7-k3.html">Kapitel 3</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Öva mer</span>
+  </div>
+</nav>
+
+<header class="hero" id="hero">
+  <div class="hero-eyebrow">Kapitel 3 · Årskurs 7</div>
+  <h1 class="hero-title">Öva mer · <em>Algebra</em></h1>
+  <p class="hero-desc">Träna på uttryck, mönster, ekvationer och problemlösning. Övningarna anpassar sig efter hur det går – ju bättre det går, desto svårare blir de.</p>
+  <a class="hero-back" href="ak7-k3.html">← Tillbaka till kapitlet</a>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Kapitel 3 · Öva mer</span>
+</footer>
+
+<script>
+// ============================================================
+// ALGEBRA – ÖVA MER (kapitel 3)
+// ============================================================
+
+// ---- STRUKTUR: kunskapsområden med undergrupper ----
+var OMRADEN = [
+  {
+    id:'uttryck', nr:1, titel:'Uttryck', farg:'tolka',
+    beskrivning:'Tolka, skriva, beräkna med och förenkla algebraiska uttryck.',
+    grupper:[
+      {id:'tolka',    namn:'Tolka uttryck',        implemented:true},
+      {id:'skriva',   namn:'Skriva uttryck',       implemented:true},
+      {id:'berakna',  namn:'Beräkna med uttryck',  implemented:true},
+      {id:'forenkla', namn:'Förenkla uttryck',     implemented:true}
+    ]
+  },
+  {
+    id:'monster', nr:2, titel:'Mönster', farg:'skriva',
+    beskrivning:'Talföljder, hitta mönster och beskriva dem med uttryck.',
+    grupper:[
+      {id:'fortsatta', namn:'Fortsätta talföljd', implemented:false},
+      {id:'valja',     namn:'Välja rätt uttryck', implemented:false},
+      {id:'skapa',     namn:'Skapa uttryck',      implemented:false},
+      {id:'rakna',     namn:'Räkna med uttryck',  implemented:false}
+    ]
+  },
+  {
+    id:'ekvationer', nr:3, titel:'Ekvationer', farg:'berakna',
+    beskrivning:'Lösa ekvationer steg för steg.',
+    grupper:[
+      {id:'standard',  namn:'Standardvarianter',          implemented:false},
+      {id:'badasidor', namn:'Variabel på båda sidor',     implemented:false},
+      {id:'plusminus', namn:'Plus och minus före parentes', implemented:false},
+      {id:'siffra',    namn:'Siffra före parentes',       implemented:false}
+    ]
+  },
+  {
+    id:'problem', nr:4, titel:'Problemlösning', farg:'forenkla',
+    beskrivning:'Skapa ekvationer från text och lösa problem av olika slag.',
+    grupper:[
+      {id:'fran-text',   namn:'Skapa ekvation från text', implemented:false},
+      {id:'olika-saker', namn:'Problem med olika saker',  implemented:false},
+      {id:'olika-tal',   namn:'Problem med olika tal',    implemented:false},
+      {id:'vinklar',     namn:'Problem med vinklar',      implemented:false},
+      {id:'omkrets',     namn:'Geometriska figurer (omkrets)', implemented:false},
+      {id:'area',        namn:'Geometriska figurer (area)',    implemented:false},
+      {id:'parentes',    namn:'Ekvation från text (parentes)', implemented:false}
+    ]
+  }
+];
+
+var app = document.getElementById('app');
+
+// ============================================================
+// HJÄLPFUNKTIONER
+// ============================================================
+function d3RandInt(lo, hi){ return lo + Math.floor(Math.random() * (hi - lo + 1)); }
+function randPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// Jämför tal (komma/punkt, minustecken, mellanslag)
+function jamforTal(a, b){
+  if(a == null) return false;
+  var s = String(a).replace(/\s/g,'').replace(/\u2212/g,'-').replace(',', '.');
+  if(s === '') return false;
+  var n = parseFloat(s);
+  return !isNaN(n) && Math.abs(n - b) < 1e-9;
+}
+// Jämför algebraiskt uttryck (normaliserat: termordning, 4y=y4)
+function jamforUttryck(a, godkanda){
+  if(a == null) return false;
+  function normTerm(t){
+    var neg=false;
+    if(t[0]==='+'){t=t.slice(1);} else if(t[0]==='-'){neg=true;t=t.slice(1);}
+    return (neg?'-':'') + t.split('').sort().join('');
+  }
+  function norm(x){
+    var s=String(x).toLowerCase().replace(/[·×*]/g,'').replace(/\s/g,'').replace(/\u2212/g,'-').replace(/,/g,'.');
+    var termer=s.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';});
+    return termer.map(normTerm).sort().join('+');
+  }
+  var na=norm(a);
+  return godkanda.some(function(g){return norm(g)===na;});
+}
+// Symbolisk förenkling med flera variabler (x,y,a,b) – expanderar parenteser,
+// multiplikation och division, samlar koefficienter per variabel + konstant.
+function forenklaFler(uttryck){
+  if(uttryck == null) return null;
+  var s = String(uttryck).toLowerCase()
+    .replace(/\u2212/g,'-').replace(/[×]/g,'*').replace(/·/g,'*')
+    .replace(/\s/g,'').replace(/,/g,'.');
+  if(s === '') return null;
+  var vars = [];
+  (s.match(/[a-z]/g)||[]).forEach(function(c){ if(vars.indexOf(c)<0) vars.push(c); });
+  s = s.replace(/(\d|\))(\()/g,'$1*$2')
+       .replace(/(\))(\d|[a-z]|\()/g,'$1*$2')
+       .replace(/(\d)([a-z])/g,'$1*$2')
+       .replace(/([a-z])(\d)/g,'$1*$2')
+       .replace(/([a-z])([a-z])/g,'$1*$2');
+  function evalAt(vals){
+    var e = s;
+    for(var k in vals){ e = e.replace(new RegExp(k,'g'), '('+vals[k]+')'); }
+    if(!/^[-+*/().\d]+$/.test(e)) return null;
+    try{ var r = Function('"use strict";return ('+e+')')(); return (typeof r==='number'&&isFinite(r))?r:null; }
+    catch(err){ return null; }
+  }
+  var noll = {}; vars.forEach(function(v){ noll[v]=0; });
+  var c = evalAt(noll);
+  if(c === null) return null;
+  var koef = {};
+  for(var i=0;i<vars.length;i++){
+    var vv = {}; vars.forEach(function(v){ vv[v]=0; }); vv[vars[i]] = 1;
+    var f1 = evalAt(vv);
+    if(f1 === null) return null;
+    koef[vars[i]] = Math.round((f1 - c)*1e6)/1e6;
+  }
+  var delar = vars.slice().sort().map(function(v){ return koef[v]+v; });
+  delar.push('C'+(Math.round(c*1e6)/1e6));
+  return delar.join('|');
+}
+function jamforFler(a, facit){
+  var na = forenklaFler(a);
+  if(na === null) return false;
+  return na === forenklaFler(facit);
+}
+// Räknar antal termer i ett uttryck (för "skriv fyra termer")
+function antalTermer(s){
+  var t = String(s).toLowerCase().replace(/\u2212/g,'-').replace(/\s/g,'');
+  if(t==='') return 0;
+  t = t.replace(/^[+-]/,'');
+  var m = t.match(/[+-]/g);
+  return (m?m.length:0) + 1;
+}
+// Jämför fritext mot lista godkända
+function jamforText(a, godkanda){
+  if(a==null) return false;
+  function norm(x){return String(x).toLowerCase().replace(/\s/g,'').replace(/[.,!?]/g,'');}
+  var na=norm(a);
+  if(na==='') return false;
+  return godkanda.some(function(g){return norm(g)===na;});
+}
+// Jämför ett led på FORM (rätt tal och tecken; mellanslag, ·/x/* och omkastad ordning ok)
+function jamforForm(a, godkanda){
+  if(a == null) return false;
+  function normTerm(t){
+    var neg=false;
+    if(t[0]==='+'){t=t.slice(1);} else if(t[0]==='-'){neg=true;t=t.slice(1);}
+    var faktorer=t.split('·').filter(function(f){return f!=='';}).sort();
+    return (neg?'-':'') + faktorer.join('·');
+  }
+  function norm(x){
+    var s=String(x).toLowerCase().replace(/[×*x]/g,'·').replace(/\s/g,'').replace(/\u2212/g,'-').replace(/,/g,'.');
+    if(s==='') return '';
+    var termer=s.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';});
+    return termer.map(normTerm).sort().join('+');
+  }
+  var na=norm(a);
+  if(na==='') return false;
+  return godkanda.some(function(g){return norm(g)===na;});
+}
+// Adaptiv nivåjustering
+function adjustLevel(level, right, total){
+  var change=0;
+  if(total>0){
+    var kvot=right/total;
+    if(kvot>=0.8 && level<3){ level++; change=1; }
+    else if(kvot<0.4 && level>1){ level--; change=-1; }
+  }
+  return {level:level, change:change};
+}
+// Konfetti
+function konfetti(){
+  var gammal=document.querySelector('.konfetti-lager'); if(gammal) gammal.remove();
+  var lager=document.createElement('div'); lager.className='konfetti-lager'; document.body.appendChild(lager);
+  var farger=['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899','#06b6d4'];
+  for(var i=0;i<70;i++){
+    var b=document.createElement('span'); b.className='konfetti';
+    b.style.left=(Math.random()*100)+'vw';
+    b.style.background=farger[Math.floor(Math.random()*farger.length)];
+    b.style.animationDuration=(2.5+Math.random()*2)+'s';
+    b.style.animationDelay=(Math.random()*0.6)+'s';
+    lager.appendChild(b);
+  }
+  setTimeout(function(){ if(lager.parentNode) lager.remove(); }, 6000);
+}
+
+// ============================================================
+// ÖVERSIKTSVY
+// ============================================================
+function renderOversikt(){
+  document.getElementById('hero').style.display='';
+  var STRIPE = { uttryck:'#7c4a8a', monster:'#b08900', ekvationer:'#1d6f97', problem:'#b05a30' };
+  var html='<div class="view">';
+  OMRADEN.forEach(function(omr){
+    var farg = STRIPE[omr.id] || '#7c4a8a';
+    html+='<div class="area-card">';
+    html+='<div class="area-stripe" style="background:'+farg+'"></div>';
+    html+='<div class="area-body">';
+    html+='<div class="area-head"><span class="area-num">Del '+omr.nr+'</span>'
+        +'<span class="area-title">'+omr.titel+'</span></div>';
+    html+='<div class="area-desc">'+omr.beskrivning+'</div>';
+    html+='<div class="sub-grid">';
+    omr.grupper.forEach(function(g){
+      var klar=g.implemented;
+      html+='<button class="sub-card '+(klar?'klar':'soon')+'" '
+          +(klar?('data-omr="'+omr.id+'" data-grupp="'+g.id+'"'):'disabled')+'>'
+          +'<span class="sub-dot"></span>'
+          +'<span class="sub-namn">'+g.namn+'</span>'
+          +(klar?'<span class="sub-arrow">›</span>':'')
+          +'</button>';
+    });
+    html+='</div></div></div>';
+  });
+  html+='</div>';
+  app.innerHTML=html;
+  app.querySelectorAll('[data-grupp]').forEach(function(btn){
+    btn.onclick=function(){ oppnaGrupp(btn.dataset.omr, btn.dataset.grupp); };
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Dispatch till rätt övning
+function oppnaGrupp(omrId, gruppId){
+  document.getElementById('hero').style.display='none';
+  if(omrId==='uttryck' && gruppId==='tolka'){ renderTolkaUttryck(); return; }
+  if(omrId==='uttryck' && gruppId==='skriva'){ renderSkriva(); return; }
+  if(omrId==='uttryck' && gruppId==='berakna'){ beraknaEngine(); return; }
+  if(omrId==='uttryck' && gruppId==='forenkla'){ renderForenkla(); return; }
+  // fallback (ska inte nås så länge bara implementerade kort är klickbara)
+  renderOversikt();
+}
+
+// ============================================================
+// ÖVNING: TOLKA UTTRYCK
+// ============================================================
+var VAROR = [
+  {emoji:'🍦', ental:'glass',   flertal:'glassar'},
+  {emoji:'🥤', ental:'läsk',    flertal:'läsk'},
+  {emoji:'🍩', ental:'munk',    flertal:'munkar'},
+  {emoji:'☕', ental:'kaffe',   flertal:'kaffe'},
+  {emoji:'🍕', ental:'pizza',   flertal:'pizzor'},
+  {emoji:'🍎', ental:'äpple',   flertal:'äpplen'},
+  {emoji:'🍌', ental:'banan',   flertal:'bananer'},
+  {emoji:'👕', ental:'tröja',   flertal:'tröjor'},
+  {emoji:'🧦', ental:'par strumpor', flertal:'par strumpor'},
+  {emoji:'🍪', ental:'kaka',    flertal:'kakor'}
+];
+var NAMN = ['Nadia','Hugo','Selma','Omar','Vera','Elliot','Saga','Noel','Tuva','Milo','Iris','Leon'];
+var RAKNEORD = ['noll','en','två','tre','fyra','fem','sex','sju','åtta','nio','tio'];
+function emojiRad(antal, emoji){ var s=''; for(var i=0;i<antal;i++) s+=emoji; return s; }
+
+function genTolkaBild(level){
+  var v = VAROR.slice().sort(function(){return Math.random()-0.5;});
+  var v1=v[0], v2=v[1];
+  var n1 = level===1? d3RandInt(2,4) : d3RandInt(2,6);
+  var n2 = level===1? d3RandInt(2,3) : d3RandInt(2,5);
+  var namn = randPick(NAMN);
+  var uttryck = n1+'a + '+n2+'b';
+  var svarText = RAKNEORD[n1]+' '+v1.flertal+' och '+RAKNEORD[n2]+' '+v2.flertal;
+  var accept = [
+    RAKNEORD[n1]+v1.flertal+'och'+RAKNEORD[n2]+v2.flertal,
+    RAKNEORD[n1]+v1.flertal+RAKNEORD[n2]+v2.flertal,
+    n1+v1.flertal+n2+v2.flertal,
+    n1+v1.ental+n2+v2.ental,
+    RAKNEORD[n1]+v1.flertal+RAKNEORD[n2]+v2.ental
+  ];
+  var svg = '<div class="emoji-bild">'
+    + '<span class="emoji-grupp">'+emojiRad(n1,v1.emoji)+'<span class="emoji-text">'+n1+' '+v1.flertal+' · a kr</span></span>'
+    + '<span class="emoji-grupp">'+emojiRad(n2,v2.emoji)+'<span class="emoji-text">'+n2+' '+v2.flertal+' · b kr</span></span>'
+    + '</div>';
+  return {
+    intro:'En '+v1.ental+' kostar a kronor och en '+v2.ental+' kostar b kronor.',
+    fraga:'Vad har '+namn+' köpt om uttrycket '+uttryck+' beskriver kostnaden?',
+    svg:svg, svarTyp:'text', svar:svarText, accept:accept
+  };
+}
+function genTolkaVarde(level){
+  var v = VAROR.slice().sort(function(){return Math.random()-0.5;});
+  var v1=v[0], v2=v[1];
+  var n1 = level===1? d3RandInt(2,4) : d3RandInt(2,6);
+  var n2 = level===1? d3RandInt(2,3) : d3RandInt(2,5);
+  var a = level===1? d3RandInt(3,15) : d3RandInt(5,40);
+  var b = level===1? d3RandInt(3,15) : d3RandInt(5,40);
+  var namn = randPick(NAMN);
+  return {
+    intro:'En '+v1.ental+' kostar a kronor och en '+v2.ental+' kostar b kronor. '+namn+' köper '+n1+' '+v1.flertal+' och '+n2+' '+v2.flertal+'.',
+    fraga:'Hur mycket betalar '+namn+' om a = '+a+' och b = '+b+'?',
+    svarTyp:'tal', svar:n1*a + n2*b
+  };
+}
+function genTolkaSkriv(level){
+  var typ = randPick(level===1? ['ggr','plus'] : ['ggr','plus','minus']);
+  var namn = randPick(NAMN);
+  var v = randPick(VAROR);
+  if(typ==='ggr'){
+    var n = d3RandInt(3,6);
+    return {fraga:'En '+v.ental+' kostar a kronor. Skriv ett uttryck för vad '+n+' '+v.flertal+' kostar.',
+      svarTyp:'uttryck', svar:n+'a', accept:[n+'a','a·'+n,n+'·a']};
+  }
+  if(typ==='plus'){
+    var k = d3RandInt(2,9);
+    return {fraga:namn+' är x år. En kompis är '+k+' år äldre. Skriv ett uttryck för kompisens ålder.',
+      svarTyp:'uttryck', svar:'x+'+k, accept:['x+'+k, k+'+x']};
+  }
+  var m = d3RandInt(2,9);
+  return {fraga:namn+' är x år. En kompis är '+m+' år yngre. Skriv ett uttryck för kompisens ålder.',
+    svarTyp:'uttryck', svar:'x−'+m, accept:['x-'+m]};
+}
+
+function tolkaEngine(kategori){
+  var level=1, omgang=[], idx=0, results=[], OMG=6;
+  var gen = kategori==='bild'? genTolkaBild : (kategori==='varde'? genTolkaVarde : genTolkaSkriv);
+  var titel = kategori==='bild'? 'Tolka uttryck · vad har personen köpt?'
+            : kategori==='varde'? 'Tolka uttryck · sätt in värdet'
+            : 'Tolka uttryck · skriv ett eget uttryck';
+  var sub = kategori==='bild'? 'Titta på bilden och skriv med ord vad personen köpt.'
+          : kategori==='varde'? 'Sätt in värdena på a och b och räkna ut kostnaden.'
+          : 'Skriv ett uttryck med variabeln. Använd · för gånger.';
+  function nyOmgang(){ omgang=[]; for(var i=0;i<OMG;i++) omgang.push(gen(level)); idx=0; results=[]; }
+
+  function render(){
+    if(idx>=omgang.length){
+      var right=results.filter(function(x){return x;}).length;
+      var adj=adjustLevel(level,right,omgang.length); level=adj.level;
+      app.innerHTML='<div class="view"><div class="exercise-card">'
+        +'<div class="ex-header"><h2 class="ex-title">Klart!</h2>'
+        +'<div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
+        +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
+        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-level">Nivå '+level+'</div></div>'
+        +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
+        +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
+      document.getElementById('next').onclick=function(){ nyOmgang(); render(); };
+      document.getElementById('back').onclick=function(){ renderTolkaUttryck(); };
+      if(right>=omgang.length-1) konfetti();
+      return;
+    }
+    var task=omgang[idx];
+    var dots='';
+    for(var i=0;i<omgang.length;i++){
+      var cls = i<idx? (results[i]?'right':'wrong') : (i===idx?'current':'');
+      dots+='<div class="score-dot '+cls+'"></div>';
+    }
+    var svarFalt;
+    if(task.svarTyp==='tal'){
+      svarFalt='<input class="ex-in" id="svar" inputmode="decimal" autocomplete="off"><span class="svar-fast">kr</span>';
+    } else if(task.svarTyp==='uttryck'){
+      svarFalt='<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="uttryck">';
+    } else {
+      svarFalt='<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="svar med ord" style="min-width:240px;">';
+    }
+    app.innerHTML='<div class="view"><div class="exercise-card">'
+      +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2>'
+      +'<div class="ex-sub">'+sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'
+      +'<div class="scorebar">'+dots+'</div>'
+      +(task.intro?'<div class="ex-fraga">'+task.intro+'</div>':'')
+      +(task.svg||'')
+      +'<div class="ex-fraga" style="margin-top:10px;">'+task.fraga+'</div>'
+      +'<div class="svar-rad">'+svarFalt+'</div>'
+      +'<div class="ex-feedback" id="fb"></div>'
+      +(task.svarTyp==='uttryck'?keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','b','·','+','\u2212']):(task.svarTyp==='tal'?keypadHTML(['7','8','9','4','5','6','1','2','3','0']):''))
+      +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
+      +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
+    var inp=document.getElementById('svar');
+    setTimeout(function(){ inp.focus(); },50);
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); check(); } });
+    bindKeypad();
+    document.getElementById('check').onclick=check;
+    document.getElementById('back').onclick=function(){ renderTolkaUttryck(); };
+
+    function check(){
+      var fb=document.getElementById('fb'); fb.className='ex-feedback show';
+      var ok;
+      if(task.svarTyp==='tal') ok=jamforTal(inp.value, task.svar);
+      else if(task.svarTyp==='uttryck') ok=jamforUttryck(inp.value, task.accept||[task.svar]);
+      else ok=jamforText(inp.value, task.accept||[task.svar]);
+      inp.disabled=true; document.getElementById('check').disabled=true;
+      if(ok){ inp.classList.add('correct'); fb.classList.add('correct');
+        fb.textContent='Rätt!' + (task.svarTyp==='tal'?' '+task.svar+' kr':''); }
+      else { inp.classList.add('wrong'); fb.classList.add('wrong');
+        fb.textContent='Rätt svar: '+(task.svarTyp==='tal'?task.svar+' kr':task.svar); }
+      results.push(ok);
+      var b=document.createElement('button'); b.className='btn primary'; b.textContent=(idx+1>=omgang.length?'Se resultat':'Nästa');
+      b.onclick=function(){ idx++; render(); };
+      document.getElementById('check').replaceWith(b);
+    }
+  }
+  nyOmgang(); render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderTolkaUttryck(){
+  document.getElementById('hero').style.display='none';
+  var kat=[
+    {id:'bild',  namn:'Vad har personen köpt?', desc:'Tolka uttrycket utifrån bilden.'},
+    {id:'varde', namn:'Sätt in värdet',         desc:'Räkna ut kostnaden när a och b är kända.'},
+    {id:'skriv', namn:'Skriv ett eget uttryck', desc:'Skriv ett uttryck från en text.'}
+  ];
+  var html='<div class="view"><div class="exercise-card">'
+    +'<div class="ex-header"><h2 class="ex-title">Tolka uttryck</h2>'
+    +'<div class="ex-sub">Välj vad du vill träna på. Nivån anpassar sig medan du räknar.</div></div>'
+    +'<div class="sub-grid" style="margin-top:6px;">';
+  kat.forEach(function(k,i){
+    html+='<button class="sub-card klar" data-kat="'+k.id+'">'
+      +'<span class="sub-card-num">'+(i+1)+'</span>'
+      +'<span class="sub-card-body"><span class="sub-card-namn">'+k.namn+'</span>'
+      +'<span class="sub-card-status" style="color:var(--ink-faint);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12px;">'+k.desc+'</span></span>'
+      +'<span class="sub-card-arrow">›</span></button>';
+  });
+  html+='</div><div class="ex-actions"><button class="btn subtle" id="back">Till alla områden</button></div></div></div>';
+  app.innerHTML=html;
+  app.querySelectorAll('[data-kat]').forEach(function(btn){
+    btn.onclick=function(){ tolkaEngine(btn.dataset.kat); };
+  });
+  document.getElementById('back').onclick=renderOversikt;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function keypadHTML(ops){
+  if(!ops || !ops.length) return '';
+  var h='<div class="keypad">';
+  ops.forEach(function(op){ h+='<button type="button" class="kp-btn" data-op="'+op+'">'+op+'</button>'; });
+  return h+'</div>';
+}
+function bindKeypad(){
+  var inp=document.getElementById('svar'); if(!inp) return;
+  document.querySelectorAll('.kp-btn').forEach(function(btn){
+    btn.onclick=function(){ inp.value+=btn.dataset.op; inp.focus(); };
+  });
+}
+
+
+// ============================================================
+// ÖVNING: BERÄKNA MED UTTRYCK
+// ============================================================
+// Genererar insättningsuppgifter med mellanled (insättning → förenkling → svar),
+// adaptivt nivå 1–3. Leden rättas på form, svaret på värde.
+
+function genBerakna(level){
+  function plus(n){ return (n<0 ? ' \u2212 ' + Math.abs(n) : ' + ' + n); }
+  function plusForm(n){ return (n<0 ? '-' + Math.abs(n) : '+' + n); }
+
+  if(level === 1){
+    var variant = randPick(['produkt','plus','plus','minusFore','minusFore']);
+    var v = randPick(['x','y','a']);
+    var a = d3RandInt(2, 9);
+    var val = d3RandInt(2, 9);
+    if(variant==='produkt'){
+      return { vansterText: a+v+',&nbsp;'+v+' = '+val,
+        led: [ {accept:[a+'·'+val], visa:a+'·'+val}, {svar:a*val} ] };
+    }
+    if(variant==='minusFore'){
+      // c − a·v, där c väljs så att svaret blir positivt: c > a·val
+      var prodM = a*val;
+      var c2 = prodM + d3RandInt(1, 12);   // garanterar positivt svar
+      return { vansterText: c2+' \u2212 '+a+v+',&nbsp;'+v+' = '+val,
+        led: [ {accept:[c2+'-'+a+'·'+val], visa:c2+' \u2212 '+a+'·'+val},
+               {accept:[c2+'-'+prodM], visa:c2+' \u2212 '+prodM},
+               {svar: c2 - prodM} ] };
+    }
+    var tecken = randPick([1,-1]), prod = a*val;
+    var c;
+    if(tecken < 0){ c = d3RandInt(1, Math.max(1, prod)); }  // a·v − c ≥ 0
+    else { c = d3RandInt(1, 9); }
+    var cc = tecken*c;
+    return { vansterText: a+v+plus(cc)+',&nbsp;'+v+' = '+val,
+      led: [ {accept:[a+'·'+val+plusForm(cc)], visa:a+'·'+val+plus(cc)},
+             {accept:[prod+plusForm(cc)], visa:prod+plus(cc)}, {svar: prod + cc} ] };
+  }
+
+  if(level === 2){
+    var tva = (Math.random() < 0.6);
+    if(tva){
+      var a2=d3RandInt(2,6), b2=d3RandInt(2,6), xv=d3RandInt(2,9), yv=d3RandInt(2,9);
+      var prodA=a2*xv, prodB=b2*yv;
+      return { vansterText:a2+'x + '+b2+'y,&nbsp;x = '+xv+' och y = '+yv,
+        led:[ {accept:[a2+'·'+xv+'+'+b2+'·'+yv], visa:a2+'·'+xv+' + '+b2+'·'+yv},
+              {accept:[prodA+'+'+prodB], visa:prodA+' + '+prodB}, {svar:prodA+prodB} ] };
+    }
+    var v3=randPick(['x','y','a','b']), a3=d3RandInt(3,9), val3=d3RandInt(5,12);
+    var c3=d3RandInt(2,15), t3=randPick([1,-1]), cc3=t3*c3, prod3=a3*val3;
+    return { vansterText:a3+v3+plus(cc3)+',&nbsp;'+v3+' = '+val3,
+      led:[ {accept:[a3+'·'+val3+plusForm(cc3)], visa:a3+'·'+val3+plus(cc3)},
+            {accept:[prod3+plusForm(cc3)], visa:prod3+plus(cc3)}, {svar:prod3+cc3} ] };
+  }
+
+  // level 3
+  var medKonst = (Math.random() < 0.5);
+  var a4=d3RandInt(3,8), b4=d3RandInt(2,6), xv4=d3RandInt(2,9), yv4=d3RandInt(2,9);
+  var prodA4=a4*xv4, prodB4=b4*yv4;
+  if(!medKonst){
+    return { vansterText:a4+'x \u2212 '+b4+'y,&nbsp;x = '+xv4+' och y = '+yv4,
+      led:[ {accept:[a4+'·'+xv4+'-'+b4+'·'+yv4], visa:a4+'·'+xv4+' \u2212 '+b4+'·'+yv4},
+            {accept:[prodA4+'-'+prodB4], visa:prodA4+' \u2212 '+prodB4}, {svar:prodA4-prodB4} ] };
+  }
+  var c4=d3RandInt(2,9);
+  return { vansterText:a4+'x + '+b4+'y \u2212 '+c4+',&nbsp;x = '+xv4+' och y = '+yv4,
+    led:[ {accept:[a4+'·'+xv4+'+'+b4+'·'+yv4+'-'+c4], visa:a4+'·'+xv4+' + '+b4+'·'+yv4+' \u2212 '+c4},
+          {accept:[prodA4+'+'+prodB4+'-'+c4], visa:prodA4+' + '+prodB4+' \u2212 '+c4}, {svar:prodA4+prodB4-c4} ] };
+}
+
+function beraknaEngine(){
+  document.getElementById('hero').style.display='none';
+  var level=1, omgang=[], idx=0, results=[], OMG=6;
+  function nyOmgang(){ omgang=[]; for(var i=0;i<OMG;i++) omgang.push(genBerakna(level)); idx=0; results=[]; }
+
+  function render(){
+    if(idx>=omgang.length){
+      var right=results.filter(function(x){return x;}).length;
+      var adj=adjustLevel(level,right,omgang.length); level=adj.level;
+      app.innerHTML='<div class="view"><div class="exercise-card">'
+        +'<div class="ex-header"><h2 class="ex-title">Klart!</h2>'
+        +'<div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
+        +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
+        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-level">Nivå '+level+'</div></div>'
+        +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
+        +'<button class="btn subtle" id="back">Till alla områden</button></div></div></div>';
+      document.getElementById('next').onclick=function(){ nyOmgang(); render(); };
+      document.getElementById('back').onclick=renderOversikt;
+      if(right>=omgang.length-1) konfetti();
+      return;
+    }
+    var task=omgang[idx];
+    var dots='';
+    for(var i=0;i<omgang.length;i++){
+      var cls = i<idx? (results[i]?'right':'wrong') : (i===idx?'current':'');
+      dots+='<div class="score-dot '+cls+'"></div>';
+    }
+    var ledHtml='<span class="svar-fast">'+task.vansterText+'</span><span class="svar-fast" style="margin:0 2px;">=</span>';
+    task.led.forEach(function(led, li){
+      var arSvar=(li===task.led.length-1);
+      if(arSvar){
+        ledHtml+='<input class="ex-in" data-svar="'+led.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="min-width:74px;">';
+      } else {
+        ledHtml+='<input class="ex-in bred berakna-led" data-form="'+encodeURIComponent((led.accept||[led.visa]).join('|'))
+          +'" data-visa="'+led.visa+'" inputmode="text" autocomplete="off" placeholder="led" style="min-width:104px;">';
+        ledHtml+='<span class="svar-fast" style="margin:0 2px;">=</span>';
+      }
+    });
+    app.innerHTML='<div class="view"><div class="exercise-card">'
+      +'<div class="ex-header"><h2 class="ex-title">Beräkna med uttryck</h2>'
+      +'<div class="ex-sub">Sätt in värdet och visa mellanleden. Skriv insättningen, förenklingen och svaret.</div>'
+      +'<span class="ex-level">Nivå '+level+'</span></div>'
+      +'<div class="scorebar">'+dots+'</div>'
+      +'<div class="svar-rad" style="font-size:18px;">'+ledHtml+'</div>'
+      +'<div class="ex-feedback" id="fb"></div>'
+      +keypadHTML(['7','8','9','4','5','6','1','2','3','0','·','+','\u2212'])
+      +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
+      +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
+    var ledFalt=Array.prototype.slice.call(app.querySelectorAll('.ex-in'));
+    setTimeout(function(){ if(ledFalt[0]) ledFalt[0].focus(); },50);
+    ledFalt.forEach(function(inp, fi){
+      inp.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){ e.preventDefault(); if(fi+1<ledFalt.length) ledFalt[fi+1].focus(); else check(); }
+      });
+      if(inp.classList.contains('berakna-led')){
+        inp.addEventListener('input',function(){
+          var pos=inp.selectionStart, fore=inp.value.slice(0,pos);
+          function ff(s){return s.replace(/\s*([+\u2212-])\s*/g,' $1 ').replace(/\s{2,}/g,' ').replace(/^\s+/,'');}
+          var ny=ff(inp.value);
+          if(ny!==inp.value){ var fp=ff(fore).length; inp.value=ny; try{inp.setSelectionRange(fp,fp);}catch(e){} }
+        });
+      }
+    });
+    bindKeypadMulti(ledFalt);
+    document.getElementById('check').onclick=check;
+    document.getElementById('back').onclick=function(){ renderOversikt(); };
+
+    function check(){
+      var fb=document.getElementById('fb'); fb.className='ex-feedback show';
+      var alltRatt=true;
+      ledFalt.forEach(function(inp){
+        inp.disabled=true;
+        var ok;
+        if(inp.dataset.form!==undefined) ok=jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
+        else ok=jamforTal(inp.value, parseFloat(inp.dataset.svar));
+        inp.classList.add(ok?'correct':'wrong');
+        if(!ok) alltRatt=false;
+      });
+      document.getElementById('check').disabled=true;
+      if(alltRatt){ fb.classList.add('correct'); fb.textContent='Rätt – snyggt uppställt!'; }
+      else { fb.classList.add('wrong');
+        fb.innerHTML='Rätt: '+task.led.map(function(l){return l.svar!==undefined?l.svar:l.visa;}).join(' = '); }
+      results.push(alltRatt);
+      var b=document.createElement('button'); b.className='btn primary'; b.textContent=(idx+1>=omgang.length?'Se resultat':'Nästa');
+      b.onclick=function(){ idx++; render(); };
+      document.getElementById('check').replaceWith(b);
+    }
+  }
+  nyOmgang(); render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function bindKeypadMulti(falt){
+  var sist=falt[0];
+  falt.forEach(function(f){ f.addEventListener('focus',function(){ sist=f; }); });
+  document.querySelectorAll('.kp-btn').forEach(function(btn){
+    btn.onclick=function(){
+      if(sist && !sist.disabled){ sist.value+=btn.dataset.op; sist.focus();
+        var cl=sist.classList;
+        if(cl.contains('berakna-led')||cl.contains('forenkla-led')||cl.contains('skriva-led')){
+          var ev=document.createEvent('Event'); ev.initEvent('input',true,true); sist.dispatchEvent(ev); } }
+    };
+  });
+}
+
+// ============================================================
+// ÖVNING: FÖRENKLA UTTRYCK
+// ============================================================
+// Picker med fem kategorier; adaptiva generatorer nivå 1–3.
+// Svar rättas symboliskt (en/två variabler, bråk), så olika ordning godtas.
+
+function teckenStr(n, forst){
+  // visning av en term med tecken, t.ex. " + 3x" / " − 2y". forst=true → utan inledande +
+  if(forst) return (n<0?'\u2212':'') + Math.abs(n);
+  return (n<0?' \u2212 ':' + ') + Math.abs(n);
+}
+function termStr(koef, v, forst){
+  var k = Math.abs(koef);
+  var ks = (k===1? '' : k) + v;
+  if(forst) return (koef<0?'\u2212':'') + ks;
+  return (koef<0?' \u2212 ':' + ') + ks;
+}
+
+// Generator: förenkla med EN variabel (ax + b efter hopslagning)
+function genForenklaEn(level){
+  var v = randPick(['x','y','a']);
+  if(level===1){
+    // x + x + x  eller  2x + 3x  → ren variabel
+    var t1=d3RandInt(1,4), t2=d3RandInt(1,4), t3=(Math.random()<0.5?d3RandInt(1,3):0);
+    var delar=[t1,t2]; if(t3) delar.push(t3);
+    var fraga=delar.map(function(k,i){return termStr(k,v,i===0);}).join('');
+    var summa=delar.reduce(function(a,b){return a+b;},0);
+    return {fraga:fraga, svar:summa+v, accept:[summa+v]};
+  }
+  // ax + c ± dx ± e
+  var a1=d3RandInt(2,6), c1=d3RandInt(1,9), a2=d3RandInt(1,5), c2=d3RandInt(1,9);
+  var s2=randPick([1,-1]), s3=randPick([1,-1]);
+  var fraga=a1+v+' + '+c1+termStr(s2*a2,v,false).replace(/^ /,' ')+teckenStr(s3*c2,false);
+  // bygg tydligt: a1v + c1 ± a2v ± c2
+  fraga = a1+v+' + '+c1 + (s2<0?' \u2212 ':' + ')+a2+v + (s3<0?' \u2212 ':' + ')+c2;
+  var koefV=a1+s2*a2, konst=c1+s3*c2;
+  var svar;
+  if(konst===0) svar=koefV+v;
+  else svar=(koefV+v)+(konst<0?'\u2212':'+')+Math.abs(konst);
+  return {fraga:fraga, svar:svar.replace('\u2212','-'), accept:[koefV+v+(konst<0?'-':'+')+Math.abs(konst)], _facit:koefV+v+(konst<0?'-':'+')+Math.abs(konst)};
+}
+
+// Generator: förenkla med TVÅ variabler
+function genForenklaTva(level){
+  var ax=d3RandInt(2,7), bx=d3RandInt(1,5), ay=d3RandInt(2,6), by=d3RandInt(1,5);
+  var sx=randPick([1,-1]), sy=randPick([1,-1]);
+  var koefX=ax+sx*bx, koefY=ay+sy*by;
+  // se till att x-koefficienten blir positiv och ej noll
+  if(koefX<=0){ ax+=3; koefX=ax+sx*bx; }
+  if(koefY===0){ ay+=1; koefY=ay+sy*by; }
+  var fraga=ax+'x + '+ay+'y'+(sx<0?' \u2212 ':' + ')+bx+'x'+(sy<0?' \u2212 ':' + ')+by+'y';
+  var facit=koefX+'x'+(koefY<0?'-':'+')+Math.abs(koefY)+'y';
+  var visa=koefX+'x'+(koefY<0?' \u2212 ':' + ')+Math.abs(koefY)+'y';
+  return {fraga:fraga, svar:visa, accept:[facit]};
+}
+
+// Generator: omkrets (figur med SVG)
+var FORENKLA_FIGURER = [
+  function(){ // rektangel ax × c
+    var a=d3RandInt(2,5), c=d3RandInt(3,9);
+    var svg='<svg viewBox="0 0 220 120" width="220" height="120" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="33" width="130" height="54" fill="#f59e42" stroke="#b05a00" stroke-width="2.5"/><text x="105" y="26" text-anchor="middle" font-size="14" font-style="italic" fill="#7a3d00">'+a+'x</text><text x="105" y="105" text-anchor="middle" font-size="14" font-style="italic" fill="#7a3d00">'+a+'x</text><text x="183" y="64" text-anchor="middle" font-size="14" font-style="italic" fill="#7a3d00">'+c+'</text><text x="28" y="64" text-anchor="middle" font-size="14" font-style="italic" fill="#7a3d00">'+c+'</text></svg>';
+    return {svg:svg, uppstallning:a+'x + '+c+' + '+a+'x + '+c, facit:(2*a)+'x+'+(2*c), visa:(2*a)+'x + '+(2*c)};
+  },
+  function(){ // likbent triangel 2 sidor my, bas c
+    var m=d3RandInt(2,4), c=d3RandInt(3,8);
+    var svg='<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg"><polygon points="100,30 60,110 140,110" fill="#fde047" stroke="#b08900" stroke-width="2.5"/><text x="66" y="72" text-anchor="middle" font-size="14" font-style="italic" fill="#7a5d00">'+m+'y</text><text x="134" y="72" text-anchor="middle" font-size="14" font-style="italic" fill="#7a5d00">'+m+'y</text><text x="100" y="128" text-anchor="middle" font-size="14" font-style="italic" fill="#7a5d00">'+c+'</text></svg>';
+    return {svg:svg, uppstallning:m+'y + '+m+'y + '+c, facit:(2*m)+'y+'+c, visa:(2*m)+'y + '+c};
+  },
+  function(){ // triangel olika: c1, ax, c2, bx (fyrhörning enkel)
+    var a=d3RandInt(2,4), b=d3RandInt(1,3), c1=d3RandInt(10,25), c2=d3RandInt(10,25);
+    var svg='<svg viewBox="0 0 220 130" width="220" height="130" xmlns="http://www.w3.org/2000/svg"><polygon points="35,95 35,45 120,30 150,95" fill="#fde68a" stroke="#b08900" stroke-width="2.5"/><text x="78" y="28" text-anchor="middle" font-size="13" font-style="italic" fill="#7a5d00">'+c1+'</text><text x="150" y="60" text-anchor="middle" font-size="13" font-style="italic" fill="#7a5d00">'+a+'x</text><text x="92" y="112" text-anchor="middle" font-size="13" font-style="italic" fill="#7a5d00">'+c2+'</text><text x="20" y="72" text-anchor="middle" font-size="13" font-style="italic" fill="#7a5d00">'+b+'x</text></svg>';
+    return {svg:svg, uppstallning:c1+' + '+a+'x + '+c2+' + '+b+'x', facit:(a+b)+'x+'+(c1+c2), visa:(a+b)+'x + '+(c1+c2)};
+  }
+];
+function genForenklaOmkrets(level){
+  var f = (level===1? FORENKLA_FIGURER[Math.random()<0.5?0:1] : randPick(FORENKLA_FIGURER))();
+  return {svg:f.svg, uppstallning:f.uppstallning, svar:f.visa, accept:[f.facit], placeholder:f.uppstallning};
+}
+
+// Generator: bråk-uttryck
+function genForenklaBrak(level){
+  var v = randPick(['x','y','a']);
+  var mult=d3RandInt(2,4), namnare=randPick([2,3]);
+  var taljkoef=mult*namnare; // så taljkoef/namnare = mult (heltal)
+  var b=d3RandInt(2,6), s=randPick([1,-1]);
+  // (taljkoef·v)/namnare + b·v  → (mult + s·b? ) nej: vi gör (tk v)/n ± c
+  var c=d3RandInt(2,9), sc=randPick([1,-1]);
+  var koef = mult; // efter division
+  var fraga='<span class="brak"><span class="taljare">'+taljkoef+v+'</span><span class="namnare">'+namnare+'</span></span>'
+    + (sc<0?' \u2212 ':' + ') + c + 'v'.replace('v','');
+  // enklare: (tk v)/n + b·v ± c   → (mult+b)v ± c
+  fraga='<span class="brak"><span class="taljare">'+taljkoef+v+'</span><span class="namnare">'+namnare+'</span></span> + '+b+v+(sc<0?' \u2212 ':' + ')+c;
+  var koefV=mult+b, konst=sc*c;
+  var facit=koefV+v+(konst<0?'-':'+')+Math.abs(konst);
+  var visa=koefV+v+(konst<0?' \u2212 ':' + ')+Math.abs(konst);
+  return {fragaHtml:fraga, svar:visa, accept:[facit], rawUttryck:'('+taljkoef+v+')/'+namnare+'+'+b+v+(sc<0?'-':'+')+c};
+}
+
+function forenklaEngine(kategori){
+  document.getElementById('hero').style.display='none';
+  var level=1, omgang=[], idx=0, results=[], OMG=6;
+  var gen = {en:genForenklaEn, tva:genForenklaTva, omkrets:genForenklaOmkrets, brak:genForenklaBrak}[kategori];
+  var titel = {en:'Förenkla · en variabel', tva:'Förenkla · två variabler', omkrets:'Förenkla · omkrets', brak:'Förenkla · med division'}[kategori];
+  var sub = kategori==='omkrets'? 'Skriv uppställningen och det förenklade uttrycket.'
+          : 'Lägg ihop termer av samma sort. Skriv det förenklade uttrycket.';
+  function nyOmgang(){ omgang=[]; for(var i=0;i<OMG;i++) omgang.push(gen(level)); idx=0; results=[]; }
+
+  function render(){
+    if(idx>=omgang.length){
+      var right=results.filter(function(x){return x;}).length;
+      var adj=adjustLevel(level,right,omgang.length); level=adj.level;
+      app.innerHTML='<div class="view"><div class="exercise-card">'
+        +'<div class="ex-header"><h2 class="ex-title">Klart!</h2><div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
+        +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
+        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-level">Nivå '+level+'</div></div>'
+        +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
+        +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
+      document.getElementById('next').onclick=function(){ nyOmgang(); render(); };
+      document.getElementById('back').onclick=function(){ renderForenkla(); };
+      if(right>=omgang.length-1) konfetti();
+      return;
+    }
+    var task=omgang[idx], dots='';
+    for(var i=0;i<omgang.length;i++){
+      var cls=i<idx?(results[i]?'right':'wrong'):(i===idx?'current':'');
+      dots+='<div class="score-dot '+cls+'"></div>';
+    }
+    var kropp;
+    if(kategori==='omkrets'){
+      kropp='<div class="emoji-bild" style="padding:14px;">'+task.svg+'</div>'
+        +'<div class="svar-rad"><span class="svar-fast">Omkrets =</span>'
+        +'<input class="ex-in bred forenkla-led" id="mellan" data-form="'+encodeURIComponent(task.accept.join('|'))+'" inputmode="text" autocomplete="off" placeholder="uppställning" style="min-width:170px;">'
+        +'<span class="svar-fast">=</span>'
+        +'<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="förenkla" style="min-width:120px;"></div>';
+    } else {
+      var fr = task.fragaHtml || task.fraga;
+      kropp='<div class="ex-fraga ex-num" style="font-size:21px;">'+fr+'</div>'
+        +'<div class="svar-rad"><span class="svar-fast">=</span>'
+        +'<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="förenkla" style="min-width:150px;"></div>';
+    }
+    app.innerHTML='<div class="view"><div class="exercise-card">'
+      +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2><div class="ex-sub">'+sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'
+      +'<div class="scorebar">'+dots+'</div>'+kropp
+      +'<div class="ex-feedback" id="fb"></div>'+keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','b','·','+','\u2212'])
+      +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
+      +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
+    var falt=Array.prototype.slice.call(app.querySelectorAll('.ex-in'));
+    setTimeout(function(){ if(falt[0]) falt[0].focus(); },50);
+    falt.forEach(function(inp,fi){
+      inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault(); if(fi+1<falt.length) falt[fi+1].focus(); else check();} });
+      if(inp.classList.contains('forenkla-led')){
+        inp.addEventListener('input',function(){
+          var pos=inp.selectionStart, fore=inp.value.slice(0,pos);
+          function ff(s){return s.replace(/\s*([+\u2212-])\s*/g,' $1 ').replace(/\s{2,}/g,' ').replace(/^\s+/,'');}
+          var ny=ff(inp.value); if(ny!==inp.value){var fp=ff(fore).length;inp.value=ny;try{inp.setSelectionRange(fp,fp);}catch(e){}}
+        });
+      }
+    });
+    bindKeypadMulti(falt);
+    document.getElementById('check').onclick=check;
+    document.getElementById('back').onclick=function(){ renderForenkla(); };
+
+    function check(){
+      var fb=document.getElementById('fb'); fb.className='ex-feedback show';
+      var svarInp=document.getElementById('svar');
+      var alltRatt=true;
+      if(kategori==='omkrets'){
+        var mInp=document.getElementById('mellan');
+        mInp.disabled=true;
+        var mOk=jamforForm(mInp.value, decodeURIComponent(mInp.dataset.form).split('|')) || jamforFler(mInp.value, task.accept[0]);
+        mInp.classList.add(mOk?'correct':'wrong'); if(!mOk) alltRatt=false;
+      }
+      svarInp.disabled=true;
+      var sOk = jamforUttryck(svarInp.value, task.accept) || jamforFler(svarInp.value, task.accept[0]);
+      svarInp.classList.add(sOk?'correct':'wrong'); if(!sOk) alltRatt=false;
+      document.getElementById('check').disabled=true;
+      if(alltRatt){ fb.classList.add('correct'); fb.textContent='Rätt!'; }
+      else { fb.classList.add('wrong'); fb.textContent='Rätt svar: '+task.svar; }
+      results.push(alltRatt);
+      var b=document.createElement('button'); b.className='btn primary'; b.textContent=(idx+1>=omgang.length?'Se resultat':'Nästa');
+      b.onclick=function(){ idx++; render(); };
+      document.getElementById('check').replaceWith(b);
+    }
+  }
+  nyOmgang(); render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderForenkla(){
+  document.getElementById('hero').style.display='none';
+  var kat=[
+    {id:'en',      namn:'En variabel',     desc:'T.ex. 2x + 5 + 3x + 7.'},
+    {id:'tva',     namn:'Två variabler',   desc:'T.ex. 6x + 2y − 3x + 4y.'},
+    {id:'omkrets', namn:'Figurens omkrets',desc:'Skriv uppställning och förenkla.'},
+    {id:'brak',    namn:'Med division',    desc:'T.ex. 9x/3 + 2x.'}
+  ];
+  var html='<div class="view"><div class="exercise-card">'
+    +'<div class="ex-header"><h2 class="ex-title">Förenkla uttryck</h2>'
+    +'<div class="ex-sub">Välj vad du vill träna på. Nivån anpassar sig medan du räknar.</div></div>'
+    +'<div class="sub-grid" style="margin-top:6px;">';
+  kat.forEach(function(k,i){
+    html+='<button class="sub-card klar" data-kat="'+k.id+'"><span class="sub-card-num">'+(i+1)+'</span>'
+      +'<span class="sub-card-body"><span class="sub-card-namn">'+k.namn+'</span>'
+      +'<span class="sub-card-status" style="color:var(--ink-faint);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12px;">'+k.desc+'</span></span>'
+      +'<span class="sub-card-arrow">›</span></button>';
+  });
+  html+='</div><div class="ex-actions"><button class="btn subtle" id="back">Till alla områden</button></div></div></div>';
+  app.innerHTML=html;
+  app.querySelectorAll('[data-kat]').forEach(function(btn){ btn.onclick=function(){ forenklaEngine(btn.dataset.kat); }; });
+  document.getElementById('back').onclick=renderOversikt;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+// ============================================================
+// ÖVNING: SKRIVA UTTRYCK
+// ============================================================
+// Tre delar: 1) textuppgifter  2) geometriska figurer  3) sträckor.
+// Adaptiva generatorer nivå 1–3. Uttryckssvar rättas symboliskt.
+
+// ---- 1. TEXTUPPGIFTER ----
+function genSkrivText(level){
+  var namn = randPick(NAMN);
+  var v = randPick(['x','a','y']);
+  var typer;
+  if(level===1) typer=['fler','farre','ggr'];
+  else if(level===2) typer=['fler','farre','ggr','halften','aldre'];
+  else typer=['ggr','halften','summa','aldre','dubbeltplus'];
+  var typ = randPick(typer);
+  var sak = randPick(['kulor','kort','kronor','poäng','klistermärken','snäckor','pärlor']);
+  if(typ==='fler'){
+    var k=d3RandInt(2,12);
+    return {fraga:namn+' har '+v+' '+sak+'. '+namn+' får '+k+' till. Skriv ett uttryck för hur många '+sak+' '+namn+' har nu.',
+      svar:v+'+'+k, accept:[v+'+'+k, k+'+'+v]};
+  }
+  if(typ==='farre'){
+    var k2=d3RandInt(2,9);
+    return {fraga:namn+' har '+v+' '+sak+'. '+namn+' ger bort '+k2+'. Skriv ett uttryck för hur många '+sak+' '+namn+' har kvar.',
+      svar:v+'\u2212'+k2, accept:[v+'-'+k2]};
+  }
+  if(typ==='ggr'){
+    var k3=d3RandInt(2,6);
+    return {fraga:namn+' har '+v+' '+sak+'. En kompis har '+k3+' gånger så många. Skriv ett uttryck för kompisens antal.',
+      svar:k3+v, accept:[k3+v, v+'·'+k3, k3+'·'+v]};
+  }
+  if(typ==='halften'){
+    return {fraga:namn+' har '+v+' '+sak+'. En kompis har hälften så många. Skriv ett uttryck för kompisens antal.',
+      svar:v+'/2', accept:[v+'/2']};
+  }
+  if(typ==='aldre'){
+    var k4=d3RandInt(2,9);
+    return {fraga:namn+' är '+v+' år. Ett syskon är '+k4+' år äldre. Skriv ett uttryck för syskonets ålder.',
+      svar:v+'+'+k4, accept:[v+'+'+k4, k4+'+'+v]};
+  }
+  if(typ==='dubbeltplus'){
+    var k5=d3RandInt(2,8);
+    return {fraga:namn+' är '+v+' år. Ett syskon är dubbelt så gammalt plus '+k5+' år. Skriv ett uttryck för syskonets ålder.',
+      svar:'2'+v+'+'+k5, accept:['2'+v+'+'+k5, k5+'+2'+v]};
+  }
+  // summa: tre saker uttryckta i v
+  var k6=d3RandInt(2,6);
+  return {fraga:namn+' har '+v+' '+sak+'. Ett syskon har '+k6+' fler. Skriv ett uttryck för hur många de har tillsammans (förenklat).',
+    svar:'2'+v+'+'+k6, accept:['2'+v+'+'+k6, k6+'+2'+v]};
+}
+
+// ---- 2. GEOMETRISKA FIGURER (omkrets) ----
+function genSkrivFigur(level){
+  var v = randPick(['x','y','a']);
+  var typ;
+  if(level===1) typ=randPick(['kvadrat','rektangel']);
+  else if(level===2) typ=randPick(['rektangel','triangel-lik','triangel-olik']);
+  else typ=randPick(['triangel-olik','rektangel2','femhorning']);
+
+  if(typ==='kvadrat'){
+    var svg='<svg viewBox="0 0 150 150" width="150" height="150" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="35" width="75" height="75" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="77" y="28" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+v+'</text><text x="77" y="126" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+v+'</text><text x="30" y="78" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+v+'</text><text x="124" y="78" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+v+'</text></svg>';
+    return {svg:svg, figurTyp:'kvadrat', uppstallning:v+' + '+v+' + '+v+' + '+v, svar:'4'+v, accept:['4'+v]};
+  }
+  if(typ==='rektangel'){
+    var k=d3RandInt(2,9);
+    var svg='<svg viewBox="0 0 220 120" width="220" height="120" xmlns="http://www.w3.org/2000/svg"><rect x="45" y="33" width="130" height="54" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="110" y="26" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+v+'</text><text x="110" y="104" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+v+'</text><text x="33" y="64" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+k+'</text><text x="187" y="64" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+k+'</text></svg>';
+    return {svg:svg, figurTyp:'rektangel', uppstallning:v+' + '+k+' + '+v+' + '+k, svar:'2'+v+'+'+(2*k), accept:['2'+v+'+'+(2*k),(2*k)+'+2'+v]};
+  }
+  if(typ==='rektangel2'){
+    var a=d3RandInt(2,4), b=d3RandInt(1,3);
+    var svg='<svg viewBox="0 0 220 120" width="220" height="120" xmlns="http://www.w3.org/2000/svg"><rect x="45" y="33" width="130" height="54" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="110" y="26" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+a+v+'</text><text x="110" y="104" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+a+v+'</text><text x="33" y="64" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+b+v+'</text><text x="187" y="64" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+b+v+'</text></svg>';
+    return {svg:svg, figurTyp:'rektangel2', uppstallning:a+v+' + '+b+v+' + '+a+v+' + '+b+v, svar:(2*a+2*b)+v, accept:[(2*a+2*b)+v]};
+  }
+  if(typ==='triangel-lik'){
+    var m=d3RandInt(2,4), bas=d3RandInt(3,8);
+    var svg='<svg viewBox="0 0 200 150" width="200" height="150" xmlns="http://www.w3.org/2000/svg"><polygon points="100,30 60,110 140,110" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="66" y="72" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+m+v+'</text><text x="134" y="72" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+m+v+'</text><text x="100" y="128" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+bas+'</text></svg>';
+    return {svg:svg, figurTyp:'triangel-lik', uppstallning:m+v+' + '+m+v+' + '+bas, svar:(2*m)+v+'+'+bas, accept:[(2*m)+v+'+'+bas,bas+'+'+(2*m)+v]};
+  }
+  if(typ==='triangel-olik'){
+    var s1=d3RandInt(2,4), s2=d3RandInt(2,5), s3=d3RandInt(2,4);
+    var svg='<svg viewBox="0 0 200 150" width="200" height="150" xmlns="http://www.w3.org/2000/svg"><polygon points="40,120 40,40 150,120" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="26" y="82" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+s1+v+'</text><text x="105" y="74" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+s2+v+'</text><text x="95" y="138" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">'+s3+v+'</text></svg>';
+    return {svg:svg, figurTyp:'triangel-olik', uppstallning:s1+v+' + '+s2+v+' + '+s3+v, svar:(s1+s2+s3)+v, accept:[(s1+s2+s3)+v]};
+  }
+  // femhörning med konstanter
+  var p=d3RandInt(2,3), c1=d3RandInt(2,6), c2=d3RandInt(2,6);
+  var svg='<svg viewBox="0 0 200 150" width="200" height="150" xmlns="http://www.w3.org/2000/svg"><polygon points="100,25 165,70 140,130 60,130 35,70" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="125" y="40" text-anchor="middle" font-size="13" font-style="italic" fill="#27365a">'+p+v+'</text><text x="160" y="105" text-anchor="middle" font-size="13" font-style="italic" fill="#27365a">'+c1+'</text><text x="100" y="145" text-anchor="middle" font-size="13" font-style="italic" fill="#27365a">'+p+v+'</text><text x="40" y="105" text-anchor="middle" font-size="13" font-style="italic" fill="#27365a">'+c2+'</text><text x="62" y="40" text-anchor="middle" font-size="13" font-style="italic" fill="#27365a">'+p+v+'</text></svg>';
+  return {svg:svg, figurTyp:'femhorning', uppstallning:p+v+' + '+c1+' + '+p+v+' + '+c2+' + '+p+v, svar:(3*p)+v+'+'+(c1+c2), accept:[(3*p)+v+'+'+(c1+c2),(c1+c2)+'+'+(3*p)+v]};
+}
+
+// ---- 3. STRÄCKOR ----
+function strackaSVG(segments, helText){
+  // segments: array av {label, frac} som tillsammans = hela röda sträckan
+  var W=300, x0=20, y1=22, y2=48, total=segments.reduce(function(a,s){return a+s.frac;},0);
+  var svg='<svg viewBox="0 0 340 70" width="340" height="70" xmlns="http://www.w3.org/2000/svg">';
+  // röd hel sträcka
+  svg+='<line x1="'+x0+'" y1="'+y1+'" x2="'+(x0+W)+'" y2="'+y1+'" stroke="#c0392b" stroke-width="3"/>';
+  svg+='<line x1="'+x0+'" y1="'+(y1-6)+'" x2="'+x0+'" y2="'+(y1+6)+'" stroke="#c0392b" stroke-width="2"/>';
+  svg+='<line x1="'+(x0+W)+'" y1="'+(y1-6)+'" x2="'+(x0+W)+'" y2="'+(y1+6)+'" stroke="#c0392b" stroke-width="2"/>';
+  // svarta segment
+  var cx=x0;
+  segments.forEach(function(s){
+    var w=W*s.frac/total;
+    svg+='<line x1="'+cx+'" y1="'+y2+'" x2="'+(cx+w)+'" y2="'+y2+'" stroke="#333" stroke-width="2"/>';
+    svg+='<line x1="'+cx+'" y1="'+(y2-6)+'" x2="'+cx+'" y2="'+(y2+6)+'" stroke="#333" stroke-width="2"/>';
+    svg+='<text x="'+(cx+w/2)+'" y="'+(y2+18)+'" text-anchor="middle" font-size="13" font-style="italic">'+s.label+'</text>';
+    cx+=w;
+  });
+  svg+='<line x1="'+(x0+W)+'" y1="'+(y2-6)+'" x2="'+(x0+W)+'" y2="'+(y2+6)+'" stroke="#333" stroke-width="2"/>';
+  svg+='</svg>';
+  return svg;
+}
+function genSkrivStracka(level){
+  var v=randPick(['x','a']);
+  var typ;
+  if(level===1) typ=randPick(['v-plus-tal','tal-plus-v']);
+  else if(level===2) typ=randPick(['v-plus-tal','tre-v','v-tal-v']);
+  else typ=randPick(['tre-v','v-tal-v-tal','tal-minus-v']);
+
+  if(typ==='v-plus-tal'){
+    var k=d3RandInt(2,9);
+    return {svg:strackaSVG([{label:v,frac:2},{label:k,frac:1.4}]), svar:v+'+'+k, accept:[v+'+'+k,k+'+'+v]};
+  }
+  if(typ==='tal-plus-v'){
+    var k2=d3RandInt(2,9);
+    return {svg:strackaSVG([{label:k2,frac:1.6},{label:v,frac:2}]), svar:v+'+'+k2, accept:[v+'+'+k2,k2+'+'+v]};
+  }
+  if(typ==='tre-v'){
+    return {svg:strackaSVG([{label:v,frac:1},{label:v,frac:1},{label:v,frac:1}]), svar:'3'+v, accept:['3'+v,v+'+'+v+'+'+v]};
+  }
+  if(typ==='v-tal-v'){
+    var k3=d3RandInt(2,6);
+    return {svg:strackaSVG([{label:v,frac:1.6},{label:k3,frac:1},{label:v,frac:1.6}]), svar:'2'+v+'+'+k3, accept:['2'+v+'+'+k3,k3+'+2'+v]};
+  }
+  if(typ==='v-tal-v-tal'){
+    var k4=d3RandInt(2,5), k5=d3RandInt(2,5);
+    return {svg:strackaSVG([{label:v,frac:1.4},{label:k4,frac:1},{label:v,frac:1.4},{label:k5,frac:1}]), svar:'2'+v+'+'+(k4+k5), accept:['2'+v+'+'+(k4+k5),(k4+k5)+'+2'+v]};
+  }
+  // tal-minus-v: hela = tal, en del = v, röda (resten) = tal − v
+  var helt=d3RandInt(10,24);
+  return {svg:strackaSVG([{label:helt+' (hela)',frac:3}]).replace('</svg>','')
+      + '<line x1="200" y1="48" x2="320" y2="48" stroke="#c0392b" stroke-width="3"/><text x="260" y="66" text-anchor="middle" font-size="13" font-style="italic">'+v+'</text></svg>',
+    svar:helt+'\u2212'+v, accept:[helt+'-'+v], _enkel:true};
+}
+
+function skrivaEngine(kategori){
+  document.getElementById('hero').style.display='none';
+  var level=1, omgang=[], idx=0, results=[], OMG=6;
+  var gen = {text:genSkrivText, figur:genSkrivFigur, stracka:genSkrivStracka}[kategori];
+  var titel = {text:'Skriva uttryck · textuppgifter', figur:'Skriva uttryck · geometriska figurer', stracka:'Skriva uttryck · sträckor'}[kategori];
+  var sub = kategori==='text'? 'Läs texten och skriv ett uttryck. Använd · för gånger och / för delat.'
+          : kategori==='figur'? 'Skriv först ett uttryck för omkretsen, förenkla det sedan.'
+          : 'Skriv ett uttryck för längden av den röda sträckan.';
+  function nyOmgang(){
+    omgang=[]; idx=0; results=[];
+    if(kategori==='figur'){
+      var sista=null;
+      for(var i=0;i<OMG;i++){
+        var t, forsok=0;
+        do { t=gen(level); forsok++; } while(t.figurTyp===sista && forsok<12);
+        sista=t.figurTyp; omgang.push(t);
+      }
+    } else {
+      for(var j=0;j<OMG;j++) omgang.push(gen(level));
+    }
+  }
+
+  function render(){
+    if(idx>=omgang.length){
+      var right=results.filter(function(x){return x;}).length;
+      var adj=adjustLevel(level,right,omgang.length); level=adj.level;
+      app.innerHTML='<div class="view"><div class="exercise-card">'
+        +'<div class="ex-header"><h2 class="ex-title">Klart!</h2><div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
+        +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
+        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-level">Nivå '+level+'</div></div>'
+        +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
+        +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
+      document.getElementById('next').onclick=function(){ nyOmgang(); render(); };
+      document.getElementById('back').onclick=function(){ renderSkriva(); };
+      if(right>=omgang.length-1) konfetti();
+      return;
+    }
+    var task=omgang[idx], dots='';
+    for(var i=0;i<omgang.length;i++){ var cls=i<idx?(results[i]?'right':'wrong'):(i===idx?'current':''); dots+='<div class="score-dot '+cls+'"></div>'; }
+    var kropp;
+    if(kategori==='text'){
+      kropp='<div class="ex-fraga">'+task.fraga+'</div>'
+        +'<div class="svar-rad"><input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" placeholder="skriv ett uttryck" style="min-width:160px;"></div>';
+    } else if(kategori==='figur'){
+      kropp='<div class="emoji-bild" style="padding:14px;">'+task.svg+'</div>'
+        +'<div class="svar-rad"><span class="svar-fast">Omkrets =</span>'
+        +'<input class="ex-in bred skriva-led" id="mellan" inputmode="text" autocomplete="off" placeholder="skriv ett uttryck" style="min-width:150px;">'
+        +'<span class="svar-fast">=</span>'
+        +'<input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" placeholder="förenkla" style="min-width:120px;"></div>';
+    } else {
+      kropp='<div class="emoji-bild" style="padding:14px;">'+task.svg+'</div>'
+        +'<div class="svar-rad"><span class="svar-fast">Röda sträckan =</span>'
+        +'<input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" placeholder="skriv ett uttryck" style="min-width:140px;"></div>';
+    }
+    app.innerHTML='<div class="view"><div class="exercise-card">'
+      +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2><div class="ex-sub">'+sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'
+      +'<div class="scorebar">'+dots+'</div>'+kropp
+      +'<div class="ex-feedback" id="fb"></div>'+keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','·','/','+','\u2212'])
+      +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
+      +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
+    var falt=Array.prototype.slice.call(app.querySelectorAll('.ex-in'));
+    var inp=document.getElementById('svar');
+    setTimeout(function(){ if(falt[0]) falt[0].focus(); },50);
+    falt.forEach(function(f, fi){
+      f.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault(); if(fi+1<falt.length) falt[fi+1].focus(); else check();} });
+      f.addEventListener('input',function(){
+        var pos=f.selectionStart, fore=f.value.slice(0,pos);
+        function ff(s){return s.replace(/\s*([+\u2212-])\s*/g,' $1 ').replace(/\s{2,}/g,' ').replace(/^\s+/,'');}
+        var ny=ff(f.value);
+        if(ny!==f.value){ var fp=ff(fore).length; f.value=ny; try{f.setSelectionRange(fp,fp);}catch(e){} }
+      });
+    });
+    bindKeypadMulti(falt);
+    document.getElementById('check').onclick=check;
+    document.getElementById('back').onclick=function(){ renderSkriva(); };
+
+    function check(){
+      var fb=document.getElementById('fb'); fb.className='ex-feedback show';
+      document.getElementById('check').disabled=true;
+      var ok=true;
+      if(kategori==='figur'){
+        var mInp=document.getElementById('mellan');
+        mInp.disabled=true;
+        // mellanledet (uppställningen) ska förenklas till samma som svaret
+        var mOk = jamforFler(mInp.value, task.svar) || jamforUttryck(mInp.value, task.accept);
+        mInp.classList.add(mOk?'correct':'wrong'); if(!mOk) ok=false;
+      }
+      inp.disabled=true;
+      var sOk=jamforUttryck(inp.value, task.accept) || jamforFler(inp.value, task.accept[0]);
+      inp.classList.add(sOk?'correct':'wrong'); if(!sOk) ok=false;
+      if(ok){ fb.classList.add('correct'); fb.textContent='Rätt!'; }
+      else { fb.classList.add('wrong'); fb.textContent='Rätt svar: '+(kategori==='figur'?(task.uppstallning+' = '+task.svar):task.svar); }
+      results.push(ok);
+      var b=document.createElement('button'); b.className='btn primary'; b.textContent=(idx+1>=omgang.length?'Se resultat':'Nästa');
+      b.onclick=function(){ idx++; render(); };
+      document.getElementById('check').replaceWith(b);
+    }
+  }
+  nyOmgang(); render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderSkriva(){
+  document.getElementById('hero').style.display='none';
+  var kat=[
+    {id:'text',    namn:'Textuppgifter',       desc:'Skriv uttryck från en text.'},
+    {id:'figur',   namn:'Geometriska figurer', desc:'Skriv figurens omkrets.'},
+    {id:'stracka', namn:'Sträckor',            desc:'Skriv längden av den röda sträckan.'}
+  ];
+  var html='<div class="view"><div class="exercise-card">'
+    +'<div class="ex-header"><h2 class="ex-title">Skriva uttryck</h2>'
+    +'<div class="ex-sub">Välj vad du vill träna på. Nivån anpassar sig medan du räknar.</div></div>'
+    +'<div class="sub-grid" style="margin-top:6px;">';
+  kat.forEach(function(k,i){
+    html+='<button class="sub-card klar" data-kat="'+k.id+'"><span class="sub-card-num">'+(i+1)+'</span>'
+      +'<span class="sub-card-body"><span class="sub-card-namn">'+k.namn+'</span>'
+      +'<span class="sub-card-status" style="color:var(--ink-faint);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12px;">'+k.desc+'</span></span>'
+      +'<span class="sub-card-arrow">›</span></button>';
+  });
+  html+='</div><div class="ex-actions"><button class="btn subtle" id="back">Till alla områden</button></div></div></div>';
+  app.innerHTML=html;
+  app.querySelectorAll('[data-kat]').forEach(function(btn){ btn.onclick=function(){ skrivaEngine(btn.dataset.kat); }; });
+  document.getElementById('back').onclick=renderOversikt;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+// ============================================================
+// START
+// ============================================================
+renderOversikt();
+</script>
+</body>
+</html>

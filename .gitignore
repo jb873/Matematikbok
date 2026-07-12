@@ -1,0 +1,9 @@
+# Gamla generationer – stannar på disk, versioneras ej
+Arkiv/
+
+# Redundant arkiv-artefakt
+ak7.zip
+
+# OS-skräp
+Thumbs.db
+.DS_Store

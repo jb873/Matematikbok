@@ -1,0 +1,89 @@
+/* Faktorträds-CSS, byte-identiskt ur ak7-k1-ram.html (rad 628-713).
+   Beroende av familj-B:s CSS-variabler (--c-metod, --line, --radius, --mono ...)
+   och delade UI-klasser (.exercise-card/.btn/.summary-*) => bredare metod-CSS
+   är ett eget flaggat steg. */
+/* ==== FAKTORTRÄD (rekursivt) ==== */
+.tree-task{padding:20px;background:var(--bg-warm);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px}
+.tree-prompt{font-size:15px;margin-bottom:8px;color:var(--ink)}
+.tree-prompt strong{font-family:var(--mono);font-weight:500;font-size:20px;color:var(--c-metod)}
+.tree-instructions{font-size:13px;color:var(--ink-soft);font-style:italic;margin-bottom:18px}
+
+.tree-container{
+  display:flex;justify-content:center;
+  padding:14px 8px;overflow-x:auto;
+  min-height:120px;
+}
+.tnode{
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;
+}
+.tnode-label{
+  font-family:var(--mono);font-weight:600;
+  font-size:18px;
+  width:52px;height:52px;
+  border:2px solid var(--line);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg-card);color:var(--ink);
+  flex-shrink:0;
+}
+.tnode-label.root{background:var(--primary-bg);border-color:var(--primary);color:var(--primary)}
+.tnode-label.prime{background:var(--success-bg);border-color:var(--success);color:var(--success)}
+.tnode-label.composite{background:var(--bg-card);border-color:var(--ink-soft);color:var(--ink)}
+.tnode-label.composite::after{
+  content:"";position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--ink-soft);
+}
+
+.tnode-input-row{
+  display:inline-flex;gap:6px;align-items:center;
+  margin-top:14px;padding:8px 10px;
+  background:var(--bg-card);
+  border:1.5px dashed var(--c-metod);
+  border-radius:var(--radius);
+  font-family:var(--mono);font-size:15px;
+}
+.tnode-input-row .tnode-target{
+  font-weight:600;color:var(--c-metod);
+  padding:0 4px;
+}
+.tnode-input-row .tnode-eq{color:var(--ink-soft);margin:0 2px}
+.tnode-input{
+  font-family:var(--mono);font-size:16px;font-weight:500;
+  width:40px;height:36px;
+  border:2px solid var(--c-metod);
+  border-radius:var(--radius-sm);
+  text-align:center;background:var(--primary-bg);
+  outline:none;color:var(--ink);padding:0;
+}
+.tnode-input:focus{background:#fff}
+.tnode-input.error{border-color:var(--error);background:var(--error-bg)}
+.tnode-mult{font-family:var(--mono);font-size:18px;color:var(--c-metod);font-weight:600}
+.tnode-expand-btn{
+  font-size:12px;background:var(--c-metod);color:#fff;
+  border:none;padding:5px 10px;border-radius:var(--radius-sm);
+  cursor:pointer;font-family:var(--sans);font-weight:500;
+  margin-left:4px;
+}
+.tnode-expand-btn:hover{background:#9A4607}
+.tnode-expand-btn:disabled{background:var(--ink-faint);cursor:not-allowed}
+
+.tnode-children{
+  display:flex;gap:28px;margin-top:14px;
+  align-items:flex-start;justify-content:center;
+}
+.tnode-connector{
+  height:14px;width:2px;background:var(--ink-faint);
+  margin-top:6px;
+}
+
+.tree-result{
+  margin-top:18px;padding:14px;
+  border-radius:var(--radius);
+  text-align:center;font-family:var(--mono);font-size:16px;
+  display:none;
+}
+.tree-result.show{display:block}
+.tree-result.correct{background:var(--success-bg);color:var(--success);font-weight:500}
+.tree-result.tip{background:var(--c-resonera-bg);color:var(--c-resonera)}
+.tree-actions{display:flex;gap:10px;margin-top:14px;justify-content:center;flex-wrap:wrap}

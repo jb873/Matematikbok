@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Taluppfattning · Positionssystem och talförståelse</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   MATEMATIK · GEMENSAM STIL FÖR NAVIGATIONSSIDORNA
+   Delas av index.html, ak*.html och omrade-*.html
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.6;}
+
+/* ── TOPNAV ── */
+.topnav{
+  position:sticky;top:0;z-index:100;
+  background:var(--navy);border-bottom:1px solid rgba(255,255,255,.07);
+  padding:0 28px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-brand{
+  font-family:var(--cinzel);font-size:13px;font-weight:500;letter-spacing:.14em;
+  color:rgba(255,255,255,.9);text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.nav-brand span{color:var(--gold-lt);letter-spacing:.1em}
+.nav-sep{color:rgba(255,255,255,.2);margin:0 2px}
+.nav-crumbs{
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--cinzel);font-size:11px;letter-spacing:.08em;
+  color:rgba(255,255,255,.45);
+}
+.nav-crumbs a{
+  color:rgba(255,255,255,.6);text-decoration:none;
+  transition:color .15s;
+}
+.nav-crumbs a:hover{color:var(--gold-lt)}
+.nav-crumbs .crumb-sep{color:rgba(255,255,255,.2)}
+.nav-crumbs .crumb-current{color:rgba(255,255,255,.85)}
+
+/* ── HERO ── */
+.hero{
+  background:var(--navy);position:relative;overflow:hidden;
+  padding:64px 28px 56px;text-align:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(135deg, rgba(27,75,138,.15) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px);
+}
+.hero-eyebrow{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;letter-spacing:.22em;
+  color:var(--gold-lt);text-transform:uppercase;margin-bottom:18px;
+  position:relative;display:inline-flex;align-items:center;gap:10px;
+}
+.hero-eyebrow::before,.hero-eyebrow::after{
+  content:'';display:block;width:28px;height:1px;
+  background:var(--gold-lt);opacity:.5;
+}
+h1.hero-title{
+  font-family:var(--serif);font-size:clamp(38px, 6vw, 64px);
+  font-weight:300;line-height:1.1;color:#fff;letter-spacing:-.01em;
+  position:relative;margin-bottom:16px;
+}
+h1.hero-title em{font-style:italic;color:var(--gold-lt);}
+.hero-desc{
+  font-size:16px;font-weight:300;color:rgba(255,255,255,.55);
+  max-width:500px;margin:0 auto;line-height:1.65;position:relative;
+}
+.hero-back{
+  position:relative;margin-top:26px;display:inline-block;
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold-lt);text-decoration:none;
+  padding:7px 16px;border:1px solid rgba(255,255,255,.2);border-radius:4px;
+  transition:background .15s, border-color .15s;
+}
+.hero-back:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4)}
+
+/* ── SEKTIONSRUBRIK ── */
+.section-label{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);
+  display:flex;align-items:center;gap:12px;
+  padding:40px 28px 18px;max-width:920px;margin:0 auto;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--paper-dk);}
+
+/* ── KORT-GRID (områden, årskurser) ── */
+.card-grid{
+  max-width:920px;margin:0 auto;padding:0 28px 56px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.nav-card{
+  display:flex;background:var(--paper-lt);
+  border:1px solid var(--paper-dk);border-radius:4px;overflow:hidden;
+  text-decoration:none;color:inherit;position:relative;
+  transition:box-shadow .18s, transform .18s, border-color .18s;
+  animation:fadeUp .4s ease both;
+}
+.nav-card:hover{
+  box-shadow:0 4px 20px rgba(0,0,0,.09);
+  transform:translateX(3px);border-color:rgba(0,0,0,.12);
+}
+.nav-card.is-soon{opacity:.6;cursor:default;pointer-events:none;}
+.nav-card.is-soon:hover{transform:none;box-shadow:none}
+.nav-card:nth-child(1){animation-delay:.04s}
+.nav-card:nth-child(2){animation-delay:.08s}
+.nav-card:nth-child(3){animation-delay:.12s}
+.nav-card:nth-child(4){animation-delay:.16s}
+.nav-card:nth-child(5){animation-delay:.20s}
+.nav-card:nth-child(6){animation-delay:.24s}
+.nav-card:nth-child(7){animation-delay:.28s}
+.nav-card:nth-child(8){animation-delay:.32s}
+.nav-card:nth-child(9){animation-delay:.36s}
+.nav-card:nth-child(10){animation-delay:.40s}
+
+.card-stripe{width:5px;flex-shrink:0;background:var(--blue);}
+.card-body{
+  flex:1;padding:19px 22px;
+  display:flex;align-items:center;gap:18px;
+}
+.card-num{
+  font-family:var(--cinzel);font-size:12px;font-weight:500;letter-spacing:.1em;
+  color:var(--ink-faint);flex-shrink:0;min-width:74px;
+}
+.card-main{flex:1}
+.card-title{
+  font-family:var(--serif);font-size:21px;font-weight:500;line-height:1.2;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:4px;
+}
+.card-title em{font-style:italic}
+.card-desc{font-size:13px;color:var(--ink-faint);line-height:1.5;}
+.card-arrow{
+  font-size:20px;color:var(--ink-faint);font-family:var(--cinzel);flex-shrink:0;
+  transition:color .15s, transform .15s;
+}
+.nav-card:hover .card-arrow{color:var(--ink);transform:translateX(3px);}
+.card-badge{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 10px;border-radius:2px;flex-shrink:0;
+}
+.card-badge.open{background:rgba(27,75,138,.1);color:var(--blue);}
+.card-badge.soon{background:var(--paper-dk);color:var(--ink-faint);}
+.card-badge.prov{background:rgba(154,114,40,.12);color:var(--gold);}
+
+/* ── VÄGVAL (öva färdigheter / avsnitt) ── */
+.val-grid{
+  max-width:920px;margin:0 auto;padding:0 28px 56px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;
+}
+.val-card{
+  background:var(--paper-lt);border:1px solid var(--paper-dk);border-radius:6px;
+  padding:30px 28px;text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;position:relative;overflow:hidden;
+  transition:box-shadow .18s, transform .18s, border-color .18s;
+  animation:fadeUp .4s ease both;
+}
+.val-card:hover{
+  box-shadow:0 6px 24px rgba(0,0,0,.1);transform:translateY(-3px);
+  border-color:rgba(0,0,0,.12);
+}
+.val-card.is-soon{opacity:.6;cursor:default;pointer-events:none;}
+.val-card.is-soon:hover{transform:none;box-shadow:none}
+.val-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--blue);
+}
+.val-card.accent-green::before{background:var(--green);}
+.val-icon{
+  font-size:30px;margin-bottom:14px;
+}
+.val-title{
+  font-family:var(--serif);font-size:25px;font-weight:500;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:8px;
+}
+.val-desc{font-size:14px;color:var(--ink-faint);line-height:1.6;flex:1;}
+.val-cta{
+  margin-top:18px;font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--blue);
+  display:flex;align-items:center;gap:7px;
+}
+.val-card.accent-green .val-cta{color:var(--green);}
+.val-badge-soon{
+  margin-top:18px;font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+}
+
+/* ── FÄRDIGHETSTRÄNING-BANNER (stor ingång på åk-sidan) ── */
+.train-banner{
+  max-width:920px;margin:0 auto;padding:0 28px;
+}
+.train-card{
+  display:flex;align-items:center;gap:24px;
+  background:linear-gradient(135deg, var(--navy-mid) 0%, var(--navy) 100%);
+  border:1px solid rgba(255,255,255,.08);border-radius:8px;
+  padding:26px 30px;text-decoration:none;position:relative;overflow:hidden;
+  transition:box-shadow .18s, transform .18s;
+  animation:fadeUp .4s ease both;
+}
+.train-card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.022) 40px);
+}
+.train-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.22);transform:translateY(-2px);}
+.train-icon{
+  font-size:34px;flex-shrink:0;position:relative;
+  width:62px;height:62px;border-radius:50%;
+  background:rgba(196,154,64,.14);border:1px solid rgba(196,154,64,.3);
+  display:flex;align-items:center;justify-content:center;
+}
+.train-text{flex:1;position:relative;}
+.train-eyebrow{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold-lt);
+  margin-bottom:6px;
+}
+.train-title{
+  font-family:var(--serif);font-size:26px;font-weight:500;
+  letter-spacing:-.01em;color:#fff;margin-bottom:5px;
+}
+.train-desc{font-size:13px;color:rgba(255,255,255,.55);line-height:1.55;}
+.train-cta{
+  flex-shrink:0;position:relative;
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--navy);
+  background:var(--gold-lt);padding:11px 20px;border-radius:5px;
+  transition:background .15s;
+}
+.train-card:hover .train-cta{background:#fff;}
+
+/* ── KAPITELSIDA: innehållssektioner ── */
+.kapitel-intro{
+  max-width:920px;margin:0 auto;padding:32px 28px 8px;
+}
+.content-block{
+  max-width:920px;margin:0 auto;padding:18px 28px;
+}
+.content-card{
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-radius:6px;padding:26px 28px;
+  animation:fadeUp .4s ease both;
+}
+.content-card h2{
+  font-family:var(--serif);font-size:24px;font-weight:500;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:6px;
+}
+.content-card .ch-sub{
+  font-size:13px;color:var(--ink-faint);line-height:1.55;margin-bottom:18px;
+}
+.placeholder-note{
+  display:flex;gap:13px;align-items:flex-start;
+  background:var(--paper-dk);border-radius:5px;padding:15px 17px;
+  font-size:13px;color:var(--ink-soft);line-height:1.6;
+}
+.placeholder-note .pn-icon{font-size:17px;flex-shrink:0;}
+
+/* ── GENVÄG TILL FÄRDIGHETSTRÄNING (inifrån kapitel) ── */
+.shortcut-link{
+  display:flex;align-items:center;gap:14px;
+  max-width:920px;margin:8px auto 0;padding:18px 28px;
+}
+.shortcut-link a{
+  display:flex;align-items:center;gap:13px;width:100%;
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-left:4px solid var(--green);border-radius:6px;
+  padding:17px 20px;text-decoration:none;color:inherit;
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.shortcut-link a:hover{
+  box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateX(3px);
+}
+.shortcut-icon{font-size:23px;flex-shrink:0;}
+.shortcut-body{flex:1;}
+.shortcut-title{
+  font-family:var(--serif);font-size:18px;font-weight:500;color:var(--ink);
+}
+.shortcut-desc{font-size:12px;color:var(--ink-faint);margin-top:2px;}
+.shortcut-arrow{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--green);
+  flex-shrink:0;
+}
+
+@media(max-width:600px){
+  .train-card{flex-wrap:wrap;gap:16px;}
+  .train-cta{width:100%;text-align:center;}
+}
+
+/* ── FLIKRAD (delkapitlets undersidor) ── */
+.tab-row{
+  max-width:920px;margin:0 auto;padding:28px 28px 0;
+  display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;
+  border-bottom:1px solid var(--paper-dk);
+  -webkit-overflow-scrolling:touch;
+}
+.tab-btn{
+  flex-shrink:0;
+  font-family:var(--cinzel);font-size:12px;font-weight:500;letter-spacing:.06em;
+  color:var(--ink-faint);background:none;border:none;cursor:pointer;
+  padding:13px 17px;border-bottom:3px solid transparent;
+  transition:color .15s, border-color .15s;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.is-active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-panel{display:none;animation:fadeUp .35s ease both;}
+.tab-panel.is-active{display:block;}
+
+/* ── FÖRELÄSNINGSKORT ── */
+.lecture-list{
+  max-width:920px;margin:0 auto;padding:24px 28px 8px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.lecture-card{
+  display:flex;align-items:center;gap:18px;
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-radius:6px;padding:16px 20px;cursor:pointer;
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.lecture-card:hover{
+  box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateX(3px);
+  border-color:rgba(0,0,0,.12);
+}
+.lecture-card.is-playing{
+  border-color:var(--blue);box-shadow:0 4px 18px rgba(27,75,138,.14);
+}
+.lecture-thumb{
+  position:relative;width:108px;height:64px;flex-shrink:0;
+  border-radius:5px;overflow:hidden;background:var(--navy);
+}
+.lecture-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.lecture-play{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(15,30,46,.32);transition:background .15s;
+}
+.lecture-card:hover .lecture-play{background:rgba(15,30,46,.12);}
+.lecture-play span{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.92);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--navy);padding-left:3px;
+}
+.lecture-meta{flex:1;}
+.lecture-title{
+  font-family:var(--serif);font-size:20px;font-weight:500;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:3px;
+}
+.lecture-tag{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+}
+.lecture-state{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--blue);
+  flex-shrink:0;
+}
+/* Inbäddad spelare som fälls ut under kortet */
+.lecture-player{
+  max-width:920px;margin:4px auto 0;padding:0 28px;
+  display:none;
+}
+.lecture-player.is-open{display:block;animation:fadeUp .3s ease both;}
+.lecture-frame{
+  position:relative;width:100%;height:0;
+  padding-bottom:56.25%; /* 16:9 – fungerar i alla webbläsare */
+  border-radius:8px;overflow:hidden;background:#000;
+  border:1px solid var(--paper-dk);
+}
+.lecture-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.lecture-yt-link{
+  display:inline-block;margin-top:11px;
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.06em;color:var(--ink-faint);text-decoration:none;
+  transition:color .15s;
+}
+.lecture-yt-link:hover{color:var(--blue);}
+
+/* ── ÖVNINGSPLATSHÅLLARE I FLIK ── */
+.tab-placeholder{
+  max-width:920px;margin:0 auto;padding:24px 28px;
+}
+
+@media(max-width:600px){
+  .tab-row{padding:20px 16px 0;}
+  .lecture-card{flex-wrap:wrap;}
+  .lecture-thumb{width:92px;height:54px;}
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--paper-dk);padding:26px 28px;
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:920px;margin:0 auto;
+  color:var(--ink-faint);font-size:12px;letter-spacing:.04em;
+}
+footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:600px){
+  .card-body{flex-wrap:wrap;gap:12px}
+  .card-num{min-width:auto}
+  .hero{padding:48px 20px 44px}
+  .topnav{padding:0 16px}
+  .nav-crumbs{display:none}
+}
+/* ============================================================
+   ÖVNINGSBLAD (delat av alla fyra övningsflikar)
+   ============================================================ */
+.ovn-wrap{max-width:920px;margin:0 auto;padding:24px 28px 12px;}
+.ovn-sheet{
+  background:var(--paper-lt);border:1px solid var(--paper-dk);
+  border-radius:8px;padding:30px 36px;
+  font-family:'Source Serif 4',Georgia,serif;
+  color:var(--ink);
+}
+.ovn-sheet h2{
+  font-family:var(--serif);font-size:26px;font-weight:500;
+  letter-spacing:-.01em;margin-bottom:6px;
+}
+.ovn-sheet .ovn-intro{
+  font-size:13px;color:var(--ink-faint);line-height:1.6;
+  margin-bottom:24px;
+}
+.ovn-grupp{margin-top:22px;}
+.ovn-grupp:first-of-type{margin-top:6px;}
+.ovn-grupp-rubrik{
+  font-family:'Source Serif 4',Georgia,serif;
+  font-size:21px;font-weight:700;
+  color:var(--ink);margin-bottom:14px;
+  letter-spacing:-.005em;
+}
+.ovn-rad{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 0;font-size:20px;font-family:var(--mono,'Source Serif 4');
+  border-bottom:1px dotted var(--paper-dk);
+}
+.ovn-rad:last-child{border-bottom:none;}
+.ovn-label{
+  font-family:var(--cinzel);font-size:11px;font-weight:500;
+  letter-spacing:.06em;color:var(--ink-faint);
+  min-width:24px;
+}
+.ovn-text{font-family:'Source Serif 4',Georgia,serif;font-size:21px;}
+/* Bråk-visning: täljare över streck, nämnare under */
+.ovn-brak{
+  display:inline-flex;flex-direction:column;align-items:center;
+  vertical-align:middle;margin:0 4px;
+}
+.ovn-brak-taljare{
+  padding:0 10px 3px;font-family:'Source Serif 4',Georgia,serif;
+  font-size:19px;font-feature-settings:'tnum';white-space:nowrap;
+}
+.ovn-brak-strecket{
+  height:2px;background:var(--ink);width:100%;min-width:60px;
+}
+.ovn-brak-namnare{
+  padding:3px 10px 0;font-family:'Source Serif 4',Georgia,serif;
+  font-size:19px;font-feature-settings:'tnum';white-space:nowrap;
+}
+.ovn-brak-rad{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:1px dotted var(--paper-dk);
+}
+.ovn-brak-rad:last-child{border-bottom:none;}
+.ovn-num{font-feature-settings:'tnum';}
+.ovn-in{
+  width:90px;height:42px;text-align:center;
+  font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;
+  border:2px solid var(--c-rakna);border-radius:6px;
+  background:#fff;color:var(--c-rakna);outline:none;padding:0 6px;
+  font-feature-settings:'tnum';
+  transition:background .2s, border-color .2s, color .2s;
+}
+.ovn-in.lucka{width:80px;border-style:dashed;}
+.ovn-in.bred{width:160px;}
+.ovn-in:focus{box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+.ovn-in.correct{
+  background:#dcfce7;border-color:#16a34a;border-style:solid;color:#15803d;
+  font-weight:700;
+}
+.ovn-in.wrong{
+  background:#fee2e2;border-color:#dc2626;border-style:solid;color:#b91c1c;
+  font-weight:700;
+}
+/* Pulserande blink när rättning sker */
+@keyframes ovn-pulse{
+  0%   { transform:scale(1);   }
+  40%  { transform:scale(1.08);}
+  100% { transform:scale(1);   }
+}
+.ovn-in.correct.just-checked,
+.ovn-in.wrong.just-checked{
+  animation:ovn-pulse .45s ease;
+}
+/* Bock-/kryss-markering bredvid svaret */
+.ovn-mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:50%;
+  font-size:17px;font-weight:700;flex-shrink:0;margin-left:4px;
+  animation:ovn-mark-in .35s cubic-bezier(.5,1.6,.5,1) both;
+}
+@keyframes ovn-mark-in{
+  from{ transform:scale(0); opacity:0; }
+  to  { transform:scale(1); opacity:1; }
+}
+.ovn-mark.ok   { background:#16a34a;color:#fff; }
+.ovn-mark.fel  { background:#dc2626;color:#fff; }
+.ovn-fasit{
+  display:inline-block;
+  background:#fee2e2;color:#991b1b;font-weight:600;
+  border-radius:5px;padding:3px 9px;margin-left:6px;
+  font-family:'Source Serif 4',Georgia,serif;font-size:15px;
+  animation:ovn-mark-in .35s cubic-bezier(.5,1.6,.5,1) both;
+}
+.ovn-exempel{
+  background:var(--bg-warm);border:1px solid var(--paper-dk);
+  border-radius:6px;padding:11px 15px;margin-bottom:8px;
+  font-size:13px;color:var(--ink-soft);
+}
+.ovn-exempel strong{color:var(--ink);font-weight:600;}
+/* Skärmtangentbord – samma stil som öva-delen */
+.ovn-keypad{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
+.ovn-keypad-digits{display:grid;grid-template-columns:repeat(3,46px);gap:6px;}
+.ovn-keypad-ops{display:grid;grid-template-columns:46px;gap:6px;align-content:start;}
+.ovn-kp-key{
+  height:44px;border:1.5px solid var(--line);border-radius:6px;
+  background:var(--bg-card);font-family:var(--mono,'Source Serif 4');
+  font-size:19px;font-weight:600;
+  color:var(--ink);cursor:pointer;
+  transition:transform .08s,background .1s,border-color .1s;
+  display:flex;align-items:center;justify-content:center;user-select:none;
+}
+.ovn-kp-key:hover{background:var(--c-metod-bg, var(--bg-soft));border-color:var(--c-metod, var(--ink-faint));}
+.ovn-kp-key:active{transform:scale(.92);}
+.ovn-kp-key.op{color:var(--c-metod, var(--blue));font-weight:700;}
+.ovn-kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px;}
+.ovn-kp-key.span2{grid-column:span 2;}
+/* På smala skärmar: klistra knappsatsen nedtill så den alltid syns */
+@media(max-width:720px){
+  body{padding-bottom:230px;}
+  .ovn-keypad{
+    position:fixed;bottom:0;left:0;right:0;z-index:100;
+    margin:0;padding:10px 12px;
+    background:var(--bg-warm);
+    border-top:1px solid var(--line);
+    box-shadow:0 -4px 14px rgba(0,0,0,.08);
+  }
+}
+.ovn-kontroll-rad{
+  display:flex;justify-content:center;gap:12px;margin-top:22px;flex-wrap:wrap;
+}
+/* Gemensam grund för alla 3D-knappar */
+.ovn-kontroll,
+.ovn-aterstall,
+.ovn-skriv-ut button{
+  cursor:pointer;
+  font-family:'Source Serif 4',Georgia,serif;
+  border-radius:8px;
+  transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+.ovn-kontroll{
+  background:linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  color:#fff;border:1px solid #15803d;
+  padding:14px 30px;font-size:16px;font-weight:700;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 2px 0 #15803d,
+    0 4px 10px rgba(22,163,74,.3);
+}
+.ovn-kontroll:hover{
+  background:linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 3px 0 #15803d,
+    0 6px 14px rgba(22,163,74,.4);
+}
+.ovn-kontroll:active{
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.2),
+    0 0 0 #15803d;
+}
+.ovn-aterstall{
+  background:linear-gradient(180deg, #fff 0%, #f4f0e8 100%);
+  color:var(--ink);
+  border:1px solid #c9c2b3;
+  padding:13px 24px;font-size:15px;font-weight:600;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 2px 0 #c9c2b3,
+    0 4px 8px rgba(0,0,0,.08);
+}
+.ovn-aterstall:hover{
+  background:linear-gradient(180deg, #faf6ee 0%, #ede6d6 100%);
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 3px 0 #c9c2b3,
+    0 5px 12px rgba(0,0,0,.12);
+}
+.ovn-aterstall:active{
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.1),
+    0 0 0 #c9c2b3;
+}
+.ovn-sammanf{
+  margin-top:18px;padding:16px 20px;border-radius:8px;
+  font-size:15px;text-align:center;
+  background:var(--bg-card);border:1px solid var(--line);
+}
+.ovn-sammanf.ok{
+  background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border:2px solid #16a34a;color:#14532d;
+  padding:22px 24px;font-size:17px;font-weight:600;
+  animation:ovn-mark-in .4s cubic-bezier(.5,1.6,.5,1) both;
+}
+.ovn-sammanf.ok .ovn-sammanf-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:42px;height:42px;border-radius:50%;
+  background:#16a34a;color:#fff;font-size:24px;font-weight:700;
+  margin-bottom:10px;
+}
+.ovn-sammanf.ok .ovn-sammanf-titel{
+  display:block;font-family:var(--serif);font-size:22px;
+  font-weight:500;margin-bottom:4px;
+}
+.ovn-sammanf.delvis{background:var(--bg-warm);border-color:var(--gold);color:var(--gold);}
+
+/* ============================================================
+   KONFETTI – när eleven får alla rätt
+   ============================================================ */
+.konfetti-lager{
+  position:fixed;inset:0;pointer-events:none;
+  overflow:hidden;z-index:9999;
+}
+.konfetti{
+  position:absolute;width:10px;height:14px;top:-30px;
+  border-radius:2px;opacity:0;
+  animation:konfetti-fall linear forwards;
+}
+@keyframes konfetti-fall{
+  0%   { transform:translateY(0) rotate(0deg);   opacity:1; }
+  100% { transform:translateY(110vh) rotate(720deg); opacity:1; }
+}
+.ovn-skriv-ut{
+  text-align:center;margin:20px 0 4px;
+}
+.ovn-skriv-ut button{
+  background:linear-gradient(180deg, #fff 0%, #f4f0e8 100%);
+  color:var(--ink-soft);
+  border:1px solid #c9c2b3;
+  padding:10px 20px;font-size:13px;font-weight:600;
+  letter-spacing:.02em;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 2px 0 #c9c2b3,
+    0 3px 6px rgba(0,0,0,.06);
+}
+.ovn-skriv-ut button:hover{
+  background:linear-gradient(180deg, #faf6ee 0%, #ede6d6 100%);
+  color:var(--ink);
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    0 3px 0 #c9c2b3,
+    0 5px 10px rgba(0,0,0,.1);
+}
+.ovn-skriv-ut button:active{
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.1),
+    0 0 0 #c9c2b3;
+}
+
+/* ============================================================
+   PROBLEMUPPGIFTER (kladdruta + svar med enhet)
+   ============================================================ */
+.prob-rad{
+  padding:18px 0 20px;
+  border-bottom:1px dotted var(--paper-dk);
+}
+.prob-rad:last-child{border-bottom:none;}
+.prob-fraga{
+  display:flex;gap:10px;align-items:flex-start;
+  font-family:'Source Serif 4',Georgia,serif;font-size:18px;
+  line-height:1.55;color:var(--ink);margin-bottom:12px;
+}
+.prob-fraga .ovn-label{margin-top:2px;}
+.prob-kladd-rubrik{
+  font-family:var(--cinzel);font-size:10px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+  margin:0 0 6px;
+}
+.prob-kladd{
+  width:100%;min-height:90px;
+  border:1.5px solid var(--paper-dk);border-radius:6px;
+  background:#fff;padding:10px 12px;
+  font-family:'Source Serif 4',Georgia,serif;font-size:16px;
+  line-height:1.6;color:var(--ink);
+  resize:vertical;outline:none;
+  font-feature-settings:'tnum';
+}
+.prob-kladd:focus{border-color:var(--c-rakna);box-shadow:0 0 0 3px rgba(22,163,74,.12);}
+.prob-svar-rad{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-top:12px;
+}
+.prob-svar-rad .prob-label{
+  font-family:var(--cinzel);font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
+}
+.ovn-in.enhet{
+  width:90px;font-family:'Source Serif 4',Georgia,serif;font-weight:500;
+  color:var(--ink);border-color:var(--c-metod, var(--ink-faint));
+  background:var(--bg-warm);
+}
+.ovn-in.enhet:focus{box-shadow:0 0 0 3px rgba(180,83,9,.15);}
+.ovn-in.enhet.correct{background:var(--success-bg);border-color:var(--success);color:var(--success);}
+.ovn-in.enhet.wrong{background:var(--error-bg);border-color:var(--error);color:var(--error);}
+
+@media print{
+  .prob-kladd{
+    border:1px solid #aaa !important;background:#fff !important;
+    min-height:120px;
+  }
+  .prob-kladd-rubrik{color:#444 !important;}
+}
+
+/* ============================================================
+   UTSKRIFT: dölj webb-element, behåll papperskänsla
+   ============================================================ */
+@media print{
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+  body{background:#fff;}
+  .topnav,.hero,.tab-row,.lecture-list,.lecture-player,footer,
+  .ovn-keypad,.ovn-kontroll-rad,.ovn-skriv-ut,
+  .konfetti-lager,.ovn-mark{display:none !important;}
+  .tab-panel{display:none !important;}
+  .tab-panel.is-active{display:block !important;}
+  .ovn-wrap{padding:0;}
+  .ovn-sheet{border:none;background:#fff;padding:18px 22px;}
+  .ovn-in,.ovn-in.lucka,.ovn-in.bred{
+    background:#fff !important;color:#000 !important;
+    border:1.5px solid #555 !important;border-style:solid !important;
+  }
+  .ovn-in.correct,.ovn-in.wrong{
+    color:#000 !important;background:#fff !important;border-color:#555 !important;
+  }
+  .ovn-rad{border-bottom:1px solid #eaeaea;}
+  .ovn-exempel{border:1px solid #aaa;background:#f6f6f6;color:#222;}
+}
+/* ── Negativa tal: storleksordna & talföljd ── */
+.ovn-ordna-rad,.ovn-foljd-rad{flex-wrap:wrap;gap:10px;}
+.ovn-ordna-prompt{font-family:'Source Serif 4',Georgia,serif;font-size:16px;color:var(--ink-soft);}
+.ovn-ordna-set{font-family:'Source Serif 4',Georgia,serif;font-size:19px;font-feature-settings:'tnum';
+  background:var(--paper-dk);border-radius:8px;padding:5px 14px;letter-spacing:.02em;}
+.ovn-ordna-svar{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.ovn-ordna-pil{font-size:18px;color:var(--ink-faint);}
+.ovn-ordna-in{width:56px;text-align:center;}
+.ovn-foljd-led{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:20px;}
+.ovn-foljd-tal{font-size:20px;}
+.ovn-foljd-in{width:60px;text-align:center;}
+.ovn-foljd-komma{color:var(--ink-faint);}
+
+.alg-bild{display:flex;justify-content:center;padding:10px;background:#fff;border:1px solid var(--line);border-radius:10px;}
+.alg-bild svg{max-width:100%;height:auto;}
+.brak{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;font-family:'Source Serif 4',Georgia,serif;}
+.brak .taljare{border-bottom:1.5px solid currentColor;padding:0 5px;line-height:1.25;}
+.brak .namnare{padding:0 5px;line-height:1.25;}
+.valruta-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+.valruta-btn{font-family:var(--serif,'Cormorant Garamond');font-size:20px;font-weight:600;padding:10px 22px;cursor:pointer;border:2px solid var(--line,#e5e0d8);border-radius:10px;background:#fff;color:var(--ink,#12110f);transition:background .15s,border-color .15s,color .15s;}
+.valruta-btn:hover{border-color:var(--gold-lt,#c49a40);}
+.valruta-btn.is-vald{background:var(--gold-lt,#c49a40);border-color:var(--gold-lt,#c49a40);color:#fff;}
+.valruta-btn.correct{background:#16a34a;border-color:#16a34a;color:#fff;}
+.valruta-btn.wrong{background:#dc2626;border-color:#dc2626;color:#fff;}
+.emoji-bild{display:flex;gap:34px;flex-wrap:wrap;align-items:flex-start;justify-content:center;padding:18px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;width:100%;box-sizing:border-box;}
+.emoji-grupp{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:38px;line-height:1.1;text-align:center;}
+.emoji-text{font-size:13px;font-family:'Source Serif 4',Georgia,serif;font-style:italic;color:var(--ink-soft,#5d5347);}
+.variant-rad{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.variant-lbl{font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint,#7a6e65);}
+.variant-btn{font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.06em;padding:7px 16px;border-radius:7px;border:1px solid var(--line,#e5e0d8);background:#fff;color:var(--ink-soft,#3d3630);cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+.variant-btn:hover{border-color:var(--gold-lt,#c49a40);}
+.variant-btn.is-active{background:var(--nav-bg,#0f1e2e);border-color:var(--nav-bg,#0f1e2e);color:#fff;}
+.variant-btn.is-locked{opacity:.5;cursor:not-allowed;}
+.variant-btn.is-locked:hover{border-color:var(--line,#e5e0d8);}
+.stencil-info{font-size:13px;color:var(--ink-faint,#7a6e65);margin:-6px 0 16px;font-style:italic;}
+.stencil-info.klar{color:#15803d;font-style:normal;}
+.steg-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 14px;padding:10px 14px;background:var(--bg-soft,#faf7f1);border:1px solid var(--line,#e5e0d8);border-radius:10px;}
+.steg-btn{font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.06em;padding:8px 16px;border-radius:7px;border:1px solid var(--line,#e5e0d8);background:#fff;color:var(--ink-soft,#3d3630);cursor:pointer;transition:background .15s,border-color .15s,opacity .15s;}
+.steg-btn:hover:not(:disabled){border-color:var(--gold-lt,#c49a40);}
+.steg-btn:disabled{opacity:.4;cursor:not-allowed;}
+.steg-btn[data-steg="next"]{background:var(--nav-bg,#0f1e2e);border-color:var(--nav-bg,#0f1e2e);color:#fff;}
+.steg-btn[data-steg="next"]:disabled{background:#fff;color:var(--ink-soft,#3d3630);}
+.steg-info{font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.08em;color:var(--ink-faint,#7a6e65);text-transform:uppercase;}
+.ovn-grupp.steg-dold{display:none;}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="ak7-k1.html">Kapitel 1</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Positionssystem och talförståelse</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow">Delkapitel 1 · Kapitel 1</div>
+  <h1 class="hero-title">Positionssystem och <em>talförståelse</em></h1>
+  <p class="hero-desc">Tiosystemet och hur tal byggs upp av siffror med olika värde. Träna på siffrans värde, att bygga tal, utvecklad form och decimaltal.</p>
+  <a class="hero-back" href="ak7-k1.html">← Alla delkapitel</a>
+</header>
+
+<!-- FLIKRAD -->
+<div class="tab-row" id="tab-row">
+  <button class="tab-btn is-active" data-tab="forelasningar">Föreläsningar</button>
+  <button class="tab-btn" data-tab="tiosystemet">Tiosystemet</button>
+  <button class="tab-btn" data-tab="egenskaper">Tals egenskaper</button>
+  <button class="tab-btn" data-tab="storlek">Storlek och ordning</button>
+  <button class="tab-btn" data-tab="positionsrakning">Räkna i positionssystemet</button>
+</div>
+
+<!-- PANEL: FÖRELÄSNINGAR -->
+<section class="tab-panel is-active" data-panel="forelasningar">
+  <div class="lecture-list" id="lecture-list"></div>
+  <div class="lecture-player" id="lecture-player">
+    <div class="lecture-frame" id="lecture-frame"></div>
+    <a class="lecture-yt-link" id="lecture-yt-link" href="#" target="_blank" rel="noopener">
+      Filmen startar inte? Öppna den på YouTube ↗
+    </a>
+  </div>
+</section>
+
+<!-- PANEL: TIOSYSTEMET -->
+<section class="tab-panel" data-panel="tiosystemet">
+  <div class="variant-rad">
+    <span class="variant-lbl">Välj blad:</span>
+    <button class="variant-btn is-active" data-sheet="tiosystemet" data-variant="A">Blad A</button>
+    <button class="variant-btn" data-sheet="tiosystemet" data-variant="B">Blad B</button>
+  </div>
+  <div class="ovn-wrap" id="sheet-tiosystemet"></div>
+</section>
+
+<!-- PANEL: TALS EGENSKAPER -->
+<section class="tab-panel" data-panel="egenskaper">
+  <div class="variant-rad">
+    <span class="variant-lbl">Välj blad:</span>
+    <button class="variant-btn is-active" data-sheet="egenskaper" data-variant="A">Blad A</button>
+    <button class="variant-btn" data-sheet="egenskaper" data-variant="B">Blad B</button>
+  </div>
+  <div class="ovn-wrap" id="sheet-egenskaper"></div>
+</section>
+
+<!-- PANEL: STORLEK OCH ORDNING -->
+<section class="tab-panel" data-panel="storlek">
+  <div class="variant-rad">
+    <span class="variant-lbl">Stencil:</span>
+    <button class="variant-btn is-active" id="stencil-btn-A" data-stencil="A">Stencil A</button>
+    <button class="variant-btn is-locked" id="stencil-btn-B" data-stencil="B" disabled>Stencil B 🔒</button>
+  </div>
+  <div class="stencil-info" id="stencil-info">Klara minst 80 % på Stencil A för att låsa upp Stencil B.</div>
+  <div class="ovn-wrap" id="sheet-storlek"></div>
+</section>
+
+<!-- PANEL: RÄKNA I POSITIONSSYSTEMET -->
+<section class="tab-panel" data-panel="positionsrakning">
+  <div class="variant-rad">
+    <span class="variant-lbl">Välj blad:</span>
+    <button class="variant-btn is-active" data-sheet="positionsrakning" data-variant="A">Blad A</button>
+    <button class="variant-btn" data-sheet="positionsrakning" data-variant="B">Blad B</button>
+  </div>
+  <div class="ovn-wrap" id="sheet-positionsrakning"></div>
+</section>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Delkapitel 1</span>
+</footer>
+
+<script>
+// ---- FLIKVÄXLING ----
+var tabRow = document.getElementById('tab-row');
+tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var id = btn.dataset.tab;
+    tabRow.querySelectorAll('.tab-btn').forEach(function(b){
+      b.classList.toggle('is-active', b === btn);
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(p){
+      p.classList.toggle('is-active', p.dataset.panel === id);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+// ---- FÖRELÄSNINGAR ----
+// id = YouTube-videons id. Tumnagel hämtas automatiskt från YouTube.
+var FORELASNINGAR = [
+  {id:'QUrodq8ZHmM', titel:'Begreppskunskap', tag:'Föreläsning'},
+  {id:'NsSyKd5ndAE', titel:'Positionssystemet', tag:'Föreläsning'},
+  {id:'pq7sXrQpnPo', titel:'Delbarhetsregler', tag:'Föreläsning'},
+  {id:'rNdzIREh0bc', titel:'Primtalsfaktorisera med faktorträd', tag:'Föreläsning'},
+  {id:'sn23QGLVN2g', titel:'Talföljder', tag:'Föreläsning'},
+  {id:'AVcsB9Tf7_k', titel:'Räkna i positionssystemet', tag:'Föreläsning'},
+];
+
+var lectureList = document.getElementById('lecture-list');
+var player = document.getElementById('lecture-player');
+var frame = document.getElementById('lecture-frame');
+var ytLink = document.getElementById('lecture-yt-link');
+var aktivKort = null;
+
+FORELASNINGAR.forEach(function(f){
+  var card = document.createElement('div');
+  card.className = 'lecture-card';
+  card.innerHTML =
+      '<div class="lecture-thumb">'
+        + '<img src="https://img.youtube.com/vi/' + f.id + '/mqdefault.jpg" alt="" loading="lazy">'
+        + '<div class="lecture-play"><span>▶</span></div>'
+      + '</div>'
+    + '<div class="lecture-meta">'
+      + '<div class="lecture-title">' + f.titel + '</div>'
+      + '<div class="lecture-tag">' + f.tag + '</div>'
+    + '</div>'
+    + '<div class="lecture-state" data-state>Spela film</div>';
+  card.addEventListener('click', function(){
+    if(aktivKort === card){
+      // klick på samma kort igen -> stäng
+      stopPlayer();
+      return;
+    }
+    if(aktivKort){
+      aktivKort.classList.remove('is-playing');
+      aktivKort.querySelector('[data-state]').textContent = 'Spela film';
+    }
+    aktivKort = card;
+    card.classList.add('is-playing');
+    card.querySelector('[data-state]').textContent = 'Spelas nu';
+    // origin/widget_referrer hjälper YouTube känna igen domänen och
+    // undvika "fel 153". location.origin är tomt vid file://-visning –
+    // då hoppar vi över parametern så inbäddningen inte bryts.
+    var origin = (location.origin && location.origin.indexOf('http') === 0)
+      ? '&origin=' + encodeURIComponent(location.origin)
+        + '&widget_referrer=' + encodeURIComponent(location.origin)
+      : '';
+    frame.innerHTML = '<iframe src="https://www.youtube.com/embed/' + f.id
+      + '?rel=0&playsinline=1&enablejsapi=1' + origin + '" title="' + f.titel
+      + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    ytLink.href = 'https://youtu.be/' + f.id;
+    player.classList.add('is-open');
+    // flytta spelaren direkt under det klickade kortet
+    card.insertAdjacentElement('afterend', player);
+    player.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  lectureList.appendChild(card);
+});
+
+if(FORELASNINGAR.length === 0){
+  lectureList.innerHTML = '<div class="placeholder-note" style="padding:24px;">'
+    + '<span class="pn-icon">📽️</span>'
+    + '<span>Föreläsningar om negativa tal läggs in här när länkarna är klara.</span>'
+  + '</div>';
+}
+
+function stopPlayer(){
+  if(aktivKort){
+    aktivKort.classList.remove('is-playing');
+    aktivKort.querySelector('[data-state]').textContent = 'Spela film';
+    aktivKort = null;
+  }
+  player.classList.remove('is-open');
+  frame.innerHTML = '';
+}
+
+// ============================================================
+// ÖVNINGSMOTOR  – samma motor för alla fyra övningsblad
+// ============================================================
+//
+// Varje övning beskrivs som ett "blad" med en lista av "rader".
+// En rad är antingen:
+//   - {typ:'enkel',  vansterText:'10 · 5 =',  svar:50}
+//   - {typ:'lucka',  delar:['__ · 4,5 = 10'], luckPos:0, svar:???}
+//                    (text med en lucka markerad som '__')
+//   - {typ:'mellan', vansterText:'60 · 0,3 =', mellan:'6·3', svar:18}
+//                    (eleven skriver först mellanled, sedan svar)
+//
+// 'exempel' (valfritt) visas som förinifyllt exempel ovanför rad-listan.
+//
+// Rad-lista grupperas av {grupp:'Beräkna', rader:[...]}.
+
+function jamforTal(a, b){
+  // tillåt komma eller punkt, ignorera mellanslag
+  if(a == null) return false;
+  var s = String(a).replace(/\s/g,'').replace(/\u2212/g,'-').replace(',', '.');
+  if(s === '') return false;
+  var n = parseFloat(s);
+  if(isNaN(n)) return false;
+  return Math.abs(n - b) < 1e-9;
+}
+// Jämför ett algebraiskt uttryck mot en lista godkända svar (normaliserat).
+function jamforUttryck(a, godkanda){
+  if(a == null) return false;
+  function normTerm(t){
+    var neg = false;
+    if(t[0] === '+'){ t = t.slice(1); }
+    else if(t[0] === '-'){ neg = true; t = t.slice(1); }
+    var ch = t.split('').sort().join('');
+    return (neg ? '-' : '') + ch;
+  }
+  function norm(x){
+    var s = String(x).toLowerCase()
+      .replace(/[·×*]/g, '')
+      .replace(/\s/g, '')
+      .replace(/\u2212/g, '-')
+      .replace(/,/g, '.');
+    var termer = s.replace(/-/g, '+-').split('+').filter(function(t){ return t !== ''; });
+    return termer.map(normTerm).sort().join('+');
+  }
+  var na = norm(a);
+  return godkanda.some(function(g){ return norm(g) === na; });
+}
+// Jämför fritext mot en lista godkända svar (gemener, utan mellanslag).
+function jamforText(a, godkanda){
+  if(a == null) return false;
+  function norm(x){
+    return String(x).toLowerCase().replace(/\s/g,'').replace(/[.,!?]/g,'');
+  }
+  var na = norm(a);
+  if(na === '') return false;
+  return godkanda.some(function(g){ return norm(g) === na; });
+}
+// Symbolisk förenkling av linjärt uttryck med EN variabel → kanonisk form.
+function forenklaKanon(uttryck){
+  if(uttryck == null) return null;
+  var s = String(uttryck).toLowerCase()
+    .replace(/\u2212/g, '-').replace(/[×]/g, '*').replace(/·/g, '*')
+    .replace(/\s/g, '').replace(/,/g, '.');
+  if(s === '') return null;
+  var vm = s.match(/[a-z]/);
+  var v = vm ? vm[0] : null;
+  if(v && new RegExp('[a-z]').test(s.replace(new RegExp(v,'g'),''))) return null;
+  s = s.replace(/(\d|\))(\()/g, '$1*$2')
+       .replace(/(\))(\d|[a-z]|\()/g, '$1*$2')
+       .replace(/(\d)([a-z])/g, '$1*$2')
+       .replace(/([a-z])(\d)/g, '$1*$2');
+  function evalAt(xval){
+    var e = v ? s.replace(new RegExp(v,'g'), '('+xval+')') : s;
+    if(!/^[-+*/().\d]+$/.test(e)) return null;
+    try{ var r = Function('"use strict";return ('+e+')')(); return (typeof r==='number'&&isFinite(r))?r:null; }
+    catch(err){ return null; }
+  }
+  if(!v){ var c0 = evalAt(0); return c0===null?null:'C'+(Math.round(c0*1e6)/1e6); }
+  var f0 = evalAt(0), f1 = evalAt(1);
+  if(f0===null||f1===null) return null;
+  return (Math.round((f1-f0)*1e6)/1e6) + v + '+' + (Math.round(f0*1e6)/1e6);
+}
+function jamforForenkla(a, facit){
+  var na = forenklaKanon(a);
+  if(na === null) return false;
+  return na === forenklaKanon(facit);
+}
+// Symbolisk förenkling med FLERA variabler (x,y,a,b). Expanderar parenteser,
+// multiplikation och division, samlar koefficienter per variabel + konstant.
+// Returnerar kanonisk sträng, eller null om uttrycket inte kan tolkas.
+function forenklaFler(uttryck){
+  if(uttryck == null) return null;
+  var s = String(uttryck).toLowerCase()
+    .replace(/\u2212/g,'-').replace(/[×]/g,'*').replace(/·/g,'*')
+    .replace(/\s/g,'').replace(/,/g,'.');
+  if(s === '') return null;
+  // vilka variabler förekommer?
+  var vars = [];
+  (s.match(/[a-z]/g)||[]).forEach(function(c){ if(vars.indexOf(c)<0) vars.push(c); });
+  // implicit multiplikation
+  s = s.replace(/(\d|\))(\()/g,'$1*$2')
+       .replace(/(\))(\d|[a-z]|\()/g,'$1*$2')
+       .replace(/(\d)([a-z])/g,'$1*$2')
+       .replace(/([a-z])(\d)/g,'$1*$2')
+       .replace(/([a-z])([a-z])/g,'$1*$2');
+  function evalAt(vals){
+    var e = s;
+    for(var k in vals){ e = e.replace(new RegExp(k,'g'), '('+vals[k]+')'); }
+    if(!/^[-+*/().\d]+$/.test(e)) return null;
+    try{ var r = Function('"use strict";return ('+e+')')(); return (typeof r==='number'&&isFinite(r))?r:null; }
+    catch(err){ return null; }
+  }
+  // konstant = värde då alla variabler = 0
+  var noll = {}; vars.forEach(function(v){ noll[v]=0; });
+  var c = evalAt(noll);
+  if(c === null) return null;
+  // koefficient för varje variabel: värde då just den = 1 (övriga 0), minus konstant
+  var koef = {};
+  for(var i=0;i<vars.length;i++){
+    var vv = {}; vars.forEach(function(v){ vv[v]=0; }); vv[vars[i]] = 1;
+    var f1 = evalAt(vv);
+    if(f1 === null) return null;
+    koef[vars[i]] = Math.round((f1 - c)*1e6)/1e6;
+  }
+  // kanonisk: variabler i bokstavsordning + konstant
+  var delar = vars.slice().sort().map(function(v){ return koef[v]+v; });
+  delar.push('C'+(Math.round(c*1e6)/1e6));
+  return delar.join('|');
+}
+function jamforFler(a, facit){
+  var na = forenklaFler(a);
+  if(na === null) return false;
+  return na === forenklaFler(facit);
+}
+// Jämför ett led på FORM (rätt tal och tecken; godtar mellanslag, ·/x/*,
+// omkastad faktorordning 3·5=5·3 och omkastad termordning 15+2=2+15).
+function jamforForm(a, godkanda){
+  if(a == null) return false;
+  function normTerm(t){
+    var neg=false;
+    if(t[0]==='+'){t=t.slice(1);} else if(t[0]==='-'){neg=true;t=t.slice(1);}
+    var faktorer=t.split('·').filter(function(f){return f!=='';}).sort();
+    return (neg?'-':'') + faktorer.join('·');
+  }
+  function norm(x){
+    var s=String(x).toLowerCase().replace(/[×*x]/g,'·').replace(/\s/g,'').replace(/\u2212/g,'-').replace(/,/g,'.');
+    if(s==='') return '';
+    var termer=s.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';});
+    return termer.map(normTerm).sort().join('+');
+  }
+  var na=norm(a);
+  if(na==='') return false;
+  return godkanda.some(function(g){return norm(g)===na;});
+}
+// Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
+function visaTal(t){
+  var s = String(t).replace('.', ',');
+  return s.replace(/^-/, '\u2212');
+}
+function jamforMellan(a, b){
+  // mellanled får skrivas med eller utan likhetstecken, mellanslag, ·/x/*
+  if(a == null) return false;
+  var s = String(a).toLowerCase()
+    .replace(/[x×*]/g, '·')
+    .replace(/[\s=]/g, '')
+    .replace(',', '.');
+  var bnorm = String(b).toLowerCase()
+    .replace(/[x×*]/g, '·')
+    .replace(/[\s=]/g, '')
+    .replace(',', '.');
+  return s === bnorm;
+}
+function jamforEnhet(a, b){
+  // Enhet rättas flexibelt: utan mellanslag, gemener,
+  // och med vanliga skrivvarianter (kr/sek osv. accepteras).
+  if(a == null) return false;
+  var alias = {
+    'sek':'s', 'sekund':'s', 'sekunder':'s',
+    'kr':'kr', 'kronor':'kr', 'krona':'kr',
+    'meter':'m', 'metrar':'m',
+    'kilometer':'km',
+    'centimeter':'cm',
+    'pase':'påsar', 'påse':'påsar', 'pasar':'påsar', 'påsarna':'påsar',
+    'flaska':'flaskor', 'flaskorna':'flaskor'
+  };
+  function norm(x){
+    var t = String(x).toLowerCase().replace(/\./g,'').replace(/\s/g,'');
+    // ta bort eventuell punkt (m. -> m)
+    return t;
+  }
+  var na = norm(a), nb = norm(b);
+  if(na === nb) return true;
+  // alias åt båda håll
+  if(alias[na] === nb) return true;
+  if(alias[nb] === na) return true;
+  return false;
+}
+
+// ============================================================
+// KONFETTI – när eleven får alla rätt
+// ============================================================
+function visaKonfetti(){
+  // Plocka bort eventuell gammal konfetti
+  var gammal = document.querySelector('.konfetti-lager');
+  if(gammal) gammal.remove();
+  var lager = document.createElement('div');
+  lager.className = 'konfetti-lager';
+  document.body.appendChild(lager);
+  var färger = ['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899','#06b6d4'];
+  var antal = 80;
+  for(var i = 0; i < antal; i++){
+    var b = document.createElement('span');
+    b.className = 'konfetti';
+    b.style.left = (Math.random() * 100) + 'vw';
+    b.style.background = färger[Math.floor(Math.random() * färger.length)];
+    var duration = 2.5 + Math.random() * 2; // 2,5–4,5 sek
+    var delay = Math.random() * 0.8;        // upp till 0,8 sek försening
+    b.style.animationDuration = duration + 's';
+    b.style.animationDelay = delay + 's';
+    b.style.width = (6 + Math.random() * 8) + 'px';
+    b.style.height = (10 + Math.random() * 8) + 'px';
+    lager.appendChild(b);
+  }
+  // Städa upp efter att allt fallit klart
+  setTimeout(function(){ if(lager.parentNode) lager.remove(); }, 6000);
+}
+
+function bladHTML(blad){
+  var html = '<div class="ovn-sheet">'
+    + '<h2>' + blad.titel + '</h2>'
+    + (blad.intro ? '<p class="ovn-intro">' + blad.intro + '</p>' : '');
+
+  if(blad.exempel){
+    html += '<div class="ovn-exempel">' + blad.exempel + '</div>';
+  }
+
+  if(blad.stegvis){
+    html += '<div class="steg-nav" data-stegnav>'
+      + '<button type="button" class="steg-btn" data-steg="prev" disabled>← Föregående</button>'
+      + '<span class="steg-info" data-steg-info>Avsnitt 1 av ' + blad.grupper.length + '</span>'
+      + '<button type="button" class="steg-btn" data-steg="next">Nästa avsnitt →</button>'
+      + '</div>';
+  }
+
+  var radNummer = 0;
+  blad.grupper.forEach(function(grupp, gi){
+    html += '<div class="ovn-grupp" data-grupp-idx="' + gi + '">';
+    html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
+    grupp.rader.forEach(function(rad){
+      radNummer++;
+      var bokstav = String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
+      if(rad.typ === 'problemTid'){
+        // Problem med tidssvar: timmar + minuter i två fält
+        html += '<div class="prob-rad" data-rad="' + radNummer + '">';
+        html += '<div class="prob-fraga">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span>' + rad.fraga + '</span>';
+        html += '</div>';
+        html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
+        html += '<textarea class="prob-kladd" rows="3" '
+          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
+        html += '<div class="prob-svar-rad">';
+        html += '<span class="prob-label">Svar:</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.timmar + '" '
+          + 'inputmode="numeric" autocomplete="off" style="width:70px;">';
+        html += '<span class="ovn-text" style="margin:0 2px;">h</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.minuter + '" '
+          + 'inputmode="numeric" autocomplete="off" style="width:70px;">';
+        html += '<span class="ovn-text" style="margin:0 2px;">min</span>';
+        html += '</div>';
+        html += '</div>';
+        return;
+      }
+      if(rad.typ === 'problem'){
+        html += '<div class="prob-fraga">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span>' + rad.fraga + '</span>';
+        html += '</div>';
+        html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
+        html += '<textarea class="prob-kladd" rows="3" '
+          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
+        html += '<div class="prob-svar-rad">';
+        html += '<span class="prob-label">Svar:</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar + '" '
+          + 'inputmode="decimal" autocomplete="off" placeholder="tal">';
+        html += '<input class="ovn-in enhet" data-enhet="' + rad.enhet + '" '
+          + 'inputmode="text" autocomplete="off" placeholder="enhet">';
+        html += '</div>';
+        html += '</div>';
+        return;
+      }
+      // Bråk-uppgifter: täljare/nämnare visas som riktigt bråk
+      if(rad.typ === 'brak' || rad.typ === 'brakLucka'){
+        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        // Bråk-blocket
+        html += '<span class="ovn-brak">';
+        if(rad.typ === 'brakLucka' && rad.luckaPos === 'taljare'){
+          // täljaren innehåller en lucka, t.ex. "706 · __"
+          var tBitar = rad.taljare.split('__');
+          html += '<span class="ovn-brak-taljare">' + tBitar[0]
+            + '<input class="ovn-in lucka" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
+            + (tBitar[1] !== undefined ? tBitar[1] : '') + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
+        } else if(rad.typ === 'brakLucka' && rad.luckaPos === 'namnare'){
+          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          var nBitar = rad.namnare.split('__');
+          html += '<span class="ovn-brak-namnare">' + nBitar[0]
+            + '<input class="ovn-in lucka" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
+            + (nBitar[1] !== undefined ? nBitar[1] : '') + '</span>';
+        } else {
+          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
+        }
+        html += '</span>';
+        html += '<span class="ovn-text">=</span>';
+        if(rad.typ === 'brakLucka'){
+          // facit står efter likhetstecknet (eleven löser luckan i bråket)
+          html += '<span class="ovn-text ovn-num">' + rad.hoger + '</span>';
+        } else {
+          html += '<input class="ovn-in" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off">';
+        }
+        html += '</div>';
+        return;
+      }
+      // Storleksordna: visa talmängden, eleven skriver i ordning i rutor
+      if(rad.typ === 'ordna'){
+        var sorterat = rad.tal.slice().sort(function(a,b){ return rad.fallande ? b-a : a-b; });
+        html += '<div class="ovn-rad ovn-ordna-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-ordna-prompt">' + (rad.fraga || (rad.fallande ? 'Störst till minst:' : 'Minst till störst:')) + '</span>';
+        html += '<span class="ovn-ordna-set">{ ' + rad.tal.map(function(t){ return visaTal(t); }).join(', ') + ' }</span>';
+        html += '<span class="ovn-ordna-svar">';
+        sorterat.forEach(function(v, k){
+          if(k>0) html += '<span class="ovn-ordna-pil">' + (rad.fallande ? '>' : '<') + '</span>';
+          html += '<input class="ovn-in ovn-ordna-in" data-svar="' + v + '" inputmode="text" autocomplete="off">';
+        });
+        html += '</span>';
+        html += '</div>';
+        return;
+      }
+      // Talföljd: vissa termer givna, andra (null) är ifyllnadsrutor
+      if(rad.typ === 'talfoljd'){
+        html += '<div class="ovn-rad ovn-foljd-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-foljd-led">';
+        rad.termer.forEach(function(t, k){
+          if(k>0) html += '<span class="ovn-foljd-komma">,</span>';
+          if(t === null){
+            html += '<input class="ovn-in ovn-foljd-in" data-svar="' + rad.facit[k] + '" inputmode="text" autocomplete="off">';
+          } else {
+            html += '<span class="ovn-text ovn-num ovn-foljd-tal">' + visaTal(t) + '</span>';
+          }
+        });
+        html += '<span class="ovn-foljd-komma">, …</span>';
+        html += '</span>';
+        html += '</div>';
+        return;
+      }
+      // Tallinje: SVG med pilar A/B/C, eleven skriver vad varje pil pekar på
+      if(rad.typ === 'tallinje'){
+        html += '<div class="ovn-rad ovn-tallinje-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:flex-start;gap:10px;">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        // bygg SVG
+        var W=620, H=70, x0=30, x1=590, mn=rad.min, mx=rad.max;
+        function px(v){ return x0 + (v-mn)/(mx-mn)*(x1-x0); }
+        var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">';
+        s+='<line x1="'+x0+'" y1="48" x2="'+x1+'" y2="48" stroke="#333" stroke-width="2"/>';
+        s+='<polygon points="'+x1+',48 '+(x1-9)+',44 '+(x1-9)+',52" fill="#333"/>';
+        // delstreck
+        rad.streck.forEach(function(t){
+          var x=px(t.v);
+          s+='<line x1="'+x+'" y1="'+(t.lang?40:44)+'" x2="'+x+'" y2="'+(t.lang?56:52)+'" stroke="#333" stroke-width="'+(t.lang?2:1)+'"/>';
+          if(t.etikett!==undefined) s+='<text x="'+x+'" y="68" text-anchor="middle" font-size="12" fill="#555">'+visaTal(t.etikett)+'</text>';
+        });
+        // pilar
+        rad.pilar.forEach(function(p){
+          var x=px(p.v);
+          s+='<line x1="'+x+'" y1="14" x2="'+x+'" y2="40" stroke="#c0392b" stroke-width="2"/>';
+          s+='<polygon points="'+x+',44 '+(x-4)+',37 '+(x+4)+',37" fill="#c0392b"/>';
+          s+='<circle cx="'+x+'" cy="9" r="9" fill="#c0392b"/>';
+          s+='<text x="'+x+'" y="13" text-anchor="middle" font-size="11" fill="#fff" font-weight="bold">'+p.namn+'</text>';
+        });
+        s+='</svg>';
+        html += '<div class="alg-bild" style="width:100%;">' + s + '</div>';
+        // svarsrutor: en per pil
+        html += '<span class="ovn-tallinje-svar" style="display:flex;gap:14px;flex-wrap:wrap;">';
+        rad.pilar.forEach(function(p){
+          html += '<span style="display:inline-flex;align-items:center;gap:5px;"><span class="ovn-text ovn-num">'+p.namn+' =</span>'
+            + '<input class="ovn-in" data-svar="' + p.v + '" inputmode="decimal" autocomplete="off" style="width:80px;"></span>';
+        });
+        html += '</span></div>';
+        return;
+      }
+      // räkna om bokstav per grupp
+      html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+      html += '<span class="ovn-label">' + bokstav + ')</span>';
+      if(rad.typ === 'enkel'){
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off">';
+      } else if(rad.typ === 'intervall'){
+        // Skriv tal strikt mellan min och max. Två rutor som standard, en ruta om enkelt:true.
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<input class="ovn-in ovn-intervall" data-min="' + rad.min + '" data-max="' + rad.max
+          + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off" placeholder="ett tal">';
+        if(!rad.enkelt){
+          html += '<input class="ovn-in ovn-intervall" data-min="' + rad.min + '" data-max="' + rad.max
+            + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off" placeholder="ett till">';
+        }
+      } else if(rad.typ === 'uttryck'){
+        // svaret är ett algebraiskt uttryck (rättas normaliserat)
+        if(rad.likhet){
+          html += '<span class="ovn-text ovn-num">' + rad.fraga + '</span>';
+          html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        } else {
+          html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        }
+        var acceptU = (rad.accept || [rad.svar]).join('|');
+        html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(acceptU)
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'uttryck') + '">';
+      } else if(rad.typ === 'ordtext'){
+        // fritext som tolkning (rättas mot lista av godkända formuleringar)
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        var acceptT = (rad.accept || [rad.svar]).join('|');
+        html += '<input class="ovn-in bred" data-text="' + encodeURIComponent(acceptT)
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'svar med ord') + '">';
+      } else if(rad.typ === 'bild'){
+        // SVG-bild + uttrycks- eller numeriskt svar
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        html += '<div class="alg-bild">' + rad.svg + '</div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html += '<span class="ovn-text">' + (rad.fraga||'') + '</span>';
+        if(rad.svarTyp === 'uttryck'){
+          var accB = (rad.accept || [rad.svar]).join('|');
+          html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(accB)
+            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'uttryck') + '">';
+        } else if(rad.svarTyp === 'text'){
+          var accBt = (rad.accept || [rad.svar]).join('|');
+          html += '<input class="ovn-in bred" data-text="' + encodeURIComponent(accBt)
+            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'svar med ord') + '">';
+        } else {
+          html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+        }
+        html += '</div></div>';
+      } else if(rad.typ === 'valruta'){
+        // Välj rätt uttryck bland alternativ (kan ha flera rätta). Valfri SVG ovanför.
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
+        html += '<span class="ovn-text" style="min-width:160px;">' + (rad.fraga||'') + '</span>';
+        var ratta = (rad.ratt || []).join('|');
+        var flera = rad.flera ? '1' : '';
+        html += '<div class="valruta-grid" data-ratt="' + encodeURIComponent(ratta) + '" data-flera="' + flera + '">';
+        rad.alt.forEach(function(a){
+          html += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + a + '</button>';
+        });
+        html += '</div></div>';
+      } else if(rad.typ === 'flerled'){
+        // Horisontell likhetskedja: uppgift = [insättning] = [förenkling] = [svar]
+        // led-objekt: {accept:[...], visa:'...'} ; sista ledet {svar:tal}
+        // Stöd för bråk i visat uttryck via rad.vansterHtml (annars rad.vansterText).
+        html += '<span class="ovn-text ovn-num">' + (rad.vansterHtml || rad.vansterText) + '</span>';
+        html += '<span class="ovn-text" style="margin:0 3px;">=</span>';
+        rad.led.forEach(function(led, li){
+          var arSvar = (li === rad.led.length - 1);
+          if(arSvar){
+            html += '<input class="ovn-in" data-svar="' + led.svar + '" inputmode="decimal" autocomplete="off" placeholder="svar" style="min-width:70px;">';
+          } else {
+            var acc = (led.accept || [led.visa]).join('|');
+            html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(acc)
+              + '" data-visa="' + led.visa + '" inputmode="text" autocomplete="off" placeholder="led" style="min-width:96px;">';
+            html += '<span class="ovn-text" style="margin:0 3px;">=</span>';
+          }
+        });
+      } else if(rad.typ === 'text'){
+        // Dela upp ett tal i summa av termer – godtar alla korrekta uppdelningar
+        html += '<span class="ovn-text" style="min-width:140px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in bred" data-term="' + rad.summa + '" data-antal="' + (rad.antal||2)
+          + '" inputmode="text" autocomplete="off" placeholder="t.ex. 10+8">';
+      } else if(rad.typ === 'tvatal'){
+        // Två tal i valfri ordning
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="0" inputmode="decimal" autocomplete="off" style="width:80px;">';
+        html += '<span class="ovn-text">och</span>';
+        html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="1" inputmode="decimal" autocomplete="off" style="width:80px;">';
+      } else if(rad.typ === 'lucka'){
+        // text innehåller '__' där luckan ska sitta
+        var bitar = rad.text.split('__');
+        html += '<span class="ovn-text ovn-num">' + bitar[0] + '</span>';
+        html += '<input class="ovn-in lucka" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off">';
+        if(bitar[1] !== undefined) html += '<span class="ovn-text ovn-num">' + bitar[1] + '</span>';
+      } else if(rad.typ === 'mellan'){
+        // [Vänster]  = [mellanled-input]  = [svar-input]
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<input class="ovn-in bred" data-mellan="' + rad.mellan
+          + '" inputmode="text" autocomplete="off" placeholder="mellanled">';
+        html += '<span class="ovn-text">=</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off">';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    radNummer = 0; // bokstäver räknas om per grupp
+  });
+
+  // räkna om labels per grupp
+  html += '</div>';
+
+  // Knappsats – samma stil som öva-delen
+  html += '<div class="ovn-wrap" style="padding-top:0;">';
+  html += '<div class="ovn-keypad" data-keypad>';
+  // Sifferblock 7-8-9 / 4-5-6 / 1-2-3 / 0(span2) backsteg
+  html += '<div class="ovn-keypad-digits">';
+  ['7','8','9','4','5','6','1','2','3'].forEach(function(d){
+    html += '<button type="button" class="ovn-kp-key" data-key="' + d + '">' + d + '</button>';
+  });
+  html += '<button type="button" class="ovn-kp-key span2" data-key="0">0</button>';
+  html += '<button type="button" class="ovn-kp-key util" data-key="back">\u232B</button>';
+  html += '</div>';
+  // Operator-kolumn: , / · =
+  html += '<div class="ovn-keypad-ops">';
+  [',','/','·','\u2212','='].forEach(function(o){
+    html += '<button type="button" class="ovn-kp-key op" data-key="' + o + '">' + o + '</button>';
+  });
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div class="ovn-kontroll-rad">'
+    + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
+    + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'
+    + (blad.kanGenerera ? '<button type="button" class="ovn-aterstall" data-action="nytt-blad">↻ Nytt blad med andra tal</button>' : '')
+  + '</div>';
+
+  html += '<div class="ovn-sammanf" data-sammanf style="display:none;"></div>';
+
+  html += '<div class="ovn-skriv-ut"><button type="button" data-action="print">↗ Skriv ut bladet</button></div>';
+  html += '</div>';
+  return html;
+}
+
+function bygg_blad(rotEl, blad){
+  rotEl.innerHTML = bladHTML(blad);
+
+  // Räkna om radbokstäver så att varje grupp börjar om från 'a'
+  rotEl.querySelectorAll('.ovn-grupp').forEach(function(g){
+    var bok = 96;
+    g.querySelectorAll('.ovn-label').forEach(function(lbl){
+      bok++;
+      lbl.textContent = String.fromCharCode(bok) + ')';
+    });
+  });
+
+  var inputs = Array.from(rotEl.querySelectorAll('.ovn-in'));
+  var fokus = 0;
+
+  // Tab/Enter -> nästa input. Ångra rättning så fort man ändrar.
+  inputs.forEach(function(inp, i){
+    inp.addEventListener('focus', function(){ fokus = i; });
+    inp.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === 'Tab' && !e.shiftKey){
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          if(i + 1 < inputs.length) inputs[i+1].focus();
+        }
+      }
+    });
+    inp.addEventListener('input', function(){
+      inp.classList.remove('correct','wrong');
+      var f = inp.parentElement.querySelector('.ovn-fasit');
+      if(f) f.remove();
+      // Auto-mellanrum runt + och − i mellanled-fält (data-form)
+      if(inp.dataset.form !== undefined){
+        var pos = inp.selectionStart;
+        var fore = inp.value.slice(0, pos);
+        var ny = inp.value
+          .replace(/\s*([+\u2212-])\s*/g, ' $1 ')   // mellanrum runt + och −
+          .replace(/\s{2,}/g, ' ')                    // inga dubbla mellanrum
+          .replace(/^\s+/, '');                        // inget inledande mellanrum
+        if(ny !== inp.value){
+          // justera markörposition efter inskjutna mellanrum
+          var foreNy = fore.replace(/\s*([+\u2212-])\s*/g, ' $1 ').replace(/\s{2,}/g,' ').replace(/^\s+/,'');
+          inp.value = ny;
+          var nyPos = foreNy.length;
+          try{ inp.setSelectionRange(nyPos, nyPos); }catch(e){}
+        }
+      }
+    });
+  });
+
+  // Knappsats
+  rotEl.querySelectorAll('.ovn-kp-key').forEach(function(btn){
+    btn.addEventListener('mousedown', function(e){
+      e.preventDefault();
+      var k = btn.dataset.key;
+      var aktiv = document.activeElement;
+      if(!aktiv || !aktiv.classList || !aktiv.classList.contains('ovn-in')){
+        if(inputs.length === 0) return;
+        aktiv = inputs[fokus] || inputs[0];
+        aktiv.focus();
+      }
+      if(k === 'back'){
+        aktiv.value = aktiv.value.slice(0, -1);
+      } else {
+        aktiv.value += k;
+      }
+      aktiv.dispatchEvent(new Event('input', {bubbles:true}));
+      aktiv.focus();
+    });
+  });
+
+  // Valruta-knappar: enkel- eller flerval
+  rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
+    var flera = grid.dataset.flera === '1';
+    grid.querySelectorAll('.valruta-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(flera){
+          btn.classList.toggle('is-vald');
+        } else {
+          grid.querySelectorAll('.valruta-btn').forEach(function(b){ b.classList.remove('is-vald','correct','wrong'); });
+          btn.classList.add('is-vald');
+        }
+      });
+    });
+  });
+
+  // Kontroll / Återställ / Skriv ut
+  var forstaForsoket = true; // 0-1 fel på första försöket -> nytt blad
+  rotEl.querySelector('[data-action="kontroll"]').addEventListener('click', function(){
+    var ratt = 0, totalt = 0;
+    // Vid stegvis läge: rätta bara det synliga avsnittet
+    var aktivaInputs = blad.stegvis
+      ? inputs.filter(function(inp){ var g = inp.closest('.ovn-grupp'); return g && !g.classList.contains('steg-dold'); })
+      : inputs;
+    aktivaInputs.forEach(function(inp){
+      var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
+      // Ta bort eventuella tidigare fasit-spans och markeringar
+      rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
+      inp.classList.remove('correct','wrong','just-checked');
+      var ok;
+      if(inp.dataset.uttryck !== undefined){
+        var godk = decodeURIComponent(inp.dataset.uttryck).split('|');
+        ok = jamforUttryck(inp.value, godk)
+          || godk.some(function(g){ return jamforForenkla(inp.value, g); })
+          || godk.some(function(g){ return jamforFler(inp.value, g); });
+      } else if(inp.dataset.form !== undefined){
+        ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
+      } else if(inp.dataset.text !== undefined){
+        ok = jamforText(inp.value, decodeURIComponent(inp.dataset.text).split('|'));
+      } else if(inp.dataset.mellan){
+        ok = jamforMellan(inp.value, inp.dataset.mellan);
+      } else if(inp.dataset.enhet){
+        ok = jamforEnhet(inp.value, inp.dataset.enhet);
+      } else if(inp.dataset.term !== undefined){
+        // dela upp i termer – godtar alla korrekta summor
+        var malSumma = parseFloat(inp.dataset.term);
+        var malAntal = parseInt(inp.dataset.antal, 10);
+        var termer = String(inp.value).replace(/\u2212/g,'-').replace(/\s/g,'').split('+');
+        var summa = 0, giltigt = true;
+        if(termer.length !== malAntal) giltigt = false;
+        termer.forEach(function(t){
+          var v = parseFloat(t.replace(',','.'));
+          if(isNaN(v)) giltigt = false; else summa += v;
+        });
+        ok = giltigt && Math.abs(summa - malSumma) < 1e-9;
+      } else if(inp.dataset.tvatal !== undefined){
+        // två tal i valfri ordning – båda fälten ska tillsammans matcha
+        var malTal = inp.dataset.tvatal.split(',').map(function(x){ return parseFloat(x); });
+        var v = parseFloat(String(inp.value).replace(',','.'));
+        ok = !isNaN(v) && malTal.some(function(m){ return Math.abs(m-v)<1e-9; });
+      } else if(inp.dataset.min !== undefined){
+        // intervall: talet ska ligga strikt mellan min och max, och de två fälten i paret ska skilja sig
+        var lo = parseFloat(inp.dataset.min), hi = parseFloat(inp.dataset.max);
+        var vi = parseFloat(String(inp.value).replace(',','.'));
+        var inomIntervall = !isNaN(vi) && vi > lo && vi < hi;
+        // hitta parets andra fält
+        var par = rotEl.querySelectorAll('.ovn-intervall[data-par="' + inp.dataset.par + '"]');
+        var olika = true;
+        if(par.length === 2){
+          var v0 = parseFloat(String(par[0].value).replace(',','.'));
+          var v1 = parseFloat(String(par[1].value).replace(',','.'));
+          if(!isNaN(v0) && !isNaN(v1) && Math.abs(v0 - v1) < 1e-9) olika = false;
+        }
+        ok = inomIntervall && olika;
+      } else {
+        ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
+      }
+      totalt++;
+      // Bocken/krysset – stor, syns tydligt
+      var mark = document.createElement('span');
+      mark.className = 'ovn-mark ' + (ok ? 'ok' : 'fel');
+      mark.textContent = ok ? '✓' : '✗';
+      if(ok){
+        inp.classList.add('correct','just-checked');
+        ratt++;
+        inp.insertAdjacentElement('afterend', mark);
+      } else {
+        inp.classList.add('wrong','just-checked');
+        var facit;
+        if(inp.dataset.uttryck !== undefined) facit = inp.dataset.visa;
+        else if(inp.dataset.form !== undefined) facit = inp.dataset.visa;
+        else if(inp.dataset.text !== undefined) facit = inp.dataset.visa;
+        else if(inp.dataset.mellan) facit = inp.dataset.mellan;
+        else if(inp.dataset.enhet) facit = inp.dataset.enhet;
+        else if(inp.dataset.term !== undefined) facit = 'summan ska bli ' + inp.dataset.term.replace('.', ',');
+        else if(inp.dataset.tvatal !== undefined) facit = inp.dataset.tvatal.split(',').join(' och ');
+        else if(inp.dataset.min !== undefined) facit = 'ett tal mellan ' + inp.dataset.min.replace('.', ',') + ' och ' + inp.dataset.max.replace('.', ',') + ' (två olika)';
+        else facit = inp.dataset.svar.replace('.', ',');
+        var f = document.createElement('span');
+        f.className = 'ovn-fasit';
+        f.textContent = 'rätt svar: ' + facit;
+        inp.insertAdjacentElement('afterend', mark);
+        mark.insertAdjacentElement('afterend', f);
+      }
+      // Ta bort blink-klassen efter animationen
+      setTimeout(function(){ inp.classList.remove('just-checked'); }, 500);
+    });
+
+    // Rätta valruta-grids (välj rätt uttryck, ev. flera rätta)
+    rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
+      if(blad.stegvis){ var gg = grid.closest('.ovn-grupp'); if(gg && gg.classList.contains('steg-dold')) return; }
+      totalt++;
+      var ratta = decodeURIComponent(grid.dataset.ratt).split('|');
+      var flera = grid.dataset.flera === '1';
+      var valda = [];
+      grid.querySelectorAll('.valruta-btn').forEach(function(b){
+        b.classList.remove('correct','wrong');
+        var bv = decodeURIComponent(b.dataset.val);
+        var arRatt = ratta.some(function(r){ return jamforUttryck(bv,[r]) || jamforFler(bv,r); });
+        if(b.classList.contains('is-vald')){
+          valda.push(bv);
+          b.classList.add(arRatt ? 'correct' : 'wrong');
+        } else if(arRatt){
+          b.classList.add('correct'); // visa de rätta även om ej valda
+        }
+      });
+      // rätt om: valt minst ett, och alla valda är rätta, och (om ej flera) exakt ett valt
+      var allaValdaRatt = valda.length>0 && valda.every(function(v){ return ratta.some(function(r){ return jamforUttryck(v,[r])||jamforFler(v,r); }); });
+      var antalRatta = ratta.length;
+      var ok = allaValdaRatt && (flera ? valda.length===antalRatta : valda.length===1);
+      if(ok) ratt++;
+    });
+    var sam = rotEl.querySelector('[data-sammanf]');
+    sam.style.display = 'block';
+    sam.classList.remove('ok','delvis');
+    if(ratt === totalt){
+      sam.classList.add('ok');
+      sam.innerHTML = '<div class="ovn-sammanf-icon">✓</div>'
+        + '<span class="ovn-sammanf-titel">Allt rätt!</span>'
+        + ratt + ' av ' + totalt + ' &mdash; jättebra jobbat!';
+      // Konfetti regnar
+      visaKonfetti();
+    } else {
+      sam.classList.add('delvis');
+      sam.textContent = 'Du fick ' + ratt + ' av ' + totalt + ' rätt. Titta på de rödmarkerade rutorna.';
+    }
+    sam.scrollIntoView({behavior:'smooth', block:'center'});
+
+    // Valfri callback (används bl.a. för att låsa upp Stencil B)
+    if(typeof blad.onResultat === 'function'){ blad.onResultat(ratt, totalt); }
+
+    // Automatiskt nytt blad om eleven klarade 0-1 fel på FÖRSTA försöket
+    // (slarvfel räcker inte för att låsa upp samma blad – men 2+ fel betyder
+    //  att hen bör få rätta och försöka igen utan att bladet byts).
+    var fel = totalt - ratt;
+    if(forstaForsoket && fel <= 1 && blad.kanGenerera && blad.genId){
+      // Visa en mjuk meddelandetext och byt blad efter en kort paus
+      setTimeout(function(){
+        var sam2 = rotEl.querySelector('[data-sammanf]');
+        if(sam2){
+          var info = document.createElement('div');
+          info.style.cssText = 'margin-top:14px;font-size:14px;font-weight:normal;color:#15803d;';
+          info.textContent = 'Nytt blad med andra tal kommer …';
+          sam2.appendChild(info);
+        }
+      }, 1600);
+      setTimeout(function(){
+        // markera att vi börjat en ny "session" på bladet, så nytt blad genereras
+        byggSheet(rotEl.id.replace('sheet-',''), 'A', false);
+      }, 3200);
+    }
+    forstaForsoket = false;
+  });
+
+  rotEl.querySelector('[data-action="reset"]').addEventListener('click', function(){
+    inputs.forEach(function(inp){
+      inp.value = '';
+      inp.classList.remove('correct','wrong','just-checked');
+    });
+    rotEl.querySelectorAll('.valruta-btn').forEach(function(b){ b.classList.remove('is-vald','correct','wrong'); });
+    rotEl.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
+    var sam = rotEl.querySelector('[data-sammanf]');
+    sam.style.display = 'none';
+    sam.textContent = '';
+    forstaForsoket = true;
+    if(inputs[0]) inputs[0].focus();
+  });
+
+  var nyttBtn = rotEl.querySelector('[data-action="nytt-blad"]');
+  if(nyttBtn){
+    nyttBtn.addEventListener('click', function(){
+      byggSheet(rotEl.id.replace('sheet-',''), 'B', false);
+    });
+  }
+
+  rotEl.querySelector('[data-action="print"]').addEventListener('click', function(){
+    window.print();
+  });
+
+  // Steg-navigering: visa ett avsnitt (en grupp) i taget
+  if(blad.stegvis){
+    var grupper = Array.from(rotEl.querySelectorAll('.ovn-grupp'));
+    var stegInfo = rotEl.querySelector('[data-steg-info]');
+    var prevBtn = rotEl.querySelector('[data-steg="prev"]');
+    var nextBtn = rotEl.querySelector('[data-steg="next"]');
+    var aktuellt = 0;
+    function visaSteg(i){
+      aktuellt = Math.max(0, Math.min(grupper.length-1, i));
+      grupper.forEach(function(g, gi){ g.classList.toggle('steg-dold', gi !== aktuellt); });
+      stegInfo.textContent = 'Avsnitt ' + (aktuellt+1) + ' av ' + grupper.length;
+      prevBtn.disabled = (aktuellt === 0);
+      nextBtn.disabled = (aktuellt === grupper.length-1);
+      var nav = rotEl.querySelector('[data-stegnav]');
+      if(nav) nav.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+    prevBtn.addEventListener('click', function(){ visaSteg(aktuellt-1); });
+    nextBtn.addEventListener('click', function(){ visaSteg(aktuellt+1); });
+    visaSteg(0);
+  }
+
+  if(inputs[0]) inputs[0].focus();
+}
+
+// ============================================================
+// UPPGIFTSDATA – negativa tal
+// ============================================================
+
+// --- 1 · BEGREPP OCH FÖRSTÅELSE ---
+// ============================================================
+// ÖVNINGSBLAD – Algebraiska uttryck (kapitel 3, del 1)
+// ============================================================
+
+// --- SKRIVA UTTRYCK (platshållare – byggs härnäst) ---
+// --- SKRIVA UTTRYCK ---
+// ============================================================
+// ÖVNINGSBLAD – Positionssystem och talförståelse (kapitel 1, del 1)
+// ============================================================
+
+// ---- TIOSYSTEMET: två varianter (Blad A / Blad B) ----
+var TIO_A = {
+  titel:'Tiosystemet – Blad A', stegvis:true,
+  intro:'Träna på siffrans värde, att bygga tal, utvecklad form och decimaltal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
+  grupper:[
+    {rubrik:'1. Vilket värde har sjuan i talet?', rader:[
+      {typ:'enkel', vansterText:'74',     svar:70},
+      {typ:'enkel', vansterText:'67',     svar:7},
+      {typ:'enkel', vansterText:'17 523', svar:7000},
+      {typ:'enkel', vansterText:'73 508', svar:70000}
+    ]},
+    {rubrik:'2. Skriv det tal som består av', rader:[
+      {typ:'enkel', vansterText:'7 hundratal, 6 tiotal och 3 ental', svar:763},
+      {typ:'enkel', vansterText:'5 tusental, 4 tiotal och 2 ental',  svar:5042},
+      {typ:'enkel', vansterText:'4 tiotusental, 5 hundratal och 2 ental', svar:40502}
+    ]},
+    {rubrik:'3. Använd siffrorna 4, 5, 6 och 7 och skriv', rader:[
+      {typ:'enkel', vansterText:'det största talet du kan',     svar:7654},
+      {typ:'enkel', vansterText:'det minsta talet du kan',      svar:4567},
+      {typ:'enkel', vansterText:'det tal som ligger närmast 6 000', svar:5764},
+      {typ:'enkel', vansterText:'det största udda talet du kan', svar:7645}
+    ]},
+    {rubrik:'4. Skriv följande tal med siffror', rader:[
+      {typ:'enkel', vansterText:'fyrahundra tjugofem',        svar:425},
+      {typ:'enkel', vansterText:'sexhundrafem',               svar:605},
+      {typ:'enkel', vansterText:'femtusen sjuhundra nittio',  svar:5790},
+      {typ:'enkel', vansterText:'fjortontusen fem',           svar:14005}
+    ]},
+    {rubrik:'5. Skriv i utvecklad form (t.ex. 500 + 60 + 7)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'567',  svar:'500+60+7', accept:['500+60+7']},
+      {typ:'uttryck', likhet:true, fraga:'43',   svar:'40+3',     accept:['40+3']},
+      {typ:'uttryck', likhet:true, fraga:'5608', svar:'5000+600+8', accept:['5000+600+8']}
+    ]},
+    {rubrik:'6. Vilket värde har trean? (skriv med komma)', rader:[
+      {typ:'enkel', vansterText:'703',    svar:3},
+      {typ:'enkel', vansterText:'12,03',  svar:0.03},
+      {typ:'enkel', vansterText:'14,36',  svar:0.3},
+      {typ:'enkel', vansterText:'348,12', svar:300},
+      {typ:'enkel', vansterText:'1,003',  svar:0.003}
+    ]},
+    {rubrik:'7. Skriv det tal som består av', rader:[
+      {typ:'enkel', vansterText:'3 ental och 2 tiondelar',                 svar:3.2},
+      {typ:'enkel', vansterText:'7 tiotal, 5 tiondelar och 8 hundradelar', svar:70.58},
+      {typ:'enkel', vansterText:'2 tiondelar och 4 hundradelar',           svar:0.24},
+      {typ:'enkel', vansterText:'6 ental, 9 tiondelar och 7 tusendelar',   svar:6.907}
+    ]},
+    {rubrik:'8. Vilket värde har trean i talet?', rader:[
+      {typ:'enkel', vansterText:'35,2',  svar:30},
+      {typ:'enkel', vansterText:'5,34',  svar:0.3},
+      {typ:'enkel', vansterText:'6,036',  svar:0.03},
+      {typ:'enkel', vansterText:'7,0837', svar:0.03}
+    ]},
+    {rubrik:'9. Skriv som tal (med komma där det behövs)', rader:[
+      {typ:'enkel', vansterText:'17 tiotal',     svar:170},
+      {typ:'enkel', vansterText:'19 hundradelar', svar:0.19},
+      {typ:'enkel', vansterText:'23 tiondelar',  svar:2.3}
+    ]},
+    {rubrik:'10. Vilket tal ska stå i rutan?', rader:[
+      {typ:'enkel', vansterText:'160 = ___ tiotal',        svar:16},
+      {typ:'enkel', vansterText:'3 ental = ___ tiondelar', svar:30},
+      {typ:'enkel', vansterText:'4 tiondelar = ___ tusendelar', svar:400},
+      {typ:'enkel', vansterText:'1,9 = ___ hundradelar',   svar:190},
+      {typ:'enkel', vansterText:'14,4 = ___ tiondelar',    svar:144}
+    ]},
+    {rubrik:'11. Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'63,9',   svar:'60+3+0,9',     accept:['60+3+0,9','60+3+0.9']},
+      {typ:'uttryck', likhet:true, fraga:'7,63',   svar:'7+0,6+0,03',   accept:['7+0,6+0,03','7+0.6+0.03']},
+      {typ:'uttryck', likhet:true, fraga:'70,809', svar:'70+0,8+0,009', accept:['70+0,8+0,009','70+0.8+0.009']}
+    ]}
+  ]
+};
+
+var TIO_B = {
+  titel:'Tiosystemet – Blad B', stegvis:true,
+  intro:'Samma slags uppgifter som Blad A, men med andra tal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
+  grupper:[
+    {rubrik:'1. Vilket värde har femman i talet?', rader:[
+      {typ:'enkel', vansterText:'52',     svar:50},
+      {typ:'enkel', vansterText:'85',     svar:5},
+      {typ:'enkel', vansterText:'45 217', svar:5000},
+      {typ:'enkel', vansterText:'56 304', svar:50000}
+    ]},
+    {rubrik:'2. Skriv det tal som består av', rader:[
+      {typ:'enkel', vansterText:'8 hundratal, 3 tiotal och 9 ental', svar:839},
+      {typ:'enkel', vansterText:'6 tusental, 7 tiotal och 1 ental',  svar:6071},
+      {typ:'enkel', vansterText:'3 tiotusental, 8 hundratal och 4 ental', svar:30804}
+    ]},
+    {rubrik:'3. Använd siffrorna 2, 4, 6 och 7 och skriv', rader:[
+      {typ:'enkel', vansterText:'det största talet du kan',     svar:7642},
+      {typ:'enkel', vansterText:'det minsta talet du kan',      svar:2467},
+      {typ:'enkel', vansterText:'det tal som ligger närmast 5 000', svar:4762},
+      {typ:'enkel', vansterText:'det största udda talet du kan', svar:6427}
+    ]},
+    {rubrik:'4. Skriv följande tal med siffror', rader:[
+      {typ:'enkel', vansterText:'trehundra sextio',          svar:360},
+      {typ:'enkel', vansterText:'åttahundrasju',             svar:807},
+      {typ:'enkel', vansterText:'sextusen fyrahundra tjugo', svar:6420},
+      {typ:'enkel', vansterText:'tjugotusen nio',            svar:20009}
+    ]},
+    {rubrik:'5. Skriv i utvecklad form (t.ex. 300 + 80 + 4)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'384',  svar:'300+80+4',   accept:['300+80+4']},
+      {typ:'uttryck', likhet:true, fraga:'72',   svar:'70+2',       accept:['70+2']},
+      {typ:'uttryck', likhet:true, fraga:'4309', svar:'4000+300+9', accept:['4000+300+9']}
+    ]},
+    {rubrik:'6. Vilket värde har sexan? (skriv med komma)', rader:[
+      {typ:'enkel', vansterText:'608',    svar:600},
+      {typ:'enkel', vansterText:'23,06',  svar:0.06},
+      {typ:'enkel', vansterText:'17,68',  svar:0.6},
+      {typ:'enkel', vansterText:'651,29', svar:600},
+      {typ:'enkel', vansterText:'2,006',  svar:0.006}
+    ]},
+    {rubrik:'7. Skriv det tal som består av', rader:[
+      {typ:'enkel', vansterText:'5 ental och 4 tiondelar',                 svar:5.4},
+      {typ:'enkel', vansterText:'8 tiotal, 3 tiondelar och 6 hundradelar', svar:80.36},
+      {typ:'enkel', vansterText:'3 tiondelar och 7 hundradelar',           svar:0.37},
+      {typ:'enkel', vansterText:'4 ental, 2 tiondelar och 5 tusendelar',   svar:4.205}
+    ]},
+    {rubrik:'8. Vilket värde har sexan i talet?', rader:[
+      {typ:'enkel', vansterText:'6,42',   svar:6},
+      {typ:'enkel', vansterText:'902,6',  svar:0.6},
+      {typ:'enkel', vansterText:'8,062',  svar:0.06},
+      {typ:'enkel', vansterText:'3,0625', svar:0.06}
+    ]},
+    {rubrik:'9. Skriv som tal (med komma där det behövs)', rader:[
+      {typ:'enkel', vansterText:'14 tiotal',      svar:140},
+      {typ:'enkel', vansterText:'27 hundradelar', svar:0.27},
+      {typ:'enkel', vansterText:'31 tiondelar',   svar:3.1}
+    ]},
+    {rubrik:'10. Vilket tal ska stå i rutan?', rader:[
+      {typ:'enkel', vansterText:'240 = ___ tiotal',        svar:24},
+      {typ:'enkel', vansterText:'5 ental = ___ tiondelar', svar:50},
+      {typ:'enkel', vansterText:'7 tiondelar = ___ tusendelar', svar:700},
+      {typ:'enkel', vansterText:'2,3 = ___ hundradelar',   svar:230},
+      {typ:'enkel', vansterText:'18,6 = ___ tiondelar',    svar:186}
+    ]},
+    {rubrik:'11. Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'48,2',   svar:'40+8+0,2',     accept:['40+8+0,2','40+8+0.2']},
+      {typ:'uttryck', likhet:true, fraga:'9,54',   svar:'9+0,5+0,04',   accept:['9+0,5+0,04','9+0.5+0.04']},
+      {typ:'uttryck', likhet:true, fraga:'50,607', svar:'50+0,6+0,007', accept:['50+0,6+0,007','50+0.6+0.007']}
+    ]}
+  ]
+};
+
+// platshållare för övriga tre flikar
+function platshallare(namn){
+  return {titel:namn, intro:'Det här avsnittet byggs härnäst.',
+    grupper:[{rubrik:'Kommer snart', rader:[{typ:'ordtext', fraga:'Uppgifter läggs in här.', svar:'', accept:['']}]}]};
+}
+var EGEN_A = {
+  titel:'Tals egenskaper – Blad A', stegvis:true,
+  intro:'Träna på jämna och udda tal, delbarhet, primtal, sammansatta tal och faktorisering. Markera alla tal som stämmer, eller skriv svaret. Tryck sedan på Kontrollera.',
+  grupper:[
+    {rubrik:'1. Vilka tal är jämna?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla jämna tal:', alt:['7','4','16','23','27'], ratt:['4','16']}
+    ]},
+    {rubrik:'2. Vilka tal är sammansatta tal?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla sammansatta tal:', alt:['3','9','11','17','25'], ratt:['9','25']}
+    ]},
+    {rubrik:'3. Vilka tal är jämnt delbara med …', rader:[
+      {typ:'valruta', flera:true, fraga:'a) … 2', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['72','70','98','100','568','490']},
+      {typ:'valruta', flera:true, fraga:'b) … 5', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['70','45','100','125','490']}
+    ]},
+    {rubrik:'4. Faktorisera talet i två faktorer (skriv t.ex. 3·5)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'15', svar:'3·5', accept:['3·5','5·3'], placeholder:'två faktorer'},
+      {typ:'uttryck', likhet:true, fraga:'27', svar:'3·9', accept:['3·9','9·3'], placeholder:'två faktorer'},
+      {typ:'uttryck', likhet:true, fraga:'36', svar:'6·6', accept:['6·6','4·9','9·4','3·12','12·3','2·18','18·2'], placeholder:'två faktorer'},
+      {typ:'uttryck', likhet:true, fraga:'12', svar:'3·4', accept:['3·4','4·3','2·6','6·2'], placeholder:'två faktorer'}
+    ]},
+    {rubrik:'5. Vilka primfaktorer saknas i faktoriseringen?', rader:[
+      {typ:'uttryck', fraga:'a) 28 = 2 · 2 · ___', svar:'7', accept:['7'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'b) 60 = 2 · 2 · ___ · 5', svar:'3', accept:['3'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'c) 45 = ___ · ___ · 5  (skriv båda, t.ex. 3·3)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
+      {typ:'uttryck', fraga:'d) 90 = 2 · ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'}
+    ]},
+    {rubrik:'6. Vilket tal har faktoriserats?', rader:[
+      {typ:'enkel', vansterText:'2 · 2 · 2 · 2', svar:16},
+      {typ:'enkel', vansterText:'2 · 2 · 5 · 5', svar:100},
+      {typ:'enkel', vansterText:'2 · 5 · 19',    svar:190}
+    ]},
+    {rubrik:'7. Vilka tal är jämnt delbara med 4 och 5?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 4 och 5:', alt:['35','40','12','120','32','87','80','400','6','115','97','528'], ratt:['40','120','80','400']}
+    ]},
+    {rubrik:'8. Vilka tal är primtal?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla primtal:', alt:['5','7','15','19','21','25','27','31'], ratt:['5','7','19','31']}
+    ]},
+    {rubrik:'9. Vilka tal är jämnt delbara med 3 och 5?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 3 och 5:', alt:['75','85','93','150','420','5','211'], ratt:['75','150','420']}
+    ]},
+    {rubrik:'10. Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'18', svar:'2·3·3', accept:['2·3·3','3·2·3','3·3·2'], placeholder:'primfaktorer'},
+      {typ:'uttryck', likhet:true, fraga:'32', svar:'2·2·2·2·2', accept:['2·2·2·2·2'], placeholder:'primfaktorer'},
+      {typ:'uttryck', likhet:true, fraga:'56', svar:'2·2·2·7', accept:['2·2·2·7','7·2·2·2','2·7·2·2','2·2·7·2'], placeholder:'primfaktorer'}
+    ]},
+    {rubrik:'11. Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
+      {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
+      {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
+      {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'}
+    ]}
+  ]
+};
+
+var EGEN_B = {
+  titel:'Tals egenskaper – Blad B', stegvis:true,
+  intro:'Samma slags uppgifter som Blad A, men med andra tal. Markera alla tal som stämmer, eller skriv svaret. Tryck sedan på Kontrollera.',
+  grupper:[
+    {rubrik:'1. Vilka tal är jämna?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla jämna tal:', alt:['9','12','21','34','45'], ratt:['12','34']}
+    ]},
+    {rubrik:'2. Vilka tal är sammansatta tal?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla sammansatta tal:', alt:['5','8','13','21','29'], ratt:['8','21']}
+    ]},
+    {rubrik:'3. Vilka tal är jämnt delbara med …', rader:[
+      {typ:'valruta', flera:true, fraga:'a) … 2', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['84','60','200','432','310']},
+      {typ:'valruta', flera:true, fraga:'b) … 5', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['55','60','200','135','310']}
+    ]},
+    {rubrik:'4. Faktorisera talet i två faktorer (skriv t.ex. 3·7)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'21', svar:'3·7', accept:['3·7','7·3'], placeholder:'två faktorer'},
+      {typ:'uttryck', likhet:true, fraga:'32', svar:'4·8', accept:['4·8','8·4','2·16','16·2'], placeholder:'två faktorer'},
+      {typ:'uttryck', likhet:true, fraga:'24', svar:'4·6', accept:['4·6','6·4','3·8','8·3','2·12','12·2'], placeholder:'två faktorer'},
+      {typ:'uttryck', likhet:true, fraga:'18', svar:'2·9', accept:['2·9','9·2','3·6','6·3'], placeholder:'två faktorer'}
+    ]},
+    {rubrik:'5. Vilka primfaktorer saknas i faktoriseringen?', rader:[
+      {typ:'uttryck', fraga:'a) 20 = 2 · 2 · ___', svar:'5', accept:['5'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'b) 84 = 2 · 2 · ___ · 7', svar:'3', accept:['3'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'c) 63 = ___ · ___ · 7  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
+      {typ:'uttryck', fraga:'d) 150 = 2 · 3 · ___ · ___  (skriv båda)', svar:'5·5', accept:['5·5'], placeholder:'två tal'}
+    ]},
+    {rubrik:'6. Vilket tal har faktoriserats?', rader:[
+      {typ:'enkel', vansterText:'2 · 2 · 2 · 3', svar:24},
+      {typ:'enkel', vansterText:'3 · 3 · 5 · 5', svar:225},
+      {typ:'enkel', vansterText:'2 · 3 · 17',    svar:102}
+    ]},
+    {rubrik:'7. Vilka tal är jämnt delbara med 4 och 5?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 4 och 5:', alt:['45','60','18','160','28','99','140','300','8','135','83','640'], ratt:['60','160','140','300','640']}
+    ]},
+    {rubrik:'8. Vilka tal är primtal?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla primtal:', alt:['3','9','11','17','23','27','33','37'], ratt:['3','11','17','23','37']}
+    ]},
+    {rubrik:'9. Vilka tal är jämnt delbara med 3 och 5?', rader:[
+      {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 3 och 5:', alt:['60','95','81','180','330','5','127'], ratt:['60','180','330']}
+    ]},
+    {rubrik:'10. Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
+      {typ:'uttryck', likhet:true, fraga:'24', svar:'2·2·2·3', accept:['2·2·2·3','3·2·2·2','2·3·2·2','2·2·3·2'], placeholder:'primfaktorer'},
+      {typ:'uttryck', likhet:true, fraga:'40', svar:'2·2·2·5', accept:['2·2·2·5','5·2·2·2','2·5·2·2','2·2·5·2'], placeholder:'primfaktorer'},
+      {typ:'uttryck', likhet:true, fraga:'60', svar:'2·2·3·5', accept:['2·2·3·5','2·2·5·3','3·2·2·5','5·2·2·3','2·3·2·5','2·5·2·3'], placeholder:'primfaktorer'}
+    ]},
+    {rubrik:'11. Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
+      {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
+      {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
+      {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'}
+    ]}
+  ]
+};
+var EGEN_VARIANTER = { A:EGEN_A, B:EGEN_B };
+function byggEgenskaper(variant){ bygg_blad(document.getElementById('sheet-egenskaper'), EGEN_VARIANTER[variant] || EGEN_A); }
+// ---- STORLEK OCH ORDNING: två stenciler (A lättare, B svårare, B låses upp efter A) ----
+var STORLEK_A = {
+  titel:'Storlek och ordning – Stencil A',
+  intro:'Träna på tiohopp, tallinjer, tiondelar och talföljder. Skriv decimaltal med komma. Tryck sedan på Kontrollera. Klara minst 80 % för att låsa upp Stencil B.',
+  grupper:[
+    {rubrik:'1. Gör tre 10-hopp framåt för varje tal', rader:[
+      {typ:'talfoljd', termer:[980, null, null, null],  facit:[null,990,1000,1010]},
+      {typ:'talfoljd', termer:[4997, null, null, null], facit:[null,5007,5017,5027]}
+    ]},
+    {rubrik:'2. Gör tre 10-hopp bakåt för varje tal', rader:[
+      {typ:'talfoljd', termer:[527, null, null, null],   facit:[null,517,507,497]},
+      {typ:'talfoljd', termer:[10025, null, null, null], facit:[null,10015,10005,9995]}
+    ]},
+    {rubrik:'3. Vilka tal pekar pilarna på?', rader:[
+      {typ:'tallinje', min:0, max:140,
+        streck:[{v:0,lang:true,etikett:0},{v:20},{v:40},{v:60},{v:80},{v:100,lang:true,etikett:100},{v:120},{v:140}],
+        pilar:[{namn:'A',v:20},{namn:'B',v:60},{namn:'C',v:120}]},
+      {typ:'tallinje', min:0, max:160,
+        streck:[{v:0,lang:true,etikett:0},{v:20},{v:40},{v:60},{v:80},{v:100,lang:true,etikett:100},{v:120},{v:140},{v:160}],
+        pilar:[{namn:'A',v:40},{namn:'B',v:60},{namn:'C',v:120}]}
+    ]},
+    {rubrik:'4. Skriv det tal som är en tiondel större än', rader:[
+      {typ:'enkel', vansterText:'46,7',  svar:46.8},
+      {typ:'enkel', vansterText:'534',   svar:534.1},
+      {typ:'enkel', vansterText:'12,93', svar:13.03}
+    ]},
+    {rubrik:'5. Gör tre 0,4-hopp framåt för varje tal', rader:[
+      {typ:'talfoljd', termer:[0.35, null, null, null], facit:[null,0.75,1.15,1.55]},
+      {typ:'talfoljd', termer:[4.57, null, null, null], facit:[null,4.97,5.37,5.77]}
+    ]},
+    {rubrik:'6. Vilka tal pekar pilarna på?', rader:[
+      {typ:'tallinje', min:0, max:14,
+        streck:[{v:0,lang:true,etikett:0},{v:2},{v:4},{v:6},{v:8},{v:10,lang:true,etikett:10},{v:12},{v:14}],
+        pilar:[{namn:'A',v:2},{namn:'B',v:4},{namn:'C',v:13}]},
+      {typ:'tallinje', min:0, max:1.4,
+        streck:[{v:0,lang:true,etikett:0},{v:0.2},{v:0.4},{v:0.5,lang:true,etikett:'0,5'},{v:0.6},{v:0.8},{v:1,lang:true,etikett:1},{v:1.2},{v:1.4}],
+        pilar:[{namn:'A',v:0.1},{namn:'B',v:0.7},{namn:'C',v:1.1}]}
+    ]},
+    {rubrik:'7. Gör tre 0,4-hopp bakåt för varje tal', rader:[
+      {typ:'talfoljd', termer:[30.75, null, null, null], facit:[null,30.35,29.95,29.55]},
+      {typ:'talfoljd', termer:[5.72, null, null, null],  facit:[null,5.32,4.92,4.52]}
+    ]},
+    {rubrik:'8. Skriv de två talen som kommer i talföljden', rader:[
+      {typ:'talfoljd', termer:[0.4, 0.6, 0.8, null, null],  facit:[null,null,null,1.0,1.2]},
+      {typ:'talfoljd', termer:[3.75, 3.50, 3.25, null, null], facit:[null,null,null,3.0,2.75]},
+      {typ:'talfoljd', termer:[0.41, 0.44, 0.47, null, null], facit:[null,null,null,0.50,0.53]},
+      {typ:'talfoljd', termer:[0.2, 0.5, 0.8, null, null],  facit:[null,null,null,1.1,1.4]}
+    ]},
+    {rubrik:'9. Skriv talen i storleksordning, börja med det minsta', rader:[
+      {typ:'ordna', tal:[6.5, 6.168, 6.17, 6.105]}
+    ]}
+  ]
+};
+
+var STORLEK_B = {
+  titel:'Storlek och ordning – Stencil B',
+  intro:'Lite svårare uppgifter: mindre steg, fler tal att ordna och tal nära varandra. Skriv decimaltal med komma.',
+  grupper:[
+    {rubrik:'10. Skriv talen i storleksordning, börja med det minsta', rader:[
+      {typ:'ordna', tal:[0.46, 0.4, 0.09, 3.895]}
+    ]},
+    {rubrik:'11. Vilket tal är en hundradel mindre än', rader:[
+      {typ:'enkel', vansterText:'7',     svar:6.99},
+      {typ:'enkel', vansterText:'16,3',  svar:16.29},
+      {typ:'enkel', vansterText:'9,206', svar:9.196}
+    ]},
+    {rubrik:'12. Ordna talen i storleksordning, börja med det minsta', rader:[
+      {typ:'ordna', tal:[0.18, 0.1, 0.2, 1.7, 0.15, 2]}
+    ]},
+    {rubrik:'13. Vilket tal är en tusendel mindre än', rader:[
+      {typ:'enkel', vansterText:'2',    svar:1.999},
+      {typ:'enkel', vansterText:'2000', svar:1999.999},
+      {typ:'enkel', vansterText:'0,57', svar:0.569}
+    ]},
+    {rubrik:'14. Vilka tal pekar pilarna på?', rader:[
+      {typ:'tallinje', min:0, max:0.015,
+        streck:[{v:0,lang:true,etikett:0},{v:0.0025},{v:0.005,lang:true,etikett:'0,005'},{v:0.0075},{v:0.01,lang:true,etikett:'0,01'},{v:0.0125},{v:0.015,lang:true,etikett:'0,015'}],
+        pilar:[{namn:'A',v:0.001},{namn:'B',v:0.007},{namn:'C',v:0.013}]},
+      {typ:'tallinje', min:0.01, max:0.026,
+        streck:[{v:0.01,lang:true,etikett:'0,01'},{v:0.012},{v:0.014},{v:0.016},{v:0.018},{v:0.02,lang:true,etikett:'0,02'},{v:0.022},{v:0.024},{v:0.026}],
+        pilar:[{namn:'A',v:0.012},{namn:'B',v:0.016},{namn:'C',v:0.022}]}
+    ]},
+    {rubrik:'15. Ordna talen i storleksordning, börja med det minsta', rader:[
+      {typ:'ordna', tal:[1.05, 0.457, 0.9, 1.3, 0.10, 0.01]}
+    ]},
+    {rubrik:'16. Skriv ett tal som är', rader:[
+      {typ:'intervall', enkelt:true, vansterText:'a) större än 9,9 men mindre än 10',    min:9.9, max:10},
+      {typ:'intervall', enkelt:true, vansterText:'b) större än 10 men mindre än 10,01', min:10, max:10.01}
+    ]}
+  ]
+};
+
+// Stencil-låsning: B låses upp när A klarats till minst 80 %
+var STORLEK_LAST_UPP = false;
+STORLEK_A.onResultat = function(ratt, totalt){
+  if(!STORLEK_LAST_UPP && totalt>0 && (ratt/totalt) >= 0.8){
+    STORLEK_LAST_UPP = true;
+    var bB = document.getElementById('stencil-btn-B');
+    bB.disabled = false; bB.classList.remove('is-locked'); bB.textContent = 'Stencil B';
+    var info = document.getElementById('stencil-info');
+    info.textContent = 'Bra jobbat! Stencil B är upplåst.';
+    info.classList.add('klar');
+  }
+};
+function byggStorlek(stencil){
+  bygg_blad(document.getElementById('sheet-storlek'), stencil==='B' ? STORLEK_B : STORLEK_A);
+}
+var POSRAK_A = {
+  titel:'Räkna i positionssystemet – Blad A', stegvis:true,
+  intro:'Träna på huvudräkning med tiondelar och hundradelar, platsövergångar och tal som ligger mittemellan. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
+  grupper:[
+    {rubrik:'1. Skriv två tal inom varje intervall', rader:[
+      {typ:'intervall', vansterText:'a) mellan 2,5 och 2,7', min:2.5, max:2.7},
+      {typ:'intervall', vansterText:'b) mellan 99 och 100',  min:99,  max:100},
+      {typ:'intervall', vansterText:'c) mellan 0,28 och 0,29', min:0.28, max:0.29}
+    ]},
+    {rubrik:'2. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'0,8 + 0,3',  svar:1.1},
+      {typ:'enkel', vansterText:'0,1 + 3,9',  svar:4},
+      {typ:'enkel', vansterText:'0,1 + 6,98', svar:7.08}
+    ]},
+    {rubrik:'3. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'16,835 − 0,1', svar:16.735},
+      {typ:'enkel', vansterText:'1,13 − 0,1',   svar:1.03},
+      {typ:'enkel', vansterText:'1,06 − 0,1',   svar:0.96}
+    ]},
+    {rubrik:'4. Vilket tal ska stå i rutan?', rader:[
+      {typ:'enkel', vansterText:'345 − ___ = 340',   svar:5},
+      {typ:'enkel', vansterText:'5678 − ___ = 678',  svar:5000},
+      {typ:'enkel', vansterText:'2354 − ___ = 2304', svar:50}
+    ]},
+    {rubrik:'5. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'5,235 − 0,01',  svar:5.225},
+      {typ:'enkel', vansterText:'0,01 + 3,99',   svar:4},
+      {typ:'enkel', vansterText:'0,01 + 6998',   svar:6998.01}
+    ]},
+    {rubrik:'6. Vilket tal är 7 tiondelar större än …', rader:[
+      {typ:'enkel', vansterText:'11,6', svar:12.3},
+      {typ:'enkel', vansterText:'9,57', svar:10.27}
+    ]},
+    {rubrik:'7. Vilket tal ska stå i rutan?', rader:[
+      {typ:'enkel', vansterText:'5891 − ___ = 5741', svar:150},
+      {typ:'enkel', vansterText:'9389 − ___ = 8989', svar:400},
+      {typ:'enkel', vansterText:'8576 − ___ = 1200', svar:7376}
+    ]},
+    {rubrik:'8. Vilket tal ligger mittemellan …', rader:[
+      {typ:'enkel', vansterText:'5,7 och 5,8',   svar:5.75},
+      {typ:'enkel', vansterText:'0,13 och 0,14', svar:0.135},
+      {typ:'enkel', vansterText:'245 och 246',   svar:245.5}
+    ]},
+    {rubrik:'9. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'15,835 − 0,01', svar:15.825},
+      {typ:'enkel', vansterText:'13 − 0,01',     svar:12.99},
+      {typ:'enkel', vansterText:'1,006 − 0,01',  svar:0.996}
+    ]},
+    {rubrik:'10. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'0,6 + 0,55',  svar:1.15},
+      {typ:'enkel', vansterText:'1 − 0,2',     svar:0.8},
+      {typ:'enkel', vansterText:'3 − 1,7',     svar:1.3},
+      {typ:'enkel', vansterText:'0,86 + 1,05', svar:1.91},
+      {typ:'enkel', vansterText:'2,75 − 1,3',  svar:1.45}
+    ]},
+    {rubrik:'11. Vilket tal ligger mittemellan …', rader:[
+      {typ:'enkel', vansterText:'1,45 och 1,4', svar:1.425},
+      {typ:'enkel', vansterText:'0,69 och 0,8', svar:0.745}
+    ]}
+  ]
+};
+
+var POSRAK_B = {
+  titel:'Räkna i positionssystemet – Blad B', stegvis:true,
+  intro:'Samma slags uppgifter som Blad A, men med andra tal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
+  grupper:[
+    {rubrik:'1. Skriv två tal inom varje intervall', rader:[
+      {typ:'intervall', vansterText:'a) mellan 3,4 och 3,6', min:3.4, max:3.6},
+      {typ:'intervall', vansterText:'b) mellan 49 och 50',   min:49,  max:50},
+      {typ:'intervall', vansterText:'c) mellan 0,71 och 0,72', min:0.71, max:0.72}
+    ]},
+    {rubrik:'2. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'0,7 + 0,5',  svar:1.2},
+      {typ:'enkel', vansterText:'0,1 + 2,9',  svar:3},
+      {typ:'enkel', vansterText:'0,1 + 5,97', svar:6.07}
+    ]},
+    {rubrik:'3. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'24,617 − 0,1', svar:24.517},
+      {typ:'enkel', vansterText:'1,28 − 0,1',   svar:1.18},
+      {typ:'enkel', vansterText:'1,04 − 0,1',   svar:0.94}
+    ]},
+    {rubrik:'4. Vilket tal ska stå i rutan?', rader:[
+      {typ:'enkel', vansterText:'672 − ___ = 670',   svar:2},
+      {typ:'enkel', vansterText:'4583 − ___ = 583',  svar:4000},
+      {typ:'enkel', vansterText:'3471 − ___ = 3421', svar:50}
+    ]},
+    {rubrik:'5. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'7,142 − 0,01',  svar:7.132},
+      {typ:'enkel', vansterText:'0,01 + 2,99',   svar:3},
+      {typ:'enkel', vansterText:'0,01 + 4997',   svar:4997.01}
+    ]},
+    {rubrik:'6. Vilket tal är 7 tiondelar större än …', rader:[
+      {typ:'enkel', vansterText:'14,8', svar:15.5},
+      {typ:'enkel', vansterText:'8,46', svar:9.16}
+    ]},
+    {rubrik:'7. Vilket tal ska stå i rutan?', rader:[
+      {typ:'enkel', vansterText:'6742 − ___ = 6532', svar:210},
+      {typ:'enkel', vansterText:'8265 − ___ = 7865', svar:400},
+      {typ:'enkel', vansterText:'9341 − ___ = 1500', svar:7841}
+    ]},
+    {rubrik:'8. Vilket tal ligger mittemellan …', rader:[
+      {typ:'enkel', vansterText:'6,3 och 6,4',   svar:6.35},
+      {typ:'enkel', vansterText:'0,21 och 0,22', svar:0.215},
+      {typ:'enkel', vansterText:'381 och 382',   svar:381.5}
+    ]},
+    {rubrik:'9. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'23,914 − 0,01', svar:23.904},
+      {typ:'enkel', vansterText:'17 − 0,01',     svar:16.99},
+      {typ:'enkel', vansterText:'1,004 − 0,01',  svar:0.994}
+    ]},
+    {rubrik:'10. Räkna med huvudräkning', rader:[
+      {typ:'enkel', vansterText:'0,7 + 0,45',  svar:1.15},
+      {typ:'enkel', vansterText:'1 − 0,4',     svar:0.6},
+      {typ:'enkel', vansterText:'4 − 2,6',     svar:1.4},
+      {typ:'enkel', vansterText:'0,78 + 1,04', svar:1.82},
+      {typ:'enkel', vansterText:'3,65 − 1,2',  svar:2.45}
+    ]},
+    {rubrik:'11. Vilket tal ligger mittemellan …', rader:[
+      {typ:'enkel', vansterText:'2,35 och 2,3', svar:2.325},
+      {typ:'enkel', vansterText:'0,58 och 0,7', svar:0.64}
+    ]}
+  ]
+};
+var POSRAK_VARIANTER = { A:POSRAK_A, B:POSRAK_B };
+function byggPosrak(variant){ bygg_blad(document.getElementById('sheet-positionsrakning'), POSRAK_VARIANTER[variant] || POSRAK_A); }
+
+// ============================================================
+// Bygg upp bladen
+// ============================================================
+var TIO_VARIANTER = { A:TIO_A, B:TIO_B };
+function byggTiosystemet(variant){
+  bygg_blad(document.getElementById('sheet-tiosystemet'), TIO_VARIANTER[variant] || TIO_A);
+}
+byggTiosystemet('A');
+byggEgenskaper('A');
+byggStorlek('A');
+byggPosrak('A');
+
+// variantväxling
+// Stencil-knappar (A/B med lås)
+document.querySelectorAll('[data-stencil]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if(btn.disabled) return;
+    document.querySelectorAll('[data-stencil]').forEach(function(b){ b.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+    byggStorlek(btn.dataset.stencil);
+  });
+});
+document.querySelectorAll('.variant-btn[data-sheet]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.variant-btn[data-sheet="'+btn.dataset.sheet+'"]').forEach(function(b){ b.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+    if(btn.dataset.sheet==='tiosystemet') byggTiosystemet(btn.dataset.variant);
+    if(btn.dataset.sheet==='egenskaper') byggEgenskaper(btn.dataset.variant);
+    if(btn.dataset.sheet==='positionsrakning') byggPosrak(btn.dataset.variant);
+  });
+});
+
+
+</script>
+
+</body>
+</html>
