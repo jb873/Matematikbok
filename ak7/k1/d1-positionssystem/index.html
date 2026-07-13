@@ -870,6 +870,30 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .test-note p{font-size:14px;line-height:1.6;max-width:480px;margin:0 auto 16px;}
 .test-note a{display:inline-block;font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);background:var(--gold-lt);padding:10px 20px;border-radius:5px;text-decoration:none;transition:background .15s;}
 .test-note a:hover{background:#fff;}
+
+/* ── FÄRDIGHETSTRÄNING: lista (6 KO) + drill-iframe bredvid ── */
+.fard-layout{max-width:920px;margin:0 auto;padding:18px 28px 44px;display:grid;grid-template-columns:288px 1fr;gap:22px;align-items:start;}
+.fard-lista{display:flex;flex-direction:column;gap:2px;}
+.fard-grupp{margin-bottom:10px;}
+.fard-ko{font-family:var(--cinzel,'Cinzel');font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold,#9a7228);margin:6px 0 7px;display:flex;align-items:center;gap:10px;}
+.fard-ko::after{content:'';flex:1;height:1px;background:var(--paper-dk,#ede6d6);}
+.fard-skill{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:7px;padding:9px 13px;margin-bottom:5px;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s,box-shadow .15s;}
+.fard-skill:hover{border-color:var(--gold-lt,#c49a40);box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.fard-skill-titel{font-family:var(--serif,'Cormorant Garamond');font-size:15.5px;font-weight:500;color:var(--ink,#12110f);line-height:1.25;letter-spacing:-.005em;}
+.fard-skill-formaga{font-family:var(--cinzel,'Cinzel');font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint,#7a6e65);}
+.fard-skill.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);}
+.fard-skill.is-active .fard-skill-titel{color:#fff;}
+.fard-skill.is-active .fard-skill-formaga{color:var(--gold-lt,#c49a40);}
+.fard-scen{position:sticky;top:14px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:12px;overflow:hidden;min-height:560px;}
+.fard-tom{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:560px;padding:40px;text-align:center;color:var(--ink-faint,#7a6e65);}
+.fard-tom-ikon{font-size:44px;color:var(--paper-dk,#ede6d6);line-height:1;}
+.fard-tom p{font-size:14.5px;line-height:1.6;max-width:280px;}
+.fard-frame{width:100%;height:660px;border:0;display:block;background:#fff;}
+@media(max-width:720px){
+  .fard-layout{grid-template-columns:1fr;padding:16px 16px 32px;gap:14px;}
+  .fard-scen{position:static;min-height:0;}
+  .fard-frame{height:560px;}
+}
 .steg-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 14px;padding:10px 14px;background:var(--bg-soft,#faf7f1);border:1px solid var(--line,#e5e0d8);border-radius:10px;}
 .steg-btn{font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.06em;padding:8px 16px;border-radius:7px;border:1px solid var(--line,#e5e0d8);background:#fff;color:var(--ink-soft,#3d3630);cursor:pointer;transition:background .15s,border-color .15s,opacity .15s;}
 .steg-btn:hover:not(:disabled){border-color:var(--gold-lt,#c49a40);}
@@ -935,7 +959,17 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
 <section class="tab-panel" data-panel="fardighet">
-  <div class="utbud" id="fardighet-lista"></div>
+  <div class="fard-layout">
+    <!-- 15 färdigheter i 6 kunskapsområden. Klick → drillen laddas i iframen bredvid. -->
+    <div class="fard-lista" id="fardighet-lista" role="tablist" aria-label="Färdigheter"></div>
+    <div class="fard-scen">
+      <div class="fard-tom" id="fard-tom">
+        <div class="fard-tom-ikon">◧</div>
+        <p>Välj en färdighet till vänster.<br>Drillen öppnas här med nivåer som klättrar men aldrig sjunker.</p>
+      </div>
+      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy" hidden></iframe>
+    </div>
+  </div>
 </section>
 
 <!-- PANEL: TEST -->
@@ -967,17 +1001,35 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       {titel:'Räkna i positionssystemet',   desc:'Huvudräkning med positionsvärde, intervall och mittemellan.',        blad:'positionsrakning', data:'POSRAK_A'},
       {titel:'Tals egenskaper',             desc:'Jämnt/udda, delbarhet, faktorisering och primtal.',                  blad:'egenskaper',       data:'EGEN_A'}
     ],
-    // FÄRDIGHETSTRÄNING = samma typer isärplockade som drillbara färdigheter (deep-link till metod-ramen).
+    // FÄRDIGHETSTRÄNING = 15 färdigheter i 6 kunskapsområden (KO). Varje färdighet är en
+    // befintlig ram-motor (KO×förmåga); klick laddar drillen i iframen (embed-läge).
     fardighet:[
-      {rubrik:'Begrepp', poster:[
-        {titel:'Siffror och tal', desc:'Grundbegrepp om siffror och tal.', ko:'siffror', formaga:'begrepp'},
-        {titel:'Positionssystemet · begrepp', desc:'Positionsvärde och tiosystemet steg för steg.', ko:'position', formaga:'begrepp'}
+      {ko:'KO 1 · Siffror och tal', drills:[
+        {titel:'Udda och jämna tal', formaga:'begrepp', ko:'siffror'}
       ]},
-      {rubrik:'Metoder', poster:[
-        {titel:'Positionssystemet · räkna', desc:'Träna räkning med positionsvärde, adaptivt.', ko:'position', formaga:'rakna'}
+      {ko:'KO 2 · Positionssystemet', drills:[
+        {titel:'Platsvärde & bygga tal', formaga:'begrepp',  ko:'position'},
+        {titel:'Tallinje, talföljder & storleksordna', formaga:'räkna', formagaKey:'rakna', ko:'position'},
+        {titel:'Jämföra & mittemellan', formaga:'resonera', ko:'position'}
       ]},
-      {rubrik:'Problemlösning', poster:[
-        {titel:'Positionssystemet · resonera', desc:'Förklara, jämför och ordna tal och värden.', ko:'position', formaga:'resonera'}
+      {ko:'KO 3 · Utvecklad form', drills:[
+        {titel:'Skriv i utvecklad form', formaga:'metod', ko:'utvecklad'},
+        {titel:'Vilket tal står på utvecklad form?', formaga:'räkna', formagaKey:'rakna', ko:'utvecklad'}
+      ]},
+      {ko:'KO 4 · Räkneträning', drills:[
+        {titel:'Öka & minska (tiondel · hundradel · tusendel)', formaga:'räkna', formagaKey:'rakna', ko:'rakneträning'}
+      ]},
+      {ko:'KO 5 · Primtal & faktorträd', drills:[
+        {titel:'Primtal eller sammansatt?', formaga:'begrepp', ko:'primtal'},
+        {titel:'Faktorisera (2–4 faktorer)', formaga:'räkna', formagaKey:'rakna', ko:'primtal'},
+        {titel:'Bygg faktorträd', formaga:'metod', ko:'primtal'},
+        {titel:'Skriv hela primtalsfaktoriseringen', formaga:'kommunikation', ko:'primtal'},
+        {titel:'Förklara varför ett tal är primtal', formaga:'resonera', ko:'primtal'},
+        {titel:'Talgåtor: vilket tal är jag?', formaga:'problemlösning', formagaKey:'problem', ko:'primtal'}
+      ]},
+      {ko:'KO 6 · Delbarhet', drills:[
+        {titel:'Vad är delbarhet?', formaga:'begrepp', ko:'delbarhet'},
+        {titel:'Avgör delbarhet snabbt', formaga:'räkna', formagaKey:'rakna', ko:'delbarhet'}
       ]}
     ]
   };
@@ -1012,18 +1064,32 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     visaBlad(0);   // starta alltid på blad 1
   }
 
-  // ── FÄRDIGHETSTRÄNING: grupperad lista, deep-links till metod-ramen (?ko=&formaga=) ──
+  // ── FÄRDIGHETSTRÄNING: grupperad lista (6 KO), klick laddar drillen i iframen (embed) ──
+  // Metod-vyns mekanik återanvänds oförändrad via ram-B; nivån klättrar men sjunker aldrig.
   var fardEl = document.getElementById('fardighet-lista');
+  var frame = document.getElementById('fard-frame');
+  var tom = document.getElementById('fard-tom');
   if(fardEl){
+    var fardKnappar = [];
+    function oppnaFardighet(btn, p){
+      fardKnappar.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected','false'); });
+      btn.classList.add('is-active'); btn.setAttribute('aria-selected','true');
+      var fKey = p.formagaKey || p.formaga;
+      if(frame){
+        frame.src = RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(fKey)+'&embed=1';
+        frame.hidden = false;
+      }
+      if(tom) tom.hidden = true;
+    }
     DEL.fardighet.forEach(function(g){
-      var gr=document.createElement('div'); gr.className='utbud-grupp';
-      var rub=document.createElement('div'); rub.className='utbud-rubrik'; rub.textContent=g.rubrik; gr.appendChild(rub);
-      g.poster.forEach(function(p){
-        var a=document.createElement('a'); a.className='utbud-post';
-        a.href=RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(p.formaga);
-        a.innerHTML='<div class="utbud-post-body"><div class="utbud-post-titel">'+p.titel+'</div>'
-          +'<div class="utbud-post-desc">'+p.desc+'</div></div><span class="utbud-post-pil">↗</span>';
-        gr.appendChild(a);
+      var gr=document.createElement('div'); gr.className='fard-grupp';
+      var rub=document.createElement('div'); rub.className='fard-ko'; rub.textContent=g.ko; gr.appendChild(rub);
+      g.drills.forEach(function(p){
+        var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.setAttribute('role','tab');
+        b.innerHTML='<span class="fard-skill-titel">'+p.titel+'</span>'
+          +'<span class="fard-skill-formaga">'+p.formaga+'</span>';
+        b.onclick=function(){ oppnaFardighet(b, p); };
+        gr.appendChild(b); fardKnappar.push(b);
       });
       fardEl.appendChild(gr);
     });

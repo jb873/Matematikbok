@@ -74,6 +74,12 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .view{display:none}
 .view.is-active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* ── INBÄDDAT LÄGE (?embed=1): dölj ramens krom, visa bara övningskortet ── */
+body.embed .topnav-hist,
+body.embed [data-view="ovning"] .breadcrumb,
+body.embed [data-view="ovning"] .nav-back-top,
+body.embed .nav-back-bottom{display:none !important}
+body.embed .layout{padding:16px 16px 32px;max-width:100%}
 
 /* ── TOPNAV (historia-boksstil) ── */
 .topnav-hist{
@@ -489,6 +495,11 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .difficulty-badge .dots{display:inline-flex;gap:3px}
 .difficulty-badge .dots i{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);font-style:normal}
 .difficulty-badge .dots i.filled{background:var(--primary)}
+/* Segment-stege: tydlig nivåtrappa (Färdighetsträning-modell, klättrar aldrig ner) */
+.difficulty-badge .dots.stege{gap:4px;align-items:center}
+.difficulty-badge .dots.stege i{width:20px;height:5px;border-radius:3px;background:var(--ink-faint);opacity:.32;transition:opacity .2s,background .2s}
+.difficulty-badge .dots.stege i.filled{background:var(--primary);opacity:1}
+.difficulty-badge .dots.stege i.aktuell{box-shadow:0 0 0 2px var(--bg-soft),0 0 0 3px var(--primary)}
 
 /* ==== FLASHCARD ==== */
 .flashcard{
@@ -2791,8 +2802,10 @@ function renderSummaryCard(opts){
  * Returns new {level, change}
  */
 function adjustLevel(level, right, total){
+  // Nivå-modell: klättrar men sjunker ALDRIG. Svårigheten går upp när eleven
+  // bemästrar; på en miss faller den inte tillbaka – man får fler uppgifter på
+  // samma nivå tills det sitter. Nuvarande nivå = golv (högsta uppnådda).
   if(right >= total - 1 && level < 3) return {level: level+1, change: 'up'};
-  if(right <= Math.floor(total/3) && level > 1) return {level: level-1, change: 'down'};
   return {level, change: null};
 }
 
@@ -3305,15 +3318,16 @@ där score är 0.0–1.0 baserat på hur väl svaret motsvarar rubricen.`;
 // EXERCISE HEADER HELPER
 // ============================================================
 function exerciseHeader(title, sub, level){
-  const levelLabel = level ? `Nivå ${level}` : '';
-  const dots = level ? Array.from({length:3}).map((_,i)=>`<i class="${i<level?'filled':''}"></i>`).join('') : '';
+  const MAXNIVA = 3;
+  const levelLabel = level ? `Nivå ${level} av ${MAXNIVA}` : '';
+  const dots = level ? Array.from({length:MAXNIVA}).map((_,i)=>`<i class="${i<level?'filled':''}${i===level-1?' aktuell':''}"></i>`).join('') : '';
   return `
     <div class="exercise-header">
       <div>
         <h2 class="exercise-title">${title}</h2>
         <p class="exercise-sub">${sub}</p>
       </div>
-      ${level?`<div class="difficulty-badge">${levelLabel} <span class="dots">${dots}</span></div>`:''}
+      ${level?`<div class="difficulty-badge">${levelLabel} <span class="dots stege">${dots}</span></div>`:''}
     </div>
   `;
 }
@@ -8229,8 +8243,16 @@ function repSkippaPanel(){
 // ============================================================
 // Deeplink: ?del=xxx / #del=xxx hoppar in i en del; view=test-config / view=skattning öppnar de vyerna.
 (function(){
+ // Kör init EFTER att metod-modulerna (<script src> nedan) har laddats. Deeplinken
+ // ?ko=&formaga= renderar en drill vars fn bor i en modul; körs init synkront här
+ // (före modulerna) är fn odefinierad och drillen renderas aldrig. DOMContentLoaded
+ // fyrar efter alla parser-insatta klassiska script, dvs efter modulerna.
+ function boot(){
   repLoad();
   var hs = location.hash + ' ' + location.search;
+  // Inbäddat läge (arbetssidans Färdighetsträning laddar drillen i en iframe):
+  // dölj ramens eget krom så bara övningskortet syns bredvid färdighetslistan.
+  if(/[?&]embed=1\b/.test(hs)) document.body.classList.add('embed');
   var mv = hs.match(/view=([a-z-]+)/i);
   if(mv && (mv[1] === 'test-config' || mv[1] === 'skattning')){
     renderKapitel();
@@ -8238,10 +8260,13 @@ function repSkippaPanel(){
     return;
   }
   // Deeplink till en KO-förmåga (från arbetssidornas Färdighetsträning): ?ko=xxx&formaga=yyy
-  var mk = hs.match(/[?&]ko=([a-z0-9-]+)/i), mf = hs.match(/[?&]formaga=([a-z0-9-]+)/i);
-  if(mk && mf && OVNING_RENDERS[mk[1]] && OVNING_RENDERS[mk[1]][mf[1]]){
+  // [^&\s]+ + decode: KO-id kan innehålla å/ä (t.ex. 'rakneträning') som blir
+  // procent-kodade av encodeURIComponent i arbetssidans Färdighetsträning-länk.
+  var mk = hs.match(/[?&]ko=([^&\s]+)/i), mf = hs.match(/[?&]formaga=([^&\s]+)/i);
+  var koId = mk && decodeURIComponent(mk[1]), fmg = mf && decodeURIComponent(mf[1]);
+  if(koId && fmg && OVNING_RENDERS[koId] && OVNING_RENDERS[koId][fmg]){
     renderKapitel();
-    navTo('ovning', {koId: mk[1], formaga: mf[1]});
+    navTo('ovning', {koId: koId, formaga: fmg});
     return;
   }
   var m = hs.match(/del=([a-z0-9-]+)/i);
@@ -8255,6 +8280,9 @@ function repSkippaPanel(){
     }
   }
   renderKapitel();
+ }
+ if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+ else boot();
 })();
 
 </script>
