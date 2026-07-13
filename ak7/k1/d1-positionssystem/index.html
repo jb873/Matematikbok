@@ -325,6 +325,34 @@ h1.hero-title em{font-style:italic;color:var(--gold-lt);}
 .tab-panel{display:none;animation:fadeUp .35s ease both;}
 .tab-panel.is-active{display:block;}
 
+/* ── BLAD-NAV (delkapitlets fyra blad, i Öva) ── */
+.blad-nav{
+  max-width:920px;margin:0 auto;padding:22px 28px 4px;
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.blad-nav-btn{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--cinzel);font-size:12.5px;letter-spacing:.03em;
+  color:var(--ink-soft);background:var(--paper-lt);
+  border:1px solid var(--paper-dk);border-radius:8px;
+  padding:9px 15px;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s,box-shadow .15s;
+}
+.blad-nav-btn:hover{border-color:var(--gold-lt);color:var(--ink);}
+.blad-nav-nr{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  background:var(--paper-dk);color:var(--ink-faint);
+  font-family:var(--cinzel);font-size:11px;font-weight:600;
+  transition:background .15s,color .15s;
+}
+.blad-nav-btn.is-active{
+  background:var(--navy);border-color:var(--navy);color:#fff;
+  box-shadow:0 3px 10px rgba(15,30,46,.18);
+}
+.blad-nav-btn.is-active .blad-nav-nr{background:var(--gold-lt);color:var(--navy);}
+@media(max-width:560px){ .blad-nav{padding:16px 16px 4px;} }
+
 /* ── FÖRELÄSNINGSKORT ── */
 .lecture-list{
   max-width:920px;margin:0 auto;padding:24px 28px 8px;
@@ -893,11 +921,12 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   </div>
 </section>
 
-<!-- PANEL: ÖVA (default) — fyra blad i lektionsordning, hela arbetsbladet i författad ordning -->
+<!-- PANEL: ÖVA (default) — blad-nav + ett helt arbetsblad i taget (författad ordning) -->
 <section class="tab-panel is-active" data-panel="ova">
-  <div class="utbud" id="ova-lista"></div>
+  <!-- Blad-navigering: delkapitlets fyra blad, numrerade i lektionsordning. Skalet fyller raden. -->
+  <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
 
-  <!-- Blad-mounts (utan A/B, utan stegare): skalet renderar hela arbetsbladet hit och flyttar in dem under rätt post -->
+  <!-- Blad-mounts (utan A/B, utan stegare): skalet renderar hela arbetsbladet hit; blad-nav visar ett i taget -->
   <div id="blad-tiosystemet" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-tiosystemet"></div></div>
   <div id="blad-storlek" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-storlek"></div></div>
   <div id="blad-positionsrakning" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-positionsrakning"></div></div>
@@ -954,29 +983,33 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   };
   var RAM = '../../../ak7-k1-ram.html';
 
-  // ── ÖVA: fyra blad i lektionsordning; öppna → hela arbetsbladet i författad ordning ──
+  // ── ÖVA: blad-nav (numrerad rad) + ett helt arbetsblad i taget ──
   // Motorns egen bygg_blad ritar hela bladet (stegvis:false = ingen avsnitts-stegare).
-  // onResultat neutraliseras så A/B-upplåsningen (som hör till Färdighetsträning) inte triggas.
-  var ovaEl = document.getElementById('ova-lista');
-  if(ovaEl){
-    DEL.ova.forEach(function(p){
-      var b = document.createElement('button'); b.type='button'; b.className='utbud-post';
-      b.innerHTML = '<div class="utbud-post-body"><div class="utbud-post-titel">'+p.titel+'</div>'
-        + '<div class="utbud-post-desc">'+p.desc+'</div></div><span class="utbud-post-pil">›</span>';
-      var slot = document.createElement('div'); slot.className='utbud-blad';
-      // Rendera HELA arbetsbladet MEDAN #sheet-X fortfarande sitter i dokumentet.
-      // getElementById hittar bara element i trädet — därför måste renderingen ske
-      // FÖRE mount flyttas in i det (ännu) frikopplade slot:et, annars blir sheet null
-      // och stegvis:false-override hoppas tyst över (motorns stegat-render står kvar).
+  // Renderingen sker MEDAN #sheet-X sitter kvar i dokumentet (getElementById hittar bara
+  // element i trädet) — mounts flyttas inte, blad-nav visar/döljer dem. onResultat
+  // neutraliseras så A/B-upplåsningen (som hör till Färdighetsträning) inte triggas.
+  var navEl = document.getElementById('blad-nav');
+  if(navEl){
+    var bladMounts = [], bladKnappar = [];
+    function visaBlad(i){
+      DEL.ova.forEach(function(p, j){
+        if(bladMounts[j]) bladMounts[j].hidden = (j !== i);
+        if(bladKnappar[j]){ var on = (j===i); bladKnappar[j].classList.toggle('is-active', on); bladKnappar[j].setAttribute('aria-selected', on ? 'true' : 'false'); }
+      });
+    }
+    DEL.ova.forEach(function(p, i){
       var data = window[p.data], sheet = document.getElementById('sheet-'+p.blad);
       if(data && sheet && typeof window.bygg_blad === 'function'){
         window.bygg_blad(sheet, Object.assign({}, data, {stegvis:false, titel:p.titel, onResultat:function(){}}));
       }
-      var mount = document.getElementById('blad-'+p.blad);
-      if(mount){ mount.hidden=false; slot.appendChild(mount); }   // flytta in det renderade bladet i sitt slot
-      b.onclick = function(){ var open=slot.classList.toggle('is-open'); b.classList.toggle('is-open', open); };
-      ovaEl.appendChild(b); ovaEl.appendChild(slot);
+      bladMounts[i] = document.getElementById('blad-'+p.blad);
+      var btn = document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn';
+      btn.setAttribute('role','tab'); btn.title = p.titel;
+      btn.innerHTML = '<span class="blad-nav-nr">'+(i+1)+'</span>'+p.titel;
+      btn.onclick = function(){ visaBlad(i); };
+      navEl.appendChild(btn); bladKnappar[i] = btn;
     });
+    visaBlad(0);   // starta alltid på blad 1
   }
 
   // ── FÄRDIGHETSTRÄNING: grupperad lista, deep-links till metod-ramen (?ko=&formaga=) ──
