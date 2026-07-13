@@ -56,12 +56,13 @@ function renderSiffrorBegrepp(body){
 // ---- 2 · UTVECKLAD FORM ----
 function renderUtveckladMetod(body){
   // eleven skriver talet i utvecklad form: 176 = 1·100 + 7·10 + 6·1
-  var level=1, omgang=[], idx=0, results=[];
+  var level=1, omgang=[], idx=0, results=[], pickLen=d1PlanPickare();
   function gen(){
-    var dec, intLen;
-    if(level===1){ dec=0; intLen=3; }
-    else if(level===2){ dec=1; intLen=d3RandInt(2,3); }
-    else { dec=2; intLen=d3RandInt(2,3); }
+    var dec, intLen, lenCats;
+    if(level===1){ dec=0; lenCats=[2,3,4]; }
+    else if(level===2){ dec=1; lenCats=[2,3,4]; }
+    else { dec=2; lenCats=[3,4,5]; }
+    intLen=pickLen(lenCats,6);   // varierad, ologisk längd → inte massor med samma platsvärde i rad
     var heltal=''; for(var i=0;i<intLen;i++) heltal+=String(d3RandInt(i===0?1:0,9));
     var decDel=''; for(var j=0;j<dec;j++) decDel+=String(d3RandInt(0,9));
     var talStr=dec?heltal+','+decDel:heltal;
@@ -105,6 +106,10 @@ function renderUtveckladMetod(body){
     var input=document.getElementById('utv-input');
     setTimeout(function(){input.focus();},50);
     input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();check();}});
+    input.addEventListener('input',function(){   // auto-mellanslag runt + och ·
+      var f=input.value.replace(/\s*([+·])\s*/g,' $1 ');
+      if(f!==input.value){ input.value=f; input.setSelectionRange(f.length,f.length); }
+    });
     document.getElementById('utv-check').onclick=check;
     document.getElementById('utv-back').onclick=utvPicker;
     function check(){
@@ -143,7 +148,7 @@ function renderUtveckladRakna(body){
       else if(level===2) platser=[{f:10,s:'10'},{f:1,s:'1'},{f:0.1,s:'0,1'}];
       else platser=[{f:100,s:'100'},{f:1,s:'1'},{f:0.1,s:'0,1'},{f:0.01,s:'0,01'}];
       var antal=level===1?d3RandInt(2,3):(level===2?d3RandInt(2,3):d3RandInt(2,4));
-      var valda=platser.slice().sort(function(){return Math.random()-0.5;}).slice(0,antal).sort(function(a,b){return b.f-a.f;});
+      var valda=shuffle(platser.slice()).slice(0,antal);   // slumpad delmängd, ologisk termordning (svaret är ordnings-oberoende)
       var termer=[], summa=0;
       valda.forEach(function(p){ var c=d3RandInt(1,9); termer.push(c+'·'+p.s); summa+=c*p.f; });
       summa=Math.round(summa*1e6)/1e6;
@@ -165,10 +170,10 @@ function renderUtveckladPicker(body){
 
 // ---- 3 · DELBARHETSREGLER ----
 function renderDelbarhetBegrepp(body){
-  // siffersumma + delbarhet ja/nej (svara 1=ja, 0=nej)
+  var pickLen=d1PlanPickare();   // varierad tal-längd → ologiskt, inte samma platsvärde i rad
   negCalcEngine(body,{title:'Siffersumma',koId:'delbarhet',forKey:'begrepp',scoreKey:'siffersumma',
     sub:'Räkna ut talets siffersumma (lägg ihop alla siffror).',keypadOps:[],OMG:6,
-    gen:function(level){ var langd=level===1?d3RandInt(2,3):(level===2?d3RandInt(3,4):d3RandInt(4,5));
+    gen:function(level){ var cats=level===1?[2,3,4]:(level===2?[3,4,5]:[4,5,6]); var langd=pickLen(cats,6);
       var n=''; var summa=0; for(var i=0;i<langd;i++){ var s=d3RandInt(i===0?1:0,9); n+=String(s); summa+=s; }
       return {q:'Vad är siffersumman av <span class="neg-expr">'+n+'</span>?', answer:summa}; }
   },function(){renderDelbarhetPicker(body);});
@@ -204,6 +209,7 @@ function renderDelbarhetPicker(body){
 
 // ---- 4 · RÄKNETRÄNING – ÖKA OCH MINSKA ----
 function renderRaknetraningRakna(body){
+  var pickStorlek=d1PlanPickare();   // varierad heltalsstorlek → ologisk, inte samma platsvärde i rad
   negCalcEngine(body,{title:'Öka och minska',koId:'rakneträning',forKey:'rakna',scoreKey:'okaminska',
     sub:'Räkna i huvudet. Tänk på vilken plats som ändras.',keypadOps:[','],OMG:8,
     gen:function(level){
@@ -212,8 +218,10 @@ function renderRaknetraningRakna(body){
       else if(level===2){ steg=randPick([0.1,0.01]); }
       else { steg=randPick([0.1,0.01,0.001]); }
       plus=Math.random()<0.5;
-      var dec=steg===0.1?2:(steg===0.01?3:3);
-      var tal=Math.round((d3RandInt(1,90)+d3RandInt(0,Math.pow(10,dec)-1)/Math.pow(10,dec))*Math.pow(10,dec))/Math.pow(10,dec);
+      var dec=steg===0.1?2:3;
+      var storlek=pickStorlek([1,2,3],8);                                  // 1-, 2- eller 3-siffrig heltalsdel
+      var heltalDel=d3RandInt(storlek===1?1:Math.pow(10,storlek-1), Math.pow(10,storlek)-1);
+      var tal=Math.round((heltalDel+d3RandInt(0,Math.pow(10,dec)-1)/Math.pow(10,dec))*Math.pow(10,dec))/Math.pow(10,dec);
       if(!plus && tal<steg) tal=Math.round((tal+1)*1e6)/1e6;
       var ans=Math.round((plus?tal+steg:tal-steg)*1e6)/1e6;
       var namn=steg===0.1?'tiondel':(steg===0.01?'hundradel':'tusendel');

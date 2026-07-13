@@ -65,16 +65,23 @@ function renderPrimtalMetod(body, koId){
 
   // Nivå 1: enkla tal som ändå kräver minst två led (t.ex. 18, 32, 42).
   const FAKTOR_L1 = [12,16,18,20,24,27,28,30,32,36,40,42,45,48];
+  let forraTarget = null;
   function generateTarget(){
-    if(level===1) return randPick(FAKTOR_L1);
-    const pool = [];
-    for(let n=8;n<=100;n++){
-      if(FAKTOR_L1.indexOf(n)!==-1) continue;
-      const len = primeFactorize(n).length;
-      if(level===2 && len===3) pool.push(n);
-      else if(level===3 && len>=4) pool.push(n);
+    let kandidater;
+    if(level===1){ kandidater = FAKTOR_L1; }
+    else {
+      kandidater = [];
+      const hi = level===3 ? 150 : 100;   // nivå 3 upp till 150 → mer variation i storlek
+      for(let n=8;n<=hi;n++){
+        if(FAKTOR_L1.indexOf(n)!==-1) continue;
+        const len = primeFactorize(n).length;
+        if(level===2 && len===3) kandidater.push(n);
+        else if(level===3 && len>=4) kandidater.push(n);
+      }
     }
-    return randPick(pool);
+    let t, guard=0;
+    do { t = randPick(kandidater); guard++; } while(t===forraTarget && kandidater.length>1 && guard<12);  // ingen direkt upprepning
+    forraTarget = t; return t;
   }
 
   function startNew(){

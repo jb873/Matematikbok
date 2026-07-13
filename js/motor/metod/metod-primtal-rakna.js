@@ -24,7 +24,7 @@ function renderPrimtalRakna(body){
     if(isTermer){
       // För termer behöver target >= antal (för att alla termer ska kunna vara minst 1)
       const min = level===1 ? Math.max(antal, 10) : level===2 ? 20 : 30;
-      const max = level===1 ? 30 : level===2 ? 60 : 100;
+      const max = level===1 ? 45 : level===2 ? 99 : 160;   // bredare spann → mer storleks-variation
       target = min + Math.floor(Math.random() * (max - min + 1));
     } else {
       // För faktorer >1 behöver target ha minst `antal` primfaktorer (med multiplicitet)
