@@ -50,34 +50,10 @@ function renderPositionBegrepp(body){
   var SKRIVTAL = {
     header:'Skriv talet med siffror', formagaKey:'begrepp', koId:'position', scoreKey:'skrivtal',
     sub:'Sätt ihop talet från platsvärdena.', backLabel:'Tillbaka till kategorier', ops:[','],
-    exempel:'<strong>Tänk så här:</strong> Lägg varje del på rätt plats.<br>'
-      +'<span class="ex-rad">3 ental, 5 hundradelar och 7 tusendelar = 3,057</span><br>'
-      +'<span class="ex-rad">19 tiondelar = 1,9</span>',
-    gen:function(level){
-      if(level>=2 && Math.random()<0.5){
-        // "X tiondelar/hundradelar/tusendelar"
-        var typ = randPick([{n:'tiondelar',f:0.1},{n:'hundradelar',f:0.01},{n:'tusendelar',f:0.001}]);
-        var antal = d3RandInt(11, 49);
-        var v = Math.round(antal*typ.f*1e6)/1e6;
-        return {display:antal+' '+typ.n, answerNum:v, answerStr:posKomma(v)};
-      }
-      // kombination av platser
-      var platser = level===1
-        ? [{n:'ental',f:1},{n:'tiondelar',f:0.1},{n:'hundradelar',f:0.01}]
-        : [{n:'tiotal',f:10},{n:'ental',f:1},{n:'hundradelar',f:0.01},{n:'tusendelar',f:0.001}];
-      var antalDelar = level===1? d3RandInt(2,3) : d3RandInt(2,3);
-      var valda = platser.slice().sort(function(){return Math.random()-0.5;}).slice(0,antalDelar);
-      // sortera efter storlek (störst först) för läsbarhet
-      valda.sort(function(a,b){return b.f-a.f;});
-      var summa=0, delar=[];
-      valda.forEach(function(p){
-        var c = d3RandInt(1,9);
-        summa += c*p.f;
-        delar.push(c+' '+p.n);
-      });
-      summa=Math.round(summa*1e6)/1e6;
-      return {display:delar.join(', '), answerNum:summa, answerStr:posKomma(summa)};
-    }
+    exempel:'<strong>Tänk så här:</strong> Lägg varje del på rätt plats – tomma platser blir 0.<br>'
+      +'<span class="ex-rad">4 tusental, 3 hundratal och 5 ental = 4 305</span><br>'
+      +'<span class="ex-rad">2 ental och 7 hundradelar = 2,07</span>',
+    gen: d1GenSkrivtal   // nivå-struktur ur d1-tillägg (L1 heltal→hundratusental, L2 decimaltal, L3 flera nollor)
   };
   function picker(){
     var kort=[
@@ -93,7 +69,7 @@ function renderPositionBegrepp(body){
           +'<div style="color:var(--ink-faint);font-size:20px;">›</div></button>';
       }).join('')+'</div></div>';
     body.querySelectorAll('[data-kat]').forEach(function(btn){
-      btn.onclick=function(){ renderAddSingle(body, btn.dataset.kat==='platsvarde'?PLATSVARDE:SKRIVTAL, picker); };
+      btn.onclick=function(){ if(btn.dataset.kat==='platsvarde') renderPlatsvarde(body, picker); else renderAddSingle(body, SKRIVTAL, picker); };
     });
   }
   picker();

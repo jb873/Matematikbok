@@ -11,6 +11,77 @@
    metod-moduler. Nivåstege respekterar ?maxniva via ramens exerciseHeader.
    ============================================================ */
 
+// ============================================================
+// PLATSVÄRDE (position/begrepp) — svar i ORD (platsens namn), ingen tipsruta
+// "Vilket värde har 5:an i talet 4527?" → hundratal. Nivå 1 = heltal, nivå 2 =
+// decimaltal (svaret ibland en heltalsplats), nivå 3 = upp till hundratusental.
+// ============================================================
+var D1_PLATSNAMN = {'5':'hundratusental','4':'tiotusental','3':'tusental','2':'hundratal','1':'tiotal','0':'ental','-1':'tiondel','-2':'hundradel','-3':'tusendel'};
+function d1GenPlatsvarde(level){
+  var intLen, decLen;
+  if(level === 1){ intLen = 4; decLen = 0; }                                    // heltal (ental..tusental)
+  else if(level === 2){ intLen = d3RandInt(2, 4); decLen = d3RandInt(2, 3); }   // decimaltal, ibland heltalsplats
+  else { intLen = d3RandInt(4, 6); decLen = d3RandInt(2, 3); }                   // upp till hundratusental
+  var maxExp = intLen - 1, exps = [], e;
+  for(e = maxExp; e >= 0; e--) exps.push(e);
+  for(e = 1; e <= decLen; e++) exps.push(-e);
+  var malExp = randPick(exps), digits = {}, malSiffra = null, tries = 0;
+  while(tries++ < 30){
+    exps.forEach(function(x){ if(x !== malExp) digits[x] = d3RandInt(x === maxExp ? 1 : 0, 9); });  // ledande ej 0
+    var andra = exps.filter(function(x){ return x !== malExp; }).map(function(x){ return digits[x]; });
+    var fria = [1,2,3,4,5,6,7,8,9].filter(function(d){ return andra.indexOf(d) < 0; });               // mål-siffran unik & nollskild
+    if(fria.length){ malSiffra = randPick(fria); digits[malExp] = malSiffra; break; }
+  }
+  var intPart = '', decPart = '';
+  for(e = maxExp; e >= 0; e--) intPart += String(digits[e]);
+  for(e = -1; e >= -decLen; e--) decPart += String(digits[e]);
+  var talStr = decLen > 0 ? intPart + ',' + decPart : intPart;
+  return { malExp: malExp, malSiffra: malSiffra, talStr: talStr, svar: D1_PLATSNAMN[String(malExp)] };
+}
+function d1NormPlats(s){ return String(s).toLowerCase().replace(/[^a-zåäö]/g, '').replace(/(arna|erna|ar|er|na|s)$/, ''); }
+function renderPlatsvarde(body, backFn){
+  var forra = null;
+  d1CustomEngine(body, {
+    title:'Platsvärde', sub:'På vilken plats står den markerade siffran? Svara med platsens namn i ord (t.ex. hundratal).',
+    koId:'position', forKey:'begrepp', scoreKey:'platsvarde', OMG:6, keypad:false, inputmode:'text', placeholder:'t.ex. tiotal',
+    gen:function(level){
+      var t, guard = 0;
+      do { t = d1GenPlatsvarde(level); guard++; } while(t.svar === forra && guard < 10);   // ingen direkt upprepning
+      forra = t.svar;
+      return { q:'Vilket värde har <span class="neg-expr">' + t.malSiffra + '</span>:an i talet <span class="neg-expr">' + t.talStr + '</span>?',
+               svar:t.svar, malSiffra:t.malSiffra };
+    },
+    valid:function(raw, t){ return d1NormPlats(raw) === d1NormPlats(t.svar); },
+    ratt:function(t){ return 'Rätt! ' + t.malSiffra + ':an står på ' + t.svar + '-platsen.'; },
+    fel:function(t){ return 'Rätt svar: ' + t.svar + '.'; }
+  }, backFn);
+}
+
+// ---- SKRIV TALET MED SIFFROR (position/begrepp) — bygg tal av platsvärdesdelar ----
+// Nivå 1 = heltal upp till hundratusental (inga decimaler). Nivå 2 = decimaltal,
+// heltalsdel max tusental (aldrig bara ental). Nivå 3 = hela spannet hundratusental
+// →tusendel med flera nollor (extra svårt). Delarna visas i ologisk ordning.
+function d1GenSkrivtal(level){
+  var places = level === 1 ? [5,4,3,2,1,0]
+             : level === 2 ? [3,2,1,0,-1,-2,-3]
+             : [5,4,3,2,1,0,-1,-2,-3];
+  var antal = level === 3 ? d3RandInt(3, 4) : d3RandInt(2, 4);
+  var valda = shuffle(places.slice()).slice(0, antal);
+  if(level === 2 && !valda.some(function(p){ return p < 0; })){         // nivå 2 ska vara decimaltal
+    valda[d3RandInt(0, valda.length - 1)] = randPick([-1,-2,-3]);
+    valda = valda.filter(function(v, i, a){ return a.indexOf(v) === i; });
+    while(valda.length < antal){ var ex = randPick(places); if(valda.indexOf(ex) < 0) valda.push(ex); }
+  }
+  var summa = 0, delar = [];
+  valda.forEach(function(p){ var c = d3RandInt(1, 9); summa += c * Math.pow(10, p); delar.push({ c:c, exp:p }); });
+  summa = Math.round(summa * 1e6) / 1e6;
+  var vis = delar.slice(), tries = 0;                                   // ologisk ordning (ej platsordning)
+  if(vis.length > 2){ do { vis = shuffle(delar.slice()); tries++; } while(tries < 50 && d1ArSorterad(vis.map(function(d){ return d.exp; }))); }
+  else vis = shuffle(delar.slice());
+  var txt = vis.map(function(d){ var namn = D1_PLATSNAMN[String(d.exp)]; if(d.exp < 0) namn = (d.c === 1 ? namn : namn + 'ar'); return d.c + ' ' + namn; }).join(', ');
+  return { display: txt, answerNum: summa, answerStr: posKomma(summa) };
+}
+
 // ---- Anti-mönster: balanserad, anti-klustrad plan över svarskategorier ----
 // Ger n värden ur cats med så jämn fördelning som möjligt, blandade och utan
 // att någon kategori förekommer fler än 2 gånger i rad. Används av kategoriska
