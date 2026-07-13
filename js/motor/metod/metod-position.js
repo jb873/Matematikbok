@@ -181,9 +181,8 @@ function renderPositionRakna(body){
   // -- Storleksordna --
   var ORDNA = {
     header:'Storleksordna', formagaKey:'rakna', koId:'position', scoreKey:'ordna',
-    sub:'Skriv talen i storleksordning, minst först. Svara med talen åtskilda av < .', backLabel:'Tillbaka till kategorier', ops:[',','<'],
-    exempel:'<strong>Tänk så här:</strong> Jämför plats för plats.<br>'
-      +'<span class="ex-rad">0,1 &lt; 0,4 &lt; 0,5 &lt; 2,5 &lt; 3,0</span>',
+    sub:'Skriv talen i storleksordning, minst först.', backLabel:'Tillbaka till kategorier', ops:[','],
+    exempel:'',
     gen:function(level){
       var n = level===1?4:(level===2?4:5);
       var dec = level===1?1:(level===2?2:3);
@@ -199,10 +198,9 @@ function renderPositionRakna(body){
       var sorterat=tal.slice().sort(function(a,b){return a-b;});
       var blandat=d1OloggiskOrdning(tal);   // visa i ologisk ordning (aldrig sorterad → ej trivialt)
       return {
-        display: blandat.map(posKomma).join('&nbsp;&nbsp;&nbsp;'),
-        leftText: blandat.map(posKomma).join('   ') + '  →',
+        givna: blandat.map(posKomma),          // rutor att storleksordna (ologisk ordning)
         answerSeq: sorterat,
-        answerStr: sorterat.map(posKomma).join(' < ')
+        answerStr: sorterat.map(posKomma).join(' ')
       };
     }
   };
@@ -210,9 +208,8 @@ function renderPositionRakna(body){
   // -- Talföljd --
   var FOLJD = {
     header:'Talföljder', formagaKey:'rakna', koId:'position', scoreKey:'foljd',
-    sub:'Vilka tre tal följer i talföljden? Svara med talen åtskilda av komma.', backLabel:'Tillbaka till kategorier', ops:[','],
-    exempel:'<strong>Tänk så här:</strong> Hitta steget mellan talen.<br>'
-      +'<span class="ex-rad">9,2  9,4  9,6  →  9,8  10,0  10,2</span>',
+    sub:'Skriv de tre tal som fortsätter talföljden.', backLabel:'Tillbaka till kategorier', ops:[','],
+    exempel:'',
     gen:function(level){
       var startH, stegH, decimaler;
       if(level===1){ decimaler=1; stegH=d3RandInt(1,3)*Math.pow(10,decimaler-1); startH=d3RandInt(10,90); }
@@ -224,11 +221,10 @@ function renderPositionRakna(body){
       var f=Math.pow(10,decimaler);
       var t0=startH, t1=startH+steg, t2=startH+2*steg;
       var n3=startH+3*steg, n4=startH+4*steg, n5=startH+5*steg;
-      var show=[t0,t1,t2].map(function(x){return posKomma(Math.round(x/f*1e6)/1e6);}).join('   ');
       return {
-        leftText: show + '  →',
+        givna:[t0,t1,t2].map(function(x){return posKomma(Math.round(x/f*1e6)/1e6);}),   // startrutor
         answerSeq:[n3,n4,n5].map(function(x){return Math.round(x/f*1e6)/1e6;}),
-        answerStr:[n3,n4,n5].map(function(x){return posKomma(Math.round(x/f*1e6)/1e6);}).join(', ')
+        answerStr:[n3,n4,n5].map(function(x){return posKomma(Math.round(x/f*1e6)/1e6);}).join('   ')
       };
     }
   };
@@ -237,9 +233,7 @@ function renderPositionRakna(body){
   var OKA = {
     header:'Öka och minska', formagaKey:'rakna', koId:'position', scoreKey:'oka',
     sub:'Räkna i huvudet. Tänk på vilken plats som ändras – ibland måste du växla en hel plats.', backLabel:'Tillbaka till kategorier', ops:[','],
-    exempel:'<strong>Tänk så här:</strong> En tiondel = 0,1 och en hundradel = 0,01. Ibland växlar ändringen över en hel plats.<br>'
-      +'<span class="ex-rad">2 tiondelar större än 9,9 = 10,1</span><br>'
-      +'<span class="ex-rad">7 tiondelar mindre än 10,3 = 9,6</span>',
+    exempel:'',
     // Generatorn ligger som global d1GenOka (fuzz-testbar). Exakt facit via
     // heltalsaritmetik i hundradelar.
     gen: d1GenOka
@@ -288,36 +282,60 @@ function renderPosSeq(body, cfg, backFn, sep){
       document.getElementById('posseq-back').onclick=backFn; return;
     }
     var task=omgang[idx];
+    var arOrdna=(sep==='<');                         // storleksordna: rutor + tomma rutor under; annars inline
+    var givna=task.givna||[];
+    var antalSvar=arOrdna? givna.length : task.answerSeq.length;
+    // rut-bredd som rymmer längsta talet (given eller facit) → ingen scroll behövs
+    var langd=Math.max.apply(null, givna.map(function(g){return g.length;})
+      .concat(task.answerSeq.map(function(a){return posKomma(a).length;})).concat([2]));
+    var bredd=Math.max(60, langd*13+30);
+    var givnaHtml=givna.map(function(g){ return '<span class="seq-ruta seq-given" style="min-width:'+bredd+'px">'+g+'</span>'; }).join('');
+    var svarHtml=''; for(var s=0;s<antalSvar;s++) svarHtml+='<input type="text" class="seq-ruta seq-svar" inputmode="decimal" autocomplete="off" style="width:'+bredd+'px">';
+    var uppgHtml=arOrdna
+      ? '<div class="seq-block"><div class="seq-rad">'+givnaHtml+'</div>'
+        +'<div class="seq-instr">↓ Skriv talen i storleksordning, minst först</div>'
+        +'<div class="seq-rad">'+svarHtml+'</div></div>'
+      : '<div class="seq-block"><div class="seq-rad">'+givnaHtml+'<span class="seq-pil">→</span>'+svarHtml+'</div></div>';
     body.innerHTML='<div class="exercise-card">'+exerciseHeader(cfg.header,cfg.sub,level)
-      +'<div class="rakna-kat-exempel">'+cfg.exempel+'</div>'
+      +(cfg.exempel?'<div class="rakna-kat-exempel">'+cfg.exempel+'</div>':'')
       +renderScoreBarSimple(results.filter(function(x){return x;}).length,results.filter(function(x){return !x;}).length,omgang.length,idx)
-      +'<div class="mult-metod-uppg"><div class="rakna-svar-rad"><span class="rakna-svar-fast">'+task.leftText+'</span>'
-        +'<input type="text" class="rakna-svar-input" id="posseq-input" autocomplete="off" placeholder="t.ex. '+(sep==='<'?'a < b < c':'a, b, c')+'"></div></div>'
+      +uppgHtml
       +'<div class="rakna-uppdela-feedback" id="posseq-fb"></div>'
       +keypadHTML(cfg.ops)
       +'<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
       +'<button class="btn primary" id="posseq-check">Kontrollera</button>'
       +'<button class="btn subtle" id="posseq-back">'+cfg.backLabel+'</button></div></div>';
     var card=body.querySelector('.exercise-card'); bindKeypad(card);
-    var input=document.getElementById('posseq-input');
-    setTimeout(function(){input.focus();},50);
-    input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();check();}});
+    var rutor=[].slice.call(card.querySelectorAll('.seq-svar')), aktiv=rutor[0];
+    setTimeout(function(){ if(rutor[0]) rutor[0].focus(); },50);
+    card.addEventListener('focusin', function(e){ if(e.target.classList && e.target.classList.contains('seq-svar')) aktiv=e.target; });
+    function hoppa(fran){ var i=rutor.indexOf(fran); if(i>=0 && i<rutor.length-1) rutor[i+1].focus(); else check(); }  // auto-hopp till nästa ruta
+    rutor.forEach(function(inp){
+      inp.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); hoppa(inp); } });
+      inp.addEventListener('input', function(){ if(/\s/.test(inp.value)){ inp.value=inp.value.replace(/\s/g,''); hoppa(inp); } });
+    });
+    var kp=card.querySelector('.keypad');   // "▸ nästa"-tangent (pekplatta utan fysiskt tangentbord)
+    if(kp){ var nb=document.createElement('button'); nb.type='button'; nb.className='kp-key op kp-nasta'; nb.textContent='▸';
+      nb.addEventListener('mousedown', function(e){ e.preventDefault(); hoppa(aktiv||rutor[0]); });
+      (kp.querySelector('.keypad-ops')||kp).appendChild(nb);
+    }
     document.getElementById('posseq-check').onclick=check;
     document.getElementById('posseq-back').onclick=backFn;
     function check(){
-      var raw=input.value.trim(), fb=document.getElementById('posseq-fb');
+      var fb=document.getElementById('posseq-fb'), raw='';
       fb.className='rakna-uppdela-feedback show';
       var ts=getTutorScore(cfg.koId,cfg.formagaKey), tsG=getTutorScore(cfg.koId,cfg.scoreKey);
       // dela upp på separator (eller komma)
       var delar=raw.replace(/\u2212/g,'-').split(sep==='<'?/[<]/:/[,]/).map(function(s){return s.trim();}).filter(function(s){return s!=='';});
       var tal=delar.map(function(s){return parseFloat(s.replace(',','.'));});
-      var ok=true;
-      if(tal.length!==task.answerSeq.length || tal.some(isNaN)) ok=false;
-      else for(var i=0;i<tal.length;i++){ if(Math.abs(tal[i]-task.answerSeq[i])>1e-9){ ok=false; break; } }
-      input.disabled=true; document.getElementById('posseq-check').disabled=true;
+      tal=rutor.map(function(inp){ var v=String(inp.value).trim().replace(',','.'); return v===''?NaN:parseFloat(v); });
+      var ok = tal.length===task.answerSeq.length && !tal.some(function(x){return isNaN(x);});
+      if(ok){ for(var i=0;i<tal.length;i++){ if(Math.abs(tal[i]-task.answerSeq[i])>1e-9){ ok=false; break; } } }
+      rutor.forEach(function(inp,i){ inp.disabled=true; inp.classList.add((!isNaN(tal[i])&&Math.abs(tal[i]-task.answerSeq[i])<1e-9)?'correct':'wrong'); });
+      document.getElementById('posseq-check').disabled=true;
       ts.total++; tsG.total++;
-      if(ok){ input.classList.add('correct'); fb.classList.add('correct'); fb.textContent='Rätt! '+task.answerStr; ts.correct++; tsG.correct++; }
-      else { input.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent='Rätt svar: '+task.answerStr; }
+      if(ok){ fb.classList.add('correct'); fb.textContent='Rätt! '+task.answerStr; ts.correct++; tsG.correct++; }
+      else { fb.classList.add('wrong'); fb.textContent='Rätt svar: '+task.answerStr; }
       results.push(ok);
       setTimeout(function(){idx++;render();}, ok?1700:2600);
     }

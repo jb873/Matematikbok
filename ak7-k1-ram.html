@@ -1915,6 +1915,18 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .rakna-svar-input:focus{background:#fff;box-shadow:0 0 0 3px rgba(22,163,74,.15)}
 .rakna-svar-input.correct{background:var(--success-bg);border-color:var(--success);color:var(--success)}
 .rakna-svar-input.wrong{background:var(--error-bg);border-color:var(--error);color:var(--error)}
+/* Sekvens-rutor (storleksordna + talföljder): rutor växer med innehållet, radbryter i stället för att scrolla */
+.seq-block{max-width:100%;margin:16px 0 6px}
+.seq-rad{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:8px 0}
+.seq-ruta{min-width:60px;height:54px;border-radius:var(--radius);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:23px;font-weight:700;padding:0 12px;box-sizing:border-box}
+.seq-given{border:2px solid var(--line,#e5e0d8);background:var(--bg-soft,#f5f2ec);color:var(--ink)}
+.seq-svar{border:2.5px solid var(--c-rakna);background:var(--c-rakna-bg);color:var(--c-rakna);text-align:center;outline:none}
+.seq-svar:focus{background:#fff;box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+.seq-svar.correct{background:var(--success-bg);border-color:var(--success);color:var(--success)}
+.seq-svar.wrong{background:var(--error-bg);border-color:var(--error);color:var(--error)}
+.seq-instr{text-align:center;color:var(--ink-soft,#5a5148);font-size:13.5px;margin:4px 0 2px}
+.seq-pil{font-size:24px;color:var(--ink-faint,#8a8177);margin:0 4px}
+.kp-nasta{font-weight:700}
 .rakna-kat-exempel{
   background:var(--c-rakna-bg);border:1px solid var(--line);border-radius:var(--radius);
   padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.7;
@@ -5625,7 +5637,7 @@ function renderAddSingle(body, cfg, backFn){
     const task = omgang[idx];
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(cfg.header, cfg.sub, level)
-      + '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>'
+      + (cfg.exempel ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="rakna-tal">' + task.display + ' =</div>'
       + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="adds-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?"></div>'
