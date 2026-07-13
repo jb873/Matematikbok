@@ -99,6 +99,36 @@ function renderPositionBegrepp(body){
   picker();
 }
 
+// Öka/minska-generator (global för fuzz). Nivå 1 = ±1 enhet utan växling;
+// nivå 2–3 = flera enheter och ofta växling över en hel plats (t.ex.
+// 2 tiondelar större än 9,9 = 10,1; 7 tiondelar mindre än 10,3 = 9,6).
+// All aritmetik i hundradelar (heltal) → exakt facit, ingen float-drift.
+function d1GenOka(level){
+  function bygg(stepH, stepNamn, N, plus, korsa){
+    var heltalH = d3RandInt(8,11) * 100, deltaH = N * stepH, fracH;
+    if(korsa && plus)       fracH = d3RandInt(100 - deltaH, 99);   // tvinga överdrag uppåt
+    else if(korsa && !plus) fracH = d3RandInt(0, deltaH - 1);      // tvinga lån nedåt
+    else if(plus)           fracH = d3RandInt(0, 99 - deltaH);     // strikt ingen växling (uppåt)
+    else                    fracH = d3RandInt(deltaH, 99);         // strikt ingen växling (nedåt)
+    var baseH = heltalH + fracH;
+    var ansH = plus ? baseH + deltaH : baseH - deltaH;
+    if(ansH < 0){ plus = true; ansH = baseH + deltaH; }
+    var namn = (N === 1 ? stepNamn : stepNamn + 'ar');
+    return { display:(N === 1 ? 'En ' : N + ' ') + namn + ' ' + (plus ? 'större' : 'mindre') + ' än ' + posKomma(baseH / 100),
+             answerNum: Math.round(ansH) / 100, answerStr: posKomma(Math.round(ansH) / 100) };
+  }
+  if(level === 1){
+    var u1 = randPick([[10,'tiondel'],[1,'hundradel']]);
+    return bygg(u1[0], u1[1], 1, Math.random() < 0.5, false);
+  }
+  if(level === 2){
+    var u2 = Math.random() < 0.7 ? [10,'tiondel'] : [1,'hundradel'];
+    return bygg(u2[0], u2[1], d3RandInt(1, 4), Math.random() < 0.5, Math.random() < 0.6);
+  }
+  var u3 = Math.random() < 0.5 ? [10,'tiondel'] : [1,'hundradel'];
+  return bygg(u3[0], u3[1], d3RandInt(2, 9), Math.random() < 0.5, Math.random() < 0.85);
+}
+
 // ============================================================
 // RÄKNA: tallinje + storleksordna + talföljd + öka/minska
 // ============================================================
@@ -227,34 +257,13 @@ function renderPositionRakna(body){
   // -- Öka/minska med tiondel/hundradel + huvudräkning --
   var OKA = {
     header:'Öka och minska', formagaKey:'rakna', koId:'position', scoreKey:'oka',
-    sub:'Räkna i huvudet. Tänk på vilken plats som ändras.', backLabel:'Tillbaka till kategorier', ops:[','],
-    exempel:'<strong>Tänk så här:</strong> En tiondel = 0,1 och en hundradel = 0,01.<br>'
-      +'<span class="ex-rad">En tiondel större än 4,58 = 4,68</span><br>'
-      +'<span class="ex-rad">0,8 + 0,03 = 0,83</span>',
-    gen:function(level){
-      var typ;
-      if(level===1) typ=randPick(['tiondel-plus','tiondel-minus','huvud']);
-      else if(level===2) typ=randPick(['tiondel-plus','hundradel-plus','huvud']);
-      else typ=randPick(['hundradel-plus','hundradel-minus','huvud']);
-      if(typ==='huvud'){
-        // 0,8 + 0,03 -typ
-        var aH=d3RandInt(1,90), bH;
-        if(level===1) bH=d3RandInt(1,9); else if(level===2) bH=d3RandInt(1,30); else bH=d3RandInt(1,200);
-        var plus=Math.random()<0.5;
-        if(!plus && bH>aH){ var t=aH; aH=bH; bH=t; }
-        var ans=plus? aH+bH : aH-bH;
-        return {display: posKomma(aH/100)+(plus?' + ':' − ')+posKomma(bH/100), answerNum:Math.round(ans)/100, answerStr:posKomma(Math.round(ans)/100)};
-      }
-      var steg = typ.indexOf('tiondel')===0?0.1:0.01;
-      var plus2 = typ.indexOf('plus')>=0;
-      var dec = steg===0.1?2:3;
-      var tal = posRandTal(0, 9, dec);
-      // undvik negativt
-      if(!plus2 && tal<steg) tal=Math.round((tal+1)*1e6)/1e6;
-      var ans2=Math.round((plus2?tal+steg:tal-steg)*1e6)/1e6;
-      var ordnamn = steg===0.1?'tiondel':'hundradel';
-      return {display:'En '+ordnamn+' '+(plus2?'större':'mindre')+' än '+posKomma(tal), answerNum:ans2, answerStr:posKomma(ans2)};
-    }
+    sub:'Räkna i huvudet. Tänk på vilken plats som ändras – ibland måste du växla en hel plats.', backLabel:'Tillbaka till kategorier', ops:[','],
+    exempel:'<strong>Tänk så här:</strong> En tiondel = 0,1 och en hundradel = 0,01. Ibland växlar ändringen över en hel plats.<br>'
+      +'<span class="ex-rad">2 tiondelar större än 9,9 = 10,1</span><br>'
+      +'<span class="ex-rad">7 tiondelar mindre än 10,3 = 9,6</span>',
+    // Generatorn ligger som global d1GenOka (fuzz-testbar). Exakt facit via
+    // heltalsaritmetik i hundradelar.
+    gen: d1GenOka
   };
 
   function picker(){
