@@ -2784,6 +2784,8 @@ function getSummaryCopy(right, total){
 function renderSummaryCard(opts){
   const {right, total, level, levelChange, nextLabel='Ny omgång'} = opts;
   const summary = getSummaryCopy(right, total);
+  // Alla rätt → konfettiregn (fyras när sammanfattningen målats).
+  if(total > 0 && right === total && typeof ovaKonfetti === 'function') setTimeout(ovaKonfetti, 150);
   let levelMsg = '';
   if(levelChange === 'up') levelMsg = `↑ Nivå upp till ${level} – nu blir det svårare!`;
   else if(levelChange === 'down') levelMsg = `↓ Nivå ner till ${level} – vi tar det lite lugnare.`;
