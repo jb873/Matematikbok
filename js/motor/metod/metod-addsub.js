@@ -231,7 +231,7 @@ function renderAddMetod(body){
     },
     {
       id:'flytta-over',
-      namn:'Öka och minska lika',
+      namn:'Flytta över',
       icon:'⚖️',
       kortBeskrivning:'Flytta ett värde från ena talet till det andra – summan ändras inte.',
       beskrivning:'Flytta ett värde från det ena talet till det andra. Välj ett mellanled som gör uträkningen enklare. Exempel: 105 + 97 -> 102 + 100 = 202.',
