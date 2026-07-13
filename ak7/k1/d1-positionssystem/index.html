@@ -885,10 +885,12 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .fard-skill.is-active .fard-skill-titel{color:#fff;}
 .fard-skill.is-active .fard-skill-formaga{color:var(--gold-lt,#c49a40);}
 .fard-scen{position:sticky;top:14px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:12px;overflow:hidden;min-height:560px;}
-.fard-tom{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:560px;padding:40px;text-align:center;color:var(--ink-faint,#7a6e65);}
-.fard-tom-ikon{font-size:44px;color:var(--paper-dk,#ede6d6);line-height:1;}
-.fard-tom p{font-size:14.5px;line-height:1.6;max-width:280px;}
-.fard-frame{width:100%;height:660px;border:0;display:block;background:#fff;}
+.fard-tom{display:flex;align-items:center;justify-content:center;min-height:560px;padding:40px;text-align:center;color:var(--ink-faint,#7a6e65);}
+.fard-tom p{font-size:15px;line-height:1.6;max-width:280px;}
+.fard-frame{width:100%;height:660px;border:0;display:none;background:#fff;}
+/* En färdighet vald → drillen ersätter platshållaren I rutan (inte under) */
+.fard-scen.har-drill .fard-tom{display:none;}
+.fard-scen.har-drill .fard-frame{display:block;}
 @media(max-width:720px){
   .fard-layout{grid-template-columns:1fr;padding:16px 16px 32px;gap:14px;}
   .fard-scen{position:static;min-height:0;}
@@ -962,12 +964,9 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   <div class="fard-layout">
     <!-- 15 färdigheter i 6 kunskapsområden. Klick → drillen laddas i iframen bredvid. -->
     <div class="fard-lista" id="fardighet-lista" role="tablist" aria-label="Färdigheter"></div>
-    <div class="fard-scen">
-      <div class="fard-tom" id="fard-tom">
-        <div class="fard-tom-ikon">◧</div>
-        <p>Välj en färdighet till vänster.<br>Drillen öppnas här med nivåer som klättrar men aldrig sjunker.</p>
-      </div>
-      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy" hidden></iframe>
+    <div class="fard-scen" id="fard-scen">
+      <div class="fard-tom" id="fard-tom"><p>Välj en färdighet till vänster</p></div>
+      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
     </div>
   </div>
 </section>
@@ -1003,23 +1002,28 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     ],
     // FÄRDIGHETSTRÄNING = 15 färdigheter i 6 kunskapsområden (KO). Varje färdighet är en
     // befintlig ram-motor (KO×förmåga); klick laddar drillen i iframen (embed-läge).
+    // niva = färdighetens verkliga nivå-antal (default 3). 1 => ingen klätterstege.
+    // Siffror/begrepp skalar bara talstorlek (udda/jämnt, antal siffror, störst/minst)
+    // — samma metod oavsett storlek => 1 nivå. Övriga skalar strukturellt (decimaler,
+    // fler faktorer, svårare delbarhetsregler) => 3. resonera/problem visar redan
+    // ingen klätterstege (fritext resp. manuellt nivåval).
     fardighet:[
-      {ko:'KO 1 · Siffror och tal', drills:[
-        {titel:'Udda och jämna tal', formaga:'begrepp', ko:'siffror'}
+      {ko:'Siffror och tal', drills:[
+        {titel:'Udda och jämna tal', formaga:'begrepp', ko:'siffror', niva:1}
       ]},
-      {ko:'KO 2 · Positionssystemet', drills:[
+      {ko:'Positionssystemet', drills:[
         {titel:'Platsvärde & bygga tal', formaga:'begrepp',  ko:'position'},
         {titel:'Tallinje, talföljder & storleksordna', formaga:'räkna', formagaKey:'rakna', ko:'position'},
         {titel:'Jämföra & mittemellan', formaga:'resonera', ko:'position'}
       ]},
-      {ko:'KO 3 · Utvecklad form', drills:[
+      {ko:'Utvecklad form', drills:[
         {titel:'Skriv i utvecklad form', formaga:'metod', ko:'utvecklad'},
         {titel:'Vilket tal står på utvecklad form?', formaga:'räkna', formagaKey:'rakna', ko:'utvecklad'}
       ]},
-      {ko:'KO 4 · Räkneträning', drills:[
+      {ko:'Räkneträning', drills:[
         {titel:'Öka & minska (tiondel · hundradel · tusendel)', formaga:'räkna', formagaKey:'rakna', ko:'rakneträning'}
       ]},
-      {ko:'KO 5 · Primtal & faktorträd', drills:[
+      {ko:'Primtal & faktorträd', drills:[
         {titel:'Primtal eller sammansatt?', formaga:'begrepp', ko:'primtal'},
         {titel:'Faktorisera (2–4 faktorer)', formaga:'räkna', formagaKey:'rakna', ko:'primtal'},
         {titel:'Bygg faktorträd', formaga:'metod', ko:'primtal'},
@@ -1027,7 +1031,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
         {titel:'Förklara varför ett tal är primtal', formaga:'resonera', ko:'primtal'},
         {titel:'Talgåtor: vilket tal är jag?', formaga:'problemlösning', formagaKey:'problem', ko:'primtal'}
       ]},
-      {ko:'KO 6 · Delbarhet', drills:[
+      {ko:'Delbarhet', drills:[
         {titel:'Vad är delbarhet?', formaga:'begrepp', ko:'delbarhet'},
         {titel:'Avgör delbarhet snabbt', formaga:'räkna', formagaKey:'rakna', ko:'delbarhet'}
       ]}
@@ -1068,18 +1072,17 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   // Metod-vyns mekanik återanvänds oförändrad via ram-B; nivån klättrar men sjunker aldrig.
   var fardEl = document.getElementById('fardighet-lista');
   var frame = document.getElementById('fard-frame');
-  var tom = document.getElementById('fard-tom');
+  var scen = document.getElementById('fard-scen');
   if(fardEl){
     var fardKnappar = [];
     function oppnaFardighet(btn, p){
       fardKnappar.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected','false'); });
       btn.classList.add('is-active'); btn.setAttribute('aria-selected','true');
       var fKey = p.formagaKey || p.formaga;
-      if(frame){
-        frame.src = RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(fKey)+'&embed=1';
-        frame.hidden = false;
-      }
-      if(tom) tom.hidden = true;
+      var url = RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(fKey)+'&embed=1';
+      if(p.niva && p.niva < 3) url += '&maxniva='+p.niva;   // enkel-/tvånivå-färdighet: rätt antal stegsegment
+      if(frame) frame.src = url;
+      if(scen) scen.classList.add('har-drill');            // visa iframen I rutan, dölj platshållaren (CSS)
     }
     DEL.fardighet.forEach(function(g){
       var gr=document.createElement('div'); gr.className='fard-grupp';

@@ -2801,11 +2801,14 @@ function renderSummaryCard(opts){
  * Adaptive level adjustment: ≥(total-1) right = level up, ≤floor(total/3) = level down
  * Returns new {level, change}
  */
+function ramMaxNiva(){ return (typeof RAM_MAXNIVA === 'number' && RAM_MAXNIVA >= 1) ? RAM_MAXNIVA : 3; }
 function adjustLevel(level, right, total){
   // Nivå-modell: klättrar men sjunker ALDRIG. Svårigheten går upp när eleven
   // bemästrar; på en miss faller den inte tillbaka – man får fler uppgifter på
   // samma nivå tills det sitter. Nuvarande nivå = golv (högsta uppnådda).
-  if(right >= total - 1 && level < 3) return {level: level+1, change: 'up'};
+  // Taket är färdighetens verkliga nivå-antal (RAM_MAXNIVA, satt av ?maxniva=N;
+  // default 3). En enkel-nivå-färdighet (max 1) klättrar aldrig.
+  if(right >= total - 1 && level < ramMaxNiva()) return {level: level+1, change: 'up'};
   return {level, change: null};
 }
 
@@ -3318,16 +3321,20 @@ där score är 0.0–1.0 baserat på hur väl svaret motsvarar rubricen.`;
 // EXERCISE HEADER HELPER
 // ============================================================
 function exerciseHeader(title, sub, level){
-  const MAXNIVA = 3;
-  const levelLabel = level ? `Nivå ${level} av ${MAXNIVA}` : '';
-  const dots = level ? Array.from({length:MAXNIVA}).map((_,i)=>`<i class="${i<level?'filled':''}${i===level-1?' aktuell':''}"></i>`).join('') : '';
+  const MAXNIVA = ramMaxNiva();
+  // Klättrande stege visas bara för flernivå-färdigheter (max ≥ 2). En enkel-nivå-
+  // färdighet (max 1) visar ingen segment-stege – bara drillen.
+  const visaStege = level && MAXNIVA >= 2;
+  const niva = Math.min(level || 1, MAXNIVA);
+  const levelLabel = visaStege ? `Nivå ${niva} av ${MAXNIVA}` : '';
+  const dots = visaStege ? Array.from({length:MAXNIVA}).map((_,i)=>`<i class="${i<niva?'filled':''}${i===niva-1?' aktuell':''}"></i>`).join('') : '';
   return `
     <div class="exercise-header">
       <div>
         <h2 class="exercise-title">${title}</h2>
         <p class="exercise-sub">${sub}</p>
       </div>
-      ${level?`<div class="difficulty-badge">${levelLabel} <span class="dots stege">${dots}</span></div>`:''}
+      ${visaStege?`<div class="difficulty-badge">${levelLabel} <span class="dots stege">${dots}</span></div>`:''}
     </div>
   `;
 }
@@ -8253,6 +8260,10 @@ function repSkippaPanel(){
   // Inbäddat läge (arbetssidans Färdighetsträning laddar drillen i en iframe):
   // dölj ramens eget krom så bara övningskortet syns bredvid färdighetslistan.
   if(/[?&]embed=1\b/.test(hs)) document.body.classList.add('embed');
+  // Färdighetens verkliga nivå-antal (?maxniva=1..3). Styr stegens segment och
+  // adjustLevel-taket; utelämnad => 3 (default). Enkel-nivå (1) = ingen klätterstege.
+  var mmx = hs.match(/[?&]maxniva=([1-3])\b/i);
+  if(mmx) window.RAM_MAXNIVA = parseInt(mmx[1], 10);
   var mv = hs.match(/view=([a-z-]+)/i);
   if(mv && (mv[1] === 'test-config' || mv[1] === 'skattning')){
     renderKapitel();
