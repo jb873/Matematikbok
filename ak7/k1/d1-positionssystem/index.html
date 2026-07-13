@@ -893,36 +893,15 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   </div>
 </section>
 
-<!-- PANEL: ÖVA (default) -->
+<!-- PANEL: ÖVA (default) — fyra blad i lektionsordning, hela arbetsbladet i författad ordning -->
 <section class="tab-panel is-active" data-panel="ova">
   <div class="utbud" id="ova-lista"></div>
 
-  <!-- Statiska blad-mounts: motorn renderar hit vid load; skalet flyttar in dem under rätt post -->
-  <div id="blad-tiosystemet" class="blad-mount" hidden>
-    <div class="variant-rad"><span class="variant-lbl">Välj blad:</span>
-      <button class="variant-btn is-active" data-sheet="tiosystemet" data-variant="A">Blad A</button>
-      <button class="variant-btn" data-sheet="tiosystemet" data-variant="B">Blad B</button></div>
-    <div class="ovn-wrap" id="sheet-tiosystemet"></div>
-  </div>
-  <div id="blad-egenskaper" class="blad-mount" hidden>
-    <div class="variant-rad"><span class="variant-lbl">Välj blad:</span>
-      <button class="variant-btn is-active" data-sheet="egenskaper" data-variant="A">Blad A</button>
-      <button class="variant-btn" data-sheet="egenskaper" data-variant="B">Blad B</button></div>
-    <div class="ovn-wrap" id="sheet-egenskaper"></div>
-  </div>
-  <div id="blad-storlek" class="blad-mount" hidden>
-    <div class="variant-rad"><span class="variant-lbl">Stencil:</span>
-      <button class="variant-btn is-active" id="stencil-btn-A" data-stencil="A">Stencil A</button>
-      <button class="variant-btn is-locked" id="stencil-btn-B" data-stencil="B" disabled>Stencil B 🔒</button></div>
-    <div class="stencil-info" id="stencil-info">Klara minst 80 % på Stencil A för att låsa upp Stencil B.</div>
-    <div class="ovn-wrap" id="sheet-storlek"></div>
-  </div>
-  <div id="blad-positionsrakning" class="blad-mount" hidden>
-    <div class="variant-rad"><span class="variant-lbl">Välj blad:</span>
-      <button class="variant-btn is-active" data-sheet="positionsrakning" data-variant="A">Blad A</button>
-      <button class="variant-btn" data-sheet="positionsrakning" data-variant="B">Blad B</button></div>
-    <div class="ovn-wrap" id="sheet-positionsrakning"></div>
-  </div>
+  <!-- Blad-mounts (utan A/B, utan stegare): skalet renderar hela arbetsbladet hit och flyttar in dem under rätt post -->
+  <div id="blad-tiosystemet" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-tiosystemet"></div></div>
+  <div id="blad-storlek" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-storlek"></div></div>
+  <div id="blad-positionsrakning" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-positionsrakning"></div></div>
+  <div id="blad-egenskaper" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-egenskaper"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -947,22 +926,19 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 <!-- MOTOR (oförändrad) -->
 <script src="../../../js/motor/blad/blad-k1-d1.js"></script>
 
-<!-- SKAL: val-rad, utbudslista, position-visare (data-driven per del) -->
+<!-- SKAL: val-rad + utbudslista (data-driven per del) -->
 <script>
 (function(){
   var DEL = {
-    kapitel:1, del:1, totDelar:10,
-    nasta:{ nr:2, titel:'Fyra räknesätt', href:'../d2-fyraraknesatt/index.html' },
+    // ÖVA = dagens fyra arbetsblad i LEKTIONSORDNING. Öppna → hela bladet i författad ordning
+    // (interleaving bevaras — ingen omgruppering, inga A/B, ingen avsnitts-stegare).
     ova:[
-      {rubrik:'Begrepp', poster:[
-        {titel:'Tiosystemet', desc:'Siffrans värde, bygga tal, utvecklad form och decimaltal.', blad:'tiosystemet'},
-        {titel:'Tals egenskaper', desc:'Jämnt och udda, delbarhet och hur tal är uppbyggda.', blad:'egenskaper'}
-      ]},
-      {rubrik:'Metoder', poster:[
-        {titel:'Storlek och ordning', desc:'Tallinjer, tiohopp, tiondelar och talföljder.', blad:'storlek'},
-        {titel:'Räkna i positionssystemet', desc:'Addition och subtraktion med positionsvärde.', blad:'positionsrakning'}
-      ]}
+      {titel:'Tiosystemet',                 desc:'Siffrans värde, bygga tal, utvecklad form och decimaltal.',          blad:'tiosystemet',      data:'TIO_A'},
+      {titel:'Storlek och ordning',         desc:'Tallinjer, tiohopp, tiondelar, talföljder och storleksordning.',     blad:'storlek',          data:'STORLEK_A'},
+      {titel:'Räkna i positionssystemet',   desc:'Huvudräkning med positionsvärde, intervall och mittemellan.',        blad:'positionsrakning', data:'POSRAK_A'},
+      {titel:'Tals egenskaper',             desc:'Jämnt/udda, delbarhet, faktorisering och primtal.',                  blad:'egenskaper',       data:'EGEN_A'}
     ],
+    // FÄRDIGHETSTRÄNING = samma typer isärplockade som drillbara färdigheter (deep-link till metod-ramen).
     fardighet:[
       {rubrik:'Begrepp', poster:[
         {titel:'Siffror och tal', desc:'Grundbegrepp om siffror och tal.', ko:'siffror', formaga:'begrepp'},
@@ -977,69 +953,44 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     ]
   };
   var RAM = '../../../ak7-k1-ram.html';
-  // Motorns byggar-funktioner per blad (globala) — används för att återställa till Blad A vid öppning.
-  var BYGGARE = { tiosystemet:'byggTiosystemet', egenskaper:'byggEgenskaper', storlek:'byggStorlek', positionsrakning:'byggPosrak' };
-  function aterstallTillA(bladId){
-    var mount = document.getElementById('blad-' + bladId);
-    if(!mount) return;
-    var bBtn = mount.querySelector('.variant-btn[data-variant="B"], .variant-btn[data-stencil="B"]');
-    if(!(bBtn && bBtn.classList.contains('is-active'))) return;   // redan på A → rör inte
-    var fn = window[BYGGARE[bladId]];
-    if(typeof fn === 'function') fn('A');                          // motorn ritar Blad A färskt (avsnitt 1)
-    var btns = mount.querySelectorAll('.variant-btn');
-    Array.prototype.forEach.call(btns, function(vb){
-      var v = vb.getAttribute('data-variant') || vb.getAttribute('data-stencil');
-      vb.classList.toggle('is-active', v === 'A');
+
+  // ── ÖVA: fyra blad i lektionsordning; öppna → hela arbetsbladet i författad ordning ──
+  // Motorns egen bygg_blad ritar hela bladet (stegvis:false = ingen avsnitts-stegare).
+  // onResultat neutraliseras så A/B-upplåsningen (som hör till Färdighetsträning) inte triggas.
+  var ovaEl = document.getElementById('ova-lista');
+  if(ovaEl){
+    DEL.ova.forEach(function(p){
+      var b = document.createElement('button'); b.type='button'; b.className='utbud-post';
+      b.innerHTML = '<div class="utbud-post-body"><div class="utbud-post-titel">'+p.titel+'</div>'
+        + '<div class="utbud-post-desc">'+p.desc+'</div></div><span class="utbud-post-pil">›</span>';
+      var slot = document.createElement('div'); slot.className='utbud-blad';
+      var mount = document.getElementById('blad-'+p.blad);
+      if(mount){ mount.hidden=false; slot.appendChild(mount); }
+      var data = window[p.data], sheet = document.getElementById('sheet-'+p.blad);
+      if(data && sheet && typeof window.bygg_blad === 'function'){
+        window.bygg_blad(sheet, Object.assign({}, data, {stegvis:false, titel:p.titel, onResultat:function(){}}));
+      }
+      b.onclick = function(){ var open=slot.classList.toggle('is-open'); b.classList.toggle('is-open', open); };
+      ovaEl.appendChild(b); ovaEl.appendChild(slot);
     });
   }
 
-  // Utbudslista (delad renderare för Öva + Färdighetsträning)
-  function post(p, deep){
-    var body='<div class="utbud-post-body"><div class="utbud-post-titel">'+p.titel+'</div>'
-      +'<div class="utbud-post-desc">'+p.desc+'</div></div><span class="utbud-post-pil">'+(deep?'↗':'›')+'</span>';
-    if(deep){
-      var a=document.createElement('a'); a.className='utbud-post'; a.innerHTML=body;
-      a.href=RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(p.formaga);
-      return {el:a};
-    }
-    var b=document.createElement('button'); b.type='button'; b.className='utbud-post'; b.innerHTML=body;
-    var slot=document.createElement('div'); slot.className='utbud-blad';
-    var mount=document.getElementById('blad-'+p.blad);
-    if(mount){ mount.hidden=false; slot.appendChild(mount); }
-    b.onclick=function(){ var open=slot.classList.toggle('is-open'); b.classList.toggle('is-open',open); if(open) aterstallTillA(p.blad); };
-    return {el:b, slot:slot};
-  }
-  function renderUtbud(el, grupper, deep){
-    if(!el) return;
-    grupper.forEach(function(g){
+  // ── FÄRDIGHETSTRÄNING: grupperad lista, deep-links till metod-ramen (?ko=&formaga=) ──
+  var fardEl = document.getElementById('fardighet-lista');
+  if(fardEl){
+    DEL.fardighet.forEach(function(g){
       var gr=document.createElement('div'); gr.className='utbud-grupp';
       var rub=document.createElement('div'); rub.className='utbud-rubrik'; rub.textContent=g.rubrik; gr.appendChild(rub);
-      g.poster.forEach(function(p){ var r=post(p,deep); gr.appendChild(r.el); if(r.slot) gr.appendChild(r.slot); });
-      el.appendChild(gr);
+      g.poster.forEach(function(p){
+        var a=document.createElement('a'); a.className='utbud-post';
+        a.href=RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(p.formaga);
+        a.innerHTML='<div class="utbud-post-body"><div class="utbud-post-titel">'+p.titel+'</div>'
+          +'<div class="utbud-post-desc">'+p.desc+'</div></div><span class="utbud-post-pil">↗</span>';
+        gr.appendChild(a);
+      });
+      fardEl.appendChild(gr);
     });
   }
-  renderUtbud(document.getElementById('ova-lista'), DEL.ova, false);
-  renderUtbud(document.getElementById('fardighet-lista'), DEL.fardighet, true);
-
-  // Bevara avsnitt-positionen vid blad-byte (A/B). Motorns bug_blad återställer till avsnitt 1
-  // vid varje ombygge; positionsbevarandet är skal-state. Vi läser aktuellt avsnitt i CAPTURE-
-  // fasen (före motorns re-render) och återställer efteråt genom att driva motorns "Nästa avsnitt".
-  document.addEventListener('click', function(e){
-    var btn = (e.target && e.target.closest) ? e.target.closest('.variant-btn[data-sheet], .variant-btn[data-stencil]') : null;
-    if(!btn || btn.disabled) return;
-    var sheetId = btn.getAttribute('data-sheet') || (btn.hasAttribute('data-stencil') ? 'storlek' : null);
-    if(!sheetId) return;
-    var sheetEl = document.getElementById('sheet-' + sheetId);
-    if(!sheetEl) return;
-    var info = sheetEl.querySelector('[data-steg-info]');
-    var idx = 0;
-    if(info){ var m = /Avsnitt\s+(\d+)/.exec(info.textContent || ''); if(m) idx = parseInt(m[1], 10) - 1; }
-    if(idx <= 0) return;                       // redan på avsnitt 1 → inget att göra
-    setTimeout(function(){                     // efter motorns synkrona re-render (avsnitt 1)
-      var next = sheetEl.querySelector('[data-steg="next"]'), guard = 0;
-      while(idx-- > 0 && next && !next.disabled && guard++ < 200){ next.click(); next = sheetEl.querySelector('[data-steg="next"]'); }
-    }, 0);
-  }, true);
 })();
 </script>
 
