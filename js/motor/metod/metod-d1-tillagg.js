@@ -11,6 +11,36 @@
    metod-moduler. Nivåstege respekterar ?maxniva via ramens exerciseHeader.
    ============================================================ */
 
+// ---- Anti-mönster: balanserad, anti-klustrad plan över svarskategorier ----
+// Ger n värden ur cats med så jämn fördelning som möjligt, blandade och utan
+// att någon kategori förekommer fler än 2 gånger i rad. Används av kategoriska
+// flashcard-drillar (udda/jämnt, antal siffror, primtal/sammansatt, delbarhet,
+// jämför <>=) så eleven inte kan gissa på mönstret i stället för att räkna.
+function d1BalansPlan(cats, n){
+  var k = cats.length, out = [], base = Math.floor(n / k), rem = n - base * k, i;
+  for(i = 0; i < k; i++){ for(var j = 0; j < base; j++) out.push(cats[i]); }
+  var extra = shuffle(cats.slice()).slice(0, rem);
+  for(i = 0; i < extra.length; i++) out.push(extra[i]);
+  out = shuffle(out);
+  for(var pass = 0; pass < n * 3; pass++){
+    var bad = -1;
+    for(i = 2; i < out.length; i++){ if(out[i] === out[i-1] && out[i] === out[i-2]){ bad = i; break; } }
+    if(bad < 0) break;
+    for(var s = 0; s < out.length; s++){
+      if(out[s] === out[bad]) continue;
+      if(s >= 1 && out[s-1] === out[bad] && s >= 2 && out[s-2] === out[bad]) continue;
+      var t = out[bad]; out[bad] = out[s]; out[s] = t; break;
+    }
+  }
+  return out;
+}
+// Stateful plockare: ger en fabrik som delar ut en balanserad kategori i taget,
+// och fyller på med ett nytt block när planen tar slut.
+function d1PlanPickare(){ var plan = []; return function(cats, blockN){
+  if(!plan.length) plan = d1BalansPlan(cats, blockN || 8);
+  return plan.shift();
+}; }
+
 // ---- Svenska talord, heltal 0..999999 (facit + fråga för Talnamn) ----
 var D1_ENTAL = ['noll','ett','två','tre','fyra','fem','sex','sju','åtta','nio',
   'tio','elva','tolv','tretton','fjorton','femton','sexton','sjutton','arton','nitton'];

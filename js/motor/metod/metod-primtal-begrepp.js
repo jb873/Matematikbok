@@ -15,17 +15,17 @@ function renderPrimtalBegrepp(body){
     const max = level===1?30 : level===2?50 : 100;
     const primesPool = (level===1?PRIMES_50.filter(p=>p<=30):level===2?PRIMES_50:PRIMES_100);
     const compPool = compositesUpTo(max);
+    // Balanserad, anti-klustrad primtal/sammansatt-följd (inget gameable mönster).
+    const plan = d1BalansPlan(['primtal','sammansatt'], 8);
     const items = [];
     const seen = new Set();
-    let attempts = 0;
-    while(items.length < 8 && attempts < 200){
-      const isPrim = Math.random()<0.5;
-      const num = isPrim ? randPick(primesPool) : randPick(compPool);
-      if(!seen.has(num)){
-        seen.add(num);
-        items.push({num, ans: isPrim?'primtal':'sammansatt'});
-      }
-      attempts++;
+    for(let i=0; i<plan.length; i++){
+      const wantPrim = plan[i]==='primtal';
+      const pool = wantPrim ? primesPool : compPool;
+      let num, tries=0;
+      do { num = randPick(pool); tries++; } while(seen.has(num) && tries<50);
+      seen.add(num);
+      items.push({num, ans: wantPrim?'primtal':'sammansatt'});
     }
     return items;
   }

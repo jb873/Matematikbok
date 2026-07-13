@@ -12,10 +12,13 @@ function renderSiffrorBegrepp(body){
   ];
   negPicker(body,'Siffror och tal','Välj vad du vill öva på. Nivån anpassar sig medan du räknar.',KAT,function(katId,backFn){
     if(katId==='uddajamn'){
+      var pickUJ=d1PlanPickare();   // balanserad, anti-klustrad udda/jämnt-följd
       tuKnappEngine(body,{title:'Udda eller jämnt',koId:'siffror',forKey:'begrepp',scoreKey:'uddajamn',
         sub:'Är talet udda eller jämnt? Tryck på rätt knapp.',OMG:8,
-        gen:function(level){ var n=level===1?d3RandInt(1,99):(level===2?d3RandInt(100,9999):d3RandInt(1000,99999));
-          var ratt=(n%2===0)?'jamn':'udda';
+        gen:function(level){ var vill=pickUJ(['jamn','udda'],8);
+          var lo=level===1?1:(level===2?100:1000), hi=level===1?99:(level===2?9999:99999);
+          var n; do{ n=d3RandInt(lo,hi); }while((n%2===0?'jamn':'udda')!==vill);
+          var ratt=vill;
           return {q:'Är talet <span class="neg-expr">'+n+'</span> udda eller jämnt?',
             alt:[{label:'Udda',val:'udda'},{label:'Jämnt',val:'jamn'}], ratt:ratt,
             rattLabel:(ratt==='udda'?'Udda':'Jämnt')}; },
@@ -23,9 +26,10 @@ function renderSiffrorBegrepp(body){
         felText:function(t){return 'Rätt svar: '+(t.ratt==='udda'?'Udda':'Jämnt')+'.';}
       },backFn);
     } else if(katId==='antal'){
+      var pickA=d1PlanPickare();   // balanserad, anti-klustrad siffer-antalsföljd
       negCalcEngine(body,{title:'Hur många siffror?',koId:'siffror',forKey:'begrepp',scoreKey:'antal',
         sub:'Hur många siffror har talet?',keypadOps:[],OMG:6,
-        gen:function(level){ var langd=level===1?d3RandInt(2,3):(level===2?d3RandInt(3,5):d3RandInt(4,7));
+        gen:function(level){ var cats=level===1?[2,3]:(level===2?[3,4,5]:[4,5,6,7]); var langd=pickA(cats,6);
           var n=''; for(var i=0;i<langd;i++) n+=String(d3RandInt(i===0?1:0,9));
           return {q:'Hur många siffror har talet <span class="neg-expr">'+n+'</span>?', answer:n.length}; }
       },backFn);
@@ -166,11 +170,15 @@ function renderDelbarhetBegrepp(body){
   },function(){renderDelbarhetPicker(body);});
 }
 function renderDelbarhetRakna(body){
+  var pickD=d1PlanPickare();   // balanserad, anti-klustrad ja/nej-följd (annars mest "nej" för stora delare)
   tuKnappEngine(body,{title:'Är talet delbart?',koId:'delbarhet',forKey:'rakna',scoreKey:'delbar',
     sub:'Är talet delbart med det angivna talet? Tryck Ja eller Nej.',OMG:8,
     gen:function(level){
       var delare=level===1?randPick([2,5,10]):(level===2?randPick([2,3,5,10]):randPick([2,3,4,5,6,9,10]));
-      var n=level===1?d3RandInt(10,99):(level===2?d3RandInt(20,300):d3RandInt(100,999));
+      var vill=pickD(['ja','nej'],8);
+      var loN=level===1?10:(level===2?20:100), hiN=level===1?99:(level===2?300:999);
+      var n, tries=0;
+      do{ n=d3RandInt(loN,hiN); tries++; }while(((n%delare===0)?'ja':'nej')!==vill && tries<100);
       var delbar=(n%delare===0)?'ja':'nej';
       return {q:'Är <span class="neg-expr">'+n+'</span> delbart med <strong>'+delare+'</strong>?',
         alt:[{label:'Ja',val:'ja'},{label:'Nej',val:'nej'}], ratt:delbar,
