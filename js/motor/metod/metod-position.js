@@ -353,15 +353,26 @@ function renderPositionResonera(body){
     exempel:'<strong>Tänk så här:</strong> Jämför plats för plats, börja från vänster.<br>'
       +'<span class="ex-rad">9,1 &gt; 9,09  (en tiondel slår två hundradelar)</span>',
     gen:function(level){
-      var a,b;
-      function rnd(){ var dec=level===1?1:(level===2?2:3); return Math.round(d3RandInt(80,120)/Math.pow(10, dec>1?1:0)*Math.pow(10,dec))/Math.pow(10,dec); }
-      // bygg par som ligger nära varandra
-      if(level===1){ a=Math.round(d3RandInt(5,99)/10*10)/10; b=Math.round((a + randPick([-0.1,0.1,0.2,-0.2,0]))*10)/10; }
-      else if(level===2){ a=Math.round(d3RandInt(50,1200)/100*100)/100; b=Math.round((a+randPick([-0.01,0.01,0.1,-0.1,0]))*100)/100; }
-      else { a=Math.round(d3RandInt(500,12000)/1000*1000)/1000; b=Math.round((a+randPick([-0.001,0.001,0.01,-0.01,0.09]))*1000)/1000; }
-      if(a<0) a=Math.abs(a); if(b<0) b=Math.abs(b);
-      var svar = a<b?'<':(a>b?'>':'=');
-      return {a:a, b:b, leftText:posKomma(a), rightText:posKomma(b), svar:svar};
+      function fmtDec(x,dec){ return x.toFixed(dec).replace('.',','); }
+      var a,b,decA=0,decB=0;
+      if(level===1){                                   // nivå 1: två heltal, varierad storlek
+        a=d3RandInt(2,999); do{ b=d3RandInt(2,999); }while(b===a);
+      } else {
+        var maxDec=level===2?2:3, heltal=d3RandInt(0,99);
+        decA=d3RandInt(1,maxDec); decB=d3RandInt(1,maxDec);
+        if(Math.random()<0.25){                        // samma värde, olika skrivsätt (13,4 = 13,40)
+          if(decA===decB) decB=(decA<maxDec?decA+1:decA-1);
+          var m=Math.min(decA,decB), p=Math.pow(10,m);
+          var v=(heltal*p + d3RandInt(0,p-1))/p; a=v; b=v;
+        } else {                                       // olika antal decimaler, ibland samma/olika heltal
+          var pa=Math.pow(10,decA); a=(heltal*pa + d3RandInt(0,pa-1))/pa;
+          var hb=Math.random()<0.6?heltal:d3RandInt(0,99), pb=Math.pow(10,decB);
+          b=(hb*pb + d3RandInt(0,pb-1))/pb;
+          if(Math.abs(a-b)<1e-9) b=b+1/pb;             // undvik oavsiktligt lika i denna gren
+        }
+      }
+      var svar = a<b-1e-9?'<':(a>b+1e-9?'>':'=');
+      return {a:a, b:b, leftText:level===1?String(a):fmtDec(a,decA), rightText:level===1?String(b):fmtDec(b,decB), svar:svar};
     }
   };
   var MELLAN = {
@@ -371,9 +382,9 @@ function renderPositionResonera(body){
       +'<span class="ex-rad">Mellan 9,9 och 10 kan du skriva 9,95.</span>',
     gen:function(level){
       var lo, hi;
-      if(level===1){ lo=Math.round(d3RandInt(10,98)/10*10)/10; hi=Math.round((lo+0.1)*10)/10; }
-      else if(level===2){ lo=Math.round(d3RandInt(90,200)/10*10)/10; hi=Math.round((lo+0.1)*10)/10; }
-      else { lo=Math.round(d3RandInt(900,1099)/100*100)/100; hi=Math.round((lo+0.01)*100)/100; }
+      if(level===1){ lo=d3RandInt(10,98); hi=lo+randPick([1,1,2,3]); }                                          // nivå 1: två heltal
+      else if(level===2){ lo=Math.round(d3RandInt(10,300))/10; hi=Math.round((lo+randPick([0.1,0.1,0.2,0.3]))*10)/10; }  // tiondelar, varierat gap
+      else { lo=Math.round(d3RandInt(90,900))/100; hi=Math.round((lo+randPick([0.01,0.02,0.05,0.1]))*100)/100; }         // hundradelar, tätt
       return {lo:lo, hi:hi, leftText:posKomma(lo)+' och '+posKomma(hi)};
     }
   };

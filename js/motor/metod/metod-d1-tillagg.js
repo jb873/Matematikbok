@@ -304,7 +304,9 @@ function d1GenEnhet(level){
           : level===2 ? ['tiondelar','tiotal','hundratal']
           : ['hundradelar','tusendelar','tiondelar'];
   var U = d1EnhByNamn(randPick(mal));
-  var A = level===3 ? d3RandInt(2, 300) : d3RandInt(2, 40);   // svaret (antal av målenheten)
+  // svaret (antal av målenheten). Nivå 3 rejält större → krångligare tal, t.ex.
+  // 4,1 i hundradelar = 410. Nivå 2 lite mer variation än förr.
+  var A = level===3 ? d3RandInt(11, 999) : (level===2 ? d3RandInt(2, 90) : d3RandInt(2, 40));
   var value = Math.round(A * U.f * 1e6) / 1e6;
   // Två fraseringar: "value = ___ enhet" och "N enhetA = ___ enhetB"
   if(Math.random() < 0.5 || U.f >= 1){
