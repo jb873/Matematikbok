@@ -42,8 +42,9 @@ function renderSiffrorBegrepp(body){
           var antal=d3RandInt(3,5);                                    // varierat antal siffror
           var siffror=shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0,antal);   // distinkta siffror, kan innehålla 0
           if(Math.random()<0.4 && siffror.indexOf(0)<0) siffror[d3RandInt(0,antal-1)]=0;  // få in 0 ibland
+          siffror=d1OloggiskOrdning(siffror);                          // visa i ologisk ordning (ej sorterad → ej trivialt)
           var decimaler=level===1?0:d3RandInt(1,Math.min(2,antal-1)); // nivå 1 = heltal, nivå 2 = decimaltal
-          var facit=d1StorstMinstSvar(siffror,storst,decimaler);
+          var facit=d1StorstMinstSvar(siffror,storst,decimaler);       // ordnings-oberoende (sorterar internt)
           var decTxt=decimaler===0?'':(decimaler===1?' med en decimal':' med två decimaler');
           return {q:'Använd siffrorna <span class="neg-expr">'+siffror.join(', ')+'</span>.<br>'
             +'Skriv det <strong>'+(storst?'största':'minsta')+'</strong> talet'+decTxt+' du kan.', answer:facit.num}; }

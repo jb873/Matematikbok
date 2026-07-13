@@ -221,7 +221,7 @@ function renderPositionRakna(body){
         if(!set.has(v)){ set.add(v); tal.push(v); }
       }
       var sorterat=tal.slice().sort(function(a,b){return a-b;});
-      var blandat=tal.slice().sort(function(){return Math.random()-0.5;});
+      var blandat=d1OloggiskOrdning(tal);   // visa i ologisk ordning (aldrig sorterad → ej trivialt)
       return {
         display: blandat.map(posKomma).join('&nbsp;&nbsp;&nbsp;'),
         leftText: blandat.map(posKomma).join('   ') + '  →',
@@ -242,9 +242,12 @@ function renderPositionRakna(body){
       if(level===1){ decimaler=1; stegH=d3RandInt(1,3)*Math.pow(10,decimaler-1); startH=d3RandInt(10,90); }
       else if(level===2){ decimaler=2; stegH=d3RandInt(1,3)*Math.pow(10,0); startH=d3RandInt(100,900); }
       else { decimaler=3; stegH=d3RandInt(1,3)*Math.pow(10,0); startH=d3RandInt(1000,9000); }
+      var riktning = Math.random()<0.5 ? 1 : -1;                                       // upp- eller nedåtgående (variation)
+      if(riktning===-1 && startH < 6*stegH) startH = 6*stegH + d3RandInt(0, 5*stegH);  // håll alla värden > 0
+      var steg = stegH*riktning;
       var f=Math.pow(10,decimaler);
-      var t0=startH, t1=startH+stegH, t2=startH+2*stegH;
-      var n3=startH+3*stegH, n4=startH+4*stegH, n5=startH+5*stegH;
+      var t0=startH, t1=startH+steg, t2=startH+2*steg;
+      var n3=startH+3*steg, n4=startH+4*steg, n5=startH+5*steg;
       var show=[t0,t1,t2].map(function(x){return posKomma(Math.round(x/f*1e6)/1e6);}).join('   ');
       return {
         leftText: show + '  →',

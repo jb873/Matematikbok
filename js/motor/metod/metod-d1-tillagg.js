@@ -52,6 +52,21 @@ function d1PlanPickare(){ var plan = []; return function(cats, blockN){
   return plan.shift();
 }; }
 
+// ---- Ologisk presentationsordning: blanda en lista så den ALDRIG står sorterad ----
+// (varken stigande eller fallande) — annars blir svaret trivialt (bara vända på
+// den visade ordningen). För 1–2 element går det inte att undvika, då blandas bara.
+function d1ArSorterad(a){
+  var asc = true, desc = true;
+  for(var i = 1; i < a.length; i++){ if(a[i] < a[i-1]) asc = false; if(a[i] > a[i-1]) desc = false; }
+  return asc || desc;
+}
+function d1OloggiskOrdning(arr){
+  if(arr.length <= 2) return shuffle(arr);
+  var a, tries = 0;
+  do { a = shuffle(arr); tries++; } while(tries < 50 && d1ArSorterad(a));
+  return a;
+}
+
 // ---- Störst/minst-facit: bygg största/minsta talet av givna distinkta siffror ----
 // decimaler = antal siffror efter kommat (0 = heltal). Ledande heltalssiffra får
 // aldrig vara 0 (ett flersiffrigt tal skrivs inte med inledande nolla).
