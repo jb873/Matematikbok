@@ -61,8 +61,20 @@ function renderPlatsvarde(body, backFn){
 // Nivå 1 = heltal upp till hundratusental (inga decimaler). Nivå 2 = decimaltal,
 // heltalsdel max tusental (aldrig bara ental). Nivå 3 = hela spannet hundratusental
 // →tusendel med flera nollor (extra svårt). Delarna visas i ologisk ordning.
+// Delen med antalet i BOKSTÄVER ("tre hundratusental", "en tiondel", "fem tiondelar").
+// ett/en-genus: heltalsplatser (tal) = "ett", decimalplatser (del) = "en".
+function d1SkrivtalDelText(c, exp){
+  var ord = (c === 1 && exp < 0) ? 'en' : D1_ENTAL[c];
+  var namn = D1_PLATSNAMN[String(exp)];
+  if(exp < 0 && c > 1) namn += 'ar';                                    // två tiondelar, en tiondel
+  return ord + ' ' + namn;
+}
+function d1ListaOch(arr){
+  if(arr.length <= 1) return arr.join('');
+  return arr.slice(0, -1).join(', ') + ' och ' + arr[arr.length - 1];
+}
 function d1GenSkrivtal(level){
-  var places = level === 1 ? [5,4,3,2,1,0]
+  var places = level === 1 ? [3,2,1,0]                                  // nivå 1: heltal ental..tusental (stegring)
              : level === 2 ? [3,2,1,0,-1,-2,-3]
              : [5,4,3,2,1,0,-1,-2,-3];
   var antal = level === 3 ? d3RandInt(3, 4) : d3RandInt(2, 4);
@@ -78,7 +90,7 @@ function d1GenSkrivtal(level){
   var vis = delar.slice(), tries = 0;                                   // ologisk ordning (ej platsordning)
   if(vis.length > 2){ do { vis = shuffle(delar.slice()); tries++; } while(tries < 50 && d1ArSorterad(vis.map(function(d){ return d.exp; }))); }
   else vis = shuffle(delar.slice());
-  var txt = vis.map(function(d){ var namn = D1_PLATSNAMN[String(d.exp)]; if(d.exp < 0) namn = (d.c === 1 ? namn : namn + 'ar'); return d.c + ' ' + namn; }).join(', ');
+  var txt = d1ListaOch(vis.map(function(d){ return d1SkrivtalDelText(d.c, d.exp); }));
   return { display: txt, answerNum: summa, answerStr: posKomma(summa) };
 }
 

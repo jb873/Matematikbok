@@ -51,8 +51,8 @@ function renderPositionBegrepp(body){
     header:'Skriv talet med siffror', formagaKey:'begrepp', koId:'position', scoreKey:'skrivtal',
     sub:'Sätt ihop talet från platsvärdena.', backLabel:'Tillbaka till kategorier', ops:[','],
     exempel:'<strong>Tänk så här:</strong> Lägg varje del på rätt plats – tomma platser blir 0.<br>'
-      +'<span class="ex-rad">4 tusental, 3 hundratal och 5 ental = 4 305</span><br>'
-      +'<span class="ex-rad">2 ental och 7 hundradelar = 2,07</span>',
+      +'<span class="ex-rad">fyra tusental, tre hundratal och fem ental = 4 305</span><br>'
+      +'<span class="ex-rad">två ental och sju hundradelar = 2,07</span>',
     gen: d1GenSkrivtal   // nivå-struktur ur d1-tillägg (L1 heltal→hundratusental, L2 decimaltal, L3 flera nollor)
   };
   function picker(){
