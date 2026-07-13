@@ -964,12 +964,16 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       b.innerHTML = '<div class="utbud-post-body"><div class="utbud-post-titel">'+p.titel+'</div>'
         + '<div class="utbud-post-desc">'+p.desc+'</div></div><span class="utbud-post-pil">›</span>';
       var slot = document.createElement('div'); slot.className='utbud-blad';
-      var mount = document.getElementById('blad-'+p.blad);
-      if(mount){ mount.hidden=false; slot.appendChild(mount); }
+      // Rendera HELA arbetsbladet MEDAN #sheet-X fortfarande sitter i dokumentet.
+      // getElementById hittar bara element i trädet — därför måste renderingen ske
+      // FÖRE mount flyttas in i det (ännu) frikopplade slot:et, annars blir sheet null
+      // och stegvis:false-override hoppas tyst över (motorns stegat-render står kvar).
       var data = window[p.data], sheet = document.getElementById('sheet-'+p.blad);
       if(data && sheet && typeof window.bygg_blad === 'function'){
         window.bygg_blad(sheet, Object.assign({}, data, {stegvis:false, titel:p.titel, onResultat:function(){}}));
       }
+      var mount = document.getElementById('blad-'+p.blad);
+      if(mount){ mount.hidden=false; slot.appendChild(mount); }   // flytta in det renderade bladet i sitt slot
       b.onclick = function(){ var open=slot.classList.toggle('is-open'); b.classList.toggle('is-open', open); };
       ovaEl.appendChild(b); ovaEl.appendChild(slot);
     });
