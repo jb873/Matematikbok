@@ -440,6 +440,7 @@ function renderUppstallningAdd(body, metod, backFn){
           </div>
 
           <div class="rakna-uppdela-feedback" id="fb"></div>
+          ${keypadHTML([])}
           <div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
             <button class="btn primary" id="check-btn">Kontrollera</button>
             <button class="btn subtle" id="back-btn">Tillbaka till metoder</button>
@@ -461,6 +462,8 @@ function renderUppstallningAdd(body, metod, backFn){
     const allInputsOrdered = [...ansInputs, ...carrInputs];
 
     ansInputs.forEach((inp, i) => {
+      function nasta(){ if(i < ansInputs.length - 1) ansInputs[i+1].focus(); else if(carrInputs[0]) carrInputs[0].focus(); }
+      inp.addEventListener('input', () => { inp.value = inp.value.replace(/[^0-9]/g,''); if(inp.value) nasta(); });   // auto-hopp (keypad + tangentbord)
       inp.addEventListener('keydown', e => {
         if(e.key === 'Enter' || e.key === 'Tab' && !e.shiftKey) {
           e.preventDefault();
@@ -481,8 +484,9 @@ function renderUppstallningAdd(body, metod, backFn){
       });
     });
 
-    // Fokusera ental-svaret direkt
+    // Fokusera ental-svaret direkt + koppla sifferknappsats mot fokuserad ruta
     setTimeout(() => ansInputs[0] && ansInputs[0].focus(), 50);
+    bindKeypad(body.querySelector('.exercise-card'));
 
     const check = () => {
       // Läs in svaret siffra för siffra
