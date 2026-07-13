@@ -2441,7 +2441,12 @@ const FORMAGOR = {
   metod: {label:'Metod', tagClass:'tag-metod', pillClass:'p-metod'},
   kommunikation: {label:'Kommunikation', tagClass:'tag-komm', pillClass:'p-komm'},
   resonera: {label:'Resonera', tagClass:'tag-resonera', pillClass:'p-resonera'},
-  problem: {label:'Problemlösning', tagClass:'tag-problem', pillClass:'p-problem'}
+  problem: {label:'Problemlösning', tagClass:'tag-problem', pillClass:'p-problem'},
+  // d1-tillägg (Färdighetsträning Steg 2): nya drillbara typer
+  namn: {label:'Talnamn', tagClass:'tag-begrepp', pillClass:'p-begrepp'},
+  enhet: {label:'Enhetsbyten', tagClass:'tag-begrepp', pillClass:'p-begrepp'},
+  baklanges: {label:'Baklänges', tagClass:'tag-rakna', pillClass:'p-rakna'},
+  konstruera: {label:'Konstruera', tagClass:'tag-rakna', pillClass:'p-rakna'}
 };
 
 // Kapitel 1 – Taluppfattning: positionssystem och räknesätt
@@ -4696,18 +4701,19 @@ function posRitaTallinje(cfg){
 
 const OVNING_RENDERS = {
   // Del 1 - Siffror och tal
-  siffror:{ begrepp:(b)=>renderSiffrorBegrepp(b) },
+  siffror:{ begrepp:(b)=>renderSiffrorBegrepp(b), namn:(b)=>renderTalnamn(b) },
   // Del 1 - Utvecklad form
   utvecklad:{ metod:(b)=>renderUtveckladMetod(b), rakna:(b)=>renderUtveckladRakna(b) },
   // Del 1 - Delbarhet
-  delbarhet:{ begrepp:(b)=>renderDelbarhetBegrepp(b), rakna:(b)=>renderDelbarhetRakna(b) },
+  delbarhet:{ begrepp:(b)=>renderDelbarhetBegrepp(b), rakna:(b)=>renderDelbarhetRakna(b), konstruera:(b)=>renderKonstrueraDelbar(b) },
   // Del 1 - Räkneträning
   'rakneträning':{ rakna:(b)=>renderRaknetraningRakna(b) },
   // Del 1 - Positionssystemet
   position:{
     begrepp:  (b)=> renderPositionBegrepp(b),
     rakna:    (b)=> renderPositionRakna(b),
-    resonera: (b)=> renderPositionResonera(b)
+    resonera: (b)=> renderPositionResonera(b),
+    enhet:    (b)=> renderEnhetsbyten(b)
   },
   // Del 1 - Primtal
   primtal:{
@@ -4716,7 +4722,8 @@ const OVNING_RENDERS = {
     metod:       (b)=> renderPrimtalMetod(b),
     kommunikation:(b)=>renderPrimtalKomm(b),
     resonera:    (b)=> renderPrimtalResonera(b),
-    problem:     (b)=> renderPrimtalProblem(b)
+    problem:     (b)=> renderPrimtalProblem(b),
+    baklanges:   (b)=> renderFaktoriseringBaklanges(b)
   },
   // Del 2 - Begrepp
   'begrepp-as':{
@@ -8310,5 +8317,6 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-prioritering.js"></script>
 <script src="js/motor/metod/metod-negativa.js"></script>
 <script src="js/motor/metod/metod-avrundning.js"></script>
+<script src="js/motor/metod/metod-d1-tillagg.js"></script>
 </body>
 </html>

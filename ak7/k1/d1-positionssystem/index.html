@@ -1009,12 +1009,14 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     // ingen klätterstege (fritext resp. manuellt nivåval).
     fardighet:[
       {ko:'Siffror och tal', drills:[
-        {titel:'Udda och jämna tal', formaga:'begrepp', ko:'siffror', niva:1}
+        {titel:'Udda och jämna tal', formaga:'begrepp', ko:'siffror', niva:1},
+        {titel:'Talnamn ↔ siffror', formaga:'begrepp', formagaKey:'namn', ko:'siffror'}
       ]},
       {ko:'Positionssystemet', drills:[
         {titel:'Platsvärde & bygga tal', formaga:'begrepp',  ko:'position'},
         {titel:'Tallinje, talföljder & storleksordna', formaga:'räkna', formagaKey:'rakna', ko:'position'},
-        {titel:'Jämföra & mittemellan', formaga:'resonera', ko:'position'}
+        {titel:'Jämföra & mittemellan', formaga:'resonera', ko:'position'},
+        {titel:'Enhetsbyten (tiotal, tiondelar …)', formaga:'begrepp', formagaKey:'enhet', ko:'position'}
       ]},
       {ko:'Utvecklad form', drills:[
         {titel:'Skriv i utvecklad form', formaga:'metod', ko:'utvecklad'},
@@ -1029,11 +1031,13 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
         {titel:'Bygg faktorträd', formaga:'metod', ko:'primtal'},
         {titel:'Skriv hela primtalsfaktoriseringen', formaga:'kommunikation', ko:'primtal'},
         {titel:'Förklara varför ett tal är primtal', formaga:'resonera', ko:'primtal'},
-        {titel:'Talgåtor: vilket tal är jag?', formaga:'problemlösning', formagaKey:'problem', ko:'primtal'}
+        {titel:'Talgåtor: vilket tal är jag?', formaga:'problemlösning', formagaKey:'problem', ko:'primtal'},
+        {titel:'Faktorisering baklänges', formaga:'räkna', formagaKey:'baklanges', ko:'primtal'}
       ]},
       {ko:'Delbarhet', drills:[
         {titel:'Vad är delbarhet?', formaga:'begrepp', ko:'delbarhet'},
-        {titel:'Avgör delbarhet snabbt', formaga:'räkna', formagaKey:'rakna', ko:'delbarhet'}
+        {titel:'Avgör delbarhet snabbt', formaga:'räkna', formagaKey:'rakna', ko:'delbarhet'},
+        {titel:'Konstruera tal (delbarhet)', formaga:'räkna', formagaKey:'konstruera', ko:'delbarhet'}
       ]}
     ]
   };
