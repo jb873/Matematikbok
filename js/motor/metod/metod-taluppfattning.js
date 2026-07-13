@@ -29,21 +29,24 @@ function renderSiffrorBegrepp(body){
       var pickA=d1PlanPickare();   // balanserad, anti-klustrad siffer-antalsföljd
       negCalcEngine(body,{title:'Hur många siffror?',koId:'siffror',forKey:'begrepp',scoreKey:'antal',
         sub:'Hur många siffror har talet?',keypadOps:[],OMG:6,
-        gen:function(level){ var cats=level===1?[2,3]:(level===2?[3,4,5]:[4,5,6,7]); var langd=pickA(cats,6);
+        gen:function(level){ var cats=level===1?[2,3,4,5]:(level===2?[3,4,5,6]:[4,5,6,7]); var langd=pickA(cats,6);
           var n=''; for(var i=0;i<langd;i++) n+=String(d3RandInt(i===0?1:0,9));
           return {q:'Hur många siffror har talet <span class="neg-expr">'+n+'</span>?', answer:n.length}; }
       },backFn);
     } else {
+      var pickSM=d1PlanPickare();   // balanserad, ologisk störst/minst-följd
       negCalcEngine(body,{title:'Störst och minst',koId:'siffror',forKey:'begrepp',scoreKey:'storstminst',
-        sub:'Bygg talet av siffrorna som visas.',keypadOps:[],OMG:6,
+        sub:'Bygg det största eller minsta talet av siffrorna.',keypadOps:[','],OMG:6,
         gen:function(level){
-          var antal=level===1?3:(level===2?4:4);
-          var siffror=[]; var pool=[1,2,3,4,5,6,7,8,9];
-          for(var i=0;i<antal;i++){ var idx=d3RandInt(0,pool.length-1); siffror.push(pool[idx]); pool.splice(idx,1); }
-          var storst=Math.random()<0.5;
-          var sorterat=siffror.slice().sort(function(a,b){return storst?b-a:a-b;});
-          var ans=parseInt(sorterat.join(''),10);
-          return {q:'Använd siffrorna <span class="neg-expr">'+siffror.join(', ')+'</span>.<br>Skriv det <strong>'+(storst?'största':'minsta')+'</strong> talet du kan.', answer:ans}; }
+          var storst=pickSM(['storst','minst'],6)==='storst';
+          var antal=d3RandInt(3,5);                                    // varierat antal siffror
+          var siffror=shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0,antal);   // distinkta siffror, kan innehålla 0
+          if(Math.random()<0.4 && siffror.indexOf(0)<0) siffror[d3RandInt(0,antal-1)]=0;  // få in 0 ibland
+          var decimaler=level===1?0:d3RandInt(1,Math.min(2,antal-1)); // nivå 1 = heltal, nivå 2 = decimaltal
+          var facit=d1StorstMinstSvar(siffror,storst,decimaler);
+          var decTxt=decimaler===0?'':(decimaler===1?' med en decimal':' med två decimaler');
+          return {q:'Använd siffrorna <span class="neg-expr">'+siffror.join(', ')+'</span>.<br>'
+            +'Skriv det <strong>'+(storst?'största':'minsta')+'</strong> talet'+decTxt+' du kan.', answer:facit.num}; }
       },backFn);
     }
   });

@@ -17,22 +17,33 @@
 // flashcard-drillar (udda/jämnt, antal siffror, primtal/sammansatt, delbarhet,
 // jämför <>=) så eleven inte kan gissa på mönstret i stället för att räkna.
 function d1BalansPlan(cats, n){
-  var k = cats.length, out = [], base = Math.floor(n / k), rem = n - base * k, i;
-  for(i = 0; i < k; i++){ for(var j = 0; j < base; j++) out.push(cats[i]); }
-  var extra = shuffle(cats.slice()).slice(0, rem);
-  for(i = 0; i < extra.length; i++) out.push(extra[i]);
-  out = shuffle(out);
-  for(var pass = 0; pass < n * 3; pass++){
-    var bad = -1;
-    for(i = 2; i < out.length; i++){ if(out[i] === out[i-1] && out[i] === out[i-2]){ bad = i; break; } }
-    if(bad < 0) break;
-    for(var s = 0; s < out.length; s++){
-      if(out[s] === out[bad]) continue;
-      if(s >= 1 && out[s-1] === out[bad] && s >= 2 && out[s-2] === out[bad]) continue;
-      var t = out[bad]; out[bad] = out[s]; out[s] = t; break;
+  // Balanserad fördelning i en OLOGISK ordning: inga kluster (>2 lika i rad),
+  // ingen lång regelbunden växling (a,b,a,b,a…), och för fler-kategori-drillar
+  // ingen direkt upprepning (varje värde skiljer sig från det förra → äkta
+  // variation). Rejection sampling: poängsätt slumpade blandningar, ta en utan
+  // brister (annars den minst dåliga).
+  var i, base = Math.floor(n / cats.length), multiset = [];
+  for(i = 0; i < cats.length; i++){ for(var j = 0; j < base; j++) multiset.push(cats[i]); }
+  var extra = shuffle(cats.slice()).slice(0, n - base * cats.length);
+  for(i = 0; i < extra.length; i++) multiset.push(extra[i]);
+  var flerKat = cats.length >= 3;
+  function poang(p){
+    var s = 0, run = 1, alt = 1;
+    for(var k = 1; k < p.length; k++){
+      if(p[k] === p[k-1]){ run++; if(flerKat) s += 6; } else run = 1;   // direkt upprepning: illa för fler-kat
+      if(run > 2) s += 100;                                              // kluster
+      if(p[k] !== p[k-1] && k >= 2 && p[k] === p[k-2]) alt++; else alt = (p[k] !== p[k-1] ? 2 : 1);
+      if(alt >= 5) s += 25;                                             // lång alternering (varannan-mönster)
     }
+    return s;
   }
-  return out;
+  var best = multiset.slice(), bestS = Infinity;
+  for(var t = 0; t < 80; t++){
+    var p = shuffle(multiset), sc = poang(p);
+    if(sc === 0) return p;
+    if(sc < bestS){ bestS = sc; best = p; }
+  }
+  return best;
 }
 // Stateful plockare: ger en fabrik som delar ut en balanserad kategori i taget,
 // och fyller på med ett nytt block när planen tar slut.
@@ -40,6 +51,23 @@ function d1PlanPickare(){ var plan = []; return function(cats, blockN){
   if(!plan.length) plan = d1BalansPlan(cats, blockN || 8);
   return plan.shift();
 }; }
+
+// ---- Störst/minst-facit: bygg största/minsta talet av givna distinkta siffror ----
+// decimaler = antal siffror efter kommat (0 = heltal). Ledande heltalssiffra får
+// aldrig vara 0 (ett flersiffrigt tal skrivs inte med inledande nolla).
+function d1StorstMinstSvar(siffror, storst, decimaler){
+  var s = siffror.slice().sort(function(a, b){ return storst ? b - a : a - b; });
+  var heltalsDel = s.length - decimaler;
+  // Ledande nolla ogiltig endast när heltalsdelen har ≥2 siffror ("05" skrivs ej,
+  // men "0,5" är ett giltigt tal). Byt då fram första nollskilda siffran.
+  if(heltalsDel >= 2 && s[0] === 0){
+    for(var k = 1; k < s.length; k++){ if(s[k] !== 0){ var t = s[0]; s[0] = s[k]; s[k] = t; break; } }
+  }
+  var intDel = s.slice(0, heltalsDel).join('');
+  var decDel = s.slice(heltalsDel).join('');
+  var str = decimaler > 0 ? intDel + ',' + decDel : intDel;
+  return { str: str, num: parseFloat(str.replace(',', '.')) };
+}
 
 // ---- Svenska talord, heltal 0..999999 (facit + fråga för Talnamn) ----
 var D1_ENTAL = ['noll','ett','två','tre','fyra','fem','sex','sju','åtta','nio',
