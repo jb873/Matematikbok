@@ -905,18 +905,23 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
   // ── Egen Öva-vy för Addition: metod-rader visar mellanled ("visa på mellanled", inte bara svar).
   //    Motorn (blad-k1-d2.js) rörs inte; återanvänder dess CSS + globala jamforTal/visaKonfetti. ──
-  // Antal mellanled-rutor per metod: talsorterna = antal talsorter (siffror + decimaler), annars 2.
-  function antalMellanBoxar(grupp, rad){
+  // Mellanled-format per metod (utifrån gruppens rubrik):
+  //  sum  = N rutor som summeras till svaret (talsorterna, flytta över, addition bakifrån)
+  //  diff = 2 rutor vars skillnad blir svaret (öka och minska lika: 642 − 400 = 242)
+  //  none = ingen mellanled, bara svar (uppställning – görs på papper)
+  function metodSpec(grupp, rad){
     var rub=(grupp.rubrik||'').toLowerCase();
     if(rub.indexOf('talsorterna')>=0){
       var nums=(rad.vansterText.match(/[0-9]+(?:[.,][0-9]+)?/g)||[]).map(function(x){return x.replace(',','.');});
       var intDig=1, dec=0;
       nums.forEach(function(s){ var p=s.split('.'); intDig=Math.max(intDig,(p[0].replace(/^0+/,'')||'0').length); if(p[1]) dec=Math.max(dec,p[1].length); });
-      return intDig+dec;
+      return {typ:'sum', antal:intDig+dec, op:'+'};
     }
-    return 2; // flytta över m.fl. – två omfördelade termer
+    if(rub.indexOf('öka och minska')>=0) return {typ:'diff', antal:2, op:'−'};
+    if(rub.indexOf('uppställning')>=0)   return {typ:'none'};
+    return {typ:'sum', antal:2, op:'+'};   // flytta över, addition bakifrån – två termer/steg
   }
-  function bygg_addition_ova(rotEl, blad){
+  function bygg_ova_metod(rotEl, blad){
     var h='<div class="ovn-sheet"><h2>'+blad.titel+'</h2>';
     h+='<div class="ovn-exempel" style="font-size:13px;">Visa <strong>mellanledet</strong> för metoden och skriv svaret. Alla korrekta mellanled godtas.</div>';
     (blad.grupper||[]).forEach(function(grupp,gi){
@@ -925,16 +930,29 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       (grupp.rader||[]).forEach(function(rad){
         bok++; var L=String.fromCharCode(bok)+')';
         if(rad.typ==='enkel'){
-          var n=antalMellanBoxar(grupp,rad), boxar='';
-          for(var bi=0;bi<n;bi++){
-            boxar += (bi>0?'<span class="ovn-text ova-plus">+</span>':'')
-              + '<input class="ovn-in ova-mellan-box" inputmode="decimal" autocomplete="off" style="width:60px;text-align:center;">';
+          var spec=metodSpec(grupp,rad);
+          if(spec.typ==='none'){
+            h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
+              +'<span class="ovn-text ovn-num">'+rad.vansterText+'</span>'
+              +'<input class="ovn-in ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:100px;"></div>';
+          } else {
+            var boxar='';
+            for(var bi=0;bi<spec.antal;bi++){
+              boxar += (bi>0?'<span class="ovn-text ova-plus">'+spec.op+'</span>':'')
+                + '<input class="ovn-in ova-mellan-box" inputmode="decimal" autocomplete="off" style="width:60px;text-align:center;">';
+            }
+            h+='<div class="ovn-rad ova-metod-rad"><span class="ovn-label">'+L+'</span>'
+              +'<span class="ovn-text ovn-num">'+rad.vansterText+'</span>'
+              +'<span class="ova-mellan-grupp" data-svar="'+rad.svar+'" data-antal="'+spec.antal+'" data-typ="'+spec.typ+'" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">'+boxar+'</span>'
+              +'<span class="ovn-text">=</span>'
+              +'<input class="ovn-in ova-slutsvar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:84px;"></div>';
           }
-          h+='<div class="ovn-rad ova-metod-rad"><span class="ovn-label">'+L+'</span>'
-            +'<span class="ovn-text ovn-num">'+rad.vansterText+'</span>'
-            +'<span class="ova-mellan-grupp" data-svar="'+rad.svar+'" data-antal="'+n+'" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">'+boxar+'</span>'
-            +'<span class="ovn-text">=</span>'
-            +'<input class="ovn-in ova-slutsvar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:84px;"></div>';
+        } else if(rad.typ==='lucka'){
+          var bitar=String(rad.text).split('__');
+          h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
+            +'<span class="ovn-text" style="min-width:160px;">'+(bitar[0]||'')
+            +'<input class="ovn-in ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" style="width:90px;margin:0 4px;">'
+            +(bitar[1]||'')+'</span></div>';
         } else if(rad.typ==='text'){
           h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
             +'<span class="ovn-text" style="flex:1;min-width:160px;">'+rad.fraga+'</span>'
@@ -999,11 +1017,19 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
           var svar=parseFloat(grp.dataset.svar);
           var vals=boxes.map(function(b){return parseFloat(String(b.value).replace(',','.'));});
           var allNum=vals.every(function(v){return !isNaN(v);});
-          var sum=vals.reduce(function(a,v){return a+(isNaN(v)?0:v);},0);
-          var noDump=!vals.some(function(v){return Math.abs(v-svar)<1e-6;});   // inte bara svaret i en ruta
-          var mOk=allNum && Math.abs(sum-svar)<1e-6 && (boxes.length<2||noDump);
+          var mOk, facitTxt;
+          if(grp.dataset.typ==='diff'){
+            // två rutor vars skillnad ska bli svaret (och b≠0 så det är ett verkligt mellanled)
+            mOk = allNum && boxes.length===2 && vals[1]!==0 && Math.abs((vals[0]-vals[1])-svar)<1e-6;
+            facitTxt='rätt svar: a − b ska bli '+String(svar).replace('.',',');
+          } else {
+            var sum=vals.reduce(function(a,v){return a+(isNaN(v)?0:v);},0);
+            var noDump=!vals.some(function(v){return Math.abs(v-svar)<1e-6;});   // inte bara svaret i en ruta
+            mOk = allNum && Math.abs(sum-svar)<1e-6 && (boxes.length<2||noDump);
+            facitTxt='rätt svar: summan ska bli '+String(svar).replace('.',',');
+          }
           boxes.forEach(function(b){ b.classList.add(mOk?'correct':'wrong'); });
-          markEfter(grp,mOk, mOk?null:'rätt svar: summan ska bli '+String(svar).replace('.',','));
+          markEfter(grp,mOk, mOk?null:facitTxt);
           totalt++; if(mOk)ratt++;
           var sInp=row.querySelector('.ova-slutsvar');
           var sOk=jamforTal(sInp.value,svar); markera(sInp,sOk,sOk?null:String(svar).replace('.',',')); totalt++; if(sOk)ratt++;
@@ -1039,8 +1065,8 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   }
 
   var OVA=[
-    {titel:'Addition', mount:'addition', bygg:function(el){ bygg_addition_ova(el,{titel:'Addition',intro:addsub.intro,grupper:addG}); }},
-    {titel:'Subtraktion', mount:'subtraktion', bygg:function(el){ window.bygg_blad(el,{titel:'Subtraktion',intro:addsub.intro,grupper:subG}); }},
+    {titel:'Addition', mount:'addition', bygg:function(el){ bygg_ova_metod(el,{titel:'Addition',intro:addsub.intro,grupper:addG}); }},
+    {titel:'Subtraktion', mount:'subtraktion', bygg:function(el){ bygg_ova_metod(el,{titel:'Subtraktion',intro:addsub.intro,grupper:subG}); }},
     {titel:'Multiplikation', mount:'mult'},          // redan auto-renderad av blad-filen
     {titel:'Division', mount:'div'},
     {titel:'Prioriteringsregeln', mount:'prio'},
