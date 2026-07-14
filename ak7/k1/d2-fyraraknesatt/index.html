@@ -918,7 +918,6 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   }
   function bygg_addition_ova(rotEl, blad){
     var h='<div class="ovn-sheet"><h2>'+blad.titel+'</h2>';
-    if(blad.intro) h+='<p class="ovn-intro">'+blad.intro+'</p>';
     h+='<div class="ovn-exempel" style="font-size:13px;">Visa <strong>mellanledet</strong> för metoden och skriv svaret. Alla korrekta mellanled godtas.</div>';
     (blad.grupper||[]).forEach(function(grupp,gi){
       h+='<div class="ovn-grupp"><div class="ovn-grupp-rubrik">'+(gi+1)+'. '+grupp.rubrik+'</div>';
@@ -1107,7 +1106,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       btn.classList.add('is-active'); btn.setAttribute('aria-selected','true');
       var fk=p.formagaKey||p.formaga, url=RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(fk)+'&embed=1';
       if(p.niva&&p.niva<3) url+='&maxniva='+p.niva;
-      if(frame) frame.src=url; if(scen) scen.classList.add('har-drill');
+      if(frame){ frame.style.height=''; frame.src=url; } if(scen) scen.classList.add('har-drill');
     }
     FARD.forEach(function(g){
       var gr=document.createElement('div'); gr.className='fard-grupp';
@@ -1121,6 +1120,13 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       fardEl.appendChild(gr);
     });
   }
+  // Auto-höjd: drillen (ram i embed) postar sin innehållshöjd → iframen växer till hela
+  // drillen så inget behöver scrollas internt. Skalat till just fard-frame via e.source.
+  window.addEventListener('message', function(e){
+    if(!frame || !e || !e.data || typeof e.data.__fardHeight !== 'number') return;
+    if(e.source !== frame.contentWindow) return;
+    frame.style.height = Math.max(320, Math.min(e.data.__fardHeight, 2200)) + 'px';
+  });
 })();
 </script>
 

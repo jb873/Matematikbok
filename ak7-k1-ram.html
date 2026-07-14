@@ -8280,7 +8280,24 @@ function repSkippaPanel(){
   var hs = location.hash + ' ' + location.search;
   // Inbäddat läge (arbetssidans Färdighetsträning laddar drillen i en iframe):
   // dölj ramens eget krom så bara övningskortet syns bredvid färdighetslistan.
-  if(/[?&]embed=1\b/.test(hs)) document.body.classList.add('embed');
+  if(/[?&]embed=1\b/.test(hs)){
+    document.body.classList.add('embed');
+    // Rapportera innehållshöjd till värdsidan så iframen kan växa till hela drillen
+    // (ingen intern scroll). file:// blockerar contentDocument-access → postMessage.
+    (function(){
+      var sist = 0;
+      function rapporteraHojd(){
+        // body-höjd (inte documentElement, som klampas till iframens viewport) → innehållets
+        // verkliga höjd så iframen både växer och krymper till drillen. +4 mot 1px-scroll.
+        var h = Math.max(document.body.scrollHeight, document.body.offsetHeight) + 4;
+        if(h && Math.abs(h - sist) > 2){ sist = h; try { parent.postMessage({ __fardHeight: h }, '*'); } catch(e){} }
+      }
+      if(window.ResizeObserver){ try { new ResizeObserver(rapporteraHojd).observe(document.body); } catch(e){} }
+      window.addEventListener('load', rapporteraHojd);
+      setTimeout(rapporteraHojd, 60); setTimeout(rapporteraHojd, 300);
+      var n = 0, iv = setInterval(function(){ rapporteraHojd(); if(++n > 24) clearInterval(iv); }, 250);
+    })();
+  }
   // Färdighetens verkliga nivå-antal (?maxniva=1..3). Styr stegens segment och
   // adjustLevel-taket; utelämnad => 3 (default). Enkel-nivå (1) = ingen klätterstege.
   var mmx = hs.match(/[?&]maxniva=([1-3])\b/i);
