@@ -905,11 +905,16 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
   // ── Egen Öva-vy för Addition: metod-rader visar mellanled ("visa på mellanled", inte bara svar).
   //    Motorn (blad-k1-d2.js) rörs inte; återanvänder dess CSS + globala jamforTal/visaKonfetti. ──
-  function evalUttryck(s){
-    if(s==null) return null;
-    var t=String(s).toLowerCase().replace(/[x×·]/g,'*').replace(/\s/g,'').replace(/,/g,'.').split('=')[0];
-    if(t===''||!/^[0-9+\-*/.()]+$/.test(t)) return null;
-    try{ var v=Function('"use strict";return('+t+')')(); return (typeof v==='number'&&isFinite(v))?v:null; }catch(e){ return null; }
+  // Antal mellanled-rutor per metod: talsorterna = antal talsorter (siffror + decimaler), annars 2.
+  function antalMellanBoxar(grupp, rad){
+    var rub=(grupp.rubrik||'').toLowerCase();
+    if(rub.indexOf('talsorterna')>=0){
+      var nums=(rad.vansterText.match(/[0-9]+(?:[.,][0-9]+)?/g)||[]).map(function(x){return x.replace(',','.');});
+      var intDig=1, dec=0;
+      nums.forEach(function(s){ var p=s.split('.'); intDig=Math.max(intDig,(p[0].replace(/^0+/,'')||'0').length); if(p[1]) dec=Math.max(dec,p[1].length); });
+      return intDig+dec;
+    }
+    return 2; // flytta över m.fl. – två omfördelade termer
   }
   function bygg_addition_ova(rotEl, blad){
     var h='<div class="ovn-sheet"><h2>'+blad.titel+'</h2>';
@@ -921,11 +926,16 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       (grupp.rader||[]).forEach(function(rad){
         bok++; var L=String.fromCharCode(bok)+')';
         if(rad.typ==='enkel'){
+          var n=antalMellanBoxar(grupp,rad), boxar='';
+          for(var bi=0;bi<n;bi++){
+            boxar += (bi>0?'<span class="ovn-text ova-plus">+</span>':'')
+              + '<input class="ovn-in ova-mellan-box" inputmode="decimal" autocomplete="off" style="width:60px;text-align:center;">';
+          }
           h+='<div class="ovn-rad ova-metod-rad"><span class="ovn-label">'+L+'</span>'
             +'<span class="ovn-text ovn-num">'+rad.vansterText+'</span>'
-            +'<input class="ovn-in ova-mellan" data-svar="'+rad.svar+'" inputmode="text" autocomplete="off" placeholder="mellanled" style="min-width:120px;">'
+            +'<span class="ova-mellan-grupp" data-svar="'+rad.svar+'" data-antal="'+n+'" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">'+boxar+'</span>'
             +'<span class="ovn-text">=</span>'
-            +'<input class="ovn-in ova-slutsvar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:90px;"></div>';
+            +'<input class="ovn-in ova-slutsvar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:84px;"></div>';
         } else if(rad.typ==='text'){
           h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
             +'<span class="ovn-text" style="flex:1;min-width:160px;">'+rad.fraga+'</span>'
@@ -955,7 +965,11 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     inputs.forEach(function(inp,i){
       inp.addEventListener('focus',function(){fokus=i;});
       inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault(); if(i+1<inputs.length) inputs[i+1].focus();} });
-      inp.addEventListener('input',function(){ inp.classList.remove('correct','wrong'); inp.parentElement.querySelectorAll('.ovn-mark,.ovn-fasit').forEach(function(x){x.remove();}); });
+      inp.addEventListener('input',function(){
+        if(inp.classList.contains('ova-mellan-box')) inp.style.width=Math.max(60, inp.value.length*13+22)+'px';
+        var row=inp.closest('.ovn-rad');
+        if(row){ row.querySelectorAll('.ovn-mark,.ovn-fasit').forEach(function(x){x.remove();}); row.querySelectorAll('.ovn-in').forEach(function(x){x.classList.remove('correct','wrong');}); }
+      });
     });
     rotEl.querySelectorAll('.ovn-kp-key').forEach(function(btn){
       btn.addEventListener('mousedown',function(e){ e.preventDefault();
@@ -970,38 +984,56 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       inp.classList.add(ok?'correct':'wrong'); inp.insertAdjacentElement('afterend',mark);
       if(!ok&&facit!=null){ var f=document.createElement('span'); f.className='ovn-fasit'; f.textContent='rätt svar: '+facit; mark.insertAdjacentElement('afterend',f); }
     }
+    function markEfter(el,ok,facit){
+      var mark=document.createElement('span'); mark.className='ovn-mark '+(ok?'ok':'fel'); mark.textContent=ok?'✓':'✗';
+      el.insertAdjacentElement('afterend',mark);
+      if(!ok&&facit!=null){ var f=document.createElement('span'); f.className='ovn-fasit'; f.textContent=facit; mark.insertAdjacentElement('afterend',f); }
+    }
     rotEl.querySelector('[data-action="kontroll"]').addEventListener('click',function(){
       var ratt=0,totalt=0;
       rotEl.querySelectorAll('.ovn-mark,.ovn-fasit').forEach(function(x){x.remove();});
       inputs.forEach(function(inp){ inp.classList.remove('correct','wrong'); });
-      inputs.forEach(function(inp){
-        var ok=false, facit=null; totalt++;
-        if(inp.classList.contains('ova-mellan')){
-          var mv=evalUttryck(inp.value), svar=parseFloat(inp.dataset.svar);
-          var harOp=/[+·*/]/.test(inp.value) || /[0-9]\s*-/.test(inp.value);   // minst en operation (inte bara talet)
-          ok = mv!=null && harOp && Math.abs(mv-svar)<1e-6;
-          facit = ok?null:'ett mellanled som blir '+String(svar).replace('.',',');
-        } else if(inp.classList.contains('ova-term')){
-          var malS=parseFloat(inp.dataset.term), malA=parseInt(inp.dataset.antal,10);
-          var termer=String(inp.value).replace(/−/g,'-').replace(/\s/g,'').split('+');
-          var sum=0,giltig=true; if(termer.length!==malA)giltig=false;
-          termer.forEach(function(t){var v=parseFloat(t.replace(',','.')); if(isNaN(v))giltig=false; else sum+=v;});
-          ok=giltig&&Math.abs(sum-malS)<1e-9; facit=ok?null:'summan ska bli '+String(malS).replace('.',',');
-        } else if(inp.classList.contains('ova-tvatal')){
-          var mal=inp.dataset.tal.split(',').map(function(x){return parseFloat(x);});
-          var vv=parseFloat(String(inp.value).replace(',','.'));
-          ok=!isNaN(vv)&&mal.some(function(m){return Math.abs(m-vv)<1e-9;}); facit=ok?null:inp.dataset.tal.split(',').join(' och ');
+      rotEl.querySelectorAll('.ovn-rad').forEach(function(row){
+        if(row.classList.contains('ova-metod-rad')){
+          var grp=row.querySelector('.ova-mellan-grupp');
+          var boxes=Array.from(grp.querySelectorAll('.ova-mellan-box'));
+          var svar=parseFloat(grp.dataset.svar);
+          var vals=boxes.map(function(b){return parseFloat(String(b.value).replace(',','.'));});
+          var allNum=vals.every(function(v){return !isNaN(v);});
+          var sum=vals.reduce(function(a,v){return a+(isNaN(v)?0:v);},0);
+          var noDump=!vals.some(function(v){return Math.abs(v-svar)<1e-6;});   // inte bara svaret i en ruta
+          var mOk=allNum && Math.abs(sum-svar)<1e-6 && (boxes.length<2||noDump);
+          boxes.forEach(function(b){ b.classList.add(mOk?'correct':'wrong'); });
+          markEfter(grp,mOk, mOk?null:'rätt svar: summan ska bli '+String(svar).replace('.',','));
+          totalt++; if(mOk)ratt++;
+          var sInp=row.querySelector('.ova-slutsvar');
+          var sOk=jamforTal(sInp.value,svar); markera(sInp,sOk,sOk?null:String(svar).replace('.',',')); totalt++; if(sOk)ratt++;
         } else {
-          var mal2=parseFloat(inp.dataset.svar); ok=jamforTal(inp.value,mal2); facit=ok?null:String(mal2).replace('.',',');
+          row.querySelectorAll('.ovn-in').forEach(function(inp){
+            var ok=false, facit=null; totalt++;
+            if(inp.classList.contains('ova-term')){
+              var malS=parseFloat(inp.dataset.term), malA=parseInt(inp.dataset.antal,10);
+              var termer=String(inp.value).replace(/−/g,'-').replace(/\s/g,'').split('+');
+              var s2=0,giltig=true; if(termer.length!==malA)giltig=false;
+              termer.forEach(function(t){var v=parseFloat(t.replace(',','.')); if(isNaN(v))giltig=false; else s2+=v;});
+              ok=giltig&&Math.abs(s2-malS)<1e-9; facit=ok?null:'summan ska bli '+String(malS).replace('.',',');
+            } else if(inp.classList.contains('ova-tvatal')){
+              var mal=inp.dataset.tal.split(',').map(function(x){return parseFloat(x);});
+              var vv=parseFloat(String(inp.value).replace(',','.'));
+              ok=!isNaN(vv)&&mal.some(function(m){return Math.abs(m-vv)<1e-9;}); facit=ok?null:inp.dataset.tal.split(',').join(' och ');
+            } else {
+              var mal2=parseFloat(inp.dataset.svar); ok=jamforTal(inp.value,mal2); facit=ok?null:String(mal2).replace('.',',');
+            }
+            if(ok)ratt++; markera(inp,ok,facit);
+          });
         }
-        if(ok)ratt++; markera(inp,ok,facit);
       });
       var sam=rotEl.querySelector('[data-sammanf]'); sam.style.display='block'; sam.classList.remove('ok','delvis');
       if(ratt===totalt){ sam.classList.add('ok'); sam.innerHTML='<div class="ovn-sammanf-icon">✓</div>Alla rätt! ('+ratt+' av '+totalt+')'; if(typeof visaKonfetti==='function') visaKonfetti(); }
       else { sam.classList.add('delvis'); sam.innerHTML=ratt+' av '+totalt+' rätt. Rätta de röda och försök igen.'; }
     });
     rotEl.querySelector('[data-action="reset"]').addEventListener('click',function(){
-      inputs.forEach(function(inp){ inp.value=''; inp.classList.remove('correct','wrong'); });
+      inputs.forEach(function(inp){ inp.value=''; inp.classList.remove('correct','wrong'); if(inp.classList.contains('ova-mellan-box')) inp.style.width='60px'; });
       rotEl.querySelectorAll('.ovn-mark,.ovn-fasit').forEach(function(x){x.remove();});
       var sam=rotEl.querySelector('[data-sammanf]'); sam.style.display='none';
     });
