@@ -664,6 +664,7 @@ function renderMultMetoder(body){
     let omgang = cfg.buildOmgang();
     let idx = 0;
     let results = [];
+    let uppgNr = 0;   // tips (Så funkar det + instruktion) bara på de två första uppgifterna
 
     function render(){
       if(idx >= omgang.length){
@@ -681,12 +682,13 @@ function renderMultMetoder(body){
         return;
       }
       const task = omgang[idx];
+      uppgNr++;
       host.innerHTML = '<div class="exercise-card">'
         + exerciseHeader(cfg.header, cfg.sub)
-        + '<div class="mult-exempel">' + cfg.exempel + '</div>'
+        + (uppgNr<=2 ? '<div class="mult-exempel">' + cfg.exempel + '</div>' : '')
         + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
         + '<div class="mult-metod-uppg">'
-          + '<div class="mult-metod-instr">' + cfg.instr + '</div>'
+          + (uppgNr<=2 ? '<div class="mult-metod-instr">' + cfg.instr + '</div>' : '')
           + '<div class="mult-rad-wrap">'
             + '<span class="mult-rad-fast">' + task.a + ' · ' + task.b + ' =</span>'
             + '<input type="text" class="mult-rad-input" id="metod-rad" autocomplete="off" placeholder="' + cfg.placeholder + '">'
@@ -704,11 +706,8 @@ function renderMultMetoder(body){
       const card = host.querySelector('.exercise-card');
       bindKeypad(card);
       const input = document.getElementById('metod-rad');
-      // mellanrum runt + - = · medan eleven skriver
-      input.addEventListener('input', function(){
-        const f = d3SpaceExpr(input.value);
-        if(f !== input.value) input.value = f;
-      });
+      // OBS: ingen live-omformatering av mellanslag – den nollställde markören så man
+      // inte kunde rätta mitt i talet. Kontrollen (d3EvalExpr) struntar i mellanslag ändå.
       setTimeout(function(){ input.focus(); }, 50);
       input.addEventListener('keydown', function(e){
         if(e.key === 'Enter'){ e.preventDefault(); check(); }
@@ -884,12 +883,12 @@ function renderUppstallningMult(body, backFn){
 
     // demo: 67 · 4. minnessiffra '2' till höger, struken i steg 2.
     const steps = [
+      {minne:'', minneStruck:false, ans:['','',''],
+       text:'Vi räknar 67 · 4. Börja längst till höger: 4 · 7 = 28. Skriv 8 i entalen och för minnessiffran 2 till höger om talet.'},
       {minne:'2', minneStruck:false, ans:['','','8'],
-       text:'Vi räknar 67 · 4. Börja längst till höger: 4 · 7 = 28. Skriv 8 i entalen och minnessiffran 2 till höger om talet.'},
-      {minne:'2', minneStruck:true, ans:['','6','8'],
        text:'Nästa kolumn: 4 · 6 = 24. Lägg till minnessiffran 2 → 26. Skriv 6 i tiotalen och stryk minnessiffran eftersom den nu är använd.'},
       {minne:'2', minneStruck:true, ans:['2','6','8'],
-       text:'Det finns inga fler kolumner. Skriv den sista 2:an i hundratalen. Svaret är 268.'}
+       text:'Skriv den sista 2:an i hundratalen. Svaret är 268.'}
     ];
     let s = 0;
     function draw(){
