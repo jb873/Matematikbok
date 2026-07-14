@@ -1429,67 +1429,93 @@ function renderOkaMinska(body, metod, backFn){
 
 // --- SUB METOD: ADDITION BAKIFRÅN ---
 function renderAdditionBakifran(body, metod, backFn){
-  function newTask(){
-    // Välj tal som passar metoden: b ska ha ett gap till nästa tiotal
-    for(let i=0; i<100; i++){
-      const a = 20 + Math.floor(Math.random()*80);
-      const b = 10 + Math.floor(Math.random()*(a-15));
-      if(b%10 !== 0 && a-b > 5) return {a, b, answer: a-b, op:'-'};
+  let level = 1;                 // 1: tvåsiffrigt · 2: hundra/tusental · 3: decimaltal
+  let omgangResults = [];
+  let uppgNr = 0;                // totalt i sessionen – Idén-rutan visas bara de 2 första
+  const OMGANG = 5;
+  function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
+  function fmt(n){ return String(n).replace('.', ','); }
+  function lvlNamn(l){ return l===1 ? 'Tvåsiffriga tal' : l===2 ? 'Hundratal och tusental' : 'Decimaltal'; }
+
+  // b måste ha ett ental/tiondel att kliva från (b%10≠0) och det ska finnas rum för två steg.
+  function newTask(lvl){
+    const dec = lvl===3 ? 1 : 0, scale = dec===1 ? 10 : 1;
+    for(let i=0;i<400;i++){
+      let aS, bS;
+      if(lvl===1){ aS = rnd(23,99);    bS = rnd(11, aS-6); }
+      else if(lvl===2){ aS = rnd(220,9989); bS = rnd(101, aS-31); }
+      else { aS = rnd(41,400); bS = rnd(13, aS-6); }        // i tiondelar → 4,1–40,0
+      if(bS % 10 === 0) continue;
+      const nextS = Math.ceil(bS/10)*10;
+      if(nextS >= aS) continue;
+      if(aS - bS < (lvl===2 ? 40 : 5)) continue;
+      return { a:aS/scale, b:bS/scale, answer:(aS-bS)/scale, dec:dec,
+               nextTio:nextS/scale, steg1:(nextS-bS)/scale, steg2:(aS-nextS)/scale };
     }
-    return {a:43, b:17, answer:26, op:'-'};
+    return dec===1 ? { a:8.3,b:2.6,answer:5.7,dec:1,nextTio:3,steg1:0.4,steg2:5.3 }
+                   : { a:43,b:17,answer:26,dec:0,nextTio:20,steg1:3,steg2:23 };
   }
-  let task = newTask();
+  let task = newTask(level);
+
+  function showSummary(){
+    const right = omgangResults.filter(x=>x).length, total = omgangResults.length;
+    const adj = adjustLevel(level, right, total); level = adj.level;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader('Metod · addition bakifrån', 'Du klarade '+right+' av '+total+'.', level)
+      + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+      + '</div>';
+    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; task=newTask(level); render(); };
+  }
 
   function render(){
-    const {a, b, answer} = task;
-    // Steg: b -> nästa tiotal -> a
-    const nextTio = Math.ceil(b/10)*10;
-    const steg1 = nextTio - b;          // från b till nästa tiotal
-    const steg2 = a - nextTio;          // från nästa tiotal till a
+    uppgNr++;
+    const {a, b, answer, nextTio, steg1, steg2} = task;
     const useTwoSteps = steg2 > 0;
+    const visaIde = uppgNr <= 2;                                   // Idén-rutan bara på de 2 första
+    const posPct = Math.max(6, Math.min(94, (steg1/answer)*100));
 
     body.innerHTML = `
       <div class="exercise-card">
-        ${exerciseHeader('Metod · addition bakifrån', metod.beskrivning)}
+        ${exerciseHeader('Metod · addition bakifrån', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level)}
         <div class="metod-explain-card">
-          <div style="background:var(--bg-warm);padding:14px;border-radius:var(--radius);margin-bottom:16px;font-size:13px;">
-            <strong>Idén:</strong> Istället för att subtrahera räknar vi hur mycket vi måste lägga till för att komma från <strong>${b}</strong> till <strong>${a}</strong>.
+          ${visaIde ? `<div style="background:var(--bg-warm);padding:14px;border-radius:var(--radius);margin-bottom:16px;font-size:13px;">
+            <strong>Idén:</strong> Istället för att subtrahera räknar vi hur mycket vi måste lägga till för att komma från <strong>${fmt(b)}</strong> till <strong>${fmt(a)}</strong>.
             Resultatet (differensen) är summan av stegen.
-          </div>
+          </div>` : ''}
 
-          <p style="font-size:15px;margin:0 0 18px;">Beräkna <strong style="font-family:var(--mono);font-size:18px;">${a} − ${b}</strong>.</p>
+          <p style="font-size:15px;margin:0 0 18px;">Beräkna <strong style="font-family:var(--mono);font-size:18px;">${fmt(a)} − ${fmt(b)}</strong>.</p>
 
           <div class="abakifran-grid">
             <div class="abakifran-tallinje">
               <div class="ab-punkt" style="left:0%">
-                <div class="ab-label">${b}</div>
+                <div class="ab-label">${fmt(b)}</div>
                 <div class="ab-dot"></div>
               </div>
-              <div class="ab-punkt" style="left:${steg1/(answer)*50}%">
-                <div class="ab-label">${nextTio}</div>
+              <div class="ab-punkt" style="left:${posPct}%">
+                <div class="ab-label">${fmt(nextTio)}</div>
                 <div class="ab-dot"></div>
               </div>
               <div class="ab-punkt" style="left:100%">
-                <div class="ab-label">${a}</div>
+                <div class="ab-label">${fmt(a)}</div>
                 <div class="ab-dot"></div>
               </div>
               <div class="ab-linje"></div>
             </div>
 
             <div class="om-uttryck-rad" style="margin-top:8px;justify-content:center;">
-              <span class="om-u-num">${a}</span>
+              <span class="om-u-num">${fmt(a)}</span>
               <span class="om-u-op">−</span>
-              <span class="om-u-num">${b}</span>
+              <span class="om-u-num">${fmt(b)}</span>
               <span class="om-u-op">=</span>
-              <input type="text" class="om-u-input" id="ab-s1" inputmode="numeric" maxlength="4" data-ans="${steg1}" placeholder="___">
+              <input type="text" class="om-u-input" id="ab-s1" inputmode="decimal" maxlength="6" data-ans="${steg1}" placeholder="___">
               ${useTwoSteps ? `<span class="om-u-op">+</span>
-              <input type="text" class="om-u-input" id="ab-s2" inputmode="numeric" maxlength="4" data-ans="${steg2}" placeholder="___">` : ''}
+              <input type="text" class="om-u-input" id="ab-s2" inputmode="decimal" maxlength="6" data-ans="${steg2}" placeholder="___">` : ''}
               <span class="om-u-op">=</span>
-              <input type="text" class="om-u-input om-u-input-sum" id="ab-sum" inputmode="numeric" maxlength="5" data-ans="${answer}" placeholder="?">
+              <input type="text" class="om-u-input om-u-input-sum" id="ab-sum" inputmode="decimal" maxlength="7" data-ans="${answer}" placeholder="?">
             </div>
           </div>
 
-          <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:10px 0 0;">Mellanledet visar stegen: från ${b} upp till ${nextTio}${useTwoSteps?` och vidare till ${a}`:''}.</p>
+          <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:10px 0 0;">Mellanledet visar stegen: från ${fmt(b)} upp till ${fmt(nextTio)}${useTwoSteps?` och vidare till ${fmt(a)}`:''}.</p>
 
           <div class="rakna-uppdela-feedback" id="fb-ab"></div>
           ${keypadHTML([])}
@@ -1508,30 +1534,34 @@ function renderAdditionBakifran(body, metod, backFn){
       document.getElementById('ab-sum')
     ].filter(Boolean);
 
+    const parse = v => parseFloat(String(v).replace(',','.'));
     const check = ()=>{
       let allRight = true;
       allInputs.forEach(inp=>{
         inp.disabled = true;
-        const correct = parseInt(inp.value) === parseInt(inp.dataset.ans);
+        const correct = Math.abs(parse(inp.value) - parseFloat(inp.dataset.ans)) < 1e-9;
         inp.classList.add(correct?'correct':'wrong');
         if(!correct) allRight = false;
       });
       const fb = document.getElementById('fb-ab'); fb.classList.add('show');
       const ts = getTutorScore('sub-metoder','metod'); ts.total++;
       const tsGB = getTutorScore('sub-metoder','bakifran'); tsGB.total++;
+      omgangResults.push(allRight);
       if(allRight){
         fb.classList.add('correct');
-        fb.textContent = `Rätt! ${b} + ${steg1}${useTwoSteps?' + '+steg2:''} = ${a}, alltså ${a} − ${b} = ${answer}`;
+        fb.textContent = `Rätt! ${fmt(b)} + ${fmt(steg1)}${useTwoSteps?' + '+fmt(steg2):''} = ${fmt(a)}, alltså ${fmt(a)} − ${fmt(b)} = ${fmt(answer)}`;
         ts.correct++; tsGB.correct++;
-        setTimeout(()=>{ task=newTask(); render(); }, 2200);
       } else {
         fb.classList.add('wrong');
-        fb.textContent = `${b} + ${steg1} = ${nextTio}${useTwoSteps?', ' + nextTio + ' + ' + steg2 + ' = ' + a : ''}. Differensen är ${steg1}${useTwoSteps?' + '+steg2:''} = ${answer}.`;
-        setTimeout(()=>{ task=newTask(); render(); }, 2800);
+        fb.textContent = `${fmt(b)} + ${fmt(steg1)} = ${fmt(nextTio)}${useTwoSteps?', ' + fmt(nextTio) + ' + ' + fmt(steg2) + ' = ' + fmt(a) : ''}. Differensen är ${fmt(answer)}.`;
       }
+      setTimeout(()=>{
+        if(omgangResults.length >= OMGANG) showSummary();
+        else { task=newTask(level); render(); }
+      }, allRight ? 2000 : 2800);
     };
     document.getElementById('ab-check').onclick = check;
-    document.getElementById('ab-ny').onclick = ()=>{ task=newTask(); render(); };
+    document.getElementById('ab-ny').onclick = ()=>{ task=newTask(level); render(); };
     document.getElementById('ab-back').onclick = backFn;
     allInputs.forEach((inp,i)=>{
       inp.addEventListener('keydown', e=>{
