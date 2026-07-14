@@ -405,16 +405,11 @@ function renderUppstallningAdd(body, metod, backFn){
           <div class="uppstallning-practice">
             <div class="uppstallning-interaktiv">
 
-              <!-- Minnessiffre-rad -->
+              <!-- Minnessiffre-rad: tomma platser, minnesrutor läggs till manuellt (aldrig över entalet) -->
               <div class="upp-i-row carry-row">
                 <div class="upp-i-op-cell"></div>
                 ${positions.map(pos => `
-                  <div class="upp-i-cell">
-                    <input type="text" class="carr-input" data-pos="${pos}"
-                      inputmode="numeric" maxlength="1"
-                      tabindex="${positions.indexOf(pos) + 1}"
-                      placeholder="">
-                  </div>
+                  <div class="upp-i-cell" data-carrycell="${pos}"></div>
                 `).join('')}
               </div>
 
@@ -461,6 +456,9 @@ function renderUppstallningAdd(body, metod, backFn){
             </div>
           </div>
 
+          <div style="text-align:center;margin:8px 0 2px;">
+            <button class="btn subtle" id="minne-btn" style="font-size:13px;">↑ Lägg till minnessiffra</button>
+          </div>
           <div class="rakna-uppdela-feedback" id="fb"></div>
           ${keypadHTML([])}
           <div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
@@ -471,40 +469,43 @@ function renderUppstallningAdd(body, metod, backFn){
       </div>
     `;
 
-    // Sätt taborder: ental-input för minnessiffra först, sedan ental-svar, sen nästa kolumn
-    // Istället: bygg tab-ordning höger->vänster per rad
-    // Minnessiffror: pos 0 -> pos 1 -> ... (höger till vänster)
-    // Svar: pos 0 -> pos 1 -> ...
-    const carrInputs = Array.from(document.querySelectorAll('.carr-input'))
-      .sort((a,b) => parseInt(a.dataset.pos) - parseInt(b.dataset.pos)); // ental först
     const ansInputs = Array.from(document.querySelectorAll('.ans-input'))
-      .sort((a,b) => parseInt(a.dataset.pos) - parseInt(b.dataset.pos));
-
-    // Fokusordning: ental-ans -> tiotal-ans -> ... (eleven börjar med svaret ental)
-    const allInputsOrdered = [...ansInputs, ...carrInputs];
+      .sort((a,b) => parseInt(a.dataset.pos) - parseInt(b.dataset.pos)); // ental först (pos 0)
 
     ansInputs.forEach((inp, i) => {
-      function nasta(){ if(i < ansInputs.length - 1) ansInputs[i+1].focus(); else if(carrInputs[0]) carrInputs[0].focus(); }
-      inp.addEventListener('input', () => { inp.value = inp.value.replace(/[^0-9]/g,''); if(inp.value) nasta(); });   // auto-hopp (keypad + tangentbord)
-      inp.addEventListener('keydown', e => {
-        if(e.key === 'Enter' || e.key === 'Tab' && !e.shiftKey) {
-          e.preventDefault();
-          // Nästa: nästa svar-kolumn, eller om sista -> första minneskolumnen
-          if(i < ansInputs.length - 1) ansInputs[i+1].focus();
-          else carrInputs[0].focus();
-        }
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/[^0-9]/g,'');
+        if(inp.value && i < ansInputs.length - 1) ansInputs[i+1].focus();   // auto-hopp höger→vänster
       });
-    });
-
-    carrInputs.forEach((inp, i) => {
       inp.addEventListener('keydown', e => {
-        if(e.key === 'Enter') {
+        if(e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
           e.preventDefault();
-          if(i < carrInputs.length - 1) carrInputs[i+1].focus();
+          if(i < ansInputs.length - 1) ansInputs[i+1].focus();
           else check();
         }
       });
     });
+
+    // Minnessiffra läggs till MANUELLT: första trycket ger en ruta över tiotalet (pos 1),
+    // nästa över hundratalet (pos 2), osv. Aldrig över entalet (pos 0).
+    let nastaMinne = 1;
+    const minneBtn = document.getElementById('minne-btn');
+    function laggTillMinne(){
+      if(nastaMinne > width - 1) return;                     // inga fler kolumner att bära över till
+      const cell = body.querySelector('[data-carrycell="' + nastaMinne + '"]');
+      if(!cell) return;
+      cell.innerHTML = '<input type="text" class="carr-input" data-pos="' + nastaMinne + '" inputmode="numeric" maxlength="1" placeholder="">';
+      const inp = cell.querySelector('.carr-input');
+      inp.addEventListener('input', () => { inp.value = inp.value.replace(/[^0-9]/g,''); });
+      inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+      nastaMinne++;
+      if(nastaMinne > width - 1) minneBtn.disabled = true;
+      inp.focus();
+    }
+    if(minneBtn){
+      minneBtn.onclick = laggTillMinne;
+      if(width - 1 < 1) minneBtn.disabled = true;            // ryms ingen minnessiffra alls
+    }
 
     // Fokusera ental-svaret direkt + koppla sifferknappsats mot fokuserad ruta
     setTimeout(() => ansInputs[0] && ansInputs[0].focus(), 50);
@@ -529,7 +530,7 @@ function renderUppstallningAdd(body, metod, backFn){
           correct = false;
         }
       });
-      carrInputs.forEach(inp => inp.disabled = true);
+      body.querySelectorAll('.carr-input').forEach(inp => inp.disabled = true);
 
       const fb = document.getElementById('fb'); fb.classList.add('show');
       document.getElementById('check-btn').disabled = true;
