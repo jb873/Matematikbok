@@ -963,7 +963,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   var omgangResults = [];
   var currentTask   = null;
   var OMGANG  = 5;
-  var MAX_LVL = 6;
+  var MAX_LVL = 3;           // 1 två/tresiffrigt · 2 hundratal/tusental · 3 decimaltal
   var svarVal = {};          // pos -> ifyllt svar (bevaras när lån-knappen re-renderar)
   var sistFokusPos = null;   // senast fokuserade svarsruta (så markören inte hoppar till entalet)
 
@@ -988,59 +988,30 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   function genTask(lvl){
     for(var i=0;i<600;i++){
       var aInt,bInt,dec=0;
-      switch(lvl){
-        case 1: // 3 siff − 2/3 siff, inget lån (aldrig ensiffrigt – ska kännas som en uppställning)
-          aInt=rnd(100,999);
-          bInt = Math.random()<0.5 ? rnd(23,99) : rnd(100,aInt-2);
-          break;
-        case 2: // 2-3 siff, 1 lån, blandade storlekar
-          aInt=rnd(100,999);
-          bInt = Math.random()<0.4 ? rnd(10,99) : rnd(100,aInt-2);
-          break;
-        case 3: // 3-4 siff, 2 lån, blandade storlekar
-          aInt = Math.random()<0.5 ? rnd(200,999) : rnd(1000,9999);
-          bInt = Math.random()<0.4 ? rnd(10,99)
-               : Math.random()<0.5 ? rnd(100,999)
-               : rnd(1000,Math.min(aInt-2,9999));
-          break;
-        case 4: // 4 siff, 2-3 lån, nollor i mitten
-          if(Math.random()<0.5){
-            // Garanterad nolla i mitten: X00Y eller X0Y0 etc.
-            var h=rnd(1,9),t=0,e=rnd(1,9);
-            aInt = h*1000 + t*100 + rnd(0,9)*10 + e;
-            if(aInt<100) aInt+=1000;
-          } else {
-            aInt=rnd(1000,9999);
-          }
-          bInt = Math.random()<0.4 ? rnd(100,999) : rnd(1000,aInt-2);
-          break;
-        case 5: // 1 decimal, 1-2 lån, blandade storlekar
-          dec=1;
-          aInt = Math.random()<0.5 ? rnd(11,99) : rnd(101,999);
-          bInt = Math.random()<0.4 ? rnd(1,9) : rnd(10,aInt-2);
-          break;
-        default: // 6: 2 decimaler, 1-2 lån
-          dec=2;
-          aInt = rnd(101,999);
-          bInt = Math.random()<0.4 ? rnd(1,99) : rnd(100,aInt-2);
-          break;
+      if(lvl===1){                          // heltal 2-3 siffror, 0-2 lån (blandat)
+        aInt=rnd(100,999);
+        bInt = Math.random()<0.5 ? rnd(23,99) : rnd(100,aInt-2);
+      } else if(lvl===2){                    // hundratal och tusental (3-4 siffror), fler lån, ibland nolla
+        if(Math.random()<0.35){              // garanterad nolla i mitten: X0YZ / XY0Z
+          var h=rnd(1,9), e=rnd(1,9);
+          aInt = h*1000 + (Math.random()<0.5?0:rnd(1,9))*100 + (Math.random()<0.5?0:rnd(1,9))*10 + e;
+        } else {
+          aInt = Math.random()<0.3 ? rnd(210,999) : rnd(1000,9999);
+        }
+        bInt = Math.random()<0.3 ? rnd(100,999) : rnd(1000,Math.max(1000,aInt-2));
+        if(bInt>=aInt) bInt = rnd(100, aInt-2);
+      } else {                               // decimaltal (1-2 decimaler)
+        dec = Math.random()<0.5 ? 1 : 2;
+        aInt = dec===1 ? (Math.random()<0.5 ? rnd(11,99) : rnd(101,999)) : rnd(101,999);
+        bInt = Math.random()<0.4 ? rnd(11,99) : rnd(100,aInt-2);
       }
 
       if(aInt<=bInt) continue;
       var nb = countBorrows(aInt,bInt);
-
-      var ok=false;
-      switch(lvl){
-        case 1: ok=(nb===0); break;
-        case 2: ok=(nb===1); break;
-        case 3: ok=(nb>=2); break;
-        case 4: ok=(nb>=2 && (hasZeroMiddle(aInt)||nb>=3)); break;
-        case 5: ok=(nb>=1); break;
-        default: ok=(nb>=1); break;
-      }
+      var ok = lvl===1 ? (nb<=2) : lvl===2 ? (nb>=2) : (nb>=1);
       if(ok) return {aInt:aInt,bInt:bInt,ansInt:aInt-bInt,dec:dec};
     }
-    return {aInt:523,bInt:278,ansInt:245,dec:0};
+    return lvl===3 ? {aInt:834,bInt:276,ansInt:558,dec:1} : {aInt:1503,bInt:278,ansInt:1225,dec:0};
   }
 
   function displayNum(n,dec){
@@ -1067,19 +1038,16 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   function dgt(n,p){ return Math.floor(n/Math.pow(10,p))%10; }
   function hasP(n,p){ return Math.floor(n/Math.pow(10,p))>0||p===0; }
 
+  // Klättrar men sjunker aldrig (samma modell som övriga drillar).
   function adjustLvl(lvl,right,total){
     if(right>=total-1 && lvl<MAX_LVL) return {level:lvl+1,change:'up'};
-    if(right<=Math.floor(total/3) && lvl>1) return {level:lvl-1,change:'down'};
     return {level:lvl,change:null};
   }
 
   function lvlName(l){
-    if(l===1) return 'Inget lån';
-    if(l===2) return '1 lån';
-    if(l===3) return '2+ lån, blandade tal';
-    if(l===4) return '4 siffror, nollor';
-    if(l===5) return 'Decimaltal (1 decimal)';
-    return 'Decimaltal (2 decimaler)';
+    return l===1 ? 'Två- och tresiffriga tal'
+         : l===2 ? 'Hundratal och tusental'
+         : 'Decimaltal';
   }
 
   function showSummary(){
