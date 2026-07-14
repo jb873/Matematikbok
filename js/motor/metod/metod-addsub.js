@@ -277,6 +277,18 @@ function renderUppstallningAdd(body, metod, backFn){
   let omgangResults = [];
   let currentTask = null;
 
+  // Uppställning ska öva minnessiffror → kräv minst en övergång, undvik runda tal
+  function genUppstAdd(){
+    for(let i=0; i<300; i++){
+      const a = 13 + Math.floor(Math.random()*86);   // 13–98, 2 siffror
+      const b = 13 + Math.floor(Math.random()*86);
+      if(a % 10 === 0 || b % 10 === 0) continue;      // inga runda tal
+      if((a % 10) + (b % 10) < 10) continue;          // garanterad minnessiffra i entalen
+      return {a, b, answer: a + b, op:'+'};
+    }
+    return {a:74, b:57, answer:131, op:'+'};
+  }
+
   function renderExplain(){
     const a = 374, b = 286; // fast exempeltal
     body.innerHTML = `
@@ -342,8 +354,7 @@ function renderUppstallningAdd(body, metod, backFn){
       <div class="uppstallning-box">
         ${entalsCarry && steg >= 1 ? '<div class="upp-carry-row"><span></span><span></span><span></span><span class="carry">¹</span></div>' : '<div class="upp-carry-row"></div>'}
         <div class="upp-row a">${digitSpans(a, 4)}</div>
-        <div class="upp-row op"><span>+</span><span></span><span></span></div>
-        <div class="upp-row b">${digitSpans(b, 4)}</div>
+        <div class="upp-row b">${digitSpansOp(b, 4, '+')}</div>
         <div class="upp-line"></div>
         ${steg >= 3 ? `<div class="upp-row result">${digitSpans(sum, 4, true)}</div>` : '<div class="upp-row result"><span>?</span></div>'}
       </div>
@@ -359,8 +370,19 @@ function renderUppstallningAdd(body, metod, backFn){
     ).join('');
   }
 
+  // Som digitSpans men sätter operatorn (+) i kolumnen till vänster om första siffran
+  function digitSpansOp(n, width, op){
+    const nStr = String(n);
+    const opIdx = Math.max(0, width - nStr.length - 1);
+    const s = nStr.padStart(width, ' ');
+    return s.split('').map((c,i)=>{
+      if(i === opIdx) return `<span style="color:var(--c-metod);font-weight:700">${op}</span>`;
+      return c === ' ' ? '<span> </span>' : `<span>${c}</span>`;
+    }).join('');
+  }
+
   function renderPractice(){
-    currentTask = genAddTask(1);
+    currentTask = genUppstAdd();
     const {a, b, answer} = currentTask;
 
     // Bestäm antal positioner (kolumner) baserat på svaret
@@ -518,11 +540,11 @@ function renderUppstallningAdd(body, metod, backFn){
         fb.classList.add('correct');
         fb.textContent = `Rätt! ${a} + ${b} = ${answer} ✓`;
         ts.correct++;
-        setTimeout(() => { currentTask = genAddTask(1); renderPractice(); }, 1800);
+        setTimeout(() => { currentTask = genUppstAdd(); renderPractice(); }, 1800);
       } else {
         fb.classList.add('wrong');
         fb.textContent = `Inte rätt – ${a} + ${b} = ${answer}. Kontrollera position för position.`;
-        setTimeout(() => { currentTask = genAddTask(1); renderPractice(); }, 2500);
+        setTimeout(() => { currentTask = genUppstAdd(); renderPractice(); }, 2500);
       }
     };
 
@@ -608,6 +630,7 @@ function renderTalsorternaAdd(body, metod, backFn){
         '<button class="ts-snabb-btn ts-snabb-del" id="ts-del-btn">✕ <span style="font-size:11px;opacity:.7">ta bort</span></button>' +
       '</div>' +
       '<div class="rakna-uppdela-feedback" id="fb-ts"></div>' +
+      keypadHTML([]) +
       '<div style="margin-top:14px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
         '<button class="btn primary" id="ts-check">Kontrollera</button>' +
         '<button class="btn subtle" id="ts-ny">Ny uppgift</button>' +
@@ -626,6 +649,7 @@ function renderTalsorternaAdd(body, metod, backFn){
     document.getElementById('ts-check').onclick = check;
 
     refreshInputs();
+    bindKeypad(body.querySelector('.exercise-card'));
 
     function check(){
       const termInputs = document.querySelectorAll('.ts-term-input');
@@ -666,16 +690,25 @@ function renderTalsorternaAdd(body, metod, backFn){
 }
 
 
-// --- METOD: ÖKA OCH MINSKA LIKA (addition) ---
+// --- METOD: FLYTTA ÖVER (addition) ---
 function renderFlyttaOver(body, metod, backFn){
+  // Bra flytta-över-tal: ETT tal ligger nära ett tiotal (slutar på 7/8/9),
+  // det andra har tillräckligt med ental att ge bort så det blir ett jämnt tiotal.
+  // Ex: 28 + 34 → flytta 2 → 30 + 32.
   function newTask(){
-    for(let i=0; i<200; i++){
-      const a = 20 + Math.floor(Math.random()*80);
-      const b = 20 + Math.floor(Math.random()*80);
-      const bMod = b % 10;
-      if(bMod >= 7 || (bMod >= 1 && bMod <= 3)) return {a, b, answer: a+b};
+    for(let i=0; i<300; i++){
+      // "mottagaren" x ligger 1–3 under ett tiotal; "givaren" y ger bort gapet
+      const x = 20 + Math.floor(Math.random()*70);        // 20–89
+      const g = 10 - (x % 10);                              // gap till nästa tiotal
+      if(g < 1 || g > 3) continue;                          // slutar på 7,8,9
+      const y = 20 + Math.floor(Math.random()*70);
+      if(y % 10 < g) continue;                              // y måste kunna ge bort g
+      if(y % 10 === 0) continue;                            // givaren ska inte redan vara jämn
+      // slumpa vilket tal som visas först
+      if(Math.random() < 0.5) return {a:x, b:y, answer:x+y, nara:'a', gap:g};
+      return {a:y, b:x, answer:x+y, nara:'b', gap:g};
     }
-    return {a:47, b:35, answer:82};
+    return {a:28, b:34, answer:62, nara:'a', gap:2};
   }
 
   let task = newTask();
@@ -717,8 +750,6 @@ function renderFlyttaOver(body, metod, backFn){
 
   function render(){
     const {a, b, answer} = task;
-    const bMod = b % 10;
-    const hintFlytt = bMod >= 7 ? 10-bMod : (bMod >= 1 && bMod <= 3 ? bMod : 5);
 
     // Bygg HTML med string concat – inga nästlade template literals
     const aktiveVanster = riktning === 'vanster' ? ' is-active' : '';
@@ -726,7 +757,7 @@ function renderFlyttaOver(body, metod, backFn){
 
     body.innerHTML =
       '<div class="exercise-card">'
-      + exerciseHeader('Metod · öka och minska lika', 'Rita en pil som visar hur du flyttar. Skriv sedan mellanledet och svaret.')
+      + exerciseHeader('Metod · flytta över', 'Rita en pil som visar hur du flyttar. Skriv sedan mellanledet och svaret.')
       + '<div class="metod-explain-card">'
         + '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">'
           + '<strong>Idén:</strong> Flytta ett värde från ett tal till det andra – summan ändras inte.<br>'
@@ -755,6 +786,7 @@ function renderFlyttaOver(body, metod, backFn){
           + '</div>'
         + '</div>'
         + '<div class="rakna-uppdela-feedback" id="fb-fo"></div>'
+        + keypadHTML([])
         + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
           + '<button class="btn primary" id="fo-check">Kontrollera</button>'
           + '<button class="btn subtle" id="fo-ny">Ny uppgift</button>'
@@ -784,6 +816,7 @@ function renderFlyttaOver(body, metod, backFn){
     mlB.addEventListener('keydown',  function(e){ if(e.key==='Enter'){e.preventDefault(); mlSum.focus();} });
     mlSum.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault(); check();} });
     document.getElementById('fo-check').onclick = check;
+    bindKeypad(body.querySelector('.exercise-card'));
 
     function check(){
       var flytt  = parseInt(flEl.value) || 0;
@@ -820,10 +853,10 @@ function renderFlyttaOver(body, metod, backFn){
       } else {
         [mlA,mlB,mlSum].forEach(function(i){ i.classList.add('wrong'); });
         fb.classList.add('wrong');
-        var bMod3 = b%10;
-        var tips = bMod3>=7
-          ? 'flytta ' + (10-bMod3) + ' från ' + b + ' till ' + a + ': ' + (a+(10-bMod3)) + ' + ' + (b-(10-bMod3))
-          : 'flytta ' + (bMod3||5) + ' från ' + a + ' till ' + b + ': ' + (a-(bMod3||5)) + ' + ' + (b+(bMod3||5));
+        var nearVal  = task.nara === 'a' ? a : b;
+        var otherVal = task.nara === 'a' ? b : a;
+        var g = task.gap;
+        var tips = 'flytta ' + g + ' från ' + otherVal + ' till ' + nearVal + ': ' + (nearVal+g) + ' + ' + (otherVal-g);
         fb.textContent = 'Mellanledet stämmer inte. Tips: ' + tips + ' = ' + answer + '.';
         [mlA,mlB,mlSum,flEl].forEach(function(i){ i.disabled=false; });
         document.getElementById('fo-check').disabled=false;
@@ -1007,11 +1040,9 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     for(var i=0;i<600;i++){
       var aInt,bInt,dec=0;
       switch(lvl){
-        case 1: // 2-3 siff, inget lån, blandade storlekar
+        case 1: // 3 siff − 2/3 siff, inget lån (aldrig ensiffrigt – ska kännas som en uppställning)
           aInt=rnd(100,999);
-          bInt = Math.random()<0.4 ? rnd(1,9)
-               : Math.random()<0.6 ? rnd(10,99)
-               : rnd(100,aInt-2);
+          bInt = Math.random()<0.5 ? rnd(23,99) : rnd(100,aInt-2);
           break;
         case 2: // 2-3 siff, 1 lån, blandade storlekar
           aInt=rnd(100,999);
@@ -1208,6 +1239,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
         +'</div>'
 
       +'<div class="rakna-uppdela-feedback" id="fb"></div>'
+      +keypadHTML([])
       +'<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
         +'<button class="btn primary" id="check-btn">Kontrollera</button>'
         +'<button class="btn subtle" id="ny-btn">Ny uppgift</button>'
@@ -1237,6 +1269,10 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     var ansInputs=Array.from(document.querySelectorAll('.ans-input'))
       .sort(function(x,y){return parseInt(x.dataset.pos)-parseInt(y.dataset.pos);});
     ansInputs.forEach(function(inp,i){
+      inp.addEventListener('input',function(){
+        inp.value = inp.value.replace(/[^0-9]/g,'');
+        if(inp.value && i<ansInputs.length-1) ansInputs[i+1].focus();   // auto-hopp (keypad + tangentbord)
+      });
       inp.addEventListener('keydown',function(e){
         if(e.key==='Enter'){e.preventDefault();
           if(i<ansInputs.length-1) ansInputs[i+1].focus(); else check();
@@ -1244,6 +1280,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
       });
     });
     setTimeout(function(){if(ansInputs[0])ansInputs[0].focus();},50);
+    bindKeypad(body.querySelector('.exercise-card'));
     document.getElementById('check-btn').onclick=check;
 
     function check(){
@@ -1347,6 +1384,7 @@ function renderOkaMinska(body, metod, backFn){
         + '</div>'
 
         + '<div class="rakna-uppdela-feedback" id="fb-om"></div>'
+        + keypadHTML(['+','-'])
         + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
           + '<button class="btn primary" id="om-check">Kontrollera</button>'
           + '<button class="btn subtle" id="om-ny">Ny uppgift</button>'
@@ -1368,6 +1406,7 @@ function renderOkaMinska(body, metod, backFn){
       });
     });
     setTimeout(() => annotInp.focus(), 50);
+    bindKeypad(body.querySelector('.exercise-card'));
 
     document.getElementById('om-check').onclick = check;
     document.getElementById('om-ny').onclick    = () => { task=newTask(); render(); };
@@ -1490,25 +1529,23 @@ function renderAdditionBakifran(body, metod, backFn){
               <div class="ab-linje"></div>
             </div>
 
-            <div class="abakifran-steg">
-              <div class="ab-steg-rad">
-                <span class="ab-steg-label">Från ${b} till ${nextTio}:</span>
-                <input type="text" class="rakna-factor-input" id="ab-s1" inputmode="numeric" maxlength="4" data-ans="${steg1}" style="width:70px;" placeholder="?">
-              </div>
-              ${useTwoSteps ? `
-              <div class="ab-steg-rad">
-                <span class="ab-steg-label">Från ${nextTio} till ${a}:</span>
-                <input type="text" class="rakna-factor-input" id="ab-s2" inputmode="numeric" maxlength="4" data-ans="${steg2}" style="width:70px;" placeholder="?">
-              </div>
-              ` : ''}
-              <div class="ab-steg-rad ab-steg-sum">
-                <span class="ab-steg-label" style="font-weight:600;">Summa (= differens):</span>
-                <input type="text" class="rakna-factor-input" id="ab-sum" inputmode="numeric" maxlength="5" data-ans="${answer}" style="width:80px;" placeholder="?">
-              </div>
+            <div class="om-uttryck-rad" style="margin-top:8px;justify-content:center;">
+              <span class="om-u-num">${a}</span>
+              <span class="om-u-op">−</span>
+              <span class="om-u-num">${b}</span>
+              <span class="om-u-op">=</span>
+              <input type="text" class="om-u-input" id="ab-s1" inputmode="numeric" maxlength="4" data-ans="${steg1}" placeholder="___">
+              ${useTwoSteps ? `<span class="om-u-op">+</span>
+              <input type="text" class="om-u-input" id="ab-s2" inputmode="numeric" maxlength="4" data-ans="${steg2}" placeholder="___">` : ''}
+              <span class="om-u-op">=</span>
+              <input type="text" class="om-u-input om-u-input-sum" id="ab-sum" inputmode="numeric" maxlength="5" data-ans="${answer}" placeholder="?">
             </div>
           </div>
 
+          <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:10px 0 0;">Mellanledet visar stegen: från ${b} upp till ${nextTio}${useTwoSteps?` och vidare till ${a}`:''}.</p>
+
           <div class="rakna-uppdela-feedback" id="fb-ab"></div>
+          ${keypadHTML([])}
           <div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
             <button class="btn primary" id="ab-check">Kontrollera</button>
             <button class="btn subtle" id="ab-ny">Ny uppgift</button>
@@ -1557,6 +1594,7 @@ function renderAdditionBakifran(body, metod, backFn){
       });
     });
     setTimeout(()=>allInputs[0].focus(), 50);
+    bindKeypad(body.querySelector('.exercise-card'));
   }
   render();
 }
