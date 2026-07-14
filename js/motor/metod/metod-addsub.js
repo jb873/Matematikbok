@@ -712,78 +712,34 @@ function renderFlyttaOver(body, metod, backFn){
   }
 
   let task = newTask();
-  let riktning = 'vanster';
-
-  function drawArrow(a, b){
-    const rad   = document.getElementById('om-lika-rad');
-    const svg   = document.getElementById('om-pil-svg');
-    const numA  = document.getElementById('om-num-a');
-    const numB  = document.getElementById('om-num-b');
-    const bWrap = document.getElementById('om-belopp-wrap');
-    if(!rad||!svg||!numA||!numB||!bWrap) return;
-
-    const radRect = rad.getBoundingClientRect();
-    const aRect   = numA.getBoundingClientRect();
-    const bRect   = numB.getBoundingClientRect();
-    const ax = aRect.left + aRect.width/2 - radRect.left;
-    const bx = bRect.left + bRect.width/2 - radRect.left;
-    const baseY = 52, topY = 8;
-    const fromX = riktning === 'vanster' ? bx : ax;
-    const toX   = riktning === 'vanster' ? ax : bx;
-    const midX  = (fromX + toX) / 2;
-
-    svg.setAttribute('viewBox', '0 0 ' + radRect.width + ' 60');
-    svg.style.width = radRect.width + 'px';
-
-    // Bygg SVG med string concat
-    const marker = '<defs><marker id="om-arr" markerWidth="9" markerHeight="9" refX="4.5" refY="9" orient="auto">'
-      + '<path d="M0,0 L4.5,9 L9,0" fill="none" stroke="var(--c-metod)" stroke-width="2" stroke-linejoin="round"/>'
-      + '</marker></defs>';
-    const lineUp   = '<line x1="' + fromX + '" y1="' + baseY + '" x2="' + fromX + '" y2="' + (topY+4) + '" stroke="var(--c-metod)" stroke-width="2.5" stroke-linecap="round"/>';
-    const lineHorz = '<line x1="' + fromX + '" y1="' + (topY+4) + '" x2="' + toX + '" y2="' + (topY+4) + '" stroke="var(--c-metod)" stroke-width="2.5" stroke-linecap="round"/>';
-    const lineDown = '<line x1="' + toX + '" y1="' + (topY+4) + '" x2="' + toX + '" y2="' + (baseY-6) + '" stroke="var(--c-metod)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#om-arr)"/>';
-    svg.innerHTML = marker + lineUp + lineHorz + lineDown;
-
-    bWrap.style.left = (midX - 26) + 'px';
-    bWrap.style.top  = '0px';
-  }
 
   function render(){
     const {a, b, answer} = task;
 
     // Bygg HTML med string concat – inga nästlade template literals
-    const aktiveVanster = riktning === 'vanster' ? ' is-active' : '';
-    const aktiveHoger   = riktning === 'hoger'   ? ' is-active' : '';
-
     body.innerHTML =
       '<div class="exercise-card">'
-      + exerciseHeader('Metod · flytta över', 'Rita en pil som visar hur du flyttar. Skriv sedan mellanledet och svaret.')
+      + exerciseHeader('Metod · flytta över', 'Flytta ett värde så att ett tal blir ett jämnt tiotal. Skriv mellanledet och svaret.')
       + '<div class="metod-explain-card">'
         + '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">'
           + '<strong>Idén:</strong> Flytta ett värde från ett tal till det andra – summan ändras inte.<br>'
           + '<span style="color:var(--ink-soft);">Exempel: 47 + 35 &rarr; flytta 3 &rarr; 50 + 32 = 82</span>'
         + '</div>'
-        + '<div class="om-rikt-row">'
-          + '<span style="font-size:13px;color:var(--ink-soft);">Pilens riktning:</span>'
-          + '<button class="om-rikt-btn' + aktiveVanster + '" id="rikt-vanster">&larr; höger till vänster</button>'
-          + '<button class="om-rikt-btn' + aktiveHoger   + '" id="rikt-hoger">&rarr; vänster till höger</button>'
+        + '<div class="om-flytt-rad" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;font-size:14px;color:var(--ink-soft);">'
+          + '<span>Flytta</span>'
+          + '<input type="text" class="om-u-input" id="om-flytt" inputmode="numeric" maxlength="3" placeholder="?" style="width:52px;">'
+          + '<span>från det ena talet till det andra.</span>'
         + '</div>'
-        + '<div class="om-lika-rad" id="om-lika-rad">'
-          + '<svg class="om-pil-svg" id="om-pil-svg" aria-hidden="true"></svg>'
-          + '<div class="om-belopp-wrap" id="om-belopp-wrap">'
-            + '<input type="text" class="om-belopp-input" id="om-flytt" inputmode="numeric" maxlength="3" placeholder="">'
-          + '</div>'
-          + '<div class="om-uttryck-rad">'
-            + '<span class="om-u-num" id="om-num-a">' + a + '</span>'
-            + '<span class="om-u-op">+</span>'
-            + '<span class="om-u-num" id="om-num-b">' + b + '</span>'
-            + '<span class="om-u-op">=</span>'
-            + '<input type="text" class="om-u-input" id="ml-a" inputmode="numeric" maxlength="5" placeholder="___">'
-            + '<span class="om-u-op">+</span>'
-            + '<input type="text" class="om-u-input" id="ml-b" inputmode="numeric" maxlength="5" placeholder="___">'
-            + '<span class="om-u-op">=</span>'
-            + '<input type="text" class="om-u-input om-u-input-sum" id="ml-sum" inputmode="numeric" maxlength="6" placeholder="?">'
-          + '</div>'
+        + '<div class="om-uttryck-rad" style="justify-content:center;">'
+          + '<span class="om-u-num">' + a + '</span>'
+          + '<span class="om-u-op">+</span>'
+          + '<span class="om-u-num">' + b + '</span>'
+          + '<span class="om-u-op">=</span>'
+          + '<input type="text" class="om-u-input" id="ml-a" inputmode="numeric" maxlength="5" placeholder="___">'
+          + '<span class="om-u-op">+</span>'
+          + '<input type="text" class="om-u-input" id="ml-b" inputmode="numeric" maxlength="5" placeholder="___">'
+          + '<span class="om-u-op">=</span>'
+          + '<input type="text" class="om-u-input om-u-input-sum" id="ml-sum" inputmode="numeric" maxlength="6" placeholder="?">'
         + '</div>'
         + '<div class="rakna-uppdela-feedback" id="fb-fo"></div>'
         + keypadHTML([])
@@ -794,15 +750,6 @@ function renderFlyttaOver(body, metod, backFn){
         + '</div>'
       + '</div></div>';
 
-    // Rita pil efter DOM är klar
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){
-      drawArrow(a, b);
-      var flytt = document.getElementById('om-flytt');
-      if(flytt) flytt.focus();
-    }); });
-
-    document.getElementById('rikt-vanster').onclick = function(){ riktning='vanster'; render(); };
-    document.getElementById('rikt-hoger').onclick   = function(){ riktning='hoger';  render(); };
     document.getElementById('fo-back').onclick = backFn;
     document.getElementById('fo-ny').onclick   = function(){ task=newTask(); render(); };
 
@@ -816,6 +763,7 @@ function renderFlyttaOver(body, metod, backFn){
     mlB.addEventListener('keydown',  function(e){ if(e.key==='Enter'){e.preventDefault(); mlSum.focus();} });
     mlSum.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault(); check();} });
     document.getElementById('fo-check').onclick = check;
+    setTimeout(function(){ flEl.focus(); }, 50);
     bindKeypad(body.querySelector('.exercise-card'));
 
     function check(){
@@ -830,18 +778,16 @@ function renderFlyttaOver(body, metod, backFn){
       document.getElementById('fo-check').disabled=true;
 
       var ts = getTutorScore('add','metod'); ts.total++;
-      var fromRight  = riktning === 'vanster';
-      var expA = fromRight ? a+flytt : a-flytt;
-      var expB = fromRight ? b-flytt : b+flytt;
-      var mellanledOK = !isNaN(aVal) && !isNaN(bVal) && (aVal+bVal===answer);
-      var pilStammer  = flytt>0 && aVal===expA && bVal===expB;
-      var sumOK       = !isNaN(sumVal) && sumVal===answer;
+      // Flytt-beloppet stämmer om ett tal ökat med flytt och det andra minskat lika mycket
+      var flyttStammer = flytt>0 && ((aVal===a+flytt && bVal===b-flytt) || (aVal===a-flytt && bVal===b+flytt));
+      var mellanledOK  = !isNaN(aVal) && !isNaN(bVal) && (aVal+bVal===answer);
+      var sumOK        = !isNaN(sumVal) && sumVal===answer;
 
       if(mellanledOK && sumOK){
         [mlA,mlB,mlSum].forEach(function(i){ i.classList.add('correct'); });
         fb.classList.add('correct');
-        fb.textContent = pilStammer
-          ? 'Rätt! Pilen och mellanledet stämmer. ' + a + ' + ' + b + ' = ' + aVal + ' + ' + bVal + ' = ' + answer + ' ✓'
+        fb.textContent = flyttStammer
+          ? 'Rätt! Du flyttade ' + flytt + '. ' + a + ' + ' + b + ' = ' + aVal + ' + ' + bVal + ' = ' + answer + ' ✓'
           : 'Rätt! ' + a + ' + ' + b + ' = ' + aVal + ' + ' + bVal + ' = ' + answer + ' ✓';
         ts.correct++;
         setTimeout(function(){ task=newTask(); render(); }, 2200);
