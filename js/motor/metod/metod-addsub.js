@@ -560,6 +560,7 @@ function renderUppstallningAdd(body, metod, backFn){
 function renderTalsorternaAdd(body, metod, backFn){
   let task = genAddTask(2);
   let terms = [''];  // state lever utanför render()
+  let uppgNr = 0;    // tips bara på de två första uppgifterna
 
   function refreshInputs(){
     const row = document.getElementById('ts-inputs-row');
@@ -599,6 +600,7 @@ function renderTalsorternaAdd(body, metod, backFn){
   }
 
   function render(){
+    uppgNr++;
     const {a, b, answer} = task;
     const divisorer = [1000, 100, 10, 1];
     const delar = divisorer.map(d => {
@@ -610,10 +612,10 @@ function renderTalsorternaAdd(body, metod, backFn){
     body.innerHTML = '<div class="exercise-card">' +
       exerciseHeader('Metod · talsorterna var för sig', metod.beskrivning) +
       '<div class="metod-explain-card">' +
-      '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">' +
+      (uppgNr<=2 ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">' +
         '<strong>Idén:</strong> Dela upp talen i talsorter, addera varje talsort för sig och summera ihop.<br>' +
         '<span style="color:var(--ink-soft);">Exempel: ' + a + ' + ' + b + ' = ' + rattMellanled + ' = ' + answer + '</span>' +
-      '</div>' +
+      '</div>' : '') +
       '<div class="ts-rad-container">' +
         '<div class="ts-rad-fast">' +
           '<span class="ts-num">' + a + '</span>' +
@@ -713,8 +715,10 @@ function renderFlyttaOver(body, metod, backFn){
   }
 
   let task = newTask();
+  let uppgNr = 0;   // tips bara på de två första uppgifterna
 
   function render(){
+    uppgNr++;
     const {a, b, answer} = task;
 
     // Bygg HTML med string concat – inga nästlade template literals
@@ -722,10 +726,10 @@ function renderFlyttaOver(body, metod, backFn){
       '<div class="exercise-card">'
       + exerciseHeader('Metod · flytta över', 'Flytta ett värde så att ett tal blir ett jämnt tiotal. Skriv mellanledet och svaret.')
       + '<div class="metod-explain-card">'
-        + '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">'
+        + (uppgNr<=2 ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">'
           + '<strong>Idén:</strong> Flytta ett värde från ett tal till det andra – summan ändras inte.<br>'
           + '<span style="color:var(--ink-soft);">Exempel: 47 + 35 &rarr; flytta 3 &rarr; 50 + 32 = 82</span>'
-        + '</div>'
+        + '</div>' : '')
         + '<div class="om-flytt-rad" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;font-size:14px;color:var(--ink-soft);">'
           + '<span>Flytta</span>'
           + '<input type="text" class="om-u-input" id="om-flytt" inputmode="numeric" maxlength="3" placeholder="?" style="width:52px;">'
@@ -1269,8 +1273,10 @@ function renderOkaMinska(body, metod, backFn){
   }
 
   let task = newTask();
+  let uppgNr = 0;   // tips bara på de två första uppgifterna
 
   function render(){
+    uppgNr++;
     const {a, b, answer} = task;
     const lvlSub = level===1 ? 'Tvåsiffriga tal' : level===2 ? 'Tresiffriga tal' : 'Blandade tal';
 
@@ -1278,9 +1284,9 @@ function renderOkaMinska(body, metod, backFn){
       '<div class="exercise-card">'
       + exerciseHeader('Metod · öka och minska lika', lvlSub + ' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level)
       + '<div class="metod-explain-card">'
-        + '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:20px;font-size:13px;line-height:1.6;">'
+        + (uppgNr<=2 ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:20px;font-size:13px;line-height:1.6;">'
           + 'Skriv ett mellanled på raden. Visa <strong>vad du gör</strong> genom att skriva t.ex. <strong>+1</strong> eller <strong>−2</strong> i rutan ovanför det första uttrycket.'
-        + '</div>'
+        + '</div>' : '')
 
         + '<div class="om-sub-card">'
           // CSS grid: 9 kolumner – annot spänner kol 1-3 (a, −, b)
