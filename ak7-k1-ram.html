@@ -1908,9 +1908,13 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .rakna-svar-fast{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink)}
 .rakna-svar-input{
   min-width:170px;max-width:340px;height:52px;
-  font-family:var(--mono);font-size:24px;font-weight:700;text-align:center;
+  font-family:var(--mono);font-size:24px;font-weight:700;text-align:left;
   border:2.5px solid var(--c-rakna);border-radius:var(--radius);
   background:var(--c-rakna-bg);color:var(--c-rakna);outline:none;padding:0 12px;
+}
+/* Rutor som håller en hel uträkning (dubbla/halvera, dubbelparentes …) – breda så allt syns */
+.rakna-svar-input.rakna-svar-bred{
+  min-width:260px;max-width:none;flex:1 1 320px;width:auto;font-size:18px;text-align:left;
 }
 .rakna-svar-input:focus{background:#fff;box-shadow:0 0 0 3px rgba(22,163,74,.15)}
 .rakna-svar-input.correct{background:var(--success-bg);border-color:var(--success);color:var(--success)}

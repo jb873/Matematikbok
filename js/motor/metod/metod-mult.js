@@ -775,6 +775,7 @@ function renderMultMetoder(body){
 function renderUppstallningMult(body, backFn){
   let level = 1;
   let omgangResults = [];
+  let uppgNr = 0;              // tipset under minnesrutorna visas bara de 2 första uppgifterna
   const OMG = 5;
 
   const LEVELNAMN = {
@@ -840,12 +841,13 @@ function renderUppstallningMult(body, backFn){
     });
   }
 
-  function minnesPanel(){
+  function minnesPanel(antal, visaTips){
+    antal = antal || 2;
     let h = '<div class="mult-minne-panel"><div class="mult-minne-rubrik">minnessiffror</div><div class="mult-minne-rutor">';
-    for(let i=0; i<5; i++){
+    for(let i=0; i<antal; i++){
       h += '<input type="text" class="mult-minne-ruta" inputmode="numeric" maxlength="1" autocomplete="off">';
     }
-    h += '</div><div class="mult-minne-tips">Klicka på en siffra för att stryka den när den är använd.</div></div>';
+    h += '</div>' + (visaTips ? '<div class="mult-minne-tips">Klicka på en siffra för att stryka den när den är använd.</div>' : '') + '</div>';
     return h;
   }
   function bindMinne(card){
@@ -882,12 +884,12 @@ function renderUppstallningMult(body, backFn){
 
     // demo: 67 · 4. minnessiffra '2' till höger, struken i steg 2.
     const steps = [
-      {minne:'', minneStruck:false, ans:['','',''],
-       text:'Vi räknar 67 · 4. Börja längst till höger: 4 · 7 = 28. Skriv 8 i entalen och minnessiffran 2 till höger om talet.'},
       {minne:'2', minneStruck:false, ans:['','','8'],
-       text:'Nästa kolumn: 4 · 6 = 24. Lägg till minnessiffran 2 → 26. Skriv 6, och stryk minnessiffran eftersom den nu är använd.'},
-      {minne:'2', minneStruck:true, ans:['','2','6'],
-       text:'Det finns inga fler kolumner. Den sista 2:an skrivs direkt. Svaret är 268.'}
+       text:'Vi räknar 67 · 4. Börja längst till höger: 4 · 7 = 28. Skriv 8 i entalen och minnessiffran 2 till höger om talet.'},
+      {minne:'2', minneStruck:true, ans:['','6','8'],
+       text:'Nästa kolumn: 4 · 6 = 24. Lägg till minnessiffran 2 → 26. Skriv 6 i tiotalen och stryk minnessiffran eftersom den nu är använd.'},
+      {minne:'2', minneStruck:true, ans:['2','6','8'],
+       text:'Det finns inga fler kolumner. Skriv den sista 2:an i hundratalen. Svaret är 268.'}
     ];
     let s = 0;
     function draw(){
@@ -924,7 +926,9 @@ function renderUppstallningMult(body, backFn){
 
   // ---------- ÖVNING ----------
   function renderPractice(){
+    uppgNr++;
     const task = genTask();
+    const visaTips = uppgNr <= 2;
     let boxHTML, infoHTML;
 
     if(task.kind === 'enkel' || task.kind === 'decimal'){
@@ -941,9 +945,10 @@ function renderUppstallningMult(body, backFn){
       rows += rowHTML({t:'op',v:'·'}, [{t:'fixed',v:String(task.d)}], W);
       rows += '<div class="mult-upp-line"></div>';
       rows += rowHTML({t:'op',v:''}, ansCells, W);
+      var minneN = String(task.mDisplay).replace(/[^0-9]/g,'').length;   // en ruta per talsiffra
       boxHTML = '<div class="mult-upp-box"><div class="mult-upp-flex">'
         + '<div class="mult-upp-rows-wrap"><div class="mult-upp-rows">' + rows + '</div></div>'
-        + minnesPanel()
+        + minnesPanel(minneN, visaTips)
       + "</div></div>";
       infoHTML = task.kind === 'decimal'
         ? 'Räkna som vanligt med siffrorna. <strong>Decimalkommat förs rakt ner</strong> i svaret – det står redan på plats.'
@@ -968,7 +973,7 @@ function renderUppstallningMult(body, backFn){
       rows += rowHTML({t:'op',v:''}, sumCells, W);
       boxHTML = '<div class="mult-upp-box"><div class="mult-upp-flex">'
         + '<div class="mult-upp-rows-wrap"><div class="mult-upp-rows">' + rows + '</div></div>'
-        + minnesPanel()
+        + minnesPanel(3, visaTips)
       + "</div></div>";
       infoHTML = 'Räkna <strong>' + task.mDisplay + ' · ' + task.ones + '</strong> på första raden och '
         + '<strong>' + task.mDisplay + ' · ' + task.tens + '</strong> på andra raden. '
@@ -1233,7 +1238,9 @@ function renderMultRakna(body){
 
 // --- Motor: 10/100/1000 – fast stegring, auto-byte, ingen tid ---
 function renderRaknaPow10(body, cfg, backFn){
-  let omgang = [], idx = 0, results = [];
+  let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  const OMG = 8;
+  const LVLNAMN = {1:'heltal', 2:'decimaltal', 3:'decimaltal med nollor'};
 
   function nzDigits(n){
     let v = 0;
@@ -1241,47 +1248,50 @@ function renderRaknaPow10(body, cfg, backFn){
     return v;
   }
 
-  function genTask(typ){
-    const mult = randPick([10,100,1000]);
-    let dec, opInt;
-    if(typ === 'heltal'){
-      dec = 0;
-      opInt = d3RandInt(12,999);
-    } else if(typ === 'decimal'){
-      dec = randPick([1,2]);
-      if(dec === 1){
-        opInt = nzDigits(randPick([1,2])) * 10 + d3RandInt(1,9);
+  // Nivå 1 heltal · 2 decimaltal (svaret ibland heltal, ibland inte) · 3 decimaltal med nolla (aldrig heltalssvar)
+  function genTask(lvl){
+    for(let tries=0; tries<200; tries++){
+      let mult = randPick([10,100,1000]);
+      let dec, opInt;
+      if(lvl === 1){
+        dec = 0; opInt = d3RandInt(12,999);
+      } else if(lvl === 2){
+        // ~50/50: ibland blir svaret heltal, ibland decimaltal
+        if(Math.random() < 0.5){
+          dec = randPick([1,2]);
+          mult = dec === 1 ? randPick([10,100,1000]) : randPick([100,1000]);   // mult ≥ 10^dec → heltalssvar
+          opInt = dec === 1 ? (nzDigits(randPick([1,2]))*10 + d3RandInt(1,9))
+                            : (nzDigits(2)*100 + d3RandInt(1,9)*10 + d3RandInt(1,9));
+        } else {
+          dec = randPick([2,3]);
+          mult = dec === 2 ? 10 : randPick([10,100]);                          // mult < 10^dec → decimalsvar
+          opInt = dec === 2 ? (nzDigits(2)*100 + d3RandInt(1,9)*10 + d3RandInt(1,9))
+                            : (nzDigits(2)*1000 + d3RandInt(1,9)*100 + d3RandInt(1,9)*10 + d3RandInt(1,9));
+        }
       } else {
-        opInt = nzDigits(2) * 100 + d3RandInt(1,9) * 10 + d3RandInt(1,9);
+        dec = 2;
+        opInt = Math.random() < 0.6 ? (d3RandInt(11,99)*100 + d3RandInt(1,9))               // X,0Z
+                                    : ((d3RandInt(1,9)*10)*100 + d3RandInt(1,9)*10 + d3RandInt(1,9)); // X0,YZ
       }
-    } else { // decimal-nolla: en nolla inne i talet
-      dec = 2;
-      if(Math.random() < 0.6){
-        // mönster  X,0Z  (nolla på tiondelsplatsen)
-        opInt = d3RandInt(11,99) * 100 + d3RandInt(1,9);
-      } else {
-        // mönster  X0,YZ  (heltalet slutar på noll)
-        opInt = (d3RandInt(1,9) * 10) * 100 + d3RandInt(1,9) * 10 + d3RandInt(1,9);
-      }
+      const prodInt = opInt * mult;
+      const svarHeltal = (prodInt % Math.pow(10,dec)) === 0;
+      if(lvl === 3 && svarHeltal) continue;                // nivå 3: inget svar blir heltal
+      return {display: mult + ' · ' + d3DecStr(opInt,dec),
+              facit: d3DecStr(prodInt,dec),
+              answerNum: prodInt / Math.pow(10,dec)};
     }
-    const prodInt = opInt * mult;
-    return {display: mult + ' · ' + d3DecStr(opInt,dec),
-            facit: d3DecStr(prodInt,dec),
-            answerNum: prodInt / Math.pow(10,dec)};
+    return {display:'10 · 6,07', facit:'60,7', answerNum:60.7};
   }
 
-  function genOmgang(){
-    // 2 heltal → 3 decimaltal → 3 decimaltal med nolla i
-    return ['heltal','heltal','decimal','decimal','decimal','decimal-nolla','decimal-nolla','decimal-nolla']
-      .map(genTask);
-  }
+  function genOmgang(){ const a=[]; for(let i=0;i<OMG;i++) a.push(genTask(level)); return a; }
 
   function renderSummary(){
     const right = results.filter(function(x){ return x; }).length;
     const total = results.length;
+    const adj = adjustLevel(level, right, total); level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(cfg.header, 'Du klarade ' + right + ' av ' + total + '.')
-      + renderSummaryCard({right:right, total:total, nextLabel:'Kör igen'})
+      + exerciseHeader(cfg.header, 'Du klarade ' + right + ' av ' + total + '.', level)
+      + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change, nextLabel:'Kör igen'})
       + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="rakna-kat-back">Tillbaka till kategorier</button></div>'
     + '</div>';
     document.getElementById('summary-next-btn').onclick = function(){
@@ -1292,15 +1302,17 @@ function renderRaknaPow10(body, cfg, backFn){
 
   function renderFraga(){
     if(idx >= omgang.length){ renderSummary(); return; }
+    uppgNr++;
     const t = omgang[idx];
     const right = results.filter(function(x){ return x; }).length;
     const pct = Math.round((idx / omgang.length) * 100);
+    const visaTips = uppgNr <= 2;                          // tips bara på de två första talen (nivå 1)
 
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(cfg.header, cfg.sub)
-      + '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>'
-      + '<div class="rakna-tal">' + t.display + ' =</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="pow-input" inputmode="text" maxlength="14" autocomplete="off" placeholder="?"></div>'
+      + exerciseHeader(cfg.header, 'Nivå ' + level + ': ' + LVLNAMN[level] + '.', level)
+      + (visaTips ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
+      + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + t.display + ' =</span>'
+        + '<input type="text" class="rakna-svar-input" id="pow-input" inputmode="text" maxlength="14" autocomplete="off" placeholder="?"></div>'
       + '<div class="tabell-feedback" id="pow-fb"></div>'
       + keypadHTML([','])
       + '<div class="tabell-progress">Tal ' + (idx+1) + ' av ' + omgang.length + ' · ' + right + ' rätt'
@@ -1366,7 +1378,7 @@ function renderRaknaPow10(body, cfg, backFn){
 
 // --- Motor: ett svar per uppgift ---
 function renderRaknaSingle(body, cfg, backFn){
-  let level = 1, omgang = [], idx = 0, results = [];
+  let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
   function genOmgang(){
     const a = [];
     for(let i=0; i<8; i++) a.push(cfg.gen(level));
@@ -1390,12 +1402,13 @@ function renderRaknaSingle(body, cfg, backFn){
       return;
     }
     const task = omgang[idx];
+    uppgNr++;
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(cfg.header, cfg.sub, level)
-      + '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>'
+      + (uppgNr<=2 ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
-      + '<div class="rakna-tal">' + task.display + ' =</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="rakna-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?"></div>'
+      + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + task.display + ' =</span>'
+        + '<input type="text" class="rakna-svar-input" id="rakna-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?"></div>'
       + '<div class="rakna-uppdela-feedback" id="rakna-fb"></div>'
       + keypadHTML(cfg.ops)
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
@@ -1446,7 +1459,7 @@ function renderRaknaSingle(body, cfg, backFn){
 
 // --- Motor: enradsuppgift med mellanled ---
 function renderRaknaEnrad(body, cfg, backFn){
-  let level = 1, omgang = [], idx = 0, results = [];
+  let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
   function genOmgang(){
     const a = [];
     for(let i=0; i<8; i++) a.push(cfg.gen(level));
@@ -1470,15 +1483,16 @@ function renderRaknaEnrad(body, cfg, backFn){
       return;
     }
     const task = omgang[idx];
+    uppgNr++;
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(cfg.header, cfg.sub, level)
-      + '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>'
+      + (uppgNr<=2 ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="mult-metod-uppg">'
-        + '<div class="mult-metod-instr">' + cfg.instr + '</div>'
+        + (uppgNr<=2 ? '<div class="mult-metod-instr">' + cfg.instr + '</div>' : '')
         + '<div class="rakna-svar-rad">'
           + '<span class="rakna-svar-fast">' + task.leftText + '</span>'
-          + '<input type="text" class="rakna-svar-input" id="rakna-input" autocomplete="off" placeholder="' + cfg.placeholder + '">'
+          + '<input type="text" class="rakna-svar-input rakna-svar-bred" id="rakna-input" autocomplete="off" placeholder="' + cfg.placeholder + '">'
         + '</div>'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="rakna-fb"></div>'
