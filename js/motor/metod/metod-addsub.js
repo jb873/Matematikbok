@@ -964,6 +964,8 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   var currentTask   = null;
   var OMGANG  = 5;
   var MAX_LVL = 6;
+  var svarVal = {};          // pos -> ifyllt svar (bevaras när lån-knappen re-renderar)
+  var sistFokusPos = null;   // senast fokuserade svarsruta (så markören inte hoppar till entalet)
 
   function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
 
@@ -1090,7 +1092,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
       +renderSummaryCard({right:right,total:total,level:level,levelChange:adj.change})
       +'</div>';
     document.getElementById('summary-next-btn').onclick=function(){
-      omgangResults=[];borrows=new Set();laan=false;
+      omgangResults=[];borrows=new Set();laan=false;svarVal={};sistFokusPos=null;
       currentTask=genTask(level);render();
     };
   }
@@ -1156,7 +1158,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
         rowAns+='<div class="upp-i-cell upp-dec-cell"><span class="upp-dec-pt ans-dec">.</span></div>';
       } else {
         rowAns+='<div class="upp-i-cell">'
-          +'<input type="text" class="ans-input" data-pos="'+col.pos+'" inputmode="numeric" maxlength="1">'
+          +'<input type="text" class="ans-input" data-pos="'+col.pos+'" inputmode="numeric" maxlength="1" value="'+(svarVal[col.pos]||'')+'">'
         +'</div>';
       }
     });
@@ -1198,7 +1200,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     var cb=document.getElementById('clear-borrows');
     if(cb) cb.onclick=function(){borrows=new Set();laan=false;render();};
     document.getElementById('ny-btn').onclick=function(){
-      borrows=new Set();laan=false;currentTask=genTask(level);render();
+      borrows=new Set();laan=false;svarVal={};sistFokusPos=null;currentTask=genTask(level);render();
     };
     document.getElementById('back-btn').onclick=backFn;
 
@@ -1216,8 +1218,10 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     var ansInputs=Array.from(document.querySelectorAll('.ans-input'))
       .sort(function(x,y){return parseInt(x.dataset.pos)-parseInt(y.dataset.pos);});
     ansInputs.forEach(function(inp,i){
+      inp.addEventListener('focus',function(){ sistFokusPos=parseInt(inp.dataset.pos); });
       inp.addEventListener('input',function(){
         inp.value = inp.value.replace(/[^0-9]/g,'');
+        svarVal[parseInt(inp.dataset.pos)] = inp.value;                 // bevara svaret över re-render
         if(inp.value && i<ansInputs.length-1) ansInputs[i+1].focus();   // auto-hopp (keypad + tangentbord)
       });
       inp.addEventListener('keydown',function(e){
@@ -1226,7 +1230,11 @@ function renderUppstallningSubEnkel(body, metod, backFn){
         }
       });
     });
-    setTimeout(function(){if(ansInputs[0])ansInputs[0].focus();},50);
+    // Behåll markören där eleven var (lån-knappen re-renderar) i stället för att hoppa till entalet
+    setTimeout(function(){
+      var mal = sistFokusPos!=null && ansInputs.filter(function(x){return parseInt(x.dataset.pos)===sistFokusPos;})[0];
+      (mal || ansInputs[0]) && (mal || ansInputs[0]).focus();
+    },50);
     bindKeypad(body.querySelector('.exercise-card'));
     document.getElementById('check-btn').onclick=check;
 
@@ -1259,7 +1267,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
       }
       setTimeout(function(){
         if(omgangResults.length>=OMGANG) showSummary();
-        else{borrows=new Set();laan=false;currentTask=genTask(level);render();}
+        else{borrows=new Set();laan=false;svarVal={};sistFokusPos=null;currentTask=genTask(level);render();}
       },1900);
     }
   }
