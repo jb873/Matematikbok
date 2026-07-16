@@ -933,7 +933,24 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   // ── ÖVA: blad-nav. Addition/Subtraktion delas ur BLAD_ADDSUB (grupper efter beslut 5/4) ──
   var addsub = window.BLAD_ADDSUB || {intro:'',grupper:[]};
   var addG=[0,1,3,4,6].map(function(i){return addsub.grupper[i];}).filter(Boolean);   // Beräkna·Vilka tal·Talsorterna·Flytta över·Flytta över(2)
-  var subG=[2,5,7,8].map(function(i){return addsub.grupper[i];}).filter(Boolean);      // Uppställning·Addition bakifrån·Öka&minska·Vilket tal saknas
+  // Egna "Vilket tal saknas?"-luckor för subtraktion (motorn orörd – byggs i skalet)
+  function subRi(lo,hi){ return lo+Math.floor(Math.random()*(hi-lo+1)); }
+  function subDstr(sI,dec){ if(dec===0) return String(sI); var s=String(sI).padStart(dec+1,'0'); return (s.slice(0,-dec)||'0')+','+s.slice(-dec); }
+  function subLuckaHel(){                                     // två heltal
+    var a=subRi(41,98), x=subRi(11,a-11);                    // a − __ = a−x
+    var b=subRi(13,49), d=subRi(11,89);                      // __ − b = d  → m=b+d
+    return {rubrik:'Vilket tal saknas?', rader:[
+      {typ:'lucka', text:a+' − __ = '+(a-x), svar:x},
+      {typ:'lucka', text:'__ − '+b+' = '+d, svar:b+d}
+    ]};
+  }
+  function subLuckaDec(){                                     // tre decimaltal, inget tal > hundratal
+    function A(){ var aT=subRi(300,1990), xT=subRi(21,aT-21); return {typ:'lucka', text:subDstr(aT,1)+' − __ = '+subDstr(aT-xT,1), svar:xT/10}; }
+    function B(){ var bT=subRi(50,900), dT=subRi(50,900); return {typ:'lucka', text:'__ − '+subDstr(bT,1)+' = '+subDstr(dT,1), svar:(bT+dT)/10}; }
+    return {rubrik:'Vilket tal saknas?', rader:[A(), B(), A()]};
+  }
+  // Uppställning · Addition bakifrån · [ny heltals-lucka] · Öka&minska · [decimal-lucka ersätter motorns index 8]
+  var subG=[ addsub.grupper[2], addsub.grupper[5], subLuckaHel(), addsub.grupper[7], subLuckaDec() ].filter(Boolean);
 
   // ── Egen Öva-vy för Addition: metod-rader visar mellanled ("visa på mellanled", inte bara svar).
   //    Motorn (blad-k1-d2.js) rörs inte; återanvänder dess CSS + globala jamforTal/visaKonfetti. ──
