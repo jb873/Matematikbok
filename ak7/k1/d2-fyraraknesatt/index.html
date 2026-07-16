@@ -1092,9 +1092,14 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
             +'<span class="ovn-text" style="flex:1;min-width:160px;">'+rad.fraga+'</span>'
             +'<input class="ovn-in bred ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar"></div>';
         } else if(rad.typ==='term'){
-          h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
-            +'<span class="ovn-text" style="min-width:140px;">'+rad.fraga+'</span>'
-            +'<input class="ovn-in bred ova-term" data-term="'+rad.summa+'" data-antal="'+(rad.antal||2)+'" inputmode="text" autocomplete="off" placeholder="t.ex. 10+8"></div>';
+          var tn=rad.antal||2, tboxar='';
+          for(var ti=0;ti<tn;ti++){
+            tboxar += (ti>0?'<span class="ovn-text ova-plus">+</span>':'')
+              + '<input class="ovn-in ova-term-box" inputmode="decimal" autocomplete="off" style="width:60px;text-align:left;">';
+          }
+          h+='<div class="ovn-rad ova-term-rad"><span class="ovn-label">'+L+'</span>'
+            +'<span class="ovn-text" style="min-width:150px;">'+rad.fraga+'</span>'
+            +'<span class="ova-term-grupp" data-summa="'+rad.summa+'" data-antal="'+tn+'" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">'+tboxar+'</span></div>';
         } else if(rad.typ==='tvatal'){
           h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
             +'<span class="ovn-text" style="flex:1;min-width:160px;">'+rad.fraga+'</span>'
@@ -1108,7 +1113,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     ['7','8','9','4','5','6','1','2','3'].forEach(function(d){ h+='<button type="button" class="ovn-kp-key" data-key="'+d+'">'+d+'</button>'; });
     h+='<button type="button" class="ovn-kp-key span2" data-key="0">0</button><button type="button" class="ovn-kp-key util" data-key="back">⌫</button></div><div class="ovn-keypad-ops">';
     [',','+','-','='].forEach(function(o){ h+='<button type="button" class="ovn-kp-key op" data-key="'+o+'">'+o+'</button>'; });
-    h+='</div></div><div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Återställ</button></div>';
+    h+='</div></div><div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'+(blad.genererare?'<button type="button" class="ovn-aterstall" data-action="nyttblad">↻ Nytt blad</button>':'')+'</div>';
     h+='<div class="ovn-sammanf" data-sammanf style="display:none;"></div></div></div>';
     rotEl.innerHTML=h;
 
@@ -1183,6 +1188,18 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
           totalt++; if(mOk)ratt++;
           var sInp=row.querySelector('.ova-slutsvar');
           var sOk=jamforTal(sInp.value,svar); markera(sInp,sOk,sOk?null:String(svar).replace('.',',')); totalt++; if(sOk)ratt++;
+        } else if(row.classList.contains('ova-term-rad')){
+          var tgrp=row.querySelector('.ova-term-grupp');
+          var tboxes=Array.from(tgrp.querySelectorAll('.ova-term-box'));
+          var tsumma=parseFloat(tgrp.dataset.summa);
+          var tvals=tboxes.map(function(b){return parseFloat(String(b.value).replace(',','.'));});
+          var tallNum=tvals.every(function(v){return !isNaN(v);});
+          var tsum=tvals.reduce(function(a,v){return a+(isNaN(v)?0:v);},0);
+          var tnoDump=!tvals.some(function(v){return Math.abs(v-tsumma)<1e-6;});
+          var tOk=tallNum && Math.abs(tsum-tsumma)<1e-6 && (tboxes.length<2||tnoDump);
+          tboxes.forEach(function(b){ b.classList.add(tOk?'correct':'wrong'); });
+          markEfter(tgrp,tOk, tOk?null:'ska summeras till '+String(tsumma).replace('.',','));
+          totalt++; if(tOk)ratt++;
         } else {
           row.querySelectorAll('.ovn-in').forEach(function(inp){
             var ok=false, facit=null; totalt++;
@@ -1214,10 +1231,35 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       rotEl.querySelectorAll('.ovn-mark,.ovn-fasit').forEach(function(x){x.remove();});
       var sam=rotEl.querySelector('[data-sammanf]'); sam.style.display='none';
     });
+    var nyttBladBtn=rotEl.querySelector('[data-action="nyttblad"]');
+    if(nyttBladBtn) nyttBladBtn.addEventListener('click',function(){
+      bygg_ova_metod(rotEl, {titel:blad.titel, intro:blad.intro, grupper:blad.genererare(), genererare:blad.genererare});
+    });
+  }
+
+  // Genererar ett addition-övningsblad med nya, liknande tal (metod-anpassade).
+  function genAddBlad(){
+    function ri(lo,hi){ return lo+Math.floor(Math.random()*(hi-lo+1)); }
+    function dstr(sI,dec){ if(dec===0) return String(sI); var s=String(sI).padStart(dec+1,'0'); return (s.slice(0,-dec)||'0')+','+s.slice(-dec); }
+    function talsort(){ var a=ri(112,989),b=ri(112,989); return {typ:'enkel',vansterText:a+' + '+b+' =',svar:a+b}; }
+    function flyttaHel(){ for(var i=0;i<200;i++){ var x=ri(20,89),g=10-(x%10); if(g<1||g>3)continue; var y=ri(20,89); if(y%10<g||y%10===0)continue; return {typ:'enkel',vansterText:x+' + '+y+' =',svar:x+y}; } return {typ:'enkel',vansterText:'28 + 34 =',svar:62}; }
+    function flyttaStor(){ for(var i=0;i<200;i++){ var x=ri(120,889),g=10-(x%10); if(g<1||g>3)continue; var y=ri(120,889); if(y%10<g||y%10===0)continue; return {typ:'enkel',vansterText:x+' + '+y+' =',svar:x+y}; } return {typ:'enkel',vansterText:'128 + 234 =',svar:362}; }
+    function flyttaDec(){ for(var i=0;i<200;i++){ var xI=ri(21,89),g=10-(xI%10); if(g<1||g>3)continue; var yI=ri(21,89); if(yI%10<g||yI%10===0)continue; return {typ:'enkel',vansterText:dstr(xI,1)+' + '+dstr(yI,1)+' =',svar:(xI+yI)/10}; } return {typ:'enkel',vansterText:'4,8 + 3,5 =',svar:8.3}; }
+    function delaupp(n){ var summa=ri(n*4+2, n*9); return {typ:'term',fraga:'Dela upp '+summa+' i '+(n===2?'två':'tre')+' termer',summa:summa,antal:n}; }
+    function tvatal(){ var t1=ri(8,20),t2=ri(2,t1-2); return {typ:'tvatal',fraga:'Summan av två tal är '+(t1+t2)+' och differensen är '+(t1-t2)+'. Vilka är talen?',tal:[t1,t2]}; }
+    function txtDiff(){ var a=ri(24,60),b=ri(3,15); return {typ:'text',fraga:'Differensen mellan '+a+' och '+b,svar:a-b}; }
+    function txtSum(){ var a=ri(20,60),b=ri(3,15); return {typ:'text',fraga:'Summan av '+a+' och '+b,svar:a+b}; }
+    return [
+      {rubrik:'Beräkna', rader:[txtDiff(), txtSum()]},
+      {rubrik:'Vilka tal?', rader:[delaupp(2), tvatal(), delaupp(3)]},
+      {rubrik:'Beräkna med talsorterna var för sig', rader:[talsort(), talsort(), talsort()]},
+      {rubrik:'Beräkna med metoden flytta över', rader:[flyttaHel(), flyttaStor(), flyttaDec()]},
+      {rubrik:'Beräkna med metoden flytta över', rader:[flyttaDec(), flyttaHel(), flyttaStor()]}
+    ];
   }
 
   var OVA=[
-    {titel:'Addition', mount:'addition', bygg:function(el){ bygg_ova_metod(el,{titel:'Addition',intro:addsub.intro,grupper:addG}); }},
+    {titel:'Addition', mount:'addition', bygg:function(el){ bygg_ova_metod(el,{titel:'Addition',grupper:genAddBlad(),genererare:genAddBlad}); }},
     {titel:'Subtraktion', mount:'subtraktion', bygg:function(el){ bygg_ova_metod(el,{titel:'Subtraktion',intro:addsub.intro,grupper:subG}); }},
     {titel:'Multiplikation', mount:'mult'},          // redan auto-renderad av blad-filen
     {titel:'Division', mount:'div'},
