@@ -821,8 +821,10 @@ function renderDivLang(body, backFn){
     var taljCells = [];
     for(var t=0; t<k; t++) taljCells.push(fixedCell(task.digs[t]));
     rows += '<div class="mult-upp-row">' + opCell('')
-      + '<div class="dl-taljbox">' + taljCells.join('') + '</div>'
-      + '<div class="cell dl-namnare">' + task.D + '</div></div>';
+      + '<div class="dl-stol">'
+        + '<div class="dl-tal">' + taljCells.join('') + '</div>'
+        + '<div class="dl-namn-box">' + task.D + '</div>'
+      + '</div></div>';
     for(var s=0; s<k; s++){
       var st = task.steps[s];
       var subStr = String(st.sub);
