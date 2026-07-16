@@ -5543,7 +5543,8 @@ function renderAddEnrad(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [];
   function genOmgang(){
     const a = [];
-    for(let i=0; i<8; i++) a.push(cfg.gen(level));
+    const antal = cfg.antal || 8;
+    for(let i=0; i<antal; i++) a.push(cfg.gen(level));
     return a;
   }
   function render(){
@@ -5861,6 +5862,7 @@ function renderAddHuvudrakning(body){
   }
   const TIO = {
     header:'Huvudräkning · tiokompisar', formagaKey:'rakna', koId:'add-rakna', scoreKey:'tiokompis',
+    antal:6,
     sub:'Räkna i huvudet genom att flytta över till ett jämnt tiotal.',
     instr:'Skriv mellanledet och svaret, t.ex. 10 + 5 = 15.',
     placeholder:'t.ex. 10 + 5 = 15', ops:['+','='], backLabel:'Tillbaka till kategorier',
