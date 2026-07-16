@@ -5622,7 +5622,7 @@ function renderAddEnrad(body, cfg, backFn){
 
 // Motor: ett svar per uppgift
 function renderAddSingle(body, cfg, backFn){
-  let level = 1, omgang = [], idx = 0, results = [];
+  let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
   function genOmgang(){
     const a = [];
     for(let i=0; i<8; i++) a.push(cfg.gen(level));
@@ -5646,12 +5646,13 @@ function renderAddSingle(body, cfg, backFn){
       return;
     }
     const task = omgang[idx];
+    uppgNr++;
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(cfg.header, cfg.sub, level)
-      + (cfg.exempel ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
+      + ((cfg.exempel && level === 1 && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
-      + '<div class="rakna-tal">' + task.display + ' =</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="adds-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?"></div>'
+      + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + task.display + ' =</span>'
+        + '<input type="text" class="rakna-svar-input" id="adds-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?"></div>'
       + '<div class="rakna-uppdela-feedback" id="adds-fb"></div>'
       + keypadHTML(cfg.ops)
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
