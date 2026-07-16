@@ -326,37 +326,49 @@ function renderUppstallningAdd(body, metod, backFn){
       else { nextBtn.onclick = ()=>{ currentSteg++; updateSteg(); }; }
     };
     document.getElementById('prev-steg').onclick = ()=>{ if(currentSteg>0){currentSteg--;updateSteg();} };
-    document.getElementById('next-steg').onclick = ()=>{ currentSteg++; updateSteg(); };
     document.getElementById('start-practice').onclick = renderPractice;
+    updateSteg();   // visa steg 0 direkt och koppla Nästa-knappen rätt (annars hoppades steg 0 över)
   }
 
   function renderUppstallningSteg(a, b, steg){
-    // steg: -1=bara talen, 0=ental, 1=tiotal, 2=hundratal, 3=summa
-    const aStr = String(a).padStart(4,' ');
-    const bStr = String(b).padStart(4,' ');
+    // steg: -1=bara talen, 0=ental klart, 1=tiotal klart, 2=hundratal klart, 3=svar
     const sum = a + b;
-
     const entalsCarry = (a%10 + b%10) >= 10 ? 1 : 0;
     const tioCarry = (Math.floor(a/10)%10 + Math.floor(b/10)%10 + entalsCarry) >= 10 ? 1 : 0;
 
     const stegTexts = [
-      `Ental: ${a%10} + ${b%10} = ${a%10+b%10}. ${entalsCarry?'Skriv '+(a%10+b%10-10)+' och för över 1 till tiotalet.':'Skriv '+((a+b)%10)+'.'}`,
-      `Tiotal: ${Math.floor(a/10)%10} + ${Math.floor(b/10)%10}${entalsCarry?' + 1 (förd)':', '} = ${Math.floor(a/10)%10+Math.floor(b/10)%10+entalsCarry}. ${tioCarry?'Skriv '+(Math.floor(a/10)%10+Math.floor(b/10)%10+entalsCarry-10)+' och för över 1.':'Skriv '+(Math.floor(a/10)%10+Math.floor(b/10)%10+entalsCarry)+'.'}`,
-      `Hundratal: ${Math.floor(a/100)} + ${Math.floor(b/100)}${tioCarry?' + 1 (förd)':', '} = ${Math.floor(a/100)+Math.floor(b/100)+tioCarry}. Skriv ${Math.floor(sum/100)}.`,
-      `Svaret är ${sum}.`
+      `Ental: ${a%10} + ${b%10} = ${a%10+b%10}. ${entalsCarry?'Skriv '+(a%10+b%10-10)+' i entalen och för minnessiffran 1 till tiotalet.':'Skriv '+((a+b)%10)+' i entalen.'}`,
+      `Tiotal: ${Math.floor(a/10)%10} + ${Math.floor(b/10)%10}${entalsCarry?' + minnessiffran 1':''} = ${Math.floor(a/10)%10+Math.floor(b/10)%10+entalsCarry}. ${tioCarry?'Skriv '+(Math.floor(a/10)%10+Math.floor(b/10)%10+entalsCarry-10)+' och för minnessiffran 1 vidare.':'Skriv '+(Math.floor(a/10)%10+Math.floor(b/10)%10+entalsCarry)+'.'}`,
+      `Hundratal: ${Math.floor(a/100)} + ${Math.floor(b/100)}${tioCarry?' + minnessiffran 1':''} = ${Math.floor(a/100)+Math.floor(b/100)+tioCarry}. Skriv ${Math.floor(sum/100)}.`,
+      `Klart! ${a} + ${b} = ${sum}.`
     ];
 
-    const highEntals = steg >= 0;
-    const highTio = steg >= 1;
-    const highHundra = steg >= 2;
+    // Minnessiffra-rad: ¹ över tiotalet (steg≥1) och hundratalet (steg≥2)
+    let carryRow = '';
+    for(let pos=3; pos>=0; pos--){
+      let m = '';
+      if(pos===1 && entalsCarry && steg>=0) m = '¹';   // minnessiffran till tiotalet skrivs i ental-steget
+      if(pos===2 && tioCarry && steg>=1) m = '¹';       // minnessiffran till hundratalet skrivs i tiotal-steget
+      carryRow += '<span class="carry">' + m + '</span>';
+    }
+
+    // Svarsrad: fyll en siffra i taget (position 0..steg), inte allt på en gång
+    let resultRow = '';
+    const sStr = String(sum).padStart(4,' ');
+    for(let i=0;i<4;i++){
+      const c = sStr[i], pos = 3 - i;
+      if(c === ' ') resultRow += '<span> </span>';
+      else if(steg>=0 && steg>=pos) resultRow += '<span class="result-digit">' + c + '</span>';
+      else resultRow += '<span></span>';
+    }
 
     return `
       <div class="uppstallning-box">
-        ${entalsCarry && steg >= 1 ? '<div class="upp-carry-row"><span></span><span></span><span></span><span class="carry">¹</span></div>' : '<div class="upp-carry-row"></div>'}
+        <div class="upp-carry-row">${carryRow}</div>
         <div class="upp-row a">${digitSpans(a, 4)}</div>
         <div class="upp-row b">${digitSpansOp(b, 4, '+')}</div>
         <div class="upp-line"></div>
-        ${steg >= 3 ? `<div class="upp-row result">${digitSpans(sum, 4, true)}</div>` : '<div class="upp-row result"><span>?</span></div>'}
+        <div class="upp-row result">${resultRow}</div>
       </div>
       ${steg >= 0 ? `<div class="metod-steg-note">${stegTexts[steg]}</div>` : ''}
     `;
@@ -492,11 +504,16 @@ function renderUppstallningAdd(body, metod, backFn){
     const minneBtn = document.getElementById('minne-btn');
     function laggTillMinne(){
       if(nastaMinne > width - 1) return;                     // inga fler kolumner att bära över till
-      const cell = body.querySelector('[data-carrycell="' + nastaMinne + '"]');
+      const pos = nastaMinne;
+      const cell = body.querySelector('[data-carrycell="' + pos + '"]');
       if(!cell) return;
-      cell.innerHTML = '<input type="text" class="carr-input" data-pos="' + nastaMinne + '" inputmode="numeric" maxlength="1" placeholder="">';
+      cell.innerHTML = '<input type="text" class="carr-input" data-pos="' + pos + '" inputmode="numeric" maxlength="1" placeholder="">';
       const inp = cell.querySelector('.carr-input');
-      inp.addEventListener('input', () => { inp.value = inp.value.replace(/[^0-9]/g,''); });
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/[^0-9]/g,'');
+        // Minnessiffran ifylld → hoppa automatiskt ned till svarsrutan i samma kolumn
+        if(inp.value){ const svar = body.querySelector('.ans-input[data-pos="' + pos + '"]'); if(svar) svar.focus(); }
+      });
       inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); check(); } });
       nastaMinne++;
       if(nastaMinne > width - 1) minneBtn.disabled = true;
