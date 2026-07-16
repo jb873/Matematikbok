@@ -1147,16 +1147,13 @@ function renderDivProblem(body){
           + '<span class="prob-enhet">' + p.enhet + '</span>'
           + '<button class="btn primary" data-check="' + i + '">Kontrollera</button>'
         + '</div>'
-        + '<div class="prob-foto-rad">'
-          + '<button type="button" class="prob-foto-btn" data-foto="' + i + '">📷 Fota din lösning <span style="opacity:.7;">(frivilligt)</span></button>'
-          + '<input type="file" accept="image/*" capture="environment" data-fotoinput="' + i + '" style="display:none;">'
-          + '<div class="prob-foto-preview" id="div-prob-foto-' + i + '"></div>'
-        + '</div>'
+        + '<div class="prob-notes"><div class="prob-notes-rubrik">Räkna här</div>'
+          + '<textarea class="prob-notes-area" rows="4" placeholder="Ställ upp och räkna här"></textarea></div>'
         + '<div class="prob-feedback" id="div-prob-fb-' + i + '"></div>'
       + '</div>';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Du kan fota din uträkning och visa hur du tänkt.')
+      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.')
       + tasks
       + '<div id="div-prob-summary-anchor"></div>'
     + '</div>';

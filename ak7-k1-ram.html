@@ -796,9 +796,21 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .prob-feedback.correct{color:var(--success)}
 .prob-feedback.wrong{color:var(--error)}
 
-/* ==== DEL 3: LÄSTAL – FOTA LÖSNING ==== */
+/* ==== DEL 3: LÄSTAL – ANTECKNINGSBLOCK ==== */
 .prob-svar-rad{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .prob-enhet{font-family:var(--mono);font-size:15px;color:var(--ink-soft)}
+/* Rutigt anteckningsblock att räkna i (ersätter foto-uppladdningen) */
+.prob-notes{margin-top:12px}
+.prob-notes-rubrik{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
+.prob-notes-area{
+  width:100%;box-sizing:border-box;min-height:96px;resize:vertical;
+  font-family:var(--mono);font-size:15px;line-height:22px;color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;padding:5px 9px;outline:none;
+  background-color:#fffdf7;
+  background-image:linear-gradient(#efe5d3 1px,transparent 1px),linear-gradient(90deg,#efe5d3 1px,transparent 1px);
+  background-size:22px 22px;background-position:-1px 4px;
+}
+.prob-notes-area:focus{border-color:var(--c-metod,#8a5a2b)}
 .prob-foto-rad{margin-top:12px}
 .prob-foto-btn{
   display:inline-flex;align-items:center;gap:6px;
@@ -6114,16 +6126,13 @@ function renderAddProblem(body){
           + '<span class="prob-enhet">' + p.enhet + '</span>'
           + '<button class="btn primary" data-check="' + i + '">Kontrollera</button>'
         + '</div>'
-        + '<div class="prob-foto-rad">'
-          + '<button type="button" class="prob-foto-btn" data-foto="' + i + '">📷 Fota din lösning <span style="opacity:.7;">(frivilligt)</span></button>'
-          + '<input type="file" accept="image/*" capture="environment" data-fotoinput="' + i + '" style="display:none;">'
-          + '<div class="prob-foto-preview" id="prob-foto-' + i + '"></div>'
-        + '</div>'
+        + '<div class="prob-notes"><div class="prob-notes-rubrik">Räkna här</div>'
+          + '<textarea class="prob-notes-area" rows="4" placeholder="Ställ upp och räkna här"></textarea></div>'
         + '<div class="prob-feedback" id="prob-fb-' + i + '"></div>'
       + '</div>';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Du kan fota din uträkning och visa hur du tänkt.')
+      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.')
       + tasks
       + '<div id="prob-summary-anchor"></div>'
     + '</div>';
@@ -6899,16 +6908,13 @@ function renderSubProblem(body){
           + '<span class="prob-enhet">' + p.enhet + '</span>'
           + '<button class="btn primary" data-check="' + i + '">Kontrollera</button>'
         + '</div>'
-        + '<div class="prob-foto-rad">'
-          + '<button type="button" class="prob-foto-btn" data-foto="' + i + '">📷 Fota din lösning <span style="opacity:.7;">(frivilligt)</span></button>'
-          + '<input type="file" accept="image/*" capture="environment" data-fotoinput="' + i + '" style="display:none;">'
-          + '<div class="prob-foto-preview" id="prob-foto-' + i + '"></div>'
-        + '</div>'
+        + '<div class="prob-notes"><div class="prob-notes-rubrik">Räkna här</div>'
+          + '<textarea class="prob-notes-area" rows="4" placeholder="Ställ upp och räkna här"></textarea></div>'
         + '<div class="prob-feedback" id="prob-fb-' + i + '"></div>'
       + '</div>';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Du kan fota din uträkning och visa hur du tänkt.')
+      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.')
       + tasks + '<div id="prob-summary-anchor"></div></div>';
 
     body.querySelectorAll('[data-check]').forEach(function(b){
