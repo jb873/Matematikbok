@@ -773,7 +773,7 @@ function renderUppstallningMult(body, backFn){
   let level = 1;
   let omgangResults = [];
   let uppgNr = 0;              // tipset under minnesrutorna visas bara de 2 första uppgifterna
-  const OMG = 5;
+  const OMG = 3;
 
   const LEVELNAMN = {
     1:'tvåsiffrigt tal · ensiffrigt',
@@ -783,31 +783,36 @@ function renderUppstallningMult(body, backFn){
   };
 
   function adjustUpp(lv, right, total){
-    if(right >= total-1 && lv < 4) return {level:lv+1, change:'up'};
+    if(right >= total-1 && lv < 3) return {level:lv+1, change:'up'};
     if(right <= Math.floor(total/3) && lv > 1) return {level:lv-1, change:'down'};
     return {level:lv, change:null};
   }
 
   function genTask(){
     if(level === 1){
-      const m = d3RandInt(12,98), d = d3RandInt(3,9);
+      // tiotal × ental: tvåsiffrigt tal slutar ej på 0/1/2, entalet 3–9
+      const units = d3RandInt(3,9), tens = d3RandInt(1,9);
+      const m = tens*10 + units;
+      const d = d3RandInt(3,9);
       return {kind:'enkel', mDisplay:String(m), d:d, answer:m*d};
     }
     if(level === 2){
-      const m = d3RandInt(112,989), d = d3RandInt(3,9);
+      // hundratal × ental: tresiffrigt tal slutar ej på 0/1/2/3, entalet 4–9
+      const units = d3RandInt(4,9), tens = d3RandInt(0,9), huns = d3RandInt(1,9);
+      const m = huns*100 + tens*10 + units;
+      const d = d3RandInt(4,9);
       return {kind:'enkel', mDisplay:String(m), d:d, answer:m*d};
     }
-    if(level === 3){
-      const whole = d3RandInt(11,98), frac = d3RandInt(1,9);
-      const mInt = whole*10 + frac;       // 367 = 36,7
-      const d = d3RandInt(3,9);
-      return {kind:'decimal', mDisplay:String(whole)+','+String(frac), dec:1,
-              d:d, answerIntStr:String(mInt*d), answerValue:(mInt/10)*d};
-    }
-    const m = d3RandInt(13,89);
-    let d; do { d = d3RandInt(12,39); } while(d % 10 < 2);
-    return {kind:'tva', mDisplay:String(m), d:d, answer:m*d,
-            ones:d%10, tens:Math.floor(d/10), p1:m*(d%10), p2:m*Math.floor(d/10)};
+    // nivå 3: decimaltal × ental. Hela delen tiotal eller hundratal, 1 eller 2
+    // decimaler, sista decimalsiffran ej 0/1/2/3, entalet 4–9.
+    const dec = d3RandInt(1,2);
+    const whole = (Math.random() < 0.5) ? d3RandInt(10,99) : d3RandInt(100,999);
+    const fracLast = d3RandInt(4,9);
+    const fracStr = dec === 1 ? String(fracLast) : String(d3RandInt(0,9)) + String(fracLast);
+    const mScaled = whole * Math.pow(10, dec) + parseInt(fracStr, 10);
+    const d = d3RandInt(4,9);
+    return {kind:'decimal', mDisplay:String(whole)+','+fracStr, dec:dec,
+            d:d, answerIntStr:String(mScaled*d), answerValue:(mScaled/Math.pow(10,dec))*d};
   }
 
   // En cell: digit (fast), comma (fast), input (svar), eller empty
