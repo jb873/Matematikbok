@@ -18,9 +18,9 @@ var DIV_BEGREPP_KORT = [
   {begrepp:'Kvot', exempel:'Svaret på en division kallas kvot.',
    fraga:'Vad heter svaret på en division?', svar:'Kvot', options:['Kvot','Summa','Produkt','Differens']},
   {begrepp:'Täljare', exempel:'I bråket 30/6 är 30 täljaren – den står överst.',
-   fraga:'I bråket 30/6, vilket tal är täljaren?', svar:'Täljare', options:['Täljare','Nämnare','Kvot','Term']},
+   fraga:'I bråket 30/6, vad heter talet 30?', svar:'Täljare', options:['Täljare','Nämnare','Kvot','Term']},
   {begrepp:'Nämnare', exempel:'I bråket 30/6 är 6 nämnaren – den står underst.',
-   fraga:'I bråket 30/6, vilket tal är nämnaren?', svar:'Nämnare', options:['Nämnare','Täljare','Kvot','Faktor']},
+   fraga:'I bråket 30/6, vad heter talet 6?', svar:'Nämnare', options:['Nämnare','Täljare','Kvot','Faktor']},
   {begrepp:'Kvot', exempel:'"Täljare delat med nämnare är lika med kvot."',
    fraga:'"Täljare delat med nämnare är lika med ___." Vilket ord saknas?', svar:'Kvot', options:['Kvot','Term','Summa','Produkt']},
   {begrepp:'Nämnare', exempel:'Om nämnaren är 0 går divisionen inte att göra – man kan inte dela med noll.',
@@ -384,9 +384,9 @@ function renderDivGata(body, backFn){
 // ---- KO 2: DIVISIONSTABELLEN ----
 function renderDivTabell(body){
   var TABELL_NIVAER = [
-    {nr:1, namn:'Nämnare upp till 5', desc:'Nämnaren är 2–5.', nLo:2, nHi:5},
-    {nr:2, namn:'Nämnare 5 till 9',   desc:'Nämnaren är 5–9.', nLo:5, nHi:9},
-    {nr:3, namn:'Nämnare 6 till 12',  desc:'Nämnaren är 6–12.', nLo:6, nHi:12}
+    {nr:1, namn:'Nämnare 5 till 7',  desc:'Nämnaren är 5–7.',  nLo:5, nHi:7},
+    {nr:2, namn:'Nämnare 6 till 9',  desc:'Nämnaren är 6–9.',  nLo:6, nHi:9},
+    {nr:3, namn:'Nämnare 8 till 12', desc:'Nämnaren är 8–12.', nLo:8, nHi:12}
   ];
   var niva = null, omgang = [], idx = 0, results = [], startTime = 0, timerInterval = null;
   if(!state.divTabellBest) state.divTabellBest = {};
@@ -401,7 +401,7 @@ function renderDivTabell(body){
   function buildOmgang(lv){
     var pool = [];
     for(var n = lv.nLo; n <= lv.nHi; n++){
-      for(var q = 2; q <= 10; q++){
+      for(var q = 5; q <= 10; q++){
         if(lv.nr === 3 && n === 10 && Math.random() < 0.6) continue;
         pool.push({n:n, q:q, taljare:n * q});
       }
