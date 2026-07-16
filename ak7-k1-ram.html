@@ -803,13 +803,15 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .prob-notes{margin-top:12px}
 .prob-notes-rubrik{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
 .prob-notes-area{
-  width:100%;box-sizing:border-box;min-height:96px;resize:vertical;
-  font-family:var(--mono);font-size:15px;line-height:22px;color:var(--ink);
-  border:1px solid var(--line);border-radius:8px;padding:5px 9px;outline:none;
+  width:100%;box-sizing:border-box;min-height:132px;resize:vertical;
+  /* letter-spacing gör att varje tecken upptar en 22px-ruta → man skriver siffra för siffra i rutnätet */
+  font-family:var(--mono);font-size:16px;line-height:22px;letter-spacing:12.4px;color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;padding:0 0 0 8px;outline:none;
   background-color:#fffdf7;
   background-image:linear-gradient(#efe5d3 1px,transparent 1px),linear-gradient(90deg,#efe5d3 1px,transparent 1px);
-  background-size:22px 22px;background-position:-1px 4px;
+  background-size:22px 22px;background-position:0 0;
 }
+.prob-notes-area::placeholder{letter-spacing:normal}
 .prob-notes-area:focus{border-color:var(--c-metod,#8a5a2b)}
 .prob-foto-rad{margin-top:12px}
 .prob-foto-btn{
