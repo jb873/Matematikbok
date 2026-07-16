@@ -831,9 +831,9 @@ function renderDivLang(body, backFn){
           subCells.push(fixedCell('<span style="color:var(--error);">' + subStr[c - (s - subLen + 1)] + '</span>'));
         } else { subCells.push(emptyCell()); }
       }
-      subCells.push(emptyCell());
+      subCells.push('<div class="cell div-lang-wall"></div>');
       rows += rowFromCells('−', subCells);
-      rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-step-line" style="width:' + fracW + 'px;"></div>' + emptyCell() + '</div>';
+      rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-step-line" style="width:' + fracW + 'px;"></div><div class="cell div-lang-wall"></div></div>';
       var diffCells = [];
       for(var d=0; d<k; d++){
         if(d === s){
@@ -844,7 +844,7 @@ function renderDivLang(body, backFn){
           diffCells.push(fixedCell('<span style="color:var(--c-metod);font-weight:700;">' + st.broughtDigit + '</span>', 'div-lang-brought'));
         } else { diffCells.push(emptyCell()); }
       }
-      diffCells.push(emptyCell());
+      diffCells.push('<div class="cell div-lang-wall"></div>');
       rows += rowFromCells('', diffCells);
     }
     return '<div class="mult-upp-box"><div class="mult-upp-rows">' + rows + '</div></div>';
