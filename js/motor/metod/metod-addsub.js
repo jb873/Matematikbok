@@ -273,20 +273,35 @@ function renderAddMetod(body){
 
 // --- METOD: UPPSTÄLLNING (addition) ---
 function renderUppstallningAdd(body, metod, backFn){
-  let step = 'explain'; // 'explain' | 'practice'
-  let omgangResults = [];
-  let currentTask = null;
+  let level = 1, omgangResults = [], currentTask = null;
+  const OMGANG = 5;
+  function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
+  function fmt(n){ return String(Math.round(n*100)/100).replace('.', ','); }
+  function lvlNamn(l){ return l===1 ? 'Tvåsiffriga tal' : l===2 ? 'Tresiffriga tal' : 'Decimaltal'; }
 
-  // Uppställning ska öva minnessiffror → kräv minst en övergång, undvik runda tal
-  function genUppstAdd(){
-    for(let i=0; i<300; i++){
-      const a = 13 + Math.floor(Math.random()*86);   // 13–98, 2 siffror
-      const b = 13 + Math.floor(Math.random()*86);
-      if(a % 10 === 0 || b % 10 === 0) continue;      // inga runda tal
-      if((a % 10) + (b % 10) < 10) continue;          // garanterad minnessiffra i entalen
-      return {a, b, answer: a + b, op:'+'};
+  // Kräver minst en övergång i lägsta kolumnen. Nivå 3 = decimaltal (aldrig avslutande 0).
+  function genUppstAdd(lvl){
+    const dec = lvl===3 ? (Math.random()<0.5?1:2) : 0, scale = Math.pow(10,dec);
+    for(let i=0; i<400; i++){
+      let a, b;
+      if(lvl===1){ a=rnd(13,98); b=rnd(13,98); }
+      else if(lvl===2){ a=rnd(115,989); b=rnd(115,989); }
+      else { a=(dec===1?rnd(15,999):rnd(115,9999))/scale; b=(dec===1?rnd(15,999):rnd(115,9999))/scale; }
+      const aI=Math.round(a*scale), bI=Math.round(b*scale);
+      if((aI%10)+(bI%10) < 10) continue;             // garanterad minnessiffra i lägsta kolumnen
+      return {a:a, b:b, answer:(aI+bI)/scale, dec:dec};
     }
-    return {a:74, b:57, answer:131, op:'+'};
+    return dec===1 ? {a:7.4,b:5.7,answer:13.1,dec:1} : {a:74,b:57,answer:131,dec:0};
+  }
+
+  function showSummary(){
+    const right = omgangResults.filter(x=>x).length, total = omgangResults.length;
+    const adj = adjustLevel(level, right, total); level = adj.level;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader('Metod · uppställning', 'Du klarade '+right+' av '+total+'.', level)
+      + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+      + '</div>';
+    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; currentTask=genUppstAdd(level); renderPractice(); };
   }
 
   function renderExplain(){
@@ -394,59 +409,47 @@ function renderUppstallningAdd(body, metod, backFn){
   }
 
   function renderPractice(){
-    currentTask = genUppstAdd();
-    const {a, b, answer} = currentTask;
+    currentTask = genUppstAdd(level);
+    const {a, b, answer, dec} = currentTask;
+    const scale = Math.pow(10, dec);
+    const aI = Math.round(a*scale), bI = Math.round(b*scale), ansI = Math.round(answer*scale);
 
-    // Bestäm antal positioner (kolumner) baserat på svaret
-    const cols = String(answer).length; // t.ex. 374+286=660 -> 3, men ev. 4 om tusenöverföring
-    const width = Math.max(String(a).length, String(b).length, cols);
-
-    // Hjälp: siffra på given position (0=ental, 1=tiotal, ...)
+    // Hjälp: siffra på given (skalad) position
     const digit = (n, pos) => Math.floor(n / Math.pow(10, pos)) % 10;
     const hasDigit = (n, pos) => Math.floor(n / Math.pow(10, pos)) > 0 || pos === 0;
 
-    // Bygg kolumner höger->vänster
-    const positions = Array.from({length: width}, (_, i) => i).reverse(); // [width-1, ..., 1, 0]
+    const width = Math.max(String(aI).length, String(bI).length, String(ansI).length);
+    // kolumner höger→vänster, decimalpunkt efter pos===dec
+    const cols = [];
+    for(let p=width-1; p>=0; p--){ cols.push({t:'d', p:p}); if(dec>0 && p===dec) cols.push({t:'dot'}); }
+    const dotA = '<div class="upp-i-cell upp-dec-cell"><span class="upp-dec-pt">,</span></div>';
+    const dotEmpty = '<div class="upp-i-cell upp-dec-cell"></div>';
 
     body.innerHTML = `
       <div class="exercise-card">
-        ${exerciseHeader('Metod · uppställning', 'Fyll i minnessiffror och svar. Börja från entalskolumnen (längst till höger).')}
+        ${exerciseHeader('Metod · uppställning', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level)}
         <div class="metod-explain-card">
-          <p style="font-size:15px;margin:0 0 6px;color:var(--ink-soft);">Beräkna:</p>
+          <p style="font-size:15px;margin:0 0 6px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">${fmt(a)} + ${fmt(b)}</strong>:</p>
 
           <div class="uppstallning-practice">
             <div class="uppstallning-interaktiv">
 
-              <!-- Minnessiffre-rad: tomma platser, minnesrutor läggs till manuellt (aldrig över entalet) -->
+              <!-- Minnessiffre-rad: tomma platser, minnesrutor läggs till manuellt -->
               <div class="upp-i-row carry-row">
                 <div class="upp-i-op-cell"></div>
-                ${positions.map(pos => `
-                  <div class="upp-i-cell" data-carrycell="${pos}"></div>
-                `).join('')}
+                ${cols.map(c => c.t==='dot' ? dotEmpty : `<div class="upp-i-cell" data-carrycell="${c.p}"></div>`).join('')}
               </div>
 
               <!-- Rad A -->
               <div class="upp-i-row">
                 <div class="upp-i-op-cell"></div>
-                ${positions.map(pos => `
-                  <div class="upp-i-cell">
-                    <span class="upp-i-digit ${!hasDigit(a,pos) && pos > 0 ? 'faint' : ''}">
-                      ${hasDigit(a, pos) ? digit(a, pos) : ''}
-                    </span>
-                  </div>
-                `).join('')}
+                ${cols.map(c => c.t==='dot' ? dotA : `<div class="upp-i-cell"><span class="upp-i-digit ${!hasDigit(aI,c.p) && c.p>0 ? 'faint' : ''}">${hasDigit(aI,c.p) ? digit(aI,c.p) : ''}</span></div>`).join('')}
               </div>
 
               <!-- Rad B -->
               <div class="upp-i-row">
                 <div class="upp-i-op-cell opp-sign">+</div>
-                ${positions.map(pos => `
-                  <div class="upp-i-cell">
-                    <span class="upp-i-digit ${!hasDigit(b,pos) && pos > 0 ? 'faint' : ''}">
-                      ${hasDigit(b, pos) ? digit(b, pos) : ''}
-                    </span>
-                  </div>
-                `).join('')}
+                ${cols.map(c => c.t==='dot' ? dotA : `<div class="upp-i-cell"><span class="upp-i-digit ${!hasDigit(bI,c.p) && c.p>0 ? 'faint' : ''}">${hasDigit(bI,c.p) ? digit(bI,c.p) : ''}</span></div>`).join('')}
               </div>
 
               <!-- Linje -->
@@ -455,14 +458,7 @@ function renderUppstallningAdd(body, metod, backFn){
               <!-- Svarsrad -->
               <div class="upp-i-row answer-row">
                 <div class="upp-i-op-cell"></div>
-                ${positions.map((pos, i) => `
-                  <div class="upp-i-cell">
-                    <input type="text" class="ans-input" data-pos="${pos}"
-                      inputmode="numeric" maxlength="1"
-                      tabindex="${width + positions.indexOf(pos) + 1}"
-                      placeholder="">
-                  </div>
-                `).join('')}
+                ${cols.map(c => c.t==='dot' ? dotA : `<div class="upp-i-cell"><input type="text" class="ans-input" data-pos="${c.p}" inputmode="numeric" maxlength="1"></div>`).join('')}
               </div>
 
             </div>
@@ -529,23 +525,16 @@ function renderUppstallningAdd(body, metod, backFn){
     bindKeypad(body.querySelector('.exercise-card'));
 
     const check = () => {
-      // Läs in svaret siffra för siffra
       let correct = true;
       ansInputs.forEach(inp => {
         const pos = parseInt(inp.dataset.pos);
-        const expected = digit(answer, pos);
-        // Tillåt tomt (0) om positionen inte finns i svaret
+        const expected = digit(ansI, pos);
         const val = inp.value === '' ? 0 : parseInt(inp.value);
-        const posExists = Math.floor(answer / Math.pow(10, pos)) > 0 || pos === 0;
+        const posExists = Math.floor(ansI / Math.pow(10, pos)) > 0 || pos === 0;
         inp.disabled = true;
-        if(posExists && val === expected){
-          inp.classList.add('correct');
-        } else if(!posExists && (inp.value === '' || val === 0)){
-          // OK att lämna tom om positionen inte finns
-        } else {
-          inp.classList.add('wrong');
-          correct = false;
-        }
+        if(posExists && val === expected){ inp.classList.add('correct'); }
+        else if(!posExists && (inp.value === '' || val === 0)){ /* ok tom */ }
+        else { inp.classList.add('wrong'); correct = false; }
       });
       body.querySelectorAll('.carr-input').forEach(inp => inp.disabled = true);
 
@@ -556,14 +545,13 @@ function renderUppstallningAdd(body, metod, backFn){
 
       if(correct){
         fb.classList.add('correct');
-        fb.textContent = `Rätt! ${a} + ${b} = ${answer} ✓`;
+        fb.textContent = `Rätt! ${fmt(a)} + ${fmt(b)} = ${fmt(answer)} ✓`;
         ts.correct++;
-        setTimeout(() => { currentTask = genUppstAdd(); renderPractice(); }, 1800);
       } else {
         fb.classList.add('wrong');
-        fb.textContent = `Inte rätt – ${a} + ${b} = ${answer}. Kontrollera position för position.`;
-        setTimeout(() => { currentTask = genUppstAdd(); renderPractice(); }, 2500);
+        fb.textContent = `Inte rätt – ${fmt(a)} + ${fmt(b)} = ${fmt(answer)}. Kontrollera kolumn för kolumn.`;
       }
+      setTimeout(() => { if(omgangResults.length>=OMGANG) showSummary(); else { currentTask=genUppstAdd(level); renderPractice(); } }, correct?1800:2500);
     };
 
     document.getElementById('check-btn').onclick = check;
