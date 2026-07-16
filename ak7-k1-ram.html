@@ -2085,10 +2085,10 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 }
 /* Lång division */
 .div-lang-wall{border-left:2px solid var(--ink);font-weight:500}
-/* Liggande stolen: vågrätt streck över täljaren + hörn (┐) som möter det lodräta strecket */
-.mult-upp-row .cell.dl-top{border-top:2px solid var(--ink)}
-.mult-upp-row .cell.dl-corner{border-right:2px solid var(--ink)}
-.mult-upp-row .cell.dl-namnare{font-weight:500;justify-content:center}
+/* Liggande stolen: täljarsiffrorna i en box med vågrätt streck (top) + lodrätt (right)
+   = hörnet ┐ som sitter ihop. Nämnaren står till höger, utanför boxen. */
+.dl-taljbox{display:flex;gap:2px;align-items:center;box-sizing:border-box;border-top:2px solid var(--ink);border-right:2px solid var(--ink)}
+.mult-upp-row .cell.dl-namnare{font-weight:500;justify-content:center;padding-left:6px}
 .div-step-line{height:2px;background:var(--line);margin:3px 0}
 
 @media (max-width:600px){

@@ -816,11 +816,12 @@ function renderDivLang(body, backFn){
     // så alla rader högerjusteras lika och kolumnerna hamnar rakt under varandra.
     kvotCells.push(emptyCell());
     rows += rowFromCells('', kvotCells);
-    // Ingen separat streck-rad: det vågräta strecket är border-top på täljarsiffrorna och
-    // sista siffran får även border-right (hörnet ┐) → strecken sitter ihop som ett liggande h.
+    // Täljarsiffrorna i en box med ETT sammanhängande vågrätt streck (border-top).
+    // Nämnaren har border-left (lodrätt streck) → möter det vågräta i hörnet = liggande stol.
     var taljCells = [];
-    for(var t=0; t<k; t++) taljCells.push(fixedCell(task.digs[t], t===k-1 ? 'dl-top dl-corner' : 'dl-top'));
-    rows += '<div class="mult-upp-row">' + opCell('') + taljCells.join('')
+    for(var t=0; t<k; t++) taljCells.push(fixedCell(task.digs[t]));
+    rows += '<div class="mult-upp-row">' + opCell('')
+      + '<div class="dl-taljbox">' + taljCells.join('') + '</div>'
       + '<div class="cell dl-namnare">' + task.D + '</div></div>';
     for(var s=0; s<k; s++){
       var st = task.steps[s];
