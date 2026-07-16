@@ -812,8 +812,11 @@ function renderDivLang(body, backFn){
         ? fixedCell('<span style="color:var(--success);font-weight:700;">' + task.steps[i].qi + '</span>')
         : inputCell(task.steps[i].qi, 'div-lang-q'));
     }
+    // Efterföljande tomma cell = samma bredd som täljarradens vägg+nämnare-cell,
+    // så alla rader högerjusteras lika och kolumnerna hamnar rakt under varandra.
+    kvotCells.push(emptyCell());
     rows += rowFromCells('', kvotCells);
-    rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-frac-line" style="width:' + fracW + 'px;"></div></div>';
+    rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-frac-line" style="width:' + fracW + 'px;"></div>' + emptyCell() + '</div>';
     var taljCells = [];
     for(var t=0; t<k; t++) taljCells.push(fixedCell(task.digs[t]));
     rows += '<div class="mult-upp-row">' + opCell('') + taljCells.join('')
@@ -828,8 +831,9 @@ function renderDivLang(body, backFn){
           subCells.push(fixedCell('<span style="color:var(--error);">' + subStr[c - (s - subLen + 1)] + '</span>'));
         } else { subCells.push(emptyCell()); }
       }
+      subCells.push(emptyCell());
       rows += rowFromCells('−', subCells);
-      rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-step-line" style="width:' + fracW + 'px;"></div></div>';
+      rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-step-line" style="width:' + fracW + 'px;"></div>' + emptyCell() + '</div>';
       var diffCells = [];
       for(var d=0; d<k; d++){
         if(d === s){
@@ -840,6 +844,7 @@ function renderDivLang(body, backFn){
           diffCells.push(fixedCell('<span style="color:var(--c-metod);font-weight:700;">' + st.broughtDigit + '</span>', 'div-lang-brought'));
         } else { diffCells.push(emptyCell()); }
       }
+      diffCells.push(emptyCell());
       rows += rowFromCells('', diffCells);
     }
     return '<div class="mult-upp-box"><div class="mult-upp-rows">' + rows + '</div></div>';
