@@ -21,7 +21,7 @@ const MULT_BEGREPP_KORT = [
 ];
 
 function renderMultBegrepp(body){
-  let level = 1;
+  // Ingen nivå-stege: bara ett övningsblad. Tycker man det är svårt → nytt blad.
   let omgang = [];
   let idx = 0;
   let omgangResults = [];
@@ -34,11 +34,9 @@ function renderMultBegrepp(body){
     if(idx >= omgang.length){
       const right = omgangResults.filter(x=>x).length;
       const total = omgangResults.length;
-      const adj = adjustLevel(level, right, total);
-      level = adj.level;
       body.innerHTML = '<div class="exercise-card">'
-        + exerciseHeader('Begrepp · faktor, produkt, primtal', 'Du klarade ' + right + ' av ' + total + '.', level)
-        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+        + exerciseHeader('Begrepp · faktor, produkt, primtal', 'Du klarade ' + right + ' av ' + total + '.')
+        + renderSummaryCard({right:right, total:total, nextLabel:'Nytt övningsblad'})
         + '</div>';
       document.getElementById('summary-next-btn').onclick = function(){
         omgang = genOmgang(); idx = 0; omgangResults = []; render();
@@ -50,7 +48,7 @@ function renderMultBegrepp(body){
       return '<button class="fc-btn" data-val="' + opt + '">' + opt + '</button>';
     }).join('');
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Begrepp · faktor, produkt, primtal', 'Välj rätt matematiskt begrepp.', level)
+      + exerciseHeader('Begrepp · faktor, produkt, primtal', 'Välj rätt matematiskt begrepp.')
       + '<div class="flashcard">'
         + '<div class="flashcard-prompt" style="font-size:13px;margin-bottom:20px;">' + k.fråga + '</div>'
         + '<div class="flashcard-actions" id="fc-actions">' + optBtns + '</div>'

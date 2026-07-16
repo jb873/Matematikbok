@@ -32,17 +32,16 @@ var DIV_BEGREPP_KORT = [
 ];
 
 function renderDivBegrepp(body){
-  var level = 1, omgang = [], idx = 0, omgangResults = [];
+  // Ingen nivå-stege: bara ett övningsblad. Tycker man det är svårt → nytt blad.
+  var omgang = [], idx = 0, omgangResults = [];
   function genOmgang(){ return shuffle(DIV_BEGREPP_KORT.slice()).slice(0, 8); }
   function render(){
     if(idx >= omgang.length){
       var right = omgangResults.filter(function(x){ return x; }).length;
       var total = omgangResults.length;
-      var adj = adjustLevel(level, right, total);
-      level = adj.level;
       body.innerHTML = '<div class="exercise-card">'
-        + exerciseHeader('Begrepp · täljare, nämnare, kvot', 'Du klarade ' + right + ' av ' + total + '.', level)
-        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+        + exerciseHeader('Begrepp · täljare, nämnare, kvot', 'Du klarade ' + right + ' av ' + total + '.')
+        + renderSummaryCard({right:right, total:total, nextLabel:'Nytt övningsblad'})
         + '</div>';
       document.getElementById('summary-next-btn').onclick = function(){
         omgang = genOmgang(); idx = 0; omgangResults = []; render();
@@ -54,7 +53,7 @@ function renderDivBegrepp(body){
       return '<button class="fc-btn" data-val="' + opt + '">' + opt + '</button>';
     }).join('');
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Begrepp · täljare, nämnare, kvot', 'Välj rätt matematiskt begrepp.', level)
+      + exerciseHeader('Begrepp · täljare, nämnare, kvot', 'Välj rätt matematiskt begrepp.')
       + '<div class="flashcard">'
         + '<div class="flashcard-prompt" style="font-size:13px;margin-bottom:20px;">' + k.fraga + '</div>'
         + '<div class="flashcard-actions" id="fc-actions">' + optBtns + '</div>'
