@@ -558,16 +558,38 @@ function renderUppstallningAdd(body, metod, backFn){
 
 // --- METOD: TALSORTERNA VAR FÖR SIG (addition) ---
 function renderTalsorternaAdd(body, metod, backFn){
-  let task = genAddTask(2);
+  let level = 1, omgangResults = [], uppgNr = 0;
+  const OMGANG = 5;
+  function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
+  function fmt(n){ return String(Math.round(n*100)/100).replace('.', ','); }
+  function lvlNamn(l){ return l===1 ? 'Tresiffriga tal' : l===2 ? 'Fyrsiffriga tal' : 'Decimaltal'; }
+  function newTask(lvl){
+    if(lvl===1){ const a=rnd(112,989), b=rnd(112,989); return {a:a,b:b,answer:a+b,dec:0}; }
+    if(lvl===2){ const a=rnd(1123,9899), b=rnd(1123,9899); return {a:a,b:b,answer:a+b,dec:0}; }
+    const dec = Math.random()<0.5 ? 1 : 2, scale = Math.pow(10,dec);
+    const aI = dec===1 ? rnd(15,999) : rnd(115,9999);
+    const bI = dec===1 ? rnd(15,999) : rnd(115,9999);
+    return {a:aI/scale, b:bI/scale, answer:(aI+bI)/scale, dec:dec};
+  }
+  let task = newTask(level);
   let terms = [''];  // state lever utanför render()
-  let uppgNr = 0;    // tips bara på de två första uppgifterna
+
+  function showSummary(){
+    const right = omgangResults.filter(x=>x).length, total = omgangResults.length;
+    const adj = adjustLevel(level, right, total); level = adj.level;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader('Metod · talsorterna var för sig', 'Du klarade '+right+' av '+total+'.', level)
+      + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+      + '</div>';
+    document.getElementById('summary-next-btn').onclick = function(){ omgangResults=[]; task=newTask(level); terms=['']; render(); };
+  }
 
   function refreshInputs(){
     const row = document.getElementById('ts-inputs-row');
     if(!row) return;
     row.innerHTML = terms.map((val, i) =>
       (i > 0 ? '<span class="ts-op ts-plus-sep">+</span>' : '') +
-      '<input type="text" class="ts-term-input" data-idx="' + i + '" inputmode="numeric" maxlength="5" value="' + val + '" placeholder="___">'
+      '<input type="text" class="ts-term-input" data-idx="' + i + '" inputmode="decimal" maxlength="7" value="' + val + '" placeholder="___">'
     ).join('');
 
     row.querySelectorAll('.ts-term-input').forEach((inp, i) => {
@@ -601,31 +623,35 @@ function renderTalsorternaAdd(body, metod, backFn){
 
   function render(){
     uppgNr++;
-    const {a, b, answer} = task;
-    const divisorer = [1000, 100, 10, 1];
-    const delar = divisorer.map(d => {
-      const s = (Math.floor(a/d)%10 + Math.floor(b/d)%10) * d;
-      return s > 0 ? s : null;
-    }).filter(Boolean);
-    const rattMellanled = delar.join(' + ');
+    const {a, b, answer, dec} = task;
+    const scale = Math.pow(10, dec);
+    const aI = Math.round(a*scale), bI = Math.round(b*scale);
+    const maxLen = String(Math.max(aI,bI)).length;
+    const delar = [];
+    for(let p=maxLen-1; p>=0; p--){
+      const s = (Math.floor(aI/Math.pow(10,p))%10 + Math.floor(bI/Math.pow(10,p))%10) * Math.pow(10,p);
+      if(s>0) delar.push(s/scale);
+    }
+    const rattMellanled = delar.map(fmt).join(' + ');
+    const visaTips = level===1 && uppgNr<=2;
 
     body.innerHTML = '<div class="exercise-card">' +
-      exerciseHeader('Metod · talsorterna var för sig', metod.beskrivning) +
+      exerciseHeader('Metod · talsorterna var för sig', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level) +
       '<div class="metod-explain-card">' +
-      (uppgNr<=2 ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">' +
+      (visaTips ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">' +
         '<strong>Idén:</strong> Dela upp talen i talsorter, addera varje talsort för sig och summera ihop.<br>' +
-        '<span style="color:var(--ink-soft);">Exempel: ' + a + ' + ' + b + ' = ' + rattMellanled + ' = ' + answer + '</span>' +
+        '<span style="color:var(--ink-soft);">Exempel: ' + fmt(a) + ' + ' + fmt(b) + ' = ' + rattMellanled + ' = ' + fmt(answer) + '</span>' +
       '</div>' : '') +
       '<div class="ts-rad-container">' +
         '<div class="ts-rad-fast">' +
-          '<span class="ts-num">' + a + '</span>' +
+          '<span class="ts-num">' + fmt(a) + '</span>' +
           '<span class="ts-op">+</span>' +
-          '<span class="ts-num">' + b + '</span>' +
+          '<span class="ts-num">' + fmt(b) + '</span>' +
           '<span class="ts-op">=</span>' +
         '</div>' +
         '<div class="ts-rad-inputs" id="ts-inputs-row"></div>' +
         '<span class="ts-op ts-eq-final">=</span>' +
-        '<input type="text" class="ts-ans-input" id="ts-final-ans" inputmode="numeric" maxlength="6" placeholder="?">' +
+        '<input type="text" class="ts-ans-input" id="ts-final-ans" inputmode="decimal" maxlength="8" placeholder="?">' +
       '</div>' +
       '<div class="ts-snabbknappar">' +
         '<button class="ts-snabb-btn" id="ts-plus-btn">+ <span style="font-size:11px;opacity:.7">lägg till term</span></button>' +
@@ -633,7 +659,7 @@ function renderTalsorternaAdd(body, metod, backFn){
         '<button class="ts-snabb-btn ts-snabb-del" id="ts-del-btn">✕ <span style="font-size:11px;opacity:.7">ta bort</span></button>' +
       '</div>' +
       '<div class="rakna-uppdela-feedback" id="fb-ts"></div>' +
-      keypadHTML([]) +
+      keypadHTML([',']) +
       '<div style="margin-top:14px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
         '<button class="btn primary" id="ts-check">Kontrollera</button>' +
         '<button class="btn subtle" id="ts-ny">Ny uppgift</button>' +
@@ -644,7 +670,7 @@ function renderTalsorternaAdd(body, metod, backFn){
     document.getElementById('ts-eq-btn').onclick = jumpToFinal;
     document.getElementById('ts-del-btn').onclick = removeTerm;
     document.getElementById('ts-back').onclick = backFn;
-    document.getElementById('ts-ny').onclick = () => { task = genAddTask(2); terms = ['']; render(); };
+    document.getElementById('ts-ny').onclick = () => { task = newTask(level); terms = ['']; render(); };
 
     document.getElementById('ts-final-ans').addEventListener('keydown', e => {
       if(e.key === 'Enter'){ e.preventDefault(); check(); }
@@ -656,8 +682,10 @@ function renderTalsorternaAdd(body, metod, backFn){
 
     function check(){
       const termInputs = document.querySelectorAll('.ts-term-input');
-      const termVals = Array.from(termInputs).map(i => parseInt(i.value)).filter(v => !isNaN(v));
-      const finalVal = parseInt(document.getElementById('ts-final-ans').value);
+      const pf = v => parseFloat(String(v).replace(',','.'));
+      const near = (x,y) => Math.abs(x-y) < 1e-9;
+      const termVals = Array.from(termInputs).map(i => pf(i.value)).filter(v => !isNaN(v));
+      const finalVal = pf(document.getElementById('ts-final-ans').value);
       const fb = document.getElementById('fb-ts');
       fb.classList.remove('correct','wrong'); fb.classList.add('show');
       document.getElementById('ts-check').disabled = true;
@@ -665,26 +693,26 @@ function renderTalsorternaAdd(body, metod, backFn){
       document.getElementById('ts-final-ans').disabled = true;
       const ts = getTutorScore('add','metod'); ts.total++;
       const termSum = termVals.reduce((x,y) => x+y, 0);
-      const termsOK = termSum === answer;
-      const finalOK = finalVal === answer;
+      const termsOK = termVals.length >= 2 && near(termSum, answer);   // måste dela upp, inte bara skriva svaret
+      const finalOK = !isNaN(finalVal) && near(finalVal, answer);
+      const nasta = ok => { omgangResults.push(ok); setTimeout(() => { if(omgangResults.length>=OMGANG) showSummary(); else { task=newTask(level); terms=['']; render(); } }, ok?2000:2700); };
       if(termsOK && finalOK){
         termInputs.forEach(i => i.classList.add('correct'));
         document.getElementById('ts-final-ans').classList.add('correct');
         fb.classList.add('correct');
-        fb.textContent = 'Rätt! ' + a + ' + ' + b + ' = ' + termVals.join(' + ') + ' = ' + answer + ' ✓';
-        ts.correct++;
-        setTimeout(() => { task = genAddTask(2); terms = ['']; render(); }, 2000);
+        fb.textContent = 'Rätt! ' + fmt(a) + ' + ' + fmt(b) + ' = ' + termVals.map(fmt).join(' + ') + ' = ' + fmt(answer) + ' ✓';
+        ts.correct++; nasta(true);
       } else if(termsOK){
         termInputs.forEach(i => i.classList.add('correct'));
         document.getElementById('ts-final-ans').classList.add('wrong');
         fb.classList.add('wrong');
-        fb.textContent = 'Termerna stämmer! Men slutsvaret är fel. Summan är ' + answer + '.';
-        setTimeout(() => { task = genAddTask(2); terms = ['']; render(); }, 2500);
+        fb.textContent = 'Termerna stämmer! Men slutsvaret är fel. Summan är ' + fmt(answer) + '.';
+        nasta(false);
       } else {
         termInputs.forEach(i => i.classList.add('wrong'));
         fb.classList.add('wrong');
-        fb.textContent = 'Termerna summeras till ' + termSum + ', men rätt svar är ' + answer + '. Rätt mellanled: ' + rattMellanled + '.';
-        setTimeout(() => { task = genAddTask(2); terms = ['']; render(); }, 2800);
+        fb.textContent = (termVals.length < 2 ? 'Dela upp i minst två talsorter. ' : 'Termerna summeras till ' + fmt(termSum) + ', men rätt svar är ' + fmt(answer) + '. ') + 'Rätt mellanled: ' + rattMellanled + '.';
+        nasta(false);
       }
     }
   }
@@ -695,56 +723,73 @@ function renderTalsorternaAdd(body, metod, backFn){
 
 // --- METOD: FLYTTA ÖVER (addition) ---
 function renderFlyttaOver(body, metod, backFn){
-  // Bra flytta-över-tal: ETT tal ligger nära ett tiotal (slutar på 7/8/9),
-  // det andra har tillräckligt med ental att ge bort så det blir ett jämnt tiotal.
-  // Ex: 28 + 34 → flytta 2 → 30 + 32.
-  function newTask(){
-    for(let i=0; i<300; i++){
-      // "mottagaren" x ligger 1–3 under ett tiotal; "givaren" y ger bort gapet
-      const x = 20 + Math.floor(Math.random()*70);        // 20–89
-      const g = 10 - (x % 10);                              // gap till nästa tiotal
-      if(g < 1 || g > 3) continue;                          // slutar på 7,8,9
-      const y = 20 + Math.floor(Math.random()*70);
-      if(y % 10 < g) continue;                              // y måste kunna ge bort g
-      if(y % 10 === 0) continue;                            // givaren ska inte redan vara jämn
-      // slumpa vilket tal som visas först
-      if(Math.random() < 0.5) return {a:x, b:y, answer:x+y, nara:'a', gap:g};
-      return {a:y, b:x, answer:x+y, nara:'b', gap:g};
+  let level = 1, omgangResults = [], uppgNr = 0;
+  const OMGANG = 5;
+  function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
+  function fmt(n){ return String(Math.round(n*1000)/1000).replace('.', ','); }
+  function lvlNamn(l){ return l===1 ? 'Tvåsiffriga tal' : l===2 ? 'Tresiffriga tal' : 'Decimaltal'; }
+
+  // Ett tal ligger 1–3 (tiondelar) under nästa hela steg; det andra ger bort gapet.
+  // Ex: 28 + 34 → flytta 2 → 30 + 32.  Nivå 3 i tiondelar: 4,8 + 3,5 → 5,0 + 3,3.
+  function newTask(lvl){
+    const dec = lvl===3 ? 1 : 0, scale = dec===1 ? 10 : 1;
+    for(let i=0; i<400; i++){
+      let xI, yI;
+      if(lvl===1){ xI = rnd(20,89);  yI = rnd(20,89); }
+      else if(lvl===2){ xI = rnd(120,889); yI = rnd(120,889); }
+      else { xI = rnd(21,89); yI = rnd(21,89); }          // tiondelar → 2,1–8,9
+      const g = 10 - (xI % 10);                            // gap till nästa hela steg
+      if(g < 1 || g > 3) continue;
+      if(yI % 10 < g) continue;                            // y kan ge bort g
+      if(yI % 10 === 0) continue;
+      const foerst = Math.random() < 0.5;
+      const aI = foerst ? xI : yI, bI = foerst ? yI : xI;
+      return { a:aI/scale, b:bI/scale, answer:(xI+yI)/scale, nara:(foerst?'a':'b'), gap:g/scale, dec:dec };
     }
-    return {a:28, b:34, answer:62, nara:'a', gap:2};
+    return dec===1 ? {a:4.8,b:3.5,answer:8.3,nara:'a',gap:0.2,dec:1} : {a:28,b:34,answer:62,nara:'a',gap:2,dec:0};
   }
 
-  let task = newTask();
-  let uppgNr = 0;   // tips bara på de två första uppgifterna
+  let task = newTask(level);
+
+  function showSummary(){
+    const right = omgangResults.filter(x=>x).length, total = omgangResults.length;
+    const adj = adjustLevel(level, right, total); level = adj.level;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader('Metod · flytta över', 'Du klarade '+right+' av '+total+'.', level)
+      + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+      + '</div>';
+    document.getElementById('summary-next-btn').onclick = function(){ omgangResults=[]; task=newTask(level); render(); };
+  }
 
   function render(){
     uppgNr++;
-    const {a, b, answer} = task;
+    const {a, b, answer, dec} = task;
+    const visaTips = level===1 && uppgNr<=2;
 
     // Bygg HTML med string concat – inga nästlade template literals
     body.innerHTML =
       '<div class="exercise-card">'
-      + exerciseHeader('Metod · flytta över', 'Flytta ett värde så att ett tal blir ett jämnt tiotal. Skriv mellanledet och svaret.')
+      + exerciseHeader('Metod · flytta över', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level)
       + '<div class="metod-explain-card">'
-        + (uppgNr<=2 ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">'
+        + (visaTips ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">'
           + '<strong>Idén:</strong> Flytta ett värde från ett tal till det andra – summan ändras inte.<br>'
           + '<span style="color:var(--ink-soft);">Exempel: 47 + 35 &rarr; flytta 3 &rarr; 50 + 32 = 82</span>'
         + '</div>' : '')
         + '<div class="om-flytt-rad" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;font-size:14px;color:var(--ink-soft);">'
           + '<span>Flytta</span>'
-          + '<input type="text" class="om-u-input" id="om-flytt" inputmode="numeric" maxlength="3" placeholder="?" style="width:52px;">'
+          + '<input type="text" class="om-u-input" id="om-flytt" inputmode="decimal" maxlength="4" placeholder="?" style="width:56px;">'
           + '<span>från det ena talet till det andra.</span>'
         + '</div>'
         + '<div class="om-uttryck-rad" style="justify-content:center;">'
-          + '<span class="om-u-num">' + a + '</span>'
+          + '<span class="om-u-num">' + fmt(a) + '</span>'
           + '<span class="om-u-op">+</span>'
-          + '<span class="om-u-num">' + b + '</span>'
+          + '<span class="om-u-num">' + fmt(b) + '</span>'
           + '<span class="om-u-op">=</span>'
-          + '<input type="text" class="om-u-input" id="ml-a" inputmode="numeric" maxlength="5" placeholder="___">'
+          + '<input type="text" class="om-u-input" id="ml-a" inputmode="decimal" maxlength="6" placeholder="___">'
           + '<span class="om-u-op">+</span>'
-          + '<input type="text" class="om-u-input" id="ml-b" inputmode="numeric" maxlength="5" placeholder="___">'
+          + '<input type="text" class="om-u-input" id="ml-b" inputmode="decimal" maxlength="6" placeholder="___">'
           + '<span class="om-u-op">=</span>'
-          + '<input type="text" class="om-u-input om-u-input-sum" id="ml-sum" inputmode="numeric" maxlength="6" placeholder="?">'
+          + '<input type="text" class="om-u-input om-u-input-sum" id="ml-sum" inputmode="decimal" maxlength="7" placeholder="?">'
         + '</div>'
         + '<div class="rakna-uppdela-feedback" id="fb-fo"></div>'
         + keypadHTML([])
@@ -756,7 +801,7 @@ function renderFlyttaOver(body, metod, backFn){
       + '</div></div>';
 
     document.getElementById('fo-back').onclick = backFn;
-    document.getElementById('fo-ny').onclick   = function(){ task=newTask(); render(); };
+    document.getElementById('fo-ny').onclick   = function(){ task=newTask(level); render(); };
 
     var mlA   = document.getElementById('ml-a');
     var mlB   = document.getElementById('ml-b');
@@ -771,11 +816,14 @@ function renderFlyttaOver(body, metod, backFn){
     setTimeout(function(){ flEl.focus(); }, 50);
     bindKeypad(body.querySelector('.exercise-card'));
 
+    function parse(v){ return parseFloat(String(v).replace(',','.')); }
+    function near(x,y){ return Math.abs(x-y) < 1e-9; }
+    function nasta(ok){
+      omgangResults.push(ok);
+      setTimeout(function(){ if(omgangResults.length>=OMGANG) showSummary(); else { task=newTask(level); render(); } }, ok?2100:2600);
+    }
     function check(){
-      var flytt  = parseInt(flEl.value) || 0;
-      var aVal   = parseInt(mlA.value);
-      var bVal   = parseInt(mlB.value);
-      var sumVal = parseInt(mlSum.value);
+      var flytt = parse(flEl.value)||0, aVal = parse(mlA.value), bVal = parse(mlB.value), sumVal = parse(mlSum.value);
       var fb = document.getElementById('fb-fo');
       fb.classList.remove('correct','wrong'); fb.classList.add('show');
       [mlA,mlB,mlSum].forEach(function(i){ i.classList.remove('correct','wrong'); i.disabled=true; });
@@ -783,32 +831,28 @@ function renderFlyttaOver(body, metod, backFn){
       document.getElementById('fo-check').disabled=true;
 
       var ts = getTutorScore('add','metod'); ts.total++;
-      // Flytt-beloppet stämmer om ett tal ökat med flytt och det andra minskat lika mycket
-      var flyttStammer = flytt>0 && ((aVal===a+flytt && bVal===b-flytt) || (aVal===a-flytt && bVal===b+flytt));
-      var mellanledOK  = !isNaN(aVal) && !isNaN(bVal) && (aVal+bVal===answer);
-      var sumOK        = !isNaN(sumVal) && sumVal===answer;
+      var flyttStammer = flytt>0 && ((near(aVal,a+flytt) && near(bVal,b-flytt)) || (near(aVal,a-flytt) && near(bVal,b+flytt)));
+      var mellanledOK  = !isNaN(aVal) && !isNaN(bVal) && near(aVal+bVal, answer);
+      var sumOK        = !isNaN(sumVal) && near(sumVal, answer);
 
       if(mellanledOK && sumOK){
         [mlA,mlB,mlSum].forEach(function(i){ i.classList.add('correct'); });
         fb.classList.add('correct');
-        fb.textContent = flyttStammer
-          ? 'Rätt! Du flyttade ' + flytt + '. ' + a + ' + ' + b + ' = ' + aVal + ' + ' + bVal + ' = ' + answer + ' ✓'
-          : 'Rätt! ' + a + ' + ' + b + ' = ' + aVal + ' + ' + bVal + ' = ' + answer + ' ✓';
-        ts.correct++;
-        setTimeout(function(){ task=newTask(); render(); }, 2200);
+        fb.textContent = (flyttStammer ? 'Rätt! Du flyttade '+fmt(flytt)+'. ' : 'Rätt! ')
+          + fmt(a)+' + '+fmt(b)+' = '+fmt(aVal)+' + '+fmt(bVal)+' = '+fmt(answer)+' ✓';
+        ts.correct++; nasta(true);
       } else if(mellanledOK && !sumOK){
         mlA.classList.add('correct'); mlB.classList.add('correct'); mlSum.classList.add('wrong');
         fb.classList.add('wrong');
-        fb.textContent = 'Mellanledet stämmer (' + aVal + ' + ' + bVal + ' = ' + answer + '), men slutsvaret är fel.';
-        setTimeout(function(){ task=newTask(); render(); }, 2500);
+        fb.textContent = 'Mellanledet stämmer ('+fmt(aVal)+' + '+fmt(bVal)+' = '+fmt(answer)+'), men slutsvaret är fel.';
+        nasta(false);
       } else {
         [mlA,mlB,mlSum].forEach(function(i){ i.classList.add('wrong'); });
         fb.classList.add('wrong');
         var nearVal  = task.nara === 'a' ? a : b;
         var otherVal = task.nara === 'a' ? b : a;
         var g = task.gap;
-        var tips = 'flytta ' + g + ' från ' + otherVal + ' till ' + nearVal + ': ' + (nearVal+g) + ' + ' + (otherVal-g);
-        fb.textContent = 'Mellanledet stämmer inte. Tips: ' + tips + ' = ' + answer + '.';
+        fb.textContent = 'Mellanledet stämmer inte. Tips: flytta '+fmt(g)+' från '+fmt(otherVal)+' till '+fmt(nearVal)+': '+fmt(nearVal+g)+' + '+fmt(otherVal-g)+' = '+fmt(answer)+'.';
         [mlA,mlB,mlSum,flEl].forEach(function(i){ i.disabled=false; });
         document.getElementById('fo-check').disabled=false;
       }
