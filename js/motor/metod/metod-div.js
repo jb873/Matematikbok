@@ -622,8 +622,9 @@ function renderDivKort(body, backFn){
       return task.carryInto[i] === 0 ? ''
         : '<span class="div-kort-carry-demo">' + task.carryInto[i] + '</span>';
     }
-    return '<input type="text" class="div-kort-carry" data-expect="' + task.carryInto[i]
-      + '" inputmode="numeric" maxlength="1" autocomplete="off">';
+    // Övning: tom klickbar plats – eleven trycker själv för att skapa minnesrutan
+    return '<button type="button" class="div-kort-carry-slot" data-expect="' + task.carryInto[i]
+      + '" title="Lägg till minnessiffra">+</button>';
   }
   function buildBox(task, demo){
     var k = task.k;
@@ -677,7 +678,7 @@ function renderDivKort(body, backFn){
       + exerciseHeader('Metod · kort division — nivå ' + level, 'Nivå ' + level + ': ' + LEVELNAMN[level] + '.')
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.N + ' / ' + task.n + '</strong></p>'
-        + '<p style="font-size:13px;margin:0 0 14px;color:var(--ink-soft);">Skriv kvoten i de gröna rutorna och minnessiffran i de små rutorna framför nästa siffra. Lämna en minnesruta tom om resten är 0.</p>'
+        + '<p style="font-size:13px;margin:0 0 14px;color:var(--ink-soft);">Skriv kvoten i de gröna rutorna. Tryck på <strong>+</strong> för att lägga till en minnessiffra framför nästa siffra.</p>'
         + '<div style="display:flex;justify-content:center;">' + buildBox(task, false) + '</div>'
         + '<div class="rakna-uppdela-feedback" id="kort-fb"></div>'
         + keypadHTML([])
@@ -691,26 +692,27 @@ function renderDivKort(body, backFn){
     bindKeypad(card);
     // Ordning: kvotsiffra, sedan minnessiffran in i nästa kolumn, osv.
     // Markören startar därför på första kvotrutan – inte på en minnessiffra.
-    var qs = Array.from(card.querySelectorAll('.div-kort-q'));
-    var cs = Array.from(card.querySelectorAll('.div-kort-carry'));
-    var allInputs = [];
-    for(var qi=0; qi<qs.length; qi++){
-      allInputs.push(qs[qi]);
-      if(qi < cs.length) allInputs.push(cs[qi]);
-    }
-    setTimeout(function(){ if(allInputs.length) allInputs[0].focus(); }, 50);
-    allInputs.forEach(function(inp, i){
+    var qs = Array.from(card.querySelectorAll('.div-kort-q'));   // kvotsiffror (fokus + nav)
+    // Klickbar minnesplats: skapa själv rutan när eleven trycker på +
+    card.querySelectorAll('.div-kort-carry-slot').forEach(function(slot){
+      slot.addEventListener('click', function(){
+        var inp = document.createElement('input');
+        inp.type='text'; inp.className='div-kort-carry'; inp.setAttribute('inputmode','numeric');
+        inp.maxLength=1; inp.autocomplete='off'; inp.dataset.expect=slot.dataset.expect;
+        inp.addEventListener('input', function(){ inp.value=inp.value.replace(/[^0-9]/g,''); });
+        slot.replaceWith(inp); inp.focus();
+      });
+    });
+    setTimeout(function(){ if(qs.length) qs[0].focus(); }, 50);
+    qs.forEach(function(inp, i){
       inp.addEventListener('keydown', function(e){
-        if(e.key === 'Enter'){
-          e.preventDefault();
-          if(i < allInputs.length - 1) allInputs[i+1].focus();
-          else check();
-        }
+        if(e.key === 'Enter'){ e.preventDefault(); if(i < qs.length - 1) qs[i+1].focus(); else check(); }
       });
     });
     function check(){
       var correct = true;
-      allInputs.forEach(function(inp){
+      card.querySelectorAll('.div-kort-carry-slot').forEach(function(s){ s.disabled = true; });
+      Array.from(card.querySelectorAll('.div-kort-q, .div-kort-carry')).forEach(function(inp){
         var exp = inp.dataset.expect;
         var got = inp.value.trim();
         if(inp.classList.contains('div-kort-carry') && got === '') got = '0';

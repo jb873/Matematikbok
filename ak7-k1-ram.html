@@ -2060,7 +2060,7 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 }
 .div-kort-digcell{position:relative;}
 .div-kort-carry{
-  position:absolute;left:-11px;bottom:3px;
+  position:absolute;left:-12px;top:-13px;
   width:21px;height:23px;
   font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;
   color:var(--error);border:1.5px dashed var(--line);border-radius:4px;
@@ -2069,8 +2069,17 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .div-kort-carry:focus{border-color:var(--error);background:var(--error-bg)}
 .div-kort-carry.correct{border-style:solid;border-color:var(--success);background:var(--success-bg);color:var(--success)}
 .div-kort-carry.wrong{border-style:solid;border-color:var(--error);background:var(--error-bg);color:var(--error)}
+.div-kort-carry-slot{
+  position:absolute;left:-12px;top:-13px;
+  width:21px;height:23px;line-height:1;
+  font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;
+  color:var(--ink-faint);border:1.5px dashed var(--line);border-radius:4px;
+  background:#fff;cursor:pointer;padding:0;z-index:2;
+}
+.div-kort-carry-slot:hover{border-color:var(--c-metod);color:var(--c-metod)}
+.div-kort-carry-slot:disabled{opacity:.3;cursor:default}
 .div-kort-carry-demo{
-  position:absolute;left:-11px;bottom:3px;
+  position:absolute;left:-12px;top:-13px;
   width:21px;height:23px;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:13px;font-weight:700;color:var(--error);
 }
