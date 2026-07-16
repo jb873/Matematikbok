@@ -816,11 +816,12 @@ function renderDivLang(body, backFn){
     // så alla rader högerjusteras lika och kolumnerna hamnar rakt under varandra.
     kvotCells.push(emptyCell());
     rows += rowFromCells('', kvotCells);
-    rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-frac-line" style="width:' + fracW + 'px;"></div>' + emptyCell() + '</div>';
+    // Ingen separat streck-rad: det vågräta strecket är border-top på täljarsiffrorna och
+    // sista siffran får även border-right (hörnet ┐) → strecken sitter ihop som ett liggande h.
     var taljCells = [];
-    for(var t=0; t<k; t++) taljCells.push(fixedCell(task.digs[t]));
+    for(var t=0; t<k; t++) taljCells.push(fixedCell(task.digs[t], t===k-1 ? 'dl-top dl-corner' : 'dl-top'));
     rows += '<div class="mult-upp-row">' + opCell('') + taljCells.join('')
-      + '<div class="cell div-lang-wall">' + task.D + '</div></div>';
+      + '<div class="cell dl-namnare">' + task.D + '</div></div>';
     for(var s=0; s<k; s++){
       var st = task.steps[s];
       var subStr = String(st.sub);
@@ -831,9 +832,9 @@ function renderDivLang(body, backFn){
           subCells.push(fixedCell('<span style="color:var(--error);">' + subStr[c - (s - subLen + 1)] + '</span>'));
         } else { subCells.push(emptyCell()); }
       }
-      subCells.push('<div class="cell div-lang-wall"></div>');
+      subCells.push(emptyCell());
       rows += rowFromCells('−', subCells);
-      rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-step-line" style="width:' + fracW + 'px;"></div><div class="cell div-lang-wall"></div></div>';
+      rows += '<div class="mult-upp-row"><div class="cell opcell"></div><div class="div-step-line" style="width:' + fracW + 'px;"></div>' + emptyCell() + '</div>';
       var diffCells = [];
       for(var d=0; d<k; d++){
         if(d === s){
@@ -844,7 +845,7 @@ function renderDivLang(body, backFn){
           diffCells.push(fixedCell('<span style="color:var(--c-metod);font-weight:700;">' + st.broughtDigit + '</span>', 'div-lang-brought'));
         } else { diffCells.push(emptyCell()); }
       }
-      diffCells.push('<div class="cell div-lang-wall"></div>');
+      diffCells.push(emptyCell());
       rows += rowFromCells('', diffCells);
     }
     return '<div class="mult-upp-box"><div class="mult-upp-rows">' + rows + '</div></div>';
