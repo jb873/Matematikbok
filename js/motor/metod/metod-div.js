@@ -832,7 +832,10 @@ function renderDivLang(body, backFn){
       var subCells = [];
       for(var c=0; c<k; c++){
         if(c > s - subLen && c <= s){
-          subCells.push(fixedCell('<span style="color:var(--error);">' + subStr[c - (s - subLen + 1)] + '</span>'));
+          var subDig = subStr[c - (s - subLen + 1)];
+          subCells.push(demo
+            ? fixedCell('<span style="color:var(--error);">' + subDig + '</span>')
+            : inputCell(subDig, 'div-lang-sub'));
         } else { subCells.push(emptyCell()); }
       }
       subCells.push(emptyCell());
@@ -845,7 +848,9 @@ function renderDivLang(body, backFn){
             ? fixedCell('<span style="color:var(--success);font-weight:700;">' + st.rem + '</span>')
             : inputCell(st.rem, 'div-lang-rem'));
         } else if(d === s + 1 && st.broughtDigit !== null){
-          diffCells.push(fixedCell('<span style="color:var(--c-metod);font-weight:700;">' + st.broughtDigit + '</span>', 'div-lang-brought'));
+          diffCells.push(demo
+            ? fixedCell('<span style="color:var(--c-metod);font-weight:700;">' + st.broughtDigit + '</span>', 'div-lang-brought')
+            : inputCell(st.broughtDigit, 'div-lang-brought'));
         } else { diffCells.push(emptyCell()); }
       }
       diffCells.push(emptyCell());
@@ -883,7 +888,7 @@ function renderDivLang(body, backFn){
       + exerciseHeader('Metod · lång division — nivå ' + level, 'Nivå ' + level + ': ' + LEVELNAMN[level] + '.')
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.N + ' / ' + task.D + '</strong> med liggande stolen.</p>'
-        + '<p style="font-size:13px;margin:0 0 14px;color:var(--ink-soft);">Subtraktionsraderna (röda) är ifyllda. Skriv <strong>kvoten</strong> överst och <strong>differensen</strong> efter varje subtraktion.</p>'
+        + '<p style="font-size:13px;margin:0 0 14px;color:var(--ink-soft);">Fyll i <strong>allt själv</strong>: kvoten överst, talen du subtraherar och differenserna. Räkna steg för steg.</p>'
         + '<div style="display:flex;justify-content:center;">' + buildBox(task, false) + '</div>'
         + '<div class="rakna-uppdela-feedback" id="lang-fb"></div>'
         + keypadHTML([])
@@ -895,7 +900,7 @@ function renderDivLang(body, backFn){
     + '</div>';
     var card = body.querySelector('.exercise-card');
     bindKeypad(card);
-    var allInputs = Array.from(card.querySelectorAll('.div-lang-q, .div-lang-rem'));
+    var allInputs = Array.from(card.querySelectorAll('.div-lang-q, .div-lang-sub, .div-lang-brought, .div-lang-rem'));
     setTimeout(function(){ if(allInputs.length) allInputs[0].focus(); }, 50);
     allInputs.forEach(function(inp, i){
       inp.addEventListener('keydown', function(e){
