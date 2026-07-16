@@ -775,6 +775,38 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   .ovn-exempel{border:1px solid #aaa;background:#f6f6f6;color:#222;}
 }
 
+/* Anteckningsblock – interaktiv uppställning */
+.ova-upp-rad{flex-wrap:wrap}
+.ova-upp-toggle{margin-left:10px;font-size:13px;padding:6px 12px;border:1px solid var(--c-metod,#8a5a2b);color:var(--c-metod,#8a5a2b);background:transparent;border-radius:8px;cursor:pointer}
+.ova-upp-toggle:hover{background:rgba(138,90,43,.08)}
+.ova-upp-block{margin:6px 0 18px 34px;padding:16px 18px;max-width:560px;background:repeating-linear-gradient(#fffdf7,#fffdf7 27px,#e7d9c3 28px);border:1px solid var(--paper-dk,#ede6d6);border-radius:10px}
+.uppb{display:inline-block;font-family:var(--mono,monospace);margin-bottom:10px}
+.uppb-row{display:flex;justify-content:flex-end;align-items:center;gap:2px;min-height:36px}
+.uppb-opcell{width:26px;text-align:center;font-size:22px;color:var(--c-metod,#8a5a2b);font-weight:700}
+.uppb-cell{width:36px;display:flex;align-items:center;justify-content:center}
+.uppb-dot{width:10px;text-align:center;font-size:22px;font-weight:700;color:var(--c-metod,#8a5a2b)}
+.uppb-dig{font-size:24px;color:var(--ink,#222)}
+.uppb-dig.faint{color:transparent}
+.uppb-dig.borrowable{cursor:pointer;border-radius:4px;padding:0 3px}
+.uppb-dig.borrowable:hover{background:rgba(138,90,43,.12)}
+.uppb-dig.struck{text-decoration:line-through;color:#c0392b}
+.uppb-line{height:2px;background:var(--ink,#222);margin:3px 0;width:100%}
+.uppb-ans{width:34px;height:38px;text-align:center;font-family:var(--mono,monospace);font-size:22px;font-weight:600;border:2px solid var(--c-metod,#8a5a2b);border-radius:6px;background:#fff;color:var(--ink,#222);outline:none;padding:0}
+.uppb-ans.correct{border-color:#16a34a;background:#e8f5e9;color:#16a34a}
+.uppb-ans.wrong{border-color:#c0392b;background:#fdeaea;color:#c0392b}
+.uppb-mem-in{width:26px;height:26px;text-align:center;font-family:var(--mono,monospace);font-size:15px;border:1.5px solid #c0392b;border-radius:5px;background:#fff;color:#c0392b;outline:none;padding:0}
+.uppb-mem-in.struck{text-decoration:line-through;opacity:.6}
+.uppb-ten{font-size:14px;color:#c0392b;font-weight:700}
+.uppb-ctrls{display:flex;align-items:center;gap:10px;margin:4px 0 10px}
+.uppb-btn{font-size:13px;padding:6px 12px;border:1px solid var(--c-metod,#8a5a2b);color:var(--c-metod,#8a5a2b);background:transparent;border-radius:8px;cursor:pointer}
+.uppb-btn.is-active{background:var(--c-metod,#8a5a2b);color:#fff}
+.uppb-btn:disabled{opacity:.4;cursor:default}
+.uppb-hint{font-size:12px;color:var(--ink-soft,#666);font-style:italic}
+.uppb-keypad{display:grid;grid-template-columns:repeat(3,44px);gap:6px}
+.uppb-key{height:44px;font-family:var(--mono,monospace);font-size:19px;border:1px solid var(--line,#ccc);border-radius:8px;background:#fff;color:var(--ink,#222);cursor:pointer}
+.uppb-key:hover{background:#f3ede2}
+.uppb-key.util{color:var(--ink-soft,#666)}
+
 /* ── BLAD-NAV (delkapitlets blad, i Öva) ── */
 .blad-nav{max-width:920px;margin:0 auto;padding:22px 28px 4px;display:flex;flex-wrap:wrap;gap:8px;}
 .blad-nav-btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--cinzel,'Cinzel');font-size:12.5px;letter-spacing:.03em;color:var(--ink-soft,#3d3630);background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:8px;padding:9px 15px;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,box-shadow .15s;}
@@ -921,6 +953,104 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     if(rub.indexOf('uppställning')>=0)   return {typ:'none'};
     return {typ:'sum', antal:2, op:'+'};   // flytta över, addition bakifrån – två termer/steg
   }
+
+  // Tolka "419 + 145 =" → {a,b,op,dec}. Hanterar tusenmellanslag och komma-decimaler.
+  function parseUpp(vansterText){
+    var s = String(vansterText).replace(/\s/g,'').replace(/=$/,'');
+    var m = s.match(/^([\d.,]+)([+−\-])([\d.,]+)$/);
+    if(!m) return null;
+    function decs(t){ var i=t.indexOf(','); if(i<0) i=t.indexOf('.'); return i<0?0:(t.length-i-1); }
+    return { a: parseFloat(m[1].replace(',','.')), b: parseFloat(m[3].replace(',','.')),
+             op: (m[2]==='+' ? '+' : '−'), dec: Math.max(decs(m[1]), decs(m[3])) };
+  }
+
+  // Interaktivt uppställnings-"anteckningsblock". op '+'|'−'. Rättas via .check().
+  function byggUppstBlock(mount, a, b, op, dec){
+    var scale = Math.pow(10, dec);
+    var aI = Math.round(a*scale), bI = Math.round(b*scale);
+    var ansI = op==='+' ? (aI+bI) : (aI-bI);
+    var opSign = op==='+' ? '+' : '−';
+    function intDigs(x){ return String(Math.floor(x/scale)).length; }
+    var total = Math.max(intDigs(aI), intDigs(bI), intDigs(ansI), 1) + dec;
+    function dgt(x,p){ return Math.floor(x/Math.pow(10,p))%10; }
+    function hasP(x,p){ return Math.floor(x/Math.pow(10,p))>0 || p===0; }
+    var cols=[];
+    for(var p=total-1;p>=0;p--){ cols.push({t:'d',p:p}); if(dec>0 && p===dec) cols.push({t:'dot'}); }
+    var lanMode=false, nastaMinne=1;
+
+    var h='<div class="uppb">';
+    h+='<div class="uppb-row"><div class="uppb-opcell"></div>'+cols.map(function(c){ return c.t==='dot'?'<div class="uppb-dot"></div>':'<div class="uppb-cell" data-mem="'+c.p+'"></div>'; }).join('')+'</div>';
+    h+='<div class="uppb-row"><div class="uppb-opcell"></div>'+cols.map(function(c){
+      if(c.t==='dot') return '<div class="uppb-dot pt">,</div>';
+      var d=hasP(aI,c.p)?dgt(aI,c.p):null;
+      return d===null?'<div class="uppb-cell"></div>':'<div class="uppb-cell"><span class="uppb-dig'+(op==='−'?' borrowable':'')+'" data-ap="'+c.p+'">'+d+'</span></div>';
+    }).join('')+'</div>';
+    h+='<div class="uppb-row"><div class="uppb-opcell op">'+opSign+'</div>'+cols.map(function(c){
+      if(c.t==='dot') return '<div class="uppb-dot pt">,</div>';
+      var d=hasP(bI,c.p)?dgt(bI,c.p):null;
+      return '<div class="uppb-cell">'+(d===null?'':'<span class="uppb-dig">'+d+'</span>')+'</div>';
+    }).join('')+'</div>';
+    h+='<div class="uppb-line"></div>';
+    h+='<div class="uppb-row"><div class="uppb-opcell"></div>'+cols.map(function(c){
+      return c.t==='dot'?'<div class="uppb-dot pt">,</div>':'<div class="uppb-cell"><input class="uppb-ans" data-p="'+c.p+'" inputmode="numeric" maxlength="1"></div>';
+    }).join('')+'</div>';
+    h+='</div>';
+    h+='<div class="uppb-ctrls">'
+      +(op==='+'?'<button type="button" class="uppb-btn" data-act="minne">↑ Lägg till minnessiffra</button>'
+                :'<button type="button" class="uppb-btn" data-act="lan">↖ Lån</button>')
+      +'<span class="uppb-hint" data-hint></span></div>';
+    h+='<div class="uppb-keypad">'+['7','8','9','4','5','6','1','2','3'].map(function(k){return '<button type="button" class="uppb-key" data-k="'+k+'">'+k+'</button>';}).join('')
+      +'<button type="button" class="uppb-key" data-k="0">0</button><button type="button" class="uppb-key util" data-k="back">⌫</button></div>';
+    mount.innerHTML = h;
+
+    var ansEls = Array.prototype.slice.call(mount.querySelectorAll('.uppb-ans')).sort(function(x,y){return parseInt(x.dataset.p)-parseInt(y.dataset.p);});
+    var active = ansEls[0]||null;
+    mount.addEventListener('focusin', function(e){ if(e.target.tagName==='INPUT') active=e.target; });
+    ansEls.forEach(function(inp,i){ inp.addEventListener('input', function(){ inp.value=inp.value.replace(/[^0-9]/g,''); inp.classList.remove('correct','wrong'); if(inp.value && i<ansEls.length-1) ansEls[i+1].focus(); }); });
+    mount.querySelectorAll('.uppb-key').forEach(function(btn){ btn.addEventListener('mousedown', function(e){ e.preventDefault();
+      if(!active||active.disabled) active=ansEls[0]; if(!active) return;
+      if(btn.dataset.k==='back') active.value=active.value.slice(0,-1); else active.value=btn.dataset.k;
+      active.dispatchEvent(new Event('input',{bubbles:true})); active.focus();
+    }); });
+    var minneBtn = mount.querySelector('[data-act="minne"]');
+    if(minneBtn) minneBtn.onclick = function(){
+      if(nastaMinne>total-1) return;
+      var cell=mount.querySelector('[data-mem="'+nastaMinne+'"]'); if(!cell) return;
+      cell.innerHTML='<input class="uppb-mem-in" inputmode="numeric" maxlength="1">';
+      var mi=cell.querySelector('input');
+      mi.addEventListener('input', function(){ mi.value=mi.value.replace(/[^0-9]/g,''); });
+      mi.addEventListener('click', function(){ if(mi.value.trim()!=='' && document.activeElement!==mi) mi.classList.toggle('struck'); });
+      mi.addEventListener('dblclick', function(){ mi.classList.toggle('struck'); });
+      nastaMinne++; if(nastaMinne>total-1) minneBtn.disabled=true; mi.focus();
+    };
+    var lanBtn = mount.querySelector('[data-act="lan"]'), hint=mount.querySelector('[data-hint]');
+    if(lanBtn){
+      lanBtn.onclick=function(){ lanMode=!lanMode; lanBtn.classList.toggle('is-active',lanMode); if(hint) hint.textContent=lanMode?'Klicka på siffran du lånar av':''; };
+      mount.querySelectorAll('.borrowable').forEach(function(el){ el.addEventListener('click', function(){
+        if(!lanMode) return;
+        var p=parseInt(el.dataset.ap); el.classList.toggle('struck');
+        var recv=mount.querySelector('[data-mem="'+(p-1)+'"]');
+        if(recv) recv.innerHTML = el.classList.contains('struck') ? '<span class="uppb-ten">10</span>' : '';
+        lanMode=false; lanBtn.classList.remove('is-active'); if(hint) hint.textContent='';
+      }); });
+    }
+    setTimeout(function(){ if(ansEls[0]) ansEls[0].focus(); }, 30);
+
+    return { check: function(){
+      var allRight=true;
+      ansEls.forEach(function(inp){
+        var p=parseInt(inp.dataset.p), exp=dgt(ansI,p);
+        var posExists=Math.floor(ansI/Math.pow(10,p))>0||p===0;
+        var val=inp.value===''?-1:parseInt(inp.value);
+        inp.classList.remove('correct','wrong');
+        if(!posExists && (inp.value===''||val===0)){/*ok*/}
+        else if(val===exp) inp.classList.add('correct');
+        else { inp.classList.add('wrong'); allRight=false; }
+      });
+      return allRight;
+    } };
+  }
+
   function bygg_ova_metod(rotEl, blad){
     var h='<div class="ovn-sheet"><h2>'+blad.titel+'</h2>';
     h+='<div class="ovn-exempel" style="font-size:13px;">Visa <strong>mellanledet</strong> för metoden och skriv svaret. Alla korrekta mellanled godtas.</div>';
@@ -932,9 +1062,13 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
         if(rad.typ==='enkel'){
           var spec=metodSpec(grupp,rad);
           if(spec.typ==='none'){
-            h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
+            var pu=parseUpp(rad.vansterText);
+            h+='<div class="ovn-rad ova-upp-rad"><span class="ovn-label">'+L+'</span>'
               +'<span class="ovn-text ovn-num">'+rad.vansterText+'</span>'
-              +'<input class="ovn-in ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:100px;"></div>';
+              +'<input class="ovn-in ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:100px;">'
+              +(pu?'<button type="button" class="ova-upp-toggle" data-a="'+pu.a+'" data-b="'+pu.b+'" data-op="'+pu.op+'" data-dec="'+pu.dec+'">Räkna här ▾</button>':'')
+              +'</div>'
+              +(pu?'<div class="ova-upp-block" hidden></div>':'');
           } else {
             var boxar='';
             for(var bi=0;bi<spec.antal;bi++){
@@ -977,6 +1111,22 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     h+='</div></div><div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Återställ</button></div>';
     h+='<div class="ovn-sammanf" data-sammanf style="display:none;"></div></div></div>';
     rotEl.innerHTML=h;
+
+    // "Räkna här" – fäll ut anteckningsblocket (byggs vid första öppning)
+    rotEl.querySelectorAll('.ova-upp-toggle').forEach(function(btn){
+      var block=btn.parentElement.nextElementSibling;
+      if(!block || !block.classList.contains('ova-upp-block')) return;
+      btn.addEventListener('click', function(){
+        if(block.hidden){
+          block.hidden=false;
+          if(!block.dataset.built){
+            block._inst=byggUppstBlock(block, parseFloat(btn.dataset.a), parseFloat(btn.dataset.b), btn.dataset.op, parseInt(btn.dataset.dec,10));
+            block.dataset.built='1';
+          }
+          btn.textContent='Dölj ▴';
+        } else { block.hidden=true; btn.textContent='Räkna här ▾'; }
+      });
+    });
 
     var inputs=Array.from(rotEl.querySelectorAll('.ovn-in')); var fokus=0;
     inputs.forEach(function(inp,i){
@@ -1053,6 +1203,8 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
           });
         }
       });
+      // Rätta även öppnade anteckningsblock (siffra för siffra)
+      rotEl.querySelectorAll('.ova-upp-block').forEach(function(bl){ if(!bl.hidden && bl._inst) bl._inst.check(); });
       var sam=rotEl.querySelector('[data-sammanf]'); sam.style.display='block'; sam.classList.remove('ok','delvis');
       if(ratt===totalt){ sam.classList.add('ok'); sam.innerHTML='<div class="ovn-sammanf-icon">✓</div>Alla rätt! ('+ratt+' av '+totalt+')'; if(typeof visaKonfetti==='function') visaKonfetti(); }
       else { sam.classList.add('delvis'); sam.innerHTML=ratt+' av '+totalt+' rätt. Rätta de röda och försök igen.'; }
