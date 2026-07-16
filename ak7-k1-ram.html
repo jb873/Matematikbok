@@ -5762,6 +5762,116 @@ function renderKompisTre(body, cfg, backFn){
   render();
 }
 
+// Motor: bråk/blandad form – mellanled med två rutor (talen i decimalform) + svarsruta: op1 − op2 = svar
+function renderBrakMellanled(body, cfg, backFn){
+  let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  function genOmgang(){
+    const a = [];
+    const antal = cfg.antal || 8;
+    for(let i=0; i<antal; i++) a.push(cfg.gen(level));
+    return a;
+  }
+  function render(){
+    if(idx >= omgang.length){
+      const right = results.filter(function(x){ return x; }).length;
+      const total = results.length;
+      const adj = adjustLevel(level, right, total);
+      level = adj.level;
+      body.innerHTML = '<div class="exercise-card">'
+        + exerciseHeader(cfg.header, 'Du klarade ' + right + ' av ' + total + '.', level)
+        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+        + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="brm-back">' + cfg.backLabel + '</button></div>'
+      + '</div>';
+      document.getElementById('summary-next-btn').onclick = function(){
+        omgang = genOmgang(); idx = 0; results = []; render();
+      };
+      document.getElementById('brm-back').onclick = backFn;
+      return;
+    }
+    const task = omgang[idx];
+    uppgNr++;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader(cfg.header, cfg.sub, level)
+      + ((cfg.exempel && level === 1 && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
+      + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
+      + '<div class="mult-metod-uppg">'
+        + '<div class="mult-metod-instr">Skriv båda talen i decimalform i mellanledet och räkna ut svaret.</div>'
+        + '<div class="kompis-tre-rad">'
+          + '<span class="rakna-svar-fast">' + task.leftText + '</span>'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-o1" inputmode="text" maxlength="7" autocomplete="off" placeholder="?">'
+          + '<span class="kompis-tre-op">−</span>'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-o2" inputmode="text" maxlength="7" autocomplete="off" placeholder="?">'
+          + '<span class="kompis-tre-op">=</span>'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-sv" inputmode="text" maxlength="7" autocomplete="off" placeholder="?">'
+        + '</div>'
+      + '</div>'
+      + '<div class="rakna-uppdela-feedback" id="brm-fb"></div>'
+      + keypadHTML(cfg.ops)
+      + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+        + '<button class="btn primary" id="brm-check">Kontrollera</button>'
+        + '<button class="btn subtle" id="brm-back">' + cfg.backLabel + '</button>'
+      + '</div>'
+    + '</div>';
+    const card = body.querySelector('.exercise-card');
+    bindKeypad(card);
+    const o1 = document.getElementById('brm-o1');
+    const o2 = document.getElementById('brm-o2');
+    const sv = document.getElementById('brm-sv');
+    setTimeout(function(){ o1.focus(); }, 50);
+    [o1, o2, sv].forEach(function(inp){
+      inp.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){ e.preventDefault(); check(); }
+      });
+    });
+    document.getElementById('brm-check').onclick = check;
+    document.getElementById('brm-back').onclick = backFn;
+
+    function check(){
+      const v1 = d3ParseNum(o1.value.replace(/−/g,'-'));
+      const v2 = d3ParseNum(o2.value.replace(/−/g,'-'));
+      const v3 = d3ParseNum(sv.value.replace(/−/g,'-'));
+      const fb = document.getElementById('brm-fb');
+      fb.className = 'rakna-uppdela-feedback show';
+      const facit = task.leftText + ' ' + task.op1Str + ' − ' + task.op2Str + ' = ' + task.answerStr;
+      if(v1 === null || v2 === null || v3 === null){
+        fb.classList.add('wrong');
+        fb.textContent = 'Fyll i alla tre rutorna med tal.';
+        return;
+      }
+      o1.disabled = true; o2.disabled = true; sv.disabled = true;
+      document.getElementById('brm-check').disabled = true;
+      const ts = getTutorScore(cfg.koId, cfg.formagaKey); ts.total++;
+      const tsG = getTutorScore(cfg.koId, cfg.scoreKey); tsG.total++;
+      const eps = 1e-6 * Math.max(1, Math.abs(task.answerNum));
+      const mellanOk = Math.abs(v1 - task.op1Val) < 1e-6 * Math.max(1, Math.abs(task.op1Val))
+                    && Math.abs(v2 - task.op2Val) < 1e-6 * Math.max(1, Math.abs(task.op2Val));
+      const decompOk = Math.abs(v1 - v2 - v3) < eps;
+      const svarOk = Math.abs(v3 - task.answerNum) < eps;
+      let ok = false;
+      if(!mellanOk){
+        fb.classList.add('wrong');
+        fb.textContent = 'Skriv om talen i decimalform i mellanledet. ' + facit;
+      } else if(!decompOk){
+        fb.classList.add('wrong');
+        fb.textContent = 'Rutorna hänger inte ihop – första − andra ska bli svaret. ' + facit;
+      } else if(!svarOk){
+        fb.classList.add('wrong');
+        fb.textContent = 'Fel svar. ' + facit;
+      } else {
+        ok = true;
+        o1.classList.add('correct'); o2.classList.add('correct'); sv.classList.add('correct');
+        fb.classList.add('correct');
+        fb.textContent = 'Rätt! ' + facit;
+        ts.correct++; tsG.correct++;
+      }
+      results.push(ok);
+      setTimeout(function(){ idx++; render(); }, ok ? 1800 : 2800);
+    }
+  }
+  omgang = genOmgang();
+  render();
+}
+
 // Motor: ett svar per uppgift
 function renderAddSingle(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
@@ -6600,17 +6710,16 @@ const SUB_BEGREPP_KORT = [
 ];
 
 function renderSubBegrepp(body){
-  let level = 1, omgang = [], idx = 0, omgangResults = [];
+  // Ingen nivå-stege: bara ett övningsblad. Tycker man det är svårt → nytt blad.
+  let omgang = [], idx = 0, omgangResults = [];
   function genOmgang(){ return shuffle(SUB_BEGREPP_KORT.slice()).slice(0, 8); }
   function render(){
     if(idx >= omgang.length){
       const right = omgangResults.filter(function(x){ return x; }).length;
       const total = omgangResults.length;
-      const adj = adjustLevel(level, right, total);
-      level = adj.level;
       body.innerHTML = '<div class="exercise-card">'
-        + exerciseHeader('Begrepp · term och differens', 'Du klarade ' + right + ' av ' + total + '.', level)
-        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+        + exerciseHeader('Begrepp · term och differens', 'Du klarade ' + right + ' av ' + total + '.')
+        + renderSummaryCard({right:right, total:total, nextLabel:'Nytt övningsblad'})
       + '</div>';
       document.getElementById('summary-next-btn').onclick = function(){ omgang = genOmgang(); idx = 0; omgangResults = []; render(); };
       return;
@@ -6620,7 +6729,7 @@ function renderSubBegrepp(body){
       return '<button class="fc-btn" data-val="' + opt + '">' + opt + '</button>';
     }).join('');
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Begrepp · term och differens', 'Välj rätt matematiskt begrepp.', level)
+      + exerciseHeader('Begrepp · term och differens', 'Välj rätt matematiskt begrepp.')
       + '<div class="flashcard">'
         + '<div class="flashcard-prompt" style="font-size:13px;margin-bottom:20px;">' + k.fraga + '</div>'
         + '<div class="flashcard-actions" id="fc-actions">' + optBtns + '</div>'
@@ -6790,13 +6899,16 @@ function renderSubHuvudrakning(body){
       + '<span class="ex-rad">2,4 − 1,7 = 0,7</span><br>'
       + '<span class="ex-rad">12,5 − 3,9 = 8,6</span>',
     gen:function(level){
-      let aH, bH;
       if(level === 1){
-        // nära tiotal
-        const base = d3RandInt(1,9) * 100;
-        aH = base + d3RandInt(1,15);
-        bH = d3RandInt(2,Math.min(aH-1, 20));
-      } else if(level === 2){
+        // Nivå 1: endast tiondelar (en decimal)
+        const aT = d3RandInt(11,199), bT = d3RandInt(1, aT-1);
+        return {display: d3DecStr(aT,1) + ' − ' + d3DecStr(bT,1),
+                answerNum: (aT-bT)/10,
+                answerStr: d3DecStr(aT-bT,1)};
+      }
+      // Nivå 2–3: hundradelar (två decimaler)
+      let aH, bH;
+      if(level === 2){
         aH = d3RandInt(15,300); bH = d3RandInt(5, aH-1);
       } else {
         aH = d3RandInt(105,1200); bH = d3RandInt(15, aH-1);
@@ -6814,42 +6926,33 @@ function renderSubHuvudrakning(body){
   ];
   const BRAK = {
     header:'Huvudräkning · bråk och blandad form', formagaKey:'rakna', koId:'sub-rakna', scoreKey:'brak',
-    sub:'Skriv om bråket till decimalform och subtrahera. Visa mellanledet.',
-    instr:'Skriv om och räkna, t.ex. 0,7 − 0,25 = 0,45.',
-    placeholder:'t.ex. 0,7 − 0,25 = 0,45', ops:['-',',','='], backLabel:'Tillbaka till kategorier',
-    exempel:'<strong>Så funkar det:</strong> Skriv bråket som decimaltal, subtrahera sedan.<br>'
+    sub:'Skriv om talen i decimalform i mellanledet och subtrahera sedan.',
+    ops:[','], backLabel:'Tillbaka till kategorier',
+    exempel:'<strong>Så funkar det:</strong> Skriv först båda talen som decimaltal, subtrahera sedan.<br>'
       + '<span class="ex-rad">0,7 − 1/4 = 0,7 − 0,25 = 0,45</span><br>'
       + '<span class="ex-rad">3/5 − 0,25 = 0,6 − 0,25 = 0,35</span>',
     gen:function(level){
-      const fr = randPick(FRACBANK);
-      let leftText, ansH;
+      let A, B;   // {disp, h}  – h = hundradelar, decimalvärde = h/100
       if(level === 1){
-        const decH = d3RandInt(5,12) * 10;
-        if(decH <= fr.d){ // ensure positive
-          const decH2 = fr.d + d3RandInt(1,5)*10;
-          ansH = decH2 - fr.d;
-          leftText = d3DecStr(decH2,2) + ' − ' + fr.f + ' =';
-        } else {
-          ansH = decH - fr.d;
-          leftText = d3DecStr(decH,2) + ' − ' + fr.f + ' =';
-        }
+        const t = d3RandInt(3,9); let fr = randPick(FRACBANK);
+        while(fr.d === t*10) fr = randPick(FRACBANK);   // undvik lika tal (svar 0)
+        A = {disp:d3DecStr(t,1), h:t*10};
+        B = {disp:fr.f, h:fr.d};
       } else if(level === 2){
-        const w = d3RandInt(1,4);
-        const fr2 = randPick(FRACBANK);
-        const bigH = w*100 + fr.d;
-        if(fr2.d >= bigH){ ansH = fr2.d - bigH; leftText = fr2.f + ' − ' + w + ' ' + fr.f + ' ='; }
-        else { ansH = bigH - fr2.d; leftText = w + ' ' + fr.f + ' − ' + d3DecStr(fr2.d,2) + ' ='; }
-        if(ansH < 0){ ansH = -ansH; } // failsafe
+        const w = d3RandInt(1,3), fr1 = randPick(FRACBANK), fr2 = randPick(FRACBANK);
+        A = {disp:w + ' ' + fr1.f, h:w*100 + fr1.d};
+        B = {disp:d3DecStr(fr2.d,2), h:fr2.d};
       } else {
-        const fr2 = randPick(FRACBANK);
-        const bigger = Math.max(fr.d, fr2.d);
-        const smaller = Math.min(fr.d, fr2.d);
-        ansH = bigger - smaller;
-        if(fr.d > fr2.d) leftText = fr.f + ' − ' + fr2.f + ' =';
-        else leftText = fr2.f + ' − ' + fr.f + ' =';
+        const frA = randPick(FRACBANK); let frB = randPick(FRACBANK);
+        while(frB.d === frA.d) frB = randPick(FRACBANK);
+        A = {disp:frA.f, h:frA.d};
+        B = {disp:frB.f, h:frB.d};
       }
-      if(ansH < 0) ansH = 0;
-      return {leftText: leftText, answerNum: ansH/100};
+      if(B.h > A.h){ const tmp = A; A = B; B = tmp; }   // ordna så differensen blir ≥ 0
+      const ansH = A.h - B.h;
+      return {leftText: A.disp + ' − ' + B.disp + ' =',
+              op1Val: A.h/100, op2Val: B.h/100, answerNum: ansH/100,
+              op1Str: d3DecStr(A.h,2), op2Str: d3DecStr(B.h,2), answerStr: d3DecStr(ansH,2)};
     }
   };
 
@@ -6877,7 +6980,7 @@ function renderSubHuvudrakning(body){
     body.querySelectorAll('[data-kat]').forEach(function(btn){
       btn.onclick = function(){
         const kat = btn.dataset.kat;
-        if(kat === 'brak') renderSubEnrad(body, BRAK, renderPicker);
+        if(kat === 'brak') renderBrakMellanled(body, BRAK, renderPicker);
         else renderAddSingle(body, kat === 'enkel' ? ENKEL : DECIMAL, renderPicker);
       };
     });
