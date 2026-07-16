@@ -1931,6 +1931,13 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .rakna-svar-input:focus{background:#fff;box-shadow:0 0 0 3px rgba(22,163,74,.15)}
 .rakna-svar-input.correct{background:var(--success-bg);border-color:var(--success);color:var(--success)}
 .rakna-svar-input.wrong{background:var(--error-bg);border-color:var(--error);color:var(--error)}
+/* Beräkningar – små tal genom förlängning: rakt bråkstreck med två mellanled-rutor + svarsruta */
+.div-forlang-rad{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:8px 0 4px}
+.div-forlang-lika{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink)}
+.div-forlang-brak{display:inline-flex;flex-direction:column;align-items:stretch;gap:5px}
+.div-forlang-streck{height:3px;background:var(--ink);border-radius:2px;width:100%}
+.div-forlang-in,.div-forlang-svar{min-width:96px;max-width:150px;width:96px;text-align:center;padding:0 8px}
+.div-forlang-svar{min-width:120px;width:120px}
 /* Sekvens-rutor (storleksordna + talföljder): rutor växer med innehållet, radbryter i stället för att scrolla */
 .seq-block{max-width:100%;margin:16px 0 6px}
 .seq-rad{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:8px 0}

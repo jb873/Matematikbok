@@ -1028,18 +1028,21 @@ function renderDivRakna(body){
     },
     sma:{
       header:'Beräkningar · små tal genom förlängning',
-      sub:'Förläng täljare och nämnare så att nämnaren blir 1 eller ett heltal.',
+      sub:'Förläng täljare och nämnare med samma tal så att nämnaren blir ett heltal – räkna sedan ut svaret.',
       ops:[],
+      forlang:true,
       exempel:'<strong>Tänk så här:</strong> Förläng (gångra) både täljare och nämnare med samma tal.<br>'
         + '<span class="ex-rad">12 / 0,2 = (12·5) / (0,2·5) = 60 / 1 = 60</span><br>'
-        + '<span class="ex-rad">8 / 0,4 = (8·10) / (0,4·10) = 80 / 4 = 20</span>',
+        + '<span class="ex-rad">8 / 0,4 = (8·5) / (0,4·5) = 40 / 2 = 20</span>',
       gen:function(level){
         var pool = SMA_POOL[Math.min(level, 3)];
         var d = randPick(pool);
         var j = d3RandInt(2, level === 3 ? 12 : 9);
         var taljare = d.num * j;
         var answer = d.den * j;
-        return {display:taljare + ' / ' + d.s, answerNum:answer, answerStr:String(answer)};
+        return {display:taljare + ' / ' + d.s, answerNum:answer, answerStr:String(answer),
+                taljare:taljare, namnStr:d.s, namnVal:d.num / d.den,
+                facitFt:taljare * d.den, facitFn:d.num};
       }
     },
     negativa:{
@@ -1093,11 +1096,120 @@ function renderDivRakna(body){
         cfg.formagaKey = 'rakna';
         cfg.scoreKey = btn.dataset.kat;
         cfg.backLabel = 'Tillbaka till kategorier';
-        renderAddSingle(body, cfg, renderPicker);
+        if(cfg.forlang) renderDivForlang(body, cfg, renderPicker);
+        else renderAddSingle(body, cfg, renderPicker);
       };
     });
   }
   renderPicker();
+}
+
+// Beräkningar – små tal genom förlängning (två mellanled-rutor: förlängd täljare/nämnare + svar)
+function renderDivForlang(body, cfg, backFn){
+  var level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  function genOmgang(){
+    var a = [];
+    for(var i=0; i<8; i++) a.push(cfg.gen(level));
+    return a;
+  }
+  function render(){
+    if(idx >= omgang.length){
+      var right = results.filter(function(x){ return x; }).length;
+      var total = results.length;
+      var adj = adjustLevel(level, right, total);
+      level = adj.level;
+      body.innerHTML = '<div class="exercise-card">'
+        + exerciseHeader(cfg.header, 'Du klarade ' + right + ' av ' + total + '.', level)
+        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+        + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="dfl-back">' + cfg.backLabel + '</button></div>'
+      + '</div>';
+      document.getElementById('summary-next-btn').onclick = function(){
+        omgang = genOmgang(); idx = 0; results = []; render();
+      };
+      document.getElementById('dfl-back').onclick = backFn;
+      return;
+    }
+    var task = omgang[idx];
+    uppgNr++;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader(cfg.header, cfg.sub, level)
+      + ((cfg.exempel && level === 1 && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
+      + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
+      + '<div class="div-forlang-rad">'
+        + '<span class="rakna-svar-fast">' + task.display + '</span>'
+        + '<span class="div-forlang-lika">=</span>'
+        + '<span class="div-forlang-brak">'
+          + '<input type="text" class="rakna-svar-input div-forlang-in" id="dfl-ft" inputmode="text" maxlength="10" autocomplete="off" placeholder="?">'
+          + '<span class="div-forlang-streck"></span>'
+          + '<input type="text" class="rakna-svar-input div-forlang-in" id="dfl-fn" inputmode="text" maxlength="10" autocomplete="off" placeholder="?">'
+        + '</span>'
+        + '<span class="div-forlang-lika">=</span>'
+        + '<input type="text" class="rakna-svar-input div-forlang-svar" id="dfl-sv" inputmode="text" maxlength="12" autocomplete="off" placeholder="?">'
+      + '</div>'
+      + '<div class="rakna-uppdela-feedback" id="dfl-fb"></div>'
+      + keypadHTML(cfg.ops)
+      + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+        + '<button class="btn primary" id="dfl-check">Kontrollera</button>'
+        + '<button class="btn subtle" id="dfl-back">' + cfg.backLabel + '</button>'
+      + '</div>'
+    + '</div>';
+    var card = body.querySelector('.exercise-card');
+    bindKeypad(card);
+    var ft = document.getElementById('dfl-ft');
+    var fn = document.getElementById('dfl-fn');
+    var sv = document.getElementById('dfl-sv');
+    setTimeout(function(){ ft.focus(); }, 50);
+    [ft, fn, sv].forEach(function(inp){
+      inp.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){ e.preventDefault(); check(); }
+      });
+    });
+    document.getElementById('dfl-check').onclick = check;
+    document.getElementById('dfl-back').onclick = backFn;
+
+    function check(){
+      var vFt = d3ParseNum(ft.value.replace(/−/g,'-'));
+      var vFn = d3ParseNum(fn.value.replace(/−/g,'-'));
+      var vSv = d3ParseNum(sv.value.replace(/−/g,'-'));
+      var fb = document.getElementById('dfl-fb');
+      fb.className = 'rakna-uppdela-feedback show';
+      var facit = task.display + ' = ' + task.facitFt + ' / ' + task.facitFn + ' = ' + task.answerStr;
+      if(vFt === null || vFn === null || vSv === null){
+        fb.classList.add('wrong');
+        fb.textContent = 'Fyll i alla tre rutorna med tal.';
+        return;
+      }
+      ft.disabled = true; fn.disabled = true; sv.disabled = true;
+      document.getElementById('dfl-check').disabled = true;
+      var ts = getTutorScore(cfg.koId, cfg.formagaKey); ts.total++;
+      var tsG = getTutorScore(cfg.koId, cfg.scoreKey); tsG.total++;
+      var namnHeltal = Math.abs(vFn - Math.round(vFn)) < 1e-9 && vFn >= 1;
+      // äkta förlängning: förlängd täljare/nämnare = original täljare/nämnare (samma faktor)
+      var sammaFaktor = Math.abs(vFt * task.namnVal - vFn * task.taljare) < 1e-6 * Math.max(1, Math.abs(vFn * task.taljare));
+      var svarRatt = Math.abs(vSv - task.answerNum) < 1e-6 * Math.max(1, Math.abs(task.answerNum));
+      var ok = false;
+      if(!namnHeltal){
+        fb.classList.add('wrong');
+        fb.textContent = 'Nämnaren måste bli ett heltal. ' + facit;
+      } else if(!sammaFaktor){
+        fb.classList.add('wrong');
+        fb.textContent = 'Förläng täljare och nämnare med samma tal. ' + facit;
+      } else if(!svarRatt){
+        fb.classList.add('wrong');
+        fb.textContent = 'Rätt förlängning, men fel svar. ' + facit;
+      } else {
+        ok = true;
+        ft.classList.add('correct'); fn.classList.add('correct'); sv.classList.add('correct');
+        fb.classList.add('correct');
+        fb.textContent = 'Rätt! ' + facit;
+        ts.correct++; tsG.correct++;
+      }
+      results.push(ok);
+      setTimeout(function(){ idx++; render(); }, ok ? 1700 : 2800);
+    }
+  }
+  omgang = genOmgang();
+  render();
 }
 
 // ---- KO 5: PROBLEMLÖSNING MED LÄSTAL ----
