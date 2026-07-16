@@ -1249,11 +1249,18 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     function tvatal(){ var t1=ri(8,20),t2=ri(2,t1-2); return {typ:'tvatal',fraga:'Summan av två tal är '+(t1+t2)+' och differensen är '+(t1-t2)+'. Vilka är talen?',tal:[t1,t2]}; }
     function txtDiff(){ var a=ri(24,60),b=ri(3,15); return {typ:'text',fraga:'Differensen mellan '+a+' och '+b,svar:a-b}; }
     function txtSum(){ var a=ri(20,60),b=ri(3,15); return {typ:'text',fraga:'Summan av '+a+' och '+b,svar:a+b}; }
+    function saknasHelA(){ var a=ri(31,98),b=ri(31,98); return {typ:'lucka',text:a+' + __ = '+(a+b),svar:b}; }
+    function saknasHelB(){ var a=ri(31,98),b=ri(31,98); return {typ:'lucka',text:'__ + '+b+' = '+(a+b),svar:a}; }
+    function decPar(){ var aI,bI; do{ aI=ri(11,98); bI=ri(11,98); }while(aI%10===0||bI%10===0||(aI+bI)%10===0); return {aI:aI,bI:bI}; }
+    function saknasDecA(){ var p=decPar(); return {typ:'lucka',text:dstr(p.aI,1)+' + __ = '+dstr(p.aI+p.bI,1),svar:p.bI/10}; }
+    function saknasDecB(){ var p=decPar(); return {typ:'lucka',text:'__ + '+dstr(p.bI,1)+' = '+dstr(p.aI+p.bI,1),svar:p.aI/10}; }
     return [
       {rubrik:'Beräkna', rader:[txtDiff(), txtSum()]},
       {rubrik:'Vilka tal?', rader:[delaupp(2), tvatal(), delaupp(3)]},
       {rubrik:'Beräkna med talsorterna var för sig', rader:[talsort(), talsort(), talsort()]},
+      {rubrik:'Vilket tal saknas?', rader:[saknasHelA(), saknasHelB()]},
       {rubrik:'Beräkna med metoden flytta över', rader:[flyttaHel(), flyttaStor(), flyttaDec()]},
+      {rubrik:'Vilket tal saknas?', rader:[saknasDecA(), saknasDecB()]},
       {rubrik:'Beräkna med metoden flytta över', rader:[flyttaDec(), flyttaHel(), flyttaStor()]}
     ];
   }
