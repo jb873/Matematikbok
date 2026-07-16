@@ -1546,7 +1546,7 @@ function renderAdditionBakifran(body, metod, backFn){
             </div>
           </div>
 
-          <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:10px 0 0;">Mellanledet visar stegen: från ${fmt(b)} upp till ${fmt(nextTio)}${useTwoSteps?` och vidare till ${fmt(a)}`:''}.</p>
+          ${visaIde ? `<p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:10px 0 0;">Mellanledet visar stegen: från ${fmt(b)} upp till ${fmt(nextTio)}${useTwoSteps?` och vidare till ${fmt(a)}`:''}.</p>` : ''}
 
           <div class="rakna-uppdela-feedback" id="fb-ab"></div>
           ${keypadHTML([])}
