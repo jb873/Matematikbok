@@ -5762,6 +5762,86 @@ function renderKompisTre(body, cfg, backFn){
   render();
 }
 
+// Motor: kompisar – skriv komplementet (hundra-/tusenkompis). Fråga + en svarsruta.
+function renderKompisFraga(body, cfg, backFn){
+  let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  function genOmgang(){
+    const a = [];
+    const antal = cfg.antal || 8;
+    for(let i=0; i<antal; i++) a.push(cfg.gen(level));
+    return a;
+  }
+  function render(){
+    if(idx >= omgang.length){
+      const right = results.filter(function(x){ return x; }).length;
+      const total = results.length;
+      const adj = adjustLevel(level, right, total);
+      level = adj.level;
+      body.innerHTML = '<div class="exercise-card">'
+        + exerciseHeader(cfg.header, 'Du klarade ' + right + ' av ' + total + '.', level)
+        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+        + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="kf-back">' + cfg.backLabel + '</button></div>'
+      + '</div>';
+      document.getElementById('summary-next-btn').onclick = function(){
+        omgang = genOmgang(); idx = 0; results = []; render();
+      };
+      document.getElementById('kf-back').onclick = backFn;
+      return;
+    }
+    const task = omgang[idx];
+    uppgNr++;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader(cfg.header, cfg.sub, level)
+      + ((cfg.exempel && level === 1 && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
+      + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
+      + '<div class="rakna-tal">' + task.fraga + '</div>'
+      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="kf-input" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="?"></div>'
+      + '<div class="rakna-uppdela-feedback" id="kf-fb"></div>'
+      + keypadHTML(cfg.ops)
+      + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+        + '<button class="btn primary" id="kf-check">Kontrollera</button>'
+        + '<button class="btn subtle" id="kf-back">' + cfg.backLabel + '</button>'
+      + '</div>'
+    + '</div>';
+    const card = body.querySelector('.exercise-card');
+    bindKeypad(card);
+    const input = document.getElementById('kf-input');
+    setTimeout(function(){ input.focus(); }, 50);
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+    document.getElementById('kf-check').onclick = check;
+    document.getElementById('kf-back').onclick = backFn;
+
+    function check(){
+      const stu = d3ParseNum(input.value.replace(/−/g,'-'));
+      const fb = document.getElementById('kf-fb');
+      fb.className = 'rakna-uppdela-feedback show';
+      input.disabled = true;
+      document.getElementById('kf-check').disabled = true;
+      const ts = getTutorScore(cfg.koId, cfg.formagaKey); ts.total++;
+      const tsG = getTutorScore(cfg.koId, cfg.scoreKey); tsG.total++;
+      let ok = false;
+      if(stu === null){
+        fb.classList.add('wrong');
+        fb.textContent = 'Skriv ett tal.';
+      } else if(Math.abs(stu - task.answerNum) < 1e-9){
+        ok = true;
+        input.classList.add('correct');
+        fb.classList.add('correct');
+        fb.textContent = 'Rätt! ' + task.x + ' + ' + task.answerStr + ' = ' + task.bas;
+        ts.correct++; tsG.correct++;
+      } else {
+        input.classList.add('wrong');
+        fb.classList.add('wrong');
+        fb.textContent = 'Inte rätt. ' + task.x + ' + ' + task.answerStr + ' = ' + task.bas + ', så kompisen är ' + task.answerStr + '.';
+      }
+      results.push(ok);
+      setTimeout(function(){ idx++; render(); }, ok ? 1500 : 2600);
+    }
+  }
+  omgang = genOmgang();
+  render();
+}
+
 // Motor: bråk/blandad form – mellanled med två rutor (talen i decimalform) + svarsruta: op1 − op2 = svar
 function renderBrakMellanled(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
@@ -6172,23 +6252,22 @@ function renderAddHuvudrakning(body){
   const HUNDRATUSEN = {
     header:'Huvudräkning · hundra- och tusenkompisar', formagaKey:'rakna', koId:'add-rakna', scoreKey:'hundratusen',
     antal:6,
-    sub:'Flytta över till närmaste jämna hundra eller tusen.',
+    sub:'Skriv vilket tal som är kompisen – de två tal som tillsammans blir 100 eller 1000.',
     ops:[], backLabel:'Tillbaka till kategorier',
-    exempel:'<strong>Så funkar det:</strong> Fyll upp till närmaste hundra (eller tusen).<br>'
-      + '<span class="ex-rad">78 + 45 = 100 + 23 = 123</span><br>'
-      + '<span class="ex-rad">780 + 450 = 1000 + 230 = 1230</span>',
+    exempel:'<strong>Så funkar det:</strong> Hundrakompisar blir tillsammans 100, tusenkompisar 1000.<br>'
+      + '<span class="ex-rad">Hundrakompis till 65 är 35 &nbsp;(65 + 35 = 100)</span><br>'
+      + '<span class="ex-rad">Tusenkompis till 240 är 760 &nbsp;(240 + 760 = 1000)</span>',
     gen:function(level){
-      function mk(lo, hi, round){
-        let a, b;
-        do { a = d3RandInt(lo, hi); b = d3RandInt(lo, hi); } while(a + b <= round);
-        return {a:a, b:b, round:round};
+      function mk(lo, hi, bas, namn){
+        let x;
+        do { x = d3RandInt(lo, hi); } while(x % 10 === 0);
+        return {x:x, bas:bas, namn:namn, answer:bas - x};
       }
-      const g = level === 1 ? mk(23, 99, 100)
-              : level === 2 ? mk(124, 999, 1000)
-              : (Math.random() < 0.5 ? mk(23, 99, 100) : mk(124, 999, 1000));
-      const sum = g.a + g.b, rest = sum - g.round;
-      return {leftText: g.a + ' + ' + g.b + ' =', roundNum: g.round, roundStr: String(g.round),
-              restStr: String(rest), answerNum: sum, answerStr: String(sum)};
+      const g = level === 1 ? mk(23, 77, 100, 'hundrakompis')
+              : level === 2 ? mk(124, 876, 1000, 'tusenkompis')
+              : (Math.random() < 0.5 ? mk(23, 77, 100, 'hundrakompis') : mk(124, 876, 1000, 'tusenkompis'));
+      return {fraga:'Vilket tal är ' + g.namn + ' till ' + g.x + '?',
+              x:g.x, bas:g.bas, answerNum:g.answer, answerStr:String(g.answer)};
     }
   };
   const ENTAL = {
@@ -6213,7 +6292,7 @@ function renderAddHuvudrakning(body){
   function renderPicker(){
     const kort = [
       {id:'tiokompis',   nr:1, namn:'Tiokompisar (flytta över)',        desc:'8 + 7 = 10 + 5 = 15'},
-      {id:'hundratusen', nr:2, namn:'Hundra- och tusenkompisar',        desc:'78 + 45 = 100 + 23 = 123'},
+      {id:'hundratusen', nr:2, namn:'Hundra- och tusenkompisar',        desc:'Hundrakompis till 65 är 35'},
       {id:'entalskompis',nr:3, namn:'Entals- och decimalkompisar',      desc:'0,8 + 0,7 = 1 + 0,5 = 1,5'},
       {id:'decimal',     nr:4, namn:'Decimaltal',                       desc:'9,8 + 0,3 = 10,1'},
       {id:'brak',        nr:5, namn:'Bråk och blandad form',            desc:'1/4 + 0,5 = 0,75'}
@@ -6237,7 +6316,7 @@ function renderAddHuvudrakning(body){
       btn.onclick = function(){
         const kat = btn.dataset.kat;
         if(kat === 'tiokompis') renderAddEnrad(body, TIO, renderPicker);
-        else if(kat === 'hundratusen') renderKompisTre(body, HUNDRATUSEN, renderPicker);
+        else if(kat === 'hundratusen') renderKompisFraga(body, HUNDRATUSEN, renderPicker);
         else if(kat === 'entalskompis') renderKompisTre(body, ENTAL, renderPicker);
         else if(kat === 'brak') renderAddEnrad(body, BRAK, renderPicker);
         else renderAddSingle(body, DECIMAL, renderPicker);
