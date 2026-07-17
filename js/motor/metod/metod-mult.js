@@ -503,6 +503,8 @@ function renderMultMetoder(body){
   const METODER = [
     {id:'uppstallning',  namn:'Uppställning', icon:'📐',
      kort:'Ställ upp talen under varandra och räkna kolumn för kolumn.'},
+    {id:'uppstallning-fler', namn:'Uppställning · flersiffrig multiplikator', icon:'📐',
+     kort:'Multiplikatorn har flera siffror – två delprodukter och en summa.'},
     {id:'talsorterna',   namn:'Talsorterna var för sig', icon:'🔢',
      kort:'Dela upp talet i talsorter, multiplicera var för sig och summera.'},
     {id:'dubbla',        namn:'Dubbla och halvera', icon:'✌️',
@@ -538,6 +540,7 @@ function renderMultMetoder(body){
   function openMetod(id){
     const back = function(){ renderValjMetod(); };
     if(id === 'uppstallning'){ renderUppstallningMult(body, back); return; }
+    if(id === 'uppstallning-fler'){ renderUppstallningMult(body, back, {variant:'fler'}); return; }
     const cfg = ENRADS[id];
     cfg.scoreKey = id;
     renderEnradsMetod(body, cfg, back);
@@ -769,13 +772,20 @@ function renderMultMetoder(body){
 // --- METOD: UPPSTÄLLNING (multiplikation) ---
 // Nivå 1: tvåsiffrigt · ensiffrigt   Nivå 2: tresiffrigt · ensiffrigt
 // Nivå 3: decimaltal · ensiffrigt    Nivå 4: tvåsiffrigt · tvåsiffrigt
-function renderUppstallningMult(body, backFn){
+function renderUppstallningMult(body, backFn, cfg){
+  cfg = cfg || {};
+  const FLER = cfg.variant === 'fler';   // flersiffrig multiplikator (två delprodukter)
   let level = 1;
   let omgangResults = [];
   let uppgNr = 0;              // tipset under minnesrutorna visas bara de 2 första uppgifterna
-  const OMG = 3;
+  const OMG = FLER ? 5 : 3;
+  const TITEL = FLER ? 'Metod · uppställning · flersiffrig' : 'Metod · uppställning';
 
-  const LEVELNAMN = {
+  const LEVELNAMN = FLER ? {
+    1:'tvåsiffrigt · tvåsiffrigt',
+    2:'tresiffrigt · tvåsiffrigt',
+    3:'decimaltal · tvåsiffrigt'
+  } : {
     1:'tvåsiffrigt tal · ensiffrigt',
     2:'tresiffrigt tal · ensiffrigt',
     3:'decimaltal · ensiffrigt',
@@ -788,7 +798,27 @@ function renderUppstallningMult(body, backFn){
     return {level:lv, change:null};
   }
 
+  // Flersiffrig multiplikator (23–99, ental 3–9). Två delprodukter + summa.
+  function genTaskFler(taskIdx){
+    const dU = d3RandInt(3,9), dT = d3RandInt(2,9), dScaled = dT*10 + dU;   // 23–99, ental 3–9
+    const ones = dScaled % 10, tens = Math.floor(dScaled/10);
+    function build(mScaled, mDec, dDec){
+      const p1 = mScaled * ones, p2 = mScaled * tens;
+      const prod = mScaled * dScaled, totalDec = mDec + dDec;
+      return {kind:'tva',
+        mDisplay: d3DecStr(mScaled, mDec), dDisplay: d3DecStr(dScaled, dDec),
+        d: dScaled, ones: ones, tens: tens, p1: p1, p2: p2,
+        answer: prod, answerDisplay: d3DecStr(prod, totalDec),
+        answerValue: prod / Math.pow(10, totalDec)};
+    }
+    if(level === 1) return build(d3RandInt(2,9)*10 + d3RandInt(3,9), 0, 0);                       // m 23–99
+    if(level === 2) return build(d3RandInt(1,9)*100 + d3RandInt(0,9)*10 + d3RandInt(3,9), 0, 0);  // m 123–999
+    // nivå 3: m alltid decimal (sista siffran 3–9); d decimal först fr.o.m. tredje uppgiften
+    return build(d3RandInt(10,99)*10 + d3RandInt(3,9), 1, taskIdx >= 2 ? 1 : 0);
+  }
+
   function genTask(){
+    if(FLER) return genTaskFler(omgangResults.length);
     if(level === 1){
       // tiotal × ental: tvåsiffrigt tal slutar ej på 0/1/2, entalet 3–9
       const units = d3RandInt(3,9), tens = d3RandInt(1,9);
@@ -957,14 +987,14 @@ function renderUppstallningMult(body, backFn){
         : 'Multiplicera kolumn för kolumn från höger. Använd minnesrutorna till höger som stöd.';
     } else {
       // tvåsiffrig multiplikator: två delprodukter + summa
-      const sumStr = String(task.answer);
+      const sumStr = task.answerDisplay || String(task.answer);
       const W = sumStr.length;
       const p1Cells = strToInputCells(String(task.p1));
       // delprodukt 2 skiftas ett steg vänster: en tom cell längst till höger
       const p2Cells = strToInputCells(String(task.p2)).concat([{t:'empty'}]);
       const sumCells = strToInputCells(sumStr);
       const mCells = strToFixedCells(task.mDisplay);
-      const dCells = strToFixedCells(String(task.d));
+      const dCells = strToFixedCells(task.dDisplay || String(task.d));
       let rows = '';
       rows += rowHTML({t:'op',v:''}, mCells, W);
       rows += rowHTML({t:'op',v:'·'}, dCells, W);
@@ -977,15 +1007,18 @@ function renderUppstallningMult(body, backFn){
         + '<div class="mult-upp-rows-wrap"><div class="mult-upp-rows">' + rows + '</div></div>'
         + minnesPanel(3, visaTips)
       + "</div></div>";
-      infoHTML = 'Räkna <strong>' + task.mDisplay + ' · ' + task.ones + '</strong> på första raden och '
-        + '<strong>' + task.mDisplay + ' · ' + task.tens + '</strong> på andra raden. '
-        + 'Andra raden flyttas ett steg åt vänster (den multipliceras med tiotal). Addera ihop raderna.';
+      const mDigits = task.mDisplay.replace(',', '');
+      const harKomma = /,/.test(task.mDisplay) || /,/.test(task.dDisplay || '');
+      infoHTML = 'Räkna <strong>' + mDigits + ' · ' + task.ones + '</strong> på första raden och '
+        + '<strong>' + mDigits + ' · ' + task.tens + '</strong> på andra raden (ett steg åt vänster). '
+        + 'Addera ihop raderna'
+        + (harKomma ? ' och <strong>för ner kommat i svaret</strong> – lika många decimaler som i faktorerna tillsammans.' : '.');
     }
 
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · uppställning', LEVELNAMN[level] + '.', level)
+      + exerciseHeader(TITEL, LEVELNAMN[level] + '.', level)
       + '<div class="metod-explain-card">'
-        + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.mDisplay + ' · ' + task.d + '</strong></p>'
+        + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.mDisplay + ' · ' + (task.dDisplay || task.d) + '</strong></p>'
         + '<p style="font-size:13px;margin:0 0 12px;color:var(--ink-soft);">' + infoHTML + '</p>'
         + '<div style="display:flex;justify-content:center;">' + boxHTML + '</div>'
         + '<div class="rakna-uppdela-feedback" id="upp-fb"></div>'
@@ -1031,15 +1064,15 @@ function renderUppstallningMult(body, backFn){
       const tsG = getTutorScore('mult-metoder','uppstallning');
       ts.total++; tsG.total++;
       omgangResults.push(correct);
+      const dTxt = task.dDisplay || task.d;
+      const ansTxt = task.answerDisplay || (task.kind === 'decimal' ? d3FmtNum(task.answerValue) : task.answer);
       if(correct){
         fb.classList.add('correct');
-        fb.textContent = 'Rätt! ' + task.mDisplay + ' · ' + task.d + ' = '
-          + (task.kind === 'decimal' ? d3FmtNum(task.answerValue) : task.answer) + '  ✓';
+        fb.textContent = 'Rätt! ' + task.mDisplay + ' · ' + dTxt + ' = ' + ansTxt + '  ✓';
         ts.correct++; tsG.correct++;
       } else {
         fb.classList.add('wrong');
-        fb.textContent = 'Inte rätt – ' + task.mDisplay + ' · ' + task.d + ' = '
-          + (task.kind === 'decimal' ? d3FmtNum(task.answerValue) : task.answer)
+        fb.textContent = 'Inte rätt – ' + task.mDisplay + ' · ' + dTxt + ' = ' + ansTxt
           + '. Kontrollera kolumn för kolumn.';
       }
       if(omgangResults.length >= OMG) setTimeout(showSummary, correct ? 1700 : 2700);
@@ -1055,7 +1088,7 @@ function renderUppstallningMult(body, backFn){
     const adj = adjustUpp(level, right, total);
     level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · uppställning', 'Du klarade ' + right + ' av ' + total + '.')
+      + exerciseHeader(TITEL, 'Du klarade ' + right + ' av ' + total + '.')
       + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change, nextLabel:'Ny omgång'})
       + '<div style="margin-top:-8px;text-align:center;">'
         + '<button class="btn subtle" id="upp-tillmetoder">Tillbaka till metoder</button>'
@@ -1067,7 +1100,7 @@ function renderUppstallningMult(body, backFn){
     document.getElementById('upp-tillmetoder').onclick = backFn;
   }
 
-  renderExplain();
+  if(FLER) renderPractice(); else renderExplain();
 }
 
 // ============================================================
