@@ -1918,7 +1918,9 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
   font-family:var(--mono);font-size:28px;font-weight:600;color:var(--c-rakna);
   text-align:center;margin:14px 0 8px;word-break:break-word;line-height:1.3;
 }
-.rakna-svar-rad{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.rakna-svar-rad{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}
+/* Svarsrutan växer och ligger kvar på samma rad som "… =", vänsterjusterat (breda uttrycksrutor undantagna) */
+.rakna-svar-rad .rakna-svar-input:not(.rakna-svar-bred){min-width:120px;flex:1 1 140px}
 .rakna-svar-fast{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink)}
 .rakna-svar-input{
   min-width:170px;max-width:340px;height:52px;

@@ -980,10 +980,16 @@ function renderDivRakna(body){
         + '<span class="ex-rad">45 / 10 = 4,5</span><br>'
         + '<span class="ex-rad">65 / 1000 = 0,065</span>',
       gen:function(level){
-        var p, ddec, N;
-        if(level === 1){ p = randPick([1,2]); ddec = 0; N = d3RandInt(11,999); }
-        else if(level === 2){ p = randPick([1,2,3]); ddec = 0; N = d3RandInt(101,99999); }
-        else { p = randPick([1,2,3]); ddec = randPick([1,2]); N = d3RandInt(101,99999); }
+        // Balanserad fördelning av nämnaren per omgång (8 tal). Tak: 10/100/1000 max 3 ggr.
+        // Nivå 1 (bara 10 & 100): 4,4. Nivå 2–3 (10,100,1000): 3,3,2.
+        if(!this._bag || !this._bag.length){
+          this._bag = shuffle(level === 1 ? [1,1,1,1,2,2,2,2] : [1,1,1,2,2,2,3,3]);
+        }
+        var p = this._bag.pop();
+        var ddec, N;
+        if(level === 1){ ddec = 0; N = d3RandInt(11,999); }
+        else if(level === 2){ ddec = 0; N = d3RandInt(101,99999); }
+        else { ddec = randPick([1,2]); N = d3RandInt(101,99999); }
         var divisor = Math.pow(10, p);
         return {display:d3DecStr(N, ddec) + ' / ' + divisor,
                 answerNum:N / Math.pow(10, ddec + p),
