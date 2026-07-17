@@ -253,7 +253,7 @@ function renderPrioBerakning(body){
     }
     var task = omgang[idx];
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Beräkningar — nivå ' + level, 'Nivå ' + level + ': ' + PRIO_NIVANAMN[level]
+      + exerciseHeader('Beräkningar', PRIO_NIVANAMN[level].charAt(0).toUpperCase() + PRIO_NIVANAMN[level].slice(1)
           + '. Räkna ut hela uttrycket. Kom ihåg ordningen: parenteser, sedan · och /, sist + och −.', level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="prio-expr-stor">' + task.expr + ' <span class="prio-expr-eq">=</span></div>'
@@ -391,7 +391,7 @@ function renderPrioMetod(body){
   function renderTask(){
     var task = randPick(PRIO_TPL[level])();
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Visa metoden — nivå ' + level, 'Nivå ' + level + ': ' + PRIO_NIVANAMN[level]
+      + exerciseHeader('Visa metoden', PRIO_NIVANAMN[level].charAt(0).toUpperCase() + PRIO_NIVANAMN[level].slice(1)
           + '. Räkna nedåt. Skriv det förenklade ledet i rutan före likhetstecknet och svaret i rutan efter.', level)
       + prioTrappaHTML(task)
       + '<div class="rakna-uppdela-feedback" id="met-fb"></div>'
@@ -555,7 +555,7 @@ function renderLagOvning(body, katId, backFn){
   function renderTask(){
     var task = LAG_GEN[katId](level);
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(LAG_NAMN[katId] + ' — nivå ' + level, task.sub, level)
+      + exerciseHeader(LAG_NAMN[katId], task.sub, level)
       + prioRadHTML(task)
       + '<div class="rakna-uppdela-feedback" id="lag-fb"></div>'
       + keypadHTML(['+','·'])

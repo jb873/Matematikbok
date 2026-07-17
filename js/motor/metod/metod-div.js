@@ -674,7 +674,7 @@ function renderDivKort(body, backFn){
   function renderPractice(){
     var task = genTask();
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · kort division — nivå ' + level, 'Nivå ' + level + ': ' + LEVELNAMN[level] + '.')
+      + exerciseHeader('Metod · kort division', LEVELNAMN[level] + '.', level)
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.N + ' / ' + task.n + '</strong></p>'
         + '<p style="font-size:13px;margin:0 0 14px;color:var(--ink-soft);">Skriv kvoten i de gröna rutorna. Tryck på <strong>+</strong> för att lägga till en minnessiffra framför nästa siffra.</p>'
@@ -884,7 +884,7 @@ function renderDivLang(body, backFn){
   function renderPractice(){
     var task = genTask();
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · lång division — nivå ' + level, 'Nivå ' + level + ': ' + LEVELNAMN[level] + '.')
+      + exerciseHeader('Metod · lång division', LEVELNAMN[level] + '.', level)
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.N + ' / ' + task.D + '</strong> med liggande stolen.</p>'
         + '<p style="font-size:13px;margin:0 0 14px;color:var(--ink-soft);">Fyll i <strong>allt själv</strong>: kvoten överst, talen du subtraherar och differenserna. Räkna steg för steg.</p>'
@@ -1264,7 +1264,7 @@ function renderDivProblem(body){
       + '</div>';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.')
+      + exerciseHeader('Problemlösning med lästal', 'Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.', level)
       + tasks
       + '<div id="div-prob-summary-anchor"></div>'
     + '</div>';

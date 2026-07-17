@@ -983,7 +983,7 @@ function renderUppstallningMult(body, backFn){
     }
 
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · uppställning — nivå ' + level, 'Nivå ' + level + ': ' + LEVELNAMN[level] + '.')
+      + exerciseHeader('Metod · uppställning', LEVELNAMN[level] + '.', level)
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.mDisplay + ' · ' + task.d + '</strong></p>'
         + '<p style="font-size:13px;margin:0 0 12px;color:var(--ink-soft);">' + infoHTML + '</p>'
@@ -1633,7 +1633,7 @@ function renderMultProblem(body){
       + '</div>';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.')
+      + exerciseHeader('Problemlösning med lästal', 'Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.', level)
       + tasks
       + '<div id="prob-summary-anchor"></div>'
     + '</div>';

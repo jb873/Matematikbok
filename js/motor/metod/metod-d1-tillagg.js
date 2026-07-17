@@ -219,7 +219,7 @@ function d1CustomEngine(body, cfg, backFn){
     }
     var task = omgang[idx];
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(cfg.title + ' — nivå ' + level, cfg.sub, level)
+      + exerciseHeader(cfg.title, cfg.sub, level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="neg-fraga">' + task.q + '</div>'
       + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="d1c-input" inputmode="' + (cfg.inputmode || 'text') + '" autocomplete="off" placeholder="' + (cfg.placeholder || '?') + '"' + (cfg.maxlength ? ' maxlength="' + cfg.maxlength + '"' : '') + '></div>'

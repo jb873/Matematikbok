@@ -6410,7 +6410,7 @@ function renderAddProblem(body){
       + '</div>';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.')
+      + exerciseHeader('Problemlösning med lästal', 'Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.', level)
       + tasks
       + '<div id="prob-summary-anchor"></div>'
     + '</div>';
@@ -7185,7 +7185,7 @@ function renderSubProblem(body){
       + '</div>';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Problemlösning med lästal', 'Nivå ' + level + ' av 3. Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.')
+      + exerciseHeader('Problemlösning med lästal', 'Lös de tre lästalen. Räkna i anteckningsblocket och skriv svaret.', level)
       + tasks + '<div id="prob-summary-anchor"></div></div>';
 
     body.querySelectorAll('[data-check]').forEach(function(b){
@@ -7834,7 +7834,7 @@ function negCalcEngine(body, cfg, backFn){
     }
     var task = omgang[idx];
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(cfg.title + ' — nivå ' + level, cfg.sub, level)
+      + exerciseHeader(cfg.title, cfg.sub, level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="neg-fraga">' + task.q + '</div>'
       + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off" placeholder="?"></div>'

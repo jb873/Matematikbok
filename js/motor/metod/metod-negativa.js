@@ -60,7 +60,7 @@ function renderNegTalfoljd(body, backFn){
       cells += '<input type="text" class="neg-seq-input" data-i="' + i + '" inputmode="text" maxlength="7" autocomplete="off">';
     }
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Talföljder — nivå ' + level, 'Vilka tre tal kommer härnäst? Hitta mönstret och fyll i.', level)
+      + exerciseHeader('Talföljder', 'Vilka tre tal kommer härnäst? Hitta mönstret och fyll i.', level)
       + '<div class="neg-seq">' + cells + '</div>'
       + '<div class="rakna-uppdela-feedback" id="seq-fb"></div>'
       + keypadHTML(['−',','])
@@ -172,7 +172,7 @@ function renderNegStorleksordna(body, backFn){
     }
     var done = placed.length === nums.length;
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Storleksordna — nivå ' + level, 'Klicka på talen i ordning från minst till störst. Klicka i din ordning för att ångra.', level)
+      + exerciseHeader('Storleksordna', 'Klicka på talen i ordning från minst till störst. Klicka i din ordning för att ångra.', level)
       + '<p class="neg-hint">Tal att ordna</p>'
       + '<div class="neg-chip-row">' + chips + '</div>'
       + '<p class="neg-hint">Din ordning — minst först</p>'

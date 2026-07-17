@@ -77,7 +77,7 @@ function renderAvrNarmevarde(body, backFn){
       return '<button class="avr-opt" data-v="' + v + '">' + avrNum(v) + '</button>';
     }).join('');
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Begreppet närmevärde — nivå ' + level,
+      + exerciseHeader('Begreppet närmevärde',
           'Vilket tal är ett bra närmevärde till uträkningen? Välj det som ligger närmast.', level)
       + '<div class="avr-fraga"><span class="avr-expr">' + task.label + '</span></div>'
       + '<div class="avr-opt-grid">' + opts + '</div>'
@@ -176,7 +176,7 @@ function avrRoundEngine(body, cfg, backFn){
     }
     var task = omgang[idx];
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(cfg.title + ' — nivå ' + level, cfg.sub, level)
+      + exerciseHeader(cfg.title, cfg.sub, level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="avr-fraga">Avrunda <span class="avr-expr">' + avrNum(task.n) + '</span>'
         + ' till närmaste <strong>' + task.posNamn + '</strong>.</div>'
