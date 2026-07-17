@@ -988,7 +988,10 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 <!-- MOTOR (oförändrad) -->
 <script src="../../../js/motor/blad/blad-k1-d1.js"></script>
 
-<!-- SKAL: val-rad + utbudslista (data-driven per del) -->
+<!-- TAXONOMI: delad nodstruktur (en källa, alla vyer) -->
+<script src="../../../js/data/k1-taxonomi.js"></script>
+
+<!-- SKAL: val-rad + utbudslista (utbudslistan läses ur taxonomi-noderna) -->
 <script>
 (function(){
   var DEL = {
@@ -1000,48 +1003,29 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       {titel:'Räkna i positionssystemet',   desc:'Huvudräkning med positionsvärde, intervall och mittemellan.',        blad:'positionsrakning', data:'POSRAK_A'},
       {titel:'Tals egenskaper',             desc:'Jämnt/udda, delbarhet, faktorisering och primtal.',                  blad:'egenskaper',       data:'EGEN_A'}
     ],
-    // FÄRDIGHETSTRÄNING = 15 färdigheter i 6 kunskapsområden (KO). Varje färdighet är en
-    // befintlig ram-motor (KO×förmåga); klick laddar drillen i iframen (embed-läge).
-    // niva = färdighetens verkliga nivå-antal (default 3). 1 => ingen klätterstege.
-    // Siffror/begrepp skalar bara talstorlek (udda/jämnt, antal siffror, störst/minst)
-    // — samma metod oavsett storlek => 1 nivå. Övriga skalar strukturellt (decimaler,
-    // fler faktorer, svårare delbarhetsregler) => 3. resonera/problem visar redan
-    // ingen klätterstege (fritext resp. manuellt nivåval).
-    fardighet:[
-      {ko:'Siffror och tal', drills:[
-        {titel:'Siffror och tal (udda/jämnt · antal · störst/minst)', formaga:'begrepp', ko:'siffror', niva:2},
-        {titel:'Talnamn ↔ siffror', formaga:'begrepp', formagaKey:'namn', ko:'siffror'}
-      ]},
-      {ko:'Positionssystemet', drills:[
-        {titel:'Platsvärde & bygga tal', formaga:'begrepp',  ko:'position'},
-        {titel:'Tallinje, talföljder & storleksordna', formaga:'räkna', formagaKey:'rakna', ko:'position'},
-        {titel:'Jämföra & mittemellan', formaga:'resonera', ko:'position'},
-        {titel:'Enhetsbyten (tiotal, tiondelar …)', formaga:'begrepp', formagaKey:'enhet', ko:'position'}
-      ]},
-      {ko:'Utvecklad form', drills:[
-        {titel:'Skriv i utvecklad form', formaga:'metod', ko:'utvecklad'},
-        {titel:'Vilket tal står på utvecklad form?', formaga:'räkna', formagaKey:'rakna', ko:'utvecklad'}
-      ]},
-      {ko:'Räkneträning', drills:[
-        {titel:'Öka & minska (tiondel · hundradel · tusendel)', formaga:'räkna', formagaKey:'rakna', ko:'rakneträning'}
-      ]},
-      {ko:'Primtal & faktorträd', drills:[
-        {titel:'Primtal eller sammansatt?', formaga:'begrepp', ko:'primtal'},
-        {titel:'Faktorisera (2–4 faktorer)', formaga:'räkna', formagaKey:'rakna', ko:'primtal'},
-        {titel:'Bygg faktorträd', formaga:'metod', ko:'primtal'},
-        {titel:'Skriv hela primtalsfaktoriseringen', formaga:'kommunikation', ko:'primtal'},
-        {titel:'Förklara varför ett tal är primtal', formaga:'resonera', ko:'primtal'},
-        {titel:'Talgåtor: vilket tal är jag?', formaga:'problemlösning', formagaKey:'problem', ko:'primtal'},
-        {titel:'Faktorisering baklänges', formaga:'räkna', formagaKey:'baklanges', ko:'primtal'}
-      ]},
-      {ko:'Delbarhet', drills:[
-        {titel:'Vad är delbarhet?', formaga:'begrepp', ko:'delbarhet'},
-        {titel:'Avgör delbarhet snabbt', formaga:'räkna', formagaKey:'rakna', ko:'delbarhet'},
-        {titel:'Konstruera tal (delbarhet)', formaga:'räkna', formagaKey:'konstruera', ko:'delbarhet'}
-      ]}
-    ]
+    // FÄRDIGHETSTRÄNING byggs nu ur taxonomin (window.K1_TAXONOMI) i stället för hårdkodat
+    // – se fardighetUrTaxonomi() nedan. En källa, alla vyer.
   };
   var RAM = '../../../ak7-k1-ram.html';
+
+  // Bygg Färdighetsträningens grupper/rader ur taxonomi-noderna (window.K1_TAXONOMI).
+  // Deldomäner (KO) med visning = utbudslistans grupper (rubrik+ordning); lövnoder med
+  // visning = färdigheterna (titel, förmåge-etikett, koId, formagaKey, niva).
+  function fardighetUrTaxonomi(omradeId){
+    var t = window.K1_TAXONOMI, noder = (t && t.noder) || [];
+    var grupper = noder.filter(function(n){
+      return n.niva === 'deldoman' && n.parent === omradeId && n.visning;
+    }).sort(function(a, b){ return a.visning.ordning - b.visning.ordning; });
+    return grupper.map(function(dd){
+      var drills = noder.filter(function(n){
+        return n.niva === 'lovnod' && n.parent === dd.id && n.visning;
+      }).map(function(ln){
+        return { titel: ln.visning.titel, formaga: ln.visning.etikett, ko: dd.id,
+                 formagaKey: ln.visning.formagaKey || undefined, niva: ln.visning.niva || undefined };
+      });
+      return { ko: dd.visning.rubrik, drills: drills };
+    });
+  }
 
   // ── ÖVA: blad-nav (numrerad rad) + ett helt arbetsblad i taget ──
   // Motorns egen bygg_blad ritar hela bladet (stegvis:false = ingen avsnitts-stegare).
@@ -1088,7 +1072,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       if(frame) frame.src = url;
       if(scen) scen.classList.add('har-drill');            // visa iframen I rutan, dölj platshållaren (CSS)
     }
-    DEL.fardighet.forEach(function(g){
+    fardighetUrTaxonomi('taluppfattning').forEach(function(g){
       var gr=document.createElement('div'); gr.className='fard-grupp';
       var rub=document.createElement('div'); rub.className='fard-ko'; rub.textContent=g.ko; gr.appendChild(rub);
       g.drills.forEach(function(p){
