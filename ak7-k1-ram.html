@@ -5768,9 +5768,20 @@ function renderKompisTre(body, cfg, backFn){
 function renderKompisFraga(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
   function genOmgang(){
+    // Variation: undvik att samma par (eller dess komplement) upprepas i omgången,
+    // t.ex. "kompis till 65" och "kompis till 35" (65+35 = 35+65). Faller tillbaka
+    // utan dedup om talpoolen är för liten (t.ex. tiondelar på nivå 1).
     const a = [];
     const antal = cfg.antal || 8;
-    for(let i=0; i<antal; i++) a.push(cfg.gen(level));
+    const seen = {};
+    let guard = 0;
+    while(a.length < antal && guard++ < 500){
+      const t = cfg.gen(level);
+      if(t.pairKey && seen[t.pairKey]) continue;
+      if(t.pairKey) seen[t.pairKey] = true;
+      a.push(t);
+    }
+    while(a.length < antal) a.push(cfg.gen(level));
     return a;
   }
   function render(){
@@ -6269,7 +6280,8 @@ function renderAddHuvudrakning(body){
               : level === 2 ? mk(124, 876, 1000, 'tusenkompis')
               : (Math.random() < 0.5 ? mk(23, 77, 100, 'hundrakompis') : mk(124, 876, 1000, 'tusenkompis'));
       return {fraga:'Vilket tal är ' + g.namn + ' till ' + g.x + '?',
-              x:g.x, bas:g.bas, answerNum:g.answer, answerStr:String(g.answer)};
+              x:g.x, bas:g.bas, answerNum:g.answer, answerStr:String(g.answer),
+              pairKey:g.bas + ':' + Math.min(g.x, g.answer)};
     }
   };
   const ENTAL = {
@@ -6289,7 +6301,8 @@ function renderAddHuvudrakning(body){
       do { x = d3RandInt(lo, hi); } while(level > 1 && x % 10 === 0);
       const ans = scale - x;
       return {fraga:'Vilket tal är entalskompis till ' + d3DecStr(x, dec) + '?',
-              x:d3DecStr(x, dec), bas:1, answerNum:ans / scale, answerStr:d3DecStr(ans, dec)};
+              x:d3DecStr(x, dec), bas:1, answerNum:ans / scale, answerStr:d3DecStr(ans, dec),
+              pairKey:scale + ':' + Math.min(x, ans)};
     }
   };
 
