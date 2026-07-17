@@ -6273,19 +6273,21 @@ function renderAddHuvudrakning(body){
   const ENTAL = {
     header:'Huvudräkning · entals- och decimalkompisar', formagaKey:'rakna', koId:'add-rakna', scoreKey:'entalskompis',
     antal:6,
-    sub:'Flytta över till närmaste hela tal (1).',
+    sub:'Skriv vilket tal som är kompisen – de två tal som tillsammans blir 1 (ett helt).',
     ops:[','], backLabel:'Tillbaka till kategorier',
-    exempel:'<strong>Så funkar det:</strong> Fyll upp decimaltalet till 1.<br>'
-      + '<span class="ex-rad">0,8 + 0,7 = 1 + 0,5 = 1,5</span><br>'
-      + '<span class="ex-rad">0,78 + 0,45 = 1 + 0,23 = 1,23</span>',
+    exempel:'<strong>Så funkar det:</strong> Entalskompisar blir tillsammans 1.<br>'
+      + '<span class="ex-rad">Entalskompis till 0,7 är 0,3 &nbsp;(0,7 + 0,3 = 1)</span><br>'
+      + '<span class="ex-rad">Entalskompis till 0,45 är 0,55 &nbsp;(0,45 + 0,55 = 1)</span>',
     gen:function(level){
-      let a, b, scale, dec;
-      if(level === 1){ scale = 10; dec = 1; do { a = d3RandInt(2,9); b = d3RandInt(2,9); } while(a + b <= 10); }
-      else if(level === 2){ scale = 100; dec = 2; do { a = d3RandInt(13,99); b = d3RandInt(13,99); } while(a + b <= 100); }
-      else { scale = 1000; dec = 3; do { a = d3RandInt(124,999); b = d3RandInt(124,999); } while(a + b <= 1000); }
-      const sum = a + b, rest = sum - scale;
-      return {leftText: d3DecStr(a,dec) + ' + ' + d3DecStr(b,dec) + ' =', roundNum: 1, roundStr: '1',
-              restStr: d3DecStr(rest, dec), answerNum: sum / scale, answerStr: d3DecStr(sum, dec)};
+      let scale, dec, lo, hi;
+      if(level === 1){ scale = 10; dec = 1; lo = 1; hi = 9; }
+      else if(level === 2){ scale = 100; dec = 2; lo = 13; hi = 87; }
+      else { scale = 1000; dec = 3; lo = 124; hi = 876; }
+      let x;
+      do { x = d3RandInt(lo, hi); } while(level > 1 && x % 10 === 0);
+      const ans = scale - x;
+      return {fraga:'Vilket tal är entalskompis till ' + d3DecStr(x, dec) + '?',
+              x:d3DecStr(x, dec), bas:1, answerNum:ans / scale, answerStr:d3DecStr(ans, dec)};
     }
   };
 
@@ -6293,7 +6295,7 @@ function renderAddHuvudrakning(body){
     const kort = [
       {id:'tiokompis',   nr:1, namn:'Tiokompisar (flytta över)',        desc:'8 + 7 = 10 + 5 = 15'},
       {id:'hundratusen', nr:2, namn:'Hundra- och tusenkompisar',        desc:'Hundrakompis till 65 är 35'},
-      {id:'entalskompis',nr:3, namn:'Entals- och decimalkompisar',      desc:'0,8 + 0,7 = 1 + 0,5 = 1,5'},
+      {id:'entalskompis',nr:3, namn:'Entals- och decimalkompisar',      desc:'Entalskompis till 0,7 är 0,3'},
       {id:'decimal',     nr:4, namn:'Decimaltal',                       desc:'9,8 + 0,3 = 10,1'},
       {id:'brak',        nr:5, namn:'Bråk och blandad form',            desc:'1/4 + 0,5 = 0,75'}
     ];
@@ -6317,7 +6319,7 @@ function renderAddHuvudrakning(body){
         const kat = btn.dataset.kat;
         if(kat === 'tiokompis') renderAddEnrad(body, TIO, renderPicker);
         else if(kat === 'hundratusen') renderKompisFraga(body, HUNDRATUSEN, renderPicker);
-        else if(kat === 'entalskompis') renderKompisTre(body, ENTAL, renderPicker);
+        else if(kat === 'entalskompis') renderKompisFraga(body, ENTAL, renderPicker);
         else if(kat === 'brak') renderAddEnrad(body, BRAK, renderPicker);
         else renderAddSingle(body, DECIMAL, renderPicker);
       };
