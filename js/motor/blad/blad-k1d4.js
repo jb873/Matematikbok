@@ -173,25 +173,27 @@ function GEN_TEST_N1(){ return bladTest(1, false); }
 function GRUND_TEST_N2(){ return bladTest(2, true); }
 function GEN_TEST_N2(){ return bladTest(2, false); }
 
-// ── Ett hopslaget ÖVA-dokument: bråk↔decimal + tiondelar/hundradelar i ETT blad ──
-// Återanvänder bladBTform + bladHundra byte-identiskt (grupperna slås ihop till två
-// ämnes-sektioner). Inga nivåer/nivå-etikett – ett dokument. "Nytt blad" ger mängdträning.
-function bladOva(forsta){
-  var b1 = bladBTform(1, forsta);   // bråk ↔ decimal
-  var b2 = bladHundra(1, forsta);   // tiondelar & hundradelar
-  return {
-    titel: 'Bråkform och decimalform',
-    intro: 'Växla mellan bråkform och decimalform. Tiondelar och hundradelar är bryggan mellan formerna. Skriv decimaltal med komma och bråk i enklaste form.',
-    hint: b2.hint,
-    keypadOps: [','],
-    grupper: [].concat(b1.grupper, b2.grupper)
-  };
+// ── ÖVA: två blad (per ämne), utan nivå-toggle men med HELA innehållet (nivå-2-poolen
+//    innehåller både enkla tal och de svåra: hundradelar, förlängning av 20/25/50).
+//    Återanvänder bladBTform/bladHundra byte-identiskt; sätter bara ren titel. ──
+function bladBrakDec(forsta){
+  var b = bladBTform(2, forsta);
+  b.titel = 'Bråk ↔ decimal';
+  b.intro = 'Skriv bråket som decimaltal och decimaltalet som bråk i enklaste form. Här finns både tiondelar och hundradelar.';
+  b.hint = BTFORM_HINT + ' Här finns även <strong>hundradelar</strong> – dem skriver du med nämnaren 100 (t.ex. 0,07 = 7/100).';
+  return b;
 }
-function GRUND_OVA(){ return bladOva(true); }
-function GEN_OVA(){ return bladOva(false); }
+function bladTionHundra(forsta){
+  var b = bladHundra(2, forsta);
+  b.titel = 'Tiondelar & hundradelar';
+  b.intro = 'Tiondelar och hundradelar är bryggan mellan formerna. Förläng bråket till hundradelar och läs av decimaltalet.';
+  b.hint = HUNDRA_HINT + ' Här finns även bråk vars nämnare är 20, 25 eller 50 – förläng dem till hundradelar.';
+  return b;
+}
 
 var GENERATORER = {
-  ova:    { grund: GRUND_OVA, gen: GEN_OVA },   // hopslaget Öva-dokument (utan nivå-toggle)
+  brakdec:    { grund: function(){ return bladBrakDec(true); },    gen: function(){ return bladBrakDec(false); } },
+  tionhundra: { grund: function(){ return bladTionHundra(true); }, gen: function(){ return bladTionHundra(false); } },
   btform: { nivaer: { 1: { grund: GRUND_BTFORM_N1, gen: GEN_BTFORM_N1 },
                       2: { grund: GRUND_BTFORM_N2, gen: GEN_BTFORM_N2 } } },
   hundra: { nivaer: { 1: { grund: GRUND_HUNDRA_N1, gen: GEN_HUNDRA_N1 },

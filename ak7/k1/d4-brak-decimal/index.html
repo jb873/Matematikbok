@@ -943,6 +943,14 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   .tallinje{margin-left:14px;margin-right:14px;}
   .tl-brak,.tl-dec{font-size:13px;}
 }
+/* ── BLAD-NAV (delkapitlets blad, i Öva) ── */
+.blad-nav{max-width:920px;margin:0 auto;padding:22px 28px 4px;display:flex;flex-wrap:wrap;gap:8px;}
+.blad-nav-btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--cinzel,'Cinzel');font-size:12.5px;letter-spacing:.03em;color:var(--ink-soft,#3d3630);background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:8px;padding:9px 15px;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,box-shadow .15s;}
+.blad-nav-btn:hover{border-color:var(--gold-lt,#c49a40);color:var(--ink,#12110f);}
+.blad-nav-nr{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;flex-shrink:0;background:var(--paper-dk,#ede6d6);color:var(--ink-faint,#7a6e65);font-family:var(--cinzel,'Cinzel');font-size:11px;font-weight:600;transition:background .15s,color .15s;}
+.blad-nav-btn.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);color:#fff;box-shadow:0 3px 10px rgba(15,30,46,.18);}
+.blad-nav-btn.is-active .blad-nav-nr{background:var(--gold-lt,#c49a40);color:var(--navy,#0f1e2e);}
+@media(max-width:560px){.blad-nav{padding:16px 16px 4px;}}
 /* ── FÄRDIGHETSTRÄNING (lista + drill-iframe) ── */
 .fard-layout{max-width:920px;margin:0 auto;padding:18px 28px 44px;display:grid;grid-template-columns:288px 1fr;gap:22px;align-items:start;}
 .fard-lista{display:flex;flex-direction:column;gap:2px;}
@@ -1041,9 +1049,11 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   </div>
 </section>
 
-<!-- PANEL: ÖVA — ett hopslaget dokument (bråk↔decimal + tiondelar/hundradelar) -->
+<!-- PANEL: ÖVA — två blad (bråk↔decimal + tiondelar/hundradelar) via blad-nav -->
 <section class="tab-panel is-active" data-panel="ova">
-  <div class="ovn-wrap" id="sheet-ova"></div>
+  <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
+  <div id="blad-brakdec" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-brakdec"></div></div>
+  <div id="blad-tionhundra" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-tionhundra"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -1083,8 +1093,26 @@ tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
 });
 
 initForelasningar();
-byggSheet('ova', true);    // ett hopslaget Öva-dokument (bråk↔decimal + tiondelar/hundradelar)
-byggSheet('test', true);   // Visa vad du kan
+byggSheet('brakdec', true);     // Öva-blad 1: Bråk ↔ decimal
+byggSheet('tionhundra', true);  // Öva-blad 2: Tiondelar & hundradelar
+byggSheet('test', true);        // Visa vad du kan
+
+// ── ÖVA: blad-nav över de två bladen (renderade ovan) ──
+(function(){
+  var OVA=[ {titel:'Bråk ↔ decimal', mount:'brakdec'}, {titel:'Tiondelar & hundradelar', mount:'tionhundra'} ];
+  var navEl=document.getElementById('blad-nav');
+  if(!navEl) return;
+  var mounts=[], knappar=[];
+  function visa(i){ OVA.forEach(function(b,j){ if(mounts[j]) mounts[j].hidden=(j!==i); if(knappar[j]){ var on=(j===i); knappar[j].classList.toggle('is-active',on); knappar[j].setAttribute('aria-selected',on?'true':'false'); } }); }
+  OVA.forEach(function(b,i){
+    mounts[i]=document.getElementById('blad-'+b.mount);
+    var btn=document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn'; btn.setAttribute('role','tab'); btn.title=b.titel;
+    btn.innerHTML='<span class="blad-nav-nr">'+(i+1)+'</span>'+b.titel;
+    btn.onclick=function(){ visa(i); };
+    navEl.appendChild(btn); knappar[i]=btn;
+  });
+  visa(0);
+})();
 
 // ── FÄRDIGHETSTRÄNING ur taxonomin (utbudslista 'd4') ──
 (function(){
