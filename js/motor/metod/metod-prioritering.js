@@ -256,10 +256,11 @@ function renderPrioBerakning(body){
       + exerciseHeader('Beräkningar', PRIO_NIVANAMN[level].charAt(0).toUpperCase() + PRIO_NIVANAMN[level].slice(1)
           + '. Räkna ut hela uttrycket. Kom ihåg ordningen: parenteser, sedan · och /, sist + och −.', level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
+      + '<div class="mult-metod-instr" style="text-align:center;margin-bottom:2px;">Visa mellanledet: räkna ut · och / först, skriv sedan svaret. T.ex. <strong>24 − 12 = 12</strong>.</div>'
       + '<div class="prio-expr-stor">' + task.expr + ' <span class="prio-expr-eq">=</span></div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="ber-input" inputmode="text" maxlength="9" autocomplete="off" placeholder="?"></div>'
+      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input rakna-svar-bred" id="ber-input" inputmode="text" autocomplete="off" placeholder="t.ex. 24 − 12 = 12"></div>'
       + '<div class="rakna-uppdela-feedback" id="ber-fb"></div>'
-      + keypadHTML(['−'])
+      + keypadHTML(['+','−','·','/','='])
       + '<div style="margin-top:16px;text-align:center;">'
         + '<button class="btn primary" id="ber-check">Kontrollera</button>'
       + '</div>'
@@ -272,26 +273,43 @@ function renderPrioBerakning(body){
       if(e.key === 'Enter'){ e.preventDefault(); check(); }
     });
     function check(){
+      var raw = input.value.trim();
       var fb = document.getElementById('ber-fb');
       fb.className = 'rakna-uppdela-feedback show';
-      var stu = d3ParseNum(input.value);
+      var ts = getTutorScore('prio-prioritering','rakna');
+      // Kedjan efter uppgiftens "=": varje led (mellanled + svar) måste bli svaret,
+      // och minst ett mellanled ska visas (två led åtskilda med =).
+      var segs = raw.split('=').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
+      var ok = false, msg = '';
+      if(!raw){ msg = 'Skriv mellanledet och svaret, t.ex. 24 − 12 = 12.'; }
+      else if(segs.length < 2){ msg = 'Visa mellanledet – skriv förenklingen och svaret, åtskilda med =.'; }
+      else {
+        ok = true;
+        for(var i=0; i<segs.length; i++){
+          var v = prioEval(segs[i]);
+          if(v === null){ ok = false; msg = 'Kunde inte tolka "' + segs[i] + '". Använd siffror och räknetecken.'; break; }
+          if(Math.abs(v - task.answer) > 1e-6){
+            ok = false;
+            msg = 'Det stämmer inte. "' + segs[i] + '" blir ' + prioNum(v) + ', men svaret ska bli ' + prioNum(task.answer) + '.';
+            break;
+          }
+        }
+      }
       input.disabled = true;
       document.getElementById('ber-check').disabled = true;
-      var ts = getTutorScore('prio-prioritering','rakna');
       ts.total++;
-      var ok = stu !== null && Math.abs(stu - task.answer) < 1e-6;
       if(ok){
         input.classList.add('correct');
         fb.classList.add('correct');
-        fb.textContent = 'Rätt! ' + task.expr + ' = ' + prioNum(task.answer) + '.';
+        fb.textContent = 'Rätt! ' + task.expr + ' = ' + raw + '  ✓';
         ts.correct++;
       } else {
         input.classList.add('wrong');
         fb.classList.add('wrong');
-        fb.textContent = 'Inte rätt. ' + task.expr + ' = ' + prioNum(task.answer) + '.';
+        fb.textContent = msg;
       }
       results.push(ok);
-      setTimeout(function(){ idx++; render(); }, ok ? 1800 : 3000);
+      setTimeout(function(){ idx++; render(); }, ok ? 1900 : 3200);
     }
     document.getElementById('ber-check').onclick = check;
   }
