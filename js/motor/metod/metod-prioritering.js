@@ -256,55 +256,56 @@ function renderPrioBerakning(body){
       + exerciseHeader('Beräkningar', PRIO_NIVANAMN[level].charAt(0).toUpperCase() + PRIO_NIVANAMN[level].slice(1)
           + '. Räkna ut hela uttrycket. Kom ihåg ordningen: parenteser, sedan · och /, sist + och −.', level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
-      + '<div class="mult-metod-instr" style="text-align:center;margin-bottom:2px;">Visa mellanledet: räkna ut · och / först, skriv sedan svaret. T.ex. <strong>24 − 12 = 12</strong>.</div>'
-      + '<div class="prio-expr-stor">' + task.expr + ' <span class="prio-expr-eq">=</span></div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input rakna-svar-bred" id="ber-input" inputmode="text" autocomplete="off" placeholder="t.ex. 24 − 12 = 12"></div>'
+      + '<div class="mult-metod-instr" style="text-align:center;margin-bottom:2px;">Skriv mellanledet i första rutan (räkna ut · och / först) och svaret i den andra. T.ex. <strong>6 · 4 − 12 = 24 − 12 = 12</strong>.</div>'
+      + '<div class="prio-ber-rad">'
+        + '<span class="rakna-svar-fast">' + task.expr + '</span>'
+        + '<span class="prio-ber-eq">=</span>'
+        + '<input type="text" class="rakna-svar-input prio-ber-in prio-ber-mellan" id="ber-mellan" inputmode="text" autocomplete="off" placeholder="mellanled">'
+        + '<span class="prio-ber-eq">=</span>'
+        + '<input type="text" class="rakna-svar-input prio-ber-in prio-ber-svar" id="ber-svar" inputmode="text" autocomplete="off" placeholder="svar">'
+      + '</div>'
       + '<div class="rakna-uppdela-feedback" id="ber-fb"></div>'
-      + keypadHTML(['+','−','·','/','='])
+      + keypadHTML(['+','−','·','/'])
       + '<div style="margin-top:16px;text-align:center;">'
         + '<button class="btn primary" id="ber-check">Kontrollera</button>'
       + '</div>'
     + '</div>';
     var card = body.querySelector('.exercise-card');
     bindKeypad(card);
-    var input = document.getElementById('ber-input');
-    setTimeout(function(){ input.focus(); }, 50);
-    input.addEventListener('keydown', function(e){
-      if(e.key === 'Enter'){ e.preventDefault(); check(); }
-    });
+    var mellanInp = document.getElementById('ber-mellan');
+    var svarInp = document.getElementById('ber-svar');
+    setTimeout(function(){ mellanInp.focus(); }, 50);
+    mellanInp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); svarInp.focus(); } });
+    svarInp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+    // Facit-mellanledet (t.ex. "24 − 12") ur uppgiftens första förenklingssteg.
+    function stegStr(line){
+      return line.map(function(c){ return c.t === 'op' ? c.v : prioNum(c.v); }).join(' ');
+    }
     function check(){
-      var raw = input.value.trim();
+      var m = mellanInp.value.trim(), s = svarInp.value.trim();
       var fb = document.getElementById('ber-fb');
       fb.className = 'rakna-uppdela-feedback show';
       var ts = getTutorScore('prio-prioritering','rakna');
-      // Kedjan efter uppgiftens "=": varje led (mellanled + svar) måste bli svaret,
-      // och minst ett mellanled ska visas (två led åtskilda med =).
-      var segs = raw.split('=').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
+      var mVal = prioEval(m), sVal = prioEval(s);
+      // mellanledet ska vara ett UTTRYCK (operator mellan tal), inte bara svaret
+      var harOp = /[\d)]\s*[-−+*/·xX]/.test(m);
+      var facit = task.expr + ' = ' + stegStr(task.steps[0]) + ' = ' + prioNum(task.answer);
       var ok = false, msg = '';
-      if(!raw){ msg = 'Skriv mellanledet och svaret, t.ex. 24 − 12 = 12.'; }
-      else if(segs.length < 2){ msg = 'Visa mellanledet – skriv förenklingen och svaret, åtskilda med =.'; }
-      else {
-        ok = true;
-        for(var i=0; i<segs.length; i++){
-          var v = prioEval(segs[i]);
-          if(v === null){ ok = false; msg = 'Kunde inte tolka "' + segs[i] + '". Använd siffror och räknetecken.'; break; }
-          if(Math.abs(v - task.answer) > 1e-6){
-            ok = false;
-            msg = 'Det stämmer inte. "' + segs[i] + '" blir ' + prioNum(v) + ', men svaret ska bli ' + prioNum(task.answer) + '.';
-            break;
-          }
-        }
-      }
-      input.disabled = true;
+      if(m === '' || s === ''){ msg = 'Fyll i både mellanledet och svaret.'; }
+      else if(!harOp){ msg = 'Visa mellanledet – räkna ut · och / först (t.ex. 24 − 12).'; }
+      else if(mVal === null || Math.abs(mVal - task.answer) > 1e-6){ msg = 'Mellanledet stämmer inte. ' + facit; }
+      else if(sVal === null || Math.abs(sVal - task.answer) > 1e-6){ msg = 'Fel svar. ' + facit; }
+      else { ok = true; }
+      mellanInp.disabled = true; svarInp.disabled = true;
       document.getElementById('ber-check').disabled = true;
       ts.total++;
       if(ok){
-        input.classList.add('correct');
+        mellanInp.classList.add('correct'); svarInp.classList.add('correct');
         fb.classList.add('correct');
-        fb.textContent = 'Rätt! ' + task.expr + ' = ' + raw + '  ✓';
+        fb.textContent = 'Rätt! ' + task.expr + ' = ' + m + ' = ' + s + '  ✓';
         ts.correct++;
       } else {
-        input.classList.add('wrong');
+        mellanInp.classList.add('wrong'); svarInp.classList.add('wrong');
         fb.classList.add('wrong');
         fb.textContent = msg;
       }

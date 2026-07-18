@@ -2178,6 +2178,12 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .prio-vl.correct,.prio-svar.correct{background:var(--success-bg);border-color:var(--success);border-style:solid;color:var(--success);}
 .prio-vl.wrong,.prio-svar.wrong{background:var(--error-bg);border-color:var(--error);border-style:solid;color:var(--error);}
 .prio-tom{display:inline-block;}
+/* Beräkningar (prio · rakna): uttryck = [mellanled] = [svar] på EN rad, vänsterjusterat */
+.prio-ber-rad{display:flex;align-items:center;justify-content:flex-start;gap:12px;flex-wrap:wrap;margin:16px 0 4px;}
+.prio-ber-eq{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink);}
+.prio-ber-in{text-align:left;padding:0 12px;}
+.prio-ber-mellan{min-width:150px;max-width:230px;width:170px;}
+.prio-ber-svar{min-width:96px;max-width:150px;width:110px;}
 .prio-metod-trappa-GAMMAL{
   display:grid;
   grid-template-columns:minmax(0,max-content) max-content minmax(0,max-content);
