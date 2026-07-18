@@ -176,19 +176,35 @@ function GEN_TEST_N2(){ return bladTest(2, false); }
 // ── ÖVA: två blad (per ämne), utan nivå-toggle men med HELA innehållet (nivå-2-poolen
 //    innehåller både enkla tal och de svåra: hundradelar, förlängning av 20/25/50).
 //    Återanvänder bladBTform/bladHundra byte-identiskt; sätter bara ren titel. ──
+// Slå ihop enkla (nivå 1) och svåra (nivå 2) grupper per rubrik, utan dubbletter, så
+// varje blad garanterat innehåller BÅDE enkla tal OCH de svåra som låg på den låsta nivån.
+function bdMergeGrupper(g1, g2){
+  var out = [];
+  function grupp(rubrik){ var ex = out.filter(function(x){ return x.rubrik === rubrik; })[0]; if(!ex){ ex = { rubrik: rubrik, rader: [], _seen: {} }; out.push(ex); } return ex; }
+  function add(g){ var ex = grupp(g.rubrik); g.rader.forEach(function(r){ var k = JSON.stringify(r); if(!ex._seen[k]){ ex._seen[k] = 1; ex.rader.push(r); } }); }
+  g1.forEach(add); g2.forEach(add);
+  out.forEach(function(g){ delete g._seen; });
+  return out;
+}
 function bladBrakDec(forsta){
-  var b = bladBTform(2, forsta);
-  b.titel = 'Bråk ↔ decimal';
-  b.intro = 'Skriv bråket som decimaltal och decimaltalet som bråk i enklaste form. Här finns både tiondelar och hundradelar.';
-  b.hint = BTFORM_HINT + ' Här finns även <strong>hundradelar</strong> – dem skriver du med nämnaren 100 (t.ex. 0,07 = 7/100).';
-  return b;
+  var b1 = bladBTform(1, forsta), b2 = bladBTform(2, forsta);
+  return {
+    titel: 'Bråk ↔ decimal',
+    intro: 'Skriv bråket som decimaltal och decimaltalet som bråk i enklaste form. Här finns både enkla tal och svårare med hundradelar.',
+    hint: BTFORM_HINT + ' Här finns även <strong>hundradelar</strong> – dem skriver du med nämnaren 100 (t.ex. 0,07 = 7/100).',
+    keypadOps: [','],
+    grupper: bdMergeGrupper(b1.grupper, b2.grupper)
+  };
 }
 function bladTionHundra(forsta){
-  var b = bladHundra(2, forsta);
-  b.titel = 'Tiondelar & hundradelar';
-  b.intro = 'Tiondelar och hundradelar är bryggan mellan formerna. Förläng bråket till hundradelar och läs av decimaltalet.';
-  b.hint = HUNDRA_HINT + ' Här finns även bråk vars nämnare är 20, 25 eller 50 – förläng dem till hundradelar.';
-  return b;
+  var b1 = bladHundra(1, forsta), b2 = bladHundra(2, forsta);
+  return {
+    titel: 'Tiondelar & hundradelar',
+    intro: 'Tiondelar och hundradelar är bryggan mellan formerna. Här finns både enkla tal och svårare – förläng bråket till hundradelar och läs av decimaltalet.',
+    hint: HUNDRA_HINT + ' Här finns även bråk vars nämnare är 20, 25 eller 50 – förläng dem till hundradelar.',
+    keypadOps: [','],
+    grupper: bdMergeGrupper(b1.grupper, b2.grupper)
+  };
 }
 
 var GENERATORER = {
