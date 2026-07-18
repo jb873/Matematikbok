@@ -961,7 +961,8 @@ function renderDivRakna(body){
     {id:'stora',    nr:2, namn:'Stora tal',            desc:'Tal med många nollor.'},
     {id:'storasma', nr:3, namn:'Stora och små tal',    desc:'Stora tal delade med små decimaltal.'},
     {id:'sma',      nr:4, namn:'Små tal – förlängning',desc:'Förläng nämnaren till 1 eller ett heltal.'},
-    {id:'negativa', nr:5, namn:'Negativa tal',         desc:'Håll koll på tecknet – plus och minus.'}
+    {id:'negativa', nr:5, namn:'Negativa tal',         desc:'Håll koll på tecknet – plus och minus.'},
+    {id:'saknas',   nr:6, namn:'Vilket tal saknas',    desc:'Hitta talet som fattas i divisionen.'}
   ];
   var SMA_POOL = {
     1:[{s:'0,5',num:1,den:2},{s:'0,2',num:1,den:5},{s:'0,25',num:1,den:4},{s:'0,1',num:1,den:10}],
@@ -1074,6 +1075,31 @@ function renderDivRakna(body){
                 answerNum:answer,
                 answerStr:(answer < 0 ? '−' : '') + Math.abs(answer)};
       }
+    },
+    saknas:{
+      mode:'saknas',
+      header:'Beräkningar · vilket tal saknas',
+      sub:'Vilket tal ska stå i rutan? Tänk på sambandet mellan division och multiplikation.',
+      ops:[','],
+      exempel:'<strong>Tänk så här:</strong> Täljare / nämnare = kvot. Saknas täljaren: gånga. Saknas nämnaren: dela.<br>'
+        + '<span class="ex-rad">▢ / 6 = 7 &nbsp;→&nbsp; 6 · 7 = 42</span><br>'
+        + '<span class="ex-rad">56 / ▢ = 8 &nbsp;→&nbsp; 56 / 8 = 7</span>',
+      gen:function(level){
+        if(level === 1){                                          // tabellnära: a = q·b, dölj täljare eller nämnare
+          var q = d3RandInt(2,9), b = d3RandInt(2,9), a = q * b;
+          if(Math.random() < 0.5) return {leftText:'', rightText:' / ' + b + ' = ' + q, answerNum:a, answerStr:String(a)};
+          return {leftText:a + ' / ', rightText:' = ' + q, answerNum:b, answerStr:String(b)};
+        }
+        if(level === 2){                                          // större heltal
+          var q2 = d3RandInt(6,15), b2 = d3RandInt(3,9), a2 = q2 * b2;
+          if(Math.random() < 0.5) return {leftText:'', rightText:' / ' + b2 + ' = ' + q2, answerNum:a2, answerStr:String(a2)};
+          return {leftText:a2 + ' / ', rightText:' = ' + q2, answerNum:b2, answerStr:String(b2)};
+        }
+        var q3 = d3RandInt(4,9), dsc = randPick([2,3,4,5,6,8]);   // nivå 3: nämnaren är ett decimaltal (0,2–0,8)
+        var dStr = d3DecStr(dsc,1), aStr = d3DecStr(dsc * q3, 1); // täljaren a = nämnare · kvot
+        if(Math.random() < 0.5) return {leftText:'', rightText:' / ' + dStr + ' = ' + q3, answerNum:dsc * q3 / 10, answerStr:aStr};
+        return {leftText:aStr + ' / ', rightText:' = ' + q3, answerNum:dsc / 10, answerStr:dStr};
+      }
     }
   };
 
@@ -1102,6 +1128,7 @@ function renderDivRakna(body){
         cfg.scoreKey = btn.dataset.kat;
         cfg.backLabel = 'Tillbaka till kategorier';
         if(cfg.forlang) renderDivForlang(body, cfg, renderPicker);
+        else if(cfg.mode === 'saknas') renderRaknaSaknas(body, cfg, renderPicker);
         else renderAddSingle(body, cfg, renderPicker);
       };
     });

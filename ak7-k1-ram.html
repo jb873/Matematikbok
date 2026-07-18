@@ -6052,6 +6052,84 @@ function renderAddSingle(body, cfg, backFn){
   render();
 }
 
+// Motor: "Vilket tal saknas" – luckan sitter INNE i uttrycket (a · __ = c). Delas av
+// mult- och div-Beräkningar. cfg: {header, sub, exempel, ops, koId, formagaKey, scoreKey,
+// backLabel, gen}. gen(level) → {leftText, rightText, answerNum, answerStr}; uttrycket
+// renderas som  leftText [input] rightText  och luckans värde är answerNum.
+function renderRaknaSaknas(body, cfg, backFn){
+  let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  function genOmgang(){ const a = []; for(let i=0; i<8; i++) a.push(cfg.gen(level)); return a; }
+  function render(){
+    if(idx >= omgang.length){
+      const right = results.filter(function(x){ return x; }).length;
+      const total = results.length;
+      const adj = adjustLevel(level, right, total);
+      level = adj.level;
+      body.innerHTML = '<div class="exercise-card">'
+        + exerciseHeader(cfg.header, 'Du klarade ' + right + ' av ' + total + '.', level)
+        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
+        + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="saknas-back">' + (cfg.backLabel || 'Tillbaka till kategorier') + '</button></div>'
+      + '</div>';
+      document.getElementById('summary-next-btn').onclick = function(){ omgang = genOmgang(); idx = 0; results = []; render(); };
+      document.getElementById('saknas-back').onclick = backFn;
+      return;
+    }
+    const task = omgang[idx];
+    uppgNr++;
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader(cfg.header, cfg.sub, level)
+      + ((cfg.exempel && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
+      + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
+      + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + task.leftText + '</span>'
+        + '<input type="text" class="rakna-svar-input" id="saknas-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?" style="flex:0 0 auto;width:88px;text-align:center;">'
+        + '<span class="rakna-svar-fast">' + task.rightText + '</span></div>'
+      + '<div class="rakna-uppdela-feedback" id="saknas-fb"></div>'
+      + keypadHTML(cfg.ops)
+      + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+        + '<button class="btn primary" id="saknas-check">Kontrollera</button>'
+        + '<button class="btn subtle" id="saknas-back2">' + (cfg.backLabel || 'Tillbaka till kategorier') + '</button>'
+      + '</div>'
+    + '</div>';
+    const card = body.querySelector('.exercise-card');
+    bindKeypad(card);
+    const input = document.getElementById('saknas-input');
+    setTimeout(function(){ input.focus(); }, 50);
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+    document.getElementById('saknas-check').onclick = check;
+    document.getElementById('saknas-back2').onclick = backFn;
+
+    function check(){
+      const stu = d3ParseNum(input.value.replace(/−/g,'-'));
+      const fb = document.getElementById('saknas-fb');
+      fb.className = 'rakna-uppdela-feedback show';
+      input.disabled = true;
+      document.getElementById('saknas-check').disabled = true;
+      const ts = getTutorScore(cfg.koId, cfg.formagaKey); ts.total++;
+      const tsG = getTutorScore(cfg.koId, cfg.scoreKey); tsG.total++;
+      const facit = task.leftText + task.answerStr + task.rightText;
+      let ok = false;
+      if(stu === null){
+        fb.classList.add('wrong');
+        fb.textContent = 'Skriv ett tal. Använd komma för decimaler.';
+      } else if(Math.abs(stu - task.answerNum) < 1e-6 * Math.max(1, Math.abs(task.answerNum))){
+        ok = true;
+        input.classList.add('correct');
+        fb.classList.add('correct');
+        fb.textContent = 'Rätt! ' + facit;
+        ts.correct++; tsG.correct++;
+      } else {
+        input.classList.add('wrong');
+        fb.classList.add('wrong');
+        fb.textContent = 'Inte rätt. ' + facit;
+      }
+      results.push(ok);
+      setTimeout(function(){ idx++; render(); }, ok ? 1700 : 2600);
+    }
+  }
+  omgang = genOmgang();
+  render();
+}
+
 // Motor: uppställning i addition – siffra för siffra
 function renderAddUppstallning(body, backFn){
   let level = 1, omgang = [], idx = 0, results = [];

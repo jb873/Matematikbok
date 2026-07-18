@@ -1127,7 +1127,8 @@ function renderMultRakna(body){
     {id:'stora',    nr:2, namn:'Stora tal',            desc:'Tal med många nollor.'},
     {id:'sma',      nr:3, namn:'Små tal',              desc:'Decimaltal som är mindre än 1.'},
     {id:'storasma', nr:4, namn:'Stora och små tal',    desc:'Visa ett mellanled som förenklar uträkningen.'},
-    {id:'negativa', nr:5, namn:'Negativa tal',         desc:'Plus och minus – håll koll på tecknet.'}
+    {id:'negativa', nr:5, namn:'Negativa tal',         desc:'Plus och minus – håll koll på tecknet.'},
+    {id:'saknas',   nr:6, namn:'Vilket tal saknas',    desc:'Hitta faktorn som fattas i produkten.'}
   ];
 
   // ---- Konfiguration per kategori ----
@@ -1237,6 +1238,31 @@ function renderMultRakna(body){
                 answerNum: prodSign * prodInt / Math.pow(10,prodDec),
                 answerStr: d3DecStr(prodSign * prodInt, prodDec)};
       }
+    },
+    saknas:{
+      mode:'saknas',
+      header:'Beräkningar · vilket tal saknas',
+      sub:'Vilket tal ska stå i rutan? Räkna baklänges från produkten.',
+      ops:[','],
+      exempel:'<strong>Tänk så här:</strong> Dela produkten med den faktor du ser.<br>'
+        + '<span class="ex-rad">6 · ▢ = 42 &nbsp;→&nbsp; 42 / 6 = 7</span><br>'
+        + '<span class="ex-rad">▢ · 8 = 56 &nbsp;→&nbsp; 56 / 8 = 7</span>',
+      gen:function(level){
+        if(level === 1){                                            // tabellnära: dölj en faktor 2–9
+          const a = d3RandInt(2,9), b = d3RandInt(2,9), prod = a * b;
+          if(Math.random() < 0.5) return {leftText:a + ' · ', rightText:' = ' + prod, answerNum:b, answerStr:String(b)};
+          return {leftText:'', rightText:' · ' + b + ' = ' + prod, answerNum:a, answerStr:String(a)};
+        }
+        if(level === 2){                                            // tiotal × ental: dölj den ena
+          const stor = d3RandInt(11,30), liten = d3RandInt(3,9), p = stor * liten;
+          if(Math.random() < 0.5) return {leftText:stor + ' · ', rightText:' = ' + p, answerNum:liten, answerStr:String(liten)};
+          return {leftText:'', rightText:' · ' + liten + ' = ' + p, answerNum:stor, answerStr:String(stor)};
+        }
+        const n = d3RandInt(2,9), dsc = randPick([2,3,4,5,6,8]);    // nivå 3: en faktor är ett decimaltal (0,2–0,8)
+        const dStr = d3DecStr(dsc,1), prodStr = d3DecStr(n * dsc, 1);
+        if(Math.random() < 0.5) return {leftText:'', rightText:' · ' + dStr + ' = ' + prodStr, answerNum:n, answerStr:String(n)};
+        return {leftText:n + ' · ', rightText:' = ' + prodStr, answerNum:dsc / 10, answerStr:dStr};
+      }
     }
   };
 
@@ -1263,6 +1289,7 @@ function renderMultRakna(body){
         cfg.scoreKey = btn.dataset.kat;
         if(cfg.mode === 'enrad') renderRaknaEnrad(body, cfg, renderPicker);
         else if(cfg.mode === 'pow10') renderRaknaPow10(body, cfg, renderPicker);
+        else if(cfg.mode === 'saknas'){ cfg.koId = 'mult-rakna'; cfg.formagaKey = 'rakna'; cfg.backLabel = 'Tillbaka till kategorier'; renderRaknaSaknas(body, cfg, renderPicker); }
         else renderRaknaSingle(body, cfg, renderPicker);
       };
     });
