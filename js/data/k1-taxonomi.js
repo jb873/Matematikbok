@@ -1,6 +1,7 @@
 /* k1-taxonomi.js — maskinläsbar nodstruktur (område → deldomän → lövnod).
    AUTOGENERERAD av js/data/generate-taxonomi.js ur ak7-k1-ram.html + delkapitlens utbudslistor.
-   formaga + generator är förifyllda ur koden. arskursRelevans + malniva har defaults att tagga.
+   formaga + generator är förifyllda ur koden. arskursRelevans + roll har defaults att tagga
+   (roll: karna | breddning | fordjupning). Manuella tags bor i OVERRIDES/EXTRA_NODER i generatorn.
    visning bär presentationsdatan; visning.utbudslista anger vilken delkapitel-lista raden hör till.
    REGENERERA när ramens DELAR/DELAR_KO/OVNING_RENDERS ändras. Motorer/Arkiv orörda. */
 window.K1_TAXONOMI = {
@@ -13,7 +14,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Tal och deras egenskaper: siffror, positionssystemet, tallinjer, primtal och delbarhet.",
@@ -28,7 +29,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Översätta mellan bråk, decimaltal och blandad form. T.ex. 3/4 = 0,75.",
@@ -43,7 +44,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Begrepp, huvudräkning, metoder och problemlösning för addition.",
@@ -58,7 +59,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Begrepp, huvudräkning, metoder och problemlösning för subtraktion.",
@@ -73,7 +74,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Begrepp, multiplikationstabellen, metoder, beräkningar och problemlösning med lästal.",
@@ -88,7 +89,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Begrepp, delbarhet, divisionstabellen, kort och lång division, beräkningar och problemlösning.",
@@ -103,7 +104,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Samband mellan räknesätten, prioriteringsregeln och de tre räknelagarna.",
@@ -118,7 +119,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Tal mindre än noll. Motsatta tal, storleksordna och räkna med negativa tal i alla räknesätt.",
@@ -133,7 +134,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Närmevärde och avrundningsregler. Avrunda till olika platsvärden och använd överslag.",
@@ -148,7 +149,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Repetition av allt i kapitlet. Bra inför prov.",
@@ -163,7 +164,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Förstå skillnaden mellan siffra och tal, och vad som gör ett tal udda eller jämnt.",
@@ -177,7 +178,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderSiffrorBegrepp",
       "begrepp": "Vad en siffra och ett tal är, udda/jämnt och att bygga tal av siffror.",
@@ -200,7 +201,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderTalnamn",
       "begrepp": null,
@@ -223,7 +224,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Platsvärden från tusental till tusendel. Tallinjen. Avgör en siffras värde i talet.",
@@ -237,7 +238,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderPositionBegrepp",
       "begrepp": "Platsvärde, och skriva tal från ental, tiondelar, hundradelar …",
@@ -260,7 +261,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPositionRakna",
       "begrepp": "Tallinjen, storleksordna, talföljder och att öka/minska med en tiondel.",
@@ -283,7 +284,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RESONERA",
       "generator": "renderPositionResonera",
       "begrepp": "Jämför tal som 9,1 och 9,09, och hitta tal som ligger mellan.",
@@ -306,7 +307,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderEnhetsbyten",
       "begrepp": null,
@@ -329,7 +330,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Dela upp tal som 54,2 = 5·10 + 4·1 + 2·0,1",
@@ -343,7 +344,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderUtveckladMetod",
       "begrepp": "Skriv talet i utvecklad form steg för steg.",
@@ -366,7 +367,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderUtveckladRakna",
       "begrepp": "Vilket tal står på utvecklad form?",
@@ -389,7 +390,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Avgör om ett tal är primtal eller sammansatt. Bygg faktorträd och hitta primfaktorer.",
@@ -403,7 +404,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderPrimtalBegrepp",
       "begrepp": "Är talet ett primtal eller sammansatt? Snabba flashcards.",
@@ -426,7 +427,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPrimtalRakna",
       "begrepp": "Dela upp tal i termer eller faktorer. Två, tre eller fyra stycken.",
@@ -449,7 +450,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderPrimtalMetod",
       "begrepp": "Bygg faktorträd – välj själv hur du delar upp.",
@@ -472,7 +473,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "KOMMUNIKATION",
       "generator": "renderPrimtalKomm",
       "begrepp": "Skriv hela primtalsfaktoriseringen.",
@@ -495,7 +496,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RESONERA",
       "generator": "renderPrimtalResonera",
       "begrepp": "Förklara varför ett tal är primtal eller inte.",
@@ -518,7 +519,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "PROBLEM",
       "generator": "renderPrimtalProblem",
       "begrepp": "Gåtor: vilket tal är jag?",
@@ -541,7 +542,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderFaktoriseringBaklanges",
       "begrepp": null,
@@ -564,7 +565,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Reglerna för 2, 3, 5 och 10. Fördjupning: 4, 6 och 9.",
@@ -578,7 +579,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderDelbarhetBegrepp",
       "begrepp": "Vad betyder delbarhet? Vad är en siffersumma?",
@@ -601,7 +602,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderDelbarhetRakna",
       "begrepp": "Avgör snabbt om ett tal är delbart.",
@@ -624,7 +625,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderKonstrueraDelbar",
       "begrepp": null,
@@ -647,7 +648,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "T.ex. öka 9,92 med en tiondel, minska 10,09 med en hundradel.",
@@ -661,7 +662,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderRaknetraningRakna",
       "begrepp": "Öka och minska med en tiondel, hundradel eller tusendel.",
@@ -684,7 +685,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Term och summa, tiokompisar och hundrakompisar samt att dela upp tal i termer.",
@@ -698,7 +699,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderAddBegrepp",
       "begrepp": "Vad menas med term och summa?",
@@ -721,7 +722,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderAddBegreppRakna",
       "begrepp": "Tiokompisar, hundrakompisar och att dela upp tal i termer.",
@@ -735,7 +736,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Räkna i huvudet med tiokompisar, decimaltal och tal i bråkform och blandad form.",
@@ -749,7 +750,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderAddHuvudrakning",
       "begrepp": "Huvudräkning med tiokompisar, decimaltal och bråk.",
@@ -772,7 +773,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Uppställning, talsorterna var för sig, flytta över och addition med negativa tal.",
@@ -786,7 +787,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderAddMetod",
       "begrepp": "Lär dig och välj bland additionsmetoderna.",
@@ -809,7 +810,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Lös additionsproblem med lästal – välj svårighetsgrad själv.",
@@ -823,7 +824,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "PROBLEM",
       "generator": "renderAddProblem",
       "begrepp": "Lös lästal med addition.",
@@ -846,7 +847,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Term och differens – matematikens vokabulär för subtraktion. Dela upp en differens i termer.",
@@ -860,7 +861,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderSubBegrepp",
       "begrepp": "Vad menas med term och differens?",
@@ -883,7 +884,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderSubBegreppRakna",
       "begrepp": "Dela upp en differens i två eller tre termer.",
@@ -897,7 +898,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Räkna i huvudet över tiotalsgränsen, med decimaltal och med bråkform.",
@@ -911,7 +912,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderSubHuvudrakning",
       "begrepp": "Huvudräkning med enkla tal, decimaltal och bråk.",
@@ -934,7 +935,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Uppställning, öka och minska lika, addition bakifrån och subtraktion med negativa tal.",
@@ -948,7 +949,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderSubMetod",
       "begrepp": "Lär dig och välj bland subtraktionsmetoderna.",
@@ -971,7 +972,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Lös subtraktionsproblem med lästal – välj svårighetsgrad själv.",
@@ -985,7 +986,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "PROBLEM",
       "generator": "renderSubProblem",
       "begrepp": "Lös lästal med subtraktion.",
@@ -1008,7 +1009,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Faktor, produkt, primtal och sammansatt tal. Faktorisera tal och bygg faktorträd.",
@@ -1022,7 +1023,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderMultBegrepp",
       "begrepp": "Känn igen faktor, produkt, primtal och sammansatt tal.",
@@ -1045,7 +1046,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderMultFaktorisera",
       "begrepp": "Faktorisera ett tal i två eller tre faktorer.",
@@ -1059,7 +1060,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderPrimtalMetod",
       "begrepp": "Bygg ett faktorträd och hitta primtalsfaktorerna.",
@@ -1073,7 +1074,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Träna tabellerna snabbt – tre nivåer med stigande svårighet.",
@@ -1087,7 +1088,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderMultTabell",
       "begrepp": "Snabba flashcards med multiplikationstabellen.",
@@ -1110,7 +1111,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Uppställning, talsorterna var för sig, dubbla och halvera, kompensation och dubbelparentes.",
@@ -1124,7 +1125,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Lär dig och välj bland flera multiplikationsmetoder.",
@@ -1147,7 +1148,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Multiplikation med 10, 100 och 1000, stora tal, små tal och negativa tal.",
@@ -1161,7 +1162,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderMultRakna",
       "begrepp": "Blandade beräkningar – nivån anpassar sig.",
@@ -1184,7 +1185,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Lästal i olika varianter och svårighetsgrad. Visa din kommunikation.",
@@ -1198,7 +1199,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "PROBLEM",
       "generator": "renderMultProblem",
       "begrepp": "Lös lästal som handlar om multiplikation.",
@@ -1221,7 +1222,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Täljare, nämnare och kvot. Delbarhetsreglerna för 2, 3, 5, 10 samt 4 och 9, och talgåtor.",
@@ -1235,7 +1236,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderDivBegrepp",
       "begrepp": "Känn igen täljare, nämnare och kvot.",
@@ -1258,7 +1259,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderDivBegreppRakna",
       "begrepp": "Delbarhetsregler och talgåtor – tre kategorier.",
@@ -1272,7 +1273,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Träna divisionstabellen snabbt – tre nivåer med stigande nämnare.",
@@ -1286,7 +1287,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderDivTabell",
       "begrepp": "Snabba flashcards med divisionstabellen.",
@@ -1309,7 +1310,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Kort division och lång division (liggande stolen) – med genomgång och övning.",
@@ -1323,7 +1324,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderDivMetoder",
       "begrepp": "Lär dig och öva kort och lång division.",
@@ -1346,7 +1347,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Division med 10, 100 och 1000, stora tal, små tal genom förlängning och negativa tal.",
@@ -1360,7 +1361,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderDivRakna",
       "begrepp": "Blandade beräkningar – nivån anpassar sig.",
@@ -1383,7 +1384,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Lästal i olika varianter och svårighetsgrad. Visa din kommunikation.",
@@ -1397,7 +1398,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "PROBLEM",
       "generator": "renderDivProblem",
       "begrepp": "Lös lästal som handlar om division.",
@@ -1420,7 +1421,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Hur addition och subtraktion hänger ihop, och hur multiplikation och division hänger ihop. Fyll i talet som saknas.",
@@ -1434,7 +1435,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPrioSamband",
       "begrepp": "Hitta talet som saknas i rutan – två kategorier.",
@@ -1457,7 +1458,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "I vilken ordning räknar man? Parenteser, sedan multiplikation och division, sist addition och subtraktion.",
@@ -1471,7 +1472,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPrioBerakning",
       "begrepp": "Räkna ut uttryck med prioriteringsregeln – tre nivåer.",
@@ -1494,7 +1495,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "valbar",
+      "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderPrioMetod",
       "begrepp": "Visa metoden steg för steg – räkna nedåt rad för rad.",
@@ -1508,7 +1509,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Den kommutativa, associativa och distributiva lagen – verktyg som gör uträkningar enklare.",
@@ -1522,7 +1523,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPrioLagar",
       "begrepp": "Öva de tre räknelagarna med tydliga mellanled.",
@@ -1545,7 +1546,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Motsatta tal, storleksordna positiva och negativa tal samt talföljder.",
@@ -1559,7 +1560,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderNegBegrepp",
       "begrepp": "Motsatta talet, storleksordna och talföljder – tre kategorier.",
@@ -1573,7 +1574,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Räkna med negativa tal i addition, subtraktion, multiplikation och division – även med flera faktorer.",
@@ -1587,7 +1588,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderNegRakna",
       "begrepp": "Addition och subtraktion, multiplikation och division, flera faktorer.",
@@ -1601,7 +1602,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Begreppet närmevärde, avrundningsreglerna och att avrunda hela tal och decimaltal till olika platsvärden.",
@@ -1615,7 +1616,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderAvrAvrundning",
       "begrepp": "Närmevärde, avrunda hela tal och avrunda decimaltal – tre kategorier.",
@@ -1629,7 +1630,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": null,
       "generator": null,
       "begrepp": "Använd avrundning för att snabbt göra ungefärliga beräkningar i alla räknesätt.",
@@ -1643,10 +1644,66 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "malniva": "obligatorisk",
+      "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderAvrOverslag",
       "begrepp": "Överslagsberäkningar i addition, subtraktion, multiplikation och division.",
+      "visning": null
+    },
+    {
+      "id": "prio-kombinationer",
+      "namn": "Kombinationer av räknesätt (i–iv)",
+      "parent": "prio-prioritering",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderPrioBerakning",
+      "begrepp": "Blanda ·, /, + och − i rätt ordning.",
+      "visning": null
+    },
+    {
+      "id": "prio-parenteser",
+      "namn": "Parenteser med tal (v)",
+      "parent": "prio-prioritering",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderPrioBerakning",
+      "begrepp": "Räkna parentesen först. Parentes med tal hör åk 7 (parentes i ekvationer = åk 8, k3).",
+      "visning": null
+    },
+    {
+      "id": "prio-negativt",
+      "namn": "Svaret blir negativt (vi)",
+      "parent": "prio-prioritering",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "fordjupning",
+      "formaga": "RAKNA",
+      "generator": "renderPrioBerakning",
+      "begrepp": "Uttryck där resultatet blir negativt – utmaning.",
+      "visning": null
+    },
+    {
+      "id": "prio-potenser",
+      "namn": "Potenser (vii)",
+      "parent": "prio-prioritering",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": null,
+      "begrepp": "Prioritering med potenser – framtid, kommer i åk 8.",
       "visning": null
     }
   ]

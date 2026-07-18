@@ -115,7 +115,7 @@ const DEFAULT_ARK = { ak7: 'mal' };
 for(const del of DELAR){
   noder.push({
     id: del.id, namn: del.titel, parent: null, niva: 'omrade',
-    arskursRelevans: Object.assign({}, DEFAULT_ARK), malniva: 'obligatorisk',
+    arskursRelevans: Object.assign({}, DEFAULT_ARK), roll: 'karna',
     formaga: null, generator: null, begrepp: del.beskrivning || null,
     grupp: del.grupp || null, implemented: !!del.implemented
   });
@@ -125,7 +125,7 @@ for(const delId in DELAR_KO){
     koToDel[ko.id] = delId;
     noder.push({
       id: ko.id, namn: ko.titel, parent: delId, niva: 'deldoman',
-      arskursRelevans: Object.assign({}, DEFAULT_ARK), malniva: 'obligatorisk',
+      arskursRelevans: Object.assign({}, DEFAULT_ARK), roll: 'karna',
       formaga: null, generator: null, begrepp: ko.beskrivning || null,
       visning: null   // presentationen ligger på lövnoderna
     });
@@ -140,7 +140,7 @@ for(const delId in DELAR_KO){
         namn: vis ? vis.titel : (ko.titel + ' · ' + ((FORMAGOR[techKey] && FORMAGOR[techKey].label) || techKey)),
         parent: ko.id, niva: 'lovnod',
         arskursRelevans: Object.assign({}, DEFAULT_ARK),
-        malniva: (kat === 'METOD') ? 'valbar' : 'obligatorisk',
+        roll: (kat === 'METOD') ? 'breddning' : 'karna',
         formaga: kat, generator: rend[techKey], begrepp: desc,
         visning: vis
       });
@@ -148,10 +148,40 @@ for(const delId in DELAR_KO){
   }
 }
 
+// ---- EXTRA noder: analysverktygets finare decomposition (utan egna kod-generatorer) ----
+// Prioriteringsregelns i–vii. renderPrioBerakning täcker i–vi via svårighetsnivåer; de är
+// pedagogiska progressions-noder under prio-prioritering (visning:null => syns ej i utbudslistor).
+const EXTRA_NODER = [
+  { id:'prio-kombinationer', namn:'Kombinationer av räknesätt (i–iv)', parent:'prio-prioritering', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'karna', formaga:'RAKNA', generator:'renderPrioBerakning',
+    begrepp:'Blanda ·, /, + och − i rätt ordning.', visning:null },
+  { id:'prio-parenteser', namn:'Parenteser med tal (v)', parent:'prio-prioritering', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'karna', formaga:'RAKNA', generator:'renderPrioBerakning',
+    begrepp:'Räkna parentesen först. Parentes med tal hör åk 7 (parentes i ekvationer = åk 8, k3).', visning:null },
+  { id:'prio-negativt', namn:'Svaret blir negativt (vi)', parent:'prio-prioritering', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'fordjupning', formaga:'RAKNA', generator:'renderPrioBerakning',
+    begrepp:'Uttryck där resultatet blir negativt – utmaning.', visning:null },
+  { id:'prio-potenser', namn:'Potenser (vii)', parent:'prio-prioritering', niva:'lovnod',
+    arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'RAKNA', generator:null,
+    begrepp:'Prioritering med potenser – framtid, kommer i åk 8.', visning:null }
+];
+for(const n of EXTRA_NODER) noder.push(n);
+
+// ---- OVERRIDES: manuella tags från Joachims review (bevaras vid regenerering) ----
+// Regenerering sätter defaults; dessa läggs på ovanpå för enskilda noder. Fyll på per order.
+const OVERRIDES = {
+  // 'nod-id': { roll: 'fordjupning' },  eller  { arskursRelevans: { ak8: 'mal' } }
+};
+for(const n of noder){
+  const o = OVERRIDES[n.id];
+  if(o){ if(o.roll) n.roll = o.roll; if(o.arskursRelevans) n.arskursRelevans = o.arskursRelevans; }
+}
+
 // ---- skriv fil ----
 const header = '/* k1-taxonomi.js — maskinläsbar nodstruktur (område → deldomän → lövnod).\n'
   + '   AUTOGENERERAD av js/data/generate-taxonomi.js ur ak7-k1-ram.html + delkapitlens utbudslistor.\n'
-  + '   formaga + generator är förifyllda ur koden. arskursRelevans + malniva har defaults att tagga.\n'
+  + '   formaga + generator är förifyllda ur koden. arskursRelevans + roll har defaults att tagga\n'
+  + '   (roll: karna | breddning | fordjupning). Manuella tags bor i OVERRIDES/EXTRA_NODER i generatorn.\n'
   + '   visning bär presentationsdatan; visning.utbudslista anger vilken delkapitel-lista raden hör till.\n'
   + '   REGENERERA när ramens DELAR/DELAR_KO/OVNING_RENDERS ändras. Motorer/Arkiv orörda. */\n';
 fs.mkdirSync(path.join(ROOT, 'js/data'), { recursive: true });
@@ -167,4 +197,21 @@ for(const uid of utbudIds){
   const grupper = new Set(r.map(n => n.visning.grupp)).size;
   console.log('  utbudslista ' + uid + ': ' + grupper + ' grupper, ' + r.length + ' rader' + (PAGES.some(p => p.id === uid) ? ' (läst ur sidan)' : ' (bevarad)'));
 }
-console.log('malniva=valbar (metod):', noder.filter(n => n.niva === 'lovnod' && n.malniva === 'valbar').length);
+const rollC = {}; noder.filter(n => n.niva === 'lovnod').forEach(n => rollC[n.roll] = (rollC[n.roll] || 0) + 1);
+console.log('roll (lövnoder):', JSON.stringify(rollC));
+
+// ---- KORSKOLL: kodens färdigheter (OVNING_RENDERS) utan taxonomi-nod ----
+const nodeIds = new Set(noder.map(n => n.id));
+const koIds = new Set();
+for(const d in DELAR_KO) for(const k of DELAR_KO[d]) koIds.add(k.id);
+const luckor = [];
+for(const koId in OR){
+  for(const techKey in OR[koId]){
+    const lovId = koId + ':' + techKey, gen = OR[koId][techKey];
+    if(!koIds.has(koId)) luckor.push(lovId + '  → ' + gen + '  (koId saknar KO i DELAR_KO)');
+    else if(!nodeIds.has(lovId)) luckor.push(lovId + '  → ' + gen + '  (KO finns men lövnod saknas)');
+  }
+}
+console.log('KORSKOLL – kodfärdigheter utan nod: ' + luckor.length);
+luckor.forEach(l => console.log('  ⚠ ' + l));
+console.log('Divisionstabellen: nod ' + (nodeIds.has('div-tabell:rakna') ? 'FINNS (div-tabell:rakna → ' + (OR['div-tabell'] || {}).rakna + ')' : 'SAKNAS'));
