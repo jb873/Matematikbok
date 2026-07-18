@@ -188,7 +188,9 @@ const OVERRIDES = {
   // Beräkningar-aggregaten avlöstes av per-kategori-noderna i Del 5/6/7. Ta bort dem ur
   // Fyra räknesätt (d2) och dölj dem på kartan (kategorierna är de riktiga färdigheterna).
   'mult-rakna:rakna': { visning:null, doljKarta:true },
-  'div-rakna:rakna':  { visning:null, doljKarta:true }
+  'div-rakna:rakna':  { visning:null, doljKarta:true },
+  // Del 4 — Bråkform och decimalform: pilot-färdighet (färsk generator, fuzz-verifierad).
+  'bd-vaxla:rakna': { visning:{ utbudslista:'d4', grupp:'Bråkform och decimalform', gruppordning:0, radordning:0, titel:'Växla bråk och decimal', etikett:'räkna', formagaKey:'rakna', niva:null } }
 };
 for(const n of noder){
   const o = OVERRIDES[n.id];

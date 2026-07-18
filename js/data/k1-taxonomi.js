@@ -34,7 +34,7 @@ window.K1_TAXONOMI = {
       "generator": null,
       "begrepp": "Översätta mellan bråk, decimaltal och blandad form. T.ex. 3/4 = 0,75.",
       "grupp": "tal",
-      "implemented": false
+      "implemented": true
     },
     {
       "id": "addition",
@@ -1156,7 +1156,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-rakna:rakna",
-      "namn": "Beräkningar",
+      "namn": "Beräkningar · Räkna",
       "parent": "mult-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1439,7 +1439,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-rakna:rakna",
-      "namn": "Beräkningar",
+      "namn": "Beräkningar · Räkna",
       "parent": "div-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1775,6 +1775,43 @@ window.K1_TAXONOMI = {
         "gruppordning": 0,
         "radordning": 1,
         "titel": "Räkna med negativa tal",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
+    },
+    {
+      "id": "bd-vaxla",
+      "namn": "Växla bråk och decimal",
+      "parent": "brak-decimal",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Skriva bråk i decimalform. Exakta bråk med nämnare 2, 4, 5, 8, 10, 20, 25 …",
+      "visning": null
+    },
+    {
+      "id": "bd-vaxla:rakna",
+      "namn": "Växla bråk och decimal",
+      "parent": "bd-vaxla",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderBrakDecimal",
+      "begrepp": "Skriv bråket som decimaltal – exakta (terminerande) bråk.",
+      "visning": {
+        "utbudslista": "d4",
+        "grupp": "Bråkform och decimalform",
+        "gruppordning": 0,
+        "radordning": 0,
+        "titel": "Växla bråk och decimal",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null

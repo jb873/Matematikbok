@@ -2229,6 +2229,11 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 /* ==== DEL 8: NEGATIVA TAL ==== */
 .neg-fraga{text-align:left;margin:22px 0 6px;font-size:18px;color:var(--ink);line-height:1.5;}
 .neg-expr{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--ink);}
+/* Del 4 — bråk-display (täljare över nämnare) i Växla bråk↔decimal */
+.bd-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-family:var(--mono);font-weight:600;color:var(--ink);}
+.bd-tal{padding:0 9px 2px;line-height:1.05;}
+.bd-strk{height:2px;background:currentColor;width:100%;min-width:26px;}
+.bd-nmn{padding:2px 9px 0;line-height:1.05;}
 .neg-hint{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);text-align:center;margin:18px 0 8px;}
 .neg-seq{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:10px;margin:22px 0;}
 .neg-seq-term{
@@ -2534,8 +2539,8 @@ const DELAR = [
     titel:'Byta form mellan bråkform och decimalform',
     beskrivning:'Översätta mellan bråk, decimaltal och blandad form. T.ex. 3/4 = 0,75.',
     grupp:'tal',
-    implemented:false,
-    plannedAreas:['Bråk till decimaltal','Decimaltal till bråk','Blandad form','Förkortning av bråk']
+    implemented:true,
+    koCount:1
   },
   {
     nr:3, id:'addition',
@@ -4662,6 +4667,17 @@ DELAR_KO['negativa'] = [
   }
 ];
 
+DELAR_KO['brak-decimal'] = [
+  {
+    id:'bd-vaxla', nr:1,
+    titel:'Växla bråk och decimal',
+    beskrivning:'Skriva bråk i decimalform. Exakta bråk med nämnare 2, 4, 5, 8, 10, 20, 25 …',
+    formagor:{
+      rakna:{desc:'Skriv bråket som decimaltal – exakta (terminerande) bråk.', implemented:true}
+    }
+  }
+];
+
 DELAR_KO['avrundning'] = [
   {
     id:'avr-avrundning', nr:1,
@@ -4887,6 +4903,10 @@ const OVNING_RENDERS = {
   },
   'div-problem':{
     problem: (b)=> renderDivProblem(b)
+  },
+  // Del 4 - Bråkform och decimalform
+  'bd-vaxla':{
+    rakna: (b)=> renderBrakDecimal(b)
   },
   // Del 7 - Prioriteringsregeln och lagar
   'prio-samband':{
@@ -6134,6 +6154,71 @@ function renderRaknaSaknas(body, cfg, backFn){
         input.classList.add('wrong');
         fb.classList.add('wrong');
         fb.textContent = 'Inte rätt. ' + facit;
+      }
+      results.push(ok);
+      setTimeout(function(){ idx++; render(); }, ok ? 1700 : 2600);
+    }
+  }
+  omgang = genOmgang();
+  render();
+}
+
+// ============================================================
+// DEL 4 — Växla bråk → decimal. Generatorn (färsk, fuzz-verifierad) bor i
+// js/motor/metod/metod-brak-decimal.js (window.BrakDecimalGen). Adaptiv nivå,
+// getTutorScore('bd-vaxla','rakna') → färgar begreppskartan.
+// ============================================================
+function bdFracHTML(t, n){
+  return '<span class="bd-frac"><span class="bd-tal">' + t + '</span>'
+    + '<span class="bd-strk"></span><span class="bd-nmn">' + n + '</span></span>';
+}
+function renderBrakDecimal(body){
+  var level = 1, omgang = [], idx = 0, results = [], OMG = 8;
+  function genOmgang(){ var a = []; for(var i = 0; i < OMG; i++) a.push(window.BrakDecimalGen.gen(level)); return a; }
+  function render(){
+    if(idx >= omgang.length){
+      var right = results.filter(function(x){ return x; }).length, total = results.length;
+      var adj = adjustLevel(level, right, total); level = adj.level;
+      body.innerHTML = '<div class="exercise-card">'
+        + exerciseHeader('Växla bråk och decimal', 'Du klarade ' + right + ' av ' + total + '.', level)
+        + renderSummaryCard({ right: right, total: total, level: level, levelChange: adj.change })
+      + '</div>';
+      var nb = document.getElementById('summary-next-btn');
+      if(nb) nb.onclick = function(){ omgang = genOmgang(); idx = 0; results = []; render(); };
+      return;
+    }
+    var task = omgang[idx];
+    body.innerHTML = '<div class="exercise-card">'
+      + exerciseHeader('Växla bråk och decimal', 'Skriv bråket i decimalform. Använd komma för decimaltecken.', level)
+      + renderScoreBarSimple(results.filter(function(x){ return x; }).length, results.filter(function(x){ return !x; }).length, omgang.length, idx)
+      + '<div class="rakna-svar-rad" style="font-size:23px;">' + bdFracHTML(task.t, task.n)
+        + '<span class="rakna-svar-fast" style="margin:0 6px;">=</span>'
+        + '<input type="text" class="rakna-svar-input" id="bd-input" inputmode="decimal" maxlength="12" autocomplete="off" placeholder="?" style="flex:0 0 auto;width:110px;text-align:center;"></div>'
+      + '<div class="rakna-uppdela-feedback" id="bd-fb"></div>'
+      + keypadHTML([','])
+      + '<div style="margin-top:16px;text-align:center;"><button class="btn primary" id="bd-check">Kontrollera</button></div>'
+    + '</div>';
+    var card = body.querySelector('.exercise-card');
+    bindKeypad(card);
+    var input = document.getElementById('bd-input');
+    setTimeout(function(){ input.focus(); }, 50);
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+    document.getElementById('bd-check').onclick = check;
+    function check(){
+      var stu = d3ParseNum(input.value);
+      var fb = document.getElementById('bd-fb');
+      fb.className = 'rakna-uppdela-feedback show';
+      input.disabled = true;
+      document.getElementById('bd-check').disabled = true;
+      var ts = getTutorScore('bd-vaxla', 'rakna'); ts.total++;
+      var ok = stu !== null && Math.abs(stu - task.svar) < 1e-9;
+      if(ok){
+        input.classList.add('correct'); fb.classList.add('correct');
+        fb.textContent = 'Rätt! ' + task.t + '/' + task.n + ' = ' + task.svarStr;
+        ts.correct++;
+      } else {
+        input.classList.add('wrong'); fb.classList.add('wrong');
+        fb.textContent = 'Inte rätt. ' + task.t + '/' + task.n + ' = ' + task.svarStr + '.';
       }
       results.push(ok);
       setTimeout(function(){ idx++; render(); }, ok ? 1700 : 2600);
@@ -8836,6 +8921,7 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-div.js"></script>
 <script src="js/motor/metod/metod-prioritering.js"></script>
 <script src="js/motor/metod/metod-negativa.js"></script>
+<script src="js/motor/metod/metod-brak-decimal.js"></script>
 <script src="js/motor/metod/metod-avrundning.js"></script>
 <script src="js/motor/metod/metod-d1-tillagg.js"></script>
 <!-- Mastery-loggning (elev-lokal, localStorage). Observerar getTutorScore; rör ej drill-logik. -->
