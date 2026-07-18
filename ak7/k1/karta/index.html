@@ -96,7 +96,7 @@
   // ── STRUKTUR ur taxonomin (window.K1_TAXONOMI) — inga motorer, inga svar. ──
   var TAX = (window.K1_TAXONOMI && window.K1_TAXONOMI.noder) || [];
   var byId = {}; TAX.forEach(function(n){ byId[n.id] = n; });
-  function barnAv(id){ return TAX.filter(function(n){ return n.parent === id; }); }
+  function barnAv(id){ return TAX.filter(function(n){ return n.parent === id && !n.doljKarta; }); }
   var OMRADEN = TAX.filter(function(n){ return n.niva === 'omrade' && n.implemented; });
 
   // ── ELEV-LOKAL DATA · localStorage ENDAST. Lämnar ALDRIG enheten. ──
@@ -118,7 +118,7 @@
     var m = {}, nu = Date.now(), D = 86400000;
     var monster = [ {n:6, spann:30}, {n:3, spann:5}, {n:1, spann:0}, {n:0, spann:0} ]; // grön · gul · orange · röd
     var i = 0;
-    TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator; }).forEach(function(n){
+    TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator && !n.doljKarta; }).forEach(function(n){
       var p = monster[i++ % monster.length], log = [];
       for(var k = 0; k < p.n; k++){
         var dagarSedan = p.n > 1 ? p.spann * (p.n - 1 - k) / (p.n - 1) : 0;
@@ -226,7 +226,7 @@
     renderControls();
   }
   function renderMeter(){
-    var lov = TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator && scopeAv(n, PREF).inScope; });
+    var lov = TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator && !n.doljKarta && scopeAv(n, PREF).inScope; });
     var Y = lov.length;
     var X = lov.filter(function(n){ return Mastery.masteryState(MATRIS[n.id]) === 3; }).length;
     var pct = Y ? Math.round(X / Y * 100) : 0;

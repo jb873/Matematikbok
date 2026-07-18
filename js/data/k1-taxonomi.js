@@ -1166,16 +1166,8 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderMultRakna",
       "begrepp": "Blandade beräkningar – nivån anpassar sig.",
-      "visning": {
-        "utbudslista": "d2",
-        "grupp": "Multiplikation",
-        "gruppordning": 2,
-        "radordning": 3,
-        "titel": "Beräkningar",
-        "etikett": "räkna",
-        "formagaKey": "rakna",
-        "niva": null
-      }
+      "visning": null,
+      "doljKarta": true
     },
     {
       "id": "mult-rakna:pow10",
@@ -1457,16 +1449,8 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderDivRakna",
       "begrepp": "Blandade beräkningar – nivån anpassar sig.",
-      "visning": {
-        "utbudslista": "d2",
-        "grupp": "Division",
-        "gruppordning": 3,
-        "radordning": 3,
-        "titel": "Beräkningar",
-        "etikett": "räkna",
-        "formagaKey": "rakna",
-        "niva": null
-      }
+      "visning": null,
+      "doljKarta": true
     },
     {
       "id": "div-rakna:pow10",

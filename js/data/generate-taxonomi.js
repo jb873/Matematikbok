@@ -184,14 +184,19 @@ const OVERRIDES = {
   'div-rakna:sma':       { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:2, titel:'Små tal – förlängning', etikett:'räkna', formagaKey:'sma', niva:null } },
   // Del 8 — Avrundning och överslag: generatorerna finns, bind dem till d8:s Färdighetsträning.
   'avr-avrundning:begrepp': { visning:{ utbudslista:'d8', grupp:'Avrundning och överslag', gruppordning:0, radordning:0, titel:'Avrundning', etikett:'begrepp', formagaKey:null, niva:null } },
-  'avr-overslag:rakna':     { visning:{ utbudslista:'d8', grupp:'Avrundning och överslag', gruppordning:0, radordning:1, titel:'Överslagsräkning', etikett:'räkna', formagaKey:'rakna', niva:null } }
+  'avr-overslag:rakna':     { visning:{ utbudslista:'d8', grupp:'Avrundning och överslag', gruppordning:0, radordning:1, titel:'Överslagsräkning', etikett:'räkna', formagaKey:'rakna', niva:null } },
+  // Beräkningar-aggregaten avlöstes av per-kategori-noderna i Del 5/6/7. Ta bort dem ur
+  // Fyra räknesätt (d2) och dölj dem på kartan (kategorierna är de riktiga färdigheterna).
+  'mult-rakna:rakna': { visning:null, doljKarta:true },
+  'div-rakna:rakna':  { visning:null, doljKarta:true }
 };
 for(const n of noder){
   const o = OVERRIDES[n.id];
   if(o){
     if(o.roll) n.roll = o.roll;
     if(o.arskursRelevans) n.arskursRelevans = o.arskursRelevans;
-    if(o.visning){ n.visning = o.visning; if(o.visning.titel) n.namn = o.visning.titel; }
+    if('visning' in o){ n.visning = o.visning; if(o.visning && o.visning.titel) n.namn = o.visning.titel; }
+    if(o.doljKarta) n.doljKarta = true;
   }
 }
 
