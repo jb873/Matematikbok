@@ -1178,6 +1178,98 @@ window.K1_TAXONOMI = {
       }
     },
     {
+      "id": "mult-rakna:pow10",
+      "namn": "Multiplikation med 10, 100 och 1000",
+      "parent": "mult-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderMultRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d5",
+        "grupp": "Räkna med 10, 100 och 1000",
+        "gruppordning": 0,
+        "radordning": 0,
+        "titel": "Multiplikation med 10, 100 och 1000",
+        "etikett": "räkna",
+        "formagaKey": "pow10",
+        "niva": null
+      }
+    },
+    {
+      "id": "mult-rakna:stora",
+      "namn": "Stora tal",
+      "parent": "mult-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderMultRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d6",
+        "grupp": "Multiplikation med stora och små tal",
+        "gruppordning": 0,
+        "radordning": 0,
+        "titel": "Stora tal",
+        "etikett": "räkna",
+        "formagaKey": "stora",
+        "niva": null
+      }
+    },
+    {
+      "id": "mult-rakna:sma",
+      "namn": "Små tal",
+      "parent": "mult-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderMultRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d6",
+        "grupp": "Multiplikation med stora och små tal",
+        "gruppordning": 0,
+        "radordning": 1,
+        "titel": "Små tal",
+        "etikett": "räkna",
+        "formagaKey": "sma",
+        "niva": null
+      }
+    },
+    {
+      "id": "mult-rakna:storasma",
+      "namn": "Stora och små tal",
+      "parent": "mult-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderMultRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d6",
+        "grupp": "Multiplikation med stora och små tal",
+        "gruppordning": 0,
+        "radordning": 2,
+        "titel": "Stora och små tal",
+        "etikett": "räkna",
+        "formagaKey": "storasma",
+        "niva": null
+      }
+    },
+    {
       "id": "mult-problem",
       "namn": "Problemlösning med lästal",
       "parent": "multiplikation",
@@ -1373,6 +1465,98 @@ window.K1_TAXONOMI = {
         "titel": "Beräkningar",
         "etikett": "räkna",
         "formagaKey": "rakna",
+        "niva": null
+      }
+    },
+    {
+      "id": "div-rakna:pow10",
+      "namn": "Division med 10, 100 och 1000",
+      "parent": "div-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderDivRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d5",
+        "grupp": "Räkna med 10, 100 och 1000",
+        "gruppordning": 0,
+        "radordning": 1,
+        "titel": "Division med 10, 100 och 1000",
+        "etikett": "räkna",
+        "formagaKey": "pow10",
+        "niva": null
+      }
+    },
+    {
+      "id": "div-rakna:stora",
+      "namn": "Stora tal",
+      "parent": "div-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderDivRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d7",
+        "grupp": "Division med stora och små tal",
+        "gruppordning": 0,
+        "radordning": 0,
+        "titel": "Stora tal",
+        "etikett": "räkna",
+        "formagaKey": "stora",
+        "niva": null
+      }
+    },
+    {
+      "id": "div-rakna:storasma",
+      "namn": "Stora och små tal",
+      "parent": "div-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderDivRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d7",
+        "grupp": "Division med stora och små tal",
+        "gruppordning": 0,
+        "radordning": 1,
+        "titel": "Stora och små tal",
+        "etikett": "räkna",
+        "formagaKey": "storasma",
+        "niva": null
+      }
+    },
+    {
+      "id": "div-rakna:sma",
+      "namn": "Små tal – förlängning",
+      "parent": "div-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderDivRakna",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d7",
+        "grupp": "Division med stora och små tal",
+        "gruppordning": 0,
+        "radordning": 2,
+        "titel": "Små tal – förlängning",
+        "etikett": "räkna",
+        "formagaKey": "sma",
         "niva": null
       }
     },

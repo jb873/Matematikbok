@@ -955,7 +955,7 @@ function renderDivLang(body, backFn){
 }
 
 // ---- KO 4: BERÄKNINGAR ----
-function renderDivRakna(body){
+function renderDivRakna(body, startKat){
   var KATEGORIER = [
     {id:'pow10',    nr:1, namn:'Med 10, 100 och 1000', desc:'Dividera med tiotal, hundratal och tusental.'},
     {id:'stora',    nr:2, namn:'Stora tal',            desc:'Tal med många nollor.'},
@@ -1121,19 +1121,26 @@ function renderDivRakna(body){
       + '<div class="tabell-level-grid">' + cards + '</div>'
     + '</div>';
     body.querySelectorAll('[data-kat]').forEach(function(btn){
-      btn.onclick = function(){
-        var cfg = CFG[btn.dataset.kat];
-        cfg.koId = 'div-rakna';
-        cfg.formagaKey = 'rakna';
-        cfg.scoreKey = btn.dataset.kat;
-        cfg.backLabel = 'Tillbaka till kategorier';
-        if(cfg.forlang) renderDivForlang(body, cfg, renderPicker);
-        else if(cfg.mode === 'saknas') renderRaknaSaknas(body, cfg, renderPicker);
-        else renderAddSingle(body, cfg, renderPicker);
-      };
+      btn.onclick = function(){ openKat(btn.dataset.kat); };
     });
   }
-  renderPicker();
+
+  // Öppna en kategori direkt (picker-klick eller deeplink ?formaga=<kategori>).
+  // Generatorerna/beräkningen orörda – bara vilken vy som visas först.
+  function openKat(katId){
+    var cfg = CFG[katId];
+    if(!cfg){ renderPicker(); return; }
+    cfg.koId = 'div-rakna';
+    cfg.formagaKey = 'rakna';
+    cfg.scoreKey = katId;
+    cfg.backLabel = 'Tillbaka till kategorier';
+    if(cfg.forlang) renderDivForlang(body, cfg, renderPicker);
+    else if(cfg.mode === 'saknas') renderRaknaSaknas(body, cfg, renderPicker);
+    else renderAddSingle(body, cfg, renderPicker);
+  }
+
+  if(startKat && CFG[startKat]) openKat(startKat);
+  else renderPicker();
 }
 
 // Beräkningar – små tal genom förlängning (två mellanled-rutor: förlängd täljare/nämnare + svar)

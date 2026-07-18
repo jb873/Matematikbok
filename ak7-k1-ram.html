@@ -2511,7 +2511,12 @@ const FORMAGOR = {
   namn: {label:'Talnamn', tagClass:'tag-begrepp', pillClass:'p-begrepp'},
   enhet: {label:'Enhetsbyten', tagClass:'tag-begrepp', pillClass:'p-begrepp'},
   baklanges: {label:'Baklänges', tagClass:'tag-rakna', pillClass:'p-rakna'},
-  konstruera: {label:'Konstruera', tagClass:'tag-rakna', pillClass:'p-rakna'}
+  konstruera: {label:'Konstruera', tagClass:'tag-rakna', pillClass:'p-rakna'},
+  // Del 5/6/7: utbrutna Beräkningar-kategorier (deeplink ?formaga=<kategori> → egen nod/logg)
+  pow10:    {label:'Med 10, 100 och 1000', tagClass:'tag-rakna', pillClass:'p-rakna'},
+  stora:    {label:'Stora tal',            tagClass:'tag-rakna', pillClass:'p-rakna'},
+  sma:      {label:'Små tal',              tagClass:'tag-rakna', pillClass:'p-rakna'},
+  storasma: {label:'Stora och små tal',    tagClass:'tag-rakna', pillClass:'p-rakna'}
 };
 
 // Kapitel 1 – Taluppfattning: positionssystem och räknesätt
@@ -4850,9 +4855,13 @@ const OVNING_RENDERS = {
   'mult-metoder':{
     metod: (b)=> renderMultMetoder(b)
   },
-  // Del 3 - Beräkningar
+  // Del 3 - Beräkningar (aggregat) + per-kategori-deeplinkar (Del 5/6 loggar till egen nod)
   'mult-rakna':{
-    rakna: (b)=> renderMultRakna(b)
+    rakna:    (b)=> renderMultRakna(b),
+    pow10:    (b)=> renderMultRakna(b, 'pow10'),      // Del 5: ×10/100/1000
+    stora:    (b)=> renderMultRakna(b, 'stora'),      // Del 6: stora tal
+    sma:      (b)=> renderMultRakna(b, 'sma'),        // Del 6: små tal
+    storasma: (b)=> renderMultRakna(b, 'storasma')    // Del 6: stora och små tal
   },
   // Del 3 - Problemlösning med lästal
   'mult-problem':{
@@ -4870,7 +4879,11 @@ const OVNING_RENDERS = {
     metod: (b)=> renderDivMetoder(b)
   },
   'div-rakna':{
-    rakna: (b)=> renderDivRakna(b)
+    rakna:    (b)=> renderDivRakna(b),
+    pow10:    (b)=> renderDivRakna(b, 'pow10'),       // Del 5: ÷10/100/1000
+    stora:    (b)=> renderDivRakna(b, 'stora'),       // Del 7: stora tal
+    storasma: (b)=> renderDivRakna(b, 'storasma'),    // Del 7: stora och små tal
+    sma:      (b)=> renderDivRakna(b, 'sma')          // Del 7: små tal genom förlängning
   },
   'div-problem':{
     problem: (b)=> renderDivProblem(b)

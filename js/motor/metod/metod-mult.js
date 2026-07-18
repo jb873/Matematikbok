@@ -1121,7 +1121,7 @@ function d3ParseNum(str){
   return Number(s);
 }
 
-function renderMultRakna(body){
+function renderMultRakna(body, startKat){
   const KATEGORIER = [
     {id:'pow10',    nr:1, namn:'Med 10, 100 och 1000', desc:'Multiplicera med tiotal, hundratal och tusental.'},
     {id:'stora',    nr:2, namn:'Stora tal',            desc:'Tal med många nollor.'},
@@ -1284,18 +1284,24 @@ function renderMultRakna(body){
       + '<div class="tabell-level-grid">' + cards + '</div>'
     + '</div>';
     body.querySelectorAll('[data-kat]').forEach(function(btn){
-      btn.onclick = function(){
-        const cfg = CFG[btn.dataset.kat];
-        cfg.scoreKey = btn.dataset.kat;
-        if(cfg.mode === 'enrad') renderRaknaEnrad(body, cfg, renderPicker);
-        else if(cfg.mode === 'pow10') renderRaknaPow10(body, cfg, renderPicker);
-        else if(cfg.mode === 'saknas'){ cfg.koId = 'mult-rakna'; cfg.formagaKey = 'rakna'; cfg.backLabel = 'Tillbaka till kategorier'; renderRaknaSaknas(body, cfg, renderPicker); }
-        else renderRaknaSingle(body, cfg, renderPicker);
-      };
+      btn.onclick = function(){ openKat(btn.dataset.kat); };
     });
   }
 
-  renderPicker();
+  // Öppna en kategori direkt (används av picker-klick och av deeplink ?formaga=<kategori>).
+  // Generatorerna/beräkningen orörda – bara vilken vy som visas först.
+  function openKat(katId){
+    const cfg = CFG[katId];
+    if(!cfg){ renderPicker(); return; }
+    cfg.scoreKey = katId;
+    if(cfg.mode === 'enrad') renderRaknaEnrad(body, cfg, renderPicker);
+    else if(cfg.mode === 'pow10') renderRaknaPow10(body, cfg, renderPicker);
+    else if(cfg.mode === 'saknas'){ cfg.koId = 'mult-rakna'; cfg.formagaKey = 'rakna'; cfg.backLabel = 'Tillbaka till kategorier'; renderRaknaSaknas(body, cfg, renderPicker); }
+    else renderRaknaSingle(body, cfg, renderPicker);
+  }
+
+  if(startKat && CFG[startKat]) openKat(startKat);
+  else renderPicker();
 }
 
 // --- Motor: 10/100/1000 – fast stegring, auto-byte, ingen tid ---

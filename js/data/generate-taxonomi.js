@@ -171,10 +171,25 @@ for(const n of EXTRA_NODER) noder.push(n);
 // Regenerering sätter defaults; dessa läggs på ovanpå för enskilda noder. Fyll på per order.
 const OVERRIDES = {
   // 'nod-id': { roll: 'fordjupning' },  eller  { arskursRelevans: { ak8: 'mal' } }
+  // Del 5/6/7 — Beräkningar-kategorier utbrutna ur mult-rakna/div-rakna till egna
+  // färdigheter. visning.formagaKey = kategori-nyckeln → deeplink ?formaga=<kat> loggar
+  // till just denna nod (mult-rakna:pow10 etc.), så kartan skiljer Del 5/6/7 åt.
+  'mult-rakna:pow10':    { visning:{ utbudslista:'d5', grupp:'Räkna med 10, 100 och 1000', gruppordning:0, radordning:0, titel:'Multiplikation med 10, 100 och 1000', etikett:'räkna', formagaKey:'pow10', niva:null } },
+  'div-rakna:pow10':     { visning:{ utbudslista:'d5', grupp:'Räkna med 10, 100 och 1000', gruppordning:0, radordning:1, titel:'Division med 10, 100 och 1000', etikett:'räkna', formagaKey:'pow10', niva:null } },
+  'mult-rakna:stora':    { visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:0, titel:'Stora tal', etikett:'räkna', formagaKey:'stora', niva:null } },
+  'mult-rakna:sma':      { visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:1, titel:'Små tal', etikett:'räkna', formagaKey:'sma', niva:null } },
+  'mult-rakna:storasma': { visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:2, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
+  'div-rakna:stora':     { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:0, titel:'Stora tal', etikett:'räkna', formagaKey:'stora', niva:null } },
+  'div-rakna:storasma':  { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:1, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
+  'div-rakna:sma':       { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:2, titel:'Små tal – förlängning', etikett:'räkna', formagaKey:'sma', niva:null } }
 };
 for(const n of noder){
   const o = OVERRIDES[n.id];
-  if(o){ if(o.roll) n.roll = o.roll; if(o.arskursRelevans) n.arskursRelevans = o.arskursRelevans; }
+  if(o){
+    if(o.roll) n.roll = o.roll;
+    if(o.arskursRelevans) n.arskursRelevans = o.arskursRelevans;
+    if(o.visning){ n.visning = o.visning; if(o.visning.titel) n.namn = o.visning.titel; }
+  }
 }
 
 // ---- skriv fil ----
