@@ -11,13 +11,13 @@ var TERM1 = [
   [1,5,'0,2'], [2,5,'0,4'], [3,5,'0,6'], [4,5,'0,8'],
   [1,10,'0,1'], [3,10,'0,3'], [7,10,'0,7'], [9,10,'0,9']
 ];
-// NIVÅ 2 extra: hundradelar i enklaste form (nämnare 100, exakta decimaler)
-var TERM2_HUNDRA = [
-  [1,100,'0,01'], [3,100,'0,03'], [7,100,'0,07'], [9,100,'0,09'],
-  [11,100,'0,11'], [13,100,'0,13'], [17,100,'0,17'], [19,100,'0,19'],
-  [21,100,'0,21'], [23,100,'0,23'], [27,100,'0,27'], [29,100,'0,29']
+// NIVÅ 2 extra: åttondelar (exakta decimaler, meningsfull form-växling – 1/8 = 0,125).
+// (Ugly hundradelar som 29/100 = 0,29 togs bort – de är redan i enklaste form och ger
+//  ingen förkortning; hundradels-arbetet ligger i Tiondelar & hundradelar-bladet.)
+var TERM2_ATTONDEL = [
+  [1,8,'0,125'], [3,8,'0,375'], [5,8,'0,625'], [7,8,'0,875']
 ];
-var TERM2 = TERM1.concat(TERM2_HUNDRA);
+var TERM2 = TERM1.concat(TERM2_ATTONDEL);
 
 // Plocka k unika element ur en lista (utan återläggning)
 function gSample(arr, k){
@@ -28,7 +28,7 @@ function gSample(arr, k){
 
 var BTFORM_HINT = '<strong>Tänk på:</strong> skriv decimaltal med <strong>komma</strong> (t.ex. 0,75) '
   + 'och bråk i <strong>enklaste form</strong> (t.ex. 0,5 = 1/2).';
-var BTFORM_HINT2 = BTFORM_HINT + ' På den här nivån finns även <strong>hundradelar</strong> – dem skriver du med nämnaren 100 (t.ex. 0,07 = 7/100).';
+var BTFORM_HINT2 = BTFORM_HINT + ' Här finns även <strong>åttondelar</strong> – t.ex. 1/8 = 0,125 och 3/8 = 0,375.';
 
 // Bygg ett blad ur poolerna för given nivå
 function bladBTform(niva, forsta){
@@ -39,8 +39,8 @@ function bladBTform(niva, forsta){
       bd = [[1,2,'0,5'],[3,4,'0,75'],[2,5,'0,4'],[7,10,'0,7']];
       db = [[1,2,'0,5'],[1,4,'0,25'],[4,5,'0,8'],[3,5,'0,6'],[1,5,'0,2'],[3,10,'0,3']];
     } else {
-      bd = [[1,4,'0,25'],[3,4,'0,75'],[9,10,'0,9'],[7,100,'0,07']];
-      db = [[1,2,'0,5'],[3,100,'0,03'],[1,5,'0,2'],[9,100,'0,09'],[3,10,'0,3'],[13,100,'0,13']];
+      bd = [[1,8,'0,125'],[3,4,'0,75'],[5,8,'0,625'],[9,10,'0,9']];
+      db = [[1,2,'0,5'],[7,8,'0,875'],[1,5,'0,2'],[3,8,'0,375'],[3,10,'0,3'],[1,4,'0,25']];
     }
   } else {
     bd = gSample(pool, 4);
@@ -49,7 +49,7 @@ function bladBTform(niva, forsta){
   return {
     titel: 'Bråk ↔ decimal – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
     intro: niva === 2
-      ? 'Nu även hundradelar. Skriv bråken som decimaltal och decimaltalen som bråk i enklaste form.'
+      ? 'Nu även åttondelar. Skriv bråken som decimaltal och decimaltalen som bråk i enklaste form.'
       : 'Skriv bråken som decimaltal och decimaltalen som bråk i enklaste form.',
     hint: niva === 2 ? BTFORM_HINT2 : BTFORM_HINT,
     keypadOps: [','],
@@ -70,11 +70,12 @@ function GEN_BTFORM_N2(){ return bladBTform(2, false); }
 //  DEL 2 · TIONDELAR & HUNDRADELAR  (bryggan mellan formerna)
 // ============================================================
 // Decimaltal som skrivs i bråkform (tiondelar/hundradelar, redan i enklaste form)
-var HUNDRA_DEC1 = [ [1,10,'0,1'], [3,10,'0,3'], [7,10,'0,7'], [9,10,'0,9'] ];
+var HUNDRA_DEC1 = [ [1,2,'0,5'], [1,5,'0,2'], [3,10,'0,3'], [2,5,'0,4'], [7,10,'0,7'], [4,5,'0,8'] ];
+// Hundradelar som FÖRKORTAS (0,05 = 5/100 = 1/20) – kräver tanke, till skillnad från t.ex. 29/100.
 var HUNDRA_DEC2 = [
-  [3,100,'0,03'], [7,100,'0,07'], [9,100,'0,09'], [11,100,'0,11'],
-  [13,100,'0,13'], [17,100,'0,17'], [19,100,'0,19'], [21,100,'0,21'],
-  [23,100,'0,23'], [27,100,'0,27'], [29,100,'0,29'], [31,100,'0,31']
+  [1,20,'0,05'], [3,20,'0,15'], [7,20,'0,35'], [9,20,'0,45'],
+  [1,25,'0,04'], [3,25,'0,12'], [2,25,'0,08'], [4,25,'0,16'], [6,25,'0,24'],
+  [3,50,'0,06'], [7,50,'0,14'], [1,4,'0,25']
 ];
 // Bråk som förlängs till hundradelar (nämnaren delar 100)
 var FORL1 = [ [1,2],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,10],[3,10],[7,10],[9,10] ];
@@ -95,10 +96,10 @@ function bladHundra(niva, forsta){
   var dset, fset;
   if(forsta){
     if(niva === 1){
-      dset = [ [7,10,'0,7'], [3,10,'0,3'], [9,10,'0,9'], [1,10,'0,1'] ];
+      dset = [ [1,2,'0,5'], [3,10,'0,3'], [2,5,'0,4'], [7,10,'0,7'] ];
       fset = [ [3,4], [1,2], [1,5], [3,10] ];
     } else {
-      dset = [ [7,100,'0,07'], [3,10,'0,3'], [13,100,'0,13'], [9,10,'0,9'] ];
+      dset = [ [1,20,'0,05'], [3,10,'0,3'], [3,25,'0,12'], [9,20,'0,45'] ];
       fset = [ [3,4], [1,20], [3,25], [7,10] ];
     }
   } else {
@@ -130,7 +131,7 @@ function GEN_HUNDRA_N2(){ return bladHundra(2, false); }
 // ============================================================
 var TEST_HINT  = '<strong>Testet:</strong> visa att du klarar hela delkapitlet. '
   + 'Skriv decimaltal med komma och bråk i <strong>enklaste form</strong>.';
-var TEST_HINT2 = TEST_HINT + ' På nivå 2 finns även hundradelar.';
+var TEST_HINT2 = TEST_HINT + ' På nivå 2 finns även åttondelar och hundradelar som förkortas.';
 
 function bladTest(niva, forsta){
   var poolBD = niva === 2 ? TERM2 : TERM1;
@@ -142,8 +143,8 @@ function bladTest(niva, forsta){
       t2 = [[1,4,'0,25'], [2,5,'0,4'], [3,10,'0,3']];
       t3 = [[3,4], [1,5], [1,2]];
     } else {
-      t1 = [[1,4,'0,25'], [9,10,'0,9'], [7,100,'0,07']];
-      t2 = [[3,5,'0,6'], [3,100,'0,03'], [9,100,'0,09']];
+      t1 = [[1,8,'0,125'], [9,10,'0,9'], [5,8,'0,625']];
+      t2 = [[3,5,'0,6'], [1,20,'0,05'], [3,25,'0,12']];
       t3 = [[3,4], [1,20], [3,25]];
     }
   } else {
