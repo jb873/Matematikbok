@@ -1,7 +1,8 @@
 /* k1-taxonomi.js — maskinläsbar nodstruktur (område → deldomän → lövnod).
-   AUTOGENERERAD ur ak7-k1-ram.html (DELAR/DELAR_KO/OVNING_RENDERS/FORMAGOR) + d1:s DEL.fardighet.
+   AUTOGENERERAD av js/data/generate-taxonomi.js ur ak7-k1-ram.html + delkapitlens utbudslistor.
    formaga + generator är förifyllda ur koden. arskursRelevans + malniva har defaults att tagga.
-   visning bär presentationsdatan för utbudslistan (pilot: taluppfattning). Motorer orörda. */
+   visning bär presentationsdatan; visning.utbudslista anger vilken delkapitel-lista raden hör till.
+   REGENERERA när ramens DELAR/DELAR_KO/OVNING_RENDERS ändras. Motorer/Arkiv orörda. */
 window.K1_TAXONOMI = {
   "noder": [
     {
@@ -166,10 +167,7 @@ window.K1_TAXONOMI = {
       "formaga": null,
       "generator": null,
       "begrepp": "Förstå skillnaden mellan siffra och tal, och vad som gör ett tal udda eller jämnt.",
-      "visning": {
-        "rubrik": "Siffror och tal",
-        "ordning": 0
-      }
+      "visning": null
     },
     {
       "id": "siffror:begrepp",
@@ -184,6 +182,10 @@ window.K1_TAXONOMI = {
       "generator": "renderSiffrorBegrepp",
       "begrepp": "Vad en siffra och ett tal är, udda/jämnt och att bygga tal av siffror.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Siffror och tal",
+        "gruppordning": 0,
+        "radordning": 0,
         "titel": "Siffror och tal (udda/jämnt · antal · störst/minst)",
         "etikett": "begrepp",
         "formagaKey": null,
@@ -203,6 +205,10 @@ window.K1_TAXONOMI = {
       "generator": "renderTalnamn",
       "begrepp": null,
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Siffror och tal",
+        "gruppordning": 0,
+        "radordning": 1,
         "titel": "Talnamn ↔ siffror",
         "etikett": "begrepp",
         "formagaKey": "namn",
@@ -221,10 +227,7 @@ window.K1_TAXONOMI = {
       "formaga": null,
       "generator": null,
       "begrepp": "Platsvärden från tusental till tusendel. Tallinjen. Avgör en siffras värde i talet.",
-      "visning": {
-        "rubrik": "Positionssystemet",
-        "ordning": 1
-      }
+      "visning": null
     },
     {
       "id": "position:begrepp",
@@ -239,6 +242,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPositionBegrepp",
       "begrepp": "Platsvärde, och skriva tal från ental, tiondelar, hundradelar …",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Positionssystemet",
+        "gruppordning": 1,
+        "radordning": 0,
         "titel": "Platsvärde & bygga tal",
         "etikett": "begrepp",
         "formagaKey": null,
@@ -258,6 +265,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPositionRakna",
       "begrepp": "Tallinjen, storleksordna, talföljder och att öka/minska med en tiondel.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Positionssystemet",
+        "gruppordning": 1,
+        "radordning": 1,
         "titel": "Tallinje, talföljder & storleksordna",
         "etikett": "räkna",
         "formagaKey": "rakna",
@@ -277,6 +288,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPositionResonera",
       "begrepp": "Jämför tal som 9,1 och 9,09, och hitta tal som ligger mellan.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Positionssystemet",
+        "gruppordning": 1,
+        "radordning": 2,
         "titel": "Jämföra & mittemellan",
         "etikett": "resonera",
         "formagaKey": null,
@@ -296,6 +311,10 @@ window.K1_TAXONOMI = {
       "generator": "renderEnhetsbyten",
       "begrepp": null,
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Positionssystemet",
+        "gruppordning": 1,
+        "radordning": 3,
         "titel": "Enhetsbyten (tiotal, tiondelar …)",
         "etikett": "begrepp",
         "formagaKey": "enhet",
@@ -314,10 +333,7 @@ window.K1_TAXONOMI = {
       "formaga": null,
       "generator": null,
       "begrepp": "Dela upp tal som 54,2 = 5·10 + 4·1 + 2·0,1",
-      "visning": {
-        "rubrik": "Utvecklad form",
-        "ordning": 2
-      }
+      "visning": null
     },
     {
       "id": "utvecklad:metod",
@@ -332,6 +348,10 @@ window.K1_TAXONOMI = {
       "generator": "renderUtveckladMetod",
       "begrepp": "Skriv talet i utvecklad form steg för steg.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Utvecklad form",
+        "gruppordning": 2,
+        "radordning": 0,
         "titel": "Skriv i utvecklad form",
         "etikett": "metod",
         "formagaKey": null,
@@ -351,6 +371,10 @@ window.K1_TAXONOMI = {
       "generator": "renderUtveckladRakna",
       "begrepp": "Vilket tal står på utvecklad form?",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Utvecklad form",
+        "gruppordning": 2,
+        "radordning": 1,
         "titel": "Vilket tal står på utvecklad form?",
         "etikett": "räkna",
         "formagaKey": "rakna",
@@ -369,10 +393,7 @@ window.K1_TAXONOMI = {
       "formaga": null,
       "generator": null,
       "begrepp": "Avgör om ett tal är primtal eller sammansatt. Bygg faktorträd och hitta primfaktorer.",
-      "visning": {
-        "rubrik": "Primtal & faktorträd",
-        "ordning": 4
-      }
+      "visning": null
     },
     {
       "id": "primtal:begrepp",
@@ -387,6 +408,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPrimtalBegrepp",
       "begrepp": "Är talet ett primtal eller sammansatt? Snabba flashcards.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Primtal & faktorträd",
+        "gruppordning": 4,
+        "radordning": 0,
         "titel": "Primtal eller sammansatt?",
         "etikett": "begrepp",
         "formagaKey": null,
@@ -406,6 +431,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPrimtalRakna",
       "begrepp": "Dela upp tal i termer eller faktorer. Två, tre eller fyra stycken.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Primtal & faktorträd",
+        "gruppordning": 4,
+        "radordning": 1,
         "titel": "Faktorisera (2–4 faktorer)",
         "etikett": "räkna",
         "formagaKey": "rakna",
@@ -425,6 +454,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPrimtalMetod",
       "begrepp": "Bygg faktorträd – välj själv hur du delar upp.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Primtal & faktorträd",
+        "gruppordning": 4,
+        "radordning": 2,
         "titel": "Bygg faktorträd",
         "etikett": "metod",
         "formagaKey": null,
@@ -444,6 +477,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPrimtalKomm",
       "begrepp": "Skriv hela primtalsfaktoriseringen.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Primtal & faktorträd",
+        "gruppordning": 4,
+        "radordning": 3,
         "titel": "Skriv hela primtalsfaktoriseringen",
         "etikett": "kommunikation",
         "formagaKey": null,
@@ -463,6 +500,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPrimtalResonera",
       "begrepp": "Förklara varför ett tal är primtal eller inte.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Primtal & faktorträd",
+        "gruppordning": 4,
+        "radordning": 4,
         "titel": "Förklara varför ett tal är primtal",
         "etikett": "resonera",
         "formagaKey": null,
@@ -482,6 +523,10 @@ window.K1_TAXONOMI = {
       "generator": "renderPrimtalProblem",
       "begrepp": "Gåtor: vilket tal är jag?",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Primtal & faktorträd",
+        "gruppordning": 4,
+        "radordning": 5,
         "titel": "Talgåtor: vilket tal är jag?",
         "etikett": "problemlösning",
         "formagaKey": "problem",
@@ -501,6 +546,10 @@ window.K1_TAXONOMI = {
       "generator": "renderFaktoriseringBaklanges",
       "begrepp": null,
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Primtal & faktorträd",
+        "gruppordning": 4,
+        "radordning": 6,
         "titel": "Faktorisering baklänges",
         "etikett": "räkna",
         "formagaKey": "baklanges",
@@ -519,10 +568,7 @@ window.K1_TAXONOMI = {
       "formaga": null,
       "generator": null,
       "begrepp": "Reglerna för 2, 3, 5 och 10. Fördjupning: 4, 6 och 9.",
-      "visning": {
-        "rubrik": "Delbarhet",
-        "ordning": 5
-      }
+      "visning": null
     },
     {
       "id": "delbarhet:begrepp",
@@ -537,6 +583,10 @@ window.K1_TAXONOMI = {
       "generator": "renderDelbarhetBegrepp",
       "begrepp": "Vad betyder delbarhet? Vad är en siffersumma?",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Delbarhet",
+        "gruppordning": 5,
+        "radordning": 0,
         "titel": "Vad är delbarhet?",
         "etikett": "begrepp",
         "formagaKey": null,
@@ -556,6 +606,10 @@ window.K1_TAXONOMI = {
       "generator": "renderDelbarhetRakna",
       "begrepp": "Avgör snabbt om ett tal är delbart.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Delbarhet",
+        "gruppordning": 5,
+        "radordning": 1,
         "titel": "Avgör delbarhet snabbt",
         "etikett": "räkna",
         "formagaKey": "rakna",
@@ -575,6 +629,10 @@ window.K1_TAXONOMI = {
       "generator": "renderKonstrueraDelbar",
       "begrepp": null,
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Delbarhet",
+        "gruppordning": 5,
+        "radordning": 2,
         "titel": "Konstruera tal (delbarhet)",
         "etikett": "räkna",
         "formagaKey": "konstruera",
@@ -593,10 +651,7 @@ window.K1_TAXONOMI = {
       "formaga": null,
       "generator": null,
       "begrepp": "T.ex. öka 9,92 med en tiondel, minska 10,09 med en hundradel.",
-      "visning": {
-        "rubrik": "Räkneträning",
-        "ordning": 3
-      }
+      "visning": null
     },
     {
       "id": "rakneträning:rakna",
@@ -611,6 +666,10 @@ window.K1_TAXONOMI = {
       "generator": "renderRaknetraningRakna",
       "begrepp": "Öka och minska med en tiondel, hundradel eller tusendel.",
       "visning": {
+        "utbudslista": "d1",
+        "grupp": "Räkneträning",
+        "gruppordning": 3,
+        "radordning": 0,
         "titel": "Öka & minska (tiondel · hundradel · tusendel)",
         "etikett": "räkna",
         "formagaKey": "rakna",
@@ -633,7 +692,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-begrepp:begrepp",
-      "namn": "Begrepp · Begrepp",
+      "namn": "Begrepp",
       "parent": "add-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -643,7 +702,16 @@ window.K1_TAXONOMI = {
       "formaga": "BEGREPP",
       "generator": "renderAddBegrepp",
       "begrepp": "Vad menas med term och summa?",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Addition",
+        "gruppordning": 0,
+        "radordning": 0,
+        "titel": "Begrepp",
+        "etikett": "begrepp",
+        "formagaKey": null,
+        "niva": 2
+      }
     },
     {
       "id": "add-begrepp:rakna",
@@ -675,7 +743,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-rakna:rakna",
-      "namn": "Huvudräkning · Räkna",
+      "namn": "Huvudräkning",
       "parent": "add-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -685,7 +753,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderAddHuvudrakning",
       "begrepp": "Huvudräkning med tiokompisar, decimaltal och bråk.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Addition",
+        "gruppordning": 0,
+        "radordning": 1,
+        "titel": "Huvudräkning",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "add-metoder",
@@ -703,7 +780,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-metoder:metod",
-      "namn": "Metoder · Metod",
+      "namn": "Metoder",
       "parent": "add-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -713,7 +790,16 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderAddMetod",
       "begrepp": "Lär dig och välj bland additionsmetoderna.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Addition",
+        "gruppordning": 0,
+        "radordning": 2,
+        "titel": "Metoder",
+        "etikett": "metod",
+        "formagaKey": null,
+        "niva": null
+      }
     },
     {
       "id": "add-problem",
@@ -731,7 +817,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-problem:problem",
-      "namn": "Problemlösning · Problemlösning",
+      "namn": "Problemlösning",
       "parent": "add-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -741,7 +827,16 @@ window.K1_TAXONOMI = {
       "formaga": "PROBLEM",
       "generator": "renderAddProblem",
       "begrepp": "Lös lästal med addition.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Addition",
+        "gruppordning": 0,
+        "radordning": 3,
+        "titel": "Problemlösning",
+        "etikett": "problemlösning",
+        "formagaKey": "problem",
+        "niva": null
+      }
     },
     {
       "id": "sub-begrepp",
@@ -759,7 +854,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-begrepp:begrepp",
-      "namn": "Begrepp · Begrepp",
+      "namn": "Begrepp",
       "parent": "sub-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -769,7 +864,16 @@ window.K1_TAXONOMI = {
       "formaga": "BEGREPP",
       "generator": "renderSubBegrepp",
       "begrepp": "Vad menas med term och differens?",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Subtraktion",
+        "gruppordning": 1,
+        "radordning": 0,
+        "titel": "Begrepp",
+        "etikett": "begrepp",
+        "formagaKey": null,
+        "niva": 2
+      }
     },
     {
       "id": "sub-begrepp:rakna",
@@ -801,7 +905,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-rakna:rakna",
-      "namn": "Huvudräkning · Räkna",
+      "namn": "Huvudräkning",
       "parent": "sub-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -811,7 +915,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderSubHuvudrakning",
       "begrepp": "Huvudräkning med enkla tal, decimaltal och bråk.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Subtraktion",
+        "gruppordning": 1,
+        "radordning": 1,
+        "titel": "Huvudräkning",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "sub-metoder",
@@ -829,7 +942,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-metoder:metod",
-      "namn": "Metoder · Metod",
+      "namn": "Metoder",
       "parent": "sub-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -839,7 +952,16 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderSubMetod",
       "begrepp": "Lär dig och välj bland subtraktionsmetoderna.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Subtraktion",
+        "gruppordning": 1,
+        "radordning": 2,
+        "titel": "Metoder",
+        "etikett": "metod",
+        "formagaKey": null,
+        "niva": null
+      }
     },
     {
       "id": "sub-problem",
@@ -857,7 +979,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-problem:problem",
-      "namn": "Problemlösning · Problemlösning",
+      "namn": "Problemlösning",
       "parent": "sub-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -867,7 +989,16 @@ window.K1_TAXONOMI = {
       "formaga": "PROBLEM",
       "generator": "renderSubProblem",
       "begrepp": "Lös lästal med subtraktion.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Subtraktion",
+        "gruppordning": 1,
+        "radordning": 3,
+        "titel": "Problemlösning",
+        "etikett": "problemlösning",
+        "formagaKey": "problem",
+        "niva": null
+      }
     },
     {
       "id": "mult-begrepp",
@@ -885,7 +1016,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-begrepp:begrepp",
-      "namn": "Begrepp · Begrepp",
+      "namn": "Begrepp",
       "parent": "mult-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -895,7 +1026,16 @@ window.K1_TAXONOMI = {
       "formaga": "BEGREPP",
       "generator": "renderMultBegrepp",
       "begrepp": "Känn igen faktor, produkt, primtal och sammansatt tal.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Multiplikation",
+        "gruppordning": 2,
+        "radordning": 0,
+        "titel": "Begrepp",
+        "etikett": "begrepp",
+        "formagaKey": null,
+        "niva": 2
+      }
     },
     {
       "id": "mult-begrepp:rakna",
@@ -941,7 +1081,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-tabell:rakna",
-      "namn": "Multiplikationstabellen · Räkna",
+      "namn": "Multiplikationstabellen",
       "parent": "mult-tabell",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -951,7 +1091,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderMultTabell",
       "begrepp": "Snabba flashcards med multiplikationstabellen.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Multiplikation",
+        "gruppordning": 2,
+        "radordning": 1,
+        "titel": "Multiplikationstabellen",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "mult-metoder",
@@ -969,7 +1118,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-metoder:metod",
-      "namn": "Metoder för multiplikation · Metod",
+      "namn": "Metoder",
       "parent": "mult-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -979,7 +1128,16 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Lär dig och välj bland flera multiplikationsmetoder.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Multiplikation",
+        "gruppordning": 2,
+        "radordning": 2,
+        "titel": "Metoder",
+        "etikett": "metod",
+        "formagaKey": null,
+        "niva": null
+      }
     },
     {
       "id": "mult-rakna",
@@ -997,7 +1155,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-rakna:rakna",
-      "namn": "Beräkningar · Räkna",
+      "namn": "Beräkningar",
       "parent": "mult-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1007,7 +1165,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderMultRakna",
       "begrepp": "Blandade beräkningar – nivån anpassar sig.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Multiplikation",
+        "gruppordning": 2,
+        "radordning": 3,
+        "titel": "Beräkningar",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "mult-problem",
@@ -1025,7 +1192,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-problem:problem",
-      "namn": "Problemlösning med lästal · Problemlösning",
+      "namn": "Problemlösning",
       "parent": "mult-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1035,7 +1202,16 @@ window.K1_TAXONOMI = {
       "formaga": "PROBLEM",
       "generator": "renderMultProblem",
       "begrepp": "Lös lästal som handlar om multiplikation.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Multiplikation",
+        "gruppordning": 2,
+        "radordning": 4,
+        "titel": "Problemlösning",
+        "etikett": "problemlösning",
+        "formagaKey": "problem",
+        "niva": null
+      }
     },
     {
       "id": "div-begrepp",
@@ -1053,7 +1229,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-begrepp:begrepp",
-      "namn": "Begrepp · Begrepp",
+      "namn": "Begrepp",
       "parent": "div-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1063,7 +1239,16 @@ window.K1_TAXONOMI = {
       "formaga": "BEGREPP",
       "generator": "renderDivBegrepp",
       "begrepp": "Känn igen täljare, nämnare och kvot.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Division",
+        "gruppordning": 3,
+        "radordning": 0,
+        "titel": "Begrepp",
+        "etikett": "begrepp",
+        "formagaKey": null,
+        "niva": 2
+      }
     },
     {
       "id": "div-begrepp:rakna",
@@ -1095,7 +1280,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-tabell:rakna",
-      "namn": "Divisionstabellen · Räkna",
+      "namn": "Divisionstabellen",
       "parent": "div-tabell",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1105,7 +1290,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderDivTabell",
       "begrepp": "Snabba flashcards med divisionstabellen.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Division",
+        "gruppordning": 3,
+        "radordning": 1,
+        "titel": "Divisionstabellen",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "div-metoder",
@@ -1123,7 +1317,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-metoder:metod",
-      "namn": "Metoder · Metod",
+      "namn": "Metoder",
       "parent": "div-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1133,7 +1327,16 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderDivMetoder",
       "begrepp": "Lär dig och öva kort och lång division.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Division",
+        "gruppordning": 3,
+        "radordning": 2,
+        "titel": "Metoder",
+        "etikett": "metod",
+        "formagaKey": null,
+        "niva": null
+      }
     },
     {
       "id": "div-rakna",
@@ -1151,7 +1354,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-rakna:rakna",
-      "namn": "Beräkningar · Räkna",
+      "namn": "Beräkningar",
       "parent": "div-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1161,7 +1364,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderDivRakna",
       "begrepp": "Blandade beräkningar – nivån anpassar sig.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Division",
+        "gruppordning": 3,
+        "radordning": 3,
+        "titel": "Beräkningar",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "div-problem",
@@ -1179,7 +1391,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-problem:problem",
-      "namn": "Problemlösning med lästal · Problemlösning",
+      "namn": "Problemlösning",
       "parent": "div-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1189,7 +1401,16 @@ window.K1_TAXONOMI = {
       "formaga": "PROBLEM",
       "generator": "renderDivProblem",
       "begrepp": "Lös lästal som handlar om division.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Division",
+        "gruppordning": 3,
+        "radordning": 4,
+        "titel": "Problemlösning",
+        "etikett": "problemlösning",
+        "formagaKey": "problem",
+        "niva": null
+      }
     },
     {
       "id": "prio-samband",
@@ -1207,7 +1428,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "prio-samband:rakna",
-      "namn": "Samband mellan räknesätt · Räkna",
+      "namn": "Samband mellan räknesätt",
       "parent": "prio-samband",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1217,7 +1438,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderPrioSamband",
       "begrepp": "Hitta talet som saknas i rutan – två kategorier.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Prioriteringsregeln",
+        "gruppordning": 4,
+        "radordning": 0,
+        "titel": "Samband mellan räknesätt",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "prio-prioritering",
@@ -1235,7 +1465,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "prio-prioritering:rakna",
-      "namn": "Prioriteringsregeln · Räkna",
+      "namn": "Prioriteringsregeln",
       "parent": "prio-prioritering",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1245,7 +1475,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderPrioBerakning",
       "begrepp": "Räkna ut uttryck med prioriteringsregeln – tre nivåer.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Prioriteringsregeln",
+        "gruppordning": 4,
+        "radordning": 1,
+        "titel": "Prioriteringsregeln",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "prio-prioritering:metod",
@@ -1277,7 +1516,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "prio-lagar:rakna",
-      "namn": "Räknelagar · Räkna",
+      "namn": "Räknelagar",
       "parent": "prio-lagar",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1287,7 +1526,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderPrioLagar",
       "begrepp": "Öva de tre räknelagarna med tydliga mellanled.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Prioriteringsregeln",
+        "gruppordning": 4,
+        "radordning": 2,
+        "titel": "Räknelagar",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": 2
+      }
     },
     {
       "id": "neg-begrepp",

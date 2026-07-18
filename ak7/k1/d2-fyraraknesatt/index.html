@@ -925,11 +925,39 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
 <script src="../../../js/motor/blad/blad-k1-d2.js"></script>
 
+<!-- TAXONOMI: delad nodstruktur (en källa, alla vyer) -->
+<script src="../../../js/data/k1-taxonomi.js"></script>
+
 <!-- SKAL: blad-nav (Öva) + add/sub-split + Färdighetsträning. Körs efter blad-filen
      (BLAD_*, bygg_blad definierade; auto-render klar). Motorn/blad-filen orörd. -->
 <script>
 (function(){
   var RAM='../../../ak7-k1-ram.html';
+
+  // Bygg Färdighetsträningens grupper/rader ur taxonomi-noderna (window.K1_TAXONOMI, se
+  // fardighetUrTaxonomi). Lövnoder med visning för utbudslistan grupperas på visning.grupp.
+  function fardighetUrTaxonomi(utbudslistaId){
+    var t = window.K1_TAXONOMI, noder = (t && t.noder) || [];
+    var rader = noder.filter(function(n){
+      return n.niva === 'lovnod' && n.visning && n.visning.utbudslista === utbudslistaId;
+    });
+    var grupper = {};
+    rader.forEach(function(n){
+      var v = n.visning;
+      if(!grupper[v.grupp]) grupper[v.grupp] = { rubrik: v.grupp, ordning: v.gruppordning, rader: [] };
+      grupper[v.grupp].rader.push(n);
+    });
+    return Object.keys(grupper).map(function(k){ return grupper[k]; })
+      .sort(function(a, b){ return a.ordning - b.ordning; })
+      .map(function(gr){
+        gr.rader.sort(function(a, b){ return a.visning.radordning - b.visning.radordning; });
+        return { ko: gr.rubrik, drills: gr.rader.map(function(n){
+          var v = n.visning;
+          return { titel: v.titel, formaga: v.etikett, ko: n.parent,
+                   formagaKey: v.formagaKey || undefined, niva: v.niva || undefined };
+        }) };
+      });
+  }
   // ── ÖVA: blad-nav. Addition/Subtraktion delas ur BLAD_ADDSUB (grupper efter beslut 5/4) ──
   var addsub = window.BLAD_ADDSUB || {intro:'',grupper:[]};
   var addG=[0,1,3,4,6].map(function(i){return addsub.grupper[i];}).filter(Boolean);   // Beräkna·Vilka tal·Talsorterna·Flytta över·Flytta över(2)
@@ -1309,39 +1337,8 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     visa(0);
   }
   // ── FÄRDIGHETSTRÄNING: 5 kunskapsområden, deep-link till metod-ramen (embed) ──
-  var FARD=[
-    {ko:'Addition', drills:[
-      {titel:'Begrepp', formaga:'begrepp', ko:'add-begrepp', niva:2},
-      {titel:'Huvudräkning', formaga:'räkna', formagaKey:'rakna', ko:'add-rakna'},
-      {titel:'Metoder', formaga:'metod', ko:'add-metoder'},
-      {titel:'Problemlösning', formaga:'problemlösning', formagaKey:'problem', ko:'add-problem'}
-    ]},
-    {ko:'Subtraktion', drills:[
-      {titel:'Begrepp', formaga:'begrepp', ko:'sub-begrepp', niva:2},
-      {titel:'Huvudräkning', formaga:'räkna', formagaKey:'rakna', ko:'sub-rakna'},
-      {titel:'Metoder', formaga:'metod', ko:'sub-metoder'},
-      {titel:'Problemlösning', formaga:'problemlösning', formagaKey:'problem', ko:'sub-problem'}
-    ]},
-    {ko:'Multiplikation', drills:[
-      {titel:'Begrepp', formaga:'begrepp', ko:'mult-begrepp', niva:2},
-      {titel:'Multiplikationstabellen', formaga:'räkna', formagaKey:'rakna', ko:'mult-tabell'},
-      {titel:'Metoder', formaga:'metod', ko:'mult-metoder'},
-      {titel:'Beräkningar', formaga:'räkna', formagaKey:'rakna', ko:'mult-rakna'},
-      {titel:'Problemlösning', formaga:'problemlösning', formagaKey:'problem', ko:'mult-problem'}
-    ]},
-    {ko:'Division', drills:[
-      {titel:'Begrepp', formaga:'begrepp', ko:'div-begrepp', niva:2},
-      {titel:'Divisionstabellen', formaga:'räkna', formagaKey:'rakna', ko:'div-tabell'},
-      {titel:'Metoder', formaga:'metod', ko:'div-metoder'},
-      {titel:'Beräkningar', formaga:'räkna', formagaKey:'rakna', ko:'div-rakna'},
-      {titel:'Problemlösning', formaga:'problemlösning', formagaKey:'problem', ko:'div-problem'}
-    ]},
-    {ko:'Prioriteringsregeln', drills:[
-      {titel:'Samband mellan räknesätt', formaga:'räkna', formagaKey:'rakna', ko:'prio-samband'},
-      {titel:'Prioriteringsregeln', formaga:'räkna', formagaKey:'rakna', ko:'prio-prioritering'},
-      {titel:'Räknelagar', formaga:'räkna', formagaKey:'rakna', ko:'prio-lagar', niva:2}
-    ]}
-  ];
+  // FÄRDIGHETSTRÄNING byggs ur taxonomin (window.K1_TAXONOMI, utbudslista 'd2') via
+  // fardighetUrTaxonomi() ovan – i stället för en hårdkodad array. En källa, alla vyer.
   var fardEl=document.getElementById('fardighet-lista'), frame=document.getElementById('fard-frame'), scen=document.getElementById('fard-scen');
   if(fardEl){
     var alla=[];
@@ -1352,7 +1349,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       if(p.niva&&p.niva<3) url+='&maxniva='+p.niva;
       if(frame){ frame.style.height=''; frame.src=url; } if(scen) scen.classList.add('har-drill');
     }
-    FARD.forEach(function(g){
+    fardighetUrTaxonomi('d2').forEach(function(g){
       var gr=document.createElement('div'); gr.className='fard-grupp';
       var rub=document.createElement('div'); rub.className='fard-ko'; rub.textContent=g.ko; gr.appendChild(rub);
       g.drills.forEach(function(p){

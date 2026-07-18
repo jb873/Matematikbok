@@ -1,0 +1,170 @@
+// Genererar js/data/k1-taxonomi.js ur ak7-k1-ram.html + delkapitlens DEL.fardighet/FARD.
+// Läser faktisk data (gissar inte). Motorer/ram/Arkiv rörs inte. Kör: node js/data/generate-taxonomi.js
+const fs = require('fs');
+const path = require('path');
+const ROOT = path.resolve(__dirname, '..', '..');
+const ram = fs.readFileSync(path.join(ROOT, 'ak7-k1-ram.html'), 'utf8');
+
+// ---- matcha balanserad {..}/[..] från första förekomsten (hanterar strängar) ----
+function matchBracket(s, open){
+  const close = open === '{' ? '}' : ']';
+  let depth = 0, i = s.indexOf(open); const start = i; let q = null;
+  for(; i < s.length; i++){
+    const c = s[i];
+    if(q){ if(c === '\\'){ i++; continue; } if(c === q) q = null; continue; }
+    if(c === '"' || c === "'" || c === '`'){ q = c; continue; }
+    if(c === open) depth++;
+    else if(c === close){ depth--; if(depth === 0) return s.slice(start, i+1); }
+  }
+  throw new Error('obalanserad ' + open);
+}
+function grabLiteral(src, decl, open){
+  const idx = src.indexOf(decl);
+  if(idx < 0) throw new Error('hittar ej ' + decl);
+  return matchBracket(src.slice(idx), open);
+}
+const evalLit = lit => eval('(' + lit + ')');
+
+// ---- A. rena datastrukturer ur ramen ----
+const DELAR = evalLit(grabLiteral(ram, 'const DELAR =', '['));
+const KUNSKAPSOMRADEN = evalLit(grabLiteral(ram, 'const KUNSKAPSOMRADEN =', '['));
+const FORMAGOR = evalLit(grabLiteral(ram, 'const FORMAGOR =', '{'));
+
+// ---- B. DELAR_KO-fyllningarna ----
+const DELAR_KO = { taluppfattning: KUNSKAPSOMRADEN };
+const reFill = /DELAR_KO\['([a-z0-9-]+)'\]\s*=\s*\[/g; let mF;
+while((mF = reFill.exec(ram))){
+  const delId = mF[1];
+  if(delId === 'taluppfattning') continue;
+  DELAR_KO[delId] = evalLit(matchBracket(ram.slice(mF.index + mF[0].length - 1), '['));
+}
+
+// ---- C. OVNING_RENDERS: koId → {formagaKey: renderFnNamn} ----
+const orBody = grabLiteral(ram, 'const OVNING_RENDERS =', '{');
+const OR = {};
+{
+  const inner = orBody.slice(orBody.indexOf('{') + 1, orBody.lastIndexOf('}'));
+  let i = 0;
+  while(i < inner.length){
+    while(i < inner.length && /[\s,]/.test(inner[i])) i++;
+    if(inner.slice(i, i+2) === '//'){ while(i < inner.length && inner[i] !== '\n') i++; continue; }
+    if(i >= inner.length) break;
+    let key;
+    if(inner[i] === "'"){ const e = inner.indexOf("'", i+1); key = inner.slice(i+1, e); i = e+1; }
+    else { let j = i; while(j < inner.length && /[\w-]/.test(inner[j])) j++; key = inner.slice(i, j); i = j; }
+    while(i < inner.length && /[\s:]/.test(inner[i])) i++;
+    const body = matchBracket(inner.slice(i), '{'); i += body.length;
+    const map = {}; let mm; const reFn = /([\w-]+)\s*:\s*\(b\)\s*=>\s*([A-Za-z0-9_]+)\s*\(/g;
+    while((mm = reFn.exec(body))) map[mm[1]] = mm[2];
+    OR[key] = map;
+  }
+}
+
+// ---- D. delkapitlens kurerade utbudslistor (presentationen) ----
+// Inkrementellt: läs FARD ur en sida som fortfarande har sin hårdkodade array (obunden).
+// När en sida bundits (arrayen borttagen) bevaras dess visning ur befintliga k1-taxonomi.js.
+const CANDIDATES = [
+  { id: 'd1', file: 'ak7/k1/d1-positionssystem/index.html', anchor: 'fardighet:[', from: 'fardighet:' },
+  { id: 'd2', file: 'ak7/k1/d2-fyraraknesatt/index.html',   anchor: 'var FARD=[',  from: 'var FARD=' }
+];
+const PAGES = [];
+for(const cand of CANDIDATES){
+  const src = fs.readFileSync(path.join(ROOT, cand.file), 'utf8');
+  const idx = src.indexOf(cand.anchor);
+  if(idx < 0) continue; // redan bunden → hoppa, visning bevaras nedan
+  PAGES.push({ id: cand.id, fard: evalLit(matchBracket(src.slice(idx + cand.from.length), '[')) });
+}
+// Bevara visning för redan bundna sidor ur den befintliga taxonomin.
+const prevVisning = {};
+const taxPath = path.join(ROOT, 'js/data/k1-taxonomi.js');
+if(fs.existsSync(taxPath)){
+  const vm = require('vm'); const sandbox = { window: {} };
+  vm.runInNewContext(fs.readFileSync(taxPath, 'utf8'), sandbox);
+  for(const n of ((sandbox.window.K1_TAXONOMI || {}).noder || [])) if(n.visning) prevVisning[n.id] = n.visning;
+}
+
+// Presentationen ligger PER LÖVNOD (så gruppering funkar oavsett om utbudslistan grupperar
+// per KO (d1) eller per område (d2)). lövId = koId:techKey.
+const pilotDrill = {};
+for(const page of PAGES){
+  page.fard.forEach(function(g, gi){
+    g.drills.forEach(function(d, di){
+      const techKey = d.formagaKey || d.formaga;
+      pilotDrill[d.ko + ':' + techKey] = {
+        utbudslista: page.id, grupp: g.ko, gruppordning: gi, radordning: di,
+        titel: d.titel, etikett: d.formaga,
+        formagaKey: d.formagaKey || null, niva: d.niva || null
+      };
+    });
+  });
+}
+
+// tagClass -> stor förmåge-kategori
+const CAT = { 'tag-begrepp':'BEGREPP','tag-rakna':'RAKNA','tag-metod':'METOD','tag-komm':'KOMMUNIKATION','tag-resonera':'RESONERA','tag-problem':'PROBLEM' };
+function storKategori(key){
+  const f = FORMAGOR[key];
+  if(f && CAT[f.tagClass]) return CAT[f.tagClass];
+  return key.toUpperCase();
+}
+
+// ---- bygg noder ----
+const noder = [];
+const koToDel = {};
+const DEFAULT_ARK = { ak7: 'mal' };
+
+for(const del of DELAR){
+  noder.push({
+    id: del.id, namn: del.titel, parent: null, niva: 'omrade',
+    arskursRelevans: Object.assign({}, DEFAULT_ARK), malniva: 'obligatorisk',
+    formaga: null, generator: null, begrepp: del.beskrivning || null,
+    grupp: del.grupp || null, implemented: !!del.implemented
+  });
+}
+for(const delId in DELAR_KO){
+  for(const ko of DELAR_KO[delId]){
+    koToDel[ko.id] = delId;
+    noder.push({
+      id: ko.id, namn: ko.titel, parent: delId, niva: 'deldoman',
+      arskursRelevans: Object.assign({}, DEFAULT_ARK), malniva: 'obligatorisk',
+      formaga: null, generator: null, begrepp: ko.beskrivning || null,
+      visning: null   // presentationen ligger på lövnoderna
+    });
+    const rend = OR[ko.id] || {};
+    for(const techKey in rend){
+      const kat = storKategori(techKey);
+      const lovId = ko.id + ':' + techKey;
+      const vis = pilotDrill[lovId] || prevVisning[lovId] || null;
+      const desc = ko.formagor && ko.formagor[techKey] ? ko.formagor[techKey].desc : null;
+      noder.push({
+        id: lovId,
+        namn: vis ? vis.titel : (ko.titel + ' · ' + ((FORMAGOR[techKey] && FORMAGOR[techKey].label) || techKey)),
+        parent: ko.id, niva: 'lovnod',
+        arskursRelevans: Object.assign({}, DEFAULT_ARK),
+        malniva: (kat === 'METOD') ? 'valbar' : 'obligatorisk',
+        formaga: kat, generator: rend[techKey], begrepp: desc,
+        visning: vis
+      });
+    }
+  }
+}
+
+// ---- skriv fil ----
+const header = '/* k1-taxonomi.js — maskinläsbar nodstruktur (område → deldomän → lövnod).\n'
+  + '   AUTOGENERERAD av js/data/generate-taxonomi.js ur ak7-k1-ram.html + delkapitlens utbudslistor.\n'
+  + '   formaga + generator är förifyllda ur koden. arskursRelevans + malniva har defaults att tagga.\n'
+  + '   visning bär presentationsdatan; visning.utbudslista anger vilken delkapitel-lista raden hör till.\n'
+  + '   REGENERERA när ramens DELAR/DELAR_KO/OVNING_RENDERS ändras. Motorer/Arkiv orörda. */\n';
+fs.mkdirSync(path.join(ROOT, 'js/data'), { recursive: true });
+fs.writeFileSync(path.join(ROOT, 'js/data/k1-taxonomi.js'), header + 'window.K1_TAXONOMI = ' + JSON.stringify({ noder }, null, 2) + ';\n', 'utf8');
+
+// ---- rapport ----
+const c = niva => noder.filter(n => n.niva === niva).length;
+console.log('Noder:', noder.length, '| områden:', c('omrade'), '| deldomäner:', c('deldoman'), '| lövnoder:', c('lovnod'));
+const rader = noder.filter(n => n.niva === 'lovnod' && n.visning);
+const utbudIds = [...new Set(rader.map(n => n.visning.utbudslista))].sort();
+for(const uid of utbudIds){
+  const r = rader.filter(n => n.visning.utbudslista === uid);
+  const grupper = new Set(r.map(n => n.visning.grupp)).size;
+  console.log('  utbudslista ' + uid + ': ' + grupper + ' grupper, ' + r.length + ' rader' + (PAGES.some(p => p.id === uid) ? ' (läst ur sidan)' : ' (bevarad)'));
+}
+console.log('malniva=valbar (metod):', noder.filter(n => n.niva === 'lovnod' && n.malniva === 'valbar').length);

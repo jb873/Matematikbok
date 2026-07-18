@@ -1003,28 +1003,35 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       {titel:'Räkna i positionssystemet',   desc:'Huvudräkning med positionsvärde, intervall och mittemellan.',        blad:'positionsrakning', data:'POSRAK_A'},
       {titel:'Tals egenskaper',             desc:'Jämnt/udda, delbarhet, faktorisering och primtal.',                  blad:'egenskaper',       data:'EGEN_A'}
     ],
-    // FÄRDIGHETSTRÄNING byggs nu ur taxonomin (window.K1_TAXONOMI) i stället för hårdkodat
-    // – se fardighetUrTaxonomi() nedan. En källa, alla vyer.
+    // FÄRDIGHETSTRÄNING byggs nu ur taxonomin (window.K1_TAXONOMI, utbudslista 'd1') i stället
+    // för hårdkodat – se fardighetUrTaxonomi() nedan. En källa, alla vyer.
   };
   var RAM = '../../../ak7-k1-ram.html';
 
   // Bygg Färdighetsträningens grupper/rader ur taxonomi-noderna (window.K1_TAXONOMI).
-  // Deldomäner (KO) med visning = utbudslistans grupper (rubrik+ordning); lövnoder med
-  // visning = färdigheterna (titel, förmåge-etikett, koId, formagaKey, niva).
-  function fardighetUrTaxonomi(omradeId){
+  // Lövnoder med visning för denna utbudslista grupperas på visning.grupp (rubrik+ordning);
+  // varje rad = titel, förmåge-etikett, koId (=parent) + formagaKey/niva för deeplinken.
+  function fardighetUrTaxonomi(utbudslistaId){
     var t = window.K1_TAXONOMI, noder = (t && t.noder) || [];
-    var grupper = noder.filter(function(n){
-      return n.niva === 'deldoman' && n.parent === omradeId && n.visning;
-    }).sort(function(a, b){ return a.visning.ordning - b.visning.ordning; });
-    return grupper.map(function(dd){
-      var drills = noder.filter(function(n){
-        return n.niva === 'lovnod' && n.parent === dd.id && n.visning;
-      }).map(function(ln){
-        return { titel: ln.visning.titel, formaga: ln.visning.etikett, ko: dd.id,
-                 formagaKey: ln.visning.formagaKey || undefined, niva: ln.visning.niva || undefined };
-      });
-      return { ko: dd.visning.rubrik, drills: drills };
+    var rader = noder.filter(function(n){
+      return n.niva === 'lovnod' && n.visning && n.visning.utbudslista === utbudslistaId;
     });
+    var grupper = {};
+    rader.forEach(function(n){
+      var v = n.visning;
+      if(!grupper[v.grupp]) grupper[v.grupp] = { rubrik: v.grupp, ordning: v.gruppordning, rader: [] };
+      grupper[v.grupp].rader.push(n);
+    });
+    return Object.keys(grupper).map(function(k){ return grupper[k]; })
+      .sort(function(a, b){ return a.ordning - b.ordning; })
+      .map(function(gr){
+        gr.rader.sort(function(a, b){ return a.visning.radordning - b.visning.radordning; });
+        return { ko: gr.rubrik, drills: gr.rader.map(function(n){
+          var v = n.visning;
+          return { titel: v.titel, formaga: v.etikett, ko: n.parent,
+                   formagaKey: v.formagaKey || undefined, niva: v.niva || undefined };
+        }) };
+      });
   }
 
   // ── ÖVA: blad-nav (numrerad rad) + ett helt arbetsblad i taget ──
@@ -1072,7 +1079,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       if(frame) frame.src = url;
       if(scen) scen.classList.add('har-drill');            // visa iframen I rutan, dölj platshållaren (CSS)
     }
-    fardighetUrTaxonomi('taluppfattning').forEach(function(g){
+    fardighetUrTaxonomi('d1').forEach(function(g){
       var gr=document.createElement('div'); gr.className='fard-grupp';
       var rub=document.createElement('div'); rub.className='fard-ko'; rub.textContent=g.ko; gr.appendChild(rub);
       g.drills.forEach(function(p){
