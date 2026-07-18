@@ -1554,7 +1554,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "neg-begrepp:begrepp",
-      "namn": "Begrepp och förståelse · Begrepp",
+      "namn": "Begrepp och förståelse",
       "parent": "neg-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1564,7 +1564,16 @@ window.K1_TAXONOMI = {
       "formaga": "BEGREPP",
       "generator": "renderNegBegrepp",
       "begrepp": "Motsatta talet, storleksordna och talföljder – tre kategorier.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d3",
+        "grupp": "Negativa tal",
+        "gruppordning": 0,
+        "radordning": 0,
+        "titel": "Begrepp och förståelse",
+        "etikett": "begrepp",
+        "formagaKey": null,
+        "niva": null
+      }
     },
     {
       "id": "neg-rakna",
@@ -1582,7 +1591,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "neg-rakna:rakna",
-      "namn": "Räkna med negativa tal · Räkna",
+      "namn": "Räkna med negativa tal",
       "parent": "neg-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1592,7 +1601,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderNegRakna",
       "begrepp": "Addition och subtraktion, multiplikation och division, flera faktorer.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d3",
+        "grupp": "Negativa tal",
+        "gruppordning": 0,
+        "radordning": 1,
+        "titel": "Räkna med negativa tal",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "avr-avrundning",
