@@ -1782,7 +1782,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "bd-vaxla",
-      "namn": "Växla bråk och decimal",
+      "namn": "Bråk → decimal",
       "parent": "brak-decimal",
       "niva": "deldoman",
       "arskursRelevans": {
@@ -1791,12 +1791,12 @@ window.K1_TAXONOMI = {
       "roll": "karna",
       "formaga": null,
       "generator": null,
-      "begrepp": "Skriva bråk i decimalform. Exakta bråk med nämnare 2, 4, 5, 8, 10, 20, 25 …",
+      "begrepp": "Skriva bråket i decimalform. Halva, fjärdedel, femtedel, åttondel, tiondel.",
       "visning": null
     },
     {
       "id": "bd-vaxla:rakna",
-      "namn": "Växla bråk och decimal",
+      "namn": "Bråk → decimal",
       "parent": "bd-vaxla",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1805,13 +1805,124 @@ window.K1_TAXONOMI = {
       "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderBrakDecimal",
-      "begrepp": "Skriv bråket som decimaltal – exakta (terminerande) bråk.",
+      "begrepp": "Skriv bråket som decimaltal.",
       "visning": {
         "utbudslista": "d4",
         "grupp": "Bråkform och decimalform",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Växla bråk och decimal",
+        "titel": "Bråk → decimal",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
+    },
+    {
+      "id": "bd-tillbrak",
+      "namn": "Decimal → bråk",
+      "parent": "brak-decimal",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Skriva decimaltalet som bråk i enklaste form.",
+      "visning": null
+    },
+    {
+      "id": "bd-tillbrak:rakna",
+      "namn": "Decimal → bråk",
+      "parent": "bd-tillbrak",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderDecimalBrak",
+      "begrepp": "Skriv decimaltalet som bråk i enklaste form.",
+      "visning": {
+        "utbudslista": "d4",
+        "grupp": "Bråkform och decimalform",
+        "gruppordning": 0,
+        "radordning": 1,
+        "titel": "Decimal → bråk",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
+    },
+    {
+      "id": "bd-hundra",
+      "namn": "Tiondelar & hundradelar",
+      "parent": "brak-decimal",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Skriva tiondelar och hundradelar som bråk i enklaste form – förkortning.",
+      "visning": null
+    },
+    {
+      "id": "bd-hundra:rakna",
+      "namn": "Tiondelar & hundradelar",
+      "parent": "bd-hundra",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderHundraBrak",
+      "begrepp": "Skriv decimaltalet som bråk i enklaste form (förkortas).",
+      "visning": {
+        "utbudslista": "d4",
+        "grupp": "Bråkform och decimalform",
+        "gruppordning": 0,
+        "radordning": 2,
+        "titel": "Tiondelar & hundradelar",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
+    },
+    {
+      "id": "bd-forlang",
+      "namn": "Förläng till hundradelar",
+      "parent": "brak-decimal",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Förlänga bråket till hundradelar och läsa av decimaltalet.",
+      "visning": null
+    },
+    {
+      "id": "bd-forlang:rakna",
+      "namn": "Förläng till hundradelar",
+      "parent": "bd-forlang",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderForlangDec",
+      "begrepp": "Förläng till hundradelar och skriv decimaltalet.",
+      "visning": {
+        "utbudslista": "d4",
+        "grupp": "Bråkform och decimalform",
+        "gruppordning": 0,
+        "radordning": 3,
+        "titel": "Förläng till hundradelar",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null

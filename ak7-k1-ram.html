@@ -2229,11 +2229,21 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 /* ==== DEL 8: NEGATIVA TAL ==== */
 .neg-fraga{text-align:left;margin:22px 0 6px;font-size:18px;color:var(--ink);line-height:1.5;}
 .neg-expr{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--ink);}
-/* Del 4 — bråk-display (täljare över nämnare) i Växla bråk↔decimal */
-.bd-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-family:var(--mono);font-weight:600;color:var(--ink);}
+/* Del 4 — bråk-display (täljare över nämnare) + bråk-input i drillarna */
+.bd-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-family:var(--mono);font-weight:600;color:var(--ink);font-size:23px;}
 .bd-tal{padding:0 9px 2px;line-height:1.05;}
 .bd-strk{height:2px;background:currentColor;width:100%;min-width:26px;}
 .bd-nmn{padding:2px 9px 0;line-height:1.05;}
+.bd-fraga-rad{font-size:23px;align-items:center;}
+.bd-eq{margin:0 8px;font-size:22px;color:var(--ink-soft);flex:0 0 auto;}
+.bd-dec{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--ink);}
+.bd-svarin{flex:0 0 auto;width:110px;text-align:center;}
+.bd-frac-in{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;}
+.bd-cellin{width:58px;height:36px;text-align:center;font-family:var(--mono);font-size:19px;font-weight:600;border:2px solid var(--c-rakna,#16a34a);border-radius:6px;background:#fff;color:var(--ink);outline:none;padding:0;margin:2px 0;}
+.bd-cellin:focus{box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+.bd-cellin.correct{border-color:var(--success,#16a34a);background:var(--success-bg,#dcfce7);color:var(--success,#15803d);}
+.bd-cellin.wrong{border-color:var(--error,#dc2626);background:var(--error-bg,#fee2e2);color:var(--error,#b91c1c);}
+.bd-frac-in .bd-strk{min-width:52px;background:var(--ink);}
 .neg-hint{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);text-align:center;margin:18px 0 8px;}
 .neg-seq{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:10px;margin:22px 0;}
 .neg-seq-term{
@@ -4670,11 +4680,27 @@ DELAR_KO['negativa'] = [
 DELAR_KO['brak-decimal'] = [
   {
     id:'bd-vaxla', nr:1,
-    titel:'Växla bråk och decimal',
-    beskrivning:'Skriva bråk i decimalform. Exakta bråk med nämnare 2, 4, 5, 8, 10, 20, 25 …',
-    formagor:{
-      rakna:{desc:'Skriv bråket som decimaltal – exakta (terminerande) bråk.', implemented:true}
-    }
+    titel:'Bråk → decimal',
+    beskrivning:'Skriva bråket i decimalform. Halva, fjärdedel, femtedel, åttondel, tiondel.',
+    formagor:{ rakna:{desc:'Skriv bråket som decimaltal.', implemented:true} }
+  },
+  {
+    id:'bd-tillbrak', nr:2,
+    titel:'Decimal → bråk',
+    beskrivning:'Skriva decimaltalet som bråk i enklaste form.',
+    formagor:{ rakna:{desc:'Skriv decimaltalet som bråk i enklaste form.', implemented:true} }
+  },
+  {
+    id:'bd-hundra', nr:3,
+    titel:'Tiondelar & hundradelar',
+    beskrivning:'Skriva tiondelar och hundradelar som bråk i enklaste form – förkortning.',
+    formagor:{ rakna:{desc:'Skriv decimaltalet som bråk i enklaste form (förkortas).', implemented:true} }
+  },
+  {
+    id:'bd-forlang', nr:4,
+    titel:'Förläng till hundradelar',
+    beskrivning:'Förlänga bråket till hundradelar och läsa av decimaltalet.',
+    formagor:{ rakna:{desc:'Förläng till hundradelar och skriv decimaltalet.', implemented:true} }
   }
 ];
 
@@ -4904,10 +4930,11 @@ const OVNING_RENDERS = {
   'div-problem':{
     problem: (b)=> renderDivProblem(b)
   },
-  // Del 4 - Bråkform och decimalform
-  'bd-vaxla':{
-    rakna: (b)=> renderBrakDecimal(b)
-  },
+  // Del 4 - Bråkform och decimalform (en drill per Öva-avdelning)
+  'bd-vaxla':{    rakna: (b)=> renderBrakDecimal(b) },   // bråk → decimal
+  'bd-tillbrak':{ rakna: (b)=> renderDecimalBrak(b) },   // decimal → bråk
+  'bd-hundra':{   rakna: (b)=> renderHundraBrak(b) },    // tiondelar & hundradelar → bråk
+  'bd-forlang':{  rakna: (b)=> renderForlangDec(b) },    // förläng till hundradelar
   // Del 7 - Prioriteringsregeln och lagar
   'prio-samband':{
     rakna: (b)=> renderPrioSamband(b)
@@ -6164,68 +6191,118 @@ function renderRaknaSaknas(body, cfg, backFn){
 }
 
 // ============================================================
-// DEL 4 — Växla bråk → decimal. Generatorn (färsk, fuzz-verifierad) bor i
-// js/motor/metod/metod-brak-decimal.js (window.BrakDecimalGen). Adaptiv nivå,
-// getTutorScore('bd-vaxla','rakna') → färgar begreppskartan.
+// DEL 4 — Bråkform och decimalform. Fyra drillar (en per Öva-avdelning), samma
+// tal som Öva-bladen (delad källa: js/motor/metod/metod-brak-decimal.js,
+// window.BrakDecimalGen). Varje drill loggar till sin egen nod → färgar kartan.
 // ============================================================
 function bdFracHTML(t, n){
   return '<span class="bd-frac"><span class="bd-tal">' + t + '</span>'
     + '<span class="bd-strk"></span><span class="bd-nmn">' + n + '</span></span>';
 }
-function renderBrakDecimal(body){
-  var level = 1, omgang = [], idx = 0, results = [], OMG = 8;
-  function genOmgang(){ var a = []; for(var i = 0; i < OMG; i++) a.push(window.BrakDecimalGen.gen(level)); return a; }
+function bdDec(x){ return String(x).replace('.', ','); }
+// Bråk med två inmatningsrutor (täljare/nämnare)
+function bdFracInHTML(){
+  return '<span class="bd-frac-in"><input class="bd-cellin" id="bd-t" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="?">'
+    + '<span class="bd-strk"></span>'
+    + '<input class="bd-cellin" id="bd-n" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="?"></span>';
+}
+function bdSummary(right, total){
+  var allt = right === total;
+  if(allt && typeof visaKonfetti === 'function') setTimeout(visaKonfetti, 120);
+  return '<div style="text-align:center;margin-top:20px;">'
+    + '<div style="font-size:22px;font-weight:600;color:var(--ink);">' + right + ' <span style="font-size:15px;color:var(--ink-faint);font-weight:400;">av ' + total + ' rätt</span></div>'
+    + '<div style="font-size:14px;color:var(--ink-soft);margin:6px 0 16px;">' + (allt ? 'Alla rätt – snyggt jobbat!' : 'Bra – fortsätt öva.') + '</div>'
+    + '<button class="btn primary" id="bd-next">Fortsätt</button></div>';
+}
+// Delad drill-motor. cfg: {title, sub, koId, ops, gen, fraga(task), check(task, card)→{ok,facit}}
+function renderBdDrill(body, cfg){
+  var omgang = [], idx = 0, results = [], OMG = cfg.OMG || 8;
+  function genOmgang(){ var a = []; for(var i = 0; i < OMG; i++) a.push(cfg.gen()); return a; }
   function render(){
     if(idx >= omgang.length){
       var right = results.filter(function(x){ return x; }).length, total = results.length;
-      var adj = adjustLevel(level, right, total); level = adj.level;
-      body.innerHTML = '<div class="exercise-card">'
-        + exerciseHeader('Växla bråk och decimal', 'Du klarade ' + right + ' av ' + total + '.', level)
-        + renderSummaryCard({ right: right, total: total, level: level, levelChange: adj.change })
-      + '</div>';
-      var nb = document.getElementById('summary-next-btn');
+      body.innerHTML = '<div class="exercise-card">' + exerciseHeader(cfg.title, 'Du klarade ' + right + ' av ' + total + '.')
+        + bdSummary(right, total) + '</div>';
+      var nb = document.getElementById('bd-next');
       if(nb) nb.onclick = function(){ omgang = genOmgang(); idx = 0; results = []; render(); };
       return;
     }
     var task = omgang[idx];
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Växla bråk och decimal', 'Skriv bråket i decimalform. Använd komma för decimaltecken.', level)
+      + exerciseHeader(cfg.title, cfg.sub)
       + renderScoreBarSimple(results.filter(function(x){ return x; }).length, results.filter(function(x){ return !x; }).length, omgang.length, idx)
-      + '<div class="rakna-svar-rad" style="font-size:23px;">' + bdFracHTML(task.t, task.n)
-        + '<span class="rakna-svar-fast" style="margin:0 6px;">=</span>'
-        + '<input type="text" class="rakna-svar-input" id="bd-input" inputmode="decimal" maxlength="12" autocomplete="off" placeholder="?" style="flex:0 0 auto;width:110px;text-align:center;"></div>'
+      + '<div class="rakna-svar-rad bd-fraga-rad">' + cfg.fraga(task) + '</div>'
       + '<div class="rakna-uppdela-feedback" id="bd-fb"></div>'
-      + keypadHTML([','])
+      + keypadHTML(cfg.ops || [','])
       + '<div style="margin-top:16px;text-align:center;"><button class="btn primary" id="bd-check">Kontrollera</button></div>'
     + '</div>';
     var card = body.querySelector('.exercise-card');
     bindKeypad(card);
-    var input = document.getElementById('bd-input');
-    setTimeout(function(){ input.focus(); }, 50);
-    input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+    var inputs = card.querySelectorAll('input');
+    if(inputs[0]) setTimeout(function(){ inputs[0].focus(); }, 50);
+    inputs.forEach(function(inp, i){ inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); if(i + 1 < inputs.length) inputs[i+1].focus(); else check(); } }); });
     document.getElementById('bd-check').onclick = check;
     function check(){
-      var stu = d3ParseNum(input.value);
       var fb = document.getElementById('bd-fb');
       fb.className = 'rakna-uppdela-feedback show';
-      input.disabled = true;
+      inputs.forEach(function(i){ i.disabled = true; });
       document.getElementById('bd-check').disabled = true;
-      var ts = getTutorScore('bd-vaxla', 'rakna'); ts.total++;
-      var ok = stu !== null && Math.abs(stu - task.svar) < 1e-9;
-      if(ok){
-        input.classList.add('correct'); fb.classList.add('correct');
-        fb.textContent = 'Rätt! ' + task.t + '/' + task.n + ' = ' + task.svarStr;
-        ts.correct++;
-      } else {
-        input.classList.add('wrong'); fb.classList.add('wrong');
-        fb.textContent = 'Inte rätt. ' + task.t + '/' + task.n + ' = ' + task.svarStr + '.';
-      }
-      results.push(ok);
-      setTimeout(function(){ idx++; render(); }, ok ? 1700 : 2600);
+      var ts = getTutorScore(cfg.koId, 'rakna'); ts.total++;
+      var res = cfg.check(task, card);
+      inputs.forEach(function(i){ i.classList.add(res.ok ? 'correct' : 'wrong'); });
+      if(res.ok){ fb.classList.add('correct'); fb.textContent = 'Rätt! ' + res.facit; ts.correct++; }
+      else { fb.classList.add('wrong'); fb.textContent = 'Inte rätt. ' + res.facit; }
+      results.push(res.ok);
+      setTimeout(function(){ idx++; render(); }, res.ok ? 1700 : 2600);
     }
   }
   omgang = genOmgang();
   render();
+}
+// Hjälp: läs bråk-input (täljare/nämnare) och kolla värde + enklaste form
+function bdCheckFrac(card, mal){
+  var t = parseInt(card.querySelector('#bd-t').value, 10), n = parseInt(card.querySelector('#bd-n').value, 10);
+  return !isNaN(t) && !isNaN(n) && n !== 0 && Math.abs(t / n - mal) < 1e-9 && window.BrakDecimalGen.gcd(t, n) === 1;
+}
+
+// 1 · Bråk → decimal
+function renderBrakDecimal(body){
+  renderBdDrill(body, {
+    title:'Bråk → decimal', sub:'Skriv bråket i decimalform. Använd komma för decimaltecken.', koId:'bd-vaxla', ops:[','],
+    gen:function(){ return window.BrakDecimalGen.genFracDec(); },
+    fraga:function(t){ return bdFracHTML(t.t, t.n) + '<span class="bd-eq">=</span><input type="text" class="rakna-svar-input bd-svarin" id="bd-a" inputmode="decimal" maxlength="10" autocomplete="off" placeholder="?">'; },
+    check:function(t, card){ var v = d3ParseNum(card.querySelector('#bd-a').value); return { ok: v !== null && Math.abs(v - t.svar) < 1e-9, facit: t.t + '/' + t.n + ' = ' + t.svarStr }; }
+  });
+}
+// 2 · Decimal → bråk (enklaste form)
+function renderDecimalBrak(body){
+  renderBdDrill(body, {
+    title:'Decimal → bråk', sub:'Skriv decimaltalet som bråk i enklaste form.', koId:'bd-tillbrak', ops:[],
+    gen:function(){ return window.BrakDecimalGen.genDecFrac(window.BrakDecimalGen.POOL_BD); },
+    fraga:function(t){ return '<span class="bd-dec">' + t.dec + '</span><span class="bd-eq">=</span>' + bdFracInHTML(); },
+    check:function(t, card){ return { ok: bdCheckFrac(card, t.svar), facit: t.dec + ' = ' + t.t + '/' + t.n }; }
+  });
+}
+// 3 · Tiondelar & hundradelar → bråk (de som förkortas)
+function renderHundraBrak(body){
+  renderBdDrill(body, {
+    title:'Tiondelar & hundradelar', sub:'Skriv decimaltalet som bråk i enklaste form. Förkorta.', koId:'bd-hundra', ops:[],
+    gen:function(){ return window.BrakDecimalGen.genDecFrac(window.BrakDecimalGen.POOL_HD); },
+    fraga:function(t){ return '<span class="bd-dec">' + t.dec + '</span><span class="bd-eq">=</span>' + bdFracInHTML(); },
+    check:function(t, card){ return { ok: bdCheckFrac(card, t.svar), facit: t.dec + ' = ' + t.t + '/' + t.n }; }
+  });
+}
+// 4 · Förläng till hundradelar och skriv som decimaltal
+function renderForlangDec(body){
+  renderBdDrill(body, {
+    title:'Förläng till hundradelar', sub:'Förläng bråket till hundradelar och skriv decimaltalet.', koId:'bd-forlang', ops:[','],
+    gen:function(){ return window.BrakDecimalGen.genForlang(); },
+    fraga:function(t){ return bdFracHTML(t.t, t.n) + '<span class="bd-eq">=</span>'
+      + '<span class="bd-frac-in"><input class="bd-cellin" id="bd-h" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="?"><span class="bd-strk"></span><span class="bd-nmn" style="line-height:1.4;">100</span></span>'
+      + '<span class="bd-eq">=</span><input type="text" class="rakna-svar-input bd-svarin" id="bd-a" inputmode="decimal" maxlength="10" autocomplete="off" placeholder="?">'; },
+    check:function(t, card){ var h = parseInt(card.querySelector('#bd-h').value, 10), d = d3ParseNum(card.querySelector('#bd-a').value);
+      return { ok: !isNaN(h) && h === t.hundra && d !== null && Math.abs(d - t.dec) < 1e-9, facit: t.t + '/' + t.n + ' = ' + t.hundra + '/100 = ' + bdDec(t.dec) }; }
+  });
 }
 
 // Motor: uppställning i addition – siffra för siffra
