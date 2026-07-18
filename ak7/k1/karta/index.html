@@ -88,6 +88,8 @@
 
 <!-- TAXONOMI: enda källan för kart-strukturen -->
 <script src="../../../js/data/k1-taxonomi.js"></script>
+<!-- MASTERY: delad logg + spridnings-baserad färg (localStorage, ingen server) -->
+<script src="../../../js/mastery.js"></script>
 <script>
 (function(){
   'use strict';
@@ -102,9 +104,9 @@
   var MATRIS_KEY = 'k1.taluppfattning.mastery.v1';   // { lovnodId: 0..3 }
   var PREF_KEY   = 'k1.taluppfattning.pref.v1';       // { arskurs, mal }
   function lasMatris(){
-    // Demo: ?demo seedar färger I MINNET (skrivs aldrig till localStorage) för granskning.
+    // Demo: ?demo seedar tidsstämplade loggar I MINNET (skrivs aldrig till localStorage) för granskning.
     if(/[?&]demo\b/.test(location.search)) return demoMatris();
-    try{ return JSON.parse(localStorage.getItem(MATRIS_KEY)) || {}; }catch(e){ return {}; }
+    return (window.Mastery && Mastery.lasMatris()) || {};
   }
   function lasPref(){
     var d = { arskurs:'ak7', mal:'godkant' };
@@ -112,9 +114,18 @@
   }
   function sparPref(p){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(p)); }catch(e){} }
   function demoMatris(){
-    var m = {}, states = [3,3,2,1,0,3,2,0,1,3,2,0,3,1,2,0,3];
+    // Seedar loggar med olika SPRIDNING så granskaren ser att grön kräver utspridning över tid.
+    var m = {}, nu = Date.now(), D = 86400000;
+    var monster = [ {n:6, spann:30}, {n:3, spann:5}, {n:1, spann:0}, {n:0, spann:0} ]; // grön · gul · orange · röd
     var i = 0;
-    TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator; }).forEach(function(n){ m[n.id] = states[i++ % states.length]; });
+    TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator; }).forEach(function(n){
+      var p = monster[i++ % monster.length], log = [];
+      for(var k = 0; k < p.n; k++){
+        var dagarSedan = p.n > 1 ? p.spann * (p.n - 1 - k) / (p.n - 1) : 0;
+        log.push({ ts: nu - Math.round(dagarSedan * D), resultat: 'ratt' });
+      }
+      if(log.length) m[n.id] = log;
+    });
     return m;
   }
 
@@ -138,7 +149,7 @@
     if(node.niva === 'lovnod'){
       var sc = scopeAv(node, pref);
       if(!sc.inScope) return { gra:true, orsak:sc.orsak };
-      var st = matris[node.id]; return { state: (st == null ? 0 : st) };   // tom matris → ej tränat (röd)
+      return { state: Mastery.masteryState(matris[node.id]) };   // logg → färg via spridnings-funktionen (tom → röd)
     }
     var scoped = barnAv(node.id).map(function(b){ return nodStatus(b, pref, matris); }).filter(function(c){ return !c.gra; });
     if(!scoped.length) return { gra:true, orsak:'framtid' };
@@ -217,7 +228,7 @@
   function renderMeter(){
     var lov = TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator && scopeAv(n, PREF).inScope; });
     var Y = lov.length;
-    var X = lov.filter(function(n){ return (MATRIS[n.id] || 0) === 3; }).length;
+    var X = lov.filter(function(n){ return Mastery.masteryState(MATRIS[n.id]) === 3; }).length;
     var pct = Y ? Math.round(X / Y * 100) : 0;
     document.getElementById('meter').innerHTML =
       '<div class="meter-tal">' + X + ' <small>av ' + Y + ' färdigheter befästa</small></div>'
