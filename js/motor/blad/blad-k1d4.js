@@ -173,7 +173,25 @@ function GEN_TEST_N1(){ return bladTest(1, false); }
 function GRUND_TEST_N2(){ return bladTest(2, true); }
 function GEN_TEST_N2(){ return bladTest(2, false); }
 
+// ── Ett hopslaget ÖVA-dokument: bråk↔decimal + tiondelar/hundradelar i ETT blad ──
+// Återanvänder bladBTform + bladHundra byte-identiskt (grupperna slås ihop till två
+// ämnes-sektioner). Inga nivåer/nivå-etikett – ett dokument. "Nytt blad" ger mängdträning.
+function bladOva(forsta){
+  var b1 = bladBTform(1, forsta);   // bråk ↔ decimal
+  var b2 = bladHundra(1, forsta);   // tiondelar & hundradelar
+  return {
+    titel: 'Bråkform och decimalform',
+    intro: 'Växla mellan bråkform och decimalform. Tiondelar och hundradelar är bryggan mellan formerna. Skriv decimaltal med komma och bråk i enklaste form.',
+    hint: b2.hint,
+    keypadOps: [','],
+    grupper: [].concat(b1.grupper, b2.grupper)
+  };
+}
+function GRUND_OVA(){ return bladOva(true); }
+function GEN_OVA(){ return bladOva(false); }
+
 var GENERATORER = {
+  ova:    { grund: GRUND_OVA, gen: GEN_OVA },   // hopslaget Öva-dokument (utan nivå-toggle)
   btform: { nivaer: { 1: { grund: GRUND_BTFORM_N1, gen: GEN_BTFORM_N1 },
                       2: { grund: GRUND_BTFORM_N2, gen: GEN_BTFORM_N2 } } },
   hundra: { nivaer: { 1: { grund: GRUND_HUNDRA_N1, gen: GEN_HUNDRA_N1 },
