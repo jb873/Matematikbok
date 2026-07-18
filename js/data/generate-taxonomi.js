@@ -181,7 +181,10 @@ const OVERRIDES = {
   'mult-rakna:storasma': { visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:2, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
   'div-rakna:stora':     { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:0, titel:'Stora tal', etikett:'räkna', formagaKey:'stora', niva:null } },
   'div-rakna:storasma':  { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:1, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
-  'div-rakna:sma':       { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:2, titel:'Små tal – förlängning', etikett:'räkna', formagaKey:'sma', niva:null } }
+  'div-rakna:sma':       { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:2, titel:'Små tal – förlängning', etikett:'räkna', formagaKey:'sma', niva:null } },
+  // Del 8 — Avrundning och överslag: generatorerna finns, bind dem till d8:s Färdighetsträning.
+  'avr-avrundning:begrepp': { visning:{ utbudslista:'d8', grupp:'Avrundning och överslag', gruppordning:0, radordning:0, titel:'Avrundning', etikett:'begrepp', formagaKey:null, niva:null } },
+  'avr-overslag:rakna':     { visning:{ utbudslista:'d8', grupp:'Avrundning och överslag', gruppordning:0, radordning:1, titel:'Överslagsräkning', etikett:'räkna', formagaKey:'rakna', niva:null } }
 };
 for(const n of noder){
   const o = OVERRIDES[n.id];

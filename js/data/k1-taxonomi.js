@@ -1812,7 +1812,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "avr-avrundning:begrepp",
-      "namn": "Avrundning · Begrepp",
+      "namn": "Avrundning",
       "parent": "avr-avrundning",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1822,7 +1822,16 @@ window.K1_TAXONOMI = {
       "formaga": "BEGREPP",
       "generator": "renderAvrAvrundning",
       "begrepp": "Närmevärde, avrunda hela tal och avrunda decimaltal – tre kategorier.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d8",
+        "grupp": "Avrundning och överslag",
+        "gruppordning": 0,
+        "radordning": 0,
+        "titel": "Avrundning",
+        "etikett": "begrepp",
+        "formagaKey": null,
+        "niva": null
+      }
     },
     {
       "id": "avr-overslag",
@@ -1840,7 +1849,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "avr-overslag:rakna",
-      "namn": "Överslagsräkning · Räkna",
+      "namn": "Överslagsräkning",
       "parent": "avr-overslag",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1850,7 +1859,16 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderAvrOverslag",
       "begrepp": "Överslagsberäkningar i addition, subtraktion, multiplikation och division.",
-      "visning": null
+      "visning": {
+        "utbudslista": "d8",
+        "grupp": "Avrundning och överslag",
+        "gruppordning": 0,
+        "radordning": 1,
+        "titel": "Överslagsräkning",
+        "etikett": "räkna",
+        "formagaKey": "rakna",
+        "niva": null
+      }
     },
     {
       "id": "prio-kombinationer",
