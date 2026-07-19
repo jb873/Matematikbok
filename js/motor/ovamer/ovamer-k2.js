@@ -261,6 +261,7 @@ function raknaEngine(op){
         fb.classList.add('wrong'); fb.innerHTML='Rätt svar: '+facitText(u)+'. Streaken börjar om.';
         streak=0;
       }
+      if(window.k2Logga) window.k2Logga(slutOk);   // additiv mastery-logg (rör ej beräkningen/mellanledet)
 
       var b=document.createElement('button'); b.className='btn primary'; b.textContent='Nästa';
       b.onclick=function(){ render(); };

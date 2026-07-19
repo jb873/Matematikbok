@@ -190,6 +190,9 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;}
 .svar-cell:focus{outline:none;box-shadow:0 0 0 3px rgba(46,125,82,.18);}
 .svar-cell.correct{background:rgba(22,163,74,.1);}
 .svar-cell.wrong{border-color:#dc2626;background:rgba(220,38,38,.08);}
+/* ── INBÄDDAT LÄGE (?embed=1): dölj kromet, visa bara övningen (Färdighetsträning) ── */
+body.embed .topnav, body.embed .hero{ display:none !important; }
+body.embed .wrap{ padding:12px 14px 24px; max-width:100%; }
 </style>
 </head>
 <body>
@@ -524,6 +527,7 @@ function korOvning(opts){
       if(ok){ fb.classList.add('correct'); fb.textContent='Rätt!'; }
       else { fb.classList.add('wrong'); fb.innerHTML='Rätt svar: '+task.facitText; }
       results.push(ok);
+      if(window.k2Logga) window.k2Logga(ok);   // additiv mastery-logg (rör ej beräkningen)
       var b=document.createElement('button'); b.className='btn primary'; b.textContent=(idx+1>=omgang.length?'Se resultat':'Nästa');
       b.onclick=function(){ idx++; render(); };
       document.getElementById('check').replaceWith(b);
@@ -546,10 +550,74 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 // function forkortaEngine() m.fl. utbrutna till js/motor/ovamer/ovamer-k2.js (laddas via <script src>).
 
 // ============================================================
-// START
+// START — deeplink-init körs i eget script efter att motorerna laddats.
 // ============================================================
-renderOversikt();
 </script>
+<script src="js/motor/metod/metod-brak-decimal.js"></script>
+<script src="js/mastery-k2.js"></script>
+<script src="js/data/k2-taxonomi.js"></script>
 <script src="js/motor/ovamer/ovamer-k2.js"></script>
+<script>
+// ── Del 2 blandad-form-drill: oäkta ↔ blandad (genBlandad ur BrakDecimalGen). Ny nod
+//    brak-blandad:rakna. bråk↔decimal-delen sköts av k1-Del4-drillarna (delatMed). ──
+function blandadEngine(){
+  korOvning({
+    titel:'Blandad form',
+    sub:'Skriv oäkta bråk i blandad form och blandad form som oäkta bråk.',
+    back:renderOversikt,
+    gen:function(level){
+      var u = window.BrakDecimalGen.genBlandad();
+      if(Math.random() < 0.5){
+        // oäkta → blandad: T/n = [hel] [rest]/[n]
+        return {
+          fragaHtml: frac(u.t, u.n) + '<span style="margin:0 6px;">=</span><input class="brak-in bl-hel" inputmode="numeric" autocomplete="off" style="width:44px;text-align:center;">' + fracBoxes('bl-t', 'bl-n'),
+          facitText: mixed(u.hel, u.rest, u.n),
+          check:function(){
+            var hh = parseInt(valFor('bl-hel'), 10), tt = parseInt(valFor('bl-t'), 10), nn = parseInt(valFor('bl-n'), 10);
+            if(isNaN(hh) || isNaN(tt) || isNaN(nn) || nn === 0) return false;
+            return Math.abs(hh + tt / nn - u.t / u.n) < 1e-9 && tt < nn && gcd(tt, nn) === 1;
+          }
+        };
+      }
+      // blandad → oäkta: [hel] [rest]/[n] = [T]/[n]
+      return {
+        fragaHtml: mixed(u.hel, u.rest, u.n) + '<span style="margin:0 6px;">=</span>' + fracBoxes('bl-ot', 'bl-on'),
+        facitText: frac(u.t, u.n),
+        check:function(){
+          var tt = parseInt(valFor('bl-ot'), 10), nn = parseInt(valFor('bl-on'), 10);
+          if(isNaN(tt) || isNaN(nn) || nn === 0) return false;
+          return Math.abs(tt / nn - u.t / u.n) < 1e-9;
+        }
+      };
+    }
+  });
+}
+
+// ── START / DEEPLINK: ?ko=<deldomän>&formaga=rakna(&embed=1) från delkapitlens Färdighetsträning ──
+(function(){
+  var hs = location.search;
+  var K2_DRILL = {
+    'brak-blandad':  function(){ blandadEngine(); },
+    'brak-forlanga': function(){ forlangaEngine(); },
+    'brak-forkorta': function(){ forkortaEngine(); },
+    'brak-add':      function(){ raknaEngine('addition'); },
+    'brak-sub':      function(){ raknaEngine('subtraktion'); }
+  };
+  if(/[?&]embed=1\b/.test(hs)){
+    document.body.classList.add('embed');
+    (function(){
+      var sist = 0;
+      function rap(){ var h = Math.max(document.body.scrollHeight, document.body.offsetHeight) + 4; if(h && Math.abs(h - sist) > 2){ sist = h; try { parent.postMessage({ __fardHeight: h }, '*'); } catch(e){} } }
+      if(window.ResizeObserver){ try { new ResizeObserver(rap).observe(document.body); } catch(e){} }
+      window.addEventListener('load', rap); setTimeout(rap, 60); setTimeout(rap, 300);
+      var n = 0, iv = setInterval(function(){ rap(); if(++n > 24) clearInterval(iv); }, 250);
+    })();
+  }
+  var mk = hs.match(/[?&]ko=([^&\s]+)/i);
+  var ko = mk && decodeURIComponent(mk[1]);
+  if(ko && K2_DRILL[ko]){ K2_DRILL[ko](); return; }
+  renderOversikt();
+})();
+</script>
 </body>
 </html>
