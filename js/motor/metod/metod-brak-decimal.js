@@ -34,6 +34,20 @@
 
   function pick(arr, rnd){ return arr[Math.floor((rnd || Math.random)() * arr.length)]; }
 
+  // ── Oäkta bråk ↔ blandad form (k2-Del2, det k2 lägger till utöver bråk↔decimal) ──
+  // Nämnare 2–9, heltalsdel 1–4, rest oberoende likformig bland de coprima (blandade
+  // delen i enklaste form). Ger t/n (oäkta) = hel + rest/n (blandad).
+  var POOL_BLANDAD_N = [2, 3, 4, 5, 6, 7, 8, 9];
+  function coprima(N){ var out = []; for(var r = 1; r < N; r++) if(gcd(r, N) === 1) out.push(r); return out; }
+  function genBlandad(rnd){
+    rnd = rnd || Math.random;
+    var N = POOL_BLANDAD_N[Math.floor(rnd() * POOL_BLANDAD_N.length)];
+    var cop = coprima(N);
+    var rest = cop[Math.floor(rnd() * cop.length)];
+    var hel = 1 + Math.floor(rnd() * 4);
+    return { hel: hel, rest: rest, n: N, t: hel * N + rest };
+  }
+
   // Bråk → decimal: visa t/n, svara decimaltalet
   function genFracDec(rnd){ var p = pick(POOL_BD, rnd); return { t:p[0], n:p[1], svar:p[0]/p[1], svarStr:p[2] }; }
   // Decimal → bråk (enklaste form): visa decimalen, svara t/n. pool = POOL_BD eller POOL_HD.
@@ -44,7 +58,8 @@
   var API = {
     gcd: gcd,
     POOL_BD: POOL_BD, POOL_HD: POOL_HD, POOL_FORL: POOL_FORL,
-    genFracDec: genFracDec, genDecFrac: genDecFrac, genForlang: genForlang
+    genFracDec: genFracDec, genDecFrac: genDecFrac, genForlang: genForlang,
+    genBlandad: genBlandad
   };
   if(typeof module !== 'undefined' && module.exports) module.exports = API;
   else root.BrakDecimalGen = API;
