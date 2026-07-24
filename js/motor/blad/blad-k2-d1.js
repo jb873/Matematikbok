@@ -31,6 +31,15 @@
   function delTriangel4(fyllda){ var A=[4,116],B=[116,116],C=[60,6],AB=[60,116],BC=[88,61],CA=[32,61],tri=[[A,CA,AB],[B,AB,BC],[C,CA,BC],[CA,AB,BC]],s=''; tri.forEach(function(t,i){s+='<polygon points="'+t.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';}); return svg(s,120,122); }
   function delHexagon(fyllda){ var cx=60,cy=60,r=56,pts=[],s=''; for(var k=0;k<6;k++){var a=-Math.PI/2+k*Math.PI/3;pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);} for(var i=0;i<6;i++){var p=pts[i],q=pts[(i+1)%6];s+='<polygon points="'+cx+','+cy+' '+p[0].toFixed(1)+','+p[1].toFixed(1)+' '+q[0].toFixed(1)+','+q[1].toFixed(1)+'" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,120,120); }
   function delStrip(n, fyllda){ var W=46*n,s=''; for(var i=0;i<n;i++){s+='<rect x="'+(i*46)+'" y="0" width="46" height="46" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,W,46); }
+  // ── DELAD FIGUR med OLIKA STORA delar (svårare — matchar originalen) ──
+  // 3b: kvadrat med vit triangel-hack (vit = 1/4) → färgad 3/4
+  function hackKvadrat(){ return svg('<rect x="0" y="0" width="120" height="120" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="2"/><polygon points="0,0 0,120 60,60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/>',120,120); }
+  // 3c: rektangel i 2 små + 1 dubbelbred (olika stora) → färgad 1/2
+  function olikStrip(){ return svg('<rect x="0" y="0" width="60" height="60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><rect x="60" y="0" width="60" height="60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><rect x="120" y="0" width="120" height="60" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="2"/>',240,60); }
+  // 9b: rätvinklig triangel, mittre (medial) triangeln färgad → 1/4
+  function ratTriKvart(){ return svg('<polygon points="0,0 0,120 120,120" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><line x1="0" y1="0" x2="120" y2="120" stroke="'+C_LINE+'" stroke-width="2"/><line x1="0" y1="60" x2="60" y2="60" stroke="'+C_LINE+'" stroke-width="1.5"/><line x1="60" y1="60" x2="60" y2="120" stroke="'+C_LINE+'" stroke-width="1.5"/><polygon points="0,60 60,60 60,120" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="1.5"/>',120,122); }
+  // 9c: kvadrat med diagonal + kvadrant, liten hörntriangel färgad → 1/8
+  function diagKvadratAtta(){ return svg('<rect x="0" y="0" width="120" height="120" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><line x1="0" y1="120" x2="120" y2="0" stroke="'+C_LINE+'" stroke-width="2"/><line x1="60" y1="0" x2="60" y2="60" stroke="'+C_LINE+'" stroke-width="1.5"/><line x1="0" y1="60" x2="60" y2="60" stroke="'+C_LINE+'" stroke-width="1.5"/><polygon points="0,120 60,120 60,60" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="1.5"/>',120,120); }
 
   // ── FIGURTYP 2: TALLINJE (markörer: pil eller punkt A/B/C) ──
   function tallinje(start, end, steg, markorer){
@@ -110,7 +119,7 @@
     { nr:2, rubrik:'Vilket bråk pekar pilen på?', flagg:'⚠️ pil-lägen bekräftas', innehall:
       tallinjeRad({lbl:'a)', svg:tallinje(0,1.3,5,[{v:3/5,typ:'pil'}]), marker:[{lbl:'pilen',t:3,n:5}]})
       + tallinjeRad({lbl:'b)', svg:tallinje(0,1.25,8,[{v:3/8,typ:'pil'}]), marker:[{lbl:'pilen',t:3,n:8}]}) },
-    { nr:3, rubrik:'Hur stor del av figuren är färgad?', flagg:'⚠️ 3a/3b bekräftas', innehall:figrad([{lbl:'a)',svg:delHexagon([0,2,4]),svar:1,t:3,n:6},{lbl:'b)',svg:delKryss([1,2]),svar:1,t:1,n:2},{lbl:'c)',svg:delStrip(3,[2]),svar:1,t:1,n:3}]) },
+    { nr:3, rubrik:'Hur stor del av figuren är färgad?', flagg:'⚠️ andelar bekräftas', innehall:figrad([{lbl:'a)',svg:delHexagon([0,2,4]),svar:1,t:3,n:6},{lbl:'b)',svg:hackKvadrat(),svar:1,t:3,n:4},{lbl:'c)',svg:olikStrip(),svar:1,t:1,n:2}]) },
     { nr:4, rubrik:'Skriv två hela i bråkform på tre olika sätt.', innehall:'<div class="d1-svar d1-villkor" data-typ="villkor-hela" data-varde="2" data-antal="3">'+svarBrakRaw()+'<span class="d1-komma">,</span>'+svarBrakRaw()+'<span class="d1-komma">,</span>'+svarBrakRaw()+'</div>' },
     { nr:5, rubrik:'Vilka av påståendena är riktiga? Klicka de riktiga.', innehall:flervalHtml([['a',frac(1,3)+' &gt; '+frac(1,4)],['b',frac(2,3)+' &gt; '+frac(3,4)],['c',frac(2,5)+' + '+frac(3,5)+' = 1'],['d',frac(2,5)+' &gt; '+frac(1,2)],['e',frac(1,2)+' = '+frac(2,4)+' = '+frac(3,6)],['f',frac(4,5)+' &lt; '+frac(5,6)]],[0,2,4,5]) },
     { nr:6, rubrik:'Vilka är talen A och B på tallinjen?', flagg:'⚠️ lägen bekräftas', innehall:
@@ -120,7 +129,7 @@
     { nr:8, rubrik:'Markera rätt antal rutor så andelen stämmer.', innehall:'<div class="d1-rutnat-grupp">'
       + klickRutnat('r12',12,1, 'a) '+frac(1,12)) + klickRutnat('r6',12,2, 'b) '+frac(1,6))
       + klickRutnat('r3',12,4, 'c) '+frac(1,3)) + klickRutnat('r4',12,3, 'd) '+frac(1,4)) + '</div>' },
-    { nr:9, rubrik:'Hur stor andel av figuren är färgad?', innehall:figrad([{lbl:'a)',svg:delCirkel(3,[1]),svar:1,t:1,n:3},{lbl:'b)',svg:delTriangel4([3]),svar:1,t:1,n:4},{lbl:'c)',svg:delAtta([5]),svar:1,t:1,n:8}]) },
+    { nr:9, rubrik:'Hur stor andel av figuren är färgad?', flagg:'⚠️ andelar bekräftas', innehall:figrad([{lbl:'a)',svg:delCirkel(3,[1]),svar:1,t:1,n:3},{lbl:'b)',svg:ratTriKvart(),svar:1,t:1,n:4},{lbl:'c)',svg:diagKvadratAtta(),svar:1,t:1,n:8}]) },
     { nr:10, rubrik:'Kulor', typ:'rubrik' },
     { nr:11, rubrik:'Hur stor andel av Hugos kulor är blå?', innehall:'<div class="d1-figrad">'+antalsfigur(['bla','bla','bla','rod'])+'</div><div style="margin-top:6px;">'+svarBrak(3,4)+'</div>' },
     { nr:12, rubrik:'Hur stor andel av Hannas kulor är blå?', innehall:'<div class="d1-figrad">'+antalsfigur(['rod','bla','bla','rod','bla','bla'])+'</div><div style="margin-top:6px;">'+svarBrak(4,6)+'</div>' },
