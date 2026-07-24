@@ -221,6 +221,7 @@ function raknaEngine(op){
     });
     bindKeypadMulti(falt);
     document.getElementById('back').onclick=renderOversikt;
+    document.getElementById('check').onclick=check;   // additiv: Kontrollera-knappen (check hoistad)
 
     function check(){
       var fb=document.getElementById('fb'); fb.className='ex-feedback show';

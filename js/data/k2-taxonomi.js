@@ -50,9 +50,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-blandad:rakna", "namn": "Oäkta bråk ↔ blandad form", "parent": "brak-blandad", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "bytaFormEngine",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "blandadEngine",
       "begrepp": "Skriv oäkta bråk i blandad form och blandad form som oäkta bråk.",
-      "visning": null
+      "visning": { "utbudslista": "k2d2", "grupp": "Byta form", "gruppordning": 0, "radordning": 3, "titel": "Blandad form", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 3 · Förlänga och förkorta (öppen) ─────────────── */
@@ -72,7 +72,7 @@ window.K2_TAXONOMI = {
       "id": "brak-forlanga:rakna", "namn": "Förlänga bråk", "parent": "brak-forlanga", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "forlangaEngine",
       "begrepp": "Förläng täljare och nämnare med samma tal till given nämnare.",
-      "visning": null
+      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 0, "titel": "Förlänga bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-forkorta", "namn": "Förkorta bråk", "parent": "brak-likv", "niva": "deldoman",
@@ -84,7 +84,7 @@ window.K2_TAXONOMI = {
       "id": "brak-forkorta:rakna", "namn": "Förkorta bråk", "parent": "brak-forkorta", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "forkortaEngine",
       "begrepp": "Dela täljare och nämnare med samma tal till enklaste form.",
-      "visning": null
+      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 1, "titel": "Förkorta bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 4 · Jämföra bråk (kommer senare) ─────────────── */
@@ -112,7 +112,7 @@ window.K2_TAXONOMI = {
       "id": "brak-add:rakna", "namn": "Addition med bråk", "parent": "brak-add", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut summan; visa mellanledet (förläng till gemensam nämnare).",
-      "visning": null
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0, "titel": "Addition med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-sub", "namn": "Subtraktion med bråk", "parent": "brak-as", "niva": "deldoman",
@@ -124,7 +124,7 @@ window.K2_TAXONOMI = {
       "id": "brak-sub:rakna", "namn": "Subtraktion med bråk", "parent": "brak-sub", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut differensen; visa mellanledet (förläng till gemensam nämnare).",
-      "visning": null
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 1, "titel": "Subtraktion med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 6 · Multiplikation med bråk (öppen; ram-drill byggs i wiring) ─────────────── */
