@@ -28,6 +28,12 @@
   function olikStrip(){ return svg('<rect x="0" y="0" width="60" height="60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><rect x="60" y="0" width="60" height="60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><rect x="120" y="0" width="120" height="60" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="2"/>',240,60); }
   function ratTriKvart(){ return svg('<polygon points="0,0 0,120 120,120" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><line x1="0" y1="0" x2="120" y2="120" stroke="'+C_LINE+'" stroke-width="2"/><line x1="0" y1="60" x2="60" y2="60" stroke="'+C_LINE+'" stroke-width="1.5"/><line x1="60" y1="60" x2="60" y2="120" stroke="'+C_LINE+'" stroke-width="1.5"/><polygon points="0,60 60,60 60,120" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="1.5"/>',120,122); }
   function diagKvadratAtta(){ return svg('<rect x="0" y="0" width="120" height="120" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><line x1="0" y1="120" x2="120" y2="0" stroke="'+C_LINE+'" stroke-width="2"/><line x1="60" y1="0" x2="60" y2="60" stroke="'+C_LINE+'" stroke-width="1.5"/><line x1="0" y1="60" x2="60" y2="60" stroke="'+C_LINE+'" stroke-width="1.5"/><polygon points="0,120 60,120 60,60" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="1.5"/>',120,120); }
+  // Parametrerad hack-kvadrat: vit triangel-hack = fT/fN av kvadraten → färgad = resten
+  function hackVar(fT, fN){ var hx = 240 * fT / fN; return svg('<rect x="0" y="0" width="120" height="120" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="2"/><polygon points="0,0 0,120 '+hx.toFixed(0)+',60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/>',120,120); }
+  // Parametrerad strip med OLIKA breda celler (cells = relativa bredder), fyllda = index
+  function olikVar(cells, fyllda){ var U = 46, tot = 0, i; for(i = 0; i < cells.length; i++) tot += cells[i]; var W = tot * U, s = '', x = 0;
+    for(i = 0; i < cells.length; i++){ s += '<rect x="'+(x*U)+'" y="0" width="'+(cells[i]*U)+'" height="46" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>'; x += cells[i]; }
+    return svg(s, W, 46); }
 
   // ── TALLINJE ──
   function tallinje(start, end, steg, markorer){
@@ -84,7 +90,7 @@
     C_LINE:C_LINE, C_FILL:C_FILL, C_RED:C_RED, C_GREEN:C_GREEN, C_PAPER:C_PAPER, C_MARK:C_MARK, svg:svg,
     delRuta:delRuta, delKryss:delKryss, delAtta:delAtta, delCirkel:delCirkel, delTriangel4:delTriangel4,
     delHexagon:delHexagon, delStrip:delStrip, hackKvadrat:hackKvadrat, olikStrip:olikStrip,
-    ratTriKvart:ratTriKvart, diagKvadratAtta:diagKvadratAtta, tallinje:tallinje, antalsfigur:antalsfigur,
-    husFigur:husFigur, LFigur:LFigur
+    ratTriKvart:ratTriKvart, diagKvadratAtta:diagKvadratAtta, hackVar:hackVar, olikVar:olikVar,
+    tallinje:tallinje, antalsfigur:antalsfigur, husFigur:husFigur, LFigur:LFigur
   };
 })();

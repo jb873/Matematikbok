@@ -22,13 +22,34 @@
     function sample(n, k){ var pool = []; for(var i = 0; i < n; i++) pool.push(i);
       for(var j = n - 1; j > 0; j--){ var m = Math.floor(rnd() * (j + 1)), t = pool[j]; pool[j] = pool[m]; pool[m] = t; }
       return pool.slice(0, k).sort(function(a, b){ return a - b; }); }
+
+    // SVÅR nivå: figuren delad i OLIKA STORA delar — kräver resonemang, inte bara räkning
+    function hard(){
+      var opts = [
+        function(){ return { svg: F ? F.hackVar(1,4) : '', t:3, n:4, shape:'hack' }; },      // hack 1/4 → 3/4
+        function(){ return { svg: F ? F.hackVar(1,8) : '', t:7, n:8, shape:'hack' }; },      // hack 1/8 → 7/8
+        function(){ return { svg: F ? F.hackVar(3,8) : '', t:5, n:8, shape:'hack' }; },      // hack 3/8 → 5/8
+        function(){ return { svg: F ? F.olikVar([1,1,2],[2]) : '', t:1, n:2, shape:'olik' }; },   // 2 små + bred = 1/2
+        function(){ return { svg: F ? F.olikVar([1,3],[1]) : '', t:3, n:4, shape:'olik' }; },     // bred fylld = 3/4
+        function(){ return { svg: F ? F.olikVar([1,3],[0]) : '', t:1, n:4, shape:'olik' }; },     // smal fylld = 1/4
+        function(){ return { svg: F ? F.olikVar([3,1],[1]) : '', t:1, n:4, shape:'olik' }; },     // smal fylld = 1/4
+        function(){ return { svg: F ? F.delTriangel4([3]) : '', t:1, n:4, shape:'tri' }; },       // medial = 1/4
+        function(){ return { svg: F ? F.delTriangel4([0,1,2]) : '', t:3, n:4, shape:'tri' }; },   // 3 hörn = 3/4
+        function(){ return { svg: F ? F.diagKvadratAtta() : '', t:1, n:8, shape:'diag' }; }       // hörntriangel = 1/8
+      ];
+      return opts[ri(0, opts.length - 1)]();
+    }
+    var pHard = level >= 3 ? 0.65 : (level >= 2 ? 0.35 : 0);
+    if(pHard && rnd() < pHard) return hard();
+
+    // LÄTT/MEDEL: lika delar. Nivå 1 små/enkla, nivå 2 fler delar + kryss/atta.
     var shapes = level >= 2 ? ['ruta', 'cirkel', 'strip', 'kryss', 'atta'] : ['ruta', 'cirkel', 'strip'];
     var shape = shapes[ri(0, shapes.length - 1)], n, k, svg = '';
     if(shape === 'ruta'){
-      var conf = [[2,2],[2,3],[3,3],[2,4],[3,4]], rc = conf[ri(0, level >= 2 ? 4 : 2)], rows = rc[0], cols = rc[1];
+      var conf = level >= 2 ? [[3,3],[2,4],[3,4],[4,4]] : [[2,2],[2,3],[3,3]], rc = conf[ri(0, conf.length - 1)], rows = rc[0], cols = rc[1];
       n = rows * cols; k = ri(1, n - 1); if(F) svg = F.delRuta(rows, cols, sample(n, k));
-    } else if(shape === 'cirkel'){ n = ri(2, level >= 2 ? 8 : 4); k = ri(1, n - 1); if(F) svg = F.delCirkel(n, sample(n, k)); }
-    else if(shape === 'strip'){ n = ri(2, level >= 2 ? 8 : 5); k = ri(1, n - 1); if(F) svg = F.delStrip(n, sample(n, k)); }
+    } else if(shape === 'cirkel'){ n = level >= 2 ? ri(5, 8) : ri(2, 4); k = ri(1, n - 1); if(F) svg = F.delCirkel(n, sample(n, k)); }
+    else if(shape === 'strip'){ n = level >= 2 ? ri(5, 9) : ri(2, 5); k = ri(1, n - 1); if(F) svg = F.delStrip(n, sample(n, k)); }
     else if(shape === 'kryss'){ n = 4; k = ri(1, 3); if(F) svg = F.delKryss(sample(4, k)); }
     else { n = 8; k = ri(1, 7); if(F) svg = F.delAtta(sample(8, k)); }
     return { svg: svg, t: k, n: n, shape: shape };
