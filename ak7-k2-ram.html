@@ -607,7 +607,11 @@ function blandadEngine(){
     'brak-div-bh':   function(){ divBrakHeltalEngine(); },   // Del 7: bråktal ÷ heltal (bara svaret)
     'brak-div-hb':   function(){ divHeltalBrakEngine(); },   // Del 7: heltal ÷ bråktal (bara svaret)
     'brak-div-bb':   function(){ divBrakBrakEngine(); },     // Del 7: bråktal ÷ bråktal (visa metod)
-    'brak-jmf-riktmark': function(){ markeraRiktmarkEngine(); }   // Del 4 PILOT: markera alla mot ½ och 1
+    'brak-jmf-lika':     function(){ klickaStorstEngine(); },     // Del 4: klicka störst
+    'brak-jmf-riktmark': function(){ markeraRiktmarkEngine(); },  // Del 4: markera alla mot ½ och 1
+    'brak-jmf-ordna':    function(){ storleksordnaEngine(); },    // Del 4: storleksordna
+    'brak-jmf-summa':    function(){ summaMot1Engine(); },        // Del 4: summa mot 1 (binärt)
+    'brak-jmf-konstr':   function(){ konstrueraEngine(); }        // Del 4: konstruera (villkors-validering)
   };
   if(/[?&]embed=1\b/.test(hs)){
     document.body.classList.add('embed');

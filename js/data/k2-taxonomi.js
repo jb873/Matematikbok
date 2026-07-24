@@ -106,9 +106,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-jmf-lika:begrepp", "namn": "Jämföra bråk med samma täljare eller nämnare", "parent": "brak-jmf-lika", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": "klickaStorstEngine",
       "begrepp": "Avgör vilket bråk som är störst när täljarna eller nämnarna är lika.",
-      "visning": null
+      "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 0, "titel": "Vilket är störst?", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
     {
       "id": "brak-jmf-riktmark", "namn": "Jämföra mot 1/2 och 1", "parent": "brak-jamf", "niva": "deldoman",
@@ -130,9 +130,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-jmf-ordna:resonera", "namn": "Storleksordna bråk", "parent": "brak-jmf-ordna", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "storleksordnaEngine",
       "begrepp": "Storleksordna en uppsättning bråk, börja med det minsta.",
-      "visning": null
+      "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 2, "titel": "Storleksordna", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
     {
       "id": "brak-jmf-summa", "namn": "Uppskatta summa mot 1", "parent": "brak-jamf", "niva": "deldoman",
@@ -142,9 +142,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-jmf-summa:resonera", "namn": "Uppskatta summa mot 1", "parent": "brak-jmf-summa", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "summaMot1Engine",
       "begrepp": "Bedöm summans storlek mot 1; hitta bråk som gör summan mindre än 1.",
-      "visning": null
+      "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 3, "titel": "Summa mot 1", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
     {
       "id": "brak-jmf-konstr", "namn": "Konstruera bråk med villkor", "parent": "brak-jamf", "niva": "deldoman",
@@ -154,9 +154,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-jmf-konstr:resonera", "namn": "Konstruera bråk med villkor", "parent": "brak-jmf-konstr", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "konstrueraEngine",
       "begrepp": "Ge exempel på bråk i ett givet intervall eller med en given täljare/nämnare.",
-      "visning": null
+      "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 4, "titel": "Konstruera bråk", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
 
     /* ─────────────── Del 5 · Addition och subtraktion med bråk (öppen) ─────────────── */
