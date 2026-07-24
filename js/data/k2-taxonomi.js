@@ -118,9 +118,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-jmf-riktmark:begrepp", "namn": "Jämföra bråk mot riktmärken", "parent": "brak-jmf-riktmark", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": "markeraRiktmarkEngine",
       "begrepp": "Bedöm om ett bråk är större/mindre än 1 eller 1/2; välj rätt tecken mot 1.",
-      "visning": null
+      "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 1, "titel": "Mot ½ och 1", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
     {
       "id": "brak-jmf-ordna", "namn": "Storleksordna bråk", "parent": "brak-jamf", "niva": "deldoman",

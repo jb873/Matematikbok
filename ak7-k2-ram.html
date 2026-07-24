@@ -558,6 +558,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/data/k2-taxonomi.js"></script>
 <script src="js/motor/ovamer/ovamer-k2.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-div.js"></script>
+<script src="js/motor/ovamer/ovamer-k2-jmf.js"></script>
 <script>
 // ── Del 2 blandad-form-drill: oäkta ↔ blandad (genBlandad ur BrakDecimalGen). Ny nod
 //    brak-blandad:rakna. bråk↔decimal-delen sköts av k1-Del4-drillarna (delatMed). ──
@@ -605,7 +606,8 @@ function blandadEngine(){
     'brak-sub':      function(){ raknaEngine('subtraktion'); },
     'brak-div-bh':   function(){ divBrakHeltalEngine(); },   // Del 7: bråktal ÷ heltal (bara svaret)
     'brak-div-hb':   function(){ divHeltalBrakEngine(); },   // Del 7: heltal ÷ bråktal (bara svaret)
-    'brak-div-bb':   function(){ divBrakBrakEngine(); }      // Del 7: bråktal ÷ bråktal (visa metod)
+    'brak-div-bb':   function(){ divBrakBrakEngine(); },     // Del 7: bråktal ÷ bråktal (visa metod)
+    'brak-jmf-riktmark': function(){ markeraRiktmarkEngine(); }   // Del 4 PILOT: markera alla mot ½ och 1
   };
   if(/[?&]embed=1\b/.test(hs)){
     document.body.classList.add('embed');
