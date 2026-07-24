@@ -87,12 +87,76 @@ window.K2_TAXONOMI = {
       "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 1, "titel": "Förkorta bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
-    /* ─────────────── Del 4 · Jämföra bråk (kommer senare) ─────────────── */
+    /* ─────────────── Del 4 · Jämföra bråk (öppen; Öva = exakt-författat blad) ───────────────
+       Öva-bladet (blad-k2-d4.js) är EXAKT det Joachim författat i "Jämföra bråk.docx"
+       (13 uppgifter, ordagrant). Ingen generator ännu — lövnoderna beskriver färdigheterna
+       bladet tränar. Färdighetstränings-drillar (generator/visning) byggs i ett senare steg;
+       formåga BEGREPP/RESONERA är förslag som finjusteras i finputsen. */
     {
       "id": "brak-jamf", "namn": "Jämföra bråk", "parent": null, "niva": "omrade",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Storleksordna och jämföra bråk med olika nämnare.",
-      "grupp": "brak", "implemented": false
+      "begrepp": "Jämföra och storleksordna bråk – samma täljare/nämnare, mot riktmärkena 1/2 och 1, samt uppskatta summor.",
+      "grupp": "brak", "implemented": true
+    },
+    {
+      "id": "brak-jmf-lika", "namn": "Jämföra med samma täljare eller nämnare", "parent": "brak-jamf", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Samma nämnare: störst täljare är störst. Samma täljare: minst nämnare är störst.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-lika:begrepp", "namn": "Jämföra bråk med samma täljare eller nämnare", "parent": "brak-jmf-lika", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": null,
+      "begrepp": "Avgör vilket bråk som är störst när täljarna eller nämnarna är lika.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-riktmark", "namn": "Jämföra mot 1/2 och 1", "parent": "brak-jamf", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Använd riktmärkena 1/2 och 1: större/mindre än 1, större/mindre än 1/2.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-riktmark:begrepp", "namn": "Jämföra bråk mot riktmärken", "parent": "brak-jmf-riktmark", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": null,
+      "begrepp": "Bedöm om ett bråk är större/mindre än 1 eller 1/2; välj rätt tecken mot 1.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-ordna", "namn": "Storleksordna bråk", "parent": "brak-jamf", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Ordna flera bråk i storleksordning, med samma täljare/nämnare och blandat.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-ordna:resonera", "namn": "Storleksordna bråk", "parent": "brak-jmf-ordna", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Storleksordna en uppsättning bråk, börja med det minsta.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-summa", "namn": "Uppskatta summa mot 1", "parent": "brak-jamf", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Avgör om en summa av bråk är större eller mindre än 1 utan att räkna exakt.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-summa:resonera", "namn": "Uppskatta summa mot 1", "parent": "brak-jmf-summa", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Bedöm summans storlek mot 1; hitta bråk som gör summan mindre än 1.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-konstr", "namn": "Konstruera bråk med villkor", "parent": "brak-jamf", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Skriv ett bråk som uppfyller ett villkor, t.ex. mellan 1/2 och 1 med given täljare/nämnare.",
+      "visning": null
+    },
+    {
+      "id": "brak-jmf-konstr:resonera", "namn": "Konstruera bråk med villkor", "parent": "brak-jmf-konstr", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Ge exempel på bråk i ett givet intervall eller med en given täljare/nämnare.",
+      "visning": null
     },
 
     /* ─────────────── Del 5 · Addition och subtraktion med bråk (öppen) ─────────────── */
