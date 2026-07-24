@@ -211,12 +211,53 @@ window.K2_TAXONOMI = {
       "visning": null
     },
 
-    /* ─────────────── Del 7 · Division med bråk (kommer senare) ─────────────── */
+    /* ─────────────── Del 7 · Division med bråk (öppen; FÖRDJUPNING i åk7) ───────────────
+       Hela Del 7 är fördjupning i sjuan (roll: fordjupning) och promoteras till mål i åttan.
+       Öva-bladet (blad-k2-d7.js) är EXAKT det Joachim författat i "Division med bråk.docx"
+       (6 grupper × 3 uppgifter, komplexa/staplade bråk). Grupp 3 och 6 visar hela femstegs-
+       mellanledet (multiplicera täljare och nämnare med inverterade bråket → nämnaren blir 1).
+       Tre lövnoder = tre färdigheter som övas separat i Färdighetsträningen. */
     {
       "id": "brak-div", "namn": "Division med bråk", "parent": null, "niva": "omrade",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Dividera heltal, bråktal och blandad form.",
-      "grupp": "brak", "implemented": false
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Dividera bråktal med heltal, heltal med bråktal och bråktal med bråktal (visa metod).",
+      "grupp": "brak", "implemented": true
+    },
+    {
+      "id": "brak-div-bh", "namn": "Dividera bråktal med heltal", "parent": "brak-div", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Ett bråk delat med ett heltal – multiplicera nämnaren med heltalet.",
+      "visning": null
+    },
+    {
+      "id": "brak-div-bh:rakna", "namn": "Dividera bråktal med heltal", "parent": "brak-div-bh", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakHeltal",
+      "begrepp": "Räkna ut kvoten av ett bråk och ett heltal, svar i enklaste form.",
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 0, "titel": "Bråktal ÷ heltal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+    {
+      "id": "brak-div-hb", "namn": "Dividera heltal med bråktal", "parent": "brak-div", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Ett heltal delat med ett bråk – multiplicera heltalet med det inverterade bråket.",
+      "visning": null
+    },
+    {
+      "id": "brak-div-hb:rakna", "namn": "Dividera heltal med bråktal", "parent": "brak-div-hb", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divHeltalBrak",
+      "begrepp": "Räkna ut kvoten av ett heltal och ett bråk, svar i enklaste form.",
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 1, "titel": "Heltal ÷ bråktal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+    {
+      "id": "brak-div-bb", "namn": "Dividera bråktal med bråktal (visa metod)", "parent": "brak-div", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Bråk delat med bråk med utskrivet mellanled: multiplicera täljare och nämnare med inverterade nämnaren så att nämnaren blir 1.",
+      "visning": null
+    },
+    {
+      "id": "brak-div-bb:rakna", "namn": "Dividera bråktal med bråktal (visa metod)", "parent": "brak-div-bb", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakBrak",
+      "begrepp": "Visa hela metoden (komplext bråk → × inverterade nämnaren → förkorta → svar) för bråk delat med bråk.",
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 2, "titel": "Bråktal ÷ bråktal (visa metod)", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 8 · Problemlösning (kommer senare) ─────────────── */
