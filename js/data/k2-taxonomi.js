@@ -42,9 +42,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "andel-figur:rakna", "namn": "Andel av en figur", "parent": "andel-figur", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "andelFigurEngine",
       "begrepp": "Skriv andelen färgad del av figuren som bråk.",
-      "visning": null
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 0, "titel": "Andel av en figur", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "andel-tallinje", "namn": "Bråk på tallinje", "parent": "brak-andel", "niva": "deldoman",
