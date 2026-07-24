@@ -603,7 +603,9 @@ function blandadEngine(){
     'brak-forkorta': function(){ forkortaEngine(); },
     'brak-add':      function(){ raknaEngine('addition'); },
     'brak-sub':      function(){ raknaEngine('subtraktion'); },
-    'brak-div-bb':   function(){ divBrakBrakEngine(); }   // Del 7 PILOT (visa metod). bh/hb byggs efter OK.
+    'brak-div-bh':   function(){ divBrakHeltalEngine(); },   // Del 7: bråktal ÷ heltal (bara svaret)
+    'brak-div-hb':   function(){ divHeltalBrakEngine(); },   // Del 7: heltal ÷ bråktal (bara svaret)
+    'brak-div-bb':   function(){ divBrakBrakEngine(); }      // Del 7: bråktal ÷ bråktal (visa metod)
   };
   if(/[?&]embed=1\b/.test(hs)){
     document.body.classList.add('embed');
