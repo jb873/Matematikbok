@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Begreppskarta · Taluppfattning</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Cinzel:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../fonts/fonts.css">
 <style>
   :root{ --paper:#F5F1E8; --card:#FBF9F3; --ink:#33302A; --ink-soft:#6B675E; --line:#DAD4C6; --line-soft:#E7E1D4; }
   *{box-sizing:border-box;}
@@ -42,6 +40,7 @@
   .node .txt{flex:1;}
   .node .chev{opacity:.7;font-size:15px;}
   .node .roll{font-size:12px;opacity:.9;flex:0 0 auto;}
+  .node .roll.stod{font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#E7E1D4;color:#6B675E;padding:2px 8px;border-radius:99px;opacity:1;}
   .node.root{font-family:"Cormorant Garamond",serif;font-size:19px;font-weight:600;}
   .node.gra{cursor:default;}
   .node.gra:hover{transform:none;box-shadow:none;}
@@ -80,7 +79,8 @@
     <span class="item"><span class="sw" style="background:#E4BC34"></span>Flera gånger, spritt</span>
     <span class="item"><span class="sw" style="background:#6BA544"></span>Befäst över tid</span>
     <span class="item"><span class="sw" style="background:#EAE6DA"></span>Grått = framtid / bortvalt</span>
-    <span class="item">＋ breddning · ★ fördjupning · ⊕ stöd</span>
+    <span class="item">＋ breddning · ★ fördjupning</span>
+    <span class="item"><span class="roll stod">stöd</span> stödspår</span>
   </div>
   <p class="foot">Längst ut ligger lövnoderna — de enskilda färdigheterna. Färgen rullar <em>uppåt</em>: en förälder kan aldrig vara grönare än sin svagaste del, så en grön ruta betyder att hela grenen sitter.</p>
   <p class="privacy" id="privacy"></p>
@@ -181,8 +181,8 @@
     b.className = 'node' + (opts.root ? ' root' : '') + (status.gra ? ' gra' : '') + (opts.sel ? ' sel' : '');
     b.style.background = farg.bg; b.style.borderColor = farg.br; b.style.color = farg.fg;
     var rollM = node.roll === 'breddning' ? '＋' : node.roll === 'fordjupning' ? '★' : '';
-    // stöd = egen markör (FÖRSLAG ⊕, ej låst). Vid sidan av kärna (solid)/breddning(＋)/fördjupning(★).
-    var stodM = (node.arskursRelevans && node.arskursRelevans[PREF.arskurs] === 'stod') ? '⊕' : '';
+    // stöd = egen TEXT-PILL (låst konvention). Utanför svårighetsaxeln (kärna solid / breddning ＋ / fördjupning ★).
+    var stodM = (node.arskursRelevans && node.arskursRelevans[PREF.arskurs] === 'stod') ? 'stöd' : '';
     var markM = stodM || rollM;
     var markTitle = stodM ? 'stöd – valbart stödspår' : node.roll;
     var orsak = status.gra ? '<span class="gra-orsak">' + (status.orsak === 'framtid' ? 'åk 8' : 'bortvalt') + '</span>' : '';
