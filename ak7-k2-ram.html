@@ -614,7 +614,11 @@ function blandadEngine(){
     'brak-jmf-ordna':    function(){ storleksordnaEngine(); },    // Del 4: storleksordna
     'brak-jmf-summa':    function(){ summaMot1Engine(); },        // Del 4: summa mot 1 (binärt)
     'brak-jmf-konstr':   function(){ konstrueraEngine(); },       // Del 4: konstruera (villkors-validering)
-    'andel-figur':       function(){ andelFigurEngine(); }        // Del 1 PILOT: hur stor andel är färgad
+    'andel-figur':       function(){ andelFigurEngine(); },       // Del 1: hur stor andel är färgad
+    'andel-tallinje':    function(){ tallinjeEngine(); },          // Del 1: bråk på tallinje
+    'andel-antal':       function(){ antalEngine(); },             // Del 1: andel av ett antal
+    'andel-hela':        function(){ helaEngine(); },              // Del 1: skriva hela i bråkform (villkors-validering)
+    'andel-kontra':      function(){ kontraEngine(); }             // Del 1: andel kontra antal (val)
   };
   if(/[?&]embed=1\b/.test(hs)){
     document.body.classList.add('embed');

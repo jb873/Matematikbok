@@ -54,9 +54,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "andel-tallinje:begrepp", "namn": "Bråk på tallinje", "parent": "andel-tallinje", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": "tallinjeEngine",
       "begrepp": "Läs av bråket som pilen/punkten pekar på.",
-      "visning": null
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 1, "titel": "Bråk på tallinje", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
     {
       "id": "andel-antal", "namn": "Andel av ett antal", "parent": "brak-andel", "niva": "deldoman",
@@ -66,9 +66,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "andel-antal:rakna", "namn": "Andel av ett antal", "parent": "andel-antal", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "antalEngine",
       "begrepp": "Skriv andelen (t.ex. blå kulor av alla) som bråk.",
-      "visning": null
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 2, "titel": "Andel av ett antal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "andel-hela", "namn": "Skriva hela tal i bråkform", "parent": "brak-andel", "niva": "deldoman",
@@ -78,9 +78,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "andel-hela:resonera", "namn": "Skriva hela tal i bråkform", "parent": "andel-hela", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "helaEngine",
       "begrepp": "Ge flera bråk som är lika med ett givet helt tal (villkors-validering).",
-      "visning": null
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 3, "titel": "Skriva hela i bråkform", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
     {
       "id": "andel-kontra", "namn": "Andel kontra antal", "parent": "brak-andel", "niva": "deldoman",
@@ -90,9 +90,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "andel-kontra:resonera", "namn": "Andel kontra antal", "parent": "andel-kontra", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "kontraEngine",
       "begrepp": "Avgör vem som har flest respektive störst andel – och varför de kan skilja sig.",
-      "visning": null
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 4, "titel": "Andel kontra antal", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
 
     /* ─────────────── Del 2 · Byta form (öppen) ─────────────── */
