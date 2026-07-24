@@ -902,6 +902,15 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .valruta-btn.ruta-fel{border-color:#dc2626;background:rgba(220,38,38,.12);}
 .valruta-btn .ovn-brak{margin:0 2px;}
 .brak-heltal{width:64px;}
+/* ── BLAD-NAV (Öva) — d6 är Öva-only (ingen Färdighetsträning ännu) ── */
+.blad-nav{max-width:920px;margin:0 auto;padding:22px 28px 4px;display:flex;flex-wrap:wrap;gap:8px;}
+.blad-nav-btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--cinzel,'Cinzel');font-size:12.5px;letter-spacing:.03em;color:var(--ink-soft,#3d3630);background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:8px;padding:9px 15px;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,box-shadow .15s;}
+.blad-nav-btn:hover{border-color:var(--gold-lt,#c49a40);color:var(--ink,#12110f);}
+.blad-nav-nr{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;flex-shrink:0;background:var(--paper-dk,#ede6d6);color:var(--ink-faint,#7a6e65);font-family:var(--cinzel,'Cinzel');font-size:11px;font-weight:600;transition:background .15s,color .15s;}
+.blad-nav-btn.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);color:#fff;box-shadow:0 3px 10px rgba(15,30,46,.18);}
+.blad-nav-btn.is-active .blad-nav-nr{background:var(--gold-lt,#c49a40);color:var(--navy,#0f1e2e);}
+.blad-mount[hidden]{display:none;}
+@media(max-width:560px){.blad-nav{padding:16px 16px 4px;}}
 </style>
 
 <body>
@@ -926,54 +935,32 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   <a class="hero-back" href="../../../ak7-k2.html">← Alla delkapitel</a>
 </header>
 
-<!-- FLIKRAD -->
+<!-- FLIKRAD (val-rad) — d6 är Öva-only tills vidare. Flik-växlingen wireas av blad-k2-d6.js via #tab-row -->
 <div class="tab-row" id="tab-row">
-  <button class="tab-btn farg-gron is-active" data-tab="heltal">Heltal &amp; andel</button>
-  <button class="tab-btn farg-gron" data-tab="brakbrak">Bråk × bråk</button>
-  <button class="tab-btn farg-gron" data-tab="storatal">Stora tal</button>
-  <button class="tab-btn farg-gron" data-tab="blandad">Blandad form</button>
-  <button class="tab-btn farg-gron" data-tab="problem">Problemlösning</button>
-  <button class="tab-btn farg-rod is-locked" data-tab="test">Visa vad du kan<span class="las-ikon">🔒</span></button>
+  <button class="tab-btn is-active" data-tab="ova">Öva</button>
+  <button class="tab-btn" data-tab="test">Visa vad du kan</button>
 </div>
 
-<!-- PANEL 1: HELTAL & ANDEL -->
-<section class="tab-panel is-active" data-panel="heltal">
-  <div class="ovn-wrap" id="sheet-heltal"></div>
-</section>
-
-<!-- PANEL 2: BRÅK × BRÅK -->
-<section class="tab-panel" data-panel="brakbrak">
-  <div class="ovn-wrap" id="sheet-brakbrak"></div>
-</section>
-
-<!-- PANEL 3: STORA TAL -->
-<section class="tab-panel" data-panel="storatal">
-  <div class="ovn-wrap" id="sheet-storatal"></div>
-</section>
-
-<!-- PANEL 4: BLANDAD FORM -->
-<section class="tab-panel" data-panel="blandad">
-  <div class="ovn-wrap" id="sheet-blandad"></div>
-</section>
-
-<!-- PANEL 5: PROBLEMLÖSNING -->
-<section class="tab-panel" data-panel="problem">
-  <div class="placeholder-note">
-    <span class="pn-icon">✎</span>
-    <span>Den här fliken byggs härnäst. Skicka <strong>problemuppgifterna</strong>.</span>
+<!-- PANEL: ÖVA — blad-nav + ett blad i taget (renderas av blad-k2-d6.js in i sheet-*) -->
+<section class="tab-panel is-active" data-panel="ova">
+  <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
+  <div id="blad-heltal" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-heltal"></div></div>
+  <div id="blad-brakbrak" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-brakbrak"></div></div>
+  <div id="blad-storatal" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-storatal"></div></div>
+  <div id="blad-blandad" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-blandad"></div></div>
+  <div id="blad-problem" class="blad-mount" hidden>
+    <div class="placeholder-note">
+      <span class="pn-icon">✎</span>
+      <span>Den här fliken byggs härnäst. Skicka <strong>problemuppgifterna</strong>.</span>
+    </div>
   </div>
 </section>
 
-<!-- PANEL 6: TEST -->
+<!-- PANEL: TEST -->
 <section class="tab-panel" data-panel="test">
-  <div class="las-info" id="las-test">
-    <span class="las-stor">🔒</span>
-    <h3>Testet är låst</h3>
-    <p>Lös nivå 1 helt (alla rätt) på övningsflikarna, så öppnas testet här. Innehållet i testet läggs in när övningsflikarna är klara.</p>
-  </div>
-  <div class="placeholder-note" id="test-innehall" style="display:none;">
-    <span class="pn-icon">✓</span>
-    <span>Testet är upplåst! Själva testuppgifterna läggs in härnäst.</span>
+  <div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-left:4px solid var(--gold,#9a7228);border-radius:6px;text-align:center;color:var(--ink-soft,#3d3630);">
+    <h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink,#12110f);margin-bottom:8px;">Visa vad du kan</h3>
+    <p style="font-size:14px;line-height:1.6;max-width:480px;margin:0 auto;">Samlingstest och färdighetsträning för multiplikation wiras in i ett senare steg. Träna delarna i Öva så länge.</p>
   </div>
 </section>
 
@@ -983,6 +970,28 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 </footer>
 
 <script src="../../../js/motor/blad/blad-k2-d6.js"></script>
+
+<!-- SKAL: blad-nav (Öva). d6 har ingen Färdighetsträning ännu (brak-mult-rakna: generator/visning = null). Motorn orörd. -->
+<script>
+(function(){
+  // Testlåset öppet (som k1): ta bort is-locked på testfliken efter att blad-filen låst den.
+  var tb = document.querySelector('.tab-btn[data-tab="test"]'); if(tb) tb.classList.remove('is-locked');
+  var OVA = [ {titel:'Heltal & andel', mount:'heltal'}, {titel:'Bråk × bråk', mount:'brakbrak'}, {titel:'Stora tal', mount:'storatal'}, {titel:'Blandad form', mount:'blandad'}, {titel:'Problemlösning', mount:'problem'} ];
+  var navEl = document.getElementById('blad-nav');
+  if(navEl){
+    var mounts = [], knappar = [];
+    function visa(i){ OVA.forEach(function(b, j){ if(mounts[j]) mounts[j].hidden = (j !== i); if(knappar[j]){ var on = (j === i); knappar[j].classList.toggle('is-active', on); knappar[j].setAttribute('aria-selected', on ? 'true' : 'false'); } }); }
+    OVA.forEach(function(b, i){
+      mounts[i] = document.getElementById('blad-' + b.mount);
+      var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'blad-nav-btn'; btn.setAttribute('role', 'tab'); btn.title = b.titel;
+      btn.innerHTML = '<span class="blad-nav-nr">' + (i + 1) + '</span>' + b.titel;
+      btn.onclick = function(){ visa(i); };
+      navEl.appendChild(btn); knappar[i] = btn;
+    });
+    visa(0);
+  }
+})();
+</script>
 
 </body>
 </html>

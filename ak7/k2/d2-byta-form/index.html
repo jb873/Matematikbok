@@ -878,6 +878,35 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .bl-fall .brak-svar{margin-left:0;}
 .bl-etikett{font-family:var(--cinzel);font-size:10px;letter-spacing:.07em;color:var(--ink-faint);text-transform:uppercase;}
 .bl-dec{width:90px;}
+/* ── BLAD-NAV (Öva) ── */
+.blad-nav{max-width:920px;margin:0 auto;padding:22px 28px 4px;display:flex;flex-wrap:wrap;gap:8px;}
+.blad-nav-btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--cinzel,'Cinzel');font-size:12.5px;letter-spacing:.03em;color:var(--ink-soft,#3d3630);background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:8px;padding:9px 15px;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,box-shadow .15s;}
+.blad-nav-btn:hover{border-color:var(--gold-lt,#c49a40);color:var(--ink,#12110f);}
+.blad-nav-nr{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;flex-shrink:0;background:var(--paper-dk,#ede6d6);color:var(--ink-faint,#7a6e65);font-family:var(--cinzel,'Cinzel');font-size:11px;font-weight:600;transition:background .15s,color .15s;}
+.blad-nav-btn.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);color:#fff;box-shadow:0 3px 10px rgba(15,30,46,.18);}
+.blad-nav-btn.is-active .blad-nav-nr{background:var(--gold-lt,#c49a40);color:var(--navy,#0f1e2e);}
+@media(max-width:560px){.blad-nav{padding:16px 16px 4px;}}
+/* ── FÄRDIGHETSTRÄNING ── */
+.fard-layout{max-width:920px;margin:0 auto;padding:18px 28px 44px;display:grid;grid-template-columns:288px 1fr;gap:22px;align-items:start;}
+.fard-lista{display:flex;flex-direction:column;gap:2px;}
+.fard-grupp{margin-bottom:10px;}
+.fard-ko{font-family:var(--cinzel,'Cinzel');font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold,#9a7228);margin:6px 0 7px;display:flex;align-items:center;gap:10px;}
+.fard-ko::after{content:'';flex:1;height:1px;background:var(--paper-dk,#ede6d6);}
+.fard-skill{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:7px;padding:9px 13px;margin-bottom:5px;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s,box-shadow .15s;}
+.fard-skill:hover{border-color:var(--gold-lt,#c49a40);box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.fard-skill-titel{font-family:var(--serif,'Cormorant Garamond');font-size:15.5px;font-weight:500;color:var(--ink,#12110f);line-height:1.25;}
+.fard-skill-formaga{font-family:var(--cinzel,'Cinzel');font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint,#7a6e65);}
+.fard-skill.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);}
+.fard-skill.is-active .fard-skill-titel{color:#fff;}
+.fard-skill.is-active .fard-skill-formaga{color:var(--gold-lt,#c49a40);}
+.fard-scen{position:sticky;top:14px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:12px;overflow:hidden;min-height:560px;}
+.fard-tom{display:flex;align-items:center;justify-content:center;min-height:560px;padding:40px;text-align:center;color:var(--ink-faint,#7a6e65);}
+.fard-tom p{font-size:15px;line-height:1.6;max-width:280px;}
+.fard-frame{width:100%;height:660px;border:0;display:none;background:#fff;}
+.fard-scen.har-drill .fard-tom{display:none;}
+.fard-scen.har-drill .fard-frame{display:block;}
+.blad-mount[hidden]{display:none;}
+@media(max-width:720px){.fard-layout{grid-template-columns:1fr;padding:16px 16px 32px;gap:14px;}.fard-scen{position:static;min-height:0;}.fard-frame{height:560px;}}
 </style>
 
 <body>
@@ -902,38 +931,37 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   <a class="hero-back" href="../../../ak7-k2.html">← Alla delkapitel</a>
 </header>
 
-<!-- FLIKRAD -->
+<!-- FLIKRAD (val-rad) — flik-växlingen wireas av blad-k2-d2.js via #tab-row -->
 <div class="tab-row" id="tab-row">
-  <button class="tab-btn farg-gron is-active" data-tab="btform">Bråk ↔ decimal</button>
-  <button class="tab-btn farg-gron" data-tab="blandad">Blandad form</button>
-  <button class="tab-btn farg-gron" data-tab="rakna">Räkna med former</button>
-  <button class="tab-btn farg-rod is-locked" data-tab="test">Visa vad du kan<span class="las-ikon">🔒</span></button>
+  <button class="tab-btn is-active" data-tab="ova">Öva</button>
+  <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
+  <button class="tab-btn" data-tab="test">Visa vad du kan</button>
 </div>
 
-<!-- PANEL 1: BRÅK ↔ DECIMAL -->
-<section class="tab-panel is-active" data-panel="btform">
-  <div class="ovn-wrap" id="sheet-btform"></div>
+<!-- PANEL: ÖVA — blad-nav + ett blad i taget (renderas av blad-k2-d2.js in i sheet-*) -->
+<section class="tab-panel is-active" data-panel="ova">
+  <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
+  <div id="blad-btform" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-btform"></div></div>
+  <div id="blad-blandad" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-blandad"></div></div>
+  <div id="blad-rakna" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-rakna"></div></div>
 </section>
 
-<!-- PANEL 2: BLANDAD FORM -->
-<section class="tab-panel" data-panel="blandad">
-  <div class="ovn-wrap" id="sheet-blandad"></div>
-</section>
-
-<!-- PANEL 3: RÄKNA MED FORMER -->
-<section class="tab-panel" data-panel="rakna">
-  <div class="ovn-wrap" id="sheet-rakna"></div>
-</section>
-
-<!-- PANEL 4: TEST -->
-<section class="tab-panel" data-panel="test">
-  <div class="las-info" id="las-test">
-    <span class="las-stor">🔒</span>
-    <h3>Testet är låst</h3>
-    <p>Lös de tre övningsdelarna helt (alla rätt), så öppnas testet här.</p>
+<!-- PANEL: FÄRDIGHETSTRÄNING -->
+<section class="tab-panel" data-panel="fardighet">
+  <div class="fard-layout">
+    <div class="fard-lista" id="fardighet-lista" role="tablist" aria-label="Färdigheter"></div>
+    <div class="fard-scen" id="fard-scen">
+      <div class="fard-tom" id="fard-tom"><p>Välj en färdighet till vänster</p></div>
+      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
+    </div>
   </div>
-  <div id="test-innehall" style="display:none;">
-    <div class="ovn-wrap" id="sheet-test"></div>
+</section>
+
+<!-- PANEL: TEST -->
+<section class="tab-panel" data-panel="test">
+  <div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-left:4px solid var(--gold,#9a7228);border-radius:6px;text-align:center;color:var(--ink-soft,#3d3630);">
+    <h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink,#12110f);margin-bottom:8px;">Visa vad du kan</h3>
+    <p style="font-size:14px;line-height:1.6;max-width:480px;margin:0 auto;">Samlingstestet för delkapitlet wiras in i nästa steg. Träna delarna riktat i Färdighetsträningen så länge.</p>
   </div>
 </section>
 
@@ -943,6 +971,82 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 </footer>
 
 <script src="../../../js/motor/blad/blad-k2-d2.js"></script>
+
+<!-- TAXONOMI: k2 (Blandad form) + k1 (bråk↔decimal återanvänds via delatMed — single-source) -->
+<script src="../../../js/data/k2-taxonomi.js"></script>
+<script src="../../../js/data/k1-taxonomi.js"></script>
+
+<!-- SKAL: blad-nav (Öva) + Färdighetsträning. Byta form blandar k1-noder (→ k1-ramen) och k2:s Blandad form (→ k2-ramen). Motorn orörd. -->
+<script>
+(function(){
+  var RAM_K2 = '../../../ak7-k2-ram.html', RAM_K1 = '../../../ak7-k1-ram.html';
+  // Bygg "Byta form"-gruppen: k1:s bråk↔decimal (ur delatMed, återanvänds) + k2:s Blandad form.
+  function byggByta(){
+    var k2 = window.K2_TAXONOMI, k1 = window.K1_TAXONOMI;
+    var k2noder = (k2 && k2.noder) || [], k1noder = (k1 && k1.noder) || [];
+    var rader = [];
+    // k1-noderna som Del 2 delar (single-source — id-lista i brak-byta.delatMed)
+    var byta = k2noder.filter(function(n){ return n.id === 'brak-byta'; })[0];
+    var delade = (byta && byta.delatMed && byta.delatMed.noder) || [];
+    delade.forEach(function(id){
+      var n = k1noder.filter(function(x){ return x.id === id; })[0];
+      if(!n || !n.visning) return; var v = n.visning;
+      rader.push({ titel: v.titel, formaga: v.etikett, ko: n.parent, formagaKey: v.formagaKey || 'rakna', ram: 'k1', ord: v.radordning });
+    });
+    // k2:s egna k2d2-lövnoder (Blandad form)
+    k2noder.filter(function(n){ return n.niva === 'lovnod' && n.visning && n.visning.utbudslista === 'k2d2'; }).forEach(function(n){
+      var v = n.visning; rader.push({ titel: v.titel, formaga: v.etikett, ko: n.parent, formagaKey: v.formagaKey || 'rakna', ram: 'k2', ord: v.radordning });
+    });
+    rader.sort(function(a, b){ return a.ord - b.ord; });
+    return rader.length ? [{ ko: 'Byta form', drills: rader }] : [];
+  }
+  // Testlåset öppet (som k1): ta bort is-locked på testfliken efter att blad-filen låst den.
+  var tb = document.querySelector('.tab-btn[data-tab="test"]'); if(tb) tb.classList.remove('is-locked');
+  // ÖVA: blad-nav över bladen
+  var OVA = [ {titel:'Bråk ↔ decimal', mount:'btform'}, {titel:'Blandad form', mount:'blandad'}, {titel:'Räkna med former', mount:'rakna'} ];
+  var navEl = document.getElementById('blad-nav');
+  if(navEl){
+    var mounts = [], knappar = [];
+    function visa(i){ OVA.forEach(function(b, j){ if(mounts[j]) mounts[j].hidden = (j !== i); if(knappar[j]){ var on = (j === i); knappar[j].classList.toggle('is-active', on); knappar[j].setAttribute('aria-selected', on ? 'true' : 'false'); } }); }
+    OVA.forEach(function(b, i){
+      mounts[i] = document.getElementById('blad-' + b.mount);
+      var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'blad-nav-btn'; btn.setAttribute('role', 'tab'); btn.title = b.titel;
+      btn.innerHTML = '<span class="blad-nav-nr">' + (i + 1) + '</span>' + b.titel;
+      btn.onclick = function(){ visa(i); };
+      navEl.appendChild(btn); knappar[i] = btn;
+    });
+    visa(0);
+  }
+  // FÄRDIGHETSTRÄNING — Byta form (k1 + k2 blandat, rätt ram per rad)
+  var fardEl = document.getElementById('fardighet-lista'), frame = document.getElementById('fard-frame'), scen = document.getElementById('fard-scen');
+  if(fardEl){
+    var alla = [];
+    function oppna(btn, p){
+      alla.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
+      var ram = (p.ram === 'k1') ? RAM_K1 : RAM_K2;
+      var fk = p.formagaKey || p.formaga, url = ram + '?ko=' + encodeURIComponent(p.ko) + '&formaga=' + encodeURIComponent(fk) + '&embed=1';
+      if(frame){ frame.style.height = ''; frame.src = url; } if(scen) scen.classList.add('har-drill');
+    }
+    byggByta().forEach(function(g){
+      var gr = document.createElement('div'); gr.className = 'fard-grupp';
+      var rub = document.createElement('div'); rub.className = 'fard-ko'; rub.textContent = g.ko; gr.appendChild(rub);
+      g.drills.forEach(function(p){
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'fard-skill'; b.setAttribute('role', 'tab');
+        b.innerHTML = '<span class="fard-skill-titel">' + p.titel + '</span><span class="fard-skill-formaga">' + p.formaga + '</span>';
+        b.onclick = function(){ oppna(b, p); };
+        gr.appendChild(b); alla.push(b);
+      });
+      fardEl.appendChild(gr);
+    });
+  }
+  window.addEventListener('message', function(e){
+    if(!frame || !e || !e.data || typeof e.data.__fardHeight !== 'number') return;
+    if(e.source !== frame.contentWindow) return;
+    frame.style.height = Math.max(320, Math.min(e.data.__fardHeight, 2200)) + 'px';
+  });
+})();
+</script>
 
 </body>
 </html>
