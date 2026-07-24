@@ -34,6 +34,19 @@ function fracSpan(t, n){
        + '<span class="ovn-brak-strecket"></span>'
        + '<span class="ovn-brak-namnare">' + n + '</span></span>';
 }
+// Stående bråk med EN inmatningsruta i täljar- eller nämnarposition (åk8 d2, C1:6/8).
+// Det fasta talet visas, den andra positionen är en .brak-in-ruta. Minsta tillägg —
+// återanvänder ovn-brak-markupen + .brak-in-CSS. Rör inte fracSpan/fracBoxes.
+function fracRuta(fastTal, opts){
+  opts = opts || {};
+  var kl = opts.klass ? (' ' + opts.klass) : '';
+  var inp = '<input class="brak-in ovn-in fr-ruta' + kl + '" inputmode="numeric" autocomplete="off" style="width:52px;text-align:center;">';
+  var t = opts.ruta === 'taljare' ? inp : ('<span class="ovn-num">' + fastTal + '</span>');
+  var n = opts.ruta === 'taljare' ? ('<span class="ovn-num">' + fastTal + '</span>') : inp;
+  return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + t + '</span>'
+       + '<span class="ovn-brak-strecket"></span>'
+       + '<span class="ovn-brak-namnare">' + n + '</span></span>';
+}
 function opSpan(op){ return '<span class="ovn-text" style="margin:0 6px;">' + op + '</span>'; }
 function mixedSpan(o){
   if(o.t === 0) return '<span class="ovn-text ovn-num">' + o.hel + '</span>';
