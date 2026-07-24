@@ -43,12 +43,16 @@
     function ratt(u){ var s = las(); return isFinite(s.t) && isFinite(s.n) && s.n !== 0 && Math.abs(s.t / s.n - u.t / u.n) < 1e-9; }
 
     window.andelFigurEngine = function(){
+      var prev = null;   // undvik samma sorts figur (form + andel) två gånger på raken
       window.korOvning({
         titel: 'Hur stor andel är färgad?',
         sub: 'Skriv andelen färgad del som bråk (du får förkorta).',
         back: window.renderOversikt,
         gen: function(level){
-          var u = genAndelFigur(level);
+          var u, tries = 0;
+          do { u = genAndelFigur(level); tries++; }
+          while(prev && tries < 25 && (u.shape === prev.shape || (u.t === prev.t && u.n === prev.n)));
+          prev = u;
           return {
             fragaHtml: '<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start;">'
               + '<div>' + u.svg + '</div>'
