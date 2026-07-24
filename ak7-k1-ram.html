@@ -2527,6 +2527,9 @@ const FORMAGOR = {
   enhet: {label:'Enhetsbyten', tagClass:'tag-begrepp', pillClass:'p-begrepp'},
   baklanges: {label:'Baklänges', tagClass:'tag-rakna', pillClass:'p-rakna'},
   konstruera: {label:'Konstruera', tagClass:'tag-rakna', pillClass:'p-rakna'},
+  // Negativa tal: neg-rakna delad i add/sub (repetition åk8) + mult/div (mål åk8)
+  addsub: {label:'Addition och subtraktion', tagClass:'tag-rakna', pillClass:'p-rakna'},
+  multdiv: {label:'Multiplikation och division', tagClass:'tag-rakna', pillClass:'p-rakna'},
   // Del 5/6/7: utbrutna Beräkningar-kategorier (deeplink ?formaga=<kategori> → egen nod/logg)
   pow10:    {label:'Med 10, 100 och 1000', tagClass:'tag-rakna', pillClass:'p-rakna'},
   stora:    {label:'Stora tal',            tagClass:'tag-rakna', pillClass:'p-rakna'},
@@ -4672,7 +4675,8 @@ DELAR_KO['negativa'] = [
     titel:'Räkna med negativa tal',
     beskrivning:'Räkna med negativa tal i addition, subtraktion, multiplikation och division – även med flera faktorer.',
     formagor:{
-      rakna:{desc:'Addition och subtraktion, multiplikation och division, flera faktorer.', implemented:true}
+      addsub:{desc:'Räkna plus och minus med negativa tal.', implemented:true},
+      multdiv:{desc:'Teckenreglerna för gånger och delat, samt flera faktorer.', implemented:true}
     }
   }
 ];
@@ -4951,7 +4955,8 @@ const OVNING_RENDERS = {
     begrepp: (b)=> renderNegBegrepp(b)
   },
   'neg-rakna':{
-    rakna: (b)=> renderNegRakna(b)
+    addsub:  (b)=> renderNegAddSub(b),
+    multdiv: (b)=> renderNegMultDiv(b)
   },
   // Del 9 - Avrundning och överslagsräkning
   'avr-avrundning':{
@@ -8160,6 +8165,34 @@ function negPicker(body, title, sub, kats, openFn){
   render();
 }
 
+// ── neg-rakna DELAD (åk8-strukturpilot): add/sub = repetition, mult/div = mål ──
+//  Additiva skal-wrappers. Återanvänder negCalcEngine + negPicker + de BYTE-IDENTISKA
+//  generatorerna (negAddSubGen/negMultDivGen/negFaktorerGen i metod-negativa.js).
+//  forKey styr loggnoden: neg-rakna:addsub resp. neg-rakna:multdiv (mult/div + faktorer).
+function renderNegAddSub(body){
+  negCalcEngine(body, {
+    title:'Addition och subtraktion', koId:'neg-rakna', forKey:'addsub', scoreKey:'addsub',
+    sub:'Räkna ut uttrycket. Tänk på att minus framför en parentes byter tecken.',
+    keypadOps:['−',','], OMG:6, gen:negAddSubGen
+  }, function(){ navTo('ko', {koId:'neg-rakna', delId: state.currentDel}); });
+}
+function renderNegMultDiv(body){
+  var KAT = [
+    {id:'multdiv',  nr:1, namn:'Multiplikation och division', desc:'Teckenreglerna för gånger och delat.'},
+    {id:'faktorer', nr:2, namn:'Flera faktorer',              desc:'Tre eller fler faktorer – håll koll på tecknen.'}
+  ];
+  negPicker(body, 'Multiplikation och division', 'Välj vad du vill öva på. Nivån anpassar sig medan du räknar.',
+    KAT, function(katId, backFn){
+      if(katId === 'multdiv'){
+        negCalcEngine(body, { title:'Multiplikation och division', koId:'neg-rakna', forKey:'multdiv', scoreKey:'multdiv',
+          sub:'Lika tecken ger plus, olika tecken ger minus.', keypadOps:['−'], OMG:6, gen:negMultDivGen }, backFn);
+      } else {
+        negCalcEngine(body, { title:'Flera faktorer', koId:'neg-rakna', forKey:'multdiv', scoreKey:'faktorer',
+          sub:'Räkna antalet minustecken: jämnt antal ger plus, udda antal ger minus.', keypadOps:['−'], OMG:5, gen:negFaktorerGen }, backFn);
+      }
+    });
+}
+
 // Generisk räknemotor: visar en fråga, ett svarsfält, knappsats, nivåer.
 // cfg: {title, sub, koId, forKey, scoreKey, keypadOps, OMG, gen}
 // gen(level) returnerar {q: htmlsträng, answer: tal}
@@ -8662,7 +8695,7 @@ var REP_GRUPPER = [
            {ko:'prio-prioritering', f:'rakna'}, {ko:'prio-prioritering', f:'metod'},
            {ko:'prio-lagar', f:'rakna'}]},
   {id:'negativa', titel:'negativa tal',
-    items:[{ko:'neg-begrepp', f:'begrepp'}, {ko:'neg-rakna', f:'rakna'}]},
+    items:[{ko:'neg-begrepp', f:'begrepp'}, {ko:'neg-rakna', f:'addsub'}, {ko:'neg-rakna', f:'multdiv'}]},
   {id:'avrundning', titel:'avrundning',
     items:[{ko:'avr-avrundning', f:'begrepp'}]}
 ];
@@ -9003,5 +9036,7 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-d1-tillagg.js"></script>
 <!-- Mastery-loggning (elev-lokal, localStorage). Observerar getTutorScore; rör ej drill-logik. -->
 <script src="js/mastery.js"></script>
+<!-- Engångs-migreringar av mastery-loggen (idempotent, localStorage). Efter mastery.js. -->
+<script src="js/mastery-migrering.js"></script>
 </body>
 </html>

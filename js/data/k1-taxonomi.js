@@ -1758,25 +1758,50 @@ window.K1_TAXONOMI = {
       "visning": null
     },
     {
-      "id": "neg-rakna:rakna",
-      "namn": "Räkna med negativa tal",
+      "id": "neg-rakna:addsub",
+      "namn": "Räkna: addition och subtraktion",
       "parent": "neg-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
-      "generator": "renderNegRakna",
-      "begrepp": "Addition och subtraktion, multiplikation och division, flera faktorer.",
+      "generator": "renderNegAddSub",
+      "begrepp": "Räkna plus och minus med negativa tal.",
       "visning": {
         "utbudslista": "d3",
         "grupp": "Negativa tal",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Räkna med negativa tal",
+        "titel": "Räkna: addition och subtraktion",
         "etikett": "räkna",
-        "formagaKey": "rakna",
+        "formagaKey": "addsub",
+        "niva": null
+      }
+    },
+    {
+      "id": "neg-rakna:multdiv",
+      "namn": "Räkna: multiplikation och division",
+      "parent": "neg-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal",
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderNegMultDiv",
+      "begrepp": "Teckenreglerna för gånger och delat, samt flera faktorer.",
+      "visning": {
+        "utbudslista": "d3",
+        "grupp": "Negativa tal",
+        "gruppordning": 0,
+        "radordning": 2,
+        "titel": "Räkna: multiplikation och division",
+        "etikett": "räkna",
+        "formagaKey": "multdiv",
         "niva": null
       }
     },

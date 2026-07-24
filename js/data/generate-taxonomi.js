@@ -193,7 +193,11 @@ const OVERRIDES = {
   'bd-vaxla:rakna':    { visning:{ utbudslista:'d4', grupp:'Bråkform och decimalform', gruppordning:0, radordning:0, titel:'Bråk → decimal', etikett:'räkna', formagaKey:'rakna', niva:null } },
   'bd-tillbrak:rakna': { visning:{ utbudslista:'d4', grupp:'Bråkform och decimalform', gruppordning:0, radordning:1, titel:'Decimal → bråk', etikett:'räkna', formagaKey:'rakna', niva:null } },
   'bd-hundra:rakna':   { visning:{ utbudslista:'d4', grupp:'Bråkform och decimalform', gruppordning:0, radordning:2, titel:'Tiondelar & hundradelar', etikett:'räkna', formagaKey:'rakna', niva:null } },
-  'bd-forlang:rakna':  { visning:{ utbudslista:'d4', grupp:'Bråkform och decimalform', gruppordning:0, radordning:3, titel:'Förläng till hundradelar', etikett:'räkna', formagaKey:'rakna', niva:null } }
+  'bd-forlang:rakna':  { visning:{ utbudslista:'d4', grupp:'Bråkform och decimalform', gruppordning:0, radordning:3, titel:'Förläng till hundradelar', etikett:'räkna', formagaKey:'rakna', niva:null } },
+
+  // Negativa tal — neg-rakna delad (åk8-strukturpilot). add/sub = repetition åk8; mult/div = mål åk8.
+  'neg-rakna:addsub':  { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d3', grupp:'Negativa tal', gruppordning:0, radordning:1, titel:'Räkna: addition och subtraktion', etikett:'räkna', formagaKey:'addsub', niva:null } },
+  'neg-rakna:multdiv': { arskursRelevans:{ ak7:'mal', ak8:'mal' },        visning:{ utbudslista:'d3', grupp:'Negativa tal', gruppordning:0, radordning:2, titel:'Räkna: multiplikation och division', etikett:'räkna', formagaKey:'multdiv', niva:null } }
 };
 for(const n of noder){
   const o = OVERRIDES[n.id];
