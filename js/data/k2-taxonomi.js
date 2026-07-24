@@ -22,12 +22,77 @@
    Handskriven ren data — inga motorer/blad/mellanled rörda. */
 window.K2_TAXONOMI = {
   "noder": [
-    /* ─────────────── Del 1 · Andel och antal (kommer senare) ─────────────── */
+    /* ─────────────── Del 1 · Andel och antal (öppen; BILDBASERAT) ───────────────
+       Nästan helt visuellt: figurerna (delad figur, tallinje, rutnät, antalsfigur,
+       rutnäts-area) genereras som SVG i bokens palett — inga PNG ur läromedlet i
+       repot. Öva-bladet (blad-k2-d1.js) är Joachims uppgifter, exakt. Kärnan är
+       "andel kontra antal" (vem har flest blå vs störst andel blå). Färdighetstränings-
+       drillar byggs när figurgeneratorerna är klara (delad figur = pilot). */
     {
       "id": "brak-andel", "namn": "Andel och antal", "parent": null, "niva": "omrade",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Skriva bråk från text och tolka bråk i figurer.",
-      "grupp": "brak", "implemented": false
+      "begrepp": "Tolka och skriva andel ur figurer, tallinjer och antal – och skilja andel från antal.",
+      "grupp": "brak", "implemented": true
+    },
+    {
+      "id": "andel-figur", "namn": "Andel av en figur", "parent": "brak-andel", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Hur stor andel av en delad figur som är färgad (kvadrat, cirkel, rektangel, hexagon).",
+      "visning": null
+    },
+    {
+      "id": "andel-figur:rakna", "namn": "Andel av en figur", "parent": "andel-figur", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Skriv andelen färgad del av figuren som bråk.",
+      "visning": null
+    },
+    {
+      "id": "andel-tallinje", "namn": "Bråk på tallinje", "parent": "brak-andel", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Avläsa vilket bråk (eller tal) en markör pekar på en tallinje.",
+      "visning": null
+    },
+    {
+      "id": "andel-tallinje:begrepp", "namn": "Bråk på tallinje", "parent": "andel-tallinje", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": null,
+      "begrepp": "Läs av bråket som pilen/punkten pekar på.",
+      "visning": null
+    },
+    {
+      "id": "andel-antal", "namn": "Andel av ett antal", "parent": "brak-andel", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Andel av en mängd objekt (kulor, djur) – hur stor del som har en viss egenskap.",
+      "visning": null
+    },
+    {
+      "id": "andel-antal:rakna", "namn": "Andel av ett antal", "parent": "andel-antal", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Skriv andelen (t.ex. blå kulor av alla) som bråk.",
+      "visning": null
+    },
+    {
+      "id": "andel-hela", "namn": "Skriva hela tal i bråkform", "parent": "brak-andel", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Skriva ett helt tal som bråk på flera sätt (2 = 2/1 = 4/2 = 6/3 …).",
+      "visning": null
+    },
+    {
+      "id": "andel-hela:resonera", "namn": "Skriva hela tal i bråkform", "parent": "andel-hela", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Ge flera bråk som är lika med ett givet helt tal (villkors-validering).",
+      "visning": null
+    },
+    {
+      "id": "andel-kontra", "namn": "Andel kontra antal", "parent": "brak-andel", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Delkapitlets kärna: skilja 'flest' (antal) från 'störst andel' (proportion).",
+      "visning": null
+    },
+    {
+      "id": "andel-kontra:resonera", "namn": "Andel kontra antal", "parent": "andel-kontra", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Avgör vem som har flest respektive störst andel – och varför de kan skilja sig.",
+      "visning": null
     },
 
     /* ─────────────── Del 2 · Byta form (öppen) ─────────────── */
