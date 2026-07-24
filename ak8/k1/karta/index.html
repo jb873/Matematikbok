@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Begreppskarta · Taluppfattning</title>
+<title>Begreppskarta · Åk 8 · Kapitel 1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Cinzel:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
@@ -101,16 +101,19 @@
 
   // ── ELEV-LOKAL DATA · localStorage ENDAST. Lämnar ALDRIG enheten. ──
   // Hård gräns: ingen fetch/XHR/WebSocket, ingen server-väg. All elevdata bor här inne.
-  var MATRIS_KEY = 'k1.taluppfattning.mastery.v1';   // { lovnodId: 0..3 }
-  var PREF_KEY   = 'k1.taluppfattning.pref.v1';       // { arskurs, mal }
+  var MATRIS_KEY = 'k1.taluppfattning.mastery.v1';   // delad logg (samma som åk7 — single-source)
+  var PREF_KEY   = 'ak8.k1.taluppfattning.pref.v1';   // EGEN åk8-pref (annars ärvs åk7:s arskurs)
   function lasMatris(){
     // Demo: ?demo seedar tidsstämplade loggar I MINNET (skrivs aldrig till localStorage) för granskning.
     if(/[?&]demo\b/.test(location.search)) return demoMatris();
     return (window.Mastery && Mastery.lasMatris()) || {};
   }
   function lasPref(){
-    var d = { arskurs:'ak7', mal:'godkant' };
-    try{ return Object.assign(d, JSON.parse(localStorage.getItem(PREF_KEY)) || {}); }catch(e){ return d; }
+    // Åk8-scope. minNiva = nivåbryggans krav (grön kräver niva ≥ minNiva). Sätts i C4 när
+    // mult/div-talområdena fastställs; null = inget nivåkrav ännu (bakåtkompatibelt).
+    var d = { arskurs:'ak8', mal:'godkant', minNiva:null };
+    try{ var s = JSON.parse(localStorage.getItem(PREF_KEY)) || {}; if(s.mal) d.mal = s.mal; }catch(e){}  // bara mal från lagring; arskurs låst till ak8
+    return d;
   }
   function sparPref(p){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(p)); }catch(e){} }
   function demoMatris(){
@@ -185,7 +188,7 @@
     var stodM = (node.arskursRelevans && node.arskursRelevans[PREF.arskurs] === 'stod') ? '⊕' : '';
     var markM = stodM || rollM;
     var markTitle = stodM ? 'stöd – valbart stödspår' : node.roll;
-    var orsak = status.gra ? '<span class="gra-orsak">' + (status.orsak === 'framtid' ? 'åk 8' : 'bortvalt') + '</span>' : '';
+    var orsak = status.gra ? '<span class="gra-orsak">' + (status.orsak === 'framtid' ? 'ej åk 8' : 'bortvalt') + '</span>' : '';
     var chev = (opts.hasChildren && !status.gra) ? '<span class="chev">›</span>' : '';
     b.innerHTML = '<span class="txt">' + node.namn + orsak + '</span>'
       + (markM && !status.gra ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '') + chev;

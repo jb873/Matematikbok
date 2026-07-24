@@ -24,16 +24,25 @@
     if(!nodeId || (resultat !== 'ratt' && resultat !== 'delvis' && resultat !== 'fel')) return;
     var m = lasMatris();
     if(!m[nodeId]) m[nodeId] = [];
-    m[nodeId].push({ ts: Date.now(), resultat: resultat });
+    // NIVÅBRYGGA: aktuell drill-nivå exponeras av exerciseHeader (window.__aktuellNiva).
+    // Additivt — utan niva blir posten som förr (bakåtkompatibel).
+    var niva = (typeof window !== 'undefined' && window.__aktuellNiva) ? window.__aktuellNiva : null;
+    var post = { ts: Date.now(), resultat: resultat };
+    if(niva) post.niva = niva;
+    m[nodeId].push(post);
     sparMatris(m);
   }
 
   // ── Färg (0–3) ur loggens tidsstämplar — spridning, inte bara antal ──
   function dagKey(ts){ var d = new Date(ts); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
-  function masteryState(log){
+  // minNiva (valfri): grön kräver evidens på nivå ≥ minNiva för den årskursen (B3-nivåbryggan).
+  // Utan minNiva (åk7) räknas alla rätt — byte-identiskt beteende.
+  function masteryState(log, minNiva){
     if(!log || !log.length) return 0;                                   // röd — inga försök
-    var ratt = log.filter(function(a){ return a.resultat === 'ratt'; }); // delvis/fel drar inte mot grönt
-    if(!ratt.length) return 1;                                          // orange — försökt men inget rätt
+    var rattAll = log.filter(function(a){ return a.resultat === 'ratt'; }); // delvis/fel drar inte mot grönt
+    if(!rattAll.length) return 1;                                        // orange — försökt men inget rätt
+    var ratt = minNiva ? rattAll.filter(function(a){ return (a.niva || 0) >= minNiva; }) : rattAll;
+    if(!ratt.length) return 1;                                          // rätt finns men inte på kravnivån → orange
     ratt.sort(function(a, b){ return a.ts - b.ts; });
     var dagar = {}; ratt.forEach(function(a){ dagar[dagKey(a.ts)] = 1; });
     var antalDagar = Object.keys(dagar).length;

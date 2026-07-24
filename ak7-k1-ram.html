@@ -3421,6 +3421,8 @@ function exerciseHeader(title, sub, level){
   // färdighet (max 1) visar ingen segment-stege – bara drillen.
   const visaStege = level && MAXNIVA >= 2;
   const niva = Math.min(level || 1, MAXNIVA);
+  // NIVÅBRYGGA (B3): exponera aktuell drill-nivå så mastery-hooken kan logga den. Additivt.
+  if(typeof window !== 'undefined') window.__aktuellNiva = visaStege ? niva : null;
   const levelLabel = visaStege ? `Nivå ${niva} av ${MAXNIVA}` : '';
   const dots = visaStege ? Array.from({length:MAXNIVA}).map((_,i)=>`<i class="${i<niva?'filled':''}${i===niva-1?' aktuell':''}"></i>`).join('') : '';
   return `
