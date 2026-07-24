@@ -108,14 +108,14 @@
   var UPPG = [
     { nr:1, rubrik:'Hur stor andel av figuren är färgad?', innehall:figrad([{lbl:'a)',svg:delRuta(2,2,[2]),svar:1,t:1,n:4},{lbl:'b)',svg:delKryss([2]),svar:1,t:1,n:4},{lbl:'c)',svg:delAtta([5]),svar:1,t:1,n:8}]) },
     { nr:2, rubrik:'Vilket bråk pekar pilen på?', flagg:'⚠️ pil-lägen bekräftas', innehall:
-      tallinjeRad({lbl:'a)', svg:tallinje(0,1,5,[{v:3/5,typ:'pil'}]), marker:[{lbl:'pilen',t:3,n:5}]})
-      + tallinjeRad({lbl:'b)', svg:tallinje(0,1,8,[{v:3/8,typ:'pil'}]), marker:[{lbl:'pilen',t:3,n:8}]}) },
+      tallinjeRad({lbl:'a)', svg:tallinje(0,1.3,5,[{v:3/5,typ:'pil'}]), marker:[{lbl:'pilen',t:3,n:5}]})
+      + tallinjeRad({lbl:'b)', svg:tallinje(0,1.25,8,[{v:3/8,typ:'pil'}]), marker:[{lbl:'pilen',t:3,n:8}]}) },
     { nr:3, rubrik:'Hur stor del av figuren är färgad?', flagg:'⚠️ 3a/3b bekräftas', innehall:figrad([{lbl:'a)',svg:delHexagon([0,2,4]),svar:1,t:3,n:6},{lbl:'b)',svg:delKryss([1,2]),svar:1,t:1,n:2},{lbl:'c)',svg:delStrip(3,[2]),svar:1,t:1,n:3}]) },
     { nr:4, rubrik:'Skriv två hela i bråkform på tre olika sätt.', innehall:'<div class="d1-svar d1-villkor" data-typ="villkor-hela" data-varde="2" data-antal="3">'+svarBrakRaw()+'<span class="d1-komma">,</span>'+svarBrakRaw()+'<span class="d1-komma">,</span>'+svarBrakRaw()+'</div>' },
     { nr:5, rubrik:'Vilka av påståendena är riktiga? Klicka de riktiga.', innehall:flervalHtml([['a',frac(1,3)+' &gt; '+frac(1,4)],['b',frac(2,3)+' &gt; '+frac(3,4)],['c',frac(2,5)+' + '+frac(3,5)+' = 1'],['d',frac(2,5)+' &gt; '+frac(1,2)],['e',frac(1,2)+' = '+frac(2,4)+' = '+frac(3,6)],['f',frac(4,5)+' &lt; '+frac(5,6)]],[0,2,4,5]) },
     { nr:6, rubrik:'Vilka är talen A och B på tallinjen?', flagg:'⚠️ lägen bekräftas', innehall:
       tallinjeRad({lbl:'a)', svg:tallinje(0,1.5,4,[{v:0.25,lbl:'A',typ:'punkt'},{v:0.5,lbl:'B',typ:'punkt'}]), marker:[{lbl:'A',t:1,n:4},{lbl:'B',t:1,n:2}]})
-      + tallinjeRad({lbl:'b)', svg:tallinje(0,1.4,5,[{v:0.2,lbl:'A',typ:'punkt'},{v:1,lbl:'B',typ:'punkt'}]), marker:[{lbl:'A',t:1,n:5},{lbl:'B',t:1,n:1}]}) },
+      + tallinjeRad({lbl:'b)', svg:tallinje(0,1.4,5,[{v:0.2,lbl:'A',typ:'punkt'},{v:0.8,lbl:'B',typ:'punkt'}]), marker:[{lbl:'A',t:1,n:5},{lbl:'B',t:4,n:5}]}) },
     { nr:7, rubrik:'Hur stor del av den färgade figuren utgör den röda triangeln?', innehall:'<div class="d1-figrad">'+husFigur()+'</div><div style="margin-top:6px;">'+svarBrak(1,3)+'</div>' },
     { nr:8, rubrik:'Markera rätt antal rutor så andelen stämmer.', innehall:'<div class="d1-rutnat-grupp">'
       + klickRutnat('r12',12,1, 'a) '+frac(1,12)) + klickRutnat('r6',12,2, 'b) '+frac(1,6))
@@ -126,9 +126,10 @@
     { nr:12, rubrik:'Hur stor andel av Hannas kulor är blå?', innehall:'<div class="d1-figrad">'+antalsfigur(['rod','bla','bla','rod','bla','bla'])+'</div><div style="margin-top:6px;">'+svarBrak(4,6)+'</div>' },
     { nr:13, rubrik:'Vem har flest blå kulor?', innehall:valSvar(['Hugo','Hanna'],1) },
     { nr:14, rubrik:'Vem har störst andel blåa kulor?', innehall:valSvar(['Hugo','Hanna'],0) },
-    { nr:15, rubrik:'Vilka är talen A, B och C på tallinjen?', flagg:'⚠️ lägen + svarsformat bekräftas', innehall:
+    { nr:15, rubrik:'Vilka är talen A, B och C på tallinjen?', flagg:'⚠️ lägen bekräftas', innehall:
       tallinjeRad({lbl:'a)', svg:tallinje(0,2.6,5,[{v:4/5,lbl:'A',typ:'punkt'},{v:6/5,lbl:'B',typ:'punkt'},{v:12/5,lbl:'C',typ:'punkt'}]), marker:[{lbl:'A',t:4,n:5},{lbl:'B',t:6,n:5},{lbl:'C',t:12,n:5}]})
-      + tallinjeRad({lbl:'b)', svg:tallinje(0,2.3,10,[{v:0.9,lbl:'A',typ:'punkt'},{v:1.5,lbl:'B',typ:'punkt'},{v:1.9,lbl:'C',typ:'punkt'}]), marker:[{lbl:'A',t:9,n:10},{lbl:'B',t:3,n:2},{lbl:'C',t:19,n:10}]}) },
+      + tallinjeRad({lbl:'b)', svg:tallinje(0,2.3,10,[{v:0.9,lbl:'A',typ:'punkt'},{v:1.5,lbl:'B',typ:'punkt'},{v:1.9,lbl:'C',typ:'punkt'}]), marker:[{lbl:'A',t:9,n:10},{lbl:'B',t:3,n:2},{lbl:'C',t:19,n:10}]})
+      + tallinjeRad({lbl:'c)', svg:tallinje(10,12.3,5,[{v:10.2,lbl:'A',typ:'punkt'},{v:10.6,lbl:'B',typ:'punkt'},{v:11.6,lbl:'C',typ:'punkt'}]), marker:[{lbl:'A',t:51,n:5},{lbl:'B',t:53,n:5},{lbl:'C',t:58,n:5}]}) },
     { nr:16, rubrik:'I en hage finns det 7 hästar och 15 kor. Hur stor andel av djuren är hästar?', innehall:'<div style="margin-top:10px;">'+svarBrak(7,22)+'</div>' },
     { nr:17, rubrik:'Hur stor andel av figurens omkrets är grön, blå respektive röd?', innehall:'<div class="d1-figrad">'+LFigur()+'</div>'
       + '<div class="d1-marsvar-rad" style="margin-top:8px;"><span class="d1-marksvar"><span class="d1-mark-lbl" style="color:'+C_GREEN+';">Grön =</span>'+svarBrak(1,3)+'</span>'
