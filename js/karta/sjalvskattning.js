@@ -62,14 +62,20 @@
     var FORMAGE_DIM = { KOMMUNIKATION:1, PROBLEM:1 };
     function arFormaga(n){ return !!FORMAGE_DIM[n.formaga]; }
     function formageEtikett(f){ return f === 'KOMMUNIKATION' ? 'kommunikation' : 'problemlösning'; }
+    // Belief-only-förmågor (ingen egen drill-nod, ingen taxonomi — bor i MODULEN så de faller ut i
+    // ALLA kapitel som får sektionen). Likhetstecknet är en central kommunikationsfärdighet överallt.
+    var FORMAGA_ROWS = [
+      { id:'formaga:likhetstecken', namn:'Använda likhetstecknet korrekt', formaga:'KOMMUNIKATION', omrade:'genomgående' }
+    ];
 
     // Evidens för en k2-lövnod (0–3) eller en k1-delatMed-nod (ur k1-loggen).
     function evidensK2(id){ if(DEMO) return demoEv[id] != null ? demoEv[id] : 0; return MAST.masteryState((MAST.lasMatris() || {})[id], PREF.minNiva); }
     function evidensK1(id){ if(DEMO) return 3; return K1 ? K1.masteryState((K1.lasMatris() || {})[id], null) : 0; }
 
-    // Förmåge-dimensionen: alla i-scope lövnoder som bär KOMMUNIKATION/PROBLEM, tvärsöver områden.
+    // Förmåge-dimensionen: belief-only-förmågor (modulen) + alla i-scope lövnoder som bär
+    // KOMMUNIKATION/PROBLEM, tvärsöver områden.
     function formageRader(){
-      var rader = [];
+      var rader = FORMAGA_ROWS.map(function(f){ return { id:f.id, namn:f.namn, roll:'karna', evidens:null, kalla:'formaga', formaga:f.formaga, omrade:f.omrade, beliefOnly:true }; });
       TAX.filter(function(n){ return n.niva === 'lovnod' && arFormaga(n); }).forEach(function(n){
         var sc = scopeAv(n, PREF); if(!sc.inScope) return;
         var omr = omradeAv(n);
@@ -114,7 +120,9 @@
     // En självskattningsrad: kryss (Kan/Osäker/Kan ej) + namn + evidens + status. ALDRIG en drill-länk.
     function radHtml(r, opts){
       opts = opts || {};
-      var b = BELIEFS[r.id] || '', st = status(b, r.evidens);
+      var evNull = r.evidens == null;   // belief-only-förmåga: ingen drill → ingen evidens att bekräfta mot
+      var b = BELIEFS[r.id] || '', st = evNull ? { typ:'neutral', txt:'' } : status(b, r.evidens);
+      var evFarg = evNull ? '#D3CDBE' : FARG[r.evidens];
       var knappar = BELIEF.map(function(kv){ return '<button class="sj-b sj-b-' + kv[0] + (b===kv[0]?' on':'') + '" data-id="' + r.id + '" data-b="' + kv[0] + '">' + kv[1] + '</button>'; }).join('');
       var k1tag = r.kalla === 'k1' ? '<span class="sj-k1" title="hämtas ur kapitel 1 (delatMed)">k1</span>' : '';
       var fmtag = (opts.visaFormaga && r.formaga) ? '<span class="sj-fmtag">' + formageEtikett(r.formaga) + '</span>' : '';
@@ -122,7 +130,7 @@
       return '<div class="sj-rad sj-' + st.typ + '">'
         + '<span class="sj-belief">' + knappar + '</span>'
         + '<span class="sj-namn">' + r.namn + k1tag + omrtag + fmtag + '</span>'
-        + '<span class="sj-dot sj-ev" style="background:' + FARG[r.evidens] + '" title="evidens"></span>'
+        + '<span class="sj-dot sj-ev" style="background:' + evFarg + '" title="' + (evNull ? 'ingen mätning – bara din skattning' : 'evidens') + '"></span>'
         + '<span class="sj-status">' + (st.txt ? '<span class="sj-badge sj-badge-' + st.typ + '">' + st.txt + '</span>' : '') + '</span>'
         + '</div>';
     }
@@ -135,9 +143,10 @@
       // TVÄRGÅENDE FÖRMÅGE-DIMENSION — Joachims kärnbudskap: vägen och kommunikationen räknas, inte bara svaret.
       var fr = formageRader();
       if(fr.length){
-        var frollup = Math.min.apply(null, fr.map(function(r){ return r.evidens; }));
+        var mfr = fr.filter(function(r){ return r.evidens != null; });   // belief-only-rader saknar evidens
+        var frollup = mfr.length ? Math.min.apply(null, mfr.map(function(r){ return r.evidens; })) : null;
         html += '<section class="sj-grupp sj-formaga"><div class="sj-grupp-rubrik sj-formaga-rubrik">'
-          + '<span class="sj-dot" style="background:' + FARG[frollup] + '"></span>'
+          + '<span class="sj-dot" style="background:' + (frollup == null ? '#D3CDBE' : FARG[frollup]) + '"></span>'
           + '<span class="sj-grupp-namn">Kommunikation och problemlösning</span>'
           + '<span class="sj-formaga-flagga">förmågor · gäller allt du gör</span></div>'
           + '<p class="sj-formaga-intro">Det här är inget eget delkapitel — det är <em>förmågor</em> som efterfrågas i allt du gör, i alla kapitel och alla år. Vägen och kommunikationen räknas, inte bara svaret.</p>';
