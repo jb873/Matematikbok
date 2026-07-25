@@ -66,13 +66,12 @@
       var rader = [];
       TAX.filter(function(n){ return n.niva === 'lovnod' && omradeAv(n) === omr; }).forEach(function(n){
         var sc = scopeAv(n, PREF); if(!sc.inScope) return;
-        rader.push({ id:n.id, namn:(n.visning && n.visning.titel) || n.namn, roll:n.roll,
-          evidens: evidensK2(n.id), drillbar: !!n.generator, deeplink: n.generator ? deeplink(n) : null, kalla:'k2' });
+        // OBS: ingen deeplink. Självskattningen leder ALDRIG till en drill (belief ≠ evidens-väg).
+        rader.push({ id:n.id, namn:(n.visning && n.visning.titel) || n.namn, roll:n.roll, evidens: evidensK2(n.id), kalla:'k2' });
       });
       if(omr.delatMed && omr.delatMed.noder){
         omr.delatMed.noder.forEach(function(k1id){
-          rader.push({ id:k1id, namn: k1Namn(k1id), roll:'karna',
-            evidens: evidensK1(k1id), drillbar:false, deeplink:null, kalla:'k1' });
+          rader.push({ id:k1id, namn: k1Namn(k1id), roll:'karna', evidens: evidensK1(k1id), kalla:'k1' });
         });
       }
       return rader;
@@ -81,10 +80,6 @@
       var t = window.K1_TAXONOMI && window.K1_TAXONOMI.noder;
       if(t){ for(var i = 0; i < t.length; i++){ if(t[i].id === id) return (t[i].visning && t[i].visning.titel) || t[i].namn; } }
       return id.replace(/:.*/, '').replace(/-/g, ' ');
-    }
-    function deeplink(node){
-      var p = node.id.split(':'), ko = p[0], formaga = p.length===2 ? p[1] : (node.visning && node.visning.formagaKey) || 'rakna';
-      return config.ramPath + '?ko=' + encodeURIComponent(ko) + '&formaga=' + encodeURIComponent(formaga);
     }
 
     // Bekräftelse / glapp av belief × evidens.
@@ -115,12 +110,13 @@
           var st = status(b, r.evidens);
           var knappar = BELIEF.map(function(kv){ return '<button class="sj-b sj-b-' + kv[0] + (b===kv[0]?' on':'') + '" data-id="' + r.id + '" data-b="' + kv[0] + '">' + kv[1] + '</button>'; }).join('');
           var k1tag = r.kalla === 'k1' ? '<span class="sj-k1" title="hämtas ur kapitel 1 (delatMed)">k1</span>' : '';
-          var ovalank = (st.typ==='glapp-plan' && r.deeplink) ? '<a class="sj-ova" href="' + r.deeplink + '">Öva →</a>' : '';
+          // En självskattningsrad tar emot ETT kryss — den länkar aldrig vidare till en drill.
+          // Glappet står kvar som TEXT (belief möter evidens), utan klickbar väg till övningen.
           html += '<div class="sj-rad sj-' + st.typ + '">'
             + '<span class="sj-belief">' + knappar + '</span>'
             + '<span class="sj-namn">' + r.namn + k1tag + '</span>'
             + '<span class="sj-dot sj-ev" style="background:' + FARG[r.evidens] + '" title="evidens"></span>'
-            + '<span class="sj-status">' + (st.txt ? '<span class="sj-badge sj-badge-' + st.typ + '">' + st.txt + '</span>' : '') + ovalank + '</span>'
+            + '<span class="sj-status">' + (st.txt ? '<span class="sj-badge sj-badge-' + st.typ + '">' + st.txt + '</span>' : '') + '</span>'
             + '</div>';
         });
         html += '</section>';
