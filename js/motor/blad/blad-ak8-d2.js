@@ -52,6 +52,8 @@
   function AVLAS(linjer){ return { typ:'avlas', linjer:linjer }; }
   // Avstånd mellan punkter: par = [[namnA, namnB, vA, vB], …], facit = |vA − vB|.
   function AVST(par){ return { typ:'avstand', par:par }; }
+  // Markera talen på tallinjen (klicka-placera). mal = tal (eller {v, txt} för bråk).
+  function MARK(min, max, steg, etiketter, mal){ return { typ:'markera', min:min, max:max, steg:steg, etiketter:etiketter, mal:mal }; }
 
   // ─────────────────────────────────────────────────────────────
   //  BLAD A — GRUNDER (nod neg-begrepp:begrepp, repetition)
@@ -70,13 +72,14 @@
     { rubrik:'Skriv två tal som ligger mellan', rader:[
       V('1 och −4', 2, function(x){ return x > -4 && x < 1; }, 't.ex. 0 och −2'),
       V('−1 och −2', 2, function(x){ return x > -2 && x < -1; }, 't.ex. −1,3 och −1,7') ] },
-    FIG('Markera talen 3, −3, 2,5, −0,5, −4,5 på tallinjen (−5 till 5)'),
+    { rubrik:'Markera talen på tallinjen', rader:[ MARK(-5, 5, 0.5, [-5, 0, 5], [3, -3, 2.5, -0.5, -4.5]) ] },
     { rubrik:'Skriv de tre nästföljande talen i talföljden', rader:[
       { typ:'foljd', pre:'10, 7, 4,', facit:[1,-2,-5] },
       { typ:'foljd', pre:'−17, −13, −9,', facit:[-5,-1,3] } ] },
     { rubrik:'Vilket tal ligger mittemellan', rader:[ T('−3 och 1', -1), T('−5 och 4', -0.5), T('−7 och 3', -2) ] },
     { rubrik:'Temperaturen är −5 grader Celsius. Vad visar termometern om temperaturen', rader:[ T('ökar med 3 grader', -2), T('minskar med 4 grader', -9), T('ökar med 9 grader', 4) ] },
-    FIG('Markera bråken ½, −½, ⅓, −⅓, ¼, −¼ på tallinjen'),
+    { rubrik:'Markera bråken på tallinjen', rader:[ MARK(-1, 1, 1/12, [-1, 0, 1], [
+      { v:0.5, txt:'½' }, { v:-0.5, txt:'−½' }, { v:1/3, txt:'⅓' }, { v:-1/3, txt:'−⅓' }, { v:0.25, txt:'¼' }, { v:-0.25, txt:'−¼' } ]) ] },
     { rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[ O([-2.3, 0, 5.1, 5.03, -2.34], true) ] }
   ] };
 
@@ -251,6 +254,14 @@
       var h2 = r.par.map(function(pp){ return '<span class="ak8-avlas-in">' + pp[0] + ' och ' + pp[1] + ': <input class="ak8-in ak8-in-sm"></span>'; }).join('');
       return '<div class="ak8-rad"><span class="ak8-svar" data-idx="' + idx + '">' + h2 + '</span></div>';
     }
+    if(r.typ === 'markera'){
+      var mal = r.mal.map(function(m){ return (typeof m === 'object') ? { v:m.v, txt:m.txt } : { v:m, txt:fmt(m) }; });
+      var malTxt = mal.map(function(m){ return m.txt; }).join(', ');
+      var chips = mal.map(function(m){ return '<button type="button" class="ak8-mark-chip" data-v="' + (Math.round(m.v * 1e6) / 1e6) + '">' + m.txt + '</button>'; }).join('');
+      var svg = window.SvgTallinje ? window.SvgTallinje.linje({ min:r.min, max:r.max, steg:r.steg, etiketter:r.etiketter, punkter:[], klickbar:true }) : '';
+      CHECKS.push(function(el){ var mks = el.querySelectorAll('.tl-marker'); var ok = mks.length === mal.length; mks.forEach(function(mk){ if(Math.abs(+mk.dataset.v - +mk.dataset.target) > 1e-3) ok = false; }); return { ok: ok, facit: malTxt }; });
+      return '<div class="ak8-rad ak8-rad-fig"><span class="ak8-svar" data-idx="' + idx + '"><div class="ak8-mark-chips">' + chips + '</div><div class="ak8-mark-wrap">' + svg + '</div></span></div>';
+    }
     if(r.typ === 'figur'){
       return '<div class="ak8-figur">▨ Figur: <strong>' + r.namn + '</strong> — SVG byggs när Joachim specificerat den.</div>';
     }
@@ -272,6 +283,34 @@
     // interaktioner
     mount.querySelectorAll('.ak8-teckenslot .ak8-chip, .ak8-ekvslot .ak8-chip').forEach(function(ch){ ch.onclick = function(){ if(ch.className.indexOf('ratt') > -1 || ch.className.indexOf('fel') > -1) return; ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.remove('sel'); }); ch.classList.add('sel'); }; });
     mount.querySelectorAll('.ak8-ordna').forEach(function(rad){ rad.querySelectorAll('.ak8-tal').forEach(function(b){ b.onclick = function(){ if(b.style.pointerEvents === 'none') return; if(b.classList.contains('sel')){ b.classList.remove('sel'); b.querySelector('.ak8-ordnr') && b.querySelector('.ak8-ordnr').remove(); } else { var n = rad.querySelectorAll('.ak8-tal.sel').length + 1; b.classList.add('sel'); var s = document.createElement('span'); s.className = 'ak8-ordnr'; s.textContent = n; b.appendChild(s); } }; }); });
+    mount.querySelectorAll('.ak8-mark-wrap').forEach(function(wrap){
+      var svg = wrap.querySelector('svg'), band = wrap.querySelector('.tl-clickband'), g = wrap.querySelector('.tl-markers');
+      if(!band || !g) return;
+      var chipsBox = wrap.parentNode.querySelector('.ak8-mark-chips');
+      var min = +g.dataset.min, max = +g.dataset.max, steg = +g.dataset.steg, padL = +g.dataset.padl, padR = +g.dataset.padr, W = +g.dataset.w, y = +g.dataset.y, span = max - min;
+      var NS = 'http://www.w3.org/2000/svg', sel = null;
+      function Xv(v){ return padL + (v - min) / span * (W - padL - padR); }
+      function fritt(chip){ chip.classList.remove('placed'); }
+      function taBort(mk){ var c = chipsBox.querySelector('.ak8-mark-chip[data-v="' + mk.dataset.target + '"]'); if(c) fritt(c); mk.remove(); }
+      function placera(v, chip){
+        var grp = document.createElementNS(NS, 'g'); grp.setAttribute('class', 'tl-marker'); grp.dataset.v = v; grp.dataset.target = chip.dataset.v;
+        var cx = Xv(v);
+        var c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', cx.toFixed(1)); c.setAttribute('cy', y); c.setAttribute('r', '6'); c.setAttribute('class', 'tl-marker-dot');
+        var t = document.createElementNS(NS, 'text'); t.setAttribute('x', cx.toFixed(1)); t.setAttribute('y', y - 13); t.setAttribute('class', 'tl-marker-txt'); t.textContent = chip.textContent;
+        grp.appendChild(c); grp.appendChild(t); g.appendChild(grp);
+        grp.addEventListener('click', function(ev){ ev.stopPropagation(); taBort(grp); });
+      }
+      chipsBox.querySelectorAll('.ak8-mark-chip').forEach(function(ch){ ch.onclick = function(){ if(ch.classList.contains('placed')) return; chipsBox.querySelectorAll('.ak8-mark-chip').forEach(function(o){ o.classList.remove('sel'); }); ch.classList.add('sel'); sel = ch; }; });
+      band.addEventListener('click', function(e){
+        if(!sel) return;
+        var rect = svg.getBoundingClientRect();
+        var val = ((e.clientX - rect.left) / rect.width * W - padL) / (W - padL - padR) * span + min;
+        var v = min + Math.round((val - min) / steg) * steg; v = Math.round(v * 1e6) / 1e6;
+        if(v < min) v = min; if(v > max) v = max;
+        Array.prototype.slice.call(g.querySelectorAll('.tl-marker')).forEach(function(mk){ if(Math.abs(+mk.dataset.v - v) < 1e-6) taBort(mk); });
+        placera(v, sel); sel.classList.add('placed'); sel.classList.remove('sel'); sel = null;
+      });
+    });
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount, blad); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
   }

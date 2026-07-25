@@ -67,6 +67,15 @@
   .ak8-avlas-rad{ display:flex; flex-wrap:wrap; gap:14px; margin:6px 0 4px; }
   .ak8-avlas-in{ display:inline-flex; align-items:center; gap:6px; font-size:16px; }
   .ak8-in-sm{ width:60px; height:32px; font-size:16px; }
+  /* markera-på-tallinjen */
+  .ak8-mark-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px; }
+  .ak8-mark-chip{ font-family:var(--serif); font-size:17px; background:#fff; border:1.5px solid var(--paper-dk); border-radius:8px; padding:6px 15px; cursor:pointer; }
+  .ak8-mark-chip.sel{ border-color:var(--navy); background:rgba(15,30,46,.08); }
+  .ak8-mark-chip.placed{ opacity:.35; text-decoration:line-through; cursor:default; }
+  .ak8-mark-wrap{ position:relative; max-width:640px; }
+  .tl-clickband{ cursor:pointer; } .tl-clickband:hover{ fill:rgba(47,110,160,.06); }
+  .tl-marker-dot{ fill:var(--blue); stroke:#fff; stroke-width:1.2; cursor:pointer; }
+  .tl-marker-txt{ fill:var(--blue); font-family:var(--serif); font-weight:600; font-size:14px; text-anchor:middle; cursor:pointer; }
   /* stående bråk */
   .ovn-brak{ display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; }
   .ovn-brak-taljare,.ovn-brak-namnare{ padding:0 8px 2px; font-size:17px; font-feature-settings:'tnum'; white-space:nowrap; }

@@ -37,6 +37,13 @@
       s += '<path class="tl-pt" d="M' + x.toFixed(1) + ' ' + (y - r) + ' L' + (x + r).toFixed(1) + ' ' + y + ' L' + x.toFixed(1) + ' ' + (y + r) + ' L' + (x - r).toFixed(1) + ' ' + y + ' Z"/>';
       s += '<text class="tl-pt-namn" x="' + x.toFixed(1) + '" y="' + (y - 14) + '">' + p.namn + '</text>';
     });
+    // klickbart läge (markera talen): transparent klickband över axeln + tom markörgrupp.
+    // Klick snäpps till närmaste delstreck i wiringen. Geometri sparas för positionering.
+    if(opts.klickbar){
+      s += '<rect class="tl-clickband" x="' + padL + '" y="' + (y - 16) + '" width="' + (W - padL - padR) + '" height="32" fill="transparent"/>';
+      s += '<g class="tl-markers" data-y="' + y + '" data-min="' + opts.min + '" data-max="' + opts.max + '" data-steg="' + steg
+        + '" data-padl="' + padL + '" data-padr="' + padR + '" data-w="' + W + '"></g>';
+    }
     return s + '</svg>';
   }
 
