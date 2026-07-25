@@ -558,6 +558,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/data/k2-taxonomi.js"></script>
 <script src="js/motor/ovamer/ovamer-k2.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-div.js"></script>
+<script src="js/motor/ovamer/ovamer-k2-mult.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-jmf.js"></script>
 <script src="js/motor/figur/svg-andel.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-andel.js"></script>
@@ -606,6 +607,7 @@ function blandadEngine(){
     'brak-forkorta': function(){ forkortaEngine(); },
     'brak-add':      function(){ raknaEngine('addition'); },
     'brak-sub':      function(){ raknaEngine('subtraktion'); },
+    'brak-mult-rakna': function(){ multBrakEngine(); },      // Del 6: multiplikation med bråk (mellanled vid stora tal)
     'brak-div-bh':   function(){ divBrakHeltalEngine(); },   // Del 7: bråktal ÷ heltal (bara svaret)
     'brak-div-hb':   function(){ divHeltalBrakEngine(); },   // Del 7: heltal ÷ bråktal (bara svaret)
     'brak-div-bb':   function(){ divBrakBrakEngine(); },     // Del 7: bråktal ÷ bråktal (visa metod)

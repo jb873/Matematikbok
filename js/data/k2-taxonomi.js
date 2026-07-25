@@ -271,9 +271,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-mult-rakna:rakna", "namn": "Multiplikation med bråk", "parent": "brak-mult-rakna", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
-      "begrepp": "Öva-bladet finns (blad-k2-d6.js); Färdighetstränings-drillen byggs i wiring-steget.",
-      "visning": null
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "multBrakEngine",
+      "begrepp": "Multiplicera bråk · bråk, heltal · bråk och blandad form; svar i enklaste/blandad form. Stora tal med förkortnings-mellanled.",
+      "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 0, "titel": "Multiplikation med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 7 · Division med bråk (öppen; FÖRDJUPNING i åk7) ───────────────
