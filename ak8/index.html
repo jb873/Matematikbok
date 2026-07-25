@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matematik · Grundskola</title>
-<link rel="stylesheet" href="fonts/fonts.css">
+<title>Matematik · Årskurs 8</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
 <style>
 /* ============================================================
    MATEMATIK · GEMENSAM STIL FÖR NAVIGATIONSSIDORNA
-   Delas av index.html, ak*.html och omrade-*.html
+   Speglad från ak7.html (år-översikt). Delar designspråket med index.html.
    ============================================================ */
 *{box-sizing:border-box;margin:0;padding:0}
 
@@ -104,7 +104,7 @@ h1.hero-title em{font-style:italic;color:var(--gold-lt);}
 }
 .section-label::after{content:'';flex:1;height:1px;background:var(--paper-dk);}
 
-/* ── KORT-GRID (områden, årskurser) ── */
+/* ── KORT-GRID (kapitel) ── */
 .card-grid{
   max-width:920px;margin:0 auto;padding:0 28px 56px;
   display:flex;flex-direction:column;gap:12px;
@@ -130,8 +130,6 @@ h1.hero-title em{font-style:italic;color:var(--gold-lt);}
 .nav-card:nth-child(6){animation-delay:.24s}
 .nav-card:nth-child(7){animation-delay:.28s}
 .nav-card:nth-child(8){animation-delay:.32s}
-.nav-card:nth-child(9){animation-delay:.36s}
-.nav-card:nth-child(10){animation-delay:.40s}
 
 .card-stripe{width:5px;flex-shrink:0;background:var(--blue);}
 .card-body{
@@ -163,48 +161,6 @@ h1.hero-title em{font-style:italic;color:var(--gold-lt);}
 .card-badge.soon{background:var(--paper-dk);color:var(--ink-faint);}
 .card-badge.prov{background:rgba(154,114,40,.12);color:var(--gold);}
 
-/* ── VÄGVAL (öva färdigheter / avsnitt) ── */
-.val-grid{
-  max-width:920px;margin:0 auto;padding:0 28px 56px;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;
-}
-.val-card{
-  background:var(--paper-lt);border:1px solid var(--paper-dk);border-radius:6px;
-  padding:30px 28px;text-decoration:none;color:inherit;
-  display:flex;flex-direction:column;position:relative;overflow:hidden;
-  transition:box-shadow .18s, transform .18s, border-color .18s;
-  animation:fadeUp .4s ease both;
-}
-.val-card:hover{
-  box-shadow:0 6px 24px rgba(0,0,0,.1);transform:translateY(-3px);
-  border-color:rgba(0,0,0,.12);
-}
-.val-card.is-soon{opacity:.6;cursor:default;pointer-events:none;}
-.val-card.is-soon:hover{transform:none;box-shadow:none}
-.val-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:4px;
-  background:var(--blue);
-}
-.val-card.accent-green::before{background:var(--green);}
-.val-icon{
-  font-size:30px;margin-bottom:14px;
-}
-.val-title{
-  font-family:var(--serif);font-size:25px;font-weight:500;
-  letter-spacing:-.01em;color:var(--ink);margin-bottom:8px;
-}
-.val-desc{font-size:14px;color:var(--ink-faint);line-height:1.6;flex:1;}
-.val-cta{
-  margin-top:18px;font-family:var(--cinzel);font-size:11px;font-weight:500;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--blue);
-  display:flex;align-items:center;gap:7px;
-}
-.val-card.accent-green .val-cta{color:var(--green);}
-.val-badge-soon{
-  margin-top:18px;font-family:var(--cinzel);font-size:11px;font-weight:500;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
-}
-
 /* ── FOOTER ── */
 footer{
   border-top:1px solid var(--paper-dk);padding:26px 28px;
@@ -226,70 +182,80 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   .topnav{padding:0 16px}
   .nav-crumbs{display:none}
 }
-
 </style>
 </head>
 <body>
 
 <nav class="topnav">
-  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Grundskola</span></div>
-  <div class="nav-crumbs"><span class="crumb-current">Matematikbok</span></div>
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 8</span></div>
+  <div class="nav-crumbs">
+    <a href="../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Årskurs 8</span>
+  </div>
 </nav>
 
 <header class="hero">
-  <div class="hero-eyebrow">Digitalt läromedel</div>
-  <h1 class="hero-title">Matematik för <em>grundskolan</em></h1>
-  <p class="hero-desc">Välj din årskurs för att komma till områdena, föreläsningarna och färdighetsträningen.</p>
+  <div class="hero-eyebrow">Årskurs 8</div>
+  <h1 class="hero-title">Matematik i <em>årskurs 8</em></h1>
+  <p class="hero-desc">Jobba med läsårets kapitel. Kapitel 1 – taluppfattning – är öppet; resten byggs under läsåret.</p>
+  <a class="hero-back" href="../index.html">← Byt årskurs</a>
 </header>
 
-<div class="section-label">Välj årskurs</div>
+<div class="section-label">Läsårets kapitel</div>
 
-<main class="card-grid">
-
-  <a class="nav-card" href="ak7.html">
-    <div class="card-stripe" style="background:var(--blue);"></div>
-    <div class="card-body">
-      <div class="card-num">Årskurs 7</div>
-      <div class="card-main">
-        <div class="card-title">Årskurs <em>7</em></div>
-        <div class="card-desc">Åtta kapitel – från positionssystem och räknesätt till bråk, algebra, geometri, procent och statistik.</div>
-      </div>
-      <div class="card-badge open">Öppen</div>
-      <div class="card-arrow">›</div>
-    </div>
-  </a>
-
-  <a class="nav-card" href="ak8/index.html">
-    <div class="card-stripe" style="background:var(--green);"></div>
-    <div class="card-body">
-      <div class="card-num">Årskurs 8</div>
-      <div class="card-main">
-        <div class="card-title">Årskurs <em>8</em></div>
-        <div class="card-desc">Taluppfattning öppet – repetition och negativa tal. Fler kapitel byggs under läsåret.</div>
-      </div>
-      <div class="card-badge open">Öppen</div>
-      <div class="card-arrow">›</div>
-    </div>
-  </a>
-
-  <div class="nav-card is-soon">
-    <div class="card-stripe" style="background:var(--gold);"></div>
-    <div class="card-body">
-      <div class="card-num">Årskurs 9</div>
-      <div class="card-main">
-        <div class="card-title">Årskurs <em>9</em></div>
-        <div class="card-desc">Byggs senare.</div>
-      </div>
-      <div class="card-badge soon">Kommer senare</div>
-    </div>
-  </div>
-
-</main>
+<main class="card-grid" id="kapitel-grid"></main>
 
 <footer>
   <div>Digitalt läromedel i matematik</div>
-  <span>Grundskola</span>
+  <span>Årskurs 8</span>
 </footer>
+
+<script>
+// Läsårets kapitel i åk 8. status: 'open' | 'soon' · typ: 'kapitel' | 'prov' styr färg/badge.
+// Prov-kapitlen (4, 8) har typ:'prov' redan nu (guld-stripe + Prov-badge); status flippar
+// till 'open' när proven byggs. Bara taluppfattning är öppen i dagsläget.
+var KAPITEL = [
+  {nr:1, titel:'Taluppfattning', desc:'Repetition av positionssystem och de fyra räknesätten, samt negativa tal.', fil:'k1/index.html', typ:'kapitel', status:'open'},
+  {nr:2, titel:'Algebra', desc:'Variabler, uttryck, mönster och att lösa ekvationer.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:3, titel:'Procent', desc:'Procentbegreppet, beräkningar med procent och samband mellan andel, del och det hela.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:4, titel:'Terminsprov', desc:'Prov på höstterminens kapitel, med repetition och självskattning.', fil:null, typ:'prov', status:'soon'},
+  {nr:5, titel:'Geometri', desc:'Area, omkrets, volym, vinklar och geometriska former.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:6, titel:'Sannolikhet och statistik', desc:'Sannolikhet, tabeller, diagram och lägesmått – att samla in, visa och tolka data.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:7, titel:'Samband', desc:'Proportionalitet, funktioner och grafer.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:8, titel:'Läsårsprov', desc:'Prov på hela läsårets kapitel, med repetition och självskattning.', fil:null, typ:'prov', status:'soon'}
+];
+
+var grid = document.getElementById('kapitel-grid');
+KAPITEL.forEach(function(k){
+  var stripe = k.typ === 'prov' ? 'var(--gold)' : 'var(--blue)';
+  var badge = k.status === 'open'
+    ? '<div class="card-badge open">Öppet</div><div class="card-arrow">›</div>'
+    : '<div class="card-badge ' + (k.typ === 'prov' ? 'prov' : 'soon') + '">'
+        + (k.typ === 'prov' ? 'Prov' : 'Kommer senare') + '</div>';
+  var inner =
+      '<div class="card-stripe" style="background:' + stripe + ';"></div>'
+    + '<div class="card-body">'
+      + '<div class="card-num">Kapitel ' + k.nr + '</div>'
+      + '<div class="card-main">'
+        + '<div class="card-title">' + k.titel + '</div>'
+        + '<div class="card-desc">' + k.desc + '</div>'
+      + '</div>'
+      + badge
+    + '</div>';
+  var el;
+  if(k.status === 'open' && k.fil){
+    el = document.createElement('a');
+    el.className = 'nav-card';
+    el.href = k.fil;
+  } else {
+    el = document.createElement('div');
+    el.className = 'nav-card is-soon';
+  }
+  el.innerHTML = inner;
+  grid.appendChild(el);
+});
+</script>
 
 </body>
 </html>
