@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Var står jag? · Taluppfattning</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/karta/karta.css">
+<link rel="stylesheet" href="../../../js/karta/sjalvskattning.css">
+<style>
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 26px;}
+  .tab{font-family:"Cinzel",serif;font-size:13px;letter-spacing:.04em;padding:12px 20px;border:0;background:none;color:var(--ink-soft);border-bottom:2px solid transparent;cursor:pointer;}
+  .tab.on{color:var(--ink);border-bottom-color:var(--ink);}
+  .panel{display:none;} .panel.on{display:block;}
+  .sj-intro{font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:66ch;margin:0 0 22px;}
+  .sj-intro em{font-style:italic;color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Kapitel 1 · Plugg till prov</p>
+  <h1>Var står jag?</h1>
+  <p class="lede">Två sätt att se samma sak. <em>Kartan</em> är evidens — färgad av det du faktiskt övat. <em>Självskattningen</em> är din egen bild. Där de möts syns bekräftelsen; där de skiljer sig syns vad som är värt att titta på.</p>
+
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-panel="karta">Karta</button>
+    <button class="tab" data-panel="sjalv">Självskattning</button>
+  </div>
+
+  <section class="panel on" data-panel="karta">
+    <div class="meter" id="meter"></div>
+    <div class="controls">
+      <span>Visa:</span>
+      <span class="seg" id="mal-seg">
+        <button data-mal="godkant">Godkänt (kärna)</button>
+        <button data-mal="allt">Allt</button>
+      </span>
+      <span class="controls-note" id="scope-note"></span>
+    </div>
+    <div class="karta"><div class="cols" id="cols"></div></div>
+    <div class="legend">
+      <span class="item"><span class="sw" style="background:#D14A40"></span>Ej tränat</span>
+      <span class="item"><span class="sw" style="background:#E08529"></span>Visat en gång</span>
+      <span class="item"><span class="sw" style="background:#E4BC34"></span>Flera gånger, spritt</span>
+      <span class="item"><span class="sw" style="background:#6BA544"></span>Befäst över tid</span>
+      <span class="item"><span class="sw" style="background:#EAE6DA"></span>Grått = framtid / bortvalt</span>
+      <span class="item">＋ breddning · ★ fördjupning</span>
+      <span class="item"><span class="roll stod">stöd</span> stödspår</span>
+    </div>
+    <p class="foot">Längst ut ligger lövnoderna — de enskilda färdigheterna. Färgen rullar <em>uppåt</em>: en förälder kan aldrig vara grönare än sin svagaste del.</p>
+    <p class="privacy" id="privacy"></p>
+  </section>
+
+  <section class="panel" data-panel="sjalv">
+    <p class="sj-intro">Markera för varje färdighet vad du själv tycker: <em>Kan</em>, <em>Osäker</em> eller <em>Kan ej</em>. Bredvid står evidensen — samma färg som kartan. Grön prick + <em>Kan</em> = bekräftat. Säger du <em>Kan</em> men prick­en är röd får du en pluggplan; säger du <em>Kan ej</em> men prick­en är grön är du bättre än du tror.</p>
+    <div id="sjalv-mount"></div>
+  </section>
+</div>
+
+<script src="../../../js/data/k1-taxonomi.js"></script>
+<script src="../../../js/mastery.js"></script>
+<script src="../../../js/karta/karta-motor.js"></script>
+<script src="../../../js/karta/sjalvskattning.js"></script>
+<script>
+  var K1CFG = { taxonomi: window.K1_TAXONOMI, arskurs:'ak7', malDefault:'godkant', minNiva:null,
+    prefKey:'k1.taluppfattning.pref.v1', ramPath:'../../../ak7-k1-ram.html' };
+  var karta = KartaMotor.montera(Object.assign({}, K1CFG, { mastery: window.Mastery, rotNamn:'Taluppfattning', orsakFramtid:'åk 8' }));
+  var sjalv = Sjalvskattning.montera(Object.assign({}, K1CFG, { mastery: window.Mastery, k1mastery: window.Mastery, beliefKey:'k1.taluppfattning.belief.v1', mountId:'sjalv-mount' }));
+  try{ if(new URLSearchParams(location.search).get('tab') === 'sjalv'){
+    document.querySelectorAll('#tabs .tab').forEach(function(t){ t.classList.toggle('on', t.dataset.panel==='sjalv'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.dataset.panel==='sjalv'); });
+  } }catch(e){}
+  document.querySelectorAll('#tabs .tab').forEach(function(tab){
+    tab.onclick = function(){
+      document.querySelectorAll('#tabs .tab').forEach(function(t){ t.classList.toggle('on', t===tab); });
+      document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.dataset.panel===tab.dataset.panel); });
+      if(tab.dataset.panel === 'karta') karta.render(); else sjalv.render();
+    };
+  });
+</script>
+</body>
+</html>
