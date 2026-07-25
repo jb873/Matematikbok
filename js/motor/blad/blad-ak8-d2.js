@@ -46,26 +46,37 @@
   function E(disp, exempel){ return { typ:'ekv', disp:disp, exempel:exempel }; }
   // Figur-platshållare (väntar på Joachim).
   function FIG(namn){ return { typ:'figur', namn:namn }; }
+  // Avläsning: SVG-tallinje(r) + fält "namn = __" per punkt. Positioner = facit (självkonsistent).
+  function LINJE(min, max, steg, etiketter, punkter){ return { min:min, max:max, steg:steg, etiketter:etiketter, punkter:punkter }; }
+  function PT(v, namn){ return { v:v, namn:namn }; }
+  function AVLAS(linjer){ return { typ:'avlas', linjer:linjer }; }
+  // Avstånd mellan punkter: par = [[namnA, namnB, vA, vB], …], facit = |vA − vB|.
+  function AVST(par){ return { typ:'avstand', par:par }; }
 
   // ─────────────────────────────────────────────────────────────
   //  BLAD A — GRUNDER (nod neg-begrepp:begrepp, repetition)
   // ─────────────────────────────────────────────────────────────
   var BLAD_A = { nr:1, titel:'Grunder', nod:'neg-begrepp:begrepp', uppg:[
-    FIG('Tallinje — Scala (1)'),
+    { rubrik:'Vilka tal motsvarar de olika bokstäverna?', rader:[ AVLAS([
+      LINJE(-8, 6, 1, [-5, 0, 5], [PT(-7,'D'), PT(-2,'C'), PT(1,'B'), PT(4,'A')]),
+      LINJE(-11, 2, 1, [-10, -5, 0], [PT(-8,'D'), PT(-5,'C'), PT(-1,'B'), PT(1,'A')]),
+      LINJE(-22, 4, 2, [-20, -10, 0], [PT(-18,'D'), PT(-12,'C'), PT(-4,'B'), PT(2,'A')]) ]) ] },
     { rubrik:'Vilket är det motsatta talet till', rader:[ T('2', -2), T('−3', 3), T('7', -7) ] },
     { rubrik:'Skriv talen i storleksordning, börja med det största', rader:[ O([3,-4,-7,5], false), O([0.2,-1.2,-0.2,1.2], false) ] },
     { rubrik:'Vilket tecken ska stå mellan talen, &gt; eller &lt;', rader:[ C('−4 ___ 3', ['&lt;','&gt;'], '&lt;'), C('−1,5 ___ −3,5', ['&lt;','&gt;'], '&gt;'), C('−4,5 ___ −2,9', ['&lt;','&gt;'], '&lt;') ] },
-    FIG('Tallinje — Scala (8)'),
+    { rubrik:'Vilka tal motsvarar de olika bokstäverna?', rader:[ AVLAS([
+      LINJE(-0.6, 0.6, 0.1, [-0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6], [PT(-0.4,'A'), PT(0.1,'B'), PT(0.5,'C')]) ]) ] },
+    { rubrik:'Hur långt är det mellan', rader:[ AVST([ ['A','B',-0.4,0.1], ['B','C',0.1,0.5], ['A','C',-0.4,0.5] ]) ] },
     { rubrik:'Skriv två tal som ligger mellan', rader:[
       V('1 och −4', 2, function(x){ return x > -4 && x < 1; }, 't.ex. 0 och −2'),
       V('−1 och −2', 2, function(x){ return x > -2 && x < -1; }, 't.ex. −1,3 och −1,7') ] },
-    FIG('Tallinje — Scala (11)'),
+    FIG('Markera talen 3, −3, 2,5, −0,5, −4,5 på tallinjen (−5 till 5)'),
     { rubrik:'Skriv de tre nästföljande talen i talföljden', rader:[
       { typ:'foljd', pre:'10, 7, 4,', facit:[1,-2,-5] },
       { typ:'foljd', pre:'−17, −13, −9,', facit:[-5,-1,3] } ] },
     { rubrik:'Vilket tal ligger mittemellan', rader:[ T('−3 och 1', -1), T('−5 och 4', -0.5), T('−7 och 3', -2) ] },
     { rubrik:'Temperaturen är −5 grader Celsius. Vad visar termometern om temperaturen', rader:[ T('ökar med 3 grader', -2), T('minskar med 4 grader', -9), T('ökar med 9 grader', 4) ] },
-    FIG('Tallinje att markera på — Scala (22)'),
+    FIG('Markera bråken ½, −½, ⅓, −⅓, ¼, −¼ på tallinjen'),
     { rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[ O([-2.3, 0, 5.1, 5.03, -2.34], true) ] }
   ] };
 
@@ -224,6 +235,21 @@
       });
       return '<div class="ak8-rad"><span class="ak8-q"><span class="ak8-svar" data-idx="' + idx + '" style="display:inline;">'
         + sida(delar[0], 0) + '<span class="ovn-text" style="margin:0 8px;">=</span>' + sida(delar[1], 1) + '</span></span></div>';
+    }
+    if(r.typ === 'avlas'){
+      var varden = [], html = '';
+      r.linjer.forEach(function(lin, li){
+        var pre = r.linjer.length > 1 ? '<span class="ak8-linje-nr">' + 'abc'.charAt(li) + ')</span>' : '';
+        html += '<div class="ak8-tallinje">' + pre + (window.SvgTallinje ? window.SvgTallinje.linje(lin) : '') + '</div>';
+        html += '<div class="ak8-avlas-rad">' + lin.punkter.map(function(p){ varden.push(p.v); return '<span class="ak8-avlas-in">' + p.namn + ' = <input class="ak8-in ak8-in-sm"></span>'; }).join('') + '</div>';
+      });
+      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, fac = []; varden.forEach(function(v, i){ if(!likhetOk(pNum(ins[i].value), v)) ok = false; fac.push(fmt(v)); }); return { ok: ok, facit: fac.join(', ') }; });
+      return '<div class="ak8-rad ak8-rad-fig"><span class="ak8-svar" data-idx="' + idx + '">' + html + '</span></div>';
+    }
+    if(r.typ === 'avstand'){
+      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, fac = []; r.par.forEach(function(pp, i){ var d = Math.round(Math.abs(pp[2] - pp[3]) * 1e6) / 1e6; if(!likhetOk(pNum(ins[i].value), d)) ok = false; fac.push(fmt(d)); }); return { ok: ok, facit: fac.join(', ') }; });
+      var h2 = r.par.map(function(pp){ return '<span class="ak8-avlas-in">' + pp[0] + ' och ' + pp[1] + ': <input class="ak8-in ak8-in-sm"></span>'; }).join('');
+      return '<div class="ak8-rad"><span class="ak8-svar" data-idx="' + idx + '">' + h2 + '</span></div>';
     }
     if(r.typ === 'figur'){
       return '<div class="ak8-figur">▨ Figur: <strong>' + r.namn + '</strong> — SVG byggs när Joachim specificerat den.</div>';

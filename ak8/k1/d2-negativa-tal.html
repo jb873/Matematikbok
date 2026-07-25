@@ -55,6 +55,18 @@
   .ak8-flagg{ color:var(--gold); cursor:help; font-size:15px; margin-left:6px; }
   .ak8-vantar{ font-size:13px; font-style:italic; color:var(--gold); }
   .ak8-figur{ display:flex; align-items:center; gap:8px; margin:14px 0; padding:14px 16px; border:1px dashed var(--gold-lt); border-radius:8px; color:var(--ink-faint); font-size:14px; font-style:italic; background:rgba(154,114,40,.04); }
+  /* tallinje-figur (avläsning) */
+  .ak8-rad-fig{ flex-direction:column; align-items:stretch; }
+  .ak8-rad-fig .ak8-svar{ display:block; width:100%; }
+  .ak8-tallinje{ margin:12px 0 2px; }
+  .ak8-tallinje .tl-svg{ width:100%; max-width:640px; height:auto; display:block; }
+  .ak8-linje-nr{ font-weight:600; font-size:15px; margin-bottom:-6px; }
+  .tl-axis,.tl-tick{ stroke:var(--ink); stroke-width:1.6; } .tl-arrow{ fill:var(--ink); }
+  .tl-label{ fill:var(--ink-soft); font-family:var(--serif); font-size:13px; text-anchor:middle; }
+  .tl-pt{ fill:var(--gold); stroke:#fff; stroke-width:1; } .tl-pt-namn{ fill:var(--navy); font-family:var(--serif); font-weight:600; font-size:14px; text-anchor:middle; }
+  .ak8-avlas-rad{ display:flex; flex-wrap:wrap; gap:14px; margin:6px 0 4px; }
+  .ak8-avlas-in{ display:inline-flex; align-items:center; gap:6px; font-size:16px; }
+  .ak8-in-sm{ width:60px; height:32px; font-size:16px; }
   /* stående bråk */
   .ovn-brak{ display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; }
   .ovn-brak-taljare,.ovn-brak-namnare{ padding:0 8px 2px; font-size:17px; font-feature-settings:'tnum'; white-space:nowrap; }
@@ -128,6 +140,7 @@
 
 <!-- Blad-kärnan (fracSpan/fracRuta) + d2-bladen. Motorer orörda. -->
 <script src="../../js/motor/blad/blad-karna.js"></script>
+<script src="../../js/motor/figur/svg-tallinje.js"></script>
 <script src="../../js/motor/blad/blad-ak8-d2.js"></script>
 <script>
 (function(){
