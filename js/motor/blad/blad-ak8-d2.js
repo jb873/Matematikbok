@@ -41,6 +41,9 @@
   function M(exprHtml, posSum, negSum, svar, flagg){ return { typ:'mellan', expr:exprHtml, posSum:posSum, negSum:negSum, svar:svar, flagg:flagg }; }
   // Villkors-validering (öppet svar, många rätta): test-funktion. Platshållare om test=null.
   function V(kravHtml, antal, test, exempel){ return { typ:'villkor', krav:kravHtml, antal:antal, test:test, exempel:exempel }; }
+  // Teckenekvation: sätt in ett tecken (+ − × /) i varje ruta så att leden blir lika.
+  // disp = 'A ___ B = C ___ D' (två rutor). Flera lösningar accepteras (validering).
+  function E(disp, exempel){ return { typ:'ekv', disp:disp, exempel:exempel }; }
   // Figur-platshållare (väntar på Joachim).
   function FIG(namn){ return { typ:'figur', namn:namn }; }
 
@@ -78,7 +81,7 @@
     { rubrik:'Beräkna med mellanled', hint:'Samla de positiva talen först. Exempel: 6 − 12 + 8 = 14 − 12 = 2', rader:[
       M('3 − 15 + 17', 20, 15, 5),
       M('18 − 35 − 65', 18, 100, -82),
-      M('−2 + 0,7 + 0,3', 1, 2, -1, 'facit i transkriptionen var 1 — rätt är −1 (bekräftas)'),
+      M('−2 + 0,7 + 0,3', 1, 2, -1),
       M('0,6 − 0,8 + 0,5', 1.1, 0.8, 0.3) ] },
     { rubrik:'Vilket tal ska stå i den tomma rutan', rader:[ T('6 − □ = −2', 8), T('□ + 5 = 3', -2), T('−3 + □ = 11', 14), T('□ − 5 = −10', -5) ] },
     { rubrik:'Beräkna', rader:[
@@ -87,17 +90,17 @@
       B(neg(frac(1,4)) + ' <span class="ovn-text">+</span> ' + frac(4,5) + ' =', 11, 20) ] },
     { rubrik:'Vilket tal är', rader:[ T('6 tiondelar större än −10,5', -9.9), T('6 tiondelar mindre än −10,5', -11.1), T('6 hundradelar mindre än −10,5', -10.56), T('6 hundradelar större än −10,5', -10.44) ] },
     { grupp:'Blad B2' },
-    { rubrik:'Beräkna', rader:[ T('−5 − (−7) =', 2), T('−7 − (12) =', -19, 'parentes utan tecken — avsikt bekräftas'), T('−4 + (−11) =', -15), T('−0,9 − (−3) =', 2.1) ] },
+    { rubrik:'Beräkna', rader:[ T('−5 − (−7) =', 2), T('−7 − (−12) =', 5), T('−4 + (−11) =', -15), T('−0,9 − (−3) =', 2.1) ] },
     { rubrik:'Vilket tal saknas', rader:[ T('7 + □ = 3', -4), T('6 − □ = 13', -7), T('5 + □ = −1', -6) ] },
     { rubrik:'Beräkna', rader:[ T('17 − (−8) =', 25), T('4 + (−11) =', -7), T('(−6) + (−2,5) =', -8.5), T('(−7) − (−4) =', -3) ] },
     { rubrik:'Vilket tecken ska stå i rutan för att likheten ska stämma (+ eller −)', rader:[
       C('5 ___ (−3) = 2', ['+','−'], '+'), C('(−7) ___ 9 = −16', ['+','−'], '−'), C('(−8) ___ (−2) = −6', ['+','−'], '−'),
       C(neg(frac(1,2)) + ' ___ (' + neg(frac(1,4)) + ') = ' + neg(frac(1,4)), ['+','−'], '−') ] },
     { rubrik:'Beräkna', rader:[ T('5 − (−3) + (−4) =', 4), T('6 + (−9) − (−6) + 2 =', 5), T('−9 − (−3) + (−6) =', -12) ] },
-    { rubrik:'Skriv in ett tecken så att uttrycken blir lika (+ − × /)', villkorNot:true, rader:[
-      V('3 ___ (−4) = (−2) ___ 9', null, null, null),
-      V('(−6) − (−8) ___ 7 = 12 + (−17) ___ 14', null, null, null),
-      V('(−2,5) ___ (−4) + 5 = 7,5 − (−9) ___ 18', null, null, null) ] }
+    { rubrik:'Skriv in ett tecken så att uttrycken blir lika (+ − × /)', rader:[
+      E('3 ___ (−4) = (−2) ___ 9', '3 − (−4) = (−2) + 9'),
+      E('(−6) − (−8) ___ 7 = 12 + (−17) ___ 14', '(−6) − (−8) + 7 = 12 + (−17) + 14'),
+      E('(−2,5) ___ (−4) + 5 = 7,5 − (−9) ___ 18', '(−2,5) + (−4) + 5 = 7,5 − (−9) − 18') ] }
   ] };
 
   // ─────────────────────────────────────────────────────────────
@@ -115,7 +118,7 @@
     { rubrik:'Beräkna', rader:[ T('13 + 2 · (−5) =', 3), T('8 + ' + frac(15,-3) + ' =', 3), T('(−3) · (−5) − 8 =', 7), T(frac(-18,-3) + ' + (−4) =', 2) ] },
     { grupp:'Blad C2' },
     { rubrik:'Beräkna', rader:[
-      T(frac('1888 · 8','−6') + ' =', null, 'trolig felskrivning (frac(18·8, −6)?) — bekräftas'),
+      T(frac('4 · 9','−6') + ' =', -6),
       T(frac('3 · (−12)','(−4) · (−5)') + ' =', -1.8), T(frac('4 · (−8)','(−2) · 2') + ' =', 8) ] },
     { rubrik:'Beräkna', rader:[ T('(−2) · 6 · (−3) =', 36), T('(−4) · (−8) · (−3) =', -96), T('(−11) · (−3) · 5 =', 165) ] },
     { rubrik:'Vilket tecken ska stå mellan talen? &lt; eller &gt; eller =', rader:[
@@ -144,6 +147,25 @@
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   // data-val avkodas av webbläsaren (&lt; → <); facit i datan är entity-form för display.
   function unesc(s){ return String(s).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'); }
+
+  // Liten aritmetik-utvärderare (+ − × / parenteser, unärt minus) — ingen eval.
+  function evalArith(s){
+    s = String(s).replace(/−/g, '-').replace(/[·×]/g, '*').replace(/÷/g, '/').replace(/,/g, '.').replace(/\s+/g, '');
+    var i = 0;
+    function expr(){ var v = term(); while(s[i] === '+' || s[i] === '-'){ var op = s[i++]; var t = term(); v = op === '+' ? v + t : v - t; } return v; }
+    function term(){ var v = factor(); while(s[i] === '*' || s[i] === '/'){ var op = s[i++]; var f = factor(); v = op === '*' ? v * f : v / f; } return v; }
+    function factor(){
+      if(s[i] === '+'){ i++; return factor(); }
+      if(s[i] === '-'){ i++; return -factor(); }
+      if(s[i] === '('){ i++; var v = expr(); if(s[i] === ')') i++; return v; }
+      var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]);
+    }
+    var r = expr();
+    return i === s.length ? r : NaN;
+  }
+  // Teckenchips för ekvation: display + JS-operator.
+  var EKV_OPS = [['+','+'], ['−','-'], ['×','*'], ['÷','/']];
+  function ekvChips(){ return EKV_OPS.map(function(o){ return '<button type="button" class="ak8-chip" data-op="' + o[1] + '">' + o[0] + '</button>'; }).join(''); }
 
   function renderRad(r){
     var idx = CHECKS.length;
@@ -191,6 +213,18 @@
       var boxar2 = []; for(var i = 0; i < r.antal; i++) boxar2.push(inTal());
       return '<div class="ak8-rad"><span class="ak8-q">' + r.krav + '</span><span class="ak8-svar" data-idx="' + idx + '">' + boxar2.join('<span class="ovn-text" style="margin:0 6px;">och</span>') + '</span></div>';
     }
+    if(r.typ === 'ekv'){
+      var delar = r.disp.split('=');
+      function sida(txt, slot){ var seg = txt.split('___'); return seg[0] + '<span class="ak8-ekvslot" data-slot="' + slot + '">' + ekvChips() + '</span>' + (seg[1] || ''); }
+      CHECKS.push(function(el){
+        var slots = el.querySelectorAll('.ak8-ekvslot'), ops = [];
+        for(var s = 0; s < slots.length; s++){ var sel = slots[s].querySelector('.ak8-chip.sel'); if(!sel) return { ok:false, facit:r.exempel, chip:true }; ops.push(sel.dataset.op); }
+        var L = evalArith(delar[0].replace('___', ops[0])), R = evalArith(delar[1].replace('___', ops[1]));
+        return { ok: isFinite(L) && isFinite(R) && Math.abs(L - R) < 1e-9, facit: 't.ex. ' + r.exempel, chip:true };
+      });
+      return '<div class="ak8-rad"><span class="ak8-q"><span class="ak8-svar" data-idx="' + idx + '" style="display:inline;">'
+        + sida(delar[0], 0) + '<span class="ovn-text" style="margin:0 8px;">=</span>' + sida(delar[1], 1) + '</span></span></div>';
+    }
     if(r.typ === 'figur'){
       return '<div class="ak8-figur">▨ Figur: <strong>' + r.namn + '</strong> — SVG byggs när Joachim specificerat den.</div>';
     }
@@ -210,7 +244,7 @@
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button></div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
     mount.innerHTML = html;
     // interaktioner
-    mount.querySelectorAll('.ak8-teckenslot .ak8-chip').forEach(function(ch){ ch.onclick = function(){ if(ch.className.indexOf('ratt') > -1 || ch.className.indexOf('fel') > -1) return; ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.remove('sel'); }); ch.classList.add('sel'); }; });
+    mount.querySelectorAll('.ak8-teckenslot .ak8-chip, .ak8-ekvslot .ak8-chip').forEach(function(ch){ ch.onclick = function(){ if(ch.className.indexOf('ratt') > -1 || ch.className.indexOf('fel') > -1) return; ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.remove('sel'); }); ch.classList.add('sel'); }; });
     mount.querySelectorAll('.ak8-ordna').forEach(function(rad){ rad.querySelectorAll('.ak8-tal').forEach(function(b){ b.onclick = function(){ if(b.style.pointerEvents === 'none') return; if(b.classList.contains('sel')){ b.classList.remove('sel'); b.querySelector('.ak8-ordnr') && b.querySelector('.ak8-ordnr').remove(); } else { var n = rad.querySelectorAll('.ak8-tal.sel').length + 1; b.classList.add('sel'); var s = document.createElement('span'); s.className = 'ak8-ordnr'; s.textContent = n; b.appendChild(s); } }; }); });
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount, blad); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
