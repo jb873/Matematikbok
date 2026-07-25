@@ -1175,7 +1175,8 @@ window.K1_TAXONOMI = {
       "parent": "mult-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1198,7 +1199,8 @@ window.K1_TAXONOMI = {
       "parent": "mult-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1221,7 +1223,8 @@ window.K1_TAXONOMI = {
       "parent": "mult-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1244,7 +1247,8 @@ window.K1_TAXONOMI = {
       "parent": "mult-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1458,7 +1462,8 @@ window.K1_TAXONOMI = {
       "parent": "div-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1481,7 +1486,8 @@ window.K1_TAXONOMI = {
       "parent": "div-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1504,7 +1510,8 @@ window.K1_TAXONOMI = {
       "parent": "div-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1527,7 +1534,8 @@ window.K1_TAXONOMI = {
       "parent": "div-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak8": "repetition"
       },
       "roll": "karna",
       "formaga": "RAKNA",

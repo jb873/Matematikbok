@@ -174,14 +174,16 @@ const OVERRIDES = {
   // Del 5/6/7 — Beräkningar-kategorier utbrutna ur mult-rakna/div-rakna till egna
   // färdigheter. visning.formagaKey = kategori-nyckeln → deeplink ?formaga=<kat> loggar
   // till just denna nod (mult-rakna:pow10 etc.), så kartan skiljer Del 5/6/7 åt.
-  'mult-rakna:pow10':    { visning:{ utbudslista:'d5', grupp:'Räkna med 10, 100 och 1000', gruppordning:0, radordning:0, titel:'Multiplikation med 10, 100 och 1000', etikett:'räkna', formagaKey:'pow10', niva:null } },
-  'div-rakna:pow10':     { visning:{ utbudslista:'d5', grupp:'Räkna med 10, 100 och 1000', gruppordning:0, radordning:1, titel:'Division med 10, 100 och 1000', etikett:'räkna', formagaKey:'pow10', niva:null } },
-  'mult-rakna:stora':    { visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:0, titel:'Stora tal', etikett:'räkna', formagaKey:'stora', niva:null } },
-  'mult-rakna:sma':      { visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:1, titel:'Små tal', etikett:'räkna', formagaKey:'sma', niva:null } },
-  'mult-rakna:storasma': { visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:2, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
-  'div-rakna:stora':     { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:0, titel:'Stora tal', etikett:'räkna', formagaKey:'stora', niva:null } },
-  'div-rakna:storasma':  { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:1, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
-  'div-rakna:sma':       { visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:2, titel:'Små tal – förlängning', etikett:'räkna', formagaKey:'sma', niva:null } },
+  // Del 5/6/7-räkna-noderna repeteras i åk8 delkapitel 1 (fyra mult/div-blad). {ak8:repetition}
+  // — grönt från sjuan ärvs (repetition, ingen ny ribba; höjt talområde är extra träning i Öva-bladen).
+  'mult-rakna:pow10':    { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d5', grupp:'Räkna med 10, 100 och 1000', gruppordning:0, radordning:0, titel:'Multiplikation med 10, 100 och 1000', etikett:'räkna', formagaKey:'pow10', niva:null } },
+  'div-rakna:pow10':     { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d5', grupp:'Räkna med 10, 100 och 1000', gruppordning:0, radordning:1, titel:'Division med 10, 100 och 1000', etikett:'räkna', formagaKey:'pow10', niva:null } },
+  'mult-rakna:stora':    { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:0, titel:'Stora tal', etikett:'räkna', formagaKey:'stora', niva:null } },
+  'mult-rakna:sma':      { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:1, titel:'Små tal', etikett:'räkna', formagaKey:'sma', niva:null } },
+  'mult-rakna:storasma': { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d6', grupp:'Multiplikation med stora och små tal', gruppordning:0, radordning:2, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
+  'div-rakna:stora':     { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:0, titel:'Stora tal', etikett:'räkna', formagaKey:'stora', niva:null } },
+  'div-rakna:storasma':  { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:1, titel:'Stora och små tal', etikett:'räkna', formagaKey:'storasma', niva:null } },
+  'div-rakna:sma':       { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d7', grupp:'Division med stora och små tal', gruppordning:0, radordning:2, titel:'Små tal – förlängning', etikett:'räkna', formagaKey:'sma', niva:null } },
   // Del 8 — Avrundning och överslag: generatorerna finns, bind dem till d8:s Färdighetsträning.
   'avr-avrundning:begrepp': { visning:{ utbudslista:'d8', grupp:'Avrundning och överslag', gruppordning:0, radordning:0, titel:'Avrundning', etikett:'begrepp', formagaKey:null, niva:null } },
   'avr-overslag:rakna':     { visning:{ utbudslista:'d8', grupp:'Avrundning och överslag', gruppordning:0, radordning:1, titel:'Överslagsräkning', etikett:'räkna', formagaKey:'rakna', niva:null } },

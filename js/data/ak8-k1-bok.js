@@ -15,6 +15,18 @@ window.AK8_K1_BOK = {
   titel: 'Tal och tals användning',          // ⚠️ kapiteltitel bekräftas av Joachim
   delkapitel: [
     {
+      nr: 1, id: 'd1', titel: 'Repetition: positionssystem och fyra räknesätt', fil: 'd1-repetition.html', status: 'bygger',
+      // Fyra av åtta blad byggda (mult/div ur Joachims fyra docx). De fyra andra
+      // (positionssystem, addition, subtraktion, …) väntar på kapitel-listan.
+      // Noderna är sjuans Del 5/6/7 med {ak8:repetition} (OVERRIDES) — single-source.
+      blad: [
+        { nr: 1, titel: 'Multiplikation och division med 10, 100 och 1000', roll: 'repetition', noder: ['mult-rakna:pow10', 'div-rakna:pow10'] },
+        { nr: 2, titel: 'Multiplicera och dividera med små tal',             roll: 'repetition', noder: ['mult-rakna:sma', 'div-rakna:sma'] },
+        { nr: 3, titel: 'Multiplicera och dividera med stora tal',           roll: 'repetition', noder: ['mult-rakna:stora', 'div-rakna:stora'] },
+        { nr: 4, titel: 'Multiplicera och dividera med stora och små tal',   roll: 'repetition', noder: ['mult-rakna:storasma', 'div-rakna:storasma'] }
+      ]
+    },
+    {
       nr: 2, id: 'd2', titel: 'Negativa tal', fil: 'd2-negativa-tal.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Grunder',                     roll: 'repetition', noder: ['neg-begrepp:begrepp'] },
