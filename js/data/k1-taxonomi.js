@@ -344,7 +344,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderUtveckladMetod",
       "begrepp": "Skriv talet i utvecklad form steg för steg.",
@@ -450,7 +450,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderPrimtalMetod",
       "begrepp": "Bygg faktorträd – välj själv hur du delar upp.",
@@ -787,7 +787,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderAddMetod",
       "begrepp": "Lär dig och välj bland additionsmetoderna.",
@@ -949,7 +949,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderSubMetod",
       "begrepp": "Lär dig och välj bland subtraktionsmetoderna.",
@@ -1060,7 +1060,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderPrimtalMetod",
       "begrepp": "Bygg ett faktorträd och hitta primtalsfaktorerna.",
@@ -1125,7 +1125,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Lär dig och välj bland flera multiplikationsmetoder.",
@@ -1408,7 +1408,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderDivMetoder",
       "begrepp": "Lär dig och öva kort och lång division.",
@@ -1663,7 +1663,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "roll": "karna",
       "formaga": "METOD",
       "generator": "renderPrioMetod",
       "begrepp": "Visa metoden steg för steg – räkna nedåt rad för rad.",

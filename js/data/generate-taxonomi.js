@@ -197,7 +197,20 @@ const OVERRIDES = {
 
   // Negativa tal — neg-rakna delad (åk8-strukturpilot). add/sub = repetition åk8; mult/div = mål åk8.
   'neg-rakna:addsub':  { arskursRelevans:{ ak7:'mal', ak8:'repetition' }, visning:{ utbudslista:'d3', grupp:'Negativa tal', gruppordning:0, radordning:1, titel:'Räkna: addition och subtraktion', etikett:'räkna', formagaKey:'addsub', niva:null } },
-  'neg-rakna:multdiv': { arskursRelevans:{ ak7:'mal', ak8:'mal' },        visning:{ utbudslista:'d3', grupp:'Negativa tal', gruppordning:0, radordning:2, titel:'Räkna: multiplikation och division', etikett:'räkna', formagaKey:'multdiv', niva:null } }
+  'neg-rakna:multdiv': { arskursRelevans:{ ak7:'mal', ak8:'mal' },        visning:{ utbudslista:'d3', grupp:'Negativa tal', gruppordning:0, radordning:2, titel:'Räkna: multiplikation och division', etikett:'räkna', formagaKey:'multdiv', niva:null } },
+
+  // Roll-korrigering (Joachims review): primär-metoden per räknesätt är GOLVET (kärna), inte
+  // breddning. Migreringens default (kat METOD → breddning) drog med sådant som krävs för
+  // godkänt. De sekundära metoderna (flytta över, addition bakifrån, dubbelparentes, liggande
+  // stolen) bor kvar i samma drill. Faktorträd + utvecklad form = golvet (bekräftat).
+  'add-metoder:metod':       { roll:'karna' },
+  'sub-metoder:metod':       { roll:'karna' },
+  'mult-begrepp:metod':      { roll:'karna' },
+  'mult-metoder:metod':      { roll:'karna' },
+  'div-metoder:metod':       { roll:'karna' },
+  'prio-prioritering:metod': { roll:'karna' },
+  'primtal:metod':           { roll:'karna' },
+  'utvecklad:metod':         { roll:'karna' }
 };
 for(const n of noder){
   const o = OVERRIDES[n.id];
