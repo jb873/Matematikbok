@@ -1,0 +1,49 @@
+/* karta.css — delad stil för begreppskartan (k1 åk7/åk8 + k2). En källa. */
+:root{ --paper:#F5F1E8; --card:#FBF9F3; --ink:#33302A; --ink-soft:#6B675E; --line:#DAD4C6; --line-soft:#E7E1D4; }
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 26px 60px;}
+.eyebrow{font-family:"Cinzel",serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px;}
+h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:52px;line-height:1;margin:0 0 12px;}
+.lede{font-size:16.5px;line-height:1.6;color:var(--ink-soft);max-width:64ch;margin:0 0 22px;}
+.lede em{font-style:italic;color:var(--ink);}
+
+/* Mätare (X av Y) */
+.meter{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:0 0 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.meter-tal{font-family:"Cormorant Garamond",serif;font-size:34px;font-weight:600;line-height:1;white-space:nowrap;}
+.meter-tal small{font-family:"Source Serif 4",serif;font-size:14px;color:var(--ink-soft);font-weight:400;margin-left:4px;}
+.meter-bar{flex:1;min-width:180px;height:12px;background:#EAE6DA;border-radius:99px;overflow:hidden;}
+.meter-fill{height:100%;background:#6BA544;border-radius:99px;transition:width .4s ease;}
+.meter-txt{font-size:13.5px;color:var(--ink-soft);}
+
+/* Kontroller */
+.controls{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:0 0 18px;font-size:14px;color:var(--ink-soft);}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card);}
+.seg button{font-family:inherit;font-size:13.5px;padding:7px 14px;border:0;background:transparent;color:var(--ink-soft);cursor:pointer;}
+.seg button.on{background:var(--ink);color:#fff;}
+
+/* Kart-kolumner (drill vänster→höger) */
+.karta{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;overflow-x:auto;}
+.cols{display:flex;gap:26px;align-items:flex-start;min-width:max-content;}
+.col{display:flex;flex-direction:column;gap:9px;min-width:190px;}
+.col-rubrik{font-family:"Cinzel",serif;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:2px 0 4px 2px;}
+.node{display:flex;align-items:center;gap:9px;text-align:left;width:100%;border-radius:10px;padding:11px 13px;border:1.5px solid;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:500;line-height:1.25;transition:transform .12s, box-shadow .12s;}
+.node:hover{transform:translateX(2px);box-shadow:0 3px 12px rgba(0,0,0,.08);}
+.node.sel{box-shadow:0 0 0 3px rgba(51,48,42,.18);}
+.node .txt{flex:1;}
+.node .chev{opacity:.7;font-size:15px;}
+.node .roll{font-size:12px;opacity:.9;flex:0 0 auto;}
+.node .roll.stod{font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#E7E1D4;color:#6B675E;padding:2px 8px;border-radius:99px;opacity:1;}
+.node.root{font-family:"Cormorant Garamond",serif;font-size:19px;font-weight:600;}
+.node.gra{cursor:default;}
+.node.gra:hover{transform:none;box-shadow:none;}
+.node.nolink{cursor:default;}
+.node.nolink:hover{transform:none;box-shadow:none;}
+.gra-orsak{font-size:11px;font-style:italic;opacity:.85;margin-left:6px;}
+
+.legend{display:flex;flex-wrap:wrap;gap:20px;align-items:center;margin:18px 0 0;font-size:14px;color:var(--ink-soft);}
+.legend .item{display:flex;align-items:center;gap:8px;}
+.sw{width:15px;height:15px;border-radius:5px;flex:0 0 auto;border:1px solid rgba(0,0,0,.12);}
+.foot{margin-top:20px;font-size:14px;line-height:1.6;color:var(--ink-soft);max-width:68ch;}
+.foot em{font-style:italic;color:var(--ink);}
+.privacy{margin-top:14px;font-size:12.5px;color:var(--ink-soft);border-left:3px solid var(--line);padding:2px 0 2px 12px;}

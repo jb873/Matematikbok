@@ -324,6 +324,58 @@ window.K2_TAXONOMI = {
       "begrepp": "Visa hela metoden (komplext bråk → × inverterade nämnaren → förkorta → svar) för bråk delat med bråk.",
       "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 2, "titel": "Bråktal ÷ bråktal (visa metod)", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
+    /* SYSTER-NOD (täckningsrapport, godkänd): invertera direkt — den kortare vägen utan
+       femstegskedjan, för elever som förstått VARFÖR inverteringen fungerar. Egen nod →
+       egen logg (deeplink ?ko=brak-div-inv&formaga=rakna). roll fordjupning, ak7 endast. */
+    {
+      "id": "brak-div-inv", "namn": "Dividera bråktal med bråktal (invertera)", "parent": "brak-div", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Den kortare vägen: invertera nämnaren och multiplicera direkt – utan den utskrivna femstegskedjan. Kortare kommunikation som tecken på djupare förståelse, inte genväg.",
+      "visning": null
+    },
+    {
+      "id": "brak-div-inv:rakna", "namn": "Dividera bråktal med bråktal (invertera)", "parent": "brak-div-inv", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakBrak",
+      "begrepp": "Invertera nämnaren och multiplicera direkt; svar i enklaste form. Ingen utskriven femstegskedja krävs.",
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 3, "titel": "Bråktal ÷ bråktal (invertera)", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+
+    /* ─────────────── Fördjupnings-strand · bråk och variabler (åk7-fördjupning) ───────────────
+       Avsiktlig sträckning för de bästa eleverna redan i sjuan (täckningsrapport punkt 2).
+       Syns i självskattningen/kartan som fördjupning (★), scopas in för den som väljer "allt",
+       grå på godkänt-vägen. generator:null → ännu ej drillbara (concept-rader); belief kan ändå
+       självskattas, evidens tom. Byggs som drillar när metod-medveten rättning mognat. */
+    {
+      "id": "brak-fordjup", "namn": "Fördjupning: bråk och variabler", "parent": null, "niva": "omrade",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Faktorisera och bryta ut i bråkmiljö, och räkna med bråk som innehåller variabler – en strand för den som vill sträcka sig.",
+      "grupp": "brak", "implemented": true
+    },
+    {
+      "id": "fordjup-variabler", "namn": "Bråk med variabler", "parent": "brak-fordjup", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Förenkla och dividera bråk som innehåller variabler.", "visning": null
+    },
+    {
+      "id": "fordjup-variabler:rakna", "namn": "Dividera och förenkla bråk med variabler", "parent": "fordjup-variabler", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Dividera bråk med variabler och förenkla uttryck i bråkform.", "visning": null
+    },
+    {
+      "id": "fordjup-brytut", "namn": "Faktorisera och bryta ut", "parent": "brak-fordjup", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "begrepp": "Bryta ut gemensamma faktorer (även med variabler, potensform och nämnare) och använda konjugat-/kvadreringsregeln.", "visning": null
+    },
+    {
+      "id": "fordjup-brytut:resonera", "namn": "Bryta ut gemensamma faktorer", "parent": "fordjup-brytut", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Bryt ut gemensam faktor ur uttryck – med variabler, potensform och nämnare.", "visning": null
+    },
+    {
+      "id": "fordjup-brytut:konjugat", "namn": "Konjugat- och kvadreringsregeln", "parent": "fordjup-brytut", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Återskapa parenteser med konjugatregeln och kvadreringsreglerna.", "visning": null
+    },
 
     /* ─────────────── Del 8 · Problemlösning (kommer senare) ─────────────── */
     {

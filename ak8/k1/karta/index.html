@@ -5,58 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Begreppskarta · Åk 8 · Kapitel 1</title>
 <link rel="stylesheet" href="../../../fonts/fonts.css">
-<style>
-  :root{ --paper:#F5F1E8; --card:#FBF9F3; --ink:#33302A; --ink-soft:#6B675E; --line:#DAD4C6; --line-soft:#E7E1D4; }
-  *{box-sizing:border-box;}
-  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;-webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1080px;margin:0 auto;padding:40px 26px 60px;}
-  .eyebrow{font-family:"Cinzel",serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px;}
-  h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:52px;line-height:1;margin:0 0 12px;}
-  .lede{font-size:16.5px;line-height:1.6;color:var(--ink-soft);max-width:64ch;margin:0 0 22px;}
-  .lede em{font-style:italic;color:var(--ink);}
-
-  /* Mätare (X av Y) */
-  .meter{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:0 0 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-  .meter-tal{font-family:"Cormorant Garamond",serif;font-size:34px;font-weight:600;line-height:1;white-space:nowrap;}
-  .meter-tal small{font-family:"Source Serif 4",serif;font-size:14px;color:var(--ink-soft);font-weight:400;margin-left:4px;}
-  .meter-bar{flex:1;min-width:180px;height:12px;background:#EAE6DA;border-radius:99px;overflow:hidden;}
-  .meter-fill{height:100%;background:#6BA544;border-radius:99px;transition:width .4s ease;}
-  .meter-txt{font-size:13.5px;color:var(--ink-soft);}
-
-  /* Kontroller */
-  .controls{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:0 0 18px;font-size:14px;color:var(--ink-soft);}
-  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card);}
-  .seg button{font-family:inherit;font-size:13.5px;padding:7px 14px;border:0;background:transparent;color:var(--ink-soft);cursor:pointer;}
-  .seg button.on{background:var(--ink);color:#fff;}
-
-  /* Kart-kolumner (drill vänster→höger) */
-  .karta{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;overflow-x:auto;}
-  .cols{display:flex;gap:26px;align-items:flex-start;min-width:max-content;}
-  .col{display:flex;flex-direction:column;gap:9px;min-width:190px;}
-  .col-rubrik{font-family:"Cinzel",serif;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:2px 0 4px 2px;}
-  .node{display:flex;align-items:center;gap:9px;text-align:left;width:100%;border-radius:10px;padding:11px 13px;border:1.5px solid;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:500;line-height:1.25;transition:transform .12s, box-shadow .12s;}
-  .node:hover{transform:translateX(2px);box-shadow:0 3px 12px rgba(0,0,0,.08);}
-  .node.sel{box-shadow:0 0 0 3px rgba(51,48,42,.18);}
-  .node .txt{flex:1;}
-  .node .chev{opacity:.7;font-size:15px;}
-  .node .roll{font-size:12px;opacity:.9;flex:0 0 auto;}
-  .node .roll.stod{font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#E7E1D4;color:#6B675E;padding:2px 8px;border-radius:99px;opacity:1;}
-  .node.root{font-family:"Cormorant Garamond",serif;font-size:19px;font-weight:600;}
-  .node.gra{cursor:default;}
-  .node.gra:hover{transform:none;box-shadow:none;}
-  .gra-orsak{font-size:11px;font-style:italic;opacity:.85;margin-left:6px;}
-
-  .legend{display:flex;flex-wrap:wrap;gap:20px;align-items:center;margin:18px 0 0;font-size:14px;color:var(--ink-soft);}
-  .legend .item{display:flex;align-items:center;gap:8px;}
-  .sw{width:15px;height:15px;border-radius:5px;flex:0 0 auto;border:1px solid rgba(0,0,0,.12);}
-  .foot{margin-top:20px;font-size:14px;line-height:1.6;color:var(--ink-soft);max-width:68ch;}
-  .foot em{font-style:italic;color:var(--ink);}
-  .privacy{margin-top:14px;font-size:12.5px;color:var(--ink-soft);border-left:3px solid var(--line);padding:2px 0 2px 12px;}
-</style>
+<link rel="stylesheet" href="../../../js/karta/karta.css">
 </head>
 <body>
 <div class="wrap">
-  <p class="eyebrow">Kapitel 1 · Begreppskarta</p>
+  <p class="eyebrow">Kapitel 1 · Begreppskarta · Åk 8</p>
   <h1>Taluppfattning</h1>
   <p class="lede">Områdets framsida. Färgen är <em>data</em>, inte pynt: en röd ruta är precis det som ska övas, en grön är befäst över tid. Klicka dig in mot en färdighet och öva den — eller gör ett test på det som ännu är rött.</p>
 
@@ -86,187 +39,22 @@
   <p class="privacy" id="privacy"></p>
 </div>
 
-<!-- TAXONOMI: enda källan för kart-strukturen -->
+<!-- Åk 8: samma taxonomi + delad logg som åk7 (single-source), egen pref-nyckel + nivåbrygga N=3. -->
 <script src="../../../js/data/k1-taxonomi.js"></script>
-<!-- MASTERY: delad logg + spridnings-baserad färg (localStorage, ingen server) -->
 <script src="../../../js/mastery.js"></script>
+<script src="../../../js/karta/karta-motor.js"></script>
 <script>
-(function(){
-  'use strict';
-  // ── STRUKTUR ur taxonomin (window.K1_TAXONOMI) — inga motorer, inga svar. ──
-  var TAX = (window.K1_TAXONOMI && window.K1_TAXONOMI.noder) || [];
-  var byId = {}; TAX.forEach(function(n){ byId[n.id] = n; });
-  function barnAv(id){ return TAX.filter(function(n){ return n.parent === id && !n.doljKarta; }); }
-  var OMRADEN = TAX.filter(function(n){ return n.niva === 'omrade' && n.implemented; });
-
-  // ── ELEV-LOKAL DATA · localStorage ENDAST. Lämnar ALDRIG enheten. ──
-  // Hård gräns: ingen fetch/XHR/WebSocket, ingen server-väg. All elevdata bor här inne.
-  var MATRIS_KEY = 'k1.taluppfattning.mastery.v1';   // delad logg (samma som åk7 — single-source)
-  var PREF_KEY   = 'ak8.k1.taluppfattning.pref.v1';   // EGEN åk8-pref (annars ärvs åk7:s arskurs)
-  function lasMatris(){
-    // Demo: ?demo seedar tidsstämplade loggar I MINNET (skrivs aldrig till localStorage) för granskning.
-    if(/[?&]demo\b/.test(location.search)) return demoMatris();
-    return (window.Mastery && Mastery.lasMatris()) || {};
-  }
-  function lasPref(){
-    // Åk8-scope. minNiva = nivåbryggans krav (grön kräver niva ≥ minNiva). C4: N=3 —
-    // åk8-målnoderna kräver evidens på nivå 3 (mult/div-generatorns åk8-talområde).
-    var d = { arskurs:'ak8', mal:'godkant', minNiva:3 };
-    try{ var s = JSON.parse(localStorage.getItem(PREF_KEY)) || {}; if(s.mal) d.mal = s.mal; }catch(e){}  // bara mal från lagring; arskurs låst till ak8
-    return d;
-  }
-  function sparPref(p){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(p)); }catch(e){} }
-  function demoMatris(){
-    // Seedar loggar med olika SPRIDNING så granskaren ser att grön kräver utspridning över tid.
-    var m = {}, nu = Date.now(), D = 86400000;
-    var monster = [ {n:6, spann:30}, {n:3, spann:5}, {n:1, spann:0}, {n:0, spann:0} ]; // grön · gul · orange · röd
-    var i = 0;
-    TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator && !n.doljKarta; }).forEach(function(n){
-      var p = monster[i++ % monster.length], log = [];
-      for(var k = 0; k < p.n; k++){
-        var dagarSedan = p.n > 1 ? p.spann * (p.n - 1 - k) / (p.n - 1) : 0;
-        log.push({ ts: nu - Math.round(dagarSedan * D), resultat: 'ratt' });
-      }
-      if(log.length) m[n.id] = log;
-    });
-    return m;
-  }
-
-  // ── SCOPING: arskursRelevans + roll × elevens kontext ──
-  function scopeAv(node, pref){
-    var ark = node.arskursRelevans || {};
-    if(!(pref.arskurs in ark)) return { inScope:false, orsak:'framtid' };            // enbart framtida årskurs → grått
-    if(ark[pref.arskurs] === 'stod') return { inScope:true, stod:true };             // stödspår: i scope, EJ grått, EJ räknat
-    if(pref.mal === 'godkant' && node.roll && node.roll !== 'karna') return { inScope:false, orsak:'valde-bort' };
-    return { inScope:true };
-  }
-
-  // ── FÄRG: lövnod ur matris, förälder = svagaste i-scope barn (rollup) ──
-  var FARG = {
-    0:{bg:'#D14A40',br:'#AE3229',fg:'#fff'},
-    1:{bg:'#E08529',br:'#BE6A16',fg:'#fff'},
-    2:{bg:'#E4BC34',br:'#C29A1C',fg:'#4A3A08'},
-    3:{bg:'#6BA544',br:'#4E7D30',fg:'#fff'}
-  };
-  var GRA = { bg:'#EAE6DA', br:'#D3CDBE', fg:'#8A857A' };
-  function nodStatus(node, pref, matris){
-    if(node.niva === 'lovnod'){
-      var sc = scopeAv(node, pref);
-      if(!sc.inScope) return { gra:true, orsak:sc.orsak };
-      return { state: Mastery.masteryState(matris[node.id], pref.minNiva), stod: !!sc.stod };   // logg → färg (stöd flaggas, räknas ej i rollup)
-    }
-    var scoped = barnAv(node.id).map(function(b){ return nodStatus(b, pref, matris); }).filter(function(c){ return !c.gra && !c.stod; });
-    if(!scoped.length) return { gra:true, orsak:'framtid' };
-    return { state: Math.min.apply(null, scoped.map(function(c){ return c.state; })) };
-  }
-  function rotStatus(pref, matris){
-    var scoped = OMRADEN.map(function(o){ return nodStatus(o, pref, matris); }).filter(function(c){ return !c.gra; });
-    if(!scoped.length) return { gra:true, orsak:'framtid' };
-    return { state: Math.min.apply(null, scoped.map(function(c){ return c.state; })) };
-  }
-
-  // ── DEEPLINK till drillen (rör ej drillen — bara länkar in) ──
-  function deeplink(node){
-    var ko, formaga, p = node.id.split(':');
-    if(p.length === 2){ ko = p[0]; formaga = p[1]; }
-    else if(node.visning && node.visning.formagaKey){ ko = node.parent; formaga = node.visning.formagaKey; }
-    else { ko = node.parent; formaga = 'rakna'; }
-    return '../../../ak7-k1-ram.html?ko=' + encodeURIComponent(ko) + '&formaga=' + encodeURIComponent(formaga);
-  }
-
-  // ── RENDER ──
-  var val = { omrade:null, deldoman:null };
-  function nodBox(node, opts){
-    opts = opts || {};
-    var status = opts.rootStatus || nodStatus(node, PREF, MATRIS);
-    var farg = status.gra ? GRA : FARG[status.state];
-    var b = document.createElement(node.niva === 'lovnod' && !status.gra ? 'a' : 'div');
-    b.className = 'node' + (opts.root ? ' root' : '') + (status.gra ? ' gra' : '') + (opts.sel ? ' sel' : '');
-    b.style.background = farg.bg; b.style.borderColor = farg.br; b.style.color = farg.fg;
-    var rollM = node.roll === 'breddning' ? '＋' : node.roll === 'fordjupning' ? '★' : '';
-    // stöd = egen TEXT-PILL (låst konvention). Utanför svårighetsaxeln (kärna solid / breddning ＋ / fördjupning ★).
-    var stodM = (node.arskursRelevans && node.arskursRelevans[PREF.arskurs] === 'stod') ? 'stöd' : '';
-    var markM = stodM || rollM;
-    var markTitle = stodM ? 'stöd – valbart stödspår' : node.roll;
-    var orsak = status.gra ? '<span class="gra-orsak">' + (status.orsak === 'framtid' ? 'ej åk 8' : 'bortvalt') + '</span>' : '';
-    var chev = (opts.hasChildren && !status.gra) ? '<span class="chev">›</span>' : '';
-    b.innerHTML = '<span class="txt">' + node.namn + orsak + '</span>'
-      + (markM && !status.gra ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '') + chev;
-    if(node.niva === 'lovnod' && !status.gra){
-      b.href = deeplink(node); b.style.textDecoration = 'none';
-    } else if(!status.gra && opts.onClick){
-      b.addEventListener('click', opts.onClick);
-    }
-    return b;
-  }
-  function kolumn(rubrik){
-    var c = document.createElement('div'); c.className = 'col';
-    if(rubrik){ var r = document.createElement('div'); r.className = 'col-rubrik'; r.textContent = rubrik; c.appendChild(r); }
-    return c;
-  }
-  function render(){
-    var cols = document.getElementById('cols'); cols.innerHTML = '';
-    // Kolumn 1 — rot
-    var c1 = kolumn('Område');
-    c1.appendChild(nodBox({ niva:'rot', namn:'Taluppfattning' }, { root:true, rootStatus:rotStatus(PREF, MATRIS) }));
-    cols.appendChild(c1);
-    // Kolumn 2 — områden (implementerade)
-    var c2 = kolumn('Deldomäner');
-    OMRADEN.forEach(function(o){
-      c2.appendChild(nodBox(o, { hasChildren:true, sel: val.omrade === o.id, onClick:function(){ val.omrade = o.id; val.deldoman = null; render(); } }));
-    });
-    cols.appendChild(c2);
-    // Kolumn 3 — deldomäner (KO) för valt område
-    if(val.omrade){
-      var c3 = kolumn('Färdighetsområden');
-      barnAv(val.omrade).forEach(function(d){
-        c3.appendChild(nodBox(d, { hasChildren:true, sel: val.deldoman === d.id, onClick:function(){ val.deldoman = d.id; render(); } }));
-      });
-      cols.appendChild(c3);
-    }
-    // Kolumn 4 — lövnoder för vald deldomän
-    if(val.deldoman){
-      var c4 = kolumn('Färdigheter');
-      barnAv(val.deldoman).forEach(function(l){ c4.appendChild(nodBox(l, {})); });
-      cols.appendChild(c4);
-    }
-    renderMeter();
-    renderControls();
-  }
-  function renderMeter(){
-    // Stöd-noder ligger UTANFÖR räknaren (både X och Y) — de är valbart stödspår, ej krav.
-    var lov = TAX.filter(function(n){ var sc = scopeAv(n, PREF); return n.niva === 'lovnod' && n.generator && !n.doljKarta && sc.inScope && !sc.stod; });
-    var Y = lov.length;
-    var X = lov.filter(function(n){ return Mastery.masteryState(MATRIS[n.id], PREF.minNiva) === 3; }).length;
-    var pct = Y ? Math.round(X / Y * 100) : 0;
-    document.getElementById('meter').innerHTML =
-      '<div class="meter-tal">' + X + ' <small>av ' + Y + ' färdigheter befästa</small></div>'
-      + '<div class="meter-bar"><div class="meter-fill" style="width:' + pct + '%"></div></div>'
-      + '<div class="meter-txt">' + pct + '%</div>';
-  }
-  function renderControls(){
-    document.querySelectorAll('#mal-seg button').forEach(function(btn){ btn.classList.toggle('on', btn.dataset.mal === PREF.mal); });
-    var valbara = TAX.filter(function(n){ return n.niva === 'lovnod' && n.roll && n.roll !== 'karna'; }).length;
-    document.getElementById('scope-note').textContent = PREF.mal === 'godkant'
-      ? valbara + ' valbara färdigheter (breddning/fördjupning) är bortvalda — kärnan räcker för godkänt.'
-      : 'Alla färdigheter visas, även breddning och fördjupning.';
-  }
-
-  // ── init ──
-  var PREF = lasPref();
-  var MATRIS = lasMatris();
-  try{ var q = new URLSearchParams(location.search);
-    if(q.get('omrade') && byId[q.get('omrade')]) val.omrade = q.get('omrade');
-    if(q.get('deldoman') && byId[q.get('deldoman')]) val.deldoman = q.get('deldoman');
-    if(q.get('mal') === 'allt' || q.get('mal') === 'godkant') PREF.mal = q.get('mal');   // förhandsvisa scope
-  }catch(e){}
-  document.querySelectorAll('#mal-seg button').forEach(function(btn){
-    btn.addEventListener('click', function(){ PREF.mal = btn.dataset.mal; sparPref(PREF); render(); });
+  KartaMotor.montera({
+    taxonomi: window.K1_TAXONOMI,
+    mastery: window.Mastery,
+    prefKey: 'ak7.k1.taluppfattning.pref.v1',
+    arskurs: 'ak8',
+    malDefault: 'godkant',
+    minNiva: 3,
+    ramPath: '../../../ak7-k1-ram.html',
+    rotNamn: 'Taluppfattning',
+    orsakFramtid: 'ej åk 8'
   });
-  document.getElementById('privacy').textContent =
-    'Din progress sparas bara på den här enheten (localStorage) och skickas aldrig någonstans. Kartan hämtar inget från nätet utom typsnitten.';
-  render();
-})();
 </script>
 </body>
 </html>

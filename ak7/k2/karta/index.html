@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Begreppskarta · Taluppfattning</title>
+<title>Begreppskarta · Bråk</title>
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/karta/karta.css">
 </head>
 <body>
 <div class="wrap">
-  <p class="eyebrow">Kapitel 1 · Begreppskarta</p>
-  <h1>Taluppfattning</h1>
-  <p class="lede">Områdets framsida. Färgen är <em>data</em>, inte pynt: en röd ruta är precis det som ska övas, en grön är befäst över tid. Klicka dig in mot en färdighet och öva den — eller gör ett test på det som ännu är rött.</p>
+  <p class="eyebrow">Kapitel 2 · Begreppskarta</p>
+  <h1>Bråk</h1>
+  <p class="lede">Bråkets framsida. Färgen är <em>data</em>, inte pynt: en röd ruta är precis det som ska övas, en grön är befäst över tid. Klicka dig in mot en färdighet och öva den — eller gör ett test på det som ännu är rött.</p>
 
   <div class="meter" id="meter"></div>
 
@@ -33,26 +33,25 @@
     <span class="item"><span class="sw" style="background:#6BA544"></span>Befäst över tid</span>
     <span class="item"><span class="sw" style="background:#EAE6DA"></span>Grått = framtid / bortvalt</span>
     <span class="item">＋ breddning · ★ fördjupning</span>
-    <span class="item"><span class="roll stod">stöd</span> stödspår</span>
   </div>
   <p class="foot">Längst ut ligger lövnoderna — de enskilda färdigheterna. Färgen rullar <em>uppåt</em>: en förälder kan aldrig vara grönare än sin svagaste del, så en grön ruta betyder att hela grenen sitter.</p>
   <p class="privacy" id="privacy"></p>
 </div>
 
-<!-- TAXONOMI (enda källan för strukturen) · MASTERY (lokal logg) · KART-MOTOR (delad) -->
-<script src="../../../js/data/k1-taxonomi.js"></script>
-<script src="../../../js/mastery.js"></script>
+<!-- K2: bråk-taxonomin + k2:s egen lokala logg. Samma kart-motor som k1 (en källa). -->
+<script src="../../../js/data/k2-taxonomi.js"></script>
+<script src="../../../js/mastery-k2.js"></script>
 <script src="../../../js/karta/karta-motor.js"></script>
 <script>
   KartaMotor.montera({
-    taxonomi: window.K1_TAXONOMI,
-    mastery: window.Mastery,
-    prefKey: 'k1.taluppfattning.pref.v1',
+    taxonomi: window.K2_TAXONOMI,
+    mastery: window.MasteryK2,
+    prefKey: 'k2.brak.pref.v1',
     arskurs: 'ak7',
     malDefault: 'godkant',
     minNiva: null,
-    ramPath: '../../../ak7-k1-ram.html',
-    rotNamn: 'Taluppfattning',
+    ramPath: '../../../ak7-k2-ram.html',
+    rotNamn: 'Bråk',
     orsakFramtid: 'åk 8'
   });
 </script>
