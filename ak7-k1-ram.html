@@ -8187,7 +8187,7 @@ function renderNegMultDiv(body){
     KAT, function(katId, backFn){
       if(katId === 'multdiv'){
         negCalcEngine(body, { title:'Multiplikation och division', koId:'neg-rakna', forKey:'multdiv', scoreKey:'multdiv',
-          sub:'Lika tecken ger plus, olika tecken ger minus.', keypadOps:['−'], OMG:6, gen:negMultDivGen }, backFn);
+          sub:'Lika tecken ger plus, olika tecken ger minus.', keypadOps:['−',','], OMG:6, gen:negMultDivGenAk8 }, backFn);
       } else {
         negCalcEngine(body, { title:'Flera faktorer', koId:'neg-rakna', forKey:'multdiv', scoreKey:'faktorer',
           sub:'Räkna antalet minustecken: jämnt antal ger plus, udda antal ger minus.', keypadOps:['−'], OMG:5, gen:negFaktorerGen }, backFn);
@@ -9033,6 +9033,7 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-div.js"></script>
 <script src="js/motor/metod/metod-prioritering.js"></script>
 <script src="js/motor/metod/metod-negativa.js"></script>
+<script src="js/motor/metod/metod-negativa-ak8.js"></script>
 <script src="js/motor/metod/metod-brak-decimal.js"></script>
 <script src="js/motor/metod/metod-avrundning.js"></script>
 <script src="js/motor/metod/metod-d1-tillagg.js"></script>

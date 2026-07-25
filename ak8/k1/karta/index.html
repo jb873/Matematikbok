@@ -109,9 +109,9 @@
     return (window.Mastery && Mastery.lasMatris()) || {};
   }
   function lasPref(){
-    // Åk8-scope. minNiva = nivåbryggans krav (grön kräver niva ≥ minNiva). Sätts i C4 när
-    // mult/div-talområdena fastställs; null = inget nivåkrav ännu (bakåtkompatibelt).
-    var d = { arskurs:'ak8', mal:'godkant', minNiva:null };
+    // Åk8-scope. minNiva = nivåbryggans krav (grön kräver niva ≥ minNiva). C4: N=3 —
+    // åk8-målnoderna kräver evidens på nivå 3 (mult/div-generatorns åk8-talområde).
+    var d = { arskurs:'ak8', mal:'godkant', minNiva:3 };
     try{ var s = JSON.parse(localStorage.getItem(PREF_KEY)) || {}; if(s.mal) d.mal = s.mal; }catch(e){}  // bara mal från lagring; arskurs låst till ak8
     return d;
   }
