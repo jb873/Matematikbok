@@ -158,13 +158,21 @@
       if(belief === 'kanej' && ev >= 1)  return { typ:'glapp-battre', txt:'Du har redan börjat visa det här' };
       return { typ:'neutral', txt:'' };
     }
+    // Väntar-rader (belief finare än evidens): evidensen är OMRÅDETS, inte variantens.
+    // Ingen falsk bekräftelse — "stämmer, bevisat" hålls tills evidensen är äkta per variant.
+    function statusVantar(belief, ev){
+      if(belief === 'kan') return { typ:'omradesev', txt: ev >= 2 ? 'Området ser bra ut – öva just den här varianten för att bekräfta den' : 'Öva den här varianten och visa vad du kan' };
+      if(belief === 'kanej' && ev >= 2) return { typ:'omradesev', txt:'Området är på gång – kanske kan du mer än du tror här' };
+      return { typ:'neutral', txt:'' };
+    }
 
     var PREF, BELIEFS;
     // En självskattningsrad: kryss (Kan/Osäker/Kan ej) + namn + evidens + status. ALDRIG en drill-länk.
     function radHtml(r, opts){
       opts = opts || {};
       var evNull = r.evidens == null;   // belief-only-förmåga: ingen drill → ingen evidens att bekräfta mot
-      var b = BELIEFS[r.id] || '', st = evNull ? { typ:'neutral', txt:'' } : status(b, r.evidens);
+      // vantar-rader: evidensen är OMRÅDETS, inte variantens → ingen falsk bekräftelse ("stämmer, bevisat" hålls tills äkta per variant)
+      var b = BELIEFS[r.id] || '', st = evNull ? { typ:'neutral', txt:'' } : (r.vantar ? statusVantar(b, r.evidens) : status(b, r.evidens));
       var evFarg = evNull ? '#D3CDBE' : FARG[r.evidens];
       var knappar = BELIEF.map(function(kv){ return '<button class="sj-b sj-b-' + kv[0] + (b===kv[0]?' on':'') + '" data-id="' + r.id + '" data-b="' + kv[0] + '">' + kv[1] + '</button>'; }).join('');
       var k1tag = r.kalla === 'k1' ? '<span class="sj-k1" title="hämtas ur kapitel 1 (delatMed)">k1</span>' : '';
@@ -174,7 +182,7 @@
       return '<div class="sj-rad sj-' + st.typ + (r.variant ? ' sj-variant' : '') + '">'
         + '<span class="sj-belief">' + knappar + '</span>'
         + '<span class="sj-namn">' + r.namn + k1tag + omrtag + fmtag + vantag + '</span>'
-        + '<span class="sj-dot sj-ev" style="background:' + evFarg + '" title="' + (evNull ? 'ingen mätning – bara din skattning' : 'evidens') + '"></span>'
+        + '<span class="sj-dot sj-ev" style="background:' + evFarg + '" title="' + (evNull ? 'ingen mätning – bara din skattning' : (r.vantar ? 'evidens för hela området – inte just den här varianten' : 'evidens')) + '"></span>'
         + '<span class="sj-status">' + (st.txt ? '<span class="sj-badge sj-badge-' + st.typ + '">' + st.txt + '</span>' : '') + '</span>'
         + '</div>';
     }
