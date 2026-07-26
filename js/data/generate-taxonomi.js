@@ -111,11 +111,15 @@ function storKategori(key){
 const noder = [];
 const koToDel = {};
 const DEFAULT_ARK = { ak7: 'mal' };
+// Per-delkapitel arskurs: en DELAR-entry med ak:'ak8' (t.ex. Potenser) ger HELA subträdet
+// (område/deldomän/lövnoder) arskursRelevans {ak8:mal} utan per-nod-OVERRIDES.
+const delArk = {}; for(const del of DELAR){ delArk[del.id] = del.ak === 'ak8' ? { ak8: 'mal' } : DEFAULT_ARK; }
+function arkFor(delId){ return Object.assign({}, delArk[delId] || DEFAULT_ARK); }
 
 for(const del of DELAR){
   noder.push({
     id: del.id, namn: del.titel, parent: null, niva: 'omrade',
-    arskursRelevans: Object.assign({}, DEFAULT_ARK), roll: 'karna',
+    arskursRelevans: arkFor(del.id), roll: 'karna',
     formaga: null, generator: null, begrepp: del.beskrivning || null,
     grupp: del.grupp || null, implemented: !!del.implemented
   });
@@ -125,7 +129,7 @@ for(const delId in DELAR_KO){
     koToDel[ko.id] = delId;
     noder.push({
       id: ko.id, namn: ko.titel, parent: delId, niva: 'deldoman',
-      arskursRelevans: Object.assign({}, DEFAULT_ARK), roll: 'karna',
+      arskursRelevans: arkFor(delId), roll: 'karna',
       formaga: null, generator: null, begrepp: ko.beskrivning || null,
       visning: null   // presentationen ligger på lövnoderna
     });
@@ -139,7 +143,7 @@ for(const delId in DELAR_KO){
         id: lovId,
         namn: vis ? vis.titel : (ko.titel + ' · ' + ((FORMAGOR[techKey] && FORMAGOR[techKey].label) || techKey)),
         parent: ko.id, niva: 'lovnod',
-        arskursRelevans: Object.assign({}, DEFAULT_ARK),
+        arskursRelevans: arkFor(delId),
         roll: (kat === 'METOD') ? 'breddning' : 'karna',
         formaga: kat, generator: rend[techKey], begrepp: desc,
         visning: vis
@@ -163,7 +167,16 @@ const EXTRA_NODER = [
     begrepp:'Uttryck där resultatet blir negativt – utmaning.', visning:null },
   { id:'prio-potenser', namn:'Potenser (vii)', parent:'prio-prioritering', niva:'lovnod',
     arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'RAKNA', generator:null,
-    begrepp:'Prioritering med potenser – framtid, kommer i åk 8.', visning:null }
+    begrepp:'Prioritering med potenser (25−6²=−11) — övas som Öva-blad (dk8 blad 3); progressions-nod under prioriteringsregeln.', visning:null },
+
+  // ── Potenser (åk8): område + deldomän + drill-lövnoder byggs ur DELAR/DELAR_KO/OVNING_RENDERS
+  //    (ak:'ak8' → {ak8:mal}). Här bara de TVÅ blad-noderna som saknar egen drill-generator. ──
+  { id:'pot-begrepp:tabell', namn:'Potenstabell', parent:'pot-begrepp', niva:'lovnod',
+    arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'RAKNA', generator:null,
+    begrepp:'Fyll värde eller matcha potens (Öva-blad).', visning:null },
+  { id:'pot-begrepp:figur', namn:'Area i potensform', parent:'pot-begrepp', niva:'lovnod',
+    arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'BEGREPP', generator:null,
+    begrepp:'Kvadratens area som potens (Öva-blad).', visning:null }
 ];
 for(const n of EXTRA_NODER) noder.push(n);
 

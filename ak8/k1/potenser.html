@@ -194,7 +194,7 @@
 
   // FÄRDIGHETSTRÄNING: 3 noder → ramens drillar
   var RAM='../../ak7-k1-ram.html';
-  var DRILLS=[];   // Färdighetsdrillarna (generatorerna) byggs i FAS 3
+  var DRILLS=[ {titel:'Skriv som potens', formaga:'BEGREPP', ko:'pot-begrepp', f:'skriva'}, {titel:'Beräkna värdet', formaga:'RÄKNA', ko:'pot-begrepp', f:'evaluera'}, {titel:'Addition och subtraktion', formaga:'RÄKNA', ko:'pot-addsub', f:'rakna'}, {titel:'Multiplikation och division', formaga:'RÄKNA', ko:'pot-multdiv', f:'rakna'}, {titel:'Lös ut bas/exponent', formaga:'RÄKNA', ko:'pot-multdiv', f:'losut'}, {titel:'Resonemang', formaga:'RESONERA', ko:'pot-multdiv', f:'resonera'} ];
   var lista=document.getElementById('fard-lista'), frame=document.getElementById('fard-frame'), scen=document.getElementById('fard-scen'), alla=[];
   DRILLS.forEach(function(d){ var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.innerHTML='<span class="fard-skill-titel">'+d.titel+'</span><span class="fard-skill-formaga">'+d.formaga+'</span>'; b.onclick=function(){ alla.forEach(function(x){ x.classList.remove('is-active'); }); b.classList.add('is-active'); frame.src=RAM+'?ko='+encodeURIComponent(d.ko)+'&formaga='+encodeURIComponent(d.f)+'&embed=1'; scen.classList.add('har-drill'); }; lista.appendChild(b); alla.push(b); });
   // Ramen postar innehållshöjd i inbäddat läge → iframen växer utan intern scroll.

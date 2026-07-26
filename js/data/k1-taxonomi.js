@@ -157,6 +157,21 @@ window.K1_TAXONOMI = {
       "implemented": false
     },
     {
+      "id": "potenser",
+      "namn": "Potenser",
+      "parent": null,
+      "niva": "omrade",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Potenser: skrivsätt, evaluering, potenslagar och prioritering.",
+      "grupp": "raknesatt",
+      "implemented": true
+    },
+    {
       "id": "siffror",
       "namn": "Siffror och tal · udda och jämna",
       "parent": "taluppfattning",
@@ -781,7 +796,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-metoder:metod",
-      "namn": "Metoder",
+      "namn": "Metoder · Metod",
       "parent": "add-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -958,7 +973,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-metoder:metod",
-      "namn": "Metoder",
+      "namn": "Metoder · Metod",
       "parent": "sub-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1195,7 +1210,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-metoder:metod",
-      "namn": "Metoder",
+      "namn": "Metoder för multiplikation · Metod",
       "parent": "mult-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1497,7 +1512,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-metoder:metod",
-      "namn": "Metoder",
+      "namn": "Metoder · Metod",
       "parent": "div-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1822,7 +1837,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "prio-lagar:rakna",
-      "namn": "Räknelagar",
+      "namn": "Räknelagar · Räkna",
       "parent": "prio-lagar",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -2226,6 +2241,132 @@ window.K1_TAXONOMI = {
       }
     },
     {
+      "id": "pot-begrepp",
+      "namn": "Begrepp och skrivsätt",
+      "parent": "potenser",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Skriva potenser, växla mot multiplikation och beräkna potensens värde.",
+      "visning": null
+    },
+    {
+      "id": "pot-begrepp:skriva",
+      "namn": "Begrepp och skrivsätt · Skriv som potens",
+      "parent": "pot-begrepp",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "BEGREPP",
+      "generator": "renderPotSkriva",
+      "begrepp": "Skriv som potens ↔ multiplikation.",
+      "visning": null
+    },
+    {
+      "id": "pot-begrepp:evaluera",
+      "namn": "Begrepp och skrivsätt · Beräkna värdet",
+      "parent": "pot-begrepp",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderPotEvaluera",
+      "begrepp": "Beräkna potensens värde.",
+      "visning": null
+    },
+    {
+      "id": "pot-addsub",
+      "namn": "Räkna med potenser",
+      "parent": "potenser",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Addition, subtraktion och blandat – räkna ut varje potens och operera sedan.",
+      "visning": null
+    },
+    {
+      "id": "pot-addsub:rakna",
+      "namn": "Räkna med potenser · Räkna",
+      "parent": "pot-addsub",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderPotAddsub",
+      "begrepp": "Evaluera-sedan-operera.",
+      "visning": null
+    },
+    {
+      "id": "pot-multdiv",
+      "namn": "Potenslagar (samma bas)",
+      "parent": "potenser",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Multiplikation och division med samma bas, lös ut bas/exponent och resonemang.",
+      "visning": null
+    },
+    {
+      "id": "pot-multdiv:rakna",
+      "namn": "Potenslagar (samma bas) · Räkna",
+      "parent": "pot-multdiv",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderPotMultdiv",
+      "begrepp": "Behåll basen, operera på exponenterna.",
+      "visning": null
+    },
+    {
+      "id": "pot-multdiv:losut",
+      "namn": "Potenslagar (samma bas) · Lös ut bas/exponent",
+      "parent": "pot-multdiv",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderPotLosut",
+      "begrepp": "Hitta okänd bas eller exponent.",
+      "visning": null
+    },
+    {
+      "id": "pot-multdiv:resonera",
+      "namn": "Potenslagar (samma bas) · Resonera",
+      "parent": "pot-multdiv",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RESONERA",
+      "generator": "renderPotResonera",
+      "begrepp": "Antal faktorer, hur mycket större.",
+      "visning": null
+    },
+    {
       "id": "prio-kombinationer",
       "namn": "Kombinationer av räknesätt (i–iv)",
       "parent": "prio-prioritering",
@@ -2278,7 +2419,35 @@ window.K1_TAXONOMI = {
       "roll": "karna",
       "formaga": "RAKNA",
       "generator": null,
-      "begrepp": "Prioritering med potenser – framtid, kommer i åk 8.",
+      "begrepp": "Prioritering med potenser (25−6²=−11) — övas som Öva-blad (dk8 blad 3); progressions-nod under prioriteringsregeln.",
+      "visning": null
+    },
+    {
+      "id": "pot-begrepp:tabell",
+      "namn": "Potenstabell",
+      "parent": "pot-begrepp",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": null,
+      "begrepp": "Fyll värde eller matcha potens (Öva-blad).",
+      "visning": null
+    },
+    {
+      "id": "pot-begrepp:figur",
+      "namn": "Area i potensform",
+      "parent": "pot-begrepp",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "BEGREPP",
+      "generator": null,
+      "begrepp": "Kvadratens area som potens (Öva-blad).",
       "visning": null
     }
   ]

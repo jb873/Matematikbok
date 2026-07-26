@@ -2543,7 +2543,11 @@ const FORMAGOR = {
   okaminska:    {label:'Öka och minska lika', tagClass:'tag-metod', pillClass:'p-metod'},
   bakifran:     {label:'Addition bakifrån',   tagClass:'tag-metod', pillClass:'p-metod'},
   kort:         {label:'Kort division',       tagClass:'tag-metod', pillClass:'p-metod'},
-  lang:         {label:'Lång division',       tagClass:'tag-metod', pillClass:'p-metod'}
+  lang:         {label:'Lång division',       tagClass:'tag-metod', pillClass:'p-metod'},
+  // Potenser (åk8): drill-kategorier
+  skriva:       {label:'Skriv som potens',    tagClass:'tag-begrepp', pillClass:'p-begrepp'},
+  evaluera:     {label:'Beräkna värdet',      tagClass:'tag-rakna', pillClass:'p-rakna'},
+  losut:        {label:'Lös ut bas/exponent', tagClass:'tag-rakna', pillClass:'p-rakna'}
 };
 
 // Kapitel 1 – Taluppfattning: positionssystem och räknesätt
@@ -2627,6 +2631,15 @@ const DELAR = [
     grupp:'avslutning',
     implemented:false,
     plannedAreas:['Blandade snabbfrågor','Problemlösning','Kapitelrepetition']
+  },
+  {
+    // Potenser (åk8, greenfield). ak:'ak8' → generatorn ger hela subträdet arskursRelevans {ak8:mal}.
+    nr:11, id:'potenser', ak:'ak8',
+    titel:'Potenser',
+    beskrivning:'Potenser: skrivsätt, evaluering, potenslagar och prioritering.',
+    grupp:'raknesatt',
+    implemented:true,
+    koCount:3
   }
 ];
 
@@ -4738,6 +4751,38 @@ DELAR_KO['avrundning'] = [
   }
 ];
 
+// Potenser (åk8, greenfield) — tre färdighetsområden. renderOvning slår upp dessa KO:n;
+// generatorn bygger deldomän + lövnoder (ur OVNING_RENDERS) med {ak8:mal} (via DELAR ak:'ak8').
+DELAR_KO['potenser'] = [
+  {
+    id:'pot-begrepp', nr:1,
+    titel:'Begrepp och skrivsätt',
+    beskrivning:'Skriva potenser, växla mot multiplikation och beräkna potensens värde.',
+    formagor:{
+      skriva:{desc:'Skriv som potens ↔ multiplikation.', implemented:true},
+      evaluera:{desc:'Beräkna potensens värde.', implemented:true}
+    }
+  },
+  {
+    id:'pot-addsub', nr:2,
+    titel:'Räkna med potenser',
+    beskrivning:'Addition, subtraktion och blandat – räkna ut varje potens och operera sedan.',
+    formagor:{
+      rakna:{desc:'Evaluera-sedan-operera.', implemented:true}
+    }
+  },
+  {
+    id:'pot-multdiv', nr:3,
+    titel:'Potenslagar (samma bas)',
+    beskrivning:'Multiplikation och division med samma bas, lös ut bas/exponent och resonemang.',
+    formagor:{
+      rakna:{desc:'Behåll basen, operera på exponenterna.', implemented:true},
+      losut:{desc:'Hitta okänd bas eller exponent.', implemented:true},
+      resonera:{desc:'Antal faktorer, hur mycket större.', implemented:true}
+    }
+  }
+];
+
 // ============================================================
 // ============================================================
 // ÖVNING: POSITIONSSYSTEMET (Del 1, kunskapsområde 2)
@@ -4986,6 +5031,19 @@ const OVNING_RENDERS = {
   },
   'avr-overslag':{
     rakna: (b)=> renderAvrOverslag(b)
+  },
+  // Potenser (åk8, greenfield) — potens-drill.js. En parametriserad motor, sju gen-typer.
+  'pot-begrepp':{
+    skriva:   (b)=> renderPotSkriva(b),
+    evaluera: (b)=> renderPotEvaluera(b)
+  },
+  'pot-addsub':{
+    rakna: (b)=> renderPotAddsub(b)
+  },
+  'pot-multdiv':{
+    rakna:    (b)=> renderPotMultdiv(b),
+    losut:    (b)=> renderPotLosut(b),
+    resonera: (b)=> renderPotResonera(b)
   }
 };
 
@@ -9057,6 +9115,7 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-brak-decimal.js"></script>
 <script src="js/motor/metod/metod-avrundning.js"></script>
 <script src="js/motor/metod/metod-d1-tillagg.js"></script>
+<script src="js/motor/potens/potens-drill.js"></script>
 <!-- Mastery-loggning (elev-lokal, localStorage). Observerar getTutorScore; rör ej drill-logik. -->
 <script src="js/mastery.js"></script>
 <!-- Engångs-migreringar av mastery-loggen (idempotent, localStorage). Efter mastery.js. -->
