@@ -22,38 +22,29 @@ h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:52px
 .seg button{font-family:inherit;font-size:13.5px;padding:7px 14px;border:0;background:transparent;color:var(--ink-soft);cursor:pointer;}
 .seg button.on{background:var(--ink);color:#fff;}
 
-/* Kart-kolumner (drill vänster→höger) */
-.karta{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;overflow-x:auto;}
+/* ── Vågrätt tankekartsträd: rot vänster → växer höger, hela trädet synligt ── */
+.karta{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 14px;overflow-x:auto;}
 .cols{display:block;}
-/* Fokus-navigation: EN nivå i taget som responsiv grid → wrappar, aldrig horisontell scroll */
-.karta-niva{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;}
-.col{display:flex;flex-direction:column;gap:9px;min-width:190px;}
-.col-rubrik{font-family:"Cinzel",serif;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:2px 0 4px 2px;}
-/* Brödsmula: rot › … › fokus (färg-punkt per steg visar nivåns tillstånd) */
-.karta-brod{display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin:0 0 16px;}
-.karta-brod-steg{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13.5px;color:var(--ink-soft);background:none;border:0;padding:4px 9px;border-radius:7px;cursor:default;}
-button.karta-brod-steg{cursor:pointer;} button.karta-brod-steg:hover{background:var(--paper);color:var(--ink);}
-.karta-brod-steg.ar{color:var(--ink);font-weight:600;}
-.karta-brod-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 1px rgba(0,0,0,.12);}
-.karta-brod-sep{color:var(--ink-soft);opacity:.55;font-size:14px;}
-.node{display:flex;flex-direction:column;align-items:stretch;gap:6px;text-align:left;width:100%;border-radius:10px;padding:11px 13px;border:1.5px solid;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:500;line-height:1.25;transition:transform .12s, box-shadow .12s;}
-.node-top{display:flex;align-items:center;gap:9px;}
-/* Barn-sammanfattning på förälder-kort — samma rollup-set som kortets egen färg */
-.node-sum{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.node-sum-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 1px rgba(255,255,255,.55);}
-.node-sum-txt{font-size:11px;opacity:.9;margin-left:2px;font-weight:500;}
-.node:hover{transform:translateX(2px);box-shadow:0 3px 12px rgba(0,0,0,.08);}
-.node.sel{box-shadow:0 0 0 3px rgba(51,48,42,.18);}
-.node .txt{flex:1;}
-.node .chev{opacity:.7;font-size:15px;}
-.node .roll{font-size:12px;opacity:.9;flex:0 0 auto;}
-.node .roll.stod{font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#E7E1D4;color:#6B675E;padding:2px 8px;border-radius:99px;opacity:1;}
-.node.root{font-family:"Cormorant Garamond",serif;font-size:19px;font-weight:600;}
-.node.gra{cursor:default;}
-.node.gra:hover{transform:none;box-shadow:none;}
-.node.nolink{cursor:default;}
-.node.nolink:hover{transform:none;box-shadow:none;}
-.gra-orsak{font-size:11px;font-style:italic;opacity:.85;margin-left:6px;}
+.km-tree{display:flex;align-items:flex-start;padding:4px 2px;width:max-content;}
+.km-node{display:flex;align-items:center;}
+.km-kids{display:flex;flex-direction:column;}
+/* Grenar: vågrät stubbe till varje barn + lodrät buss som spänner barn-kolumnen */
+.km-kids > .km-node{position:relative;margin:1px 0;padding-left:22px;}
+.km-kids > .km-node::before{content:'';position:absolute;left:0;top:50%;width:22px;border-top:1.5px solid var(--line);}
+.km-kids > .km-node::after{content:'';position:absolute;left:0;top:-1px;bottom:-1px;border-left:1.5px solid var(--line);}
+.km-kids > .km-node:first-child::after{top:50%;}
+.km-kids > .km-node:last-child::after{bottom:50%;}
+.km-kids > .km-node:only-child::after{display:none;}
+/* Smala rutor: FAST bredd — lång etikett wrappar till flera rader, vidgar aldrig rutan, kapas aldrig */
+.node{box-sizing:border-box;width:162px;flex:0 0 162px;display:flex;align-items:center;gap:6px;text-align:left;border-radius:9px;padding:8px 10px;border:1.5px solid;font-family:inherit;font-size:12.5px;font-weight:500;line-height:1.22;}
+.node .txt{flex:1;white-space:normal;overflow-wrap:anywhere;}
+.node .roll{font-size:11px;opacity:.9;flex:0 0 auto;align-self:flex-start;}
+.node .roll.stod{font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:#E7E1D4;color:#6B675E;padding:2px 6px;border-radius:99px;opacity:1;}
+.node.root{font-family:"Cormorant Garamond",serif;font-size:15.5px;font-weight:600;width:150px;flex-basis:150px;}
+a.node{transition:box-shadow .12s, transform .12s;}
+a.node:hover{box-shadow:0 3px 12px rgba(0,0,0,.14);transform:translateX(1px);}
+.node.gra{opacity:.9;}
+.gra-orsak{display:block;font-size:10px;font-style:italic;opacity:.8;margin-top:1px;}
 
 .legend{display:flex;flex-wrap:wrap;gap:20px;align-items:center;margin:18px 0 0;font-size:14px;color:var(--ink-soft);}
 .legend .item{display:flex;align-items:center;gap:8px;}
