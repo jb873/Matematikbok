@@ -49,9 +49,21 @@ window.AK8_K1_BOK = {
         { nr: 2, titel: 'Addition och subtraktion',    roll: 'repetition', noder: ['neg-rakna:addsub'] },
         { nr: 3, titel: 'Multiplikation och division', roll: 'mal',        noder: ['neg-rakna:multdiv'] }
       ]
+    },
+    {
+      // Potenser (position 8) — greenfield potens-familj, pilot för dk 8/9/10 (samma motor,
+      // olika bas). Öva-bladen exakt-författade ur TRANSKRIPTION-ak8-potenser.md. Generatorerna
+      // (Färdighetsträning) + de nya {ak8:mal}-noderna (pot-*) byggs i FAS 3; prio-potenser
+      // återanvänds. minNiva sätts när talurvalet spikats (FAS 3).
+      nr: 8, id: 'potenser', titel: 'Potenser', fil: 'potenser.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Potenser grund',                  noder: ['pot-begrepp:skriva', 'pot-begrepp:evaluera', 'pot-begrepp:tabell', 'pot-begrepp:figur', 'pot-addsub:rakna'] },
+        { nr: 2, titel: 'Multiplikation och division',      noder: ['pot-multdiv:rakna', 'pot-multdiv:losut', 'pot-multdiv:resonera'] },
+        { nr: 3, titel: 'Prioriteringsregeln med potenser', noder: ['prio-potenser'] }
+      ]
     }
-    // ⚠️ Delkapitel 4–10 (bråk ×4, potenser ×3, + fördjupning/pluggtillprov) väntar på
-    // kapitel-listan. De renderas som "kommer"-slots av index tills de fylls i här.
+    // ⚠️ Delkapitel 4–7 (bråk ×4) + 9–10 (tiopotenser, grundpotenser) väntar. Tiopotenser/
+    // grundpotenser återanvänder potens-motorn (bas 10 resp fast bas) — nästa order.
     // Noderna är gemensamma med åk 7 (single-source) — ingen åk8-kopia skapas.
   ]
 };

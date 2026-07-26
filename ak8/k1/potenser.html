@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 8 · Potenser</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
+  *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
+  .topnav{ background:var(--navy); color:#fff; padding:13px 26px; font-size:13px; }
+  .topnav a{ color:rgba(255,255,255,.8); text-decoration:none; } .topnav .sep{ opacity:.5; margin:0 8px; }
+  .hero{ background:var(--navy); color:#fff; padding:24px 26px 40px; text-align:center; }
+  .hero .eyebrow{ font-family:var(--cinzel); font-size:12px; letter-spacing:.16em; color:var(--gold-lt); text-transform:uppercase; }
+  .hero h1{ font-family:var(--serif); font-size:38px; font-weight:500; margin:8px 0 6px; } .hero h1 em{ color:var(--gold-lt); font-style:italic; }
+  .hero p{ max-width:560px; margin:0 auto; color:rgba(255,255,255,.75); font-size:15px; line-height:1.6; }
+  /* val-rad */
+  .tab-row{ display:flex; gap:4px; max-width:920px; margin:0 auto; padding:22px 24px 0; }
+  .tab-btn{ font-family:var(--cinzel); font-size:12.5px; letter-spacing:.04em; color:var(--ink-faint); background:none; border:0; border-bottom:2px solid transparent; padding:10px 16px; cursor:pointer; }
+  .tab-btn.is-active{ color:var(--navy); border-bottom-color:var(--navy); }
+  .tab-panel{ display:none; } .tab-panel.is-active{ display:block; }
+  /* blad-nav */
+  .blad-nav{ max-width:920px; margin:0 auto; padding:18px 24px 4px; display:flex; flex-wrap:wrap; gap:8px; }
+  .blad-nav-btn{ display:inline-flex; align-items:center; gap:9px; font-family:var(--cinzel); font-size:12.5px; color:var(--ink-soft); background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:9px 15px; cursor:pointer; }
+  .blad-nav-btn.is-active{ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .blad-nav-nr{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--paper-dk); color:var(--ink-faint); font-size:11px; font-weight:600; }
+  .blad-nav-btn.is-active .blad-nav-nr{ background:var(--gold-lt); color:var(--navy); }
+  /* ovn-sheet (blad) — VÄNSTERSTÄLLT */
+  .ovn-wrap{ max-width:920px; margin:0 auto; padding:16px 24px 40px; }
+  .ovn-sheet{ background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:26px 30px; }
+  .ovn-sheet h2{ font-family:var(--serif); font-size:25px; font-weight:500; margin-bottom:10px; }
+  .ak8-grupp{ font-family:var(--cinzel); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:26px 0 4px; }
+  .ovn-grupp{ margin-top:18px; } .ovn-grupp:first-of-type{ margin-top:8px; }
+  .ovn-grupp-rubrik{ font-size:18px; font-weight:600; margin-bottom:8px; }
+  .ak8-hint{ font-size:13px; color:var(--ink-faint); font-style:italic; margin:2px 0 8px; }
+  .ak8-rad{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 0; border-bottom:1px dotted var(--paper-dk); }
+  .ak8-rad:last-child{ border-bottom:none; }
+  .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .ak8-svar{ display:inline-flex; align-items:center; gap:2px; }
+  .ak8-in{ width:74px; height:36px; text-align:center; font-family:var(--serif); font-size:18px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; }
+  .ak8-in.ak8-ok{ border-color:#2f7d4f; background:rgba(47,125,79,.08); color:#15803d; }
+  .ak8-in.ak8-fel{ border-color:#c0392b; background:rgba(192,57,43,.08); color:#b91c1c; }
+  .ak8-chip{ font-family:var(--serif); font-size:18px; min-width:40px; background:#fff; border:1.5px solid var(--paper-dk); border-radius:8px; padding:5px 12px; margin:0 3px; cursor:pointer; }
+  .ak8-chip.sel{ border-color:var(--navy); background:rgba(15,30,46,.06); }
+  .ak8-chip.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.14); } .ak8-chip.fel{ border-color:#c0392b; background:rgba(192,57,43,.12); }
+  .ak8-teckenslot{ display:inline-flex; flex-wrap:wrap; gap:6px; }
+  .ak8-vf.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.16); color:#15803d; }
+  .ak8-vf.fel{ border-color:#c0392b; background:rgba(192,57,43,.14); color:#b91c1c; }
+  /* potenser */
+  .pot{ font-family:var(--serif); white-space:nowrap; }
+  .pot sup{ font-size:0.72em; }
+  .pot sup .ak8-in-sm{ width:30px; height:24px; font-size:13px; padding:0; }
+  .pot > .ak8-in-sm{ width:42px; }
+  .ak8-mall{ background:rgba(154,114,40,.05); border-left:3px solid var(--gold-lt); padding-left:10px !important; }
+  .ak8-tabell{ border-collapse:collapse; margin:6px 0; }
+  .ak8-tabell th, .ak8-tabell td{ border:1px solid var(--paper-dk); padding:6px 12px; text-align:center; font-size:18px; }
+  .ak8-tabell th{ font-family:var(--cinzel); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); background:rgba(0,0,0,.02); }
+  .ak8-tabell .ak8-in-sm{ width:48px; }
+  .ak8-tabell .pot sup .ak8-in-sm{ width:28px; }
+  .ak8-kvadrat{ vertical-align:middle; }
+  .ak8-figsvar{ display:inline-flex; align-items:center; gap:6px; margin-left:14px; font-size:17px; }
+  .ak8-korval.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.16); color:#15803d; }
+  .ak8-korval.fel{ border-color:#c0392b; background:rgba(192,57,43,.14); color:#b91c1c; }
+  .ak8-ekvslot{ display:inline-flex; gap:2px; margin:0 3px; vertical-align:middle; }
+  .ak8-ekvslot .ak8-chip{ min-width:30px; font-size:16px; padding:3px 8px; margin:0 1px; }
+  .ak8-ordna{ display:inline-flex; gap:8px; flex-wrap:wrap; }
+  .ak8-tal{ position:relative; font-family:var(--serif); font-size:19px; background:#fff; border:1.5px solid var(--paper-dk); border-radius:8px; padding:9px 16px; cursor:pointer; }
+  .ak8-tal.sel{ border-color:var(--navy); background:#0f1e2e; color:#fff; }
+  .ak8-ordnr{ position:absolute; top:-8px; left:-8px; width:22px; height:22px; border-radius:50%; background:var(--gold-lt); color:var(--navy); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .ak8-ordna.ak8-ok-ram{ outline:2px solid #2f7d4f; outline-offset:4px; border-radius:8px; } .ak8-ordna.ak8-fel-ram{ outline:2px solid #c0392b; outline-offset:4px; border-radius:8px; }
+  .ak8-fasit{ display:block; margin-top:4px; font-size:12.5px; color:#c0392b; }
+  .ak8-flagg{ color:var(--gold); cursor:help; font-size:15px; margin-left:6px; }
+  .ak8-vantar{ font-size:13px; font-style:italic; color:var(--gold); }
+  .ak8-figur{ display:flex; align-items:center; gap:8px; margin:14px 0; padding:14px 16px; border:1px dashed var(--gold-lt); border-radius:8px; color:var(--ink-faint); font-size:14px; font-style:italic; background:rgba(154,114,40,.04); }
+  /* tallinje-figur (avläsning) */
+  .ak8-rad-fig{ flex-direction:column; align-items:stretch; }
+  .ak8-rad-fig .ak8-svar{ display:block; width:100%; }
+  .ak8-tallinje{ margin:12px 0 2px; }
+  .ak8-tallinje .tl-svg{ width:100%; max-width:640px; height:auto; display:block; }
+  .ak8-linje-nr{ font-weight:600; font-size:15px; margin-bottom:-6px; }
+  .tl-axis,.tl-tick{ stroke:var(--ink); stroke-width:1.6; } .tl-arrow{ fill:var(--ink); }
+  .tl-label{ fill:var(--ink-soft); font-family:var(--serif); font-size:13px; text-anchor:middle; }
+  .tl-pt{ fill:var(--gold); stroke:#fff; stroke-width:1; } .tl-pt-namn{ fill:var(--navy); font-family:var(--serif); font-weight:600; font-size:14px; text-anchor:middle; }
+  .ak8-avlas-rad{ display:flex; flex-wrap:wrap; gap:14px; margin:6px 0 4px; }
+  .ak8-avlas-in{ display:inline-flex; align-items:center; gap:6px; font-size:16px; }
+  .ak8-in-sm{ width:60px; height:32px; font-size:16px; }
+  /* markera-på-tallinjen */
+  .ak8-mark-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px; }
+  .ak8-mark-chip{ font-family:var(--serif); font-size:17px; background:#fff; border:1.5px solid var(--paper-dk); border-radius:8px; padding:6px 15px; cursor:pointer; }
+  .ak8-mark-chip.sel{ border-color:var(--navy); background:rgba(15,30,46,.08); }
+  .ak8-mark-chip.placed{ opacity:.35; text-decoration:line-through; cursor:default; }
+  .ak8-mark-wrap{ position:relative; max-width:640px; }
+  .tl-clickband{ cursor:pointer; } .tl-clickband:hover{ fill:rgba(47,110,160,.06); }
+  .tl-marker-dot{ fill:var(--blue); stroke:#fff; stroke-width:1.2; cursor:pointer; }
+  .tl-marker-txt{ fill:var(--blue); font-family:var(--serif); font-weight:600; font-size:14px; text-anchor:middle; cursor:pointer; }
+  /* stående bråk */
+  .ovn-brak{ display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; }
+  .ovn-brak-taljare,.ovn-brak-namnare{ padding:0 8px 2px; font-size:17px; font-feature-settings:'tnum'; white-space:nowrap; }
+  .ovn-brak-namnare{ padding:2px 8px 0; }
+  .ovn-brak-strecket{ height:2px; background:var(--ink); width:100%; min-width:40px; }
+  .ovn-text{ font-family:var(--serif); font-size:18px; } .ovn-num{ font-feature-settings:'tnum'; }
+  .fr-ruta{ width:52px !important; height:32px; }
+  /* kontroll + sammanfattning */
+  .ovn-kontroll-rad{ display:flex; gap:10px; margin-top:22px; }
+  .ovn-kontroll{ font-family:var(--cinzel); font-size:13px; letter-spacing:.05em; color:#fff; background:var(--gold); border:0; border-radius:8px; padding:11px 22px; cursor:pointer; }
+  .ovn-aterstall{ font-family:var(--cinzel); font-size:12px; color:var(--ink-faint); background:none; border:1px solid var(--paper-dk); border-radius:8px; padding:11px 18px; cursor:pointer; }
+  .ovn-sammanf{ margin-top:18px; padding:16px 20px; border-radius:8px; text-align:center; font-size:15px; background:#fff; border:1px solid var(--paper-dk); }
+  .ovn-sammanf.ok{ background:linear-gradient(135deg,#dcfce7,#bbf7d0); border:2px solid #16a34a; color:#14532d; }
+  .ovn-sammanf.ok .ovn-sammanf-icon{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:#16a34a; color:#fff; font-size:22px; margin-bottom:8px; }
+  .ovn-sammanf.ok .ovn-sammanf-titel{ display:block; font-family:var(--serif); font-size:21px; margin-bottom:4px; }
+  .ovn-sammanf.delvis{ background:rgba(154,114,40,.08); border-color:var(--gold); color:var(--gold); }
+  /* Färdighetsträning */
+  .fard-layout{ max-width:920px; margin:0 auto; padding:18px 24px 44px; display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }
+  .fard-lista{ display:flex; flex-direction:column; gap:6px; }
+  .fard-skill{ display:flex; flex-direction:column; gap:2px; text-align:left; background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:7px; padding:10px 14px; cursor:pointer; font-family:inherit; }
+  .fard-skill.is-active{ background:var(--navy); border-color:var(--navy); } .fard-skill.is-active *{ color:#fff !important; }
+  .fard-skill-titel{ font-size:15.5px; font-weight:600; color:var(--ink); }
+  .fard-skill-formaga{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .fard-scen{ position:sticky; top:14px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:12px; overflow:hidden; min-height:520px; }
+  .fard-tom{ display:flex; align-items:center; justify-content:center; min-height:520px; color:var(--ink-faint); }
+  .fard-frame{ width:100%; height:640px; border:0; display:none; background:#fff; } .fard-scen.har-drill .fard-tom{ display:none; } .fard-scen.har-drill .fard-frame{ display:block; }
+  @media(max-width:720px){ .fard-layout{ grid-template-columns:1fr; } }
+  footer{ text-align:center; padding:28px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--paper-dk); }
+  /* konfetti */
+  .konfetti-lager{ position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; } .konfetti{ position:absolute; top:-20px; animation:kfall linear forwards; }
+  @keyframes kfall{ to{ transform:translateY(105vh) rotate(540deg); opacity:.3; } }
+</style>
+</head>
+<body>
+<nav class="topnav"><a href="index.html">Åk 8 · Kapitel 1</a><span class="sep">›</span><span>Potenser</span></nav>
+<header class="hero">
+  <div class="eyebrow" id="del-eyebrow">Kapitel 1</div>
+  <h1><em>Potenser</em></h1>
+  <p>Skrivsätt, beräkning, potenslagar och prioritering. Exponenter upphöjt, tal vänsterställda, stående bråk.</p>
+</header>
+
+<div class="tab-row" id="tab-row">
+  <button class="tab-btn is-active" data-tab="ova">Öva</button>
+  <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
+  <button class="tab-btn" data-tab="test">Visa vad du kan</button>
+</div>
+
+<section class="tab-panel is-active" data-panel="ova">
+  <div class="blad-nav" id="blad-nav"></div>
+  <div class="ovn-wrap" id="sheet-potenser"></div>
+</section>
+
+<section class="tab-panel" data-panel="fardighet">
+  <div class="fard-layout">
+    <div class="fard-lista" id="fard-lista"></div>
+    <div class="fard-scen" id="fard-scen">
+      <div class="fard-tom"><p>Välj en färdighet till vänster</p></div>
+      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<section class="tab-panel" data-panel="test">
+  <div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;text-align:center;color:var(--ink-soft);">
+    <h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Visa vad du kan</h3>
+    <p style="font-size:14px;line-height:1.6;max-width:480px;margin:0 auto;">Samlingstestet wiras in i ett senare steg. Träna på de tre bladen i Öva och de tre färdigheterna så länge.</p>
+  </div>
+</section>
+
+<footer id="del-footer">Digitalt läromedel i matematik · Åk 8 · Kapitel 1</footer>
+
+<!-- blad-kärnan (fracSpan) + potens-bladen. Motorer orörda (bygg-id: blad-ak8-d4). -->
+<script src="../../js/data/ak8-k1-bok.js"></script>
+<script src="../../js/motor/blad/blad-karna.js"></script>
+<script src="../../js/motor/blad/blad-ak8-d4.js"></script>
+<script>
+(function(){
+  // Delkapitel-numret är data-drivet ur bok-filen (single-source på nr) — matchar på filnamn.
+  var me = location.pathname.split('/').pop();
+  var dk = ((window.AK8_K1_BOK && window.AK8_K1_BOK.delkapitel) || []).filter(function(x){ return x.fil === me; })[0];
+  if(dk){
+    var eb = document.getElementById('del-eyebrow'); if(eb) eb.textContent = 'Delkapitel ' + dk.nr + ' · Kapitel 1';
+    var ft = document.getElementById('del-footer'); if(ft) ft.textContent = 'Digitalt läromedel i matematik · Åk 8 · Kapitel 1 · Delkapitel ' + dk.nr;
+  }
+  // konfetti
+  window.visaAk8Konfetti = function(){ var g=document.querySelector('.konfetti-lager'); if(g) g.remove(); var l=document.createElement('div'); l.className='konfetti-lager'; document.body.appendChild(l); var f=['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899']; for(var i=0;i<70;i++){ var b=document.createElement('span'); b.className='konfetti'; b.style.left=(Math.random()*100)+'vw'; b.style.background=f[Math.floor(Math.random()*f.length)]; b.style.animationDuration=(2.5+Math.random()*2)+'s'; b.style.width=(6+Math.random()*8)+'px'; b.style.height=(10+Math.random()*8)+'px'; l.appendChild(b);} setTimeout(function(){ if(l) l.remove(); },5000); };
+
+  // ÖVA: blad-nav (A/B/C)
+  var D4 = window.BLAD_AK8_D4, mount = document.getElementById('sheet-potenser'), nav = document.getElementById('blad-nav');
+  var BLAD = [ {key:'GRUND', titel:'Potenser grund'}, {key:'MULTDIV', titel:'Multiplikation och division'}, {key:'PRIO', titel:'Prioriteringsregeln med potenser'} ];
+  var knappar = [];
+  function visa(i){ BLAD.forEach(function(b,j){ knappar[j].classList.toggle('is-active', j===i); }); D4.renderBlad(mount, BLAD[i].key); }
+  BLAD.forEach(function(b,i){ var btn=document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn'; btn.innerHTML='<span class="blad-nav-nr">'+(i+1)+'</span>'+b.titel; btn.onclick=function(){ visa(i); }; nav.appendChild(btn); knappar[i]=btn; });
+  visa(0);
+
+  // val-rad
+  var tabRow=document.getElementById('tab-row');
+  tabRow.querySelectorAll('.tab-btn').forEach(function(btn){ btn.onclick=function(){ tabRow.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('is-active', b===btn); }); document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('is-active', p.dataset.panel===btn.dataset.tab); }); window.scrollTo({top:0,behavior:'smooth'}); }; });
+
+  // FÄRDIGHETSTRÄNING: 3 noder → ramens drillar
+  var RAM='../../ak7-k1-ram.html';
+  var DRILLS=[];   // Färdighetsdrillarna (generatorerna) byggs i FAS 3
+  var lista=document.getElementById('fard-lista'), frame=document.getElementById('fard-frame'), scen=document.getElementById('fard-scen'), alla=[];
+  DRILLS.forEach(function(d){ var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.innerHTML='<span class="fard-skill-titel">'+d.titel+'</span><span class="fard-skill-formaga">'+d.formaga+'</span>'; b.onclick=function(){ alla.forEach(function(x){ x.classList.remove('is-active'); }); b.classList.add('is-active'); frame.src=RAM+'?ko='+encodeURIComponent(d.ko)+'&formaga='+encodeURIComponent(d.f)+'&embed=1'; scen.classList.add('har-drill'); }; lista.appendChild(b); alla.push(b); });
+  // Ramen postar innehållshöjd i inbäddat läge → iframen växer utan intern scroll.
+  window.addEventListener('message', function(e){ if(!frame || !e || !e.data || typeof e.data.__fardHeight !== 'number') return; frame.style.height = Math.max(320, Math.min(e.data.__fardHeight, 2200)) + 'px'; });
+})();
+</script>
+</body>
+</html>
