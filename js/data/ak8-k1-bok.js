@@ -19,7 +19,7 @@ window.AK8_K1_BOK = {
   titel: 'Tal och tals användning',          // ⚠️ kapiteltitel bekräftas av Joachim
   delkapitel: [
     {
-      nr: 1, id: 'berakningar', titel: 'Beräkningar', fil: 'berakningar.html', status: 'bygger',
+      nr: 2, id: 'berakningar', titel: 'Beräkningar', fil: 'berakningar.html', status: 'bygger',
       // Fyra mult/div-blad byggda (ur Joachims fyra docx). Prioriteringsregeln utan potenser
       // = tom slot, byggs i egen order. Noderna är sjuans Del 5/6/7 med {ak8:repetition}.
       blad: [
@@ -35,7 +35,7 @@ window.AK8_K1_BOK = {
       // Tiosystemet (blad 1) väntar på beslut om nya blad-mekanismer (välj-flera/produkt/summa).
       // Nod-taggning (stöd/repetition) på blad-/nod-nivå LÄMNAS OSATT — Joachim sätter den
       // efteråt (som negativa tal). Noderna är sjuans k1 (position:*), återanvända — inga nya.
-      nr: 2, id: 'grunder', titel: 'Grunder', roll: 'stod', fil: 'grunder.html', status: 'bygger',
+      nr: 1, id: 'grunder', titel: 'Grunder', roll: 'stod', fil: 'grunder.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Tiosystemet',               noder: ['position:begrepp', 'primtal:begrepp', 'primtal:rakna', 'delbarhet:rakna'] },
         { nr: 2, titel: 'Räkna i positionssystemet', noder: ['position:rakna', 'position:resonera'] },
