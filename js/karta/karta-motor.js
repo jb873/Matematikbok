@@ -138,6 +138,9 @@
       var wrap = document.createElement('div'); wrap.className = 'km-node';
       wrap.appendChild(nodBox(node, isRoot ? { rootStatus: rotStatus(PREF, MATRIS), root:true } : {}));
       var barn = isRoot ? OMRADEN : barnAv(node.id);
+      // Godkänt fäller ihop de grå grenarna (bortvalt + framtid) → kortare default-vy;
+      // Allt visar hela trädet inkl. grå. Rör bara synligheten — rollup/scoping oförändrat.
+      if(PREF.mal === 'godkant'){ barn = barn.filter(function(c){ return !nodStatus(c, PREF, MATRIS).gra; }); }
       if(barn.length){
         var kids = document.createElement('div'); kids.className = 'km-kids';
         barn.forEach(function(c){ kids.appendChild(nodTree(c, false)); });
