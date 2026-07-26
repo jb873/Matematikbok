@@ -81,6 +81,21 @@
         { key:'mb',       namn:'Bråktal · tal i blandad form' },
         { key:'mm',       namn:'Två tal i blandad form' },
         { key:'forkorta', namn:'Förkorta innan beräkning' }
+      ] },
+      // Addition/subtraktion med bråk (k2). raknaEngine → k2Logga grovt → väg 2.
+      'brak-add:rakna': { vantar:true, rader:[
+        { key:'samma',    namn:'Samma nämnare' },
+        { key:'ena',      namn:'Förläng den ena nämnaren' },
+        { key:'bada',     namn:'Förläng båda nämnarna' },
+        { key:'blandad',  namn:'Blandad form' },
+        { key:'former',   namn:'Bråkform, decimalform och blandad form' }
+      ] },
+      'brak-sub:rakna': { vantar:true, rader:[
+        { key:'samma',    namn:'Samma nämnare' },
+        { key:'ena',      namn:'Förläng den ena nämnaren' },
+        { key:'bada',     namn:'Förläng båda nämnarna' },
+        { key:'blandad',  namn:'Blandad form' },
+        { key:'lana',     namn:'Låna: gör om ett heltal till bråk' }
       ] }
     };
 
