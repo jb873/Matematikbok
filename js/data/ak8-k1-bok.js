@@ -31,10 +31,15 @@ window.AK8_K1_BOK = {
       ]
     },
     {
-      // Nytt stöd-delkapitel (position 2). Inga blad byggda ännu — Tiosystemet, Räkna i
-      // positionssystemet, Storlek och ordning, grundmetoder, andra metoder byggs i egen
-      // order och taggas stöd. Ingen fil ännu → renderas som titelsatt "kommer · stöd".
-      nr: 2, id: 'grunder', titel: 'Grunder', roll: 'stod', status: 'kommer', blad: []
+      // Grunder (position 2). Räkna + Storlek byggda (tal REGENERERADE, unika mot sjuan).
+      // Tiosystemet (blad 1) väntar på beslut om nya blad-mekanismer (välj-flera/produkt/summa).
+      // Nod-taggning (stöd/repetition) på blad-/nod-nivå LÄMNAS OSATT — Joachim sätter den
+      // efteråt (som negativa tal). Noderna är sjuans k1 (position:*), återanvända — inga nya.
+      nr: 2, id: 'grunder', titel: 'Grunder', roll: 'stod', fil: 'grunder.html', status: 'bygger',
+      blad: [
+        { nr: 2, titel: 'Räkna i positionssystemet', noder: ['position:rakna', 'position:resonera'] },
+        { nr: 3, titel: 'Storlek och ordning',       noder: ['position:rakna', 'position:resonera'] }
+      ]
     },
     {
       nr: 3, id: 'negativa-tal', titel: 'Negativa tal', fil: 'negativa-tal.html', status: 'bygger',
