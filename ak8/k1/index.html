@@ -52,17 +52,26 @@
   document.getElementById('hero-titel').textContent = bok.titel || 'Kapitel 1';
   var lista = document.getElementById('del-lista');
   var byggda = {}; (bok.delkapitel || []).forEach(function(d){ byggda[d.nr] = d; });
-  // Rendera 9 slottar; de som finns i boken är öppna, övriga "kommer".
-  for(var nr = 1; nr <= 9; nr++){
+  // Rendera 10 slottar; boken driver ordning/titel (single-source på nr).
+  for(var nr = 1; nr <= 10; nr++){
     var d = byggda[nr];
-    if(d){
+    if(d && d.fil){
+      // byggd/byggande sida → öppen länk
       var a = document.createElement('a'); a.className = 'del open'; a.href = d.fil;
       var blad = (d.blad || []).map(function(b){ return b.titel; }).join(' · ');
       a.innerHTML = '<div class="del-nr">' + nr + '</div>'
         + '<div><div class="del-titel">' + d.titel + '</div><div class="del-blad">' + blad + '</div></div>'
         + '<div class="del-badge">' + (d.status === 'bygger' ? 'bygger' : 'öppen') + '</div>';
       lista.appendChild(a);
+    } else if(d){
+      // titelsatt men ingen sida än (t.ex. stöd-delkapitel som väntar på blad)
+      var div = document.createElement('div'); div.className = 'del kommer';
+      div.innerHTML = '<div class="del-nr">' + nr + '</div>'
+        + '<div><div class="del-titel">' + d.titel + '</div><div class="del-blad">byggs senare</div></div>'
+        + '<div class="del-badge">' + (d.roll === 'stod' ? 'stöd · kommer' : 'kommer') + '</div>';
+      lista.appendChild(div);
     } else {
+      // ingen post → generisk kommer-slot
       var div = document.createElement('div'); div.className = 'del kommer';
       div.innerHTML = '<div class="del-nr">' + nr + '</div>'
         + '<div><div class="del-titel">Delkapitel ' + nr + '</div><div class="del-blad">titel fastställs</div></div>'

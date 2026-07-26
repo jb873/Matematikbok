@@ -7,36 +7,45 @@
    Varje delkapitel: { nr, id, titel, fil, blad:[ { nr, titel, roll, noder:[nod-id…] } ] }.
    roll på blad-nivå = årskursens roll för bladet (repetition | mal | fordjupning | stod).
 
-   ⚠️ De nio delkapitlen fylls i allteftersom Joachim fastställer dem. d2 (Negativa tal) är
-   strukturpiloten och är komplett här; delkapitel 1, 3–9 väntar på kapitel-listan. */
+   ⚠️ Tio delkapitel; fylls i allteftersom Joachim fastställer dem. Negativa tal (delkapitel 3)
+   är strukturpiloten och är komplett; övriga väntar på kapitel-listan.
+
+   Konvention (låst): SIDOR = slug (negativa-tal.html), MOTORER = bygg-id (blad-ak8-d2.js).
+   Delkapitel-NUMRET bor bara här (nr) → omordning sker single-source i denna fil; sidorna
+   läser sitt nummer härifrån (matchar på fil), motorernas bygg-id rörs aldrig. */
 window.AK8_K1_BOK = {
   arskurs: 'ak8',
   kapitel: 'k1',
   titel: 'Tal och tals användning',          // ⚠️ kapiteltitel bekräftas av Joachim
   delkapitel: [
     {
-      nr: 1, id: 'd1', titel: 'Repetition: positionssystem och fyra räknesätt', fil: 'd1-repetition.html', status: 'bygger',
-      // Fyra av åtta blad byggda (mult/div ur Joachims fyra docx). De fyra andra
-      // (positionssystem, addition, subtraktion, …) väntar på kapitel-listan.
-      // Noderna är sjuans Del 5/6/7 med {ak8:repetition} (OVERRIDES) — single-source.
+      nr: 1, id: 'berakningar', titel: 'Beräkningar', fil: 'berakningar.html', status: 'bygger',
+      // Fyra mult/div-blad byggda (ur Joachims fyra docx). Prioriteringsregeln utan potenser
+      // = tom slot, byggs i egen order. Noderna är sjuans Del 5/6/7 med {ak8:repetition}.
       blad: [
         { nr: 1, titel: 'Multiplikation och division med 10, 100 och 1000', roll: 'repetition', noder: ['mult-rakna:pow10', 'div-rakna:pow10'] },
         { nr: 2, titel: 'Multiplicera och dividera med små tal',             roll: 'repetition', noder: ['mult-rakna:sma', 'div-rakna:sma'] },
         { nr: 3, titel: 'Multiplicera och dividera med stora tal',           roll: 'repetition', noder: ['mult-rakna:stora', 'div-rakna:stora'] },
         { nr: 4, titel: 'Multiplicera och dividera med stora och små tal',   roll: 'repetition', noder: ['mult-rakna:storasma', 'div-rakna:storasma'] }
+        // ⚠️ tom slot: Prioriteringsregeln utan potenser — byggs i egen order (sjuans källa pekas ut).
       ]
     },
     {
-      nr: 2, id: 'd2', titel: 'Negativa tal', fil: 'd2-negativa-tal.html', status: 'bygger',
+      // Nytt stöd-delkapitel (position 2). Inga blad byggda ännu — Tiosystemet, Räkna i
+      // positionssystemet, Storlek och ordning, grundmetoder, andra metoder byggs i egen
+      // order och taggas stöd. Ingen fil ännu → renderas som titelsatt "kommer · stöd".
+      nr: 2, id: 'grunder', titel: 'Grunder', roll: 'stod', status: 'kommer', blad: []
+    },
+    {
+      nr: 3, id: 'negativa-tal', titel: 'Negativa tal', fil: 'negativa-tal.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Grunder',                     roll: 'repetition', noder: ['neg-begrepp:begrepp'] },
         { nr: 2, titel: 'Addition och subtraktion',    roll: 'repetition', noder: ['neg-rakna:addsub'] },
         { nr: 3, titel: 'Multiplikation och division', roll: 'mal',        noder: ['neg-rakna:multdiv'] }
       ]
     }
-    // ⚠️ Delkapitel 1, 3–9 väntar på Joachims kapitel-lista (titlar + nod-id per blad).
-    // Grunder- och add/sub-bladens noder får {ak8:repetition} i Fas C2; mult/div får ev.
-    // finare nya noder ({ak8:mal}) enligt transkriptionen — pekas då ut här utan att röra
-    // noddefinitionerna (single-source).
+    // ⚠️ Delkapitel 4–10 (bråk ×4, potenser ×3, + fördjupning/pluggtillprov) väntar på
+    // kapitel-listan. De renderas som "kommer"-slots av index tills de fylls i här.
+    // Noderna är gemensamma med åk 7 (single-source) — ingen åk8-kopia skapas.
   ]
 };
