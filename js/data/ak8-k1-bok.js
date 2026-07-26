@@ -37,6 +37,7 @@ window.AK8_K1_BOK = {
       // efteråt (som negativa tal). Noderna är sjuans k1 (position:*), återanvända — inga nya.
       nr: 2, id: 'grunder', titel: 'Grunder', roll: 'stod', fil: 'grunder.html', status: 'bygger',
       blad: [
+        { nr: 1, titel: 'Tiosystemet',               noder: ['position:begrepp', 'primtal:begrepp', 'primtal:rakna', 'delbarhet:rakna'] },
         { nr: 2, titel: 'Räkna i positionssystemet', noder: ['position:rakna', 'position:resonera'] },
         { nr: 3, titel: 'Storlek och ordning',       noder: ['position:rakna', 'position:resonera'] }
       ]

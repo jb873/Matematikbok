@@ -43,7 +43,9 @@
   .ak8-chip{ font-family:var(--serif); font-size:18px; min-width:40px; background:#fff; border:1.5px solid var(--paper-dk); border-radius:8px; padding:5px 12px; margin:0 3px; cursor:pointer; }
   .ak8-chip.sel{ border-color:var(--navy); background:rgba(15,30,46,.06); }
   .ak8-chip.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.14); } .ak8-chip.fel{ border-color:#c0392b; background:rgba(192,57,43,.12); }
-  .ak8-teckenslot{ display:inline-flex; }
+  .ak8-teckenslot{ display:inline-flex; flex-wrap:wrap; gap:6px; }
+  .ak8-vf.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.16); color:#15803d; }
+  .ak8-vf.fel{ border-color:#c0392b; background:rgba(192,57,43,.14); color:#b91c1c; }
   .ak8-ekvslot{ display:inline-flex; gap:2px; margin:0 3px; vertical-align:middle; }
   .ak8-ekvslot .ak8-chip{ min-width:30px; font-size:16px; padding:3px 8px; margin:0 1px; }
   .ak8-ordna{ display:inline-flex; gap:8px; flex-wrap:wrap; }
@@ -165,7 +167,7 @@
 
   // ÖVA: blad-nav (A/B/C)
   var D3 = window.BLAD_AK8_D3, mount = document.getElementById('sheet-grunder'), nav = document.getElementById('blad-nav');
-  var BLAD = [ {key:'RAKNA', titel:'Räkna i positionssystemet'}, {key:'STORLEK', titel:'Storlek och ordning'} ];
+  var BLAD = [ {key:'TIOSYSTEMET', titel:'Tiosystemet'}, {key:'RAKNA', titel:'Räkna i positionssystemet'}, {key:'STORLEK', titel:'Storlek och ordning'} ];
   var knappar = [];
   function visa(i){ BLAD.forEach(function(b,j){ knappar[j].classList.toggle('is-active', j===i); }); D3.renderBlad(mount, BLAD[i].key); }
   BLAD.forEach(function(b,i){ var btn=document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn'; btn.innerHTML='<span class="blad-nav-nr">'+(i+1)+'</span>'+b.titel; btn.onclick=function(){ visa(i); }; nav.appendChild(btn); knappar[i]=btn; });
@@ -177,7 +179,7 @@
 
   // FÄRDIGHETSTRÄNING: 3 noder → ramens drillar
   var RAM='../../ak7-k1-ram.html';
-  var DRILLS=[ {titel:'Tallinje, talföljder & storleksordna', formaga:'RÄKNA', ko:'position', f:'rakna'}, {titel:'Jämföra & mittemellan', formaga:'RESONERA', ko:'position', f:'resonera'}, {titel:'Huvudräkning · addition', formaga:'RÄKNA', ko:'add-rakna', f:'rakna'}, {titel:'Huvudräkning · subtraktion', formaga:'RÄKNA', ko:'sub-rakna', f:'rakna'} ];
+  var DRILLS=[ {titel:'Platsvärde & bygga tal', formaga:'BEGREPP', ko:'position', f:'begrepp'}, {titel:'Skriv i utvecklad form', formaga:'METOD', ko:'utvecklad', f:'metod'}, {titel:'Primtal eller sammansatt?', formaga:'BEGREPP', ko:'primtal', f:'begrepp'}, {titel:'Faktorisera (2–4 faktorer)', formaga:'RÄKNA', ko:'primtal', f:'rakna'}, {titel:'Bygg faktorträd', formaga:'METOD', ko:'primtal', f:'metod'}, {titel:'Avgör delbarhet snabbt', formaga:'RÄKNA', ko:'delbarhet', f:'rakna'}, {titel:'Tallinje, talföljder & storleksordna', formaga:'RÄKNA', ko:'position', f:'rakna'}, {titel:'Jämföra & mittemellan', formaga:'RESONERA', ko:'position', f:'resonera'}, {titel:'Huvudräkning · addition', formaga:'RÄKNA', ko:'add-rakna', f:'rakna'}, {titel:'Huvudräkning · subtraktion', formaga:'RÄKNA', ko:'sub-rakna', f:'rakna'} ];
   var lista=document.getElementById('fard-lista'), frame=document.getElementById('fard-frame'), scen=document.getElementById('fard-scen'), alla=[];
   DRILLS.forEach(function(d){ var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.innerHTML='<span class="fard-skill-titel">'+d.titel+'</span><span class="fard-skill-formaga">'+d.formaga+'</span>'; b.onclick=function(){ alla.forEach(function(x){ x.classList.remove('is-active'); }); b.classList.add('is-active'); frame.src=RAM+'?ko='+encodeURIComponent(d.ko)+'&formaga='+encodeURIComponent(d.f)+'&embed=1'; scen.classList.add('har-drill'); }; lista.appendChild(b); alla.push(b); });
   // Ramen postar innehållshöjd i inbäddat läge → iframen växer utan intern scroll.

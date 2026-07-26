@@ -26,6 +26,16 @@
   function AVLAS(linjer){ return { typ:'avlas', linjer:linjer }; }                                  // tallinje(r): avläs vad pilarna pekar på
   function G(rubrik, rader, hint){ return { rubrik:rubrik, rader:rader, hint:hint }; }
 
+  // Tiosystemet-mekanismer (godkända: tecken/valjflera/produkt/summa).
+  var PLATSER = ['tusental', 'hundratal', 'tiotal', 'ental', 'tiondel', 'hundradel', 'tusendel'];
+  function TECKEN(fraga, alt, ratt){ return { typ:'tecken', fraga:fraga, alt:alt, ratt:ratt }; }   // välj rätt platsvärde (chip)
+  function VALJ(tal, test){ return { typ:'valjflera', tal:tal, test:test }; }                        // klicka de tal som uppfyller test
+  function PROD(tal){ return { typ:'produkt', tal:tal }; }                                            // två faktorer, produkt = tal
+  function SUM(tal, antal){ return { typ:'summa', tal:tal, antal:antal }; }                           // N distinkta termer, summa = tal
+  function arSammansatt(v){ if(v < 4) return false; for(var d = 2; d * d <= v; d++) if(v % d === 0) return true; return false; }
+  function minstaFaktor(v){ for(var d = 2; d * d <= v; d++) if(v % d === 0) return d; return v; }
+  function exempelSumma(tal, antal){ var t = [], s = 0; for(var i = 1; i < antal; i++){ t.push(i); s += i; } t.push(tal - s); return t.join(' + '); }
+
   // ══════════════════════════════════════════════════════════════════════════════════════
   // BLAD: Räkna i positionssystemet  (nya tal, unika mot sjuan)
   // ══════════════════════════════════════════════════════════════════════════════════════
@@ -121,6 +131,43 @@
     ])
   ] };
 
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // BLAD: Tiosystemet  (blandat: positionssystem + tal-teori). 12,5 → 125 (bekräftat).
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  var TIOSYSTEMET = { nr:1, titel:'Tiosystemet', nod:'position:begrepp', uppg:[
+    G('Vilket platsvärde har siffran 8? Välj rätt platsvärde', [
+      TECKEN('i 835', PLATSER, 'hundratal'),
+      TECKEN('i 17,89', PLATSER, 'tiondel'),
+      TECKEN('i 18 340', PLATSER, 'tusental'),
+      TECKEN('i 9,08', PLATSER, 'hundradel')
+    ]),
+    G('Skriv talet med siffror', [
+      T('åttatusen sjutton', 8017),
+      T('femhundratre komma tretton', 503.13),
+      T('åtta tiotal, fyra tiondelar och 2 tusendelar', 80.402)
+    ]),
+    G('Skriv som tal', [
+      T('19 tiondelar', 1.9), T('37 tusendelar', 0.037), T('802 hundradelar', 8.02)
+    ]),
+    G('Vilka tal är sammansatta tal? Klicka på dem', [
+      VALJ([7, 12, 13, 17, 25], function(v){ return arSammansatt(v); })
+    ]),
+    G('Faktorisera i två faktorer', [
+      PROD(35), PROD(32)
+    ]),
+    G('Skriv talet med tre olika termer', [
+      SUM(27, 3), SUM(19, 3)
+    ]),
+    G('Vilka tal är delbara med 5? Klicka på dem', [
+      VALJ([67, 75, 125, 176, 18970], function(v){ return v % 5 === 0; })
+    ]),
+    G('Vilka tal är delbara med 3? Klicka på dem', [
+      VALJ([87, 135, 973, 761, 4302], function(v){ return v % 3 === 0; })
+    ]),
+    G('Utvecklad form &amp; faktorträd', [],
+      'Öva "Skriv i utvecklad form" och "Bygg faktorträd" i fliken <em>Färdighetsträning</em> – de har egna interaktiva verktyg.')
+  ] };
+
   // ── RENDER ──
   var CHECKS = [];
   function renderRad(r){
@@ -174,6 +221,38 @@
       });
       return '<div class="ak8-rad ak8-rad-fig"><span class="ak8-svar" data-idx="' + idx + '">' + svg + '</span></div>';
     }
+    if(r.typ === 'tecken'){
+      CHECKS.push(function(el){ var s = el.querySelector('.ak8-chip.sel'); return { ok: !!s && s.dataset.val === r.ratt, facit: r.ratt, chip:true }; });
+      var chips = r.alt.map(function(a){ return '<button type="button" class="ak8-chip" data-val="' + a + '">' + a + '</button>'; }).join('');
+      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '"><span class="ak8-teckenslot">' + chips + '</span></span></div>';
+    }
+    if(r.typ === 'valjflera'){
+      CHECKS.push(function(el){
+        var bs = el.querySelectorAll('.ak8-vf'), ok = true, ratt = [];
+        bs.forEach(function(b){ var sel = b.classList.contains('sel'), rat = b.dataset.ratt === '1'; if(rat) ratt.push(b.textContent); if(sel !== rat) ok = false; });
+        return { ok: ok, facit: ratt.join('   '), valjflera:true };
+      });
+      var knappar = r.tal.map(function(v){ return '<button type="button" class="ak8-tal ak8-vf" data-ratt="' + (r.test(v) ? '1' : '0') + '">' + fmt(v) + '</button>'; }).join('');
+      return '<div class="ak8-rad"><span class="ak8-svar" data-idx="' + idx + '"><span class="ak8-ordna">' + knappar + '</span></span></div>';
+    }
+    if(r.typ === 'produkt'){
+      CHECKS.push(function(el){
+        var ins = el.querySelectorAll('.ak8-in'), a = pNum(ins[0].value), b = pNum(ins[1].value);
+        var ok = isFinite(a) && isFinite(b) && a > 1 && b > 1 && Math.abs(a * b - r.tal) < 1e-9;
+        var d = minstaFaktor(r.tal); return { ok: ok, facit: 't.ex. ' + d + ' · ' + (r.tal / d) };
+      });
+      return '<div class="ak8-rad"><span class="ak8-q">' + fmt(r.tal) + ' =</span><span class="ak8-svar" data-idx="' + idx + '">' + inTal(true) + ' <span class="ak8-q">·</span> ' + inTal(true) + '</span></div>';
+    }
+    if(r.typ === 'summa'){
+      CHECKS.push(function(el){
+        var ins = el.querySelectorAll('.ak8-in'), v = [].map.call(ins, function(i){ return pNum(i.value); });
+        var ok = v.every(function(x){ return isFinite(x); }) && Math.abs(v.reduce(function(a, b){ return a + b; }, 0) - r.tal) < 1e-9;
+        for(var a = 0; a < v.length; a++) for(var b = a + 1; b < v.length; b++) if(Math.abs(v[a] - v[b]) < 1e-9) ok = false;   // distinkta
+        return { ok: ok, facit: 't.ex. ' + exempelSumma(r.tal, r.antal) };
+      });
+      var rutor = []; for(var k = 0; k < r.antal; k++) rutor.push(inTal(true));
+      return '<div class="ak8-rad"><span class="ak8-q">' + fmt(r.tal) + ' =</span><span class="ak8-svar" data-idx="' + idx + '">' + rutor.join(' <span class="ak8-q">+</span> ') + '</span></div>';
+    }
     return '';
   }
 
@@ -189,8 +268,8 @@
       + '<button class="ovn-aterstall" data-reset>Återställ</button></div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
     mount.innerHTML = html;
-    // ordna: klicka i ordning → stämpla sekvensnummer
-    mount.querySelectorAll('.ak8-tal').forEach(function(btn){
+    // ordna: klicka i ordning → stämpla sekvensnummer (valjflera-knappar exkluderas)
+    mount.querySelectorAll('.ak8-tal:not(.ak8-vf)').forEach(function(btn){
       btn.onclick = function(){
         var grid = btn.closest('.ak8-ordna');
         if(btn.classList.contains('sel')){
@@ -202,6 +281,11 @@
         }
       };
     });
+    // tecken: enkel-val chip. valjflera: växla-val.
+    mount.querySelectorAll('.ak8-teckenslot').forEach(function(slot){
+      slot.querySelectorAll('.ak8-chip').forEach(function(chip){ chip.onclick = function(){ slot.querySelectorAll('.ak8-chip').forEach(function(c){ c.classList.toggle('sel', c === chip); }); }; });
+    });
+    mount.querySelectorAll('.ak8-vf').forEach(function(b){ b.onclick = function(){ b.classList.toggle('sel'); }; });
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
   }
@@ -214,8 +298,11 @@
       tot++;
       el.querySelectorAll('.ak8-in').forEach(function(i){ i.disabled = true; });
       if(res.ordna){
-        var grid = el.querySelector('.ak8-ordna');
-        grid.classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram');
+        el.querySelector('.ak8-ordna').classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram');
+      } else if(res.chip){
+        var s = el.querySelector('.ak8-chip.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel');
+      } else if(res.valjflera){
+        el.querySelectorAll('.ak8-vf').forEach(function(b){ var sel = b.classList.contains('sel'), rat = b.dataset.ratt === '1'; if(sel && rat) b.classList.add('ratt'); else if(sel !== rat) b.classList.add('fel'); });
       } else {
         el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       }
@@ -236,7 +323,7 @@
   }
 
   window.BLAD_AK8_D3 = {
-    RAKNA: RAKNA, STORLEK: STORLEK,
-    renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, ({ RAKNA:RAKNA, STORLEK:STORLEK })[key]); }
+    TIOSYSTEMET: TIOSYSTEMET, RAKNA: RAKNA, STORLEK: STORLEK,
+    renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, ({ TIOSYSTEMET:TIOSYSTEMET, RAKNA:RAKNA, STORLEK:STORLEK })[key]); }
   };
 })();
