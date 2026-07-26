@@ -56,10 +56,22 @@
     }
 
     // ── SCOPING: arskursRelevans + roll × elevens kontext ──
+    // Grått reserveras för GENUIN framtid (nodens tidigaste relevanta år ligger EFTER elevens)
+    // och för lärar-bortvalt (breddning/fördjupning i godkänt). Elevens år ELLER förflutet
+    // (repetition från tidigare år) bär sin mastery-färg. Färg-beräkningen är oförändrad —
+    // detta styr bara om noden visas i färg eller grått.
+    var AR_ORDN = { ak7:7, ak8:8, ak9:9 };
     function scopeAv(node, pref){
       var ark = node.arskursRelevans || {};
-      if(!(pref.arskurs in ark)) return { inScope:false, orsak:'framtid' };
-      if(ark[pref.arskurs] === 'stod') return { inScope:true, stod:true };
+      var nu = AR_ORDN[pref.arskurs] || 0;
+      var keys = Object.keys(ark);
+      if(!keys.length) return { inScope:false, orsak:'framtid' };
+      var minAr = Math.min.apply(null, keys.map(function(k){ return AR_ORDN[k] || 99; }));
+      if(minAr > nu) return { inScope:false, orsak:'framtid' };   // bara senare år → genuin framtid
+      // Roll-avläsning för det relevanta året: elevens år om noden finns där, annars närmaste förflutna.
+      var relAr = (pref.arskurs in ark) ? pref.arskurs
+        : keys.filter(function(k){ return (AR_ORDN[k] || 99) <= nu; }).sort(function(a, b){ return AR_ORDN[b] - AR_ORDN[a]; })[0];
+      if(ark[relAr] === 'stod') return { inScope:true, stod:true };
       if(pref.mal === 'godkant' && node.roll && node.roll !== 'karna') return { inScope:false, orsak:'valde-bort' };
       return { inScope:true };
     }
