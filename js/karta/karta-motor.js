@@ -48,7 +48,7 @@
         var p = monster[i++ % monster.length], log = [];
         for(var k = 0; k < p.n; k++){
           var dagarSedan = p.n > 1 ? p.spann * (p.n - 1 - k) / (p.n - 1) : 0;
-          log.push({ ts: nu - Math.round(dagarSedan * D), resultat: 'ratt' });
+          log.push({ ts: nu - Math.round(dagarSedan * D), resultat: 'ratt', niva: 3 });   // niva:3 → demo funkar även med minNiva:3 (åk8)
         }
         if(log.length) m[n.id] = log;
       });
@@ -88,7 +88,7 @@
       if(node.niva === 'lovnod'){
         var sc = scopeAv(node, pref);
         if(!sc.inScope) return { gra:true, orsak:sc.orsak };
-        return { state: MAST.masteryState(matris[node.id], pref.minNiva), stod: !!sc.stod };
+        return { state: MAST.masteryState(matris[node.id], pref.minNiva, BLEKNING), stod: !!sc.stod };
       }
       var scoped = barnAv(node.id).map(function(b){ return nodStatus(b, pref, matris); }).filter(function(c){ return !c.gra && !c.stod; });
       if(!scoped.length) return { gra:true, orsak:'framtid' };
@@ -208,7 +208,7 @@
     function renderMeter(){
       var lov = TAX.filter(function(n){ var sc = scopeAv(n, PREF); return n.niva === 'lovnod' && n.generator && !n.doljKarta && sc.inScope && !sc.stod; });
       var Y = lov.length;
-      var X = lov.filter(function(n){ return MAST.masteryState(MATRIS[n.id], PREF.minNiva) === 3; }).length;
+      var X = lov.filter(function(n){ return MAST.masteryState(MATRIS[n.id], PREF.minNiva, BLEKNING) === 3; }).length;
       var pct = Y ? Math.round(X / Y * 100) : 0;
       var el = document.getElementById('meter'); if(!el) return;
       el.innerHTML =
@@ -228,6 +228,10 @@
     // ── init ──
     var PREF = lasPref();
     var MATRIS = lasMatris();
+    // Glömskekurvan: bara åk8-kartan (config.blekning) blekner. ?blekveckor=N är en test-hook
+    // som skjuter blekklockan framåt N veckor (simulerar inaktivitet headless) — 0 i drift.
+    var BLEKNING = config.blekning ? { aktiv:true, nu: Date.now() } : null;
+    try{ if(BLEKNING){ var bw = parseFloat(new URLSearchParams(location.search).get('blekveckor')); if(bw > 0) BLEKNING.nu += bw * 7 * 86400000; } }catch(e){}
     try{ var q = new URLSearchParams(location.search);
       var f = q.get('fokus') || q.get('deldoman') || q.get('omrade');   // bakåtkompat: djupaste vinner
       if(f && byId[f]) fokus = f;

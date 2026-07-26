@@ -11,7 +11,15 @@
   // Nyckeln: GRÖN kräver SPRIDNING över lång tid, inte bara antal. 5 rätt samma kväll ≠ grön.
   var CFG = {
     GUL:  { minRatt: 3, minDagar: 2 },                    // flera gånger, spritt över tid → gul
-    GRON: { minRatt: 5, minDagar: 4, minSpannDagar: 21 }  // flera gånger, utspritt över LÅNG tid → grön
+    GRON: { minRatt: 5, minDagar: 4, minSpannDagar: 21 }, // flera gånger, utspritt över LÅNG tid → grön
+    // ── GLÖMSKEKURVA (blekning) · tunbar mot spacing-schemat ──────────────────────────
+    // Färgen bleknar utan aktivitet sedan SENASTE RÄTT. Kalibrerad så en sommars inaktivitet
+    // (~10 v) tar grön → orange: grön håller hallVeckor, glider sedan ett steg per stegVeckor.
+    //   grön(3): håller 4 v · → gul vid 4 v · → orange vid 4+6=10 v.  gul(2): → orange vid 4 v.
+    // Golv-regeln: har-varit-lärd (nått ≥ orange, härlett ur den append-only loggen) bottnar i
+    // ORANGE; aldrig-lärd (röd, inga försök) bleknar inte alls. Bara åk8-kartan skickar aktiv
+    // blekning — åk7 + självskattning anropar utan den → oförändrat.
+    BLEKNING: { hallVeckor: 4, stegVeckor: 6, golv: 1 }
   };
 
   var MATRIS_KEY = 'k1.taluppfattning.mastery.v1';   // { nodeId: [ { ts, resultat } ... ] }
@@ -37,8 +45,9 @@
   function dagKey(ts){ var d = new Date(ts); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
   // minNiva (valfri): grön kräver evidens på nivå ≥ minNiva för den årskursen (B3-nivåbryggan).
   // Utan minNiva (åk7) räknas alla rätt — byte-identiskt beteende.
-  function masteryState(log, minNiva){
-    if(!log || !log.length) return 0;                                   // röd — inga försök
+  // blekning (valfri): { aktiv, nu } — bara åk8-kartan skickar den. Utan → oförändrat (ingen decay).
+  function masteryState(log, minNiva, blekning){
+    if(!log || !log.length) return 0;                                   // röd — inga försök (aldrig-lärd → bleknar ej)
     var rattAll = log.filter(function(a){ return a.resultat === 'ratt'; }); // delvis/fel drar inte mot grönt
     if(!rattAll.length) return 1;                                        // orange — försökt men inget rätt
     var ratt = minNiva ? rattAll.filter(function(a){ return (a.niva || 0) >= minNiva; }) : rattAll;
@@ -47,9 +56,16 @@
     var dagar = {}; ratt.forEach(function(a){ dagar[dagKey(a.ts)] = 1; });
     var antalDagar = Object.keys(dagar).length;
     var spannDagar = (ratt[ratt.length - 1].ts - ratt[0].ts) / 86400000;
-    if(ratt.length >= CFG.GRON.minRatt && antalDagar >= CFG.GRON.minDagar && spannDagar >= CFG.GRON.minSpannDagar) return 3; // grön
-    if(ratt.length >= CFG.GUL.minRatt && antalDagar >= CFG.GUL.minDagar) return 2;                                          // gul
-    return 1;                                                                                                                // orange
+    var s0 = (ratt.length >= CFG.GRON.minRatt && antalDagar >= CFG.GRON.minDagar && spannDagar >= CFG.GRON.minSpannDagar) ? 3 // grön
+           : (ratt.length >= CFG.GUL.minRatt && antalDagar >= CFG.GUL.minDagar) ? 2                                          // gul
+           : 1;                                                                                                              // orange
+    // ── Glömskekurva: blekna sedan SENASTE RÄTT. Bara grön/gul kan blekna; golv = orange
+    //    (har-varit-lärd). Utan aktiv blekning eller för s0≤1 → oförändrat. ──
+    if(!blekning || !blekning.aktiv || s0 <= 1) return s0;
+    var veckor = (blekning.nu - ratt[ratt.length - 1].ts) / (7 * 86400000);
+    if(veckor < CFG.BLEKNING.hallVeckor) return s0;                     // grön håller några veckor
+    var steg = Math.floor((veckor - CFG.BLEKNING.hallVeckor) / CFG.BLEKNING.stegVeckor) + 1;
+    return Math.max(CFG.BLEKNING.golv, s0 - steg);                      // bottnar i orange, aldrig röd
   }
 
   // ── Aktuell nod ur deeplinken ?ko=&formaga= (samma som utbudslistorna/kartan använder) ──
