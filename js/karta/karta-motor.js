@@ -97,15 +97,25 @@
       return RAM + '?ko=' + encodeURIComponent(ko) + '&formaga=' + encodeURIComponent(formaga);
     }
 
-    // ── RENDER ──
-    var val = { omrade:null, deldoman:null };
+    // ── RENDER (fokus-navigation: en nivå i taget + brödsmula → ingen horisontell scroll) ──
+    var fokus = null;   // null = toppvy (områdena); annars id på det område/deldomän man borrat in i
+
+    // Samma barn-set som nodStatus-rollupen (se rad ~81): synliga (barnAv → !doljKarta), i-scope,
+    // ej grå/stöd. Barn-sammanfattningen och förälderns egen färg blir därmed SAMMA sanning.
+    function barnStates(node){
+      return barnAv(node.id)
+        .map(function(b){ return nodStatus(b, PREF, MATRIS); })
+        .filter(function(c){ return !c.gra && !c.stod; })
+        .map(function(c){ return c.state; });
+    }
+
     function nodBox(node, opts){
       opts = opts || {};
       var status = opts.rootStatus || nodStatus(node, PREF, MATRIS);
       var farg = status.gra ? GRA : FARG[status.state];
       var lankbar = node.niva === 'lovnod' && !status.gra && !!node.generator;   // concept-noder (utan generator) länkas ej
       var b = document.createElement(lankbar ? 'a' : 'div');
-      b.className = 'node' + (opts.root ? ' root' : '') + (status.gra ? ' gra' : '') + (opts.sel ? ' sel' : '')
+      b.className = 'node' + (status.gra ? ' gra' : '') + (opts.sel ? ' sel' : '')
         + (node.niva === 'lovnod' && !status.gra && !node.generator ? ' nolink' : '');
       b.style.background = farg.bg; b.style.borderColor = farg.br; b.style.color = farg.fg;
       var rollM = node.roll === 'breddning' ? '＋' : node.roll === 'fordjupning' ? '★' : '';
@@ -114,42 +124,72 @@
       var markTitle = stodM ? 'stöd – valbart stödspår' : node.roll;
       var orsak = status.gra ? '<span class="gra-orsak">' + (status.orsak === 'framtid' ? (config.orsakFramtid || 'framtid') : 'bortvalt') + '</span>' : '';
       var chev = (opts.hasChildren && !status.gra) ? '<span class="chev">›</span>' : '';
-      b.innerHTML = '<span class="txt">' + node.namn + orsak + '</span>'
-        + (markM && !status.gra ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '') + chev;
+      // Barn-sammanfattning på förälder-kort (så man ser var det är rött/blekt INNAN drill-in).
+      // Samma rollup-set som förälderns färg → summering och färg kan aldrig säga emot varandra.
+      var sumHtml = '';
+      if(opts.summary && !status.gra){
+        var states = barnStates(node);
+        if(states.length){
+          var roda = states.filter(function(s){ return s === 0; }).length;
+          var dots = states.map(function(s){ return '<span class="node-sum-dot" style="background:' + FARG[s].bg + ';border-color:' + FARG[s].br + '"></span>'; }).join('');
+          var etikett = roda ? (roda + ' röda av ' + states.length) : (states.length + ' i scope');
+          sumHtml = '<span class="node-sum">' + dots + '<span class="node-sum-txt">' + etikett + '</span></span>';
+        }
+      }
+      b.innerHTML = '<span class="node-top"><span class="txt">' + node.namn + orsak + '</span>'
+        + (markM && !status.gra ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '')
+        + chev + '</span>' + sumHtml;
       if(lankbar){
         b.href = deeplink(node); b.style.textDecoration = 'none';
       } else if(!status.gra && opts.onClick){
+        b.style.cursor = 'pointer';
         b.addEventListener('click', opts.onClick);
       }
       return b;
     }
-    function kolumn(rubrik){
-      var c = document.createElement('div'); c.className = 'col';
-      if(rubrik){ var r = document.createElement('div'); r.className = 'col-rubrik'; r.textContent = rubrik; c.appendChild(r); }
-      return c;
+
+    // Brödsmula: rot › … › fokus. Varje färg-punkt visar nivåns tillstånd; steg utom det sista
+    // tar tillbaka uppåt. rotStatus/nodStatus = oförändrad beräkning, bara utritad här.
+    function fokusPath(){
+      var path = [{ id:null, namn: config.rotNamn || 'Karta' }];
+      if(fokus !== null){
+        var chain = [], cur = byId[fokus];
+        while(cur){ chain.unshift(cur); cur = cur.parent ? byId[cur.parent] : null; }
+        chain.forEach(function(n){ path.push({ id:n.id, namn:n.namn }); });
+      }
+      return path;
     }
+    function brodsmula(){
+      var path = fokusPath();
+      var bc = document.createElement('nav'); bc.className = 'karta-brod';
+      path.forEach(function(steg, i){
+        var sista = i === path.length - 1;
+        var st = steg.id === null ? rotStatus(PREF, MATRIS) : nodStatus(byId[steg.id], PREF, MATRIS);
+        var farg = st.gra ? GRA : FARG[st.state];
+        var el = document.createElement(sista ? 'span' : 'button');
+        el.className = 'karta-brod-steg' + (sista ? ' ar' : '');
+        el.innerHTML = '<span class="karta-brod-dot" style="background:' + farg.bg + '"></span><span class="karta-brod-namn">' + steg.namn + '</span>';
+        if(!sista){ el.type = 'button'; el.addEventListener('click', function(){ fokus = steg.id; render(); }); }
+        bc.appendChild(el);
+        if(!sista){ var s = document.createElement('span'); s.className = 'karta-brod-sep'; s.textContent = '›'; bc.appendChild(s); }
+      });
+      return bc;
+    }
+
     function render(){
       var cols = document.getElementById('cols'); cols.innerHTML = '';
-      var c1 = kolumn('Område');
-      c1.appendChild(nodBox({ niva:'rot', namn: config.rotNamn || 'Karta' }, { root:true, rootStatus:rotStatus(PREF, MATRIS) }));
-      cols.appendChild(c1);
-      var c2 = kolumn('Deldomäner');
-      OMRADEN.forEach(function(o){
-        c2.appendChild(nodBox(o, { hasChildren:true, sel: val.omrade === o.id, onClick:function(){ val.omrade = o.id; val.deldoman = null; render(); } }));
+      cols.appendChild(brodsmula());
+      var barn = fokus === null ? OMRADEN : barnAv(fokus);
+      var niva = document.createElement('div'); niva.className = 'karta-niva';
+      barn.forEach(function(n){
+        var harBarn = n.niva !== 'lovnod' && barnAv(n.id).length > 0;
+        niva.appendChild(nodBox(n, {
+          hasChildren: harBarn,
+          summary: harBarn,
+          onClick: harBarn ? function(){ fokus = n.id; render(); } : null
+        }));
       });
-      cols.appendChild(c2);
-      if(val.omrade){
-        var c3 = kolumn('Färdighetsområden');
-        barnAv(val.omrade).forEach(function(d){
-          c3.appendChild(nodBox(d, { hasChildren:true, sel: val.deldoman === d.id, onClick:function(){ val.deldoman = d.id; render(); } }));
-        });
-        cols.appendChild(c3);
-      }
-      if(val.deldoman){
-        var c4 = kolumn('Färdigheter');
-        barnAv(val.deldoman).forEach(function(l){ c4.appendChild(nodBox(l, {})); });
-        cols.appendChild(c4);
-      }
+      cols.appendChild(niva);
       renderMeter();
       renderControls();
     }
@@ -177,8 +217,8 @@
     var PREF = lasPref();
     var MATRIS = lasMatris();
     try{ var q = new URLSearchParams(location.search);
-      if(q.get('omrade') && byId[q.get('omrade')]) val.omrade = q.get('omrade');
-      if(q.get('deldoman') && byId[q.get('deldoman')]) val.deldoman = q.get('deldoman');
+      var f = q.get('fokus') || q.get('deldoman') || q.get('omrade');   // bakåtkompat: djupaste vinner
+      if(f && byId[f]) fokus = f;
       if(q.get('mal') === 'allt' || q.get('mal') === 'godkant') PREF.mal = q.get('mal');
     }catch(e){}
     document.querySelectorAll('#mal-seg button').forEach(function(btn){

@@ -24,10 +24,24 @@ h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:52px
 
 /* Kart-kolumner (drill vänster→höger) */
 .karta{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;overflow-x:auto;}
-.cols{display:flex;gap:26px;align-items:flex-start;min-width:max-content;}
+.cols{display:block;}
+/* Fokus-navigation: EN nivå i taget som responsiv grid → wrappar, aldrig horisontell scroll */
+.karta-niva{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;}
 .col{display:flex;flex-direction:column;gap:9px;min-width:190px;}
 .col-rubrik{font-family:"Cinzel",serif;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:2px 0 4px 2px;}
-.node{display:flex;align-items:center;gap:9px;text-align:left;width:100%;border-radius:10px;padding:11px 13px;border:1.5px solid;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:500;line-height:1.25;transition:transform .12s, box-shadow .12s;}
+/* Brödsmula: rot › … › fokus (färg-punkt per steg visar nivåns tillstånd) */
+.karta-brod{display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin:0 0 16px;}
+.karta-brod-steg{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13.5px;color:var(--ink-soft);background:none;border:0;padding:4px 9px;border-radius:7px;cursor:default;}
+button.karta-brod-steg{cursor:pointer;} button.karta-brod-steg:hover{background:var(--paper);color:var(--ink);}
+.karta-brod-steg.ar{color:var(--ink);font-weight:600;}
+.karta-brod-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 1px rgba(0,0,0,.12);}
+.karta-brod-sep{color:var(--ink-soft);opacity:.55;font-size:14px;}
+.node{display:flex;flex-direction:column;align-items:stretch;gap:6px;text-align:left;width:100%;border-radius:10px;padding:11px 13px;border:1.5px solid;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:500;line-height:1.25;transition:transform .12s, box-shadow .12s;}
+.node-top{display:flex;align-items:center;gap:9px;}
+/* Barn-sammanfattning på förälder-kort — samma rollup-set som kortets egen färg */
+.node-sum{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.node-sum-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 1px rgba(255,255,255,.55);}
+.node-sum-txt{font-size:11px;opacity:.9;margin-left:2px;font-weight:500;}
 .node:hover{transform:translateX(2px);box-shadow:0 3px 12px rgba(0,0,0,.08);}
 .node.sel{box-shadow:0 0 0 3px rgba(51,48,42,.18);}
 .node .txt{flex:1;}
