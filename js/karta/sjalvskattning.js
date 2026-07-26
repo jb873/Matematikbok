@@ -230,20 +230,40 @@
     function radHtml(r, opts){
       opts = opts || {};
       var evNull = r.evidens == null;   // belief-only-förmåga: ingen drill → ingen evidens att bekräfta mot
+      var b = BELIEFS[r.id] || '';
+      // Evidensen döljs tills eleven tagit ställning på JUST den här raden: hon ska committa en
+      // egen tro innan hon ser om den stämmer, annars blir skattningen en avskrift av kartan.
+      // Regeln är per rad och drivs av belief-existens → återvändande elev ser sina tidigare
+      // ställningstaganden avslöjade, men aldrig något hon inte skattat.
+      var avslojad = !!b && !evNull;
       // vantar-rader: evidensen är OMRÅDETS, inte variantens → ingen falsk bekräftelse ("stämmer, bevisat" hålls tills äkta per variant)
-      var b = BELIEFS[r.id] || '', st = evNull ? { typ:'neutral', txt:'' } : (r.vantar ? statusVantar(b, r.evidens) : status(b, r.evidens));
-      var evFarg = evNull ? '#D3CDBE' : FARG[r.evidens];
+      var st = avslojad ? (r.vantar ? statusVantar(b, r.evidens) : status(b, r.evidens)) : { typ:'neutral', txt:'' };
+      var evFarg = avslojad ? FARG[r.evidens] : '#D3CDBE';
       var knappar = BELIEF.map(function(kv){ return '<button class="sj-b sj-b-' + kv[0] + (b===kv[0]?' on':'') + '" data-id="' + r.id + '" data-b="' + kv[0] + '">' + kv[1] + '</button>'; }).join('');
       var k1tag = r.kalla === 'k1' ? '<span class="sj-k1" title="hämtas ur kapitel 1 (delatMed)">k1</span>' : '';
       var fmtag = (opts.visaFormaga && r.formaga) ? '<span class="sj-fmtag">' + formageEtikett(r.formaga) + '</span>' : '';
       var omrtag = (opts.visaFormaga && r.omrade) ? '<span class="sj-omrade" title="förmågan bärs här">' + r.omrade + '</span>' : '';
-      var vantag = r.vantar ? '<span class="sj-vantar" title="Delar områdets evidensfärg tills drillen loggar per variant (väntar på metod-medveten rättning).">delad evidens</span>' : '';
-      return '<div class="sj-rad sj-' + st.typ + (r.variant ? ' sj-variant' : '') + '">'
+      // Delad-evidens-taggen hör ihop med områdesfärgen → visas först när raden avslöjats.
+      var vantag = (r.vantar && avslojad) ? '<span class="sj-vantar" title="Delar områdets evidensfärg tills drillen loggar per variant (väntar på metod-medveten rättning).">delad evidens</span>' : '';
+      var dotTitel = avslojad ? (r.vantar ? 'evidens för hela området – inte just den här varianten' : 'evidens')
+                              : (evNull ? 'ingen mätning – bara din skattning' : 'Skatta först – evidensen visas när du kryssat');
+      var dotKlass = 'sj-dot sj-ev' + (avslojad ? '' : ' sj-ev-dold');
+      return '<div class="sj-rad sj-' + st.typ + (r.variant ? ' sj-variant' : '') + (avslojad ? '' : ' sj-oskattad') + '">'
         + '<span class="sj-belief">' + knappar + '</span>'
         + '<span class="sj-namn">' + r.namn + k1tag + omrtag + fmtag + vantag + '</span>'
-        + '<span class="sj-dot sj-ev" style="background:' + evFarg + '" title="' + (evNull ? 'ingen mätning – bara din skattning' : (r.vantar ? 'evidens för hela området – inte just den här varianten' : 'evidens')) + '"></span>'
+        + '<span class="' + dotKlass + '"' + (avslojad ? ' style="background:' + evFarg + '"' : '') + ' title="' + dotTitel + '"></span>'
         + '<span class="sj-status">' + (st.txt ? '<span class="sj-badge sj-badge-' + st.typ + '">' + st.txt + '</span>' : '') + '</span>'
         + '</div>';
+    }
+    // Grupprollup ur ENDAST skattade rader — annars läcker gruppricken samma evidens
+    // som radprickarna döljer. null = inget skattat än → neutral platshållare.
+    function rollupSkattad(rader){
+      var e = rader.filter(function(r){ return BELIEFS[r.id] && r.evidens != null; }).map(function(r){ return r.evidens; });
+      return e.length ? Math.min.apply(null, e) : null;
+    }
+    function gruppDot(rollup){
+      return rollup == null ? '<span class="sj-dot sj-ev-dold" title="visas när du skattat raderna"></span>'
+                            : '<span class="sj-dot" style="background:' + FARG[rollup] + '"></span>';
     }
     function render(){
       PREF = lasPref(); BELIEFS = lasBelief();
@@ -254,10 +274,9 @@
       // TVÄRGÅENDE FÖRMÅGE-DIMENSION — Joachims kärnbudskap: vägen och kommunikationen räknas, inte bara svaret.
       var fr = formageRader();
       if(fr.length){
-        var mfr = fr.filter(function(r){ return r.evidens != null; });   // belief-only-rader saknar evidens
-        var frollup = mfr.length ? Math.min.apply(null, mfr.map(function(r){ return r.evidens; })) : null;
+        var frollup = rollupSkattad(fr);
         html += '<section class="sj-grupp sj-formaga"><div class="sj-grupp-rubrik sj-formaga-rubrik">'
-          + '<span class="sj-dot" style="background:' + (frollup == null ? '#D3CDBE' : FARG[frollup]) + '"></span>'
+          + gruppDot(frollup)
           + '<span class="sj-grupp-namn">Kommunikation och problemlösning</span>'
           + '<span class="sj-formaga-flagga">förmågor · gäller allt du gör</span></div>'
           + '<p class="sj-formaga-intro">Det här är inget eget delkapitel — det är <em>förmågor</em> som efterfrågas i allt du gör, i alla kapitel och alla år. Vägen och kommunikationen räknas, inte bara svaret.</p>';
@@ -267,10 +286,10 @@
       OMR.forEach(function(omr){
         var rader = raderFor(omr);
         if(!rader.length) return;
-        var rollup = Math.min.apply(null, rader.map(function(r){ return r.evidens; }));
+        var rollup = rollupSkattad(rader);
         var stjarna = omr.roll === 'fordjupning' ? ' <span class="sj-stjarna" title="fördjupning">★</span>' : '';
         html += '<section class="sj-grupp"><div class="sj-grupp-rubrik">'
-          + '<span class="sj-dot" style="background:' + FARG[rollup] + '"></span><span class="sj-grupp-namn">' + omr.namn + stjarna + '</span></div>';
+          + gruppDot(rollup) + '<span class="sj-grupp-namn">' + omr.namn + stjarna + '</span></div>';
         rader.forEach(function(r){ html += radHtml(r, {}); });
         html += '</section>';
       });
