@@ -2534,7 +2534,16 @@ const FORMAGOR = {
   pow10:    {label:'Med 10, 100 och 1000', tagClass:'tag-rakna', pillClass:'p-rakna'},
   stora:    {label:'Stora tal',            tagClass:'tag-rakna', pillClass:'p-rakna'},
   sma:      {label:'Små tal',              tagClass:'tag-rakna', pillClass:'p-rakna'},
-  storasma: {label:'Stora och små tal',    tagClass:'tag-rakna', pillClass:'p-rakna'}
+  storasma: {label:'Stora och små tal',    tagClass:'tag-rakna', pillClass:'p-rakna'},
+  // Utbrutna metod-/räknelags-kategorier (självskattningens väg 1: deeplink ?formaga=<kategori> → egen nod/logg)
+  kommutativa:  {label:'Kommutativa lagen',  tagClass:'tag-metod', pillClass:'p-metod'},
+  associativa:  {label:'Associativa lagen',  tagClass:'tag-metod', pillClass:'p-metod'},
+  distributiva: {label:'Distributiva lagen', tagClass:'tag-metod', pillClass:'p-metod'},
+  uppstallning: {label:'Uppställning',        tagClass:'tag-metod', pillClass:'p-metod'},
+  okaminska:    {label:'Öka och minska lika', tagClass:'tag-metod', pillClass:'p-metod'},
+  bakifran:     {label:'Addition bakifrån',   tagClass:'tag-metod', pillClass:'p-metod'},
+  kort:         {label:'Kort division',       tagClass:'tag-metod', pillClass:'p-metod'},
+  lang:         {label:'Lång division',       tagClass:'tag-metod', pillClass:'p-metod'}
 };
 
 // Kapitel 1 – Taluppfattning: positionssystem och räknesätt
@@ -4864,9 +4873,12 @@ const OVNING_RENDERS = {
   'sub-rakna':{
     rakna: (b)=> renderSubHuvudrakning(b)
   },
-  // Subtraktion - KO 3: Metoder
+  // Subtraktion - KO 3: Metoder (picker + per-metod-deeplinkar; per-metod loggar egen nod)
   'sub-metoder':{
-    metod: (b)=> renderSubMetod(b)     // rika versionen (metod-addsub)
+    metod:        (b)=> renderSubMetod(b),     // rika versionen (metod-addsub) — pickern
+    uppstallning: (b)=> renderUppstallningSubEnkel(b, null, ()=> renderSubMetod(b)),
+    okaminska:    (b)=> renderOkaMinska(b, null, ()=> renderSubMetod(b)),
+    bakifran:     (b)=> renderAdditionBakifran(b, null, ()=> renderSubMetod(b))
   },
   // Subtraktion - KO 4: Problemlösning
   'sub-problem':{
@@ -4881,9 +4893,10 @@ const OVNING_RENDERS = {
   'add-rakna':{
     rakna: (b)=> renderAddHuvudrakning(b)
   },
-  // Addition - KO 3: Metoder
+  // Addition - KO 3: Metoder (picker + uppställnings-deeplink; uppställning loggar egen nod)
   'add-metoder':{
-    metod: (b)=> renderAddMetod(b)     // rika versionen (metod-addsub): uppställning m. minnessiffror, talsorterna på rad, flytta över m. mellanled
+    metod:        (b)=> renderAddMetod(b),     // rika versionen (metod-addsub): uppställning m. minnessiffror, talsorterna på rad, flytta över m. mellanled
+    uppstallning: (b)=> renderAddUppstallning(b, ()=> renderAddMetod(b))
   },
   // Addition - KO 4: Problemlösning
   'add-problem':{
@@ -4899,9 +4912,10 @@ const OVNING_RENDERS = {
   'mult-tabell':{
     rakna: (b)=> renderMultTabell(b)
   },
-  // Del 3 - Metoder för multiplikation
+  // Del 3 - Metoder för multiplikation (picker + uppställnings-deeplink; uppställning loggar egen nod)
   'mult-metoder':{
-    metod: (b)=> renderMultMetoder(b)
+    metod:        (b)=> renderMultMetoder(b),
+    uppstallning: (b)=> renderUppstallningMult(b, ()=> renderMultMetoder(b))
   },
   // Del 3 - Beräkningar (aggregat) + per-kategori-deeplinkar (Del 5/6 loggar till egen nod)
   'mult-rakna':{
@@ -4923,8 +4937,11 @@ const OVNING_RENDERS = {
   'div-tabell':{
     rakna: (b)=> renderDivTabell(b)
   },
+  // Del 5 - Metoder för division (picker + per-metod-deeplinkar; per-metod loggar egen nod)
   'div-metoder':{
-    metod: (b)=> renderDivMetoder(b)
+    metod: (b)=> renderDivMetoder(b),
+    kort:  (b)=> renderDivKort(b, ()=> renderDivMetoder(b)),
+    lang:  (b)=> renderDivLang(b, ()=> renderDivMetoder(b))
   },
   'div-rakna':{
     rakna:    (b)=> renderDivRakna(b),
@@ -4950,7 +4967,10 @@ const OVNING_RENDERS = {
     metod: (b)=> renderPrioMetod(b)
   },
   'prio-lagar':{
-    rakna: (b)=> renderPrioLagar(b)
+    rakna:        (b)=> renderPrioLagar(b),   // pickern (välj lag)
+    kommutativa:  (b)=> renderLagOvning(b, 'kommutativa',  ()=> renderPrioLagar(b)),
+    associativa:  (b)=> renderLagOvning(b, 'associativa',  ()=> renderPrioLagar(b)),
+    distributiva: (b)=> renderLagOvning(b, 'distributiva', ()=> renderPrioLagar(b))
   },
   // Del 8 - Negativa tal
   'neg-begrepp':{

@@ -96,8 +96,51 @@
         { key:'bada',     namn:'Förläng båda nämnarna' },
         { key:'blandad',  namn:'Blandad form' },
         { key:'lana',     namn:'Låna: gör om ett heltal till bråk' }
+      ] },
+
+      // ── k1 räknelagar + metod-noder (VÄG 1) ──────────────────────────────
+      // vag1: egen evidensnyckel koId:key — äkta per-variant-evidens (drillen loggar
+      //       per kategori via deeplinkarna i ramens OVNING_RENDERS). Ingen delad evidens.
+      // vantar: väg 2 (belief finare än evidens) för kategorier utan egen loggnyckel —
+      //         delar nodens grova evidens, tydligt märkt "delad evidens".
+      'prio-lagar:rakna': { rader:[
+        { key:'kommutativa',  namn:'Kommutativa lagen',  vag1:true },
+        { key:'associativa',  namn:'Associativa lagen',  vag1:true },
+        { key:'distributiva', namn:'Distributiva lagen', vag1:true }
+      ] },
+      'sub-metoder:metod': { rader:[
+        { key:'uppstallning', namn:'Uppställning',        vag1:true },
+        { key:'okaminska',    namn:'Öka och minska lika', vag1:true },
+        { key:'bakifran',     namn:'Addition bakifrån',   vag1:true }
+      ] },
+      'div-metoder:metod': { rader:[
+        { key:'kort', namn:'Kort division',                    vag1:true },
+        { key:'lang', namn:'Lång division (liggande stolen)',  vag1:true }
+      ] },
+      // Blandning: uppställning loggar per kategori (väg 1), övriga loggar grovt (väg 2).
+      'add-metoder:metod': { rader:[
+        { key:'uppstallning', namn:'Uppställning',              vag1:true },
+        { key:'talsorterna',  namn:'Talsorterna var för sig',  vantar:true },
+        { key:'flytta-over',  namn:'Flytta över',              vantar:true }
+      ] },
+      'mult-metoder:metod': { rader:[
+        { key:'uppstallning',   namn:'Uppställning',                    vag1:true },
+        { key:'talsorterna',    namn:'Talsorterna var för sig',        vantar:true },
+        { key:'dubbla',         namn:'Dubbla och halvera',             vantar:true },
+        { key:'kompensation',   namn:'Kompensationsmetoden',           vantar:true },
+        { key:'dubbelparentes', namn:'Multiplicera med dubbelparentes', vantar:true }
       ] }
     };
+    // Granskningsläge: seeda även väg-1-varianternas egna nycklar så den äkta per-kategori-färgen syns.
+    if(DEMO){ Object.keys(VARIANTER).forEach(function(nid){
+      var koId = nid.split(':')[0];
+      VARIANTER[nid].rader.forEach(function(vr){
+        if(!vr.vag1) return;
+        var m = di++ % 4; demoEv[koId + ':' + vr.key] = [3, 0, 2, 1][m];
+        if(m === 0 || m === 1) demoBel[koId + ':' + vr.key] = 'kan';
+        if(m === 2) demoBel[koId + ':' + vr.key] = 'kanej';
+      });
+    }); }
 
     // Evidens för en k2-lövnod (0–3) eller en k1-delatMed-nod (ur k1-loggen).
     function evidensK2(id){ if(DEMO) return demoEv[id] != null ? demoEv[id] : 0; return MAST.masteryState((MAST.lasMatris() || {})[id], PREF.minNiva); }
@@ -127,11 +170,18 @@
         // OBS: ingen deeplink. Självskattningen leder ALDRIG till en drill (belief ≠ evidens-väg).
         var v = VARIANTER[n.id];
         if(v){
-          var ev = evidensK2(n.id);   // förälderns evidens, delad tills drillen loggar per variant
+          var koId = n.id.split(':')[0];
+          var grovEv = evidensK2(n.id);   // nodens grova evidens (delas av väg-2-rader)
           v.rader.forEach(function(vr){
             var vsc = vr.roll ? scopeAv({ roll:vr.roll, arskursRelevans:n.arskursRelevans }, PREF) : sc;
             if(!vsc.inScope) return;
-            rader.push({ id:n.id + '#' + vr.key, namn:vr.namn, roll:vr.roll || n.roll, evidens:ev, kalla:'k2', variant:true, vantar:!!v.vantar });
+            if(vr.vag1){
+              // Väg 1: äkta per-variant-evidens ur koId:key (deeplinken loggar per kategori). Ingen delad evidens.
+              rader.push({ id:koId + ':' + vr.key, namn:vr.namn, roll:vr.roll || n.roll, evidens: evidensK2(koId + ':' + vr.key), kalla:'k2', variant:true });
+            } else {
+              // Väg 2: delar nodens grova evidens tills drillen loggar per variant → delad-evidens-märkt.
+              rader.push({ id:n.id + '#' + vr.key, namn:vr.namn, roll:vr.roll || n.roll, evidens:grovEv, kalla:'k2', variant:true, vantar:true });
+            }
           });
         } else {
           rader.push({ id:n.id, namn:(n.visning && n.visning.titel) || n.namn, roll:n.roll, evidens: evidensK2(n.id), kalla:'k2' });
