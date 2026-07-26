@@ -131,6 +131,14 @@
         { key:'dubbelparentes', namn:'Multiplicera med dubbelparentes', vantar:true }
       ] }
     };
+    // Väg-1-varianterna motsvarar RIKTIGA taxonomi-noder (koId:kategori) som kartan visar.
+    // I självskattningen renderas de via VARIANTER (indragna, grupperade) — så hoppa över dem
+    // som platta rader i raderFor, annars dubbelras (VARIANTER-rad + nodens egen rad).
+    var VARIANT_AGA = {};
+    Object.keys(VARIANTER).forEach(function(nid){
+      var koId = nid.split(':')[0];
+      VARIANTER[nid].rader.forEach(function(vr){ if(vr.vag1) VARIANT_AGA[koId + ':' + vr.key] = true; });
+    });
     // Granskningsläge: seeda även väg-1-varianternas egna nycklar så den äkta per-kategori-färgen syns.
     if(DEMO){ Object.keys(VARIANTER).forEach(function(nid){
       var koId = nid.split(':')[0];
@@ -166,6 +174,7 @@
     function raderFor(omr){
       var rader = [];
       TAX.filter(function(n){ return n.niva === 'lovnod' && omradeAv(n) === omr && !arFormaga(n); }).forEach(function(n){
+        if(VARIANT_AGA[n.id]) return;   // väg-1-kategorinod → renderas via VARIANTER, inte som platt rad
         var sc = scopeAv(n, PREF); if(!sc.inScope) return;
         // OBS: ingen deeplink. Självskattningen leder ALDRIG till en drill (belief ≠ evidens-väg).
         var v = VARIANTER[n.id];

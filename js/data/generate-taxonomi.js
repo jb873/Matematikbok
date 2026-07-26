@@ -205,14 +205,40 @@ const OVERRIDES = {
   // breddning. Migreringens default (kat METOD → breddning) drog med sådant som krävs för
   // godkänt. De sekundära metoderna (flytta över, addition bakifrån, dubbelparentes, liggande
   // stolen) bor kvar i samma drill. Faktorträd + utvecklad form = golvet (bekräftat).
-  'add-metoder:metod':       { roll:'karna' },
-  'sub-metoder:metod':       { roll:'karna' },
   'mult-begrepp:metod':      { roll:'karna' },
-  'mult-metoder:metod':      { roll:'karna' },
-  'div-metoder:metod':       { roll:'karna' },
   'prio-prioritering:metod': { roll:'karna' },
   'primtal:metod':           { roll:'karna' },
-  'utvecklad:metod':         { roll:'karna' }
+  'utvecklad:metod':         { roll:'karna' },
+
+  // ── B: räknelagar + metoder utbrutna per kategori (deldomän → barn) ──────────────────
+  // Kör B (Joachims val): den grova metod-/lag-noden blir INTE en egen kart-ruta — kategorierna
+  // ÄR färdigheterna. Aggregatet göms på kartan (doljKarta → ur barnAv/rollup) och tas ur
+  // Färdighetsträningen (visning:null). Noden finns kvar för picker-deeplinken (OVNING_RENDERS
+  // …:metod / prio-lagar:rakna) och för självskattningens VARIANTER (belief-rader).
+  // Kategori-noderna genereras automatiskt ur OVNING_RENDERS; här får de roll + visning.
+  // Roll (primär-metod-regeln): uppställning, kort division och räknelagarna = KÄRNA (golvet);
+  // de alternativa metoderna = BREDDNING (grå i godkänt-vyn).
+  'add-metoder:metod':  { roll:'karna', visning:null, doljKarta:true },
+  'sub-metoder:metod':  { roll:'karna', visning:null, doljKarta:true },
+  'mult-metoder:metod': { roll:'karna', visning:null, doljKarta:true },
+  'div-metoder:metod':  { roll:'karna', visning:null, doljKarta:true },
+  'prio-lagar:rakna':   { roll:'karna', visning:null, doljKarta:true },
+
+  // Addition — uppställning (kärna). talsorterna/flytta över förblir belief-only i självskattningen.
+  'add-metoder:uppstallning': { roll:'karna', visning:{ utbudslista:'d2', grupp:'Addition', gruppordning:0, radordning:2, titel:'Uppställning', etikett:'metod', formagaKey:'uppstallning', niva:null } },
+  // Subtraktion — uppställning (kärna) + öka/minska, addition bakifrån (breddning)
+  'sub-metoder:uppstallning': { roll:'karna',     visning:{ utbudslista:'d2', grupp:'Subtraktion', gruppordning:1, radordning:2,   titel:'Uppställning',        etikett:'metod', formagaKey:'uppstallning', niva:null } },
+  'sub-metoder:okaminska':    { roll:'breddning', visning:{ utbudslista:'d2', grupp:'Subtraktion', gruppordning:1, radordning:2.1, titel:'Öka och minska lika',  etikett:'metod', formagaKey:'okaminska',    niva:null } },
+  'sub-metoder:bakifran':     { roll:'breddning', visning:{ utbudslista:'d2', grupp:'Subtraktion', gruppordning:1, radordning:2.2, titel:'Addition bakifrån',    etikett:'metod', formagaKey:'bakifran',     niva:null } },
+  // Multiplikation — uppställning (kärna)
+  'mult-metoder:uppstallning': { roll:'karna', visning:{ utbudslista:'d2', grupp:'Multiplikation', gruppordning:2, radordning:2, titel:'Uppställning', etikett:'metod', formagaKey:'uppstallning', niva:null } },
+  // Division — kort (kärna) + lång (breddning)
+  'div-metoder:kort': { roll:'karna',     visning:{ utbudslista:'d2', grupp:'Division', gruppordning:3, radordning:2,   titel:'Kort division', etikett:'metod', formagaKey:'kort', niva:null } },
+  'div-metoder:lang': { roll:'breddning', visning:{ utbudslista:'d2', grupp:'Division', gruppordning:3, radordning:2.1, titel:'Lång division', etikett:'metod', formagaKey:'lang', niva:null } },
+  // Räknelagar — alla tre kärna (kärnbegrepp)
+  'prio-lagar:kommutativa':  { roll:'karna', visning:{ utbudslista:'d2', grupp:'Prioriteringsregeln', gruppordning:4, radordning:2,   titel:'Kommutativa lagen',  etikett:'räkna', formagaKey:'kommutativa',  niva:null } },
+  'prio-lagar:associativa':  { roll:'karna', visning:{ utbudslista:'d2', grupp:'Prioriteringsregeln', gruppordning:4, radordning:2.1, titel:'Associativa lagen',  etikett:'räkna', formagaKey:'associativa',  niva:null } },
+  'prio-lagar:distributiva': { roll:'karna', visning:{ utbudslista:'d2', grupp:'Prioriteringsregeln', gruppordning:4, radordning:2.2, titel:'Distributiva lagen', etikett:'räkna', formagaKey:'distributiva', niva:null } }
 };
 for(const n of noder){
   const o = OVERRIDES[n.id];

@@ -791,14 +791,29 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderAddMetod",
       "begrepp": "Lär dig och välj bland additionsmetoderna.",
+      "visning": null,
+      "doljKarta": true
+    },
+    {
+      "id": "add-metoder:uppstallning",
+      "namn": "Uppställning",
+      "parent": "add-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": "renderAddUppstallning",
+      "begrepp": null,
       "visning": {
         "utbudslista": "d2",
         "grupp": "Addition",
         "gruppordning": 0,
         "radordning": 2,
-        "titel": "Metoder",
+        "titel": "Uppställning",
         "etikett": "metod",
-        "formagaKey": null,
+        "formagaKey": "uppstallning",
         "niva": null
       }
     },
@@ -953,14 +968,75 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderSubMetod",
       "begrepp": "Lär dig och välj bland subtraktionsmetoderna.",
+      "visning": null,
+      "doljKarta": true
+    },
+    {
+      "id": "sub-metoder:uppstallning",
+      "namn": "Uppställning",
+      "parent": "sub-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": "renderUppstallningSubEnkel",
+      "begrepp": null,
       "visning": {
         "utbudslista": "d2",
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 2,
-        "titel": "Metoder",
+        "titel": "Uppställning",
         "etikett": "metod",
-        "formagaKey": null,
+        "formagaKey": "uppstallning",
+        "niva": null
+      }
+    },
+    {
+      "id": "sub-metoder:okaminska",
+      "namn": "Öka och minska lika",
+      "parent": "sub-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": "renderOkaMinska",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Subtraktion",
+        "gruppordning": 1,
+        "radordning": 2.1,
+        "titel": "Öka och minska lika",
+        "etikett": "metod",
+        "formagaKey": "okaminska",
+        "niva": null
+      }
+    },
+    {
+      "id": "sub-metoder:bakifran",
+      "namn": "Addition bakifrån",
+      "parent": "sub-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": "renderAdditionBakifran",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Subtraktion",
+        "gruppordning": 1,
+        "radordning": 2.2,
+        "titel": "Addition bakifrån",
+        "etikett": "metod",
+        "formagaKey": "bakifran",
         "niva": null
       }
     },
@@ -1129,14 +1205,29 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Lär dig och välj bland flera multiplikationsmetoder.",
+      "visning": null,
+      "doljKarta": true
+    },
+    {
+      "id": "mult-metoder:uppstallning",
+      "namn": "Uppställning",
+      "parent": "mult-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": "renderUppstallningMult",
+      "begrepp": null,
       "visning": {
         "utbudslista": "d2",
         "grupp": "Multiplikation",
         "gruppordning": 2,
         "radordning": 2,
-        "titel": "Metoder",
+        "titel": "Uppställning",
         "etikett": "metod",
-        "formagaKey": null,
+        "formagaKey": "uppstallning",
         "niva": null
       }
     },
@@ -1416,14 +1507,52 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderDivMetoder",
       "begrepp": "Lär dig och öva kort och lång division.",
+      "visning": null,
+      "doljKarta": true
+    },
+    {
+      "id": "div-metoder:kort",
+      "namn": "Kort division",
+      "parent": "div-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": "renderDivKort",
+      "begrepp": null,
       "visning": {
         "utbudslista": "d2",
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 2,
-        "titel": "Metoder",
+        "titel": "Kort division",
         "etikett": "metod",
-        "formagaKey": null,
+        "formagaKey": "kort",
+        "niva": null
+      }
+    },
+    {
+      "id": "div-metoder:lang",
+      "namn": "Lång division",
+      "parent": "div-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": "renderDivLang",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Division",
+        "gruppordning": 3,
+        "radordning": 2.1,
+        "titel": "Lång division",
+        "etikett": "metod",
+        "formagaKey": "lang",
         "niva": null
       }
     },
@@ -1703,15 +1832,76 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderPrioLagar",
       "begrepp": "Öva de tre räknelagarna med tydliga mellanled.",
+      "visning": null,
+      "doljKarta": true
+    },
+    {
+      "id": "prio-lagar:kommutativa",
+      "namn": "Kommutativa lagen",
+      "parent": "prio-lagar",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": "renderLagOvning",
+      "begrepp": null,
       "visning": {
         "utbudslista": "d2",
         "grupp": "Prioriteringsregeln",
         "gruppordning": 4,
         "radordning": 2,
-        "titel": "Räknelagar",
+        "titel": "Kommutativa lagen",
         "etikett": "räkna",
-        "formagaKey": "rakna",
-        "niva": 2
+        "formagaKey": "kommutativa",
+        "niva": null
+      }
+    },
+    {
+      "id": "prio-lagar:associativa",
+      "namn": "Associativa lagen",
+      "parent": "prio-lagar",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": "renderLagOvning",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Prioriteringsregeln",
+        "gruppordning": 4,
+        "radordning": 2.1,
+        "titel": "Associativa lagen",
+        "etikett": "räkna",
+        "formagaKey": "associativa",
+        "niva": null
+      }
+    },
+    {
+      "id": "prio-lagar:distributiva",
+      "namn": "Distributiva lagen",
+      "parent": "prio-lagar",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak7": "mal"
+      },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": "renderLagOvning",
+      "begrepp": null,
+      "visning": {
+        "utbudslista": "d2",
+        "grupp": "Prioriteringsregeln",
+        "gruppordning": 4,
+        "radordning": 2.2,
+        "titel": "Distributiva lagen",
+        "etikett": "räkna",
+        "formagaKey": "distributiva",
+        "niva": null
       }
     },
     {
