@@ -172,6 +172,21 @@ window.K1_TAXONOMI = {
       "implemented": true
     },
     {
+      "id": "tiopotenser",
+      "namn": "Tiopotenser",
+      "parent": null,
+      "niva": "omrade",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Tal som tiopotens, potenslagarna med bas 10 och SI-prefixen kilo–tera.",
+      "grupp": "raknesatt",
+      "implemented": true
+    },
+    {
       "id": "siffror",
       "namn": "Siffror och tal · udda och jämna",
       "parent": "taluppfattning",
@@ -2367,6 +2382,90 @@ window.K1_TAXONOMI = {
       "visning": null
     },
     {
+      "id": "tio-rakna",
+      "namn": "Tiopotenser",
+      "parent": "tiopotenser",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Tal som tiopotens och tvärtom, potenslagarna med bas 10, addition/subtraktion och lös ut exponenten.",
+      "visning": null
+    },
+    {
+      "id": "tio-rakna:skriva",
+      "namn": "Tiopotenser · Skriv som potens",
+      "parent": "tio-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "BEGREPP",
+      "generator": "renderTioSkriva",
+      "begrepp": "Skriv tal som tiopotens.",
+      "visning": null
+    },
+    {
+      "id": "tio-rakna:evaluera",
+      "namn": "Tiopotenser · Beräkna värdet",
+      "parent": "tio-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderTioEvaluera",
+      "begrepp": "Beräkna tiopotensens värde.",
+      "visning": null
+    },
+    {
+      "id": "tio-rakna:rakna",
+      "namn": "Tiopotenser · Räkna",
+      "parent": "tio-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderTioMultdiv",
+      "begrepp": "Multiplikation och division – behåll basen, operera på exponenterna.",
+      "visning": null
+    },
+    {
+      "id": "tio-rakna:addsub",
+      "namn": "Tiopotenser · Addition och subtraktion",
+      "parent": "tio-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderTioAddsub",
+      "begrepp": "Addition och subtraktion – räkna ut varje tiopotens, operera sedan.",
+      "visning": null
+    },
+    {
+      "id": "tio-rakna:losut",
+      "namn": "Tiopotenser · Lös ut bas/exponent",
+      "parent": "tio-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderTioLosut",
+      "begrepp": "Vad ska stå istället för x?",
+      "visning": null
+    },
+    {
       "id": "prio-kombinationer",
       "namn": "Kombinationer av räknesätt (i–iv)",
       "parent": "prio-prioritering",
@@ -2448,6 +2547,20 @@ window.K1_TAXONOMI = {
       "formaga": "BEGREPP",
       "generator": null,
       "begrepp": "Kvadratens area som potens (Öva-blad).",
+      "visning": null
+    },
+    {
+      "id": "tio-rakna:prefix",
+      "namn": "SI-prefix",
+      "parent": "tio-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "BEGREPP",
+      "generator": null,
+      "begrepp": "Matcha tiopotens mot SI-prefix: kilo 10³, mega 10⁶, giga 10⁹, tera 10¹² (Öva-blad).",
       "visning": null
     }
   ]

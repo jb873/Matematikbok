@@ -2640,6 +2640,15 @@ const DELAR = [
     grupp:'raknesatt',
     implemented:true,
     koCount:3
+  },
+  {
+    // Tiopotenser (åk8) — SAMMA potens-motor med bas 10 (ingen ny motor). ak:'ak8' → {ak8:mal}.
+    nr:12, id:'tiopotenser', ak:'ak8',
+    titel:'Tiopotenser',
+    beskrivning:'Tal som tiopotens, potenslagarna med bas 10 och SI-prefixen kilo–tera.',
+    grupp:'raknesatt',
+    implemented:true,
+    koCount:1
   }
 ];
 
@@ -4783,6 +4792,23 @@ DELAR_KO['potenser'] = [
   }
 ];
 
+// Tiopotenser (åk8) — ETT färdighetsområde, SAMMA potens-motor med bas 10 (renderTio*).
+// SI-prefix är en begreppsnod (blad-only, generator null) via EXTRA_NODER i generate-taxonomi.js.
+DELAR_KO['tiopotenser'] = [
+  {
+    id:'tio-rakna', nr:1,
+    titel:'Tiopotenser',
+    beskrivning:'Tal som tiopotens och tvärtom, potenslagarna med bas 10, addition/subtraktion och lös ut exponenten.',
+    formagor:{
+      skriva:{desc:'Skriv tal som tiopotens.', implemented:true},
+      evaluera:{desc:'Beräkna tiopotensens värde.', implemented:true},
+      rakna:{desc:'Multiplikation och division – behåll basen, operera på exponenterna.', implemented:true},
+      addsub:{desc:'Addition och subtraktion – räkna ut varje tiopotens, operera sedan.', implemented:true},
+      losut:{desc:'Vad ska stå istället för x?', implemented:true}
+    }
+  }
+];
+
 // ============================================================
 // ============================================================
 // ÖVNING: POSITIONSSYSTEMET (Del 1, kunskapsområde 2)
@@ -5044,6 +5070,14 @@ const OVNING_RENDERS = {
     rakna:    (b)=> renderPotMultdiv(b),
     losut:    (b)=> renderPotLosut(b),
     resonera: (b)=> renderPotResonera(b)
+  },
+  // Tiopotenser (åk8) — SAMMA potens-motor, bas 10 (renderTio*). Ingen ny motor.
+  'tio-rakna':{
+    skriva:   (b)=> renderTioSkriva(b),
+    evaluera: (b)=> renderTioEvaluera(b),
+    rakna:    (b)=> renderTioMultdiv(b),
+    addsub:   (b)=> renderTioAddsub(b),
+    losut:    (b)=> renderTioLosut(b)
   }
 };
 

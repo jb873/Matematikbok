@@ -16,62 +16,75 @@
   function pot(b, e){ return '<span class="pot">' + b + '<sup>' + e + '</sup></span>'; }
   function dec(x){ return (Math.round(x * 1e9) / 1e9).toString().replace('.', ','); }
 
+  // Potenssvar med NEGATIV-exponent-kapacitet: a^(−k) = 1/a^k (stående bråk).
+  // Motorn KAN detta; talurvalet avgör om det används (potenser/tiopotenser: nej; negativa-potenser: ja).
+  function potSvarStr(bas, exp){ return exp >= 0 ? bas + '^' + exp : '1/' + bas + '^' + (-exp); }
+  function potSvarHtml(bas, exp){ return exp >= 0 ? pot(bas, exp) : (typeof window.fracSpan === 'function' ? window.fracSpan(1, pot(bas, -exp)) : '1/' + pot(bas, -exp)); }
+
   // ── Bas-strategier (parametern som gör dk 9/10 gratis) ──
   function basFri(){ return ri(2, 9); }         // dk 8: godtycklig bas
-  // (dk 9: () => 10 ; dk 10: () => FAST — anropas från framtida render-wrappers)
+  function basTio(){ return 10; }               // dk 9: tiopotenser
+  // (dk 10: () => FAST — anropas från grundpotens-wrappers senare)
 
   // ══════════════════════════════════════════════════════════════════════════════════════
   // GENERATORER — var och en returnerar { display, bas?, answerNum, answerStr }
   // ══════════════════════════════════════════════════════════════════════════════════════
 
-  // Evaluera potens (värde). Level skalar bas/exp; värde hålls ≤ ~1000.
-  function genEvaluera(level, basFn){
-    basFn = basFn || basFri;
+  // Evaluera potens (värde). Level skalar bas/exp; värde hålls ≤ valMax. opts styr bas-10-vidd.
+  function genEvaluera(level, basFn, opts){
+    basFn = basFn || basFri; opts = opts || {};
+    var eMin = opts.expMin != null ? opts.expMin : 2, eMax = opts.expMax || (2 + Math.min(level, 2)), vMax = opts.valMax || 1000;
     for(var i = 0; i < 40; i++){
-      var b = basFn(), e = ri(2, 2 + Math.min(level, 2));   // exp 2–4
-      if(level === 1 && Math.random() < 0.25) b = pick([0, 1]);
+      var b = basFn(), e = ri(eMin, eMax);
+      if(level === 1 && opts.expMin == null && Math.random() < 0.25) b = pick([0, 1]);
       var v = Math.pow(b, e);
-      if(v <= 1000) return { display: pot(b, e), answerNum: v, answerStr: '' + v };
+      if(v <= vMax) return { display: pot(b, e), answerNum: v, answerStr: '' + v };
     }
     return { display: pot(2, 3), answerNum: 8, answerStr: '8' };
   }
 
-  // Add/sub & blandat — EVALUERA-SEDAN-OPERERA. Värden ≤ ~125, resultat får bli negativt.
-  function genAddsub(level, basFn){
-    basFn = basFn || basFri;
-    var b1 = basFn(), e1 = ri(2, 3), b2 = basFn(), e2 = ri(2, 3);
-    while(Math.pow(b1, e1) > 130) e1 = ri(2, 3);
-    while(Math.pow(b2, e2) > 130) e2 = ri(2, 3);
+  // Add/sub & blandat — EVALUERA-SEDAN-OPERERA. Resultat får bli negativt. opts vidgar bas-10-range.
+  function genAddsub(level, basFn, opts){
+    basFn = basFn || basFri; opts = opts || {};
+    var eMax = opts.expMax || 3, vMax = opts.valMax || 130;
+    var b1 = basFn(), e1 = ri(2, eMax), b2 = basFn(), e2 = ri(2, eMax);
+    while(Math.pow(b1, e1) > vMax) e1 = ri(2, eMax);
+    while(Math.pow(b2, e2) > vMax) e2 = ri(2, eMax);
     var v1 = Math.pow(b1, e1), v2 = Math.pow(b2, e2), op = pick(['+', '−']);
     var ans = op === '+' ? v1 + v2 : v1 - v2;
     return { display: pot(b1, e1) + ' ' + op + ' ' + pot(b2, e2), answerNum: ans, answerStr: '' + ans };
   }
 
   // Mult/div samma bas — EXPONENT-LAG. Svar = resultatets exponent (bas^▢).
-  function genMultdiv(level, basFn){
-    basFn = basFn || basFri;
+  // opts.neg: FÖRDJUPNING — tillåt div med m<n → negativ exponent (1/a^k). Spärrat i talurvalet
+  // för potenser/tiopotenser (motorn kan, ombeds inte); negativa-potenser lättar bara villkoret.
+  function genMultdiv(level, basFn, opts){
+    basFn = basFn || basFri; opts = opts || {};
     var b = basFn(), typ = pick(['mult', 'div', 'blandat']), display, resExp;
     if(typ === 'mult'){
       var m = ri(2, 7), n = ri(2, 7); while(m + n > 12){ m = ri(2, 7); n = ri(2, 7); }
       display = pot(b, m) + ' · ' + pot(b, n); resExp = m + n;
     } else if(typ === 'div'){
-      var mm = ri(5, 12), nn = ri(2, mm - 1); if(mm - nn > 9) nn = mm - ri(1, 9);
+      var mm, nn;
+      if(opts.neg){ mm = ri(2, 9); nn = ri(2, 9); }                                   // fördjupning: m<n tillåtet
+      else { mm = ri(5, 12); nn = ri(2, mm - 1); if(mm - nn > 9) nn = mm - ri(1, 9); } // TALURVAL: m>n (positiv)
       display = pot(b, mm) + ' / ' + pot(b, nn); resExp = mm - nn;
     } else {
       var p = ri(2, 6), q = ri(2, 6), r = ri(2, Math.min(p + q - 1, 8));
       display = '(' + pot(b, p) + ' · ' + pot(b, q) + ') / ' + pot(b, r); resExp = p + q - r;
     }
-    return { display: display, bas: b, answerNum: resExp, answerStr: b + '^' + resExp };
+    return { display: display, bas: b, answerNum: resExp, answerStr: potSvarStr(b, resExp), svarHtml: potSvarHtml(b, resExp) };
   }
 
-  // Lös ut basen eller exponenten (värde).
-  function genLosut(level, basFn){
-    basFn = basFn || basFri;
-    if(Math.random() < 0.5){
+  // Lös ut basen eller exponenten (värde). opts.baraExp → bara b^x=V med bas ur basFn (tiopotenser).
+  function genLosut(level, basFn, opts){
+    basFn = basFn || basFri; opts = opts || {};
+    if(!opts.baraExp && Math.random() < 0.5){
       var b = ri(2, 9), e = ri(2, 5); while(Math.pow(b, e) > 100000){ b = ri(2, 9); e = ri(2, 5); }
       return { display: pot('x', e) + ' = ' + Math.pow(b, e) + ',&nbsp; x', answerNum: b, answerStr: '' + b };
     }
-    var bb = pick([2, 3, 4, 5, 10]), x = ri(0, 4);
+    var bb = opts.baraExp ? basFn() : pick([2, 3, 4, 5, 10]), x = ri(0, opts.baraExp ? 8 : 4);
+    while(Math.pow(bb, x) > 1e9) x = ri(0, 6);
     return { display: pot(bb, 'x') + ' = ' + Math.pow(bb, x) + ',&nbsp; x', answerNum: x, answerStr: '' + x };
   }
 
@@ -172,6 +185,13 @@
   window.renderPotResonera = function(b){ renderPotDrill(b, { ko:'pot-multdiv', formaga:'resonera', header:'Resonemang om potenser', sub:'Tänk på vad potensen betyder.', svar:'varde', gen:genResonera }); };
   window.renderPotPrio     = function(b){ renderPotDrill(b, { ko:'prio-potenser', formaga:'rakna',  header:'Prioritering med potenser', sub:'Tänk på prioriteringsreglerna. Svaret kan bli negativt.', svar:'varde', gen:genPrio }); };
 
-  // Exponera gen-funktionerna för fuzz/runs-test.
-  window.__POT_GEN = { genEvaluera:genEvaluera, genAddsub:genAddsub, genMultdiv:genMultdiv, genLosut:genLosut, genResonera:genResonera, genSkriva:genSkriva, genPrio:genPrio };
+  // ── TIOPOTENSER (dk 9): SAMMA motor, bara basFn:basTio (parametrisering, ingen kopierad motor). ──
+  window.renderTioSkriva   = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'skriva',   header:'Skriv som tiopotens', sub:'Vilken exponent? Basen är 10.', svar:'exp',   gen:genSkriva,   basFn:basTio }); };
+  window.renderTioEvaluera = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'evaluera', header:'Skriv som vanligt tal', sub:'Räkna ut värdet.', svar:'varde', gen:function(l, bf){ return genEvaluera(l, bf, { expMin:0, expMax:8, valMax:1e8 }); }, basFn:basTio }); };
+  window.renderTioMultdiv  = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'rakna',    header:'Multiplikation och division', sub:'Behåll basen 10, operera på exponenterna.', svar:'exp', gen:genMultdiv, basFn:basTio }); };
+  window.renderTioAddsub   = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'addsub',   header:'Addition och subtraktion', sub:'Räkna ut varje tiopotens, operera sedan.', svar:'varde', gen:function(l, bf){ return genAddsub(l, bf, { expMax:6, valMax:1e6 }); }, basFn:basTio }); };
+  window.renderTioLosut    = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'losut',    header:'Lös ut exponenten', sub:'Vilket tal ska x vara?', svar:'varde', gen:function(l, bf){ return genLosut(l, bf, { baraExp:true }); }, basFn:basTio }); };
+
+  // Exponera gen-funktionerna + negativ-exponent-hjälparna för fuzz/runs-test.
+  window.__POT_GEN = { genEvaluera:genEvaluera, genAddsub:genAddsub, genMultdiv:genMultdiv, genLosut:genLosut, genResonera:genResonera, genSkriva:genSkriva, genPrio:genPrio, basTio:basTio, potSvarStr:potSvarStr, potSvarHtml:potSvarHtml };
 })();

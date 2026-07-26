@@ -128,6 +128,52 @@
     ])
   ] };
 
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // BLAD: Tiopotenser (delkapitel 9) — via samma potens-mekanismer, bas 10. "Skrivb"→"Skriv".
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  var TIOPOTENSER = { nr:1, titel:'Tiopotenser', nod:'tio-rakna', uppg:[
+    G('Skriv som tiopotens', [
+      POTSVAR('1 000', 10, 3), POTSVAR('100 000', 10, 5), POTSVAR('100 000 000', 10, 8)
+    ]),
+    G('Skriv som tiopotens', [
+      POTSVAR('En miljard (en etta följd av nio nollor)', 10, 9)
+    ]),
+    G('Skriv som vanligt tal', [
+      T(pot(10, 2) + ' =', 100), T(pot(10, 6) + ' =', 1000000), T(pot(10, 0) + ' =', 1)
+    ]),
+    G('Räkna med tiopotenser — behåll basen, addera exponenterna', [
+      POTSVAR(pot(10, 4) + ' · ' + pot(10, 5), 10, 9), POTSVAR(pot(10, 7) + ' · ' + pot(10, 6), 10, 13), POTSVAR(pot(10, 0) + ' · ' + pot(10, 8), 10, 8)
+    ]),
+    G('Räkna med tiopotenser — behåll basen, subtrahera exponenterna', [
+      POTSVAR(fr(pot(10, 7), pot(10, 3)), 10, 4), POTSVAR(fr(pot(10, 11), pot(10, 5)), 10, 6), POTSVAR(fr(pot(10, 12), pot(10, 0)), 10, 12)
+    ]),
+    G('Skriv som vanligt tal', [
+      T(pot(10, 2) + ' =', 100), T(pot(10, 8) + ' =', 100000000)
+    ]),
+    G('Beräkna — räkna ut varje tiopotens, operera sedan', [
+      T(pot(10, 3) + ' + ' + pot(10, 4) + ' =', 11000), T(pot(10, 6) + ' + ' + pot(10, 2) + ' =', 1000100),
+      T(pot(10, 5) + ' − ' + pot(10, 4) + ' =', 90000), T(pot(10, 4) + ' − ' + pot(10, 3) + ' =', 9000)
+    ]),
+    G('Vad ska stå istället för x?', [
+      T(pot(10, 'x') + ' · ' + pot(10, 3) + ' = ' + pot(10, 11) + ',&nbsp; x =', 8),
+      T(pot(10, 6) + ' · ' + pot(10, 'x') + ' = ' + pot(10, 14) + ',&nbsp; x =', 8),
+      T(fr(pot(10, 'x'), pot(10, 2)) + ' = ' + pot(10, 7) + ',&nbsp; x =', 9),
+      T(fr(pot(10, 9), pot(10, 'x')) + ' = ' + pot(10, 3) + ',&nbsp; x =', 6)
+    ]),
+    G('Beräkna (blandat — se upp: exponent-lagen gäller bara samma bas)', [
+      T(pot(10, 5) + ' + ' + pot(10, 3) + ' − ' + pot(10, 4) + ' =', 91000),
+      T(pot(10, 6) + ' − ' + pot(10, 5) + ' + ' + pot(10, 2) + ' =', 900100),
+      T(pot(10, 3) + ' − ' + pot(5, 3) + ' + ' + pot(10, 4) + ' =', 10875),
+      T(pot(2, 6) + ' − ' + pot(10, 0) + ' + ' + pot(10, 3) + ' =', 1063)
+    ]),
+    G('Vilket prefix betyder samma sak? Klicka på rätt', [
+      KORVAL(pot(10, 3), ['kilo', 'mega', 'giga', 'tera'], 0),
+      KORVAL(pot(10, 6), ['kilo', 'mega', 'giga', 'tera'], 1),
+      KORVAL(pot(10, 9), ['kilo', 'mega', 'giga', 'tera'], 2),
+      KORVAL(pot(10, 12), ['kilo', 'mega', 'giga', 'tera'], 3)
+    ])
+  ] };
+
   // ── RENDER ──
   var CHECKS = [];
   function renderRad(r){
@@ -254,7 +300,7 @@
   }
 
   window.BLAD_AK8_D4 = {
-    GRUND: GRUND, MULTDIV: MULTDIV, PRIO: PRIO,
-    renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, ({ GRUND:GRUND, MULTDIV:MULTDIV, PRIO:PRIO })[key]); }
+    GRUND: GRUND, MULTDIV: MULTDIV, PRIO: PRIO, TIOPOTENSER: TIOPOTENSER,
+    renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, ({ GRUND:GRUND, MULTDIV:MULTDIV, PRIO:PRIO, TIOPOTENSER:TIOPOTENSER })[key]); }
   };
 })();

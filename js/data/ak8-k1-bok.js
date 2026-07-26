@@ -61,9 +61,18 @@ window.AK8_K1_BOK = {
         { nr: 2, titel: 'Multiplikation och division',      noder: ['pot-multdiv:rakna', 'pot-multdiv:losut', 'pot-multdiv:resonera'] },
         { nr: 3, titel: 'Prioriteringsregeln med potenser', noder: ['prio-potenser'] }
       ]
+    },
+    {
+      // Tiopotenser (position 9) — ETT blad via SAMMA potens-motor med bas 10 (ingen ny motor;
+      // renderTio* återanvänder pot-generatorerna, bara basFn:basTio skiljer). SI-prefix är en
+      // begreppsnod (tio-rakna:prefix, blad-only). Motorn är dessutom negativ-exponent-kapabel
+      // (a^(−k)=1/a^k, stående bråk) men det gate:as i talurvalet — inget blad använder det än.
+      nr: 9, id: 'tiopotenser', titel: 'Tiopotenser', fil: 'tiopotenser.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Tiopotenser', noder: ['tio-rakna:skriva', 'tio-rakna:evaluera', 'tio-rakna:rakna', 'tio-rakna:addsub', 'tio-rakna:losut', 'tio-rakna:prefix'] }
+      ]
     }
-    // ⚠️ Delkapitel 4–7 (bråk ×4) + 9–10 (tiopotenser, grundpotenser) väntar. Tiopotenser/
-    // grundpotenser återanvänder potens-motorn (bas 10 resp fast bas) — nästa order.
-    // Noderna är gemensamma med åk 7 (single-source) — ingen åk8-kopia skapas.
+    // ⚠️ Delkapitel 4–7 (bråk ×4) + 10 (grundpotenser) väntar. Grundpotenser återanvänder
+    // potens-motorn (fast bas) — nästa order. Noderna är gemensamma med åk 7 (single-source).
   ]
 };

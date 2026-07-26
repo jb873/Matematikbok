@@ -176,7 +176,13 @@ const EXTRA_NODER = [
     begrepp:'Fyll värde eller matcha potens (Öva-blad).', visning:null },
   { id:'pot-begrepp:figur', namn:'Area i potensform', parent:'pot-begrepp', niva:'lovnod',
     arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'BEGREPP', generator:null,
-    begrepp:'Kvadratens area som potens (Öva-blad).', visning:null }
+    begrepp:'Kvadratens area som potens (Öva-blad).', visning:null },
+
+  // ── Tiopotenser (åk8): tio-rakna + drill-lövnoder byggs ur DELAR_KO/OVNING_RENDERS.
+  //    Här bara SI-prefix-noden (blad-only, ingen egen drill-generator). ──
+  { id:'tio-rakna:prefix', namn:'SI-prefix', parent:'tio-rakna', niva:'lovnod',
+    arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'BEGREPP', generator:null,
+    begrepp:'Matcha tiopotens mot SI-prefix: kilo 10³, mega 10⁶, giga 10⁹, tera 10¹² (Öva-blad).', visning:null }
 ];
 for(const n of EXTRA_NODER) noder.push(n);
 
