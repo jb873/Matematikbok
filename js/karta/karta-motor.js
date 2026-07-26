@@ -88,7 +88,7 @@
       if(node.niva === 'lovnod'){
         var sc = scopeAv(node, pref);
         if(!sc.inScope) return { gra:true, orsak:sc.orsak };
-        return { state: MAST.masteryState(matris[node.id], pref.minNiva, BLEKNING), stod: !!sc.stod };
+        return { state: MAST.masteryState(matris[node.id], pref.minNiva, BLEKNING, !!LARD[node.id]), stod: !!sc.stod };
       }
       var scoped = barnAv(node.id).map(function(b){ return nodStatus(b, pref, matris); }).filter(function(c){ return !c.gra && !c.stod; });
       if(!scoped.length) return { gra:true, orsak:'framtid' };
@@ -159,7 +159,7 @@
     function renderMeter(){
       var lov = TAX.filter(function(n){ var sc = scopeAv(n, PREF); return n.niva === 'lovnod' && n.generator && !n.doljKarta && sc.inScope && !sc.stod; });
       var Y = lov.length;
-      var X = lov.filter(function(n){ return MAST.masteryState(MATRIS[n.id], PREF.minNiva, BLEKNING) === 3; }).length;
+      var X = lov.filter(function(n){ return MAST.masteryState(MATRIS[n.id], PREF.minNiva, BLEKNING, !!LARD[n.id]) === 3; }).length;
       var pct = Y ? Math.round(X / Y * 100) : 0;
       var el = document.getElementById('meter'); if(!el) return;
       el.innerHTML =
@@ -182,6 +182,8 @@
     // Glömskekurvan: bara åk8-kartan (config.blekning) blekner. ?blekveckor=N är en test-hook
     // som skjuter blekklockan framåt N veckor (simulerar inaktivitet headless) — 0 i drift.
     var BLEKNING = config.blekning ? { aktiv:true, nu: Date.now() } : null;
+    // Persistent har-varit-lärd-flagga per nod (golv-regeln) — läses EN gång, bara när blekning är på.
+    var LARD = (config.blekning && MAST.lasLard) ? MAST.lasLard() : {};
     try{ if(BLEKNING){ var bw = parseFloat(new URLSearchParams(location.search).get('blekveckor')); if(bw > 0) BLEKNING.nu += bw * 7 * 86400000; } }catch(e){}
     try{ var q = new URLSearchParams(location.search);
       if(q.get('mal') === 'allt' || q.get('mal') === 'godkant') PREF.mal = q.get('mal');

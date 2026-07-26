@@ -27,6 +27,16 @@
   function lasMatris(){ try { return JSON.parse(localStorage.getItem(MATRIS_KEY)) || {}; } catch(e){ return {}; } }
   function sparMatris(m){ try { localStorage.setItem(MATRIS_KEY, JSON.stringify(m)); } catch(e){} }
 
+  // ── Persistent "har-varit-lärd"-flagga per nod (golv-regelns källa) ──
+  // Sätts FÖRSTA gången noden loggas (når över rött) och nollställs ALDRIG. Egen store, skild
+  // från loggen → evidensen skrivs aldrig om. Blekningen läser flaggan för att välja golv:
+  // röd om aldrig lärd, orange om lärd. (För loggar äldre än flagg-lagret räcker s0≥1 som
+  // fallback — för en append-only-logg sammanfaller flagga och s0≥1 alltid.)
+  var LARD_KEY = 'k1.taluppfattning.lard.v1';   // { nodeId: true }
+  function lasLard(){ try { return JSON.parse(localStorage.getItem(LARD_KEY)) || {}; } catch(e){ return {}; } }
+  function markeraLard(nodeId){ try { var f = lasLard(); if(!f[nodeId]){ f[nodeId] = true; localStorage.setItem(LARD_KEY, JSON.stringify(f)); } } catch(e){} }
+  function harVaritLard(nodeId){ return !!lasLard()[nodeId]; }
+
   // ── Skriv ETT tidsstämplat försök till loggen (ackumulerar historik för spacing) ──
   function loggaForsok(nodeId, resultat){
     if(!nodeId || (resultat !== 'ratt' && resultat !== 'delvis' && resultat !== 'fel')) return;
@@ -39,6 +49,7 @@
     if(niva) post.niva = niva;
     m[nodeId].push(post);
     sparMatris(m);
+    markeraLard(nodeId);   // noden når/har nått över rött → sätt den persistenta har-varit-lärd-flaggan (en gång)
   }
 
   // ── Färg (0–3) ur loggens tidsstämplar — spridning, inte bara antal ──
@@ -46,7 +57,9 @@
   // minNiva (valfri): grön kräver evidens på nivå ≥ minNiva för den årskursen (B3-nivåbryggan).
   // Utan minNiva (åk7) räknas alla rätt — byte-identiskt beteende.
   // blekning (valfri): { aktiv, nu } — bara åk8-kartan skickar den. Utan → oförändrat (ingen decay).
-  function masteryState(log, minNiva, blekning){
+  // lard (valfri boolean): nodens persistenta har-varit-lärd-flagga, avläst av anroparen. Väljer
+  //   golv (orange om lärd, annars rött). s0≥1 är fallback för loggar äldre än flagg-lagret.
+  function masteryState(log, minNiva, blekning, lard){
     if(!log || !log.length) return 0;                                   // röd — inga försök (aldrig-lärd → bleknar ej)
     var rattAll = log.filter(function(a){ return a.resultat === 'ratt'; }); // delvis/fel drar inte mot grönt
     if(!rattAll.length) return 1;                                        // orange — försökt men inget rätt
@@ -59,13 +72,16 @@
     var s0 = (ratt.length >= CFG.GRON.minRatt && antalDagar >= CFG.GRON.minDagar && spannDagar >= CFG.GRON.minSpannDagar) ? 3 // grön
            : (ratt.length >= CFG.GUL.minRatt && antalDagar >= CFG.GUL.minDagar) ? 2                                          // gul
            : 1;                                                                                                              // orange
-    // ── Glömskekurva: blekna sedan SENASTE RÄTT. Bara grön/gul kan blekna; golv = orange
-    //    (har-varit-lärd). Utan aktiv blekning eller för s0≤1 → oförändrat. ──
+    // ── Glömskekurva: blekna sedan SENASTE RÄTT. Bara grön/gul kan blekna; röd (s0≤1 → 0/1)
+    //    returneras oförändrat. Utan aktiv blekning → oförändrat. ──
     if(!blekning || !blekning.aktiv || s0 <= 1) return s0;
     var veckor = (blekning.nu - ratt[ratt.length - 1].ts) / (7 * 86400000);
     if(veckor < CFG.BLEKNING.hallVeckor) return s0;                     // grön håller några veckor
     var steg = Math.floor((veckor - CFG.BLEKNING.hallVeckor) / CFG.BLEKNING.stegVeckor) + 1;
-    return Math.max(CFG.BLEKNING.golv, s0 - steg);                      // bottnar i orange, aldrig röd
+    // Golv-regeln läser har-varit-lärd-flaggan: lärd → orange, aldrig-lärd → röd. (Här är s0≥2,
+    // så noden ÄR lärd; flaggan/fallbacken ger orange-golv och blekningen når aldrig röd igen.)
+    var harVaritLard = (lard === true) || s0 >= 1;
+    return Math.max(harVaritLard ? CFG.BLEKNING.golv : 0, s0 - steg);
   }
 
   // ── Aktuell nod ur deeplinken ?ko=&formaga= (samma som utbudslistorna/kartan använder) ──
@@ -110,6 +126,7 @@
   window.Mastery = {
     CFG: CFG, MATRIS_KEY: MATRIS_KEY,
     lasMatris: lasMatris, sparMatris: sparMatris,
-    loggaForsok: loggaForsok, masteryState: masteryState
+    loggaForsok: loggaForsok, masteryState: masteryState,
+    lasLard: lasLard, markeraLard: markeraLard, harVaritLard: harVaritLard
   };
 })();
