@@ -68,6 +68,22 @@
       { id:'formaga:likhetstecken', namn:'Använda likhetstecknet korrekt', formaga:'KOMMUNIKATION', omrade:'genomgående' }
     ];
 
+    // ── GRANULARITET: grov lövnod → en belief-rad per variant (ur Joachims xlsx) ──
+    // Belief får vara finare än evidens. vantar:true = drillen loggar grovt till förälder-noden;
+    // varianterna visar förälderns evidensfärg och är märkta "väntar" (på metod-medveten rättning
+    // för egen per-variant-färg). vantar utelämnad/false = drillen loggar redan per variant (väg 1).
+    var VARIANTER = {
+      // PILOT — Multiplikation med bråk (k2). Drillen (ovamer-k2-mult) loggar grovt → väg 2.
+      'brak-mult-rakna:rakna': { vantar:true, rader:[
+        { key:'hb',       namn:'Heltal · bråktal' },
+        { key:'mh',       namn:'Heltal · tal i blandad form' },
+        { key:'bb',       namn:'Två bråktal' },
+        { key:'mb',       namn:'Bråktal · tal i blandad form' },
+        { key:'mm',       namn:'Två tal i blandad form' },
+        { key:'forkorta', namn:'Förkorta innan beräkning' }
+      ] }
+    };
+
     // Evidens för en k2-lövnod (0–3) eller en k1-delatMed-nod (ur k1-loggen).
     function evidensK2(id){ if(DEMO) return demoEv[id] != null ? demoEv[id] : 0; return MAST.masteryState((MAST.lasMatris() || {})[id], PREF.minNiva); }
     function evidensK1(id){ if(DEMO) return 3; return K1 ? K1.masteryState((K1.lasMatris() || {})[id], null) : 0; }
@@ -87,12 +103,24 @@
 
     // Rader per område: k2-lövnoder (i scope) + ev. delatMed-rader (k1-noder).
     // Förmåge-noderna (KOMMUNIKATION/PROBLEM) exkluderas här — de bor i förmåge-dimensionen.
+    // En grov lövnod med VARIANTER expanderas till en rad per variant (belief finare än evidens):
+    // varianterna delar förälderns evidensfärg tills drillen splittras (metod-medveten rättning).
     function raderFor(omr){
       var rader = [];
       TAX.filter(function(n){ return n.niva === 'lovnod' && omradeAv(n) === omr && !arFormaga(n); }).forEach(function(n){
         var sc = scopeAv(n, PREF); if(!sc.inScope) return;
         // OBS: ingen deeplink. Självskattningen leder ALDRIG till en drill (belief ≠ evidens-väg).
-        rader.push({ id:n.id, namn:(n.visning && n.visning.titel) || n.namn, roll:n.roll, evidens: evidensK2(n.id), kalla:'k2' });
+        var v = VARIANTER[n.id];
+        if(v){
+          var ev = evidensK2(n.id);   // förälderns evidens, delad tills drillen loggar per variant
+          v.rader.forEach(function(vr){
+            var vsc = vr.roll ? scopeAv({ roll:vr.roll, arskursRelevans:n.arskursRelevans }, PREF) : sc;
+            if(!vsc.inScope) return;
+            rader.push({ id:n.id + '#' + vr.key, namn:vr.namn, roll:vr.roll || n.roll, evidens:ev, kalla:'k2', variant:true, vantar:!!v.vantar });
+          });
+        } else {
+          rader.push({ id:n.id, namn:(n.visning && n.visning.titel) || n.namn, roll:n.roll, evidens: evidensK2(n.id), kalla:'k2' });
+        }
       });
       if(omr.delatMed && omr.delatMed.noder){
         omr.delatMed.noder.forEach(function(k1id){
@@ -127,9 +155,10 @@
       var k1tag = r.kalla === 'k1' ? '<span class="sj-k1" title="hämtas ur kapitel 1 (delatMed)">k1</span>' : '';
       var fmtag = (opts.visaFormaga && r.formaga) ? '<span class="sj-fmtag">' + formageEtikett(r.formaga) + '</span>' : '';
       var omrtag = (opts.visaFormaga && r.omrade) ? '<span class="sj-omrade" title="förmågan bärs här">' + r.omrade + '</span>' : '';
-      return '<div class="sj-rad sj-' + st.typ + '">'
+      var vantag = r.vantar ? '<span class="sj-vantar" title="Delar områdets evidensfärg tills drillen loggar per variant (väntar på metod-medveten rättning).">delad evidens</span>' : '';
+      return '<div class="sj-rad sj-' + st.typ + (r.variant ? ' sj-variant' : '') + '">'
         + '<span class="sj-belief">' + knappar + '</span>'
-        + '<span class="sj-namn">' + r.namn + k1tag + omrtag + fmtag + '</span>'
+        + '<span class="sj-namn">' + r.namn + k1tag + omrtag + fmtag + vantag + '</span>'
         + '<span class="sj-dot sj-ev" style="background:' + evFarg + '" title="' + (evNull ? 'ingen mätning – bara din skattning' : 'evidens') + '"></span>'
         + '<span class="sj-status">' + (st.txt ? '<span class="sj-badge sj-badge-' + st.typ + '">' + st.txt + '</span>' : '') + '</span>'
         + '</div>';

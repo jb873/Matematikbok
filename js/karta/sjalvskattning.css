@@ -35,5 +35,9 @@
 .sj-formaga-intro{margin:0;padding:12px 18px 4px;font-size:14px;line-height:1.55;color:#5a5168;}
 .sj-formaga-intro em{font-style:italic;color:#3d2f5c;font-weight:600;}
 .sj-fmtag{font-family:"Cinzel",serif;font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:#e5d9f5;color:#6b4fa0;padding:2px 7px;border-radius:99px;margin-left:8px;vertical-align:middle;}
+/* Variant-rader (belief finare än evidens) — indrag ger område→färdighet-hierarki */
+.sj-variant .sj-namn{padding-left:16px;position:relative;}
+.sj-variant .sj-namn::before{content:'';position:absolute;left:3px;top:50%;width:7px;height:1px;background:var(--line);}
+.sj-vantar{font-family:"Cinzel",serif;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;background:#f0ece2;color:#8a8172;border:1px solid #ddd5c5;padding:2px 7px;border-radius:99px;margin-left:8px;vertical-align:middle;white-space:nowrap;}
 .sj-omrade{font-size:11.5px;color:var(--ink-faint);font-style:italic;margin-left:8px;}
 @media(max-width:720px){ .sj-rad{grid-template-columns:1fr;gap:8px;} .sj-status{justify-content:flex-start;} .sj-formaga-flagga{margin-left:0;} }
