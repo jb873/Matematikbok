@@ -264,14 +264,15 @@
       var bokN = 0;
       g.rader.forEach(function(r){
         var h = renderRad(r);
-        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = h.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokN % 26)) + ')</span>'); bokN++; }
+        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = AK8_UI.injLabel(h, bokN); bokN++; }
         html += h;
       });
       html += '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
-      + '<button class="ovn-aterstall" data-reset>Återställ</button></div>'
+      + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
+    html += AK8_UI.keypadHTML({ ops:[',', '−'] });
     mount.innerHTML = html;
     // ordna: klicka i ordning → stämpla sekvensnummer (valjflera-knappar exkluderas)
     mount.querySelectorAll('.ak8-tal:not(.ak8-vf)').forEach(function(btn){
@@ -293,6 +294,7 @@
     mount.querySelectorAll('.ak8-vf').forEach(function(b){ b.onclick = function(){ b.classList.toggle('sel'); }; });
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
+    AK8_UI.bindSheet(mount);
   }
 
   function kontrollera(mount){
@@ -301,7 +303,6 @@
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;
       tot++;
-      el.querySelectorAll('.ak8-in').forEach(function(i){ i.disabled = true; });
       if(res.ordna){
         el.querySelector('.ak8-ordna').classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram');
       } else if(res.chip){
@@ -311,6 +312,7 @@
       } else {
         el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       }
+      AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);
       if(res.ok){ ratt++; }
       else if(!el.querySelector('.ak8-fasit')){
         var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = 'rätt: ' + res.facit; el.appendChild(f);

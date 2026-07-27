@@ -36,14 +36,6 @@
   .ak8-rad{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 0; border-bottom:1px dotted var(--paper-dk); }
   .ak8-rad:last-child{ border-bottom:none; }
   .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; }
-  .ovn-label{ font-family:var(--serif); font-weight:600; color:var(--gold); min-width:22px; flex:0 0 auto; }
-  .ak8-rad-fig .ovn-label{ align-self:flex-start; }
-  /* inline uttrycks-cell: text + inbäddade bråk/potenser som en enda ruta */
-  .ak8-expr{ display:inline-flex; align-items:center; gap:1px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; padding:1px 6px; min-height:38px; }
-  .ak8-exprtxt{ border:none !important; background:transparent !important; height:30px; text-align:center; font-family:var(--serif); font-size:18px; padding:0; }
-  .ak8-expr .ovn-brak{ margin:0 2px; } .ak8-expr .fr-ruta{ width:42px !important; }
-  .ak8-expr:has(.ak8-in.ak8-ok){ border-color:#2f7d4f; background:rgba(47,125,79,.08); }
-  .ak8-expr:has(.ak8-in.ak8-fel){ border-color:#c0392b; background:rgba(192,57,43,.08); }
   .ak8-svar{ display:inline-flex; align-items:center; gap:2px; }
   .ak8-in{ width:74px; height:36px; text-align:center; font-family:var(--serif); font-size:18px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; }
   .ak8-in.ak8-ok{ border-color:#2f7d4f; background:rgba(47,125,79,.08); color:#15803d; }
@@ -55,31 +47,13 @@
   .pot{ font-family:var(--serif); white-space:nowrap; }
   .pot sup{ font-size:0.72em; }
   .pot sup .ak8-in-sm{ width:30px; height:24px; font-size:13px; padding:0; }
-  .pot sup .ak8-pexp{ width:44px; }   /* exponentruta i byggd potens ("4+5", "13") */
   .pot > .ak8-in-sm{ width:42px; }
-  .kp-pot{ display:inline-flex; align-items:flex-start; color:currentColor; }
-  .kp-pot-b{ width:14px; height:14px; border:1.6px solid currentColor; border-radius:2px; }
-  .kp-pot-e{ width:8px; height:8px; border:1.6px solid currentColor; border-radius:2px; margin-left:1px; margin-top:-4px; }
-  .kp-potbtn{ color:var(--navy); }
   /* exponent på sammansatt bas (parentes/bråk): tätt intill stängande parentes, uppe till höger */
   .pot-frac > sup{ font-size:0.72em; vertical-align:top; position:relative; top:0.15em; margin-left:1px; }
   /* mellanleds-kedja: likhetstecken-mellanrum */
   .ovn-text{ font-family:var(--serif); font-size:18px; }
   .ak8-eq{ margin:0 6px; }
   .ak8-rad-kedja .ak8-svar{ flex-wrap:wrap; }
-  /* keypad — fast längst ned på skärmen; innehållet scrollar bakom den */
-  .keypad{ position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; padding:10px 12px; background:var(--paper-lt); border-top:1px solid var(--paper-dk); box-shadow:0 -3px 14px rgba(15,30,46,.08); }
-  .keypad-digits{ display:grid; grid-template-columns:repeat(3,46px); gap:6px; }
-  .keypad-ops{ display:grid; grid-template-columns:46px; gap:6px; align-content:start; }
-  .keypad-ops.wide2{ grid-template-columns:repeat(2,46px); }
-  .kp-key{ height:44px; border:1.5px solid var(--paper-dk); border-radius:8px; background:#fff; font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; transition:transform .08s, background .1s; }
-  .kp-key:hover{ background:var(--paper-dk); } .kp-key:active{ transform:scale(.92); }
-  .kp-key.op{ color:var(--gold); font-weight:700; } .kp-key.util{ background:var(--paper); color:var(--ink-faint); font-size:15px; } .kp-key.span2{ grid-column:span 2; }
-  .kp-fracbtn{ color:var(--navy); }
-  .kp-frac{ display:inline-flex; flex-direction:column; align-items:center; line-height:1; gap:1px; }
-  .kp-frac-t,.kp-frac-n{ width:15px; height:9px; border:1.4px solid currentColor; border-radius:2px; }
-  .kp-frac-l{ width:19px; height:2px; background:currentColor; }
-  .ovn-wrap{ padding-bottom:300px; }   /* plats så sista raderna kan scrollas ovanför fasta keypaden */
   .ak8-korval.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.16); color:#15803d; }
   .ak8-korval.fel{ border-color:#c0392b; background:rgba(192,57,43,.14); color:#b91c1c; }
   .ak8-ordna{ display:inline-flex; gap:8px; flex-wrap:wrap; }
@@ -117,6 +91,7 @@
   .konfetti-lager{ position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; } .konfetti{ position:absolute; top:-20px; animation:kfall linear forwards; }
   @keyframes kfall{ to{ transform:translateY(105vh) rotate(540deg); opacity:.3; } }
 </style>
+<link rel="stylesheet" href="../../js/motor/blad/ak8-blad-ui.css">
 </head>
 <body>
 <nav class="topnav"><a href="index.html">Åk 8 · Kapitel 1</a><span class="sep">›</span><span>Tiopotenser</span></nav>
@@ -159,6 +134,7 @@
 <!-- blad-kärnan (fracSpan) + potens-bladen. Motorer orörda (bygg-id: blad-ak8-d4). -->
 <script src="../../js/data/ak8-k1-bok.js"></script>
 <script src="../../js/motor/blad/blad-karna.js"></script>
+<script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/blad/blad-ak8-d4.js"></script>
 <script>
 (function(){

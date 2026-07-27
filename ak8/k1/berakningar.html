@@ -32,8 +32,6 @@
   .ak8-rad{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:9px 0; border-bottom:1px dotted var(--paper-dk); }
   .ak8-rad:last-child{ border-bottom:none; }
   .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; min-width:90px; }
-  .ovn-label{ font-family:var(--serif); font-weight:600; color:var(--gold); min-width:22px; flex:0 0 auto; }
-  .ak8-rad-fig .ovn-label{ align-self:flex-start; }
   .ak8-svar{ display:inline-flex; align-items:center; gap:2px; flex-wrap:wrap; }
   .ak8-in{ width:96px; height:36px; text-align:center; font-family:var(--serif); font-size:18px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; font-feature-settings:'tnum'; }
   .ak8-mel{ width:150px; text-align:left; padding:0 8px; }
@@ -70,6 +68,7 @@
   .konfetti-lager{ position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; } .konfetti{ position:absolute; top:-20px; animation:kfall linear forwards; }
   @keyframes kfall{ to{ transform:translateY(105vh) rotate(540deg); opacity:.3; } }
 </style>
+<link rel="stylesheet" href="../../js/motor/blad/ak8-blad-ui.css">
 </head>
 <body>
 <nav class="topnav"><a href="index.html">Åk 8 · Kapitel 1</a><span class="sep">›</span><span>Beräkningar</span></nav>
@@ -112,6 +111,7 @@
 <!-- Blad-kärnan (fracSpan) + d1-bladen. Motorer/mellanled orörda (bygg-id: blad-ak8-d1). -->
 <script src="../../js/data/ak8-k1-bok.js"></script>
 <script src="../../js/motor/blad/blad-karna.js"></script>
+<script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/blad/blad-ak8-d1.js"></script>
 <script>
 (function(){

@@ -119,20 +119,13 @@
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>'
       + '<p class="ak8-intro">Tal vänsterställda. Visa mellanledet i den vänstra rutan (förlängning eller balansera decimalerna), och svaret i den högra.</p>';
-    blad.uppg.forEach(function(g, gi){
-      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + (gi + 1) + '. ' + g.rubrik + '</div>';
-      var bokN = 0;
-      g.rader.forEach(function(r){
-        var h = renderRad(r);
-        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = h.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokN % 26)) + ')</span>'); bokN++; }
-        html += h;
-      });
-      html += '</div>';
-    });
-    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button></div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
+    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
+    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
+    html += AK8_UI.keypadHTML({ ops:[',', '·', '/', '−'] });
     mount.innerHTML = html;
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
+    AK8_UI.bindSheet(mount);
   }
 
   function kontrollera(mount){
@@ -140,8 +133,9 @@
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       tot++;
-      el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); i.disabled = true; });
-      var rad = el.closest('.ak8-rad'), old = rad && rad.querySelector('.ak8-fasit'); if(old) old.remove();
+      el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
+      var rad = el.closest('.ak8-rad'); AK8_UI.markera(rad || el, res.ok);
+      var old = rad && rad.querySelector('.ak8-fasit'); if(old) old.remove();
       if(res.ok) ratt++;
       else if(res.facit && rad){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = 'rätt: ' + res.facit; rad.appendChild(f); }
     });

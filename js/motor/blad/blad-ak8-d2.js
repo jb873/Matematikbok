@@ -280,12 +280,13 @@
       var bokN = 0;
       u.rader.forEach(function(r){
         var h = renderRad(r);
-        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = h.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokN % 26)) + ')</span>'); bokN++; }
+        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = AK8_UI.injLabel(h, bokN); bokN++; }
         html += h;
       });
       html += '</div>';
     });
-    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button></div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
+    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
+    html += AK8_UI.keypadHTML({ ops:['+', '−', '·', '/'] });
     mount.innerHTML = html;
     // interaktioner
     mount.querySelectorAll('.ak8-teckenslot .ak8-chip, .ak8-ekvslot .ak8-chip').forEach(function(ch){ ch.onclick = function(){ if(ch.className.indexOf('ratt') > -1 || ch.className.indexOf('fel') > -1) return; ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.remove('sel'); }); ch.classList.add('sel'); }; });
@@ -320,6 +321,7 @@
     });
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount, blad); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
+    AK8_UI.bindSheet(mount);
   }
 
   function kontrollera(mount, blad){
@@ -328,11 +330,12 @@
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;   // flaggad rad utan facit — räknas ej
       tot++;
-      el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); i.disabled = true; });
+      el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); });
       var old = el.parentNode.querySelector('.ak8-fasit'); if(old) old.remove();
       if(res.chip){ el.querySelectorAll('.ak8-chip').forEach(function(c){ c.style.pointerEvents = 'none'; if(c.classList.contains('sel')) c.classList.add(res.ok ? 'ratt' : 'fel'); }); }
       else if(el.classList.contains('ak8-ordna')){ el.querySelectorAll('.ak8-tal').forEach(function(b){ b.style.pointerEvents = 'none'; }); el.classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram'); }
       else { el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
+      AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);
       if(res.ok) ratt++;
       else if(res.facit){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = 'rätt: ' + res.facit; (el.closest('.ak8-rad') || el).appendChild(f); }
     });
