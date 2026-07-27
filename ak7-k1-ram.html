@@ -2649,6 +2649,15 @@ const DELAR = [
     grupp:'raknesatt',
     implemented:true,
     koCount:1
+  },
+  {
+    // Grundpotenser (åk8) — grundpotensform a·10ⁿ. SAMMA exponentkärna (m±n) + koeff/normalisering.
+    nr:13, id:'grundpotenser', ak:'ak8',
+    titel:'Grundpotenser',
+    beskrivning:'Grundpotensform a·10ⁿ: skriva, multiplikation/division med koefficient och normalisering.',
+    grupp:'raknesatt',
+    implemented:true,
+    koCount:1
   }
 ];
 
@@ -4809,6 +4818,21 @@ DELAR_KO['tiopotenser'] = [
   }
 ];
 
+// Grundpotenser (åk8) — ETT färdighetsområde, grundpotensform a·10ⁿ.
+DELAR_KO['grundpotenser'] = [
+  {
+    id:'gp-rakna', nr:1,
+    titel:'Grundpotenser',
+    beskrivning:'Grundpotensform a·10ⁿ: skriva fram och tillbaka, mult/div med koefficient och exponent, normalisering, addition/subtraktion och lös ut x.',
+    formagor:{
+      skriva:{desc:'Skriv vanligt tal ↔ grundpotensform.', implemented:true},
+      multdiv:{desc:'Multiplikation och division – koeff ×/÷, exponent +/−, normalisera.', implemented:true},
+      addsub:{desc:'Addition och subtraktion – räkna ut varje tal, operera sedan.', implemented:true},
+      losut:{desc:'Vilket tal ska x vara?', implemented:true}
+    }
+  }
+];
+
 // ============================================================
 // ============================================================
 // ÖVNING: POSITIONSSYSTEMET (Del 1, kunskapsområde 2)
@@ -5078,6 +5102,13 @@ const OVNING_RENDERS = {
     rakna:    (b)=> renderTioMultdiv(b),
     addsub:   (b)=> renderTioAddsub(b),
     losut:    (b)=> renderTioLosut(b)
+  },
+  // Grundpotenser (åk8) — SAMMA exponentkärna (expLag), nytt koeff/normaliserings-lager (renderGp*).
+  'gp-rakna':{
+    skriva:   (b)=> renderGpSkriva(b),
+    multdiv:  (b)=> renderGpMultdiv(b),
+    addsub:   (b)=> renderGpAddsub(b),
+    losut:    (b)=> renderGpLosut(b)
   }
 };
 

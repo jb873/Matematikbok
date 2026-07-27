@@ -187,6 +187,21 @@ window.K1_TAXONOMI = {
       "implemented": true
     },
     {
+      "id": "grundpotenser",
+      "namn": "Grundpotenser",
+      "parent": null,
+      "niva": "omrade",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Grundpotensform a·10ⁿ: skriva, multiplikation/division med koefficient och normalisering.",
+      "grupp": "raknesatt",
+      "implemented": true
+    },
+    {
       "id": "siffror",
       "namn": "Siffror och tal · udda och jämna",
       "parent": "taluppfattning",
@@ -2463,6 +2478,76 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderTioLosut",
       "begrepp": "Vad ska stå istället för x?",
+      "visning": null
+    },
+    {
+      "id": "gp-rakna",
+      "namn": "Grundpotenser",
+      "parent": "grundpotenser",
+      "niva": "deldoman",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": null,
+      "generator": null,
+      "begrepp": "Grundpotensform a·10ⁿ: skriva fram och tillbaka, mult/div med koefficient och exponent, normalisering, addition/subtraktion och lös ut x.",
+      "visning": null
+    },
+    {
+      "id": "gp-rakna:skriva",
+      "namn": "Grundpotenser · Skriv som potens",
+      "parent": "gp-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "BEGREPP",
+      "generator": "renderGpSkriva",
+      "begrepp": "Skriv vanligt tal ↔ grundpotensform.",
+      "visning": null
+    },
+    {
+      "id": "gp-rakna:multdiv",
+      "namn": "Grundpotenser · Multiplikation och division",
+      "parent": "gp-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderGpMultdiv",
+      "begrepp": "Multiplikation och division – koeff ×/÷, exponent +/−, normalisera.",
+      "visning": null
+    },
+    {
+      "id": "gp-rakna:addsub",
+      "namn": "Grundpotenser · Addition och subtraktion",
+      "parent": "gp-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderGpAddsub",
+      "begrepp": "Addition och subtraktion – räkna ut varje tal, operera sedan.",
+      "visning": null
+    },
+    {
+      "id": "gp-rakna:losut",
+      "namn": "Grundpotenser · Lös ut bas/exponent",
+      "parent": "gp-rakna",
+      "niva": "lovnod",
+      "arskursRelevans": {
+        "ak8": "mal"
+      },
+      "roll": "karna",
+      "formaga": "RAKNA",
+      "generator": "renderGpLosut",
+      "begrepp": "Vilket tal ska x vara?",
       "visning": null
     },
     {

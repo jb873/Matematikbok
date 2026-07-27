@@ -24,7 +24,22 @@
   // ── Bas-strategier (parametern som gör dk 9/10 gratis) ──
   function basFri(){ return ri(2, 9); }         // dk 8: godtycklig bas
   function basTio(){ return 10; }               // dk 9: tiopotenser
-  // (dk 10: () => FAST — anropas från grundpotens-wrappers senare)
+
+  // ── DELAD EXPONENTKÄRNA (dk 8/9/10): mult → m+n, div → m−n. Anropas av genMultdiv
+  //    (potens/tiopotens) OCH grundpotens-generatorerna → återanvänd, inte kopierad. ──
+  function expLag(m, n, op){ return op === 'div' ? m - n : m + n; }
+
+  // ── GRUNDPOTENS-LAGER (dk 10, a·10ⁿ): koefficient-dimension + normalisering ovanpå kärnan ──
+  function gpRound(x){ return Math.round(x * 1e9) / 1e9; }
+  // Normalisering: flytta koeff till [1,10), justera exponent. normaliserad = om något flyttades.
+  function normalisera(koeff, exp){
+    var flyttar = 0;
+    while(koeff >= 10){ koeff = gpRound(koeff / 10); exp++; flyttar++; }
+    while(koeff > 0 && koeff < 1){ koeff = gpRound(koeff * 10); exp--; flyttar++; }
+    return { koeff: koeff, exp: exp, normaliserad: flyttar > 0 };
+  }
+  function gpKoeff(){ return pick([1, 2, 3, 4, 5, 6, 7, 8, 9, 1.5, 2.5, 3.5, 4.5, 7.5]); }
+  function gp(k, e){ return dec(k) + '·' + pot(10, e); }   // rendera a·10ⁿ (koeff vänsterställt, tiopotens upphöjt)
 
   // ══════════════════════════════════════════════════════════════════════════════════════
   // GENERATORER — var och en returnerar { display, bas?, answerNum, answerStr }
@@ -63,15 +78,15 @@
     var b = basFn(), typ = pick(['mult', 'div', 'blandat']), display, resExp;
     if(typ === 'mult'){
       var m = ri(2, 7), n = ri(2, 7); while(m + n > 12){ m = ri(2, 7); n = ri(2, 7); }
-      display = pot(b, m) + ' · ' + pot(b, n); resExp = m + n;
+      display = pot(b, m) + ' · ' + pot(b, n); resExp = expLag(m, n, 'mult');
     } else if(typ === 'div'){
       var mm, nn;
       if(opts.neg){ mm = ri(2, 9); nn = ri(2, 9); }                                   // fördjupning: m<n tillåtet
       else { mm = ri(5, 12); nn = ri(2, mm - 1); if(mm - nn > 9) nn = mm - ri(1, 9); } // TALURVAL: m>n (positiv)
-      display = pot(b, mm) + ' / ' + pot(b, nn); resExp = mm - nn;
+      display = pot(b, mm) + ' / ' + pot(b, nn); resExp = expLag(mm, nn, 'div');
     } else {
       var p = ri(2, 6), q = ri(2, 6), r = ri(2, Math.min(p + q - 1, 8));
-      display = '(' + pot(b, p) + ' · ' + pot(b, q) + ') / ' + pot(b, r); resExp = p + q - r;
+      display = '(' + pot(b, p) + ' · ' + pot(b, q) + ') / ' + pot(b, r); resExp = expLag(expLag(p, q, 'mult'), r, 'div');
     }
     return { display: display, bas: b, answerNum: resExp, answerStr: potSvarStr(b, resExp), svarHtml: potSvarHtml(b, resExp) };
   }
@@ -117,6 +132,43 @@
   }
 
   // ══════════════════════════════════════════════════════════════════════════════════════
+  // GRUNDPOTENS-GENERATORER (dk 10, a·10ⁿ) — exponentkärnan (expLag) återanvänd; koeff +
+  // normalisering nytt. Svar-form 'gp' = paret (koeff, exp); add/sub → 'varde'.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  function frac(t, n){ return (typeof window.fracSpan === 'function') ? window.fracSpan(t, n) : '(' + t + ') / (' + n + ')'; }
+  function gpVal(k, e){ return k * Math.pow(10, e); }
+
+  // Mult: (a·10^m)·(b·10^n) = (a·b)·10^(m+n), normalisera.
+  function genGpMult(level){
+    var a = ri(1, 9), b = ri(1, 9), m = ri(2, 9), n = ri(2, 9); while(m + n > 18){ m = ri(2, 9); n = ri(2, 9); }
+    var norm = normalisera(a * b, expLag(m, n, 'mult'));
+    return { display: gp(a, m) + ' · ' + gp(b, n), koeff: norm.koeff, exp: norm.exp, normaliserad: norm.normaliserad, answerNum: gpVal(norm.koeff, norm.exp), answerStr: dec(norm.koeff) + '·10^' + norm.exp };
+  }
+  // Div: (a·10^m)/(b·10^n) = (a/b)·10^(m−n). Talurval: rent a/b (resultatet valt först).
+  function genGpDiv(level){
+    var rk = ri(1, 9), b = pick([2, 3, 5, 1.5, 2.5]), a = gpRound(rk * b), m = ri(6, 13), n = ri(2, m - 2);
+    var norm = normalisera(rk, expLag(m, n, 'div'));
+    return { display: frac(gp(a, m), gp(b, n)), koeff: norm.koeff, exp: norm.exp, normaliserad: norm.normaliserad, answerNum: gpVal(norm.koeff, norm.exp), answerStr: dec(norm.koeff) + '·10^' + norm.exp };
+  }
+  // Add/sub: kan ej exp-lag (olika 10-potenser) → EVALUERA båda till vanligt tal, operera.
+  function genGpAddsub(level){
+    var a = gpKoeff(), b = gpKoeff(), m = ri(3, 7), n = ri(2, m - 1), op = pick(['+', '−']);
+    var A = gpVal(a, m), B = gpVal(b, n), ans = op === '+' ? A + B : A - B;
+    return { display: gp(a, m) + ' ' + op + ' ' + gp(b, n), answerNum: ans, answerStr: dec(ans) };
+  }
+  // Skriva: vanligt tal → grundpotensform (svar 'gp'). Koeff normaliserad per konstruktion.
+  function genGpSkriva(level){
+    var a = gpKoeff(), n = ri(3, 8), v = gpVal(a, n);
+    return { display: dec(v), koeff: a, exp: n, answerNum: v, answerStr: dec(a) + '·10^' + n };
+  }
+  // Lös ut x (mult): a·10^m · x = c·10^p → x = (c/a)·10^(p−m). x normaliserad.
+  function genGpLosut(level){
+    var ak = pick([2, 3, 4, 5]), xk = pick([2, 3, 4, 6]), am = ri(2, 5), xe = ri(3, 7);
+    var cn = normalisera(ak * xk, expLag(am, xe, 'mult'));
+    return { display: gp(ak, am) + ' · x = ' + gp(cn.koeff, cn.exp) + ',&nbsp; x', koeff: xk, exp: xe, answerNum: gpVal(xk, xe), answerStr: dec(xk) + '·10^' + xe };
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════════════
   // HARNESS — kopierar renderRaknaSingle-mönstret (ramens globala hjälpare)
   // ══════════════════════════════════════════════════════════════════════════════════════
   function renderPotDrill(body, cfg){
@@ -141,13 +193,15 @@
       var task = omgang[idx]; uppgNr++;
       var svarHtml = cfg.svar === 'exp'
         ? '<span class="rakna-svar-fast">' + task.display + ' = <span class="pot">' + task.bas + '<sup><input type="text" class="rakna-svar-input" id="pot-input" inputmode="numeric" maxlength="4" style="width:2.6em;text-align:center;" autocomplete="off" placeholder="?"></sup></span></span>'
+        : cfg.svar === 'gp'
+        ? '<span class="rakna-svar-fast">' + task.display + ' = <input type="text" class="rakna-svar-input" id="pot-koeff" inputmode="text" maxlength="6" style="width:3.2em;text-align:center;" autocomplete="off" placeholder="koeff">·<span class="pot">10<sup><input type="text" class="rakna-svar-input" id="pot-input" inputmode="numeric" maxlength="3" style="width:2.4em;text-align:center;" autocomplete="off" placeholder="?"></sup></span></span>'
         : '<span class="rakna-svar-fast">' + task.display + ' =</span><input type="text" class="rakna-svar-input" id="pot-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?">';
       body.innerHTML = '<div class="exercise-card">'
         + exerciseHeader(cfg.header, cfg.sub, level)
         + renderScoreBarSimple(results.filter(function(x){ return x; }).length, results.filter(function(x){ return !x; }).length, omgang.length, idx)
         + '<div class="rakna-svar-rad">' + svarHtml + '</div>'
         + '<div class="rakna-uppdela-feedback" id="pot-fb"></div>'
-        + keypadHTML(['−'])
+        + keypadHTML(cfg.keypadOps || ['−'])
         + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
           + '<button class="btn primary" id="pot-check">Kontrollera</button>'
           + '<button class="btn subtle" id="pot-back2">Tillbaka</button>'
@@ -161,11 +215,20 @@
       document.getElementById('pot-back2').onclick = backFn;
 
       function check(){
-        var stu = d3ParseNum(input.value), fb = document.getElementById('pot-fb');
-        fb.className = 'rakna-uppdela-feedback show'; input.disabled = true; document.getElementById('pot-check').disabled = true;
+        var stu = d3ParseNum(input.value), fb = document.getElementById('pot-fb'), koeffEl = document.getElementById('pot-koeff');
+        fb.className = 'rakna-uppdela-feedback show'; input.disabled = true; if(koeffEl) koeffEl.disabled = true; document.getElementById('pot-check').disabled = true;
         var ts = getTutorScore(cfg.ko, cfg.formaga); ts.total++;
         var ok = false;
-        if(stu === null){ fb.classList.add('wrong'); fb.textContent = 'Skriv ett tal.'; }
+        if(cfg.svar === 'gp'){
+          // FORM-MEDVETEN: koeff i [1,10) OCH koeff·10^exp = målvärdet (15·10¹⁷ underkänns → 1,5·10¹⁸)
+          var koeff = d3ParseNum(koeffEl.value), exp = stu;
+          if(koeff === null || exp === null){ fb.classList.add('wrong'); fb.textContent = 'Fyll i koefficient och exponent.'; }
+          else if(koeff < 1 || koeff >= 10){ fb.classList.add('wrong'); fb.textContent = 'Koefficienten ska vara i grundpotensform (1–10). Svar: ' + task.answerStr + '.'; }
+          else if(Math.abs(koeff * Math.pow(10, exp) - task.answerNum) < 1e-3 * Math.max(1, Math.abs(task.answerNum))){
+            ok = true; input.classList.add('correct'); if(koeffEl) koeffEl.classList.add('correct'); fb.classList.add('correct'); fb.textContent = 'Rätt! Svar: ' + task.answerStr; ts.correct++;
+          } else { input.classList.add('wrong'); if(koeffEl) koeffEl.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = 'Inte rätt. Svar: ' + task.answerStr + '.'; }
+        }
+        else if(stu === null){ fb.classList.add('wrong'); fb.textContent = 'Skriv ett tal.'; }
         else if(Math.abs(stu - task.answerNum) < 1e-6 * Math.max(1, Math.abs(task.answerNum))){
           ok = true; input.classList.add('correct'); fb.classList.add('correct'); fb.textContent = 'Rätt! Svar: ' + task.answerStr; ts.correct++;
         } else { input.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = 'Inte rätt. Svar: ' + task.answerStr + '.'; }
@@ -192,6 +255,14 @@
   window.renderTioAddsub   = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'addsub',   header:'Addition och subtraktion', sub:'Räkna ut varje tiopotens, operera sedan.', svar:'varde', gen:function(l, bf){ return genAddsub(l, bf, { expMax:6, valMax:1e6 }); }, basFn:basTio }); };
   window.renderTioLosut    = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'losut',    header:'Lös ut exponenten', sub:'Vilket tal ska x vara?', svar:'varde', gen:function(l, bf){ return genLosut(l, bf, { baraExp:true }); }, basFn:basTio }); };
 
-  // Exponera gen-funktionerna + negativ-exponent-hjälparna för fuzz/runs-test.
-  window.__POT_GEN = { genEvaluera:genEvaluera, genAddsub:genAddsub, genMultdiv:genMultdiv, genLosut:genLosut, genResonera:genResonera, genSkriva:genSkriva, genPrio:genPrio, basTio:basTio, potSvarStr:potSvarStr, potSvarHtml:potSvarHtml };
+  // ── GRUNDPOTENSER (dk 10): SAMMA harness + exponentkärna (expLag), nytt koeff/normaliserings-lager.
+  //    svar:'gp' = form-medveten (koeff·10^exp); keypad har ',' för decimalkoefficienter. ──
+  window.renderGpSkriva  = function(b){ renderPotDrill(b, { ko:'gp-rakna', formaga:'skriva',   header:'Skriv i grundpotensform', sub:'Skriv talet som a·10ⁿ (1 ≤ a < 10).', svar:'gp', keypadOps:['−', ','], gen:genGpSkriva }); };
+  window.renderGpMultdiv = function(b){ renderPotDrill(b, { ko:'gp-rakna', formaga:'multdiv',  header:'Multiplikation och division', sub:'Koeff × ; exponent + / −. Normalisera svaret.', svar:'gp', keypadOps:['−', ','], gen:function(l){ return Math.random() < 0.5 ? genGpMult(l) : genGpDiv(l); } }); };
+  window.renderGpAddsub  = function(b){ renderPotDrill(b, { ko:'gp-rakna', formaga:'addsub',   header:'Addition och subtraktion', sub:'Räkna ut varje tal, operera sedan.', svar:'varde', keypadOps:['−', ','], gen:genGpAddsub }); };
+  window.renderGpLosut   = function(b){ renderPotDrill(b, { ko:'gp-rakna', formaga:'losut',    header:'Vilket tal ska x vara?', sub:'Svara i grundpotensform.', svar:'gp', keypadOps:['−', ','], gen:genGpLosut }); };
+
+  // Exponera gen-funktionerna + hjälparna för fuzz/runs-test.
+  window.__POT_GEN = { genEvaluera:genEvaluera, genAddsub:genAddsub, genMultdiv:genMultdiv, genLosut:genLosut, genResonera:genResonera, genSkriva:genSkriva, genPrio:genPrio, basTio:basTio, potSvarStr:potSvarStr, potSvarHtml:potSvarHtml,
+    expLag:expLag, normalisera:normalisera, genGpMult:genGpMult, genGpDiv:genGpDiv, genGpAddsub:genGpAddsub, genGpSkriva:genGpSkriva, genGpLosut:genGpLosut, gpVal:gpVal };
 })();

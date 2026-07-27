@@ -23,6 +23,7 @@
   // heltals-/decimalbaser → konsekvent storlek/baslinje. Bråk-bas märks (.pot-frac) för
   // att lägga exponenten uppe till höger om den stängande parentesen.
   function potP(inner, e){ var frac = String(inner).indexOf('ovn-brak') !== -1; return '<span class="pot' + (frac ? ' pot-frac' : '') + '">(' + inner + ')<sup>' + e + '</sup></span>'; }
+  function gp(k, e){ return fmt(k) + '·' + pot(10, e); }   // grundpotensform a·10ⁿ (koeff vänsterställt, tiopotens upphöjt)
 
   // ── Uppgifts-fabriker ──
   function T(fraga, facit){ return { typ:'tal', fraga:fraga, facit:facit }; }                   // talsvar (värde)
@@ -40,6 +41,10 @@
   function KBR(vanster, ft, fn, facit){ return { typ:'kedja', stil:'br', vanster:vanster, ft:ft, fn:fn, facit:facit }; }   // expandera → stående bråk: v = [mel] = [bråk]
   function KPAR(vanster, exp, basval, svar, facit){ return { typ:'kedja', stil:'par', vanster:vanster, exp:exp, basval:basval, svar:svar, facit:facit }; } // parentes: v = [bas]^exp = [svar]
   function KEXP(vanster, bas, svarExp, facit){ return { typ:'kedja', stil:'exp', vanster:vanster, bas:bas, svarExp:svarExp, facit:facit }; } // exp-lag: v = bas^[mel-uttryck] = bas^[svar-exp]
+  // ── Grundpotensform a·10ⁿ (dk 10): separata rutor [koeff]·10^[exp], form-medveten rättning. ──
+  function GPS(fraga, k, e){ return { typ:'gps', fraga:fraga, k:k, e:e }; }   // skriv i grundpotensform
+  // GP-kedja: vänster = [gp-cell] = … . leds = [{k,e} | {kind:'gpfrac',k,e,namn}]. Sista ledet kräver koeff∈[1,10).
+  function KGP(vanster, leds, facit){ return { typ:'kgp', vanster:vanster, leds:leds, facit:facit }; }
   function G(rubrik, rader, hint){ return { rubrik:rubrik, rader:rader, hint:hint }; }
 
   // ══════════════════════════════════════════════════════════════════════════════════════
@@ -198,9 +203,67 @@
     ])
   ] };
 
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // BLAD: Grundpotenser (delkapitel 10) — grundpotensform a·10ⁿ. Exponentkärnan (m±n) + koeff-
+  // dimension + normalisering. Separata rutor [koeff]·10^[exp]; eleven bygger mellanleden själv.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  var GRUNDPOTENSER = { nr:1, titel:'Grundpotenser', nod:'gp-rakna', uppg:[
+    G('Skriv i grundpotensform', [
+      GPS('50 000', 5, 4), GPS('70 000 000', 7, 7), GPS('47 000', 4.7, 4), GPS('9 500 000', 9.5, 6)
+    ]),
+    G('Skriv som vanligt tal', [
+      T(gp(3, 3) + ' =', 3000), T(gp(8, 5) + ' =', 800000), T(gp(9.8, 6) + ' =', 9800000), T(gp(1.7, 4) + ' =', 17000)
+    ]),
+    G('Multiplikation — koeff ·, exponent +, normalisera', [
+      KGP(gp(4, 5) + ' · ' + gp(2, 6), [{ k:8, e:11 }, { k:8, e:11 }], '4·10⁵ · 2·10⁶ = 8·10^(5+6) = 8·10¹¹'),
+      KGP(gp(3, 4) + ' · ' + gp(3, 9), [{ k:9, e:13 }, { k:9, e:13 }], '3·10⁴ · 3·10⁹ = 9·10^(4+9) = 9·10¹³'),
+      KGP(gp(5, 6) + ' · ' + gp(3, 11), [{ k:15, e:17 }, { k:15, e:17 }, { k:1.5, e:18 }], '5·10⁶ · 3·10¹¹ = 15·10^(6+11) = 15·10¹⁷ = 1,5·10¹⁸'),
+      KGP(gp(7, 8) + ' · ' + gp(5, 7), [{ k:35, e:15 }, { k:35, e:15 }, { k:3.5, e:16 }], '7·10⁸ · 5·10⁷ = 35·10^(8+7) = 35·10¹⁵ = 3,5·10¹⁶')
+    ], 'Normalisering: om koefficienten ≥ 10, flytta så att 1 ≤ koeff < 10.'),
+    G('Skriv i grundpotensform', [
+      GPS('350 000', 3.5, 5), GPS('407 000', 4.07, 5), GPS('30 500 000', 3.05, 7)
+    ]),
+    G('Division — koeff /, exponent −', [
+      KGP(fr(gp(8, 7), gp(2, 4)), [{ k:4, e:3 }, { k:4, e:3 }], '8·10⁷ / 2·10⁴ = 4·10^(7−4) = 4·10³'),
+      KGP(fr(gp(9, 11), gp(3, 5)), [{ k:3, e:6 }, { k:3, e:6 }], '9·10¹¹ / 3·10⁵ = 3·10^(11−5) = 3·10⁶'),
+      KGP(fr(gp(7.5, 8), gp(2.5, 3)), [{ k:3, e:5 }, { k:3, e:5 }], '7,5·10⁸ / 2,5·10³ = 3·10^(8−3) = 3·10⁵')
+    ]),
+    G('Vilket tal ska x vara?', [
+      GPS(gp(2, 5) + ' · x = ' + gp(8, 9) + ',&nbsp; x', 4, 4),
+      GPS(gp(1.5, 4) + ' · x = ' + gp(4.5, 12) + ',&nbsp; x', 3, 8),
+      GPS(gp(3, 6) + ' · x = ' + gp(1.8, 10) + ',&nbsp; x', 6, 3)
+    ]),
+    G('Svara i grundpotensform', [
+      GPS('3 · 20 000 000', 6, 7), GPS('5 · 70 000', 3.5, 5), GPS('7 · 8 000 000', 5.6, 7)
+    ]),
+    G('Vilket tal saknas? (vanligt tal ↔ grundpotensform)', [
+      T(gp(2.4, 6) + ' =', 2400000), GPS('71 000', 7.1, 4), T(gp(2.13, 8) + ' =', 213000000), GPS('801 000', 8.01, 5)
+    ]),
+    G('Addition och subtraktion — räkna ut varje tal, operera sedan', [
+      KEV(gp(4, 5) + ' + ' + gp(2, 4), 420000, '4·10⁵ + 2·10⁴ = 400 000 + 20 000 = 420 000'),
+      KEV(gp(6, 6) + ' + ' + gp(7, 3), 6007000, '6·10⁶ + 7·10³ = 6 000 000 + 7 000 = 6 007 000'),
+      KEV(gp(5, 5) + ' − ' + gp(4, 4), 460000, '5·10⁵ − 4·10⁴ = 500 000 − 40 000 = 460 000'),
+      KEV(gp(3.5, 7) + ' − ' + gp(6, 5), 34400000, '3,5·10⁷ − 6·10⁵ = 35 000 000 − 600 000 = 34 400 000')
+    ]),
+    G('Vilket tal ska x vara? (x i nämnaren)', [
+      GPS(fr(gp(7, 8), 'x') + ' = ' + gp(3.5, 5) + ',&nbsp; x', 2, 3),
+      GPS(fr(gp(6, 8), 'x') + ' = ' + gp(4, 2) + ',&nbsp; x', 1.5, 6)
+    ]),
+    G('Multiplikation och division — blandat', [
+      KGP(gp(1.2, 5) + ' · ' + gp(3, 6), [{ k:3.6, e:11 }, { k:3.6, e:11 }], '1,2·10⁵ · 3·10⁶ = 3,6·10^(5+6) = 3,6·10¹¹'),
+      KGP(gp(3, 4) + ' · ' + gp(4.5, 5), [{ k:13.5, e:9 }, { k:13.5, e:9 }, { k:1.35, e:10 }], '3·10⁴ · 4,5·10⁵ = 13,5·10^(4+5) = 13,5·10⁹ = 1,35·10¹⁰'),
+      KGP(fr(gp(9, 8), gp(1.5, 3)), [{ k:6, e:5 }, { k:6, e:5 }], '9·10⁸ / 1,5·10³ = 6·10^(8−3) = 6·10⁵'),
+      KGP(fr(gp(1.4, 7), gp(2, 4)), [{ kind:'gpfrac', k:14, e:6, namn:gp(2, 4) }, { k:7, e:2 }, { k:7, e:2 }], '1,4·10⁷ / 2·10⁴ = 14·10⁶ / 2·10⁴ = 7·10^(6−4) = 7·10²')
+    ], 'Sista raden: skriv om 1,4·10⁷ som 14·10⁶ först, så blir divisionen jämn.')
+  ] };
+
 
   // ── RENDER ──
   var CHECKS = [];
+  // ── Grundpotens-cell: [koeff]·10^[exp] (separata rutor). exp-rutan tar uttryck (5+6) via evalArith. ──
+  function gpCellHTML(){ return '<span class="ak8-gp"><input class="ak8-in ak8-gpk" inputmode="text" autocomplete="off">·<span class="pot">10<sup><input class="ak8-in ak8-in-sm ak8-gpe" inputmode="text" autocomplete="off"></sup></span></span>'; }
+  function gpFracHTML(namn){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + gpCellHTML() + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + namn + '</span></span>'; }
+  function gpRead(cell){ var k = pNum(cell.querySelector('.ak8-gpk').value), e = AK8_UI.evalArith(cell.querySelector('.ak8-gpe').value); return { k:k, e:e, num:(isFinite(k) && isFinite(e)) ? k * Math.pow(10, e) : NaN }; }
   function renderRad(r){
     var idx = CHECKS.length;
     if(r.typ === 'tal'){
@@ -246,6 +309,30 @@
         svarHtml = AK8_UI.ansCell('mel', 'mellanled') + eq + AK8_UI.ansCell('sv', 'svar');
       }
       return '<div class="ak8-rad ak8-rad-kedja"><span class="ak8-q">' + r.vanster + '</span><span class="ak8-svar" data-idx="' + idx + '">' + eq + svarHtml + '</span></div>';
+    }
+    if(r.typ === 'gps'){
+      // Grundpotensform-svar: [koeff]·10^[exp], form-medveten (koeff∈[1,10) OCH värdet stämmer).
+      CHECKS.push(function(el){
+        var c = gpRead(el.querySelector('.ak8-gp')), mal = r.k * Math.pow(10, r.e);
+        return { ok: isFinite(c.num) && Math.abs(c.num - mal) < 1e-3 * Math.max(1, mal) && c.k >= 1 && c.k < 10, facit: fmt(r.k) + '·10^' + r.e };
+      });
+      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + ' =</span><span class="ak8-svar" data-idx="' + idx + '">' + gpCellHTML() + '</span></div>';
+    }
+    if(r.typ === 'kgp'){
+      // Grundpotens-kedja: vänster = [gp-cell] = … . Varje led värde-rättas; SISTA ledet kräver
+      // normaliserad koeff (1 ≤ koeff < 10) → tvingar normaliseringen (15·10¹⁷ underkänns → 1,5·10¹⁸).
+      var eqg = '<span class="ovn-text ak8-eq">=</span>', gh = '';
+      r.leds.forEach(function(led){ gh += eqg + (led.kind === 'gpfrac' ? gpFracHTML(led.namn) : gpCellHTML()); });
+      CHECKS.push(function(el){
+        var cells = el.querySelectorAll('.ak8-gp'), ok = true, sist = r.leds.length - 1;
+        r.leds.forEach(function(led, i){
+          var c = gpRead(cells[i]), mal = led.k * Math.pow(10, led.e);
+          if(!isFinite(c.num) || Math.abs(c.num - mal) >= 1e-3 * Math.max(1, mal)) ok = false;
+          if(i === sist && (c.k < 1 || c.k >= 10)) ok = false;   // sista ledet = normaliserad grundpotensform
+        });
+        return { ok: ok, facit: r.facit };
+      });
+      return '<div class="ak8-rad ak8-rad-kedja"><span class="ak8-q">' + r.vanster + '</span><span class="ak8-svar" data-idx="' + idx + '">' + gh + '</span></div>';
     }
     if(r.typ === 'potsvar'){
       CHECKS.push(function(el){ return { ok: likhetOk(pNum(el.querySelector('.ak8-in').value), r.exp), facit: r.bas + '^' + r.exp }; });
@@ -318,7 +405,7 @@
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
       + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
-    html += AK8_UI.keypadHTML({ builders:true });   // delad keypad, fast längst ned
+    html += AK8_UI.keypadHTML({ builders:true, ops:['+', '−', '·', '/', ','] });   // delad keypad (, för decimalkoefficienter)
     mount.innerHTML = html;
     mount.querySelectorAll('.ak8-korval').forEach(function(btn){
       btn.onclick = function(){ var grid = btn.closest('.ak8-ordna'); grid.querySelectorAll('.ak8-korval').forEach(function(b){ b.classList.toggle('sel', b === btn); }); };
@@ -354,7 +441,7 @@
   }
 
   window.BLAD_AK8_D4 = {
-    GRUND: GRUND, MULTDIV: MULTDIV, PRIO: PRIO, TIOPOTENSER: TIOPOTENSER,
-    renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, ({ GRUND:GRUND, MULTDIV:MULTDIV, PRIO:PRIO, TIOPOTENSER:TIOPOTENSER })[key]); }
+    GRUND: GRUND, MULTDIV: MULTDIV, PRIO: PRIO, TIOPOTENSER: TIOPOTENSER, GRUNDPOTENSER: GRUNDPOTENSER,
+    renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, ({ GRUND:GRUND, MULTDIV:MULTDIV, PRIO:PRIO, TIOPOTENSER:TIOPOTENSER, GRUNDPOTENSER:GRUNDPOTENSER })[key]); }
   };
 })();

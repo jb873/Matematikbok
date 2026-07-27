@@ -71,8 +71,16 @@ window.AK8_K1_BOK = {
       blad: [
         { nr: 1, titel: 'Tiopotenser', noder: ['tio-rakna:skriva', 'tio-rakna:evaluera', 'tio-rakna:rakna', 'tio-rakna:addsub', 'tio-rakna:losut', 'tio-rakna:prefix'] }
       ]
+    },
+    {
+      // Grundpotenser (position 10) — grundpotensform a·10ⁿ. SAMMA exponentkärna (m±n, expLag)
+      // som potens/tiopotens; nytt koefficient- + normaliserings-lager ovanpå (ingen ny motor).
+      // Ett blad, exakt-författat ur TRANSKRIPTION-ak8-grundpotenser.md. minNiva sätts i egen order.
+      nr: 10, id: 'grundpotenser', titel: 'Grundpotenser', fil: 'grundpotenser.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Grundpotenser', noder: ['gp-rakna:skriva', 'gp-rakna:multdiv', 'gp-rakna:addsub', 'gp-rakna:losut'] }
+      ]
     }
-    // ⚠️ Delkapitel 4–7 (bråk ×4) + 10 (grundpotenser) väntar. Grundpotenser återanvänder
-    // potens-motorn (fast bas) — nästa order. Noderna är gemensamma med åk 7 (single-source).
+    // ⚠️ Delkapitel 4–7 (bråk ×4) väntar. Noderna är gemensamma med åk 7 (single-source).
   ]
 };
