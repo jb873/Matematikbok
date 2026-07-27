@@ -7,9 +7,14 @@
 <style>
   :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
   *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
-  .topnav{ background:var(--navy); color:#fff; padding:14px 26px; display:flex; align-items:center; gap:14px; font-size:13px; }
+  .topnav{ background:var(--navy); color:#fff; padding:14px 26px; display:flex; align-items:center; justify-content:space-between; gap:14px; font-size:13px; }
   .topnav .brand{ font-family:var(--cinzel); letter-spacing:.06em; }
   .topnav a{ color:rgba(255,255,255,.8); text-decoration:none; } .topnav .sep{ opacity:.5; }
+  .nav-crumbs{ display:flex; align-items:center; gap:8px; }
+  .nav-crumbs a:hover{ color:var(--gold-lt); }
+  .nav-crumbs .crumb-sep{ opacity:.35; }
+  .nav-crumbs .crumb-current{ color:rgba(255,255,255,.85); }
+  @media(max-width:560px){ .nav-crumbs .crumb-hem{ display:none; } }
   .hero{ background:var(--navy); color:#fff; padding:26px 26px 46px; text-align:center; }
   .hero .eyebrow{ font-family:var(--cinzel); font-size:12px; letter-spacing:.18em; color:var(--gold-lt); }
   .hero h1{ font-family:var(--serif); font-size:40px; font-weight:500; margin:8px 0 6px; } .hero h1 em{ color:var(--gold-lt); font-style:italic; }
@@ -31,7 +36,14 @@
 </head>
 <body>
 <nav class="topnav">
-  <span class="brand">Matematik · Åk 8</span><span class="sep">›</span><span>Kapitel 1</span>
+  <span class="brand">Matematik · Åk 8</span>
+  <div class="nav-crumbs">
+    <a class="crumb-hem" href="../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../index.html">Årskurs 8</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Kapitel 1</span>
+  </div>
 </nav>
 <header class="hero">
   <div class="eyebrow">Årskurs 8 · Kapitel 1</div>

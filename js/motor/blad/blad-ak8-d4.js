@@ -360,7 +360,7 @@
         var bok = ('' + r.bas).replace(',', '.'), okB = isNaN(pFaktor(bok)) ? b.toLowerCase() === bok.toLowerCase() : likhetOk(pFaktor(b), pFaktor(bok));
         return { ok: okB && likhetOk(e, r.exp), facit: r.bas + '^' + r.exp };
       });
-      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '"><span class="pot">' + inTal(true) + '<sup>' + inTal(true) + '</sup></span></span></div>';
+      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + ' =</span><span class="ak8-svar" data-idx="' + idx + '"><span class="pot">' + inTal(true) + '<sup>' + inTal(true) + '</sup></span></span></div>';
     }
     if(r.typ === 'skrivmult'){
       CHECKS.push(function(el){
