@@ -258,10 +258,15 @@
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
-    blad.uppg.forEach(function(g){
-      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + g.rubrik + '</div>'
+    blad.uppg.forEach(function(g, gi){
+      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + (gi + 1) + '. ' + g.rubrik + '</div>'
         + (g.hint ? '<div class="ak8-hint">' + g.hint + '</div>' : '');
-      g.rader.forEach(function(r){ html += renderRad(r); });
+      var bokN = 0;
+      g.rader.forEach(function(r){
+        var h = renderRad(r);
+        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = h.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokN % 26)) + ')</span>'); bokN++; }
+        html += h;
+      });
       html += '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'

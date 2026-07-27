@@ -119,9 +119,14 @@
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>'
       + '<p class="ak8-intro">Tal vänsterställda. Visa mellanledet i den vänstra rutan (förlängning eller balansera decimalerna), och svaret i den högra.</p>';
-    blad.uppg.forEach(function(g){
-      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + g.rubrik + '</div>';
-      g.rader.forEach(function(r){ html += renderRad(r); });
+    blad.uppg.forEach(function(g, gi){
+      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + (gi + 1) + '. ' + g.rubrik + '</div>';
+      var bokN = 0;
+      g.rader.forEach(function(r){
+        var h = renderRad(r);
+        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = h.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokN % 26)) + ')</span>'); bokN++; }
+        html += h;
+      });
       html += '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button></div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';

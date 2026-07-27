@@ -270,12 +270,19 @@
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
+    var grpN = 0;   // löpande gruppnummer (bara riktiga uppgiftsgrupper; figur/sektionshuvud hoppas över)
     blad.uppg.forEach(function(u){
       if(u.typ === 'figur'){ html += renderRad(u); return; }
       if(u.grupp){ html += '<h3 class="ak8-grupp">' + u.grupp + '</h3>'; return; }
-      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + u.rubrik + (u.villkorNot ? ' <span class="ak8-flagg" title="Precedenstvetydig — villkors-validering, villkoret saknas">⚑</span>' : '') + '</div>';
+      grpN++;
+      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + grpN + '. ' + u.rubrik + (u.villkorNot ? ' <span class="ak8-flagg" title="Precedenstvetydig — villkors-validering, villkoret saknas">⚑</span>' : '') + '</div>';
       if(u.hint) html += '<p class="ak8-hint">' + u.hint + '</p>';
-      u.rader.forEach(function(r){ html += renderRad(r); });
+      var bokN = 0;
+      u.rader.forEach(function(r){
+        var h = renderRad(r);
+        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = h.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokN % 26)) + ')</span>'); bokN++; }
+        html += h;
+      });
       html += '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button></div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
