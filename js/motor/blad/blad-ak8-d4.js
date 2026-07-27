@@ -16,9 +16,25 @@
   // en faktor ur "3/4", "0,6", "7", "x"
   function pFaktor(s){ s = String(s).trim().replace(',', '.'); var m = s.match(/^(-?\d+(?:\.\d+)?)\/(\d+)$/); if(m) return parseFloat(m[1]) / parseFloat(m[2]); return parseFloat(s); }
 
+  // Aritmetik-utvärderare för mellanledet (byte-identisk ur mellanleds-motorn i blad-ak8-d1.js;
+  // ingen eval): + − · / parenteser. Värde-rättar elevens mellanled i likhetskedjan.
+  function evalArith(s){
+    s = String(s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(/[·×x]/g, '*').replace(/÷/g, '/').replace(/,/g, '.');
+    if(!/^[-0-9.*/+()]*$/.test(s) || s === '') return NaN;
+    var i = 0;
+    function expr(){ var v = term(); while(s[i] === '+' || s[i] === '-'){ var o = s[i++], t = term(); v = o === '+' ? v + t : v - t; } return v; }
+    function term(){ var v = factor(); while(s[i] === '*' || s[i] === '/'){ var o = s[i++], f = factor(); v = o === '*' ? v * f : v / f; } return v; }
+    function factor(){ if(s[i] === '+'){ i++; return factor(); } if(s[i] === '-'){ i++; return -factor(); } if(s[i] === '('){ i++; var v = expr(); if(s[i] === ')') i++; return v; } var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]); }
+    var r = expr(); return i === s.length ? r : NaN;
+  }
+
   // ── Potens-notation (upphöjt) + stående bråk ──
   function pot(b, e){ return '<span class="pot">' + b + '<sup>' + e + '</sup></span>'; }
   function fr(t, n){ return F.fracSpan(t, n); }
+  // Potens med sammansatt bas (parentes/bråk): exponenten i SAMMA .pot-superscript som
+  // heltals-/decimalbaser → konsekvent storlek/baslinje. Bråk-bas märks (.pot-frac) för
+  // att lägga exponenten uppe till höger om den stängande parentesen.
+  function potP(inner, e){ var frac = String(inner).indexOf('ovn-brak') !== -1; return '<span class="pot' + (frac ? ' pot-frac' : '') + '">(' + inner + ')<sup>' + e + '</sup></span>'; }
 
   // ── Uppgifts-fabriker ──
   function MALL(html){ return { typ:'mall', html:html }; }                                     // statiskt räknat exempel (visas, rättas ej)
@@ -30,6 +46,12 @@
   function KORVAL(fraga, alt, ratt){ return { typ:'korval', fraga:fraga, alt:alt, ratt:ratt }; } // klicka rätt (korOvningKlick)
   function FIGUR(sida, bas, exp){ return { typ:'figur', sida:sida, bas:bas, exp:exp }; }         // rita kvadrat → area i potensform
   function TAB(potenser, varden, input){ return { typ:'tabell', potenser:potenser, varden:varden, input:input }; } // input:'varde'|'potens'
+  // ── Mellanleds-kedja (visa mellanled) — VARJE uppgift = full likhetskedja med fillbara led.
+  //    Återanvänder mellanleds-motorns mönster (evalArith värde-rättar mellanledet); facit =
+  //    full kedja (visas vid Kontrollera). Ingen avtagande scaffolding — fullt led överallt. ──
+  function KEV(vanster, svar, facit){ return { typ:'kedja', stil:'ev', vanster:vanster, svar:svar, facit:facit }; }        // evaluera: v = [mel] = [svar]
+  function KBR(vanster, ft, fn, facit){ return { typ:'kedja', stil:'br', vanster:vanster, ft:ft, fn:fn, facit:facit }; }   // expandera → stående bråk: v = [mel] = [bråk]
+  function KPAR(vanster, exp, basval, svar, facit){ return { typ:'kedja', stil:'par', vanster:vanster, exp:exp, basval:basval, svar:svar, facit:facit }; } // parentes: v = [bas]^exp = [svar]
   function G(rubrik, rader, hint){ return { rubrik:rubrik, rader:rader, hint:hint }; }
 
   // ══════════════════════════════════════════════════════════════════════════════════════
@@ -45,19 +67,22 @@
     ]),
     G('Skriv som en multiplikation', [
       SKRIVMULT(pot(7, 3), 7, 3), SKRIVMULT(pot(2, 5), 2, 5),
-      SKRIVMULT(pot('(' + fr(3, 4) + ')', 3), '3/4', 3), SKRIVMULT(pot('0,6', 4), '0,6', 4)
+      SKRIVMULT(potP(fr(3, 4), 3), '3/4', 3), SKRIVMULT(pot('0,6', 4), '0,6', 4)
     ]),
     G('Fyll i värdet', [
       TAB([pot(2, 4), pot(2, 3), pot(2, 2), pot(2, 1), pot(2, 0)], [16, 8, 4, 2, 1], 'varde')
     ]),
     G('Beräkna med mellanled — räkna ut varje potens, operera sedan', [
       MALL(pot(3, 3) + ' − ' + pot(2, 3) + ' = 27 − 8 = <b>19</b>'),
-      T(pot(6, 2) + ' + ' + pot(5, 2) + ' =', 61), T(pot(5, 3) + ' − ' + pot(10, 2) + ' =', 25), T(pot(2, 5) + ' + ' + pot(7, 2) + ' =', 81)
+      KEV(pot(6, 2) + ' + ' + pot(5, 2), 61, '6² + 5² = 36 + 25 = 61'),
+      KEV(pot(5, 3) + ' − ' + pot(10, 2), 25, '5³ − 10² = 125 − 100 = 25'),
+      KEV(pot(2, 5) + ' + ' + pot(7, 2), 81, '2⁵ + 7² = 32 + 49 = 81')
     ]),
     G('Beräkna med mellanled — parentes/potens först', [
-      MALL('(12 − 5)' + '<sup>2</sup> = ' + pot(7, 2) + ' = <b>49</b>'),
-      MALL('(' + fr(3, 4) + ')<sup>2</sup> = ' + fr(3, 4) + ' · ' + fr(3, 4) + ' = ' + fr(9, 16)),
-      T('(7 + 4)<sup>2</sup> =', 121), BR('(' + fr(2, 3) + ')<sup>3</sup> =', 8, 27)
+      MALL(potP('12 − 5', 2) + ' = ' + pot(7, 2) + ' = <b>49</b>'),
+      MALL(potP(fr(3, 4), 2) + ' = ' + fr(3, 4) + ' · ' + fr(3, 4) + ' = ' + fr(9, 16)),
+      KPAR(potP('7 + 4', 2), 2, 11, 121, '(7 + 4)² = 11² = 121'),
+      KBR(potP(fr(2, 3), 3), 8, 27, '(2/3)³ = 2/3 · 2/3 · 2/3 = 8/27')
     ]),
     G('Fyll i potensen som matchar värdet', [
       TAB([pot(3, 4), pot(3, 2), pot(3, 0), pot(3, 3), pot(3, 1)], [81, 9, 1, 27, 3], 'potens')
@@ -95,7 +120,9 @@
     ]),
     G('Beräkna med mellanled — räkna ut varje potens, operera sedan', [
       MALL(pot(2, 3) + ' + ' + pot(4, 2) + ' = 8 + 16 = <b>24</b>'),
-      T(pot(8, 2) + ' − ' + pot(2, 3) + ' =', 56), T(pot(2, 3) + ' · ' + pot(5, 2) + ' + ' + pot(3, 3) + ' =', 227), T(pot(2, 5) + ' · ' + pot(3, 2) + ' − ' + pot(4, 2) + ' =', 272)
+      KEV(pot(8, 2) + ' − ' + pot(2, 3), 56, '8² − 2³ = 64 − 8 = 56'),
+      KEV(pot(2, 3) + ' · ' + pot(5, 2) + ' + ' + pot(3, 3), 227, '2³ · 5² + 3³ = 8 · 25 + 27 = 227'),
+      KEV(pot(2, 5) + ' · ' + pot(3, 2) + ' − ' + pot(4, 2), 272, '2⁵ · 3² − 4² = 32 · 9 − 16 = 272')
     ]),
     G('Resonemang', [
       T('Hur många faktorer 3 för att få 9?', 2), T('Hur många faktorer 3 för att få 81?', 4), T('Hur många faktorer 3 för att få 27?', 3),
@@ -118,13 +145,13 @@
   // ══════════════════════════════════════════════════════════════════════════════════════
   var PRIO = { nr:3, titel:'Prioriteringsregeln med potenser', nod:'prio-potenser', uppg:[
     G('Beräkna', [
-      T('(4 · 2)<sup>2</sup> =', 64), T('5 · ' + pot(2, 4) + ' =', 80), T('5 · 2 + ' + pot(3, 3) + ' =', 37), T('25 − ' + pot(6, 2) + ' =', -11)
+      T(potP('4 · 2', 2) + ' =', 64), T('5 · ' + pot(2, 4) + ' =', 80), T('5 · 2 + ' + pot(3, 3) + ' =', 37), T('25 − ' + pot(6, 2) + ' =', -11)
     ], 'Tänk på prioriteringsreglerna. Ett svar blir negativt.'),
     G('Beräkna', [
-      T('(0,2 · 3)<sup>2</sup> =', 0.36), T('3 · (2 − 1,9)<sup>2</sup> =', 0.03), BR('4 · (' + fr(3, 4) + ')<sup>2</sup> =', 9, 4)
+      T(potP('0,2 · 3', 2) + ' =', 0.36), T('3 · ' + potP('2 − 1,9', 2) + ' =', 0.03), BR('4 · ' + potP(fr(3, 4), 2) + ' =', 9, 4)
     ]),
     G('Beräkna', [
-      T('3 + 4 · 2 − ' + pot(2, 3) + ' =', 3), T('(36 − 3 · ' + pot(2, 2) + ') + ' + pot(3, 2) + ' =', 33), BR('(' + fr(5, 3) + ')<sup>2</sup> − 12 · (' + fr(1, 2) + ')<sup>2</sup> =', -2, 9)
+      T('3 + 4 · 2 − ' + pot(2, 3) + ' =', 3), T('(36 − 3 · ' + pot(2, 2) + ') + ' + pot(3, 2) + ' =', 33), BR(potP(fr(5, 3), 2) + ' − 12 · ' + potP(fr(1, 2), 2) + ' =', -2, 9)
     ])
   ] };
 
@@ -151,8 +178,10 @@
       T(pot(10, 2) + ' =', 100), T(pot(10, 8) + ' =', 100000000)
     ]),
     G('Beräkna — räkna ut varje tiopotens, operera sedan', [
-      T(pot(10, 3) + ' + ' + pot(10, 4) + ' =', 11000), T(pot(10, 6) + ' + ' + pot(10, 2) + ' =', 1000100),
-      T(pot(10, 5) + ' − ' + pot(10, 4) + ' =', 90000), T(pot(10, 4) + ' − ' + pot(10, 3) + ' =', 9000)
+      KEV(pot(10, 3) + ' + ' + pot(10, 4), 11000, '10³ + 10⁴ = 1000 + 10000 = 11000'),
+      KEV(pot(10, 6) + ' + ' + pot(10, 2), 1000100, '10⁶ + 10² = 1000000 + 100 = 1000100'),
+      KEV(pot(10, 5) + ' − ' + pot(10, 4), 90000, '10⁵ − 10⁴ = 100000 − 10000 = 90000'),
+      KEV(pot(10, 4) + ' − ' + pot(10, 3), 9000, '10⁴ − 10³ = 10000 − 1000 = 9000')
     ]),
     G('Vad ska stå istället för x?', [
       T(pot(10, 'x') + ' · ' + pot(10, 3) + ' = ' + pot(10, 11) + ',&nbsp; x =', 8),
@@ -161,10 +190,10 @@
       T(fr(pot(10, 9), pot(10, 'x')) + ' = ' + pot(10, 3) + ',&nbsp; x =', 6)
     ]),
     G('Beräkna (blandat — se upp: exponent-lagen gäller bara samma bas)', [
-      T(pot(10, 5) + ' + ' + pot(10, 3) + ' − ' + pot(10, 4) + ' =', 91000),
-      T(pot(10, 6) + ' − ' + pot(10, 5) + ' + ' + pot(10, 2) + ' =', 900100),
-      T(pot(10, 3) + ' − ' + pot(5, 3) + ' + ' + pot(10, 4) + ' =', 10875),
-      T(pot(2, 6) + ' − ' + pot(10, 0) + ' + ' + pot(10, 3) + ' =', 1063)
+      KEV(pot(10, 5) + ' + ' + pot(10, 3) + ' − ' + pot(10, 4), 91000, '10⁵ + 10³ − 10⁴ = 100000 + 1000 − 10000 = 91000'),
+      KEV(pot(10, 6) + ' − ' + pot(10, 5) + ' + ' + pot(10, 2), 900100, '10⁶ − 10⁵ + 10² = 1000000 − 100000 + 100 = 900100'),
+      KEV(pot(10, 3) + ' − ' + pot(5, 3) + ' + ' + pot(10, 4), 10875, '10³ − 5³ + 10⁴ = 1000 − 125 + 10000 = 10875'),
+      KEV(pot(2, 6) + ' − ' + pot(10, 0) + ' + ' + pot(10, 3), 1063, '2⁶ − 10⁰ + 10³ = 64 − 1 + 1000 = 1063')
     ]),
     G('Vilket prefix betyder samma sak? Klicka på rätt', [
       KORVAL(pot(10, 3), ['kilo', 'mega', 'giga', 'tera'], 0),
@@ -192,6 +221,35 @@
       });
       var bruta = '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in ak8-bt fr-ruta"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in ak8-bn fr-ruta"></span></span>';
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + bruta + '</span></div>';
+    }
+    if(r.typ === 'kedja'){
+      // Full likhetskedja: vänster = [fillbart mellanled] = [fillbart svar]. Fillbara led på
+      // ALLA rader (ingen avtagande scaffolding); facit = full kedja, visas vid Kontrollera.
+      var eq = '<span class="ovn-text ak8-eq">=</span>', svarHtml;
+      if(r.stil === 'br'){
+        CHECKS.push(function(el){
+          var mel = evalArith(el.querySelector('.ak8-mel').value), mal = r.ft / r.fn;
+          var t = pNum(el.querySelector('.ak8-bt').value), n = pNum(el.querySelector('.ak8-bn').value);
+          return { ok: likhetOk(mel, mal) && isFinite(t) && isFinite(n) && n !== 0 && Math.abs(t / n - mal) < 1e-9, facit: r.facit };
+        });
+        svarHtml = '<input class="ak8-in ak8-mel" inputmode="text" autocomplete="off" placeholder="mellanled">' + eq
+          + '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in ak8-bt fr-ruta"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in ak8-bn fr-ruta"></span></span>';
+      } else if(r.stil === 'par'){
+        CHECKS.push(function(el){
+          var b = pNum(el.querySelector('.ak8-base').value), sv = pNum(el.querySelector('.ak8-sv').value);
+          return { ok: likhetOk(b, r.basval) && likhetOk(sv, r.svar), facit: r.facit };
+        });
+        svarHtml = '<span class="pot"><input class="ak8-in ak8-in-sm ak8-base" inputmode="text" autocomplete="off"><sup>' + r.exp + '</sup></span>' + eq
+          + '<input class="ak8-in ak8-sv" inputmode="text" autocomplete="off" placeholder="svar">';
+      } else {   // 'ev'
+        CHECKS.push(function(el){
+          var mel = evalArith(el.querySelector('.ak8-mel').value), sv = pNum(el.querySelector('.ak8-sv').value);
+          return { ok: likhetOk(mel, r.svar) && likhetOk(sv, r.svar), facit: r.facit };
+        });
+        svarHtml = '<input class="ak8-in ak8-mel" inputmode="text" autocomplete="off" placeholder="mellanled">' + eq
+          + '<input class="ak8-in ak8-sv" inputmode="text" autocomplete="off" placeholder="svar">';
+      }
+      return '<div class="ak8-rad ak8-rad-kedja"><span class="ak8-q">' + r.vanster + '</span><span class="ak8-svar" data-idx="' + idx + '">' + eq + svarHtml + '</span></div>';
     }
     if(r.typ === 'potsvar'){
       CHECKS.push(function(el){ return { ok: likhetOk(pNum(el.querySelector('.ak8-in').value), r.exp), facit: r.bas + '^' + r.exp }; });

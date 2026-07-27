@@ -49,6 +49,11 @@
   /* potenser */
   .pot{ font-family:var(--serif); white-space:nowrap; }
   .pot sup{ font-size:0.72em; }
+  /* exponent på sammansatt bas (parentes/bråk): tätt intill stängande parentes, uppe till höger */
+  .pot-frac > sup{ font-size:0.72em; vertical-align:top; position:relative; top:0.15em; margin-left:1px; }
+  /* mellanleds-kedja: likhetstecken-mellanrum */
+  .ak8-eq{ margin:0 6px; }
+  .ak8-rad-kedja .ak8-svar{ flex-wrap:wrap; }
   .pot sup .ak8-in-sm{ width:30px; height:24px; font-size:13px; padding:0; }
   .pot > .ak8-in-sm{ width:42px; }
   .ak8-mall{ background:rgba(154,114,40,.05); border-left:3px solid var(--gold-lt); padding-left:10px !important; }
