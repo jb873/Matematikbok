@@ -210,32 +210,62 @@
     ])
   ] };
 
-  // ── Svars-cell: börjar som EN ruta. Keypadens byggar-knappar gör den till ett stående bråk
-  //    (▤ täljare/nämnare) eller en potens (▢ⁿ bas + exponentruta) — eleven bygger allt själv. ──
-  function ansCell(role, ph){ return '<span class="ak8-cell" data-r="' + role + '"><input class="ak8-in ak8-cellin" inputmode="text" autocomplete="off"' + (ph ? ' placeholder="' + ph + '"' : '') + '></span>'; }
-  // Läser en cell: stående bråk → {frac, num}; potens → {pot, base, exp, num}; annars uttryck → {val, num}.
+  // ── Svars-cell = inline UTTRYCK: en rad av text-rutor och inbäddade widgets (stående bråk /
+  //    potens). Keypadens byggar-knappar infogar en widget DÄR markören är, så eleven kan skriva
+  //    blandade uttryck: "3/4 · 3/4", "6 + 27/9", "2^11". Börjar som en text-ruta. ──
+  function txtHTML(ph){ return '<input class="ak8-in ak8-exprtxt" inputmode="text" autocomplete="off"' + (ph ? ' placeholder="' + ph + '"' : '') + '>'; }
+  function fracHTML(){ return '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn" inputmode="text" autocomplete="off"></span></span>'; }
+  function potHTML(){ return '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" inputmode="text" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"></sup></span>'; }
+  function ansCell(role, ph){ return '<span class="ak8-cell" data-r="' + role + '"><span class="ak8-expr">' + txtHTML(ph) + '</span></span>'; }
+  // Serialisera uttrycket till en sträng för evalArith: text som den är, bråk → (t/n), potens → dess värde.
+  function exprSerialize(expr){
+    var s = '';
+    Array.prototype.forEach.call(expr.children, function(ch){
+      if(ch.classList.contains('ak8-exprtxt')) s += ch.value;
+      else if(ch.classList.contains('ovn-brak')) s += '(' + ch.querySelector('.ak8-frt').value + '/' + ch.querySelector('.ak8-frn').value + ')';
+      else if(ch.classList.contains('ak8-pot')){ var b = pNum(ch.querySelector('.ak8-pbase').value), e = evalArith(ch.querySelector('.ak8-pexp').value); s += '(' + ((isFinite(b) && isFinite(e)) ? Math.pow(b, e) : 'NaN') + ')'; }
+    });
+    return s;
+  }
+  // Läser en cell: ENBART ett stående bråk → {frac}; ENBART en potens → {pot, base, exp};
+  // annars (blandat/text) → {val} via serialisering. num = värdet i samtliga fall.
   function cellRead(scope, role){
-    var c = scope.querySelector('.ak8-cell[data-r="' + role + '"]'); if(!c) return { kind:'val', num:NaN };
-    var br = c.querySelector('.ovn-brak');
-    if(br){ var t = pNum(br.querySelector('.ak8-frt').value), n = pNum(br.querySelector('.ak8-frn').value); return { kind:'frac', t:t, n:n, num:(isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN }; }
-    var p = c.querySelector('.ak8-pot');
-    if(p){ var b = pNum(p.querySelector('.ak8-pbase').value), e = evalArith(p.querySelector('.ak8-pexp').value); return { kind:'pot', base:b, exp:e, num:Math.pow(b, e) }; }
-    return { kind:'val', num: evalArith(c.querySelector('input').value) };
+    var expr = scope.querySelector('.ak8-cell[data-r="' + role + '"] .ak8-expr'); if(!expr) return { kind:'val', num:NaN };
+    var fracs = expr.querySelectorAll('.ovn-brak'), pots = expr.querySelectorAll('.ak8-pot'), texts = expr.querySelectorAll('.ak8-exprtxt');
+    var textFilled = false; Array.prototype.forEach.call(texts, function(t){ if(t.value.trim() !== '') textFilled = true; });
+    if(fracs.length === 1 && pots.length === 0 && !textFilled){
+      var t = pNum(fracs[0].querySelector('.ak8-frt').value), n = pNum(fracs[0].querySelector('.ak8-frn').value);
+      return { kind:'frac', t:t, n:n, num:(isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN };
+    }
+    if(pots.length === 1 && fracs.length === 0 && !textFilled){
+      var b = pNum(pots[0].querySelector('.ak8-pbase').value), e = evalArith(pots[0].querySelector('.ak8-pexp').value);
+      return { kind:'pot', base:b, exp:e, num:Math.pow(b, e) };
+    }
+    return { kind:'val', num: evalArith(exprSerialize(expr)) };
   }
-  function esc(v){ return String(v).replace(/"/g, ''); }
-  // Byggarna bevarar det redan skrivna som första fältet (täljare resp bas) och flyttar fokus dit näst.
-  function buildFrac(c, cur){
-    c.innerHTML = '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt" value="' + esc(cur) + '" inputmode="text" autocomplete="off"></span>'
-      + '<span class="ovn-brak-strecket"></span>'
-      + '<span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn" inputmode="text" autocomplete="off"></span></span>';
+  // Infogar en widget (bråk/potens) + en efterföljande text-ruta efter slotten där markören står.
+  function insertWidget(active, kind){
+    var expr = active.closest('.ak8-expr'); if(!expr) return null;
+    var slot = active; while(slot.parentNode && slot.parentNode !== expr) slot = slot.parentNode;
+    if(slot.parentNode !== expr) return null;
+    slot.insertAdjacentHTML('afterend', (kind === 'frac' ? fracHTML() : potHTML()) + txtHTML());
+    return slot.nextElementSibling.querySelector('input');   // täljare resp bas
   }
-  function buildPot(c, cur){
-    c.innerHTML = '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" value="' + esc(cur) + '" inputmode="text" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"></sup></span>';
+  // Backsteg på en TOM widget-ruta tar bort hela widgeten (+ dess efterföljande text-ruta).
+  function removeWidgetIfEmpty(active){
+    if(active.value !== '' || !/ak8-(frt|frn|pbase|pexp)/.test(active.className)) return null;
+    var expr = active.closest('.ak8-expr'); var w = active; while(w.parentNode !== expr) w = w.parentNode;
+    var prev = w.previousElementSibling, next = w.nextElementSibling;
+    if(next && next.classList.contains('ak8-exprtxt')) next.remove();
+    w.remove();
+    return prev ? (prev.tagName === 'INPUT' ? prev : prev.querySelector('input')) : expr.querySelector('input');
   }
   // Auto-växande ruta: bredden följer innehållet så början aldrig döljs vid långt mellanled.
+  // Tom text-ruta med placeholder blir bred nog för hinten; infogad operator-ruta är liten.
   function grow(inp){
     if(!inp || inp.classList.contains('fr-ruta')) return;
-    var min = inp.classList.contains('ak8-in-sm') ? 34 : 74;
+    var min = inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-in-sm') ? 34 : 74);
+    if(inp.value === '' && inp.placeholder && inp.classList.contains('ak8-exprtxt')) min = Math.max(min, inp.placeholder.length * 9);
     inp.style.width = '1ch';
     inp.style.width = Math.max(min, Math.min(inp.scrollWidth + 6, 340)) + 'px';
   }
@@ -285,17 +315,15 @@
         if(!active || active.disabled){ var first = sheet.querySelector('input:not([disabled])'); if(first) active = first; else return; }
         var k = btn.dataset.key;
         if(k === 'frac' || k === 'pot'){
-          var c = active.closest('.ak8-cell');
-          if(c && !c.querySelector('.ovn-brak') && !c.querySelector('.ak8-pot')){
-            var cur = (c.querySelector('input') || {}).value || '';
-            if(k === 'frac'){ buildFrac(c, cur); active = c.querySelector('.ak8-frn'); grow(c.querySelector('.ak8-frt')); }
-            else { buildPot(c, cur); active = c.querySelector('.ak8-pexp'); grow(c.querySelector('.ak8-pbase')); }
-            if(active) active.focus();
-          }
+          var f = insertWidget(active, k);
+          if(f){ active = f; f.focus(); }
           return;
         }
-        if(k === 'back'){ active.value = active.value.slice(0, -1); }
-        else { active.value += k; }
+        if(k === 'back'){
+          var moved = removeWidgetIfEmpty(active);
+          if(moved){ active = moved; moved.focus(); return; }
+          active.value = active.value.slice(0, -1);
+        } else { active.value += k; }
         active.dispatchEvent(new Event('input', { bubbles:true }));
         active.focus();
       });
@@ -363,12 +391,14 @@
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + ' =</span><span class="ak8-svar" data-idx="' + idx + '"><span class="pot">' + inTal(true) + '<sup>' + inTal(true) + '</sup></span></span></div>';
     }
     if(r.typ === 'skrivmult'){
+      // Svar = multiplikation (bråk-bas byggs med bråk-knappen). Serialisera uttrycket, dela på ·.
       CHECKS.push(function(el){
-        var s = el.querySelector('.ak8-in').value.replace(/[x×*]/g, '·'), delar = s.split('·').map(function(d){ return d.trim(); }).filter(function(d){ return d !== ''; });
+        var s = exprSerialize(el.querySelector('.ak8-cell[data-r="sv"] .ak8-expr')).replace(/[x×*]/g, '·').replace(/[()]/g, '');
+        var delar = s.split('·').map(function(d){ return d.trim(); }).filter(function(d){ return d !== ''; });
         var basv = pFaktor(('' + r.bas)), ok = delar.length === r.exp && delar.every(function(d){ return likhetOk(pFaktor(d), basv); });
         var facit = []; for(var i = 0; i < r.exp; i++) facit.push('' + r.bas); return { ok: ok, facit: facit.join(' · ') };
       });
-      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + ' =</span><span class="ak8-svar" data-idx="' + idx + '">' + inTal() + '</span></div>';
+      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + ' =</span><span class="ak8-svar" data-idx="' + idx + '">' + ansCell('sv') + '</span></div>';
     }
     if(r.typ === 'korval'){
       CHECKS.push(function(el){ var s = el.querySelector('.ak8-tal.sel'); return { ok: !!s && (+s.dataset.i) === r.ratt, facit: r.alt[r.ratt], ordna:true, korval:true }; });
@@ -441,6 +471,7 @@
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
     bindKeypad(mount);
+    mount.querySelectorAll('.ak8-in').forEach(grow);   // initiala bredder (placeholder-hintar syns)
   }
 
   function kontrollera(mount){
