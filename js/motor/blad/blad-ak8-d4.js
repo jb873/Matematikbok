@@ -210,15 +210,38 @@
     ])
   ] };
 
-  // ── Svars-cell (kan bli stående bråk via keypadens bråk-byggare) ──
-  //    Börjar som EN ruta; bråk-knappen ersätter den med täljare/nämnare (eleven bygger själv).
-  function ansCell(role, fraccap){ return '<span class="ak8-cell' + (fraccap ? ' ak8-fraccap' : '') + '" data-r="' + role + '">' + inTal() + '</span>'; }
-  function brakVal(br){ var t = pNum(br.querySelector('.ak8-frt').value), n = pNum(br.querySelector('.ak8-frn').value); return (isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN; }
-  // Läser en svars-cell som VÄRDE — stående bråk (frac) eller uttryck/tal (evalArith). Aldrig sträng.
-  function ansVal(el, role){ var cell = el.querySelector('.ak8-cell[data-r="' + role + '"]'); if(!cell) return NaN; var br = cell.querySelector('.ovn-brak'); return br ? brakVal(br) : evalArith(cell.querySelector('input').value); }
+  // ── Svars-cell: börjar som EN ruta. Keypadens byggar-knappar gör den till ett stående bråk
+  //    (▤ täljare/nämnare) eller en potens (▢ⁿ bas + exponentruta) — eleven bygger allt själv. ──
+  function ansCell(role, ph){ return '<span class="ak8-cell" data-r="' + role + '"><input class="ak8-in ak8-cellin" inputmode="text" autocomplete="off"' + (ph ? ' placeholder="' + ph + '"' : '') + '></span>'; }
+  // Läser en cell: stående bråk → {frac, num}; potens → {pot, base, exp, num}; annars uttryck → {val, num}.
+  function cellRead(scope, role){
+    var c = scope.querySelector('.ak8-cell[data-r="' + role + '"]'); if(!c) return { kind:'val', num:NaN };
+    var br = c.querySelector('.ovn-brak');
+    if(br){ var t = pNum(br.querySelector('.ak8-frt').value), n = pNum(br.querySelector('.ak8-frn').value); return { kind:'frac', t:t, n:n, num:(isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN }; }
+    var p = c.querySelector('.ak8-pot');
+    if(p){ var b = pNum(p.querySelector('.ak8-pbase').value), e = evalArith(p.querySelector('.ak8-pexp').value); return { kind:'pot', base:b, exp:e, num:Math.pow(b, e) }; }
+    return { kind:'val', num: evalArith(c.querySelector('input').value) };
+  }
+  function esc(v){ return String(v).replace(/"/g, ''); }
+  // Byggarna bevarar det redan skrivna som första fältet (täljare resp bas) och flyttar fokus dit näst.
+  function buildFrac(c, cur){
+    c.innerHTML = '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt" value="' + esc(cur) + '" inputmode="text" autocomplete="off"></span>'
+      + '<span class="ovn-brak-strecket"></span>'
+      + '<span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn" inputmode="text" autocomplete="off"></span></span>';
+  }
+  function buildPot(c, cur){
+    c.innerHTML = '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" value="' + esc(cur) + '" inputmode="text" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"></sup></span>';
+  }
+  // Auto-växande ruta: bredden följer innehållet så början aldrig döljs vid långt mellanled.
+  function grow(inp){
+    if(!inp || inp.classList.contains('fr-ruta')) return;
+    var min = inp.classList.contains('ak8-in-sm') ? 34 : 74;
+    inp.style.width = '1ch';
+    inp.style.width = Math.max(min, Math.min(inp.scrollWidth + 6, 340)) + 'px';
+  }
 
-  // ── Keypad: keypadHTML byte-identisk ur drill-keypaden (metod-mult.js); bindKeypad utökad
-  //    med en bråk-byggar-knapp som gör fokuserad .ak8-fraccap-cell till ett stående bråk. ──
+  // ── Keypad: keypadHTML byte-identisk ur drill-keypaden (metod-mult.js). bindKeypad utökad
+  //    med två byggar-knappar (bråk, potens) som omvandlar den fokuserade cellen. ──
   function keypadHTML(ops){
     ops = ops || [];
     var digits = ['7','8','9','4','5','6','1','2','3'];
@@ -242,28 +265,33 @@
     return html;
   }
   var FRAC_ICON = '<span class="kp-frac"><span class="kp-frac-t"></span><span class="kp-frac-l"></span><span class="kp-frac-n"></span></span>';
-  // Öva-bladets keypad: siffror + · − + / och bråk-byggaren (egen op-kolumn).
+  var POT_ICON = '<span class="kp-pot"><span class="kp-pot-b"></span><span class="kp-pot-e"></span></span>';
+  // Öva-bladets keypad: siffror + · − + / och de två byggar-knapparna (bråk, potens).
   function bladKeypadHTML(){
     var kp = keypadHTML(['+','−','·','/']);
-    var frac = '<div class="keypad-ops"><button type="button" class="kp-key op kp-fracbtn" data-key="frac" title="Bygg stående bråk">' + FRAC_ICON + '</button></div>';
-    return kp.slice(0, kp.lastIndexOf('</div>')) + frac + '</div>';
-  }
-  function buildFrac(cell){
-    cell.innerHTML = '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt" inputmode="text" autocomplete="off"></span>'
-      + '<span class="ovn-brak-strecket"></span>'
-      + '<span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn" inputmode="text" autocomplete="off"></span></span>';
+    var byggare = '<div class="keypad-ops">'
+      + '<button type="button" class="kp-key op kp-fracbtn" data-key="frac" title="Bygg stående bråk">' + FRAC_ICON + '</button>'
+      + '<button type="button" class="kp-key op kp-potbtn" data-key="pot" title="Bygg potens: bas och exponent">' + POT_ICON + '</button>'
+      + '</div>';
+    return kp.slice(0, kp.lastIndexOf('</div>')) + byggare + '</div>';
   }
   function bindKeypad(sheet){
     var active = sheet.querySelector('input');
     sheet.addEventListener('focusin', function(e){ if(e.target.tagName === 'INPUT') active = e.target; });
+    sheet.addEventListener('input', function(e){ if(e.target.classList && e.target.classList.contains('ak8-in')) grow(e.target); });
     sheet.querySelectorAll('.kp-key').forEach(function(btn){
       btn.addEventListener('mousedown', function(e){
         e.preventDefault();
         if(!active || active.disabled){ var first = sheet.querySelector('input:not([disabled])'); if(first) active = first; else return; }
         var k = btn.dataset.key;
-        if(k === 'frac'){
-          var cell = active.closest('.ak8-cell.ak8-fraccap');
-          if(cell && !cell.querySelector('.ovn-brak')){ buildFrac(cell); var t = cell.querySelector('.ak8-frt'); if(t){ active = t; t.focus(); } }
+        if(k === 'frac' || k === 'pot'){
+          var c = active.closest('.ak8-cell');
+          if(c && !c.querySelector('.ovn-brak') && !c.querySelector('.ak8-pot')){
+            var cur = (c.querySelector('input') || {}).value || '';
+            if(k === 'frac'){ buildFrac(c, cur); active = c.querySelector('.ak8-frn'); grow(c.querySelector('.ak8-frt')); }
+            else { buildPot(c, cur); active = c.querySelector('.ak8-pexp'); grow(c.querySelector('.ak8-pbase')); }
+            if(active) active.focus();
+          }
           return;
         }
         if(k === 'back'){ active.value = active.value.slice(0, -1); }
@@ -279,47 +307,46 @@
   function renderRad(r){
     var idx = CHECKS.length;
     if(r.typ === 'tal'){
-      CHECKS.push(function(el){ return { ok: likhetOk(pNum(el.querySelector('.ak8-in').value), r.facit), facit: fmt(r.facit) }; });
-      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + inTal() + '</span></div>';
+      CHECKS.push(function(el){ return { ok: likhetOk(cellRead(el, 'sv').num, r.facit), facit: fmt(r.facit) }; });
+      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + ansCell('sv') + '</span></div>';
     }
     if(r.typ === 'brak'){
-      // Bråk-svar: eleven bygger stående bråk via keypadens bråk-knapp (börjar som en ruta).
-      CHECKS.push(function(el){ return { ok: likhetOk(ansVal(el, 'sv'), r.ft / r.fn), facit: (r.ft < 0 ? '−' : '') + Math.abs(r.ft) + '/' + r.fn }; });
-      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + ansCell('sv', true) + '</span></div>';
+      // Bråk-svar: eleven bygger stående bråk via keypadens bråk-knapp (cellen börjar som en ruta).
+      CHECKS.push(function(el){ return { ok: likhetOk(cellRead(el, 'sv').num, r.ft / r.fn), facit: (r.ft < 0 ? '−' : '') + Math.abs(r.ft) + '/' + r.fn }; });
+      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + ansCell('sv') + '</span></div>';
     }
     if(r.typ === 'kedja'){
-      // Full likhetskedja: vänster = [fillbart mellanled] = [fillbart svar]. Fillbara led på
-      // ALLA rader (ingen avtagande scaffolding); facit = full kedja, visas vid Kontrollera.
+      // Full likhetskedja: vänster = [mellanled] = [svar], bägge fillbara celler. Eleven bygger
+      // själv bråk/potens via keypaden (ingen förtryckt bas). Facit = full kedja vid Kontrollera.
       var eq = '<span class="ovn-text ak8-eq">=</span>', svarHtml;
       if(r.stil === 'br'){
         CHECKS.push(function(el){
-          var mel = evalArith(el.querySelector('.ak8-mel').value), mal = r.ft / r.fn, sv = ansVal(el, 'sv');
+          var mel = cellRead(el, 'mel').num, sv = cellRead(el, 'sv').num, mal = r.ft / r.fn;
           return { ok: likhetOk(mel, mal) && likhetOk(sv, mal), facit: r.facit };
         });
-        svarHtml = '<input class="ak8-in ak8-mel" inputmode="text" autocomplete="off" placeholder="mellanled">' + eq + ansCell('sv', true);
+        svarHtml = ansCell('mel', 'mellanled') + eq + ansCell('sv', 'svar');
       } else if(r.stil === 'par'){
+        // Parentes: mellanledet är en potens (eleven bygger bas^exp), svaret ett värde.
         CHECKS.push(function(el){
-          var b = pNum(el.querySelector('.ak8-base').value), sv = pNum(el.querySelector('.ak8-sv').value);
-          return { ok: likhetOk(b, r.basval) && likhetOk(sv, r.svar), facit: r.facit };
+          var mel = cellRead(el, 'mel'), sv = cellRead(el, 'sv').num;
+          return { ok: mel.kind === 'pot' && likhetOk(mel.base, r.basval) && likhetOk(mel.exp, r.exp) && likhetOk(sv, r.svar), facit: r.facit };
         });
-        svarHtml = '<span class="pot"><input class="ak8-in ak8-in-sm ak8-base" inputmode="text" autocomplete="off"><sup>' + r.exp + '</sup></span>' + eq
-          + '<input class="ak8-in ak8-sv" inputmode="text" autocomplete="off" placeholder="svar">';
+        svarHtml = ansCell('mel', 'bas^exp') + eq + ansCell('sv', 'svar');
       } else if(r.stil === 'exp'){
-        // Exp-lag: basen står kvar, mellanledet är exponent-operationen (t.ex. 5+6),
-        // svaret den uträknade exponenten. Bägge led = bas^[ruta] i upphöjt läge.
+        // Exp-lag: eleven bygger bas^exp i BÅDA leden (potens-knappen). Mellanledet = bas^(exp-uttryck),
+        // svaret = bas^(uträknad exponent). Basen skrivs av eleven, ingen förtryckt bas.
         CHECKS.push(function(el){
-          var mel = evalArith(el.querySelector('.ak8-mel').value), sv = pNum(el.querySelector('.ak8-sv').value);
-          return { ok: likhetOk(mel, r.svarExp) && likhetOk(sv, r.svarExp), facit: r.facit };
+          var mel = cellRead(el, 'mel'), sv = cellRead(el, 'sv');
+          return { ok: mel.kind === 'pot' && likhetOk(mel.base, r.bas) && likhetOk(mel.exp, r.svarExp)
+                    && sv.kind === 'pot' && likhetOk(sv.base, r.bas) && likhetOk(sv.exp, r.svarExp), facit: r.facit };
         });
-        svarHtml = '<span class="pot">' + r.bas + '<sup><input class="ak8-in ak8-in-sm ak8-expmel ak8-mel" inputmode="text" autocomplete="off"></sup></span>' + eq
-          + '<span class="pot">' + r.bas + '<sup><input class="ak8-in ak8-in-sm ak8-sv" inputmode="text" autocomplete="off"></sup></span>';
+        svarHtml = ansCell('mel', 'bas^exp') + eq + ansCell('sv', 'bas^exp');
       } else {   // 'ev'
         CHECKS.push(function(el){
-          var mel = evalArith(el.querySelector('.ak8-mel').value), sv = pNum(el.querySelector('.ak8-sv').value);
+          var mel = cellRead(el, 'mel').num, sv = cellRead(el, 'sv').num;
           return { ok: likhetOk(mel, r.svar) && likhetOk(sv, r.svar), facit: r.facit };
         });
-        svarHtml = '<input class="ak8-in ak8-mel" inputmode="text" autocomplete="off" placeholder="mellanled">' + eq
-          + '<input class="ak8-in ak8-sv" inputmode="text" autocomplete="off" placeholder="svar">';
+        svarHtml = ansCell('mel', 'mellanled') + eq + ansCell('sv', 'svar');
       }
       return '<div class="ak8-rad ak8-rad-kedja"><span class="ak8-q">' + r.vanster + '</span><span class="ak8-svar" data-idx="' + idx + '">' + eq + svarHtml + '</span></div>';
     }
