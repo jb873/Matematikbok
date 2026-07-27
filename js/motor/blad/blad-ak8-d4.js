@@ -253,17 +253,18 @@
       KGP(gp(1.2, 5) + ' · ' + gp(3, 6), [{ k:3.6, e:11 }, { k:3.6, e:11 }], '1,2·10⁵ · 3·10⁶ = 3,6·10^(5+6) = 3,6·10¹¹'),
       KGP(gp(3, 4) + ' · ' + gp(4.5, 5), [{ k:13.5, e:9 }, { k:13.5, e:9 }, { k:1.35, e:10 }], '3·10⁴ · 4,5·10⁵ = 13,5·10^(4+5) = 13,5·10⁹ = 1,35·10¹⁰'),
       KGP(fr(gp(9, 8), gp(1.5, 3)), [{ k:6, e:5 }, { k:6, e:5 }], '9·10⁸ / 1,5·10³ = 6·10^(8−3) = 6·10⁵'),
-      KGP(fr(gp(1.4, 7), gp(2, 4)), [{ kind:'gpfrac', k:14, e:6, namn:gp(2, 4) }, { k:7, e:2 }, { k:7, e:2 }], '1,4·10⁷ / 2·10⁴ = 14·10⁶ / 2·10⁴ = 7·10^(6−4) = 7·10²')
+      KGP(fr(gp(1.4, 7), gp(2, 4)), [{ kind:'gpfrac', k:14, e:6, dk:2, de:4 }, { k:7, e:2 }, { k:7, e:2 }], '1,4·10⁷ / 2·10⁴ = 14·10⁶ / 2·10⁴ = 7·10^(6−4) = 7·10²')
     ], 'Sista raden: skriv om 1,4·10⁷ som 14·10⁶ först, så blir divisionen jämn.')
   ] };
 
 
   // ── RENDER ──
   var CHECKS = [];
-  // ── Grundpotens-cell: [koeff]·10^[exp] (separata rutor). exp-rutan tar uttryck (5+6) via evalArith. ──
-  function gpCellHTML(){ return '<span class="ak8-gp"><input class="ak8-in ak8-gpk" inputmode="text" autocomplete="off">·<span class="pot">10<sup><input class="ak8-in ak8-in-sm ak8-gpe" inputmode="text" autocomplete="off"></sup></span></span>'; }
-  function gpFracHTML(namn){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + gpCellHTML() + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + namn + '</span></span>'; }
-  function gpRead(cell){ var k = pNum(cell.querySelector('.ak8-gpk').value), e = AK8_UI.evalArith(cell.querySelector('.ak8-gpe').value); return { k:k, e:e, num:(isFinite(k) && isFinite(e)) ? k * Math.pow(10, e) : NaN }; }
+  // ── Grundpotens-cell: [koeff]·[bas]^[exp] (separata rutor; basen 10 skrivs av eleven, ingen
+  //    förtryckt bas). exp-rutan tar uttryck (5+6) via evalArith. ──
+  function gpCellHTML(){ return '<span class="ak8-gp"><input class="ak8-in ak8-gpk" inputmode="text" autocomplete="off">·<span class="pot"><input class="ak8-in ak8-in-sm ak8-gpb" inputmode="numeric" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-gpe" inputmode="text" autocomplete="off"></sup></span></span>'; }
+  function gpFracHTML(){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + gpCellHTML() + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + gpCellHTML() + '</span></span>'; }
+  function gpRead(cell){ var k = pNum(cell.querySelector('.ak8-gpk').value), b = pNum(cell.querySelector('.ak8-gpb').value), e = AK8_UI.evalArith(cell.querySelector('.ak8-gpe').value); return { k:k, base:b, e:e, num:(isFinite(k) && isFinite(b) && isFinite(e)) ? k * Math.pow(b, e) : NaN }; }
   function renderRad(r){
     var idx = CHECKS.length;
     if(r.typ === 'tal'){
@@ -324,11 +325,11 @@
       var eqg = '<span class="ovn-text ak8-eq">=</span>', gh = '';
       r.leds.forEach(function(led){ gh += eqg + (led.kind === 'gpfrac' ? gpFracHTML(led.namn) : gpCellHTML()); });
       CHECKS.push(function(el){
-        var cells = el.querySelectorAll('.ak8-gp'), ok = true, sist = r.leds.length - 1;
+        var cells = el.querySelectorAll('.ak8-gp'), ok = true, ci = 0, sist = r.leds.length - 1;
+        function chk(c, k, e){ var mal = k * Math.pow(10, e); if(!isFinite(c.num) || Math.abs(c.num - mal) >= 1e-3 * Math.max(1, mal)) ok = false; }
         r.leds.forEach(function(led, i){
-          var c = gpRead(cells[i]), mal = led.k * Math.pow(10, led.e);
-          if(!isFinite(c.num) || Math.abs(c.num - mal) >= 1e-3 * Math.max(1, mal)) ok = false;
-          if(i === sist && (c.k < 1 || c.k >= 10)) ok = false;   // sista ledet = normaliserad grundpotensform
+          if(led.kind === 'gpfrac'){ chk(gpRead(cells[ci++]), led.k, led.e); chk(gpRead(cells[ci++]), led.dk, led.de); }   // täljare + nämnare (bägge fillbara)
+          else { var c = gpRead(cells[ci++]); chk(c, led.k, led.e); if(i === sist && (c.k < 1 || c.k >= 10)) ok = false; }   // sista ledet = normaliserad grundpotensform
         });
         return { ok: ok, facit: r.facit };
       });
