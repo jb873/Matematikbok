@@ -36,6 +36,43 @@
 /* plats så sista raderna kan scrollas ovanför den fasta keypaden */
 .ovn-wrap{ padding-bottom:300px; }
 
+/* ══ d5 (Räkna med bråk): förrenderade stående bråk-svar, blandad form, ordna, jämföra, tallinje, andel ══ */
+.ak8-hint{ font-size:13px; color:var(--ink-faint); font-style:italic; margin:0 0 8px; }
+/* förrenderat stående bråk-svar (täljare/nämnare) */
+.ovn-brak .ak8-in.fr-ruta{ width:54px; height:31px; font-size:17px; padding:0 2px; }
+.ak8-bc{ margin:0 5px; }
+.ak8-eq{ margin:0 4px; }
+.ak8-rad-kedja{ font-size:19px; }
+/* blandad form: hel-ruta + stående bråk */
+.ak8-mc{ display:inline-flex; align-items:center; gap:4px; }
+.ak8-mc .ak8-mh{ width:46px; }
+/* ordna / jämföra: klickbara bråk-knappar */
+.ak8-ordna{ display:inline-flex; gap:10px; flex-wrap:wrap; align-items:center; padding:4px; border-radius:8px; }
+.ak8-ordna.ak8-ok-ram{ outline:2px solid #2f7d4f; background:rgba(47,125,79,.06); }
+.ak8-ordna.ak8-fel-ram{ outline:2px solid #c0392b; background:rgba(192,57,43,.06); }
+.ak8-tal{ position:relative; display:inline-flex; align-items:center; justify-content:center; min-width:52px; min-height:52px; padding:6px 12px; border:1.5px solid var(--paper-dk); border-radius:10px; background:#fff; cursor:pointer; font-family:var(--serif); }
+.ak8-tal:hover{ border-color:var(--gold); }
+.ak8-tal.sel{ border-color:var(--navy); background:rgba(15,30,46,.06); }
+.ak8-tal.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.12); }
+.ak8-tal.fel{ border-color:#c0392b; background:rgba(192,57,43,.12); }
+.ak8-korval{ font-size:24px; font-weight:600; color:var(--navy); min-width:56px; }
+.ak8-ordnr{ position:absolute; top:-9px; right:-9px; min-width:20px; height:20px; padding:0 4px; border-radius:10px; background:var(--navy); color:#fff; font-size:12px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; font-family:var(--cinzel); }
+.ak8-ordnr:empty{ display:none; }
+/* tallinje */
+.ak8-rad-fig{ align-items:flex-start; }
+.ak8-tallinje{ width:100%; max-width:560px; margin:2px 0 8px; }
+.tl-svg{ width:100%; height:auto; overflow:visible; }
+.tl-axis, .tl-tick{ stroke:var(--ink); stroke-width:1.6; fill:none; } .tl-arrow{ fill:var(--ink); }
+.tl-label{ fill:var(--ink-soft); font-family:var(--serif); font-size:13px; text-anchor:middle; }
+.tl-pt{ fill:var(--gold); stroke:#fff; stroke-width:1; } .tl-pt-namn{ fill:var(--navy); font-family:var(--serif); font-weight:700; font-size:15px; text-anchor:middle; }
+.ak8-tl-rad{ display:flex; gap:22px; flex-wrap:wrap; align-items:center; }
+.ak8-tl-svar{ display:inline-flex; align-items:center; gap:3px; font-size:18px; }
+.ak8-tl-svar b{ color:var(--navy); }
+/* andel av figur */
+.ak8-andel-fig{ display:inline-flex; align-items:center; margin-right:18px; }
+.ak8-andel-fig svg{ width:180px; height:auto; }
+.ak8-andel-svar{ display:inline-flex; align-items:center; gap:3px; font-size:18px; }
+
 /* ── skriv-ut-knapp ── */
 .ovn-skriv-ut{ font-family:var(--cinzel); font-size:12px; color:var(--ink-faint); background:none; border:1px solid var(--paper-dk); border-radius:8px; padding:11px 18px; cursor:pointer; }
 .ovn-skriv-ut:hover{ color:var(--navy); border-color:var(--navy); }

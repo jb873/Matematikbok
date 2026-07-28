@@ -43,6 +43,20 @@ window.AK8_K1_BOK = {
       ]
     },
     {
+      // Räkna med bråk (position 4) — ärver åk7 k2 (bråk). Öva-bladet "Grunder i bråk" är
+      // EXAKT-författat ur TRANSKRIPTION-ak8-grunder-i-brak.md (12 uppgiftstyper). Noderna är
+      // sjuans k2 (single-source) med {ak8:repetition}, plus två nya åk8-repetitions-noder som
+      // k2 saknade: likformiga bråk (brak-likformig) och tid↔bråk/decimal (brak-tid). Motor:
+      // blad-ak8-d5.js (återanvänder ak8-blad-ui + svg-andel + svg-tallinje). minNiva ej satt.
+      nr: 4, id: 'rakna-med-brak', titel: 'Räkna med bråk', fil: 'rakna-med-brak.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Grunder i bråk', roll: 'repetition', noder: [
+          'andel-hela:resonera', 'brak-blandad:rakna', 'brak-likformig:rakna', 'brak-forkorta:rakna', 'brak-forlanga:rakna',
+          'brak-tid:rakna', 'brak-jmf-ordna:resonera', 'brak-jmf-lika:begrepp', 'andel-tallinje:begrepp', 'andel-figur:rakna'
+        ] }
+      ]
+    },
+    {
       nr: 3, id: 'negativa-tal', titel: 'Negativa tal', fil: 'negativa-tal.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Grunder',                     roll: 'repetition', noder: ['neg-begrepp:begrepp'] },
