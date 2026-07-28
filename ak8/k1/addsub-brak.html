@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 8 · Addition och subtraktion med bråk</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
+  *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
+  .topnav{ background:var(--navy); color:#fff; padding:13px 26px; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+  .topnav a{ color:rgba(255,255,255,.8); text-decoration:none; } .topnav .sep{ opacity:.5; margin:0 8px; }
+  .topnav .brand{ font-family:var(--cinzel); letter-spacing:.06em; }
+  .nav-crumbs{ display:flex; align-items:center; gap:8px; } .nav-crumbs a:hover{ color:var(--gold-lt); }
+  .nav-crumbs .crumb-sep{ opacity:.35; } .nav-crumbs .crumb-current{ color:rgba(255,255,255,.85); }
+  @media(max-width:560px){ .nav-crumbs .crumb-hem{ display:none; } }
+  .hero{ background:var(--navy); color:#fff; padding:24px 26px 40px; text-align:center; }
+  .hero .eyebrow{ font-family:var(--cinzel); font-size:12px; letter-spacing:.16em; color:var(--gold-lt); text-transform:uppercase; }
+  .hero h1{ font-family:var(--serif); font-size:38px; font-weight:500; margin:8px 0 6px; } .hero h1 em{ color:var(--gold-lt); font-style:italic; }
+  .hero p{ max-width:600px; margin:0 auto; color:rgba(255,255,255,.75); font-size:15px; line-height:1.6; }
+  .tab-row{ display:flex; gap:4px; max-width:920px; margin:0 auto; padding:22px 24px 0; }
+  .tab-btn{ font-family:var(--cinzel); font-size:12.5px; letter-spacing:.04em; color:var(--ink-faint); background:none; border:0; border-bottom:2px solid transparent; padding:10px 16px; cursor:pointer; }
+  .tab-btn.is-active{ color:var(--navy); border-bottom-color:var(--navy); }
+  .tab-panel{ display:none; } .tab-panel.is-active{ display:block; }
+  .blad-nav{ max-width:920px; margin:0 auto; padding:18px 24px 4px; display:flex; flex-wrap:wrap; gap:8px; }
+  .blad-nav-btn{ display:inline-flex; align-items:center; gap:9px; font-family:var(--cinzel); font-size:12.5px; color:var(--ink-soft); background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:9px 15px; cursor:pointer; }
+  .blad-nav-btn.is-active{ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .blad-nav-nr{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--paper-dk); color:var(--ink-faint); font-size:11px; font-weight:600; }
+  .blad-nav-btn.is-active .blad-nav-nr{ background:var(--gold-lt); color:var(--navy); }
+  .ovn-wrap{ max-width:920px; margin:0 auto; padding:16px 24px 40px; }
+  .ovn-sheet{ background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:26px 30px; }
+  .ovn-sheet h2{ font-family:var(--serif); font-size:25px; font-weight:500; margin-bottom:6px; }
+  .ovn-grupp{ margin-top:20px; } .ovn-grupp:first-of-type{ margin-top:10px; }
+  .ovn-grupp-rubrik{ font-size:18px; font-weight:600; margin-bottom:8px; }
+  .ak8-rad{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:9px 0; border-bottom:1px dotted var(--paper-dk); }
+  .ak8-rad:last-child{ border-bottom:none; }
+  .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; min-width:90px; }
+  .ak8-in{ width:96px; height:36px; text-align:center; font-family:var(--serif); font-size:18px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; font-feature-settings:'tnum'; }
+  .ak8-in.ak8-ok{ border-color:#2f7d4f; background:rgba(47,125,79,.08); color:#15803d; }
+  .ak8-in.ak8-fel{ border-color:#c0392b; background:rgba(192,57,43,.08); color:#b91c1c; }
+  .ak8-fasit{ display:block; margin-top:4px; font-size:12.5px; color:#c0392b; width:100%; }
+  /* stående bråk */
+  .ovn-brak{ display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; }
+  .ovn-brak-taljare,.ovn-brak-namnare{ padding:0 8px 2px; font-size:17px; font-feature-settings:'tnum'; white-space:nowrap; }
+  .ovn-brak-namnare{ padding:2px 8px 0; }
+  .ovn-brak-strecket{ height:2px; background:var(--ink); width:100%; min-width:40px; }
+  .ovn-text{ font-family:var(--serif); font-size:18px; } .ovn-num{ font-feature-settings:'tnum'; }
+  .ovn-kontroll-rad{ display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; align-items:center; }
+  .ovn-kontroll{ font-family:var(--cinzel); font-size:13px; letter-spacing:.05em; color:#fff; background:var(--gold); border:0; border-radius:8px; padding:11px 22px; cursor:pointer; }
+  .ovn-aterstall{ font-family:var(--cinzel); font-size:12px; color:var(--ink-faint); background:none; border:1px solid var(--paper-dk); border-radius:8px; padding:11px 18px; cursor:pointer; }
+  .ovn-sammanf{ margin-top:18px; padding:16px 20px; border-radius:8px; text-align:center; font-size:15px; background:#fff; border:1px solid var(--paper-dk); }
+  .ovn-sammanf.ok{ background:linear-gradient(135deg,#dcfce7,#bbf7d0); border:2px solid #16a34a; color:#14532d; }
+  .ovn-sammanf.ok .ovn-sammanf-icon{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:#16a34a; color:#fff; font-size:22px; margin-bottom:8px; }
+  .ovn-sammanf.ok .ovn-sammanf-titel{ display:block; font-family:var(--serif); font-size:21px; margin-bottom:4px; }
+  .ovn-sammanf.delvis{ background:rgba(154,114,40,.08); border-color:var(--gold); color:var(--gold); }
+  .fard-layout{ max-width:920px; margin:0 auto; padding:18px 24px 44px; display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }
+  .fard-lista{ display:flex; flex-direction:column; gap:6px; }
+  .fard-ko{ font-family:var(--cinzel); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin:10px 0 2px; }
+  .fard-skill{ display:flex; flex-direction:column; gap:2px; text-align:left; background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:7px; padding:10px 14px; cursor:pointer; font-family:inherit; }
+  .fard-skill.is-active{ background:var(--navy); border-color:var(--navy); } .fard-skill.is-active *{ color:#fff !important; }
+  .fard-skill-titel{ font-size:15px; font-weight:600; color:var(--ink); }
+  .fard-skill-formaga{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .fard-scen{ position:sticky; top:14px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:12px; overflow:hidden; min-height:520px; }
+  .fard-tom{ display:flex; align-items:center; justify-content:center; min-height:520px; color:var(--ink-faint); }
+  .fard-frame{ width:100%; height:640px; border:0; display:none; background:#fff; } .fard-scen.har-drill .fard-tom{ display:none; } .fard-scen.har-drill .fard-frame{ display:block; }
+  @media(max-width:720px){ .fard-layout{ grid-template-columns:1fr; } }
+  footer{ text-align:center; padding:28px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--paper-dk); }
+  .konfetti-lager{ position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; } .konfetti{ position:absolute; top:-20px; animation:kfall linear forwards; }
+  @keyframes kfall{ to{ transform:translateY(105vh) rotate(540deg); opacity:.3; } }
+</style>
+<link rel="stylesheet" href="../../js/motor/blad/ak8-blad-ui.css">
+</head>
+<body>
+<nav class="topnav">
+  <span class="brand">Matematik · Åk 8</span>
+  <div class="nav-crumbs">
+    <a class="crumb-hem" href="../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../index.html">Årskurs 8</a>
+    <span class="crumb-sep">›</span>
+    <a href="index.html">Kapitel 1</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Addition och subtraktion</span>
+  </div>
+</nav>
+<header class="hero">
+  <div class="eyebrow" id="del-eyebrow">Kapitel 1</div>
+  <h1><em>Addition och subtraktion med bråk</em></h1>
+  <p>Två blad: liknämniga och olikanämniga bråk, blandad form, med heltal och decimaltal, flerterms – och att låna från heltalet i blandad-form-subtraktion. Repetition från åk 7 med höjt talområde. Bråk som stående bråk; visa mellanledet som en likhetskedja, svara i enklaste form. Knappen <em>Visa förlängning</em> lägger till steget där du förlänger till gemensam nämnare.</p>
+</header>
+
+<div class="tab-row" id="tab-row">
+  <button class="tab-btn is-active" data-tab="ova">Öva</button>
+  <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
+  <button class="tab-btn" data-tab="test">Visa vad du kan</button>
+</div>
+
+<section class="tab-panel is-active" data-panel="ova">
+  <div class="blad-nav" id="blad-nav"></div>
+  <div class="ovn-wrap" id="sheet-d6"></div>
+</section>
+
+<section class="tab-panel" data-panel="fardighet">
+  <div class="fard-layout">
+    <div class="fard-lista" id="fard-lista"></div>
+    <div class="fard-scen" id="fard-scen">
+      <div class="fard-tom"><p>Välj en färdighet till vänster. Drillarna är åk 7:s bråk – samma träning, repeterad med höjt talområde.</p></div>
+      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<section class="tab-panel" data-panel="test">
+  <div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;text-align:center;color:var(--ink-soft);">
+    <h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Visa vad du kan</h3>
+    <p style="font-size:14px;line-height:1.6;max-width:480px;margin:0 auto;">Problemlösnings-uppgifterna och samlingstestet wiras in i ett senare steg. Träna på de två bladen och färdigheterna så länge.</p>
+  </div>
+</section>
+
+<footer id="del-footer">Digitalt läromedel i matematik · Åk 8 · Kapitel 1</footer>
+
+<!-- Blad-kärnan (fracSpan) + d6-bladen. Motorer/mattelogik orörda (bygg-id: blad-ak8-d6). -->
+<script src="../../js/data/ak8-k1-bok.js"></script>
+<script src="../../js/motor/blad/blad-karna.js"></script>
+<script src="../../js/motor/blad/ak8-blad-ui.js"></script>
+<script src="../../js/motor/blad/blad-ak8-d6.js"></script>
+<script>
+(function(){
+  var me = location.pathname.split('/').pop();
+  var dk = ((window.AK8_K1_BOK && window.AK8_K1_BOK.delkapitel) || []).filter(function(x){ return x.fil === me; })[0];
+  if(dk){
+    var eb = document.getElementById('del-eyebrow'); if(eb) eb.textContent = 'Delkapitel ' + dk.nr + ' · Kapitel 1';
+    var ft = document.getElementById('del-footer'); if(ft) ft.textContent = 'Digitalt läromedel i matematik · Åk 8 · Kapitel 1 · Delkapitel ' + dk.nr;
+  }
+  window.visaAk8Konfetti = function(){ var g=document.querySelector('.konfetti-lager'); if(g) g.remove(); var l=document.createElement('div'); l.className='konfetti-lager'; document.body.appendChild(l); var f=['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899']; for(var i=0;i<70;i++){ var b=document.createElement('span'); b.className='konfetti'; b.style.left=(Math.random()*100)+'vw'; b.style.background=f[Math.floor(Math.random()*f.length)]; b.style.animationDuration=(2.5+Math.random()*2)+'s'; b.style.width=(6+Math.random()*8)+'px'; b.style.height=(10+Math.random()*8)+'px'; l.appendChild(b);} setTimeout(function(){ if(l) l.remove(); },5000); };
+
+  // ÖVA: två blad
+  var D6 = window.BLAD_AK8_D6, mount = document.getElementById('sheet-d6'), nav = document.getElementById('blad-nav');
+  var BLAD = [ {nr:1, titel:'Blad 1', key:'B1'}, {nr:2, titel:'Blad 2', key:'B2'} ];
+  var knappar = [];
+  function visa(i){ BLAD.forEach(function(b,j){ knappar[j].classList.toggle('is-active', j===i); }); D6.renderBlad(mount, BLAD[i].key); }
+  BLAD.forEach(function(b,i){ var btn=document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn'; btn.innerHTML='<span class="blad-nav-nr">'+(i+1)+'</span>'+b.titel; btn.onclick=function(){ visa(i); }; nav.appendChild(btn); knappar[i]=btn; });
+  visa(0);
+
+  // val-rad
+  var tabRow=document.getElementById('tab-row');
+  tabRow.querySelectorAll('.tab-btn').forEach(function(btn){ btn.onclick=function(){ tabRow.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('is-active', b===btn); }); document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('is-active', p.dataset.panel===btn.dataset.tab); }); window.scrollTo({top:0,behavior:'smooth'}); }; });
+
+  // FÄRDIGHETSTRÄNING: sjuans add/sub-bråknoder → k2-ramens drillar. minNiva ej satt (repetition).
+  var RAM='../../ak7-k2-ram.html';
+  var DRILLS=[
+    {ko:'brak-add', f:'rakna', grupp:'Addition och subtraktion', titel:'Addition med bråk'},
+    {ko:'brak-sub', f:'rakna', grupp:'Addition och subtraktion', titel:'Subtraktion med bråk'},
+    {ko:'brak-blandad', f:'rakna', grupp:'Byta form', titel:'Oäkta bråk ↔ blandad form'}
+  ];
+  var lista=document.getElementById('fard-lista'), frame=document.getElementById('fard-frame'), scen=document.getElementById('fard-scen'), alla=[], sett={};
+  DRILLS.forEach(function(d){
+    if(!sett[d.grupp]){ sett[d.grupp]=1; var g=document.createElement('div'); g.className='fard-ko'; g.textContent=d.grupp; lista.appendChild(g); }
+    var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.innerHTML='<span class="fard-skill-titel">'+d.titel+'</span><span class="fard-skill-formaga">'+d.f+'</span>';
+    b.onclick=function(){ alla.forEach(function(x){ x.classList.remove('is-active'); }); b.classList.add('is-active'); frame.src=RAM+'?ko='+encodeURIComponent(d.ko)+'&formaga='+encodeURIComponent(d.f)+'&embed=1'; scen.classList.add('har-drill'); };
+    lista.appendChild(b); alla.push(b);
+  });
+  window.addEventListener('message', function(e){ if(!frame || !e || !e.data || typeof e.data.__fardHeight !== 'number') return; frame.style.height = Math.max(320, Math.min(e.data.__fardHeight, 2200)) + 'px'; });
+})();
+</script>
+</body>
+</html>

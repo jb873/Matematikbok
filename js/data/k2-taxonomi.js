@@ -251,33 +251,45 @@ window.K2_TAXONOMI = {
     /* ─────────────── Del 5 · Addition och subtraktion med bråk (öppen) ─────────────── */
     {
       "id": "brak-as", "namn": "Addition och subtraktion med bråk", "parent": null, "niva": "omrade",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Addera och subtrahera bråk – samma och olika nämnare, blandad form och negativa svar.",
       "grupp": "brak", "implemented": true
     },
     {
       "id": "brak-add", "namn": "Addition med bråk", "parent": "brak-as", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Addera bråk med samma och olika nämnare (mellanled: förläng till gemensam nämnare).",
       "visning": null
     },
     {
       "id": "brak-add:rakna", "namn": "Addition med bråk", "parent": "brak-add", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut summan; visa mellanledet (förläng till gemensam nämnare).",
       "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0, "titel": "Addition med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-sub", "namn": "Subtraktion med bråk", "parent": "brak-as", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Subtrahera bråk med samma och olika nämnare.",
       "visning": null
     },
     {
       "id": "brak-sub:rakna", "namn": "Subtraktion med bråk", "parent": "brak-sub", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut differensen; visa mellanledet (förläng till gemensam nämnare).",
       "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 1, "titel": "Subtraktion med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+    {
+      "id": "brak-lana", "namn": "Låna i blandad form", "parent": "brak-as", "niva": "deldoman",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Subtraktion i blandad form där täljaren i minuenden är för liten – låna från heltalet så bråkdelen blir oäkta. Nytt mål i åttan.",
+      "visning": null
+    },
+    {
+      "id": "brak-lana:rakna", "namn": "Låna i blandad form", "parent": "brak-lana", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Räkna ut differensen i blandad form med lån från heltalet; flera giltiga vägar (låna eller via oäkta bråk). Öva-bladet rättar equality-baserat.",
+      "visning": null
     },
 
     /* ─────────────── Del 6 · Multiplikation med bråk (öppen; ram-drill byggs i wiring) ─────────────── */

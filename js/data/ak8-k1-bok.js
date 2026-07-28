@@ -57,6 +57,18 @@ window.AK8_K1_BOK = {
       ]
     },
     {
+      // Addition och subtraktion med bråk (position 5) — ärver åk7 k2 (brak-as). Två Öva-blad,
+      // exakt-författade ur "Addition och subtraktion med bråk (1).docx". Motor blad-ak8-d6.js:
+      // mixed-eval likhetskedjor, ogrindad förlängnings-knapp, fri equality-rättad LÅNA-kedja.
+      // Noderna är sjuans brak-add/brak-sub {ak8:repetition} + ny nod brak-lana {ak8:mal} (nytt
+      // mål i åttan). Problemlösnings-fliken byggs i egen order. minNiva ej satt.
+      nr: 5, id: 'addsub-brak', titel: 'Addition och subtraktion', fil: 'addsub-brak.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Addition och subtraktion, blad 1', roll: 'repetition', noder: ['brak-add:rakna', 'brak-sub:rakna', 'brak-blandad:rakna', 'brak-lana:rakna'] },
+        { nr: 2, titel: 'Addition och subtraktion, blad 2', roll: 'repetition', noder: ['brak-add:rakna', 'brak-sub:rakna', 'brak-lana:rakna'] }
+      ]
+    },
+    {
       nr: 3, id: 'negativa-tal', titel: 'Negativa tal', fil: 'negativa-tal.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Grunder',                     roll: 'repetition', noder: ['neg-begrepp:begrepp'] },
