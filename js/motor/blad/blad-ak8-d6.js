@@ -12,59 +12,9 @@
    Mellanled/svar via bråk-byggaren → mixedEval tolkar blandade tal ("3 8/6 − 1 5/6"), bråk och decimaler. */
 (function(){
   'use strict';
-  var F = window;
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
-  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
+  var F = window, LR = window.Likhetsrattare;   // equality-rättaren (mixedEval/finalForm/finalCheck/provaKedja) bor i den delade modulen
   function fr(t, n){ return F.fracSpan(t, n); }
   function mx(h, t, n){ return h + '&nbsp;' + F.fracSpan(t, n); }
-  function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
-
-  // ── MIXED-EVAL: tolkar en expr-cell (text + inbäddade stående bråk) som blandat-tals-uttryck ──
-  function tokens(expr){
-    var toks = [];
-    Array.prototype.forEach.call(expr.children, function(ch){
-      if(ch.classList.contains('ak8-exprtxt')){
-        var s = ch.value.replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'), i = 0;
-        while(i < s.length){
-          var c = s[i];
-          if(c === '+' || c === '-'){ toks.push({ op: c }); i++; }
-          else { var m = /^\d*\.?\d+/.exec(s.slice(i)); if(m){ toks.push({ num: parseFloat(m[0]) }); i += m[0].length; } else i++; }
-        }
-      } else if(ch.classList.contains('ovn-brak')){
-        var t = pNum(ch.querySelector('.ak8-frt').value), n = pNum(ch.querySelector('.ak8-frn').value);
-        toks.push({ frac: (isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN, t: t, n: n });
-      }
-    });
-    return toks;
-  }
-  function evalToks(toks){
-    var result = 0, sign = 1, pend = null, any = false, bad = false;
-    function flush(){ if(pend !== null){ result += sign * pend; pend = null; } }
-    toks.forEach(function(tk){
-      if(tk.op != null){ flush(); sign = tk.op === '-' ? -1 : 1; }
-      else if(tk.num != null){ if(pend !== null) flush(); pend = tk.num; any = true; }
-      else if(tk.frac != null){ if(!isFinite(tk.frac)){ bad = true; return; } var term = (pend !== null ? pend : 0) + tk.frac; result += sign * term; pend = null; any = true; }
-    });
-    flush();
-    return (any && !bad) ? result : NaN;
-  }
-  function mixedEval(expr){ return expr ? evalToks(tokens(expr)) : NaN; }
-  // Klassificera en SLUTruta: enklaste form? blandad/äkta bråk/decimal? (för "svara i enklaste form")
-  function finalForm(expr){
-    if(!expr) return { kind: 'tom', num: NaN };
-    var fracs = expr.querySelectorAll('.ovn-brak'), val = mixedEval(expr);
-    var wtxt = ''; Array.prototype.forEach.call(expr.querySelectorAll('.ak8-exprtxt'), function(t){ wtxt += t.value; });
-    wtxt = wtxt.replace(/[\s ]/g, '').replace(/−/g, '-').replace(/,/g, '.');
-    if(fracs.length === 1){
-      var t = pNum(fracs[0].querySelector('.ak8-frt').value), n = pNum(fracs[0].querySelector('.ak8-frn').value);
-      var proper = isFinite(t) && isFinite(n) && Math.abs(t) < Math.abs(n) && gcd(t, n) === 1;
-      if(/^-?\d+$/.test(wtxt)) return { kind: 'mi', num: val, t: t, n: n, simplest: proper && parseInt(wtxt, 10) !== 0 };
-      if(wtxt === '' || wtxt === '-') return { kind: 'br', num: val, t: t, n: n, simplest: proper };
-      return { kind: 'expr', num: val };
-    }
-    if(fracs.length === 0 && /^-?\d*\.?\d+$/.test(wtxt)) return { kind: 'dec', num: val };
-    return { kind: 'expr', num: val };
-  }
 
   // ── FABRIKER ──
   // R: kanonisk rad. q=display, v=[p,q] (svar exakt), forlang='toggle'|'fix'|null, mid=antal vanliga mellanled, fin=slutform
@@ -144,26 +94,16 @@
   function ledWrap(role, forlangKlass){ return '<span class="ak8-ledwrap' + (forlangKlass ? ' ' + forlangKlass : '') + '">' + EQ + AK8_UI.ansCell(role) + '</span>'; }
   function exprOf(scope, role){ return scope.querySelector('.ak8-cell[data-r="' + role + '"] .ak8-expr'); }
 
-  function finalCheck(ff, fin){
-    if(fin.k === 'dec') return ff.kind === 'dec' && likhet(ff.num, fin.x);
-    if(fin.k === 'br') return ff.kind === 'br' && likhet(ff.num, fin.t / fin.n) && ff.simplest;
-    if(fin.k === 'mi') return ff.kind === 'mi' && likhet(ff.num, fin.h + fin.t / fin.n) && ff.simplest;
-    return false;
-  }
   function finText(fin){ return fin.k === 'dec' ? String(fin.x).replace('.', ',') : fin.k === 'br' ? fin.t + '/' + fin.n : fin.h + ' ' + fin.t + '/' + fin.n; }
 
   function renderRad(r){
     var idx = CHECKS.length;
     if(r.lana){
       CHECKS.push(function(el){
+        // FRI equality-kedja via delade rättaren: varje ifyllt led = radens värde, sista = svaret i enklaste form (path-fritt)
         var celler = [].slice.call(el.querySelectorAll('.ak8-cell')).map(function(c){ return exprOf(el, c.dataset.r); });
-        var ifyllda = celler.filter(function(e){ return e && [].slice.call(e.querySelectorAll('input')).some(function(i){ return i.value.trim() !== ''; }); });
-        // giltig: varje ifyllt led = radens värde; minst ett led; sista ifyllda = svaret i enklaste form
-        if(!ifyllda.length) return { ok: false, facit: 'svar: ' + finText(r.fin) };
-        var allaLika = ifyllda.every(function(e){ return likhet(mixedEval(e), r.v); });
-        var sista = ifyllda[ifyllda.length - 1];
-        var slutOk = finalCheck(finalForm(sista), r.fin);
-        return { ok: allaLika && slutOk, facit: 'svar: ' + finText(r.fin) + ' (varje led = uttrycket)' };
+        var res = LR.provaKedja(celler, r.v, r.fin);
+        return { ok: res.ok, facit: 'svar: ' + finText(r.fin) + (res.antal ? ' (varje led = uttrycket)' : '') };
       });
       // fri kedja: fyra led-rutor + "lägg till"
       var celler = '';
@@ -182,8 +122,8 @@
         var wrap = el.querySelector('.ak8-cell[data-r="' + c.role + '"]').closest('.ak8-ledwrap');
         if(wrap && wrap.classList.contains('ak8-forlang') && !el.closest('.ovn-sheet').classList.contains('visa-forlang')) return; // dolt förläng-led hoppas över
         var expr = exprOf(el, c.role);
-        if(c.fin){ if(!finalCheck(finalForm(expr), r.fin)) ok = false; }
-        else { if(!likhet(mixedEval(expr), r.v)) ok = false; }
+        if(c.fin){ if(!LR.finalCheck(LR.finalForm(expr), r.fin)) ok = false; }
+        else { if(!LR.likhet(LR.mixedEval(expr), r.v)) ok = false; }
         sett = true;
       });
       return { ok: ok && sett, facit: 'svar: ' + finText(r.fin) };

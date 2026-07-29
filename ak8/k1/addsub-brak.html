@@ -92,6 +92,7 @@
 <div class="tab-row" id="tab-row">
   <button class="tab-btn is-active" data-tab="ova">Öva</button>
   <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
+  <button class="tab-btn" data-tab="problem">Problemlösning</button>
   <button class="tab-btn" data-tab="test">Visa vad du kan</button>
 </div>
 
@@ -110,10 +111,14 @@
   </div>
 </section>
 
+<section class="tab-panel" data-panel="problem">
+  <div class="ovn-wrap" id="ruta-mount"></div>
+</section>
+
 <section class="tab-panel" data-panel="test">
   <div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;text-align:center;color:var(--ink-soft);">
     <h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Visa vad du kan</h3>
-    <p style="font-size:14px;line-height:1.6;max-width:480px;margin:0 auto;">Problemlösnings-uppgifterna och samlingstestet wiras in i ett senare steg. Träna på de två bladen och färdigheterna så länge.</p>
+    <p style="font-size:14px;line-height:1.6;max-width:480px;margin:0 auto;">Samlingstestet wiras in i ett senare steg. Träna på de två bladen, färdigheterna och problemlösningen så länge.</p>
   </div>
 </section>
 
@@ -123,7 +128,10 @@
 <script src="../../js/data/ak8-k1-bok.js"></script>
 <script src="../../js/motor/blad/blad-karna.js"></script>
 <script src="../../js/motor/blad/ak8-blad-ui.js"></script>
+<script src="../../js/motor/blad/likhetsrattare.js"></script>
 <script src="../../js/motor/blad/blad-ak8-d6.js"></script>
+<script src="../../js/mastery-k2.js"></script>
+<script src="../../js/motor/blad/prob-ruta.js"></script>
 <script>
 (function(){
   var me = location.pathname.split('/').pop();
@@ -143,8 +151,8 @@
   visa(0);
 
   // val-rad
-  var tabRow=document.getElementById('tab-row');
-  tabRow.querySelectorAll('.tab-btn').forEach(function(btn){ btn.onclick=function(){ tabRow.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('is-active', b===btn); }); document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('is-active', p.dataset.panel===btn.dataset.tab); }); window.scrollTo({top:0,behavior:'smooth'}); }; });
+  var tabRow=document.getElementById('tab-row'), rutaGjord=false;
+  tabRow.querySelectorAll('.tab-btn').forEach(function(btn){ btn.onclick=function(){ tabRow.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('is-active', b===btn); }); document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('is-active', p.dataset.panel===btn.dataset.tab); }); if(btn.dataset.tab==='problem' && !rutaGjord && window.PROB_RUTA){ window.PROB_RUTA.render(document.getElementById('ruta-mount'), {}); rutaGjord=true; } window.scrollTo({top:0,behavior:'smooth'}); }; });
 
   // FÄRDIGHETSTRÄNING: sjuans add/sub-bråknoder → k2-ramens drillar. minNiva ej satt (repetition).
   var RAM='../../ak7-k2-ram.html';

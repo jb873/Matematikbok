@@ -86,6 +86,26 @@
 .ovn-forlang-knapp{ font-family:var(--cinzel); font-size:12px; color:var(--ink-faint); background:none; border:1px solid var(--paper-dk); border-radius:8px; padding:11px 18px; cursor:pointer; }
 .ovn-forlang-knapp.is-on{ color:var(--navy); border-color:var(--navy); background:rgba(15,30,46,.05); }
 
+/* ══ Problemlösnings-ruta (prob-ruta.js) ══ */
+.prob-wrap{ max-width:none; }
+.prob-rubrik{ font-family:var(--serif); font-size:25px; font-weight:500; margin-bottom:6px; }
+.prob-intro{ font-size:13.5px; color:var(--ink-faint); margin:0 0 18px; max-width:640px; line-height:1.55; }
+.prob-kort{ background:#fff; border:1px solid var(--paper-dk); border-radius:10px; padding:16px 20px; margin-bottom:16px; }
+.prob-text{ display:flex; align-items:baseline; gap:6px; font-size:17px; line-height:1.5; margin-bottom:12px; }
+.prob-nr{ color:var(--gold); font-weight:700; flex:0 0 auto; }
+.prob-berakning{ margin:4px 0 10px; }
+.prob-label{ display:inline-block; font-family:var(--cinzel); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px; }
+.prob-boxar{ display:flex; flex-direction:column; gap:8px; }
+.prob-box .ak8-expr{ min-width:340px; min-height:42px; }
+.prob-mer{ margin-top:8px; font-family:var(--cinzel); font-size:12px; color:var(--gold); background:none; border:1px dashed var(--paper-dk); border-radius:8px; padding:7px 14px; cursor:pointer; }
+.prob-mer:hover{ border-color:var(--gold); }
+.prob-svarrad{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px dotted var(--paper-dk); }
+.prob-svarrad .prob-label{ margin-bottom:0; }
+.prob-enhet{ width:84px; }
+.prob-enhet-label{ font-family:var(--serif); font-size:15px; font-style:italic; color:var(--ink-faint); }
+.prob-fasit{ margin-top:10px; font-size:13px; color:#c0392b; }
+.prob-facit-svar{ display:inline-block; margin-left:6px; color:var(--ink-soft); font-weight:600; }
+
 /* ── skriv-ut-knapp ── */
 .ovn-skriv-ut{ font-family:var(--cinzel); font-size:12px; color:var(--ink-faint); background:none; border:1px solid var(--paper-dk); border-radius:8px; padding:11px 18px; cursor:pointer; }
 .ovn-skriv-ut:hover{ color:var(--navy); border-color:var(--navy); }
