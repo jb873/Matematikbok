@@ -42,7 +42,16 @@
 
   // ── AUTO-VÄXANDE RUTA ──
   function grow(inp){
-    if(!inp || inp.classList.contains('fr-ruta')) return;
+    if(!inp) return;
+    // Stående bråk-ruta (fr-ruta): KOMPAKT – storlek efter täljare/nämnare, INTE utdragen till textbredd.
+    // Gäller BARA bråk byggda i en uttrycks-cell (.ak8-expr); förrenderade bråk-svar (d5/d7 kanoniska
+    // bcell) ligger utanför .ak8-expr och behåller sin CSS-bredd.
+    if(inp.classList.contains('fr-ruta')){
+      if(!inp.closest('.ak8-expr')) return;
+      inp.style.width = '1ch';
+      inp.style.width = Math.max(18, Math.min(inp.scrollWidth + 2, 120)) + 'px';
+      return;
+    }
     var min = inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-in-sm') ? 34 : 74);
     if(inp.value === '' && inp.placeholder && inp.classList.contains('ak8-exprtxt')) min = Math.max(min, inp.placeholder.length * 9);
     inp.style.width = '1ch';
@@ -145,7 +154,7 @@
         e.preventDefault();
         if(!active || active.disabled){ var first = mount.querySelector('input:not([disabled])'); if(first) active = first; else return; }
         var k = btn.dataset.key;
-        if(k === 'frac' || k === 'pot'){ var f = insertWidget(active, k); if(f){ active = f; f.focus(); } return; }
+        if(k === 'frac' || k === 'pot'){ var f = insertWidget(active, k); if(f){ active = f; f.focus(); var xp = f.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); } return; }
         if(k === 'back'){ var moved = removeWidgetIfEmpty(active); if(moved){ active = moved; moved.focus(); return; } active.value = active.value.slice(0, -1); }
         else { active.value += k; }
         active.dispatchEvent(new Event('input', { bubbles:true }));

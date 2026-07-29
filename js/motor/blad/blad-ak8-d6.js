@@ -108,7 +108,7 @@
       // fri kedja: fyra led-rutor + "lägg till"
       var celler = '';
       for(var k = 0; k < 4; k++) celler += ledWrap('L' + k, k >= 2 ? 'ak8-extra' : '');
-      return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + r.q + ' =</span>' + celler
+      return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>' + celler
         + '<button type="button" class="ak8-mer" data-mer>+ led</button></div>';
     }
     // kanonisk kedja
@@ -128,7 +128,7 @@
       });
       return { ok: ok && sett, facit: 'svar: ' + finText(r.fin) };
     });
-    var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + ' =</span>';
+    var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
     cells.forEach(function(c){ html += ledWrap(c.role, c.fk); });
     return html + '</div>';
   }

@@ -117,7 +117,7 @@
         r.cells.forEach(function(c, i){ var rd = bread(el, 'k' + i); if(!likhet(rd.num, r.v)) ok = false; if(c.fin && !finOk(rd, c.fin)) ok = false; });
         return { ok: ok, facit: 'svar: ' + finText(r.cells[r.cells.length - 1].fin) };
       });
-      var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + ' =</span>';
+      var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
       r.cells.forEach(function(c, i){ html += EQS + bcell('k' + i, !!c.m); });
       return html + '</div>';
     }
@@ -129,7 +129,7 @@
     });
     var celler = '';
     for(var k = 0; k < 4; k++) celler += ansWrap('L' + k, k >= 2 ? 'ak8-extra' : '');
-    return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + r.q + ' =</span>' + celler
+    return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>' + celler
       + '<button type="button" class="ak8-mer" data-mer>+ led</button></div>';
   }
 

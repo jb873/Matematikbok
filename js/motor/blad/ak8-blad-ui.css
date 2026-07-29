@@ -8,7 +8,11 @@
 /* ── inline uttrycks-cell: text + inbäddade bråk/potenser som EN ruta ── */
 .ak8-expr{ display:inline-flex; align-items:center; gap:1px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; padding:1px 6px; min-height:38px; }
 .ak8-exprtxt{ border:none !important; background:transparent !important; height:30px; text-align:center; font-family:var(--serif); font-size:18px; padding:0; }
-.ak8-expr .ovn-brak{ margin:0 2px; } .ak8-expr .fr-ruta{ width:42px !important; }
+.ak8-expr .ovn-brak{ margin:0 2px; }
+/* bråk byggt i uttrycks-cell: KOMPAKT, storlek efter täljare/nämnare (grow sätter inline-bredd; ej utdraget till textbredd) */
+.ak8-expr .fr-ruta{ width:24px; }
+.ak8-expr .ovn-brak-taljare{ padding:0 3px 1px; } .ak8-expr .ovn-brak-namnare{ padding:1px 3px 0; }
+.ak8-expr .ovn-brak-strecket{ min-width:0; }
 .ak8-expr:has(.ak8-in.ak8-ok){ border-color:#2f7d4f; background:rgba(47,125,79,.08); }
 .ak8-expr:has(.ak8-in.ak8-fel){ border-color:#c0392b; background:rgba(192,57,43,.08); }
 .pot sup .ak8-pexp{ width:44px; }
