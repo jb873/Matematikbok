@@ -46,6 +46,9 @@
 /* blandad form: hel-ruta + stående bråk */
 .ak8-mc{ display:inline-flex; align-items:center; gap:4px; }
 .ak8-mc .ak8-mh{ width:46px; }
+/* d7: kanonisk blandad-form-cell (hel + produktbråk) */
+.ak8-mcx{ display:inline-flex; align-items:center; gap:3px; }
+.ak8-mcx .ak8-mh{ width:44px; }
 /* ordna / jämföra: klickbara bråk-knappar */
 .ak8-ordna{ display:inline-flex; gap:10px; flex-wrap:wrap; align-items:center; padding:4px; border-radius:8px; }
 .ak8-ordna.ak8-ok-ram{ outline:2px solid #2f7d4f; background:rgba(47,125,79,.06); }

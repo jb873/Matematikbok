@@ -69,6 +69,18 @@ window.AK8_K1_BOK = {
       ]
     },
     {
+      // Multiplikation med bråk (position 6) — ärver åk7 k2 (brak-mult). Två Öva-blad, exakt-författade
+      // ur "Multiplikation med bråk.docx". Motor blad-ak8-d7.js: kanoniska grupper på fasta produktbråk-
+      // rutor, förkorta-/förenkla-innan + ta-bort-mellanled equality-rättade via delade Likhetsrattare.
+      // Noderna: sjuans brak-mult {ak8:repetition} + ny nod brak-mult-forkorta {ak8:mal} (förkorta-innan =
+      // egen färdighet i åttan, för stora tal). Problemlösning byggs kombinerad med division. minNiva ej satt.
+      nr: 6, id: 'mult-brak', titel: 'Multiplikation', fil: 'mult-brak.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Multiplikation, blad 1', roll: 'repetition', noder: ['brak-mult-rakna:rakna', 'brak-mult-forkorta:rakna'] },
+        { nr: 2, titel: 'Multiplikation, blad 2', roll: 'repetition', noder: ['brak-mult-rakna:rakna', 'brak-mult-forkorta:rakna'] }
+      ]
+    },
+    {
       nr: 3, id: 'negativa-tal', titel: 'Negativa tal', fil: 'negativa-tal.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Grunder',                     roll: 'repetition', noder: ['neg-begrepp:begrepp'] },

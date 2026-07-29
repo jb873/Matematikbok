@@ -295,21 +295,33 @@ window.K2_TAXONOMI = {
     /* ─────────────── Del 6 · Multiplikation med bråk (öppen; ram-drill byggs i wiring) ─────────────── */
     {
       "id": "brak-mult", "namn": "Multiplikation med bråk", "parent": null, "niva": "omrade",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Multiplicera bråktal med bråktal, heltal och blandad form.",
       "grupp": "brak", "implemented": true
     },
     {
       "id": "brak-mult-rakna", "namn": "Multiplikation med bråk", "parent": "brak-mult", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Multiplicera bråk · bråk, bråk · heltal och blandad form.",
       "visning": null
     },
     {
       "id": "brak-mult-rakna:rakna", "namn": "Multiplikation med bråk", "parent": "brak-mult-rakna", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "multBrakEngine",
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "multBrakEngine",
       "begrepp": "Multiplicera bråk · bråk, heltal · bråk och blandad form; svar i enklaste/blandad form. Stora tal med förkortnings-mellanled.",
       "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 0, "titel": "Multiplikation med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+    {
+      "id": "brak-mult-forkorta", "namn": "Förkorta innan multiplikation", "parent": "brak-mult", "niva": "deldoman",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "När produkten är för stor för huvudräkning: förkorta (korsförkorta) täljare mot nämnare INNAN man multiplicerar. Nytt mål i åttan (höjt talområde).",
+      "visning": null
+    },
+    {
+      "id": "brak-mult-forkorta:rakna", "namn": "Förkorta innan multiplikation", "parent": "brak-mult-forkorta", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Korsförkorta täljare och nämnare (i valfri ordning) innan multiplikation; svar i enklaste/blandad form. Öva-bladet rättar equality-baserat (flera giltiga vägar).",
+      "visning": null
     },
 
     /* ─────────────── Del 7 · Division med bråk (öppen; FÖRDJUPNING i åk7) ───────────────
