@@ -12,6 +12,14 @@
   var CFG = {
     GUL:  { minRatt: 3, minDagar: 2 },                    // flera gånger, spritt över tid → gul
     GRON: { minRatt: 5, minDagar: 4, minSpannDagar: 21 }, // flera gånger, utspritt över LÅNG tid → grön
+    // ── TIDSSPÄRR (önskvärd svårighet / spacing) ─────────────────────────────────────
+    // Öva något och testa det direkt efteråt mäter arbetsminne, inte durabel kunskap. Därför
+    // räknar RETENTION-nivåerna (gul/grön) bara rätt-event som är tillräckligt SPRIDDA i tid:
+    // ett event inom fönsterTimmar av föregående RÄKNADE event för noden loggas + ger feedback,
+    // men flyttar inte färgen. Röd→orange är ogated (default) — "rört färdigheten en gång" är
+    // ärligt även på studs. fönsterTimmar=0 → av (byte-identiskt med förr). Samma tids-medvetna
+    // familj som glömskekurvan nedan: den ena hindrar för tät upprepning, den andra bleknar disuse.
+    SPARR: { fonsterTimmar: 20, gateOrange: false },      // ~1 dygn; gateOrange gatar även röd→orange
     // ── GLÖMSKEKURVA (blekning) · tunbar mot spacing-schemat ──────────────────────────
     // Färgen bleknar utan aktivitet sedan SENASTE RÄTT. Kalibrerad så en sommars inaktivitet
     // (~10 v) tar grön → orange: grön håller hallVeckor, glider sedan ett steg per stegVeckor.
@@ -66,12 +74,26 @@
     var ratt = minNiva ? rattAll.filter(function(a){ return (a.niva || 0) >= minNiva; }) : rattAll;
     if(!ratt.length) return 1;                                          // rätt finns men inte på kravnivån → orange
     ratt.sort(function(a, b){ return a.ts - b.ts; });
-    var dagar = {}; ratt.forEach(function(a){ dagar[dagKey(a.ts)] = 1; });
+
+    // ── TIDSSPÄRR: filtrera fram de rätt-event som RÄKNAS mot retention (gul/grön). Ett event
+    //    räknas bara om det ligger ≥ fönstret efter föregående RÄKNADE event för noden — en
+    //    cooldown som kollapsar en burst (öva+testa samma pass) till ETT räknat event. Loggen
+    //    och feedbacken rörs inte; bara uppflyttningen gatas. fönsterTimmar=0 → alla räknas. ──
+    var sparrMs = ((CFG.SPARR && CFG.SPARR.fonsterTimmar) || 0) * 3600000;
+    var rattSpridd = [], sist = null;
+    for(var i = 0; i < ratt.length; i++){
+      if(sist === null || (ratt[i].ts - sist) >= sparrMs){ rattSpridd.push(ratt[i]); sist = ratt[i].ts; }
+    }
+    // Röd→orange: ogated (default) — nått ratt räcker. gateOrange gatar även hit, men första
+    // eventet saknar föregångare och räknas alltid, så orange nås ändå vid första rätt.
+    if(CFG.SPARR && CFG.SPARR.gateOrange && !rattSpridd.length) return 1;
+
+    var dagar = {}; rattSpridd.forEach(function(a){ dagar[dagKey(a.ts)] = 1; });
     var antalDagar = Object.keys(dagar).length;
-    var spannDagar = (ratt[ratt.length - 1].ts - ratt[0].ts) / 86400000;
-    var s0 = (ratt.length >= CFG.GRON.minRatt && antalDagar >= CFG.GRON.minDagar && spannDagar >= CFG.GRON.minSpannDagar) ? 3 // grön
-           : (ratt.length >= CFG.GUL.minRatt && antalDagar >= CFG.GUL.minDagar) ? 2                                          // gul
-           : 1;                                                                                                              // orange
+    var spannDagar = rattSpridd.length ? (rattSpridd[rattSpridd.length - 1].ts - rattSpridd[0].ts) / 86400000 : 0;
+    var s0 = (rattSpridd.length >= CFG.GRON.minRatt && antalDagar >= CFG.GRON.minDagar && spannDagar >= CFG.GRON.minSpannDagar) ? 3 // grön
+           : (rattSpridd.length >= CFG.GUL.minRatt && antalDagar >= CFG.GUL.minDagar) ? 2                                          // gul
+           : 1;                                                                                                              // orange (retention-golv)
     // ── Glömskekurva: blekna sedan SENASTE RÄTT. Bara grön/gul kan blekna; röd (s0≤1 → 0/1)
     //    returneras oförändrat. Utan aktiv blekning → oförändrat. ──
     if(!blekning || !blekning.aktiv || s0 <= 1) return s0;
