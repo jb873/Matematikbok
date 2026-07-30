@@ -3671,6 +3671,48 @@ state.testConfig = {
 };
 state.test = null; // {questions:[], answers:{}, currentIdx:0}
 
+// ── Fabriker för slice-4-generatorerna (fyra räknesätt): kompakt numeric/flerval/product.
+//    makeItem() → {key, prompt/…, ans/options/target}. Faktorerna sköter dedup (seen) + a/b/c-labels. ──
+function testNumericGen(genId, titel, omrade, makeItem){
+  return function(seen){
+    const subs = []; let tries = 0;
+    while(subs.length < 4 && tries < 120){
+      tries++;
+      const it = makeItem();
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'numeric', prompt:it.prompt, answer:it.ans, explanation:it.expl||'' });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
+function testFlervalGen(genId, titel, omrade, makeItem){
+  return function(seen){
+    const subs = []; let tries = 0;
+    while(subs.length < 3 && tries < 120){
+      tries++;
+      const it = makeItem();
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'binary', q:it.q||'', prompt:it.prompt, options:it.options, answer:it.answer, explanation:it.expl||'' });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
+function testProductGen(genId, titel, omrade, makeItem){
+  return function(seen){
+    const subs = []; let tries = 0;
+    while(subs.length < 3 && tries < 120){
+      tries++;
+      const it = makeItem();
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'product', q:it.target+' = ___ · ___', target:it.target, operator:'·', antal:it.antal, answer:null });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
+
 // Frågegeneratorer per kunskapsområde + typ
 const TEST_GENERATORS = {
   primtal: {
@@ -4028,7 +4070,187 @@ const TEST_GENERATORS = {
         return subs.length ? {generator:'oka-minska', title:'Öka och minska.', omrade:'rakneträning', subs:subs} : null;
       }
     ]
-  }
+  },
+
+  // ═══ SLICE 4: fyra räknesätt (+ prioritering, räknelagar, negativa tal) ═══
+  // Räkning/huvudräkning/uppställning → numeric; begrepp/räknelagar → flerval; faktorisera → product.
+  'add-begrepp': { snabb: [
+    testFlervalGen('add-begr-b','Begrepp: addition','add-begrepp', function(){
+      const bank=[
+        {p:'Vad kallas svaret i en addition?', o:['Summa','Differens','Produkt','Kvot'], a:'Summa'},
+        {p:'Vad kallas talen som adderas?', o:['Termer','Faktorer','Nämnare','Kvoter'], a:'Termer'},
+        {p:'I 8 + 5 = 13, vad är 13?', o:['Summan','En term','Produkten','Differensen'], a:'Summan'},
+        {p:'Vilket räknesätt betyder "lägga ihop"?', o:['Addition','Subtraktion','Multiplikation','Division'], a:'Addition'}
+      ];
+      const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
+    }),
+    testNumericGen('add-begr-r','Tiokompisar och termer','add-begrepp', function(){
+      const t=rInt(1,3);
+      if(t===1){ const a=rInt(1,9); return {key:'tk'+a, prompt:'Vilket tal saknas?   '+a+' + ___ = 10', ans:10-a, expl:a+' + '+(10-a)+' = 10.'}; }
+      if(t===2){ const a=rInt(10,90); return {key:'hk'+a, prompt:'Vilket tal saknas?   '+a+' + ___ = 100', ans:100-a, expl:a+' + '+(100-a)+' = 100.'}; }
+      const s=rInt(12,40), x=rInt(3,s-3); return {key:'dt'+s+'-'+x, prompt:'Vilket tal saknas?   '+x+' + ___ = '+s, ans:s-x, expl:x+' + '+(s-x)+' = '+s+'.'};
+    })
+  ]},
+  'add-rakna': { snabb: [
+    testNumericGen('add-huvud','Huvudräkning: addition','add-rakna', function(){
+      if(Math.random()<0.4){ const a=avr(rInt(11,89)+rInt(1,9)/10,1), b=avr(rInt(11,89)+rInt(1,9)/10,1); return {key:'d'+a+'+'+b, prompt:'Räkna ut:   '+komma(a)+' + '+komma(b), ans:avr(a+b,1), expl:komma(a)+' + '+komma(b)+' = '+komma(avr(a+b,1))}; }
+      const a=rInt(13,89), b=rInt(13,89); return {key:a+'+'+b, prompt:'Räkna ut:   '+a+' + '+b, ans:a+b, expl:a+' + '+b+' = '+(a+b)};
+    })
+  ]},
+  'add-metoder': { snabb: [
+    testNumericGen('add-uppst','Uppställning: addition','add-metoder', function(){
+      const a=rInt(234,987), b=rInt(234,987); return {key:a+'+'+b, prompt:'Räkna ut (ställ upp):   '+a+' + '+b, ans:a+b, expl:a+' + '+b+' = '+(a+b)};
+    })
+  ]},
+
+  'sub-begrepp': { snabb: [
+    testFlervalGen('sub-begr-b','Begrepp: subtraktion','sub-begrepp', function(){
+      const bank=[
+        {p:'Vad kallas svaret i en subtraktion?', o:['Differens','Summa','Produkt','Kvot'], a:'Differens'},
+        {p:'Vad kallas talen i en subtraktion?', o:['Termer','Faktorer','Kvoter','Nämnare'], a:'Termer'},
+        {p:'I 12 − 5 = 7, vad är 7?', o:['Differensen','Summan','Produkten','En term'], a:'Differensen'},
+        {p:'Vilket räknesätt betyder "ta bort"?', o:['Subtraktion','Addition','Division','Multiplikation'], a:'Subtraktion'}
+      ];
+      const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
+    }),
+    testNumericGen('sub-begr-r','Dela upp differens','sub-begrepp', function(){
+      const a=rInt(12,20), c=rInt(1,a-3); return {key:a+'-'+c, prompt:'Vilket tal saknas?   '+a+' − ___ = '+c, ans:a-c, expl:a+' − '+(a-c)+' = '+c+'.'};
+    })
+  ]},
+  'sub-rakna': { snabb: [
+    testNumericGen('sub-huvud','Huvudräkning: subtraktion','sub-rakna', function(){
+      if(Math.random()<0.4){ const a=avr(rInt(30,99)+rInt(1,9)/10,1), b=avr(rInt(5,25)+rInt(1,9)/10,1); return {key:'d'+a+'-'+b, prompt:'Räkna ut:   '+komma(a)+' − '+komma(b), ans:avr(a-b,1), expl:komma(a)+' − '+komma(b)+' = '+komma(avr(a-b,1))}; }
+      const a=rInt(31,99), b=rInt(12,a-5); return {key:a+'-'+b, prompt:'Räkna ut:   '+a+' − '+b, ans:a-b, expl:a+' − '+b+' = '+(a-b)};
+    })
+  ]},
+  'sub-metoder': { snabb: [
+    testNumericGen('sub-uppst','Uppställning: subtraktion','sub-metoder', function(){
+      const a=rInt(400,999), b=rInt(123,a-50); return {key:a+'-'+b, prompt:'Räkna ut (ställ upp):   '+a+' − '+b, ans:a-b, expl:a+' − '+b+' = '+(a-b)};
+    })
+  ]},
+
+  'mult-begrepp': { snabb: [
+    testFlervalGen('mult-begr-b','Begrepp: multiplikation','mult-begrepp', function(){
+      const bank=[
+        {p:'Vad kallas svaret i en multiplikation?', o:['Produkt','Summa','Differens','Kvot'], a:'Produkt'},
+        {p:'Vad kallas talen man multiplicerar?', o:['Faktorer','Termer','Nämnare','Kvoter'], a:'Faktorer'},
+        {p:'Ett tal delbart bara med 1 och sig självt kallas...', o:['Primtal','Sammansatt tal','Kvadrattal','Jämnt tal'], a:'Primtal'},
+        {p:'I 4 · 6 = 24, vad är 24?', o:['Produkten','Summan','En faktor','Differensen'], a:'Produkten'}
+      ];
+      const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
+    }),
+    testProductGen('mult-fakt','Faktorisera talet','mult-begrepp', function(){
+      const t=randPick(COMPOSITES_50); return {key:t, target:t, antal:2};
+    })
+  ]},
+  'mult-tabell': { snabb: [
+    testNumericGen('mult-tabell','Multiplikationstabellen','mult-tabell', function(){
+      const a=rInt(2,10), b=rInt(2,10); return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
+    })
+  ]},
+  'mult-metoder': { snabb: [
+    testNumericGen('mult-uppst','Uppställning: multiplikation','mult-metoder', function(){
+      const a=rInt(23,99), b=rInt(12,49); return {key:a+'x'+b, prompt:'Räkna ut (ställ upp):   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
+    })
+  ]},
+  'mult-rakna': { snabb: [
+    testNumericGen('mult-rakna','Beräkningar: multiplikation','mult-rakna', function(){
+      const t=rInt(1,3);
+      if(t===1){ const a=rInt(2,99), p=randPick([10,100,1000]); return {key:a+'x'+p, prompt:'Räkna ut:   '+a+' · '+p, ans:a*p, expl:a+' · '+p+' = '+(a*p)}; }
+      if(t===2){ const a=rInt(12,29), b=rInt(3,9); return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)}; }
+      const a=rInt(2,12), b=rInt(2,9); return {key:'n'+a+'x'+b, prompt:'Räkna ut:   −'+a+' · '+b, ans:-a*b, expl:'−'+a+' · '+b+' = −'+(a*b)};
+    })
+  ]},
+
+  'div-begrepp': { snabb: [
+    testFlervalGen('div-begr-b','Begrepp: division','div-begrepp', function(){
+      const bank=[
+        {p:'Vad kallas svaret i en division?', o:['Kvot','Produkt','Summa','Differens'], a:'Kvot'},
+        {p:'I 12 / 4, vad kallas 12?', o:['Täljare','Nämnare','Kvot','Faktor'], a:'Täljare'},
+        {p:'I 12 / 4, vad kallas 4?', o:['Nämnare','Täljare','Kvot','Produkt'], a:'Nämnare'},
+        {p:'Vilket räknesätt betyder "dela lika"?', o:['Division','Multiplikation','Addition','Subtraktion'], a:'Division'}
+      ];
+      const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
+    }),
+    testFlervalGen('div-delbar','Delbarhet','div-begrepp', function(){
+      const d=randPick([2,3,4,5,9,10]), n=rInt(20,99);
+      return {key:n+'/'+d, prompt:'Är '+n+' delbart med '+d+'?', options:['Ja','Nej'], answer:(n%d===0)?'Ja':'Nej', expl:(n%d===0)?n+' = '+d+' · '+(n/d)+'.':n+' delat med '+d+' går inte jämnt ut.'};
+    })
+  ]},
+  'div-tabell': { snabb: [
+    testNumericGen('div-tabell','Divisionstabellen','div-tabell', function(){
+      const b=rInt(2,10), q=rInt(2,10), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut:   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q};
+    })
+  ]},
+  'div-metoder': { snabb: [
+    testNumericGen('div-uppst','Kort och lång division','div-metoder', function(){
+      const b=rInt(3,9), q=rInt(23,99), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut (ställ upp):   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q};
+    })
+  ]},
+  'div-rakna': { snabb: [
+    testNumericGen('div-rakna','Beräkningar: division','div-rakna', function(){
+      const t=rInt(1,3);
+      if(t===1){ const p=randPick([10,100]), q=rInt(2,20), a=p*q; return {key:a+'/'+p, prompt:'Räkna ut:   '+a+' / '+p, ans:q, expl:a+' / '+p+' = '+q}; }
+      if(t===2){ const b=rInt(3,9), q=rInt(11,20), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut:   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q}; }
+      const b=rInt(2,9), q=rInt(2,12), a=b*q; return {key:'n'+a+'/'+b, prompt:'Räkna ut:   −'+a+' / '+b, ans:-q, expl:'−'+a+' / '+b+' = −'+q};
+    })
+  ]},
+
+  'prio-samband': { snabb: [
+    testNumericGen('prio-samband','Samband mellan räknesätt','prio-samband', function(){
+      if(rInt(1,2)===1){ const a=rInt(3,20), b=rInt(3,20); return {key:'a'+a+'+'+b, prompt:'Vilket tal saknas?   '+a+' + ___ = '+(a+b), ans:b, expl:a+' + '+b+' = '+(a+b)+'.'}; }
+      const b=rInt(2,9), q=rInt(2,9); return {key:'m'+b+'x'+q, prompt:'Vilket tal saknas?   ___ · '+b+' = '+(b*q), ans:q, expl:q+' · '+b+' = '+(b*q)+'.'};
+    })
+  ]},
+  'prio-prioritering': { snabb: [
+    testNumericGen('prio-uttryck','Prioriteringsregeln','prio-prioritering', function(){
+      const t=rInt(1,5); let s, ans;
+      if(t===1){ const a=rInt(2,9),b=rInt(2,9),c=rInt(2,9); s=a+' + '+b+' · '+c; ans=a+b*c; }
+      else if(t===2){ const a=rInt(2,9),b=rInt(2,9),c=rInt(2,20); s=a+' · '+b+' + '+c; ans=a*b+c; }
+      else if(t===3){ const a=rInt(3,9),b=rInt(2,9),c=rInt(1,10); s=a+' · '+b+' − '+c; ans=a*b-c; }
+      else if(t===4){ const a=rInt(2,9),b=rInt(2,9),c=rInt(2,6); s='('+a+' + '+b+') · '+c; ans=(a+b)*c; }
+      else { const a=rInt(15,40),b=rInt(2,6),c=rInt(2,6); s=a+' − '+b+' · '+c; ans=a-b*c; }
+      return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
+    })
+  ]},
+  'prio-lagar': { snabb: [
+    testFlervalGen('prio-lagar','Räknelagarna','prio-lagar', function(){
+      const bank=[
+        {e:'7 + 12 = 12 + 7', l:'Kommutativa lagen'},
+        {e:'6 · 9 = 9 · 6', l:'Kommutativa lagen'},
+        {e:'(2 + 3) + 4 = 2 + (3 + 4)', l:'Associativa lagen'},
+        {e:'(2 · 5) · 3 = 2 · (5 · 3)', l:'Associativa lagen'},
+        {e:'3 · (4 + 5) = 3 · 4 + 3 · 5', l:'Distributiva lagen'},
+        {e:'5 · (10 + 2) = 5 · 10 + 5 · 2', l:'Distributiva lagen'}
+      ];
+      const b=randPick(bank);
+      return {key:b.e, prompt:'Vilken räknelag används?   '+b.e, options:['Kommutativa lagen','Associativa lagen','Distributiva lagen'], answer:b.l, expl:b.e+' — '+b.l+'.'};
+    })
+  ]},
+
+  'neg-begrepp': { snabb: [
+    testNumericGen('neg-begr','Negativa tal: begrepp','neg-begrepp', function(){
+      if(rInt(1,2)===1){ const a=rInt(1,20); return {key:'mot'+a, prompt:'Vilket är motsatta talet till −'+a+'?', ans:a, expl:'Motsatta talet till −'+a+' är '+a+'.'}; }
+      const start=rInt(-5,-1), step=rInt(1,3), t0=start, t1=start+step, t2=start+2*step, ans=start+3*step;
+      return {key:'tf'+start+'-'+step, prompt:'Vilket tal kommer näst?   '+t0+', '+t1+', '+t2+', ___', ans:ans, expl:'Ökar med '+step+' varje steg → '+ans+'.'};
+    })
+  ]},
+  'neg-rakna': { snabb: [
+    testNumericGen('neg-addsub','Addition och subtraktion med negativa tal','neg-rakna', function(){
+      const t=rInt(1,3); let s, ans;
+      if(t===1){ const a=rInt(1,9), b=rInt(2,12); s='−'+a+' + '+b; ans=-a+b; }
+      else if(t===2){ const a=rInt(2,12), b=rInt(3,15); s=a+' − '+b; ans=a-b; }
+      else { const a=rInt(1,9), b=rInt(1,9); s='−'+a+' − '+b; ans=-a-b; }
+      return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
+    }),
+    testNumericGen('neg-multdiv','Multiplikation och division med negativa tal','neg-rakna', function(){
+      const t=rInt(1,3); let s, ans;
+      if(t===1){ const a=rInt(2,9), b=rInt(2,9); s='−'+a+' · '+b; ans=-a*b; }
+      else if(t===2){ const b=rInt(2,6), q=rInt(2,9), a=b*q; s='−'+a+' / −'+b; ans=q; }
+      else { const b=rInt(2,6), q=rInt(2,9), a=b*q; s='−'+a+' / '+b; ans=-q; }
+      return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
+    })
+  ]}
 };
 
 // GEN_NOD: binder varje test-generator till sin TAXONOMI-nod (koId:formagaKey) — SAMMA nod som
@@ -4049,7 +4271,32 @@ const GEN_NOD = {
   'jamfor-tal':     'position:resonera',
   'utvform-valj':   'utvecklad:metod',
   'utvform-lasut':  'utvecklad:rakna',
-  'oka-minska':     'rakneträning:rakna'
+  'oka-minska':     'rakneträning:rakna',
+  // slice 4 – fyra räknesätt (+ prioritering, räknelagar, negativa tal)
+  'add-begr-b':     'add-begrepp:begrepp',
+  'add-begr-r':     'add-begrepp:rakna',
+  'add-huvud':      'add-rakna:rakna',
+  'add-uppst':      'add-metoder:metod',
+  'sub-begr-b':     'sub-begrepp:begrepp',
+  'sub-begr-r':     'sub-begrepp:rakna',
+  'sub-huvud':      'sub-rakna:rakna',
+  'sub-uppst':      'sub-metoder:metod',
+  'mult-begr-b':    'mult-begrepp:begrepp',
+  'mult-fakt':      'mult-begrepp:rakna',
+  'mult-tabell':    'mult-tabell:rakna',
+  'mult-uppst':     'mult-metoder:metod',
+  'mult-rakna':     'mult-rakna:rakna',
+  'div-begr-b':     'div-begrepp:begrepp',
+  'div-delbar':     'div-begrepp:rakna',
+  'div-tabell':     'div-tabell:rakna',
+  'div-uppst':      'div-metoder:metod',
+  'div-rakna':      'div-rakna:rakna',
+  'prio-samband':   'prio-samband:rakna',
+  'prio-uttryck':   'prio-prioritering:rakna',
+  'prio-lagar':     'prio-lagar:rakna',
+  'neg-begr':       'neg-begrepp:begrepp',
+  'neg-addsub':     'neg-rakna:addsub',
+  'neg-multdiv':    'neg-rakna:multdiv'
 };
 
 // NOD_GENS: nod (koId:formagaKey) → generatorer som träffar den. Byggs genom att fråga varje
@@ -4072,7 +4319,9 @@ const FARG_INFO = [
   {namn:'Gul',    bg:'#E4BC34'},
   {namn:'Grön',   bg:'#6BA544'}
 ];
-const FORMAGA_NAMN = {begrepp:'Begrepp', rakna:'Räkna', metod:'Metod', kommunikation:'Kommunikation', resonera:'Resonera', problem:'Problem'};
+const FORMAGA_NAMN = {begrepp:'Begrepp', rakna:'Räkna', metod:'Metod', kommunikation:'Kommunikation', resonera:'Resonera', problem:'Problem', addsub:'Plus och minus', multdiv:'Gånger och delat'};
+// Namn för syntetiska del-filter (utan egen DELAR-post), t.ex. bokens sammanslagna delkapitel.
+const DEL_FILTER_NAMN = {fyraraknesatt:'De fyra räknesätten'};
 // mastery-färg (0–3) för en nod, samma nyckel/logik som kartan läser.
 function nodFargState(node, matris){
   if(!(window.Mastery && window.Mastery.masteryState)) return 0;
@@ -4170,6 +4419,7 @@ function renderTestConfig(){
   const filterKOs = (cfg.del && DELAR_KO[cfg.del]) ? DELAR_KO[cfg.del] : null;
   const shownKOs = filterKOs || KUNSKAPSOMRADEN;
   const delObj = cfg.del ? DELAR.find(d => d.id === cfg.del) : null;
+  const delNamn = cfg.del ? (delObj ? delObj.titel : (DEL_FILTER_NAMN[cfg.del] || cfg.del)) : null;
 
   // Färdighetslista ur taxonomin (samma noder som Färdighetsträningen/självskattningen), GRUPPERAD
   // per kunskapsområde (som kartans område → färdighet). Byggbar = har en test-generator (NOD_GENS).
@@ -4204,7 +4454,7 @@ function renderTestConfig(){
       <p class="header-sub">Här ser du <strong>hela kapitlets</strong> färdigheter, grupperade per område. Fäll ihop det du inte vill se, filtrera på delkapitel eller mastery-färg för att fokusera (t.ex. alla dina orange färdigheter). Provet görs på skärmen; det rättas och färgar kartan.</p>
     </div>
 
-    ${delObj ? `<div class="config-filter-note">Filtrerat till delkapitlet <strong>${delObj.titel}</strong>. <button class="cfn-clear" id="clear-del">Visa hela kapitlet</button></div>` : ''}
+    ${cfg.del ? `<div class="config-filter-note">Filtrerat till delkapitlet <strong>${delNamn}</strong>. <button class="cfn-clear" id="clear-del">Visa hela kapitlet</button></div>` : ''}
 
     <div class="test-config-card">
       <h3>Antal frågor</h3>
@@ -4284,7 +4534,7 @@ function renderTestConfig(){
     </div>
 
     <div class="config-summary">
-      Du får <strong>${cfg.antal} frågor</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från <strong>${valda.length}</strong> ${valda.length===1?'vald färdighet':'valda färdigheter'}${delObj?` i ${delObj.titel.toLowerCase()}`:' i kapitlet'}.
+      Du får <strong>${cfg.antal} frågor</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från <strong>${valda.length}</strong> ${valda.length===1?'vald färdighet':'valda färdigheter'}${delNamn?` i ${delNamn.toLowerCase()}`:' i kapitlet'}.
     </div>
 
     <div style="text-align:center;margin-top:18px;">
@@ -4638,7 +4888,7 @@ function gradeSub(s, ans){
     return {status:'wrong', given: String(num)};
   }
   if(s.type === 'numeric'){
-    const v = parseFloat(String(ans).replace(',','.').replace(/\s/g,''));
+    const v = parseFloat(String(ans).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
     if(isNaN(v)) return {status:'wrong', given: String(ans)};
     return {status: Math.abs(v - s.answer) < 1e-6 ? 'correct' : 'wrong', given: String(ans)};
   }
@@ -5127,6 +5377,13 @@ DELAR_KO['negativa'] = [
     }
   }
 ];
+
+// Syntetiskt del-filter för provbyggaren: bokens delkapitel "De fyra räknesätten" (d2) samlar
+// addition + subtraktion + multiplikation + division + prioritering/räknelagar. Ingen egen DELAR-
+// post (Färdighetsträningen har dem som separata delar); används bara som ?del=-filter i väljaren.
+DELAR_KO['fyraraknesatt'] = [].concat(
+  DELAR_KO['addition'], DELAR_KO['subtraktion'], DELAR_KO['multiplikation'], DELAR_KO['division'], DELAR_KO['prio']
+);
 
 DELAR_KO['brak-decimal'] = [
   {
