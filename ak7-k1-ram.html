@@ -1145,6 +1145,9 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .config-group-body{display:flex;flex-direction:column;gap:8px;padding:10px}
 .config-group.is-collapsed .config-group-body{display:none}
 .config-group .config-checkbox{background:var(--bg-warm)}
+.config-group-head .cg-titel .cg-delnr{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--primary);background:var(--primary-bg);border-radius:3px;padding:2px 7px;margin-right:9px}
+.config-group-body .cg-subhead{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);margin:10px 2px 4px;padding-top:8px;border-top:1px solid var(--line)}
+.config-group-body .cg-subhead:first-child{margin-top:0;padding-top:0;border-top:none}
 .config-filter-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--c-rakna-bg);border:1px solid var(--c-rakna);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:13.5px;color:var(--c-rakna)}
 .cfn-clear{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--primary);background:none;border:1px solid var(--primary);border-radius:6px;padding:5px 11px;cursor:pointer}
 .cfn-clear:hover{background:var(--primary-bg)}
@@ -4138,9 +4141,6 @@ const TEST_GENERATORS = {
         {p:'I 4 · 6 = 24, vad är 24?', o:['Produkten','Summan','En faktor','Differensen'], a:'Produkten'}
       ];
       const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
-    }),
-    testProductGen('mult-fakt','Faktorisera talet','mult-begrepp', function(){
-      const t=randPick(COMPOSITES_50); return {key:t, target:t, antal:2};
     })
   ]},
   'mult-tabell': { snabb: [
@@ -4153,12 +4153,14 @@ const TEST_GENERATORS = {
       const a=rInt(23,99), b=rInt(12,49); return {key:a+'x'+b, prompt:'Räkna ut (ställ upp):   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
     })
   ]},
+  // Beräkningar delade i bokens noder: ·10/100/1000 → d5 (pow10), stora tal → d6 (stora).
+  // (Negativa beräkningar bor i neg-rakna:multdiv, d3 — inte här.)
   'mult-rakna': { snabb: [
-    testNumericGen('mult-rakna','Beräkningar: multiplikation','mult-rakna', function(){
-      const t=rInt(1,3);
-      if(t===1){ const a=rInt(2,99), p=randPick([10,100,1000]); return {key:a+'x'+p, prompt:'Räkna ut:   '+a+' · '+p, ans:a*p, expl:a+' · '+p+' = '+(a*p)}; }
-      if(t===2){ const a=rInt(12,29), b=rInt(3,9); return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)}; }
-      const a=rInt(2,12), b=rInt(2,9); return {key:'n'+a+'x'+b, prompt:'Räkna ut:   −'+a+' · '+b, ans:-a*b, expl:'−'+a+' · '+b+' = −'+(a*b)};
+    testNumericGen('mult-rakna-pow10','Multiplikation med 10, 100 och 1000','mult-rakna', function(){
+      const a=rInt(2,99), p=randPick([10,100,1000]); return {key:a+'x'+p, prompt:'Räkna ut:   '+a+' · '+p, ans:a*p, expl:a+' · '+p+' = '+(a*p)};
+    }),
+    testNumericGen('mult-rakna-stora','Multiplikation med stora tal','mult-rakna', function(){
+      const a=rInt(12,49), b=rInt(3,9); return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
     })
   ]},
 
@@ -4171,10 +4173,6 @@ const TEST_GENERATORS = {
         {p:'Vilket räknesätt betyder "dela lika"?', o:['Division','Multiplikation','Addition','Subtraktion'], a:'Division'}
       ];
       const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
-    }),
-    testFlervalGen('div-delbar','Delbarhet','div-begrepp', function(){
-      const d=randPick([2,3,4,5,9,10]), n=rInt(20,99);
-      return {key:n+'/'+d, prompt:'Är '+n+' delbart med '+d+'?', options:['Ja','Nej'], answer:(n%d===0)?'Ja':'Nej', expl:(n%d===0)?n+' = '+d+' · '+(n/d)+'.':n+' delat med '+d+' går inte jämnt ut.'};
     })
   ]},
   'div-tabell': { snabb: [
@@ -4188,11 +4186,11 @@ const TEST_GENERATORS = {
     })
   ]},
   'div-rakna': { snabb: [
-    testNumericGen('div-rakna','Beräkningar: division','div-rakna', function(){
-      const t=rInt(1,3);
-      if(t===1){ const p=randPick([10,100]), q=rInt(2,20), a=p*q; return {key:a+'/'+p, prompt:'Räkna ut:   '+a+' / '+p, ans:q, expl:a+' / '+p+' = '+q}; }
-      if(t===2){ const b=rInt(3,9), q=rInt(11,20), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut:   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q}; }
-      const b=rInt(2,9), q=rInt(2,12), a=b*q; return {key:'n'+a+'/'+b, prompt:'Räkna ut:   −'+a+' / '+b, ans:-q, expl:'−'+a+' / '+b+' = −'+q};
+    testNumericGen('div-rakna-pow10','Division med 10, 100 och 1000','div-rakna', function(){
+      const p=randPick([10,100]), q=rInt(2,20), a=p*q; return {key:a+'/'+p, prompt:'Räkna ut:   '+a+' / '+p, ans:q, expl:a+' / '+p+' = '+q};
+    }),
+    testNumericGen('div-rakna-stora','Division med stora tal','div-rakna', function(){
+      const b=rInt(3,9), q=rInt(11,20), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut:   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q};
     })
   ]},
 
@@ -4213,20 +4211,9 @@ const TEST_GENERATORS = {
       return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
     })
   ]},
-  'prio-lagar': { snabb: [
-    testFlervalGen('prio-lagar','Räknelagarna','prio-lagar', function(){
-      const bank=[
-        {e:'7 + 12 = 12 + 7', l:'Kommutativa lagen'},
-        {e:'6 · 9 = 9 · 6', l:'Kommutativa lagen'},
-        {e:'(2 + 3) + 4 = 2 + (3 + 4)', l:'Associativa lagen'},
-        {e:'(2 · 5) · 3 = 2 · (5 · 3)', l:'Associativa lagen'},
-        {e:'3 · (4 + 5) = 3 · 4 + 3 · 5', l:'Distributiva lagen'},
-        {e:'5 · (10 + 2) = 5 · 10 + 5 · 2', l:'Distributiva lagen'}
-      ];
-      const b=randPick(bank);
-      return {key:b.e, prompt:'Vilken räknelag används?   '+b.e, options:['Kommutativa lagen','Associativa lagen','Distributiva lagen'], answer:b.l, expl:b.e+' — '+b.l+'.'};
-    })
-  ]},
+  // OBS: räknelagarna (kommutativa/associativa/distributiva) delas i boken i tre EGNA noder
+  // (prio-lagar:kommutativa/:associativa/:distributiva). Min "vilken lag?"-flerval spänner alla
+  // tre och mappar inte rent → utelämnad här (byggs), egen skiva med per-lag-generatorer.
 
   'neg-begrepp': { snabb: [
     testNumericGen('neg-begr','Negativa tal: begrepp','neg-begrepp', function(){
@@ -4272,28 +4259,28 @@ const GEN_NOD = {
   'utvform-valj':   'utvecklad:metod',
   'utvform-lasut':  'utvecklad:rakna',
   'oka-minska':     'rakneträning:rakna',
-  // slice 4 – fyra räknesätt (+ prioritering, räknelagar, negativa tal)
+  // slice 4/5 – fyra räknesätt: bundna till BOKENS fina taxonomi-noder (utbudslista d2/d3/d5/d6/d7)
+  // så loggning färgar samma cell som kartan visar. Metoder → uppstallning/kort; beräkning delas i pow10/stora.
   'add-begr-b':     'add-begrepp:begrepp',
-  'add-begr-r':     'add-begrepp:rakna',
+  'add-begr-r':     'add-rakna:rakna',          // tiokompis/saknat tal → huvudräkning (boken har ingen egen nod)
   'add-huvud':      'add-rakna:rakna',
-  'add-uppst':      'add-metoder:metod',
+  'add-uppst':      'add-metoder:uppstallning',
   'sub-begr-b':     'sub-begrepp:begrepp',
-  'sub-begr-r':     'sub-begrepp:rakna',
+  'sub-begr-r':     'sub-rakna:rakna',
   'sub-huvud':      'sub-rakna:rakna',
-  'sub-uppst':      'sub-metoder:metod',
+  'sub-uppst':      'sub-metoder:uppstallning',
   'mult-begr-b':    'mult-begrepp:begrepp',
-  'mult-fakt':      'mult-begrepp:rakna',
   'mult-tabell':    'mult-tabell:rakna',
-  'mult-uppst':     'mult-metoder:metod',
-  'mult-rakna':     'mult-rakna:rakna',
+  'mult-uppst':     'mult-metoder:uppstallning',
+  'mult-rakna-pow10':'mult-rakna:pow10',        // ·10/100/1000 → d5
+  'mult-rakna-stora':'mult-rakna:stora',        // stora tal → d6
   'div-begr-b':     'div-begrepp:begrepp',
-  'div-delbar':     'div-begrepp:rakna',
   'div-tabell':     'div-tabell:rakna',
-  'div-uppst':      'div-metoder:metod',
-  'div-rakna':      'div-rakna:rakna',
+  'div-uppst':      'div-metoder:kort',
+  'div-rakna-pow10':'div-rakna:pow10',          // ·10/100/1000 → d5
+  'div-rakna-stora':'div-rakna:stora',          // stora tal → d7
   'prio-samband':   'prio-samband:rakna',
   'prio-uttryck':   'prio-prioritering:rakna',
-  'prio-lagar':     'prio-lagar:rakna',
   'neg-begr':       'neg-begrepp:begrepp',
   'neg-addsub':     'neg-rakna:addsub',
   'neg-multdiv':    'neg-rakna:multdiv'
@@ -4320,8 +4307,19 @@ const FARG_INFO = [
   {namn:'Grön',   bg:'#6BA544'}
 ];
 const FORMAGA_NAMN = {begrepp:'Begrepp', rakna:'Räkna', metod:'Metod', kommunikation:'Kommunikation', resonera:'Resonera', problem:'Problem', addsub:'Plus och minus', multdiv:'Gånger och delat'};
-// Namn för syntetiska del-filter (utan egen DELAR-post), t.ex. bokens sammanslagna delkapitel.
-const DEL_FILTER_NAMN = {fyraraknesatt:'De fyra räknesätten'};
+// Bokens delkapitel (kapitel 1) — samma indelning som delkapitel-sidorna och kartan (via taxonomins
+// visning.utbudslista d1–d8). Provbyggaren grupperar väljaren efter DESSA, inte ram-modellens DELAR_KO,
+// så eleven möter samma delkapitel-struktur som på kartan. Titlar = delkapitel-sidornas rubriker.
+const BOK_DELKAPITEL = [
+  {del:'d1', titel:'Positionssystem och talförståelse'},
+  {del:'d2', titel:'De fyra räknesätten'},
+  {del:'d3', titel:'Negativa tal'},
+  {del:'d4', titel:'Bråkform och decimalform'},
+  {del:'d5', titel:'Multiplikation och division med 10, 100 och 1000'},
+  {del:'d6', titel:'Multiplikation med stora och små tal'},
+  {del:'d7', titel:'Division med stora och små tal'},
+  {del:'d8', titel:'Avrundning och överslagsräkning'}
+];
 // mastery-färg (0–3) för en nod, samma nyckel/logik som kartan läser.
 function nodFargState(node, matris){
   if(!(window.Mastery && window.Mastery.masteryState)) return 0;
@@ -4413,36 +4411,52 @@ function renderTestConfig(){
   const numProblem = cfg.typ === 'snabb-och-problem' ? Math.max(1, Math.round(cfg.antal * 0.3)) : 0;
   const numSnabb = cfg.antal - numProblem;
 
-  // KAPITELNIVÅ är primär: hela kapitlet (alla KUNSKAPSOMRADEN) syns. ?del= är ett FILTER som
-  // *minskar* till ett delkapitels kunskapsområden – inte längre ett scope. Färg-filtret verkar
-  // över det som visas (hela kapitlet om inget del-filter), så eleven kan bygga t.ex. "alla orange".
-  const filterKOs = (cfg.del && DELAR_KO[cfg.del]) ? DELAR_KO[cfg.del] : null;
-  const shownKOs = filterKOs || KUNSKAPSOMRADEN;
-  const delObj = cfg.del ? DELAR.find(d => d.id === cfg.del) : null;
-  const delNamn = cfg.del ? (delObj ? delObj.titel : (DEL_FILTER_NAMN[cfg.del] || cfg.del)) : null;
-
-  // Färdighetslista ur taxonomin (samma noder som Färdighetsträningen/självskattningen), GRUPPERAD
-  // per kunskapsområde (som kartans område → färdighet). Byggbar = har en test-generator (NOD_GENS).
+  // TAXONOMI-DRIVEN: väljaren speglar BOKENS delkapitel (taxonomins visning.utbudslista d1–d8), precis
+  // som kartan/delkapitel-sidorna — inte ram-modellens DELAR_KO. Byggbar = noden har en test-generator
+  // (NOD_GENS, bunden till samma fina bok-nod som kartan färgar). Kapitelnivå primär; ?del= filtrerar
+  // till ETT bok-delkapitel; färg-filtret verkar över det visade.
+  const TAX = (window.K1_TAXONOMI && window.K1_TAXONOMI.noder) || [];
   const matris = (window.Mastery && window.Mastery.lasMatris) ? window.Mastery.lasMatris() : {};
-  const grupper = shownKOs.map(ko => ({
-    ko,
-    rader: Object.keys(ko.formagor || {}).map(fk => {
-      const node = ko.id + ':' + fk;
-      const byggbar = !!NOD_GENS[node];
-      return { node, fk, etikett: FORMAGA_NAMN[fk] || fk, desc: (ko.formagor[fk].desc || ''),
-               byggbar, farg: byggbar ? nodFargState(node, matris) : null };
-    })
-  }));
-  const byggbara = [].concat.apply([], grupper.map(g => g.rader)).filter(f => f.byggbar);
+  const delFilter = (cfg.del && BOK_DELKAPITEL.some(d => d.del === cfg.del)) ? cfg.del : null;
+  const delNamn = delFilter ? BOK_DELKAPITEL.find(d => d.del === delFilter).titel : null;
+  const bokNoder = TAX.filter(n => n.niva === 'lovnod' && n.visning && n.visning.utbudslista);
 
-  // Default-hopfällning: kollapsa område utan byggbara färdigheter (håller vyn överblickbar).
+  function minGruppOrd(nodes, g){
+    return Math.min.apply(null, nodes.filter(n => (n.visning.grupp || 'Övrigt') === g).map(n => n.visning.gruppordning || 0));
+  }
+  function radAv(n){
+    const byggbar = !!NOD_GENS[n.id];
+    return { node: n.id, etikett: (n.kartLabel || n.namn), formaga: (n.visning.etikett || ''),
+             byggbar, farg: byggbar ? nodFargState(n.id, matris) : null };
+  }
+  const delkapitel = BOK_DELKAPITEL
+    .filter(d => !delFilter || d.del === delFilter)
+    .map(d => {
+      const dn = bokNoder.filter(n => n.visning.utbudslista === d.del);
+      const gnamn = [];
+      dn.forEach(n => { const g = n.visning.grupp || 'Övrigt'; if(gnamn.indexOf(g) < 0) gnamn.push(g); });
+      gnamn.sort((a, b) => minGruppOrd(dn, a) - minGruppOrd(dn, b));
+      const undergrupper = gnamn.map(g => ({
+        namn: g,
+        rader: dn.filter(n => (n.visning.grupp || 'Övrigt') === g)
+                 .sort((x, y) => (x.visning.radordning || 0) - (y.visning.radordning || 0))
+                 .map(radAv)
+      }));
+      return { del: d.del, titel: d.titel, undergrupper };
+    })
+    .filter(d => d.undergrupper.length);
+
+  const allaRader = [].concat.apply([], delkapitel.map(d => [].concat.apply([], d.undergrupper.map(u => u.rader))));
+  const byggbara = allaRader.filter(r => r.byggbar);
+
+  // Default-hopfällning: kollapsa delkapitel utan byggbara färdigheter (håller vyn överblickbar).
   if(cfg.collapsed === null){
-    cfg.collapsed = grupper.filter(g => !g.rader.some(r => r.byggbar)).map(g => g.ko.id);
+    cfg.collapsed = delkapitel.filter(d => !d.undergrupper.some(u => u.rader.some(r => r.byggbar))).map(d => d.del);
   }
 
   // Färg-filtret härleder urvalet över det visade: nodes=null → förväljd ur filtret; annars manuellt.
   function synkaFranFilter(){
-    cfg.nodes = byggbara.filter(f => cfg.fargFilter.includes(f.farg)).map(f => f.node);
+    cfg.nodes = byggbara.filter(r => cfg.fargFilter.includes(r.farg)).map(r => r.node);
   }
   if(cfg.nodes === null) synkaFranFilter();
   const valda = cfg.nodes || [];
@@ -4451,7 +4465,7 @@ function renderTestConfig(){
     <div class="header-card">
       <div class="header-eyebrow">Kapitel 1 · Taluppfattning</div>
       <h1 class="header-title">Skapa ditt eget test</h1>
-      <p class="header-sub">Här ser du <strong>hela kapitlets</strong> färdigheter, grupperade per område. Fäll ihop det du inte vill se, filtrera på delkapitel eller mastery-färg för att fokusera (t.ex. alla dina orange färdigheter). Provet görs på skärmen; det rättas och färgar kartan.</p>
+      <p class="header-sub">Här ser du <strong>hela kapitlets</strong> färdigheter, grupperade efter <strong>bokens delkapitel</strong> – samma struktur som kartan. Fäll ihop det du inte vill se, filtrera på delkapitel eller mastery-färg för att fokusera (t.ex. alla dina orange färdigheter). Provet görs på skärmen; det rättas och färgar kartan.</p>
     </div>
 
     ${cfg.del ? `<div class="config-filter-note">Filtrerat till delkapitlet <strong>${delNamn}</strong>. <button class="cfn-clear" id="clear-del">Visa hela kapitlet</button></div>` : ''}
@@ -4496,36 +4510,40 @@ function renderTestConfig(){
     <div class="test-config-card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
         <h3 style="margin:0;">Färdigheter</h3>
-        <button class="cfn-clear" id="toggle-all-groups">${cfg.collapsed.length >= grupper.length ? 'Fäll ut alla' : 'Fäll ihop alla'}</button>
+        <button class="cfn-clear" id="toggle-all-groups">${cfg.collapsed.length >= delkapitel.length ? 'Fäll ut alla' : 'Fäll ihop alla'}</button>
       </div>
-      <p class="config-desc">Grupperat per område. Färgprickar visar hur långt du kommit; färdigheter utan test-generator är märkta "byggs".</p>
+      <p class="config-desc">Grupperat efter <strong>bokens delkapitel</strong> – samma struktur som kartan. Färgprickar visar hur långt du kommit; färdigheter utan test-generator är märkta "byggs".</p>
       <div id="config-grupper">
-        ${grupper.map(g => {
-          const gByggbara = g.rader.filter(r => r.byggbar);
-          const gValda = g.rader.filter(r => valda.includes(r.node));
-          const collapsed = cfg.collapsed.includes(g.ko.id);
+        ${delkapitel.map(d => {
+          const dRader = [].concat.apply([], d.undergrupper.map(u => u.rader));
+          const dByggbara = dRader.filter(r => r.byggbar);
+          const dValda = dRader.filter(r => valda.includes(r.node));
+          const collapsed = cfg.collapsed.includes(d.del);
           return `
             <div class="config-group ${collapsed?'is-collapsed':''}">
-              <div class="config-group-head" data-ko="${g.ko.id}">
+              <div class="config-group-head" data-del="${d.del}">
                 <span class="cg-chev">${collapsed?'▸':'▾'}</span>
-                <span class="cg-titel">${g.ko.titel || g.ko.id}</span>
-                <span class="cg-meta">${gByggbara.length ? `${gValda.length}/${gByggbara.length} valda` : 'byggs'}</span>
+                <span class="cg-titel"><span class="cg-delnr">Del ${d.del.replace('d','')}</span> ${d.titel}</span>
+                <span class="cg-meta">${dByggbara.length ? `${dValda.length}/${dByggbara.length} valda` : 'byggs'}</span>
               </div>
               <div class="config-group-body">
-                ${g.rader.map(f => {
-                  const checked = valda.includes(f.node);
-                  const dimmed = f.byggbar && !checked && !cfg.fargFilter.includes(f.farg);
-                  const dot = f.byggbar
-                    ? `<span class="cb-dot" style="background:${FARG_INFO[f.farg].bg};" title="${FARG_INFO[f.farg].namn}"></span>`
-                    : `<span class="cb-dot" style="background:transparent;border-style:dashed;box-shadow:none;"></span>`;
-                  return `
-                    <div class="config-checkbox ${checked?'is-checked':''} ${!f.byggbar?'is-disabled':''} ${dimmed?'is-dimmed':''}" data-node="${f.node}" ${!f.byggbar?'title="Byggs – ingen test-generator ännu"':''}>
-                      ${dot}
-                      <div class="cb-text">${f.etikett}${f.desc?`<span class="cb-sub">${f.desc}</span>`:''}${!f.byggbar?'<span class="cb-stub">byggs</span>':''}</div>
-                      <div class="cb-square">${checked?'✓':''}</div>
-                    </div>
-                  `;
-                }).join('')}
+                ${d.undergrupper.map(u => `
+                  <div class="cg-subhead">${u.namn}</div>
+                  ${u.rader.map(f => {
+                    const checked = valda.includes(f.node);
+                    const dimmed = f.byggbar && !checked && !cfg.fargFilter.includes(f.farg);
+                    const dot = f.byggbar
+                      ? `<span class="cb-dot" style="background:${FARG_INFO[f.farg].bg};" title="${FARG_INFO[f.farg].namn}"></span>`
+                      : `<span class="cb-dot" style="background:transparent;border-style:dashed;box-shadow:none;"></span>`;
+                    return `
+                      <div class="config-checkbox ${checked?'is-checked':''} ${!f.byggbar?'is-disabled':''} ${dimmed?'is-dimmed':''}" data-node="${f.node}" ${!f.byggbar?'title="Byggs – ingen test-generator ännu"':''}>
+                        ${dot}
+                        <div class="cb-text">${f.etikett}${f.formaga?`<span class="cb-sub">${f.formaga}</span>`:''}${!f.byggbar?'<span class="cb-stub">byggs</span>':''}</div>
+                        <div class="cb-square">${checked?'✓':''}</div>
+                      </div>
+                    `;
+                  }).join('')}
+                `).join('')}
               </div>
             </div>
           `;
@@ -4558,18 +4576,18 @@ function renderTestConfig(){
       renderTestConfig();
     };
   });
-  // Gruppuvud: fäll ihop / ut området.
+  // Gruppuvud: fäll ihop / ut delkapitlet.
   document.querySelectorAll('#config-grupper .config-group-head').forEach(head => {
     head.onclick = () => {
-      const ko = head.dataset.ko;
-      if(cfg.collapsed.includes(ko)) cfg.collapsed = cfg.collapsed.filter(x => x !== ko);
-      else cfg.collapsed = cfg.collapsed.concat(ko);
+      const del = head.dataset.del;
+      if(cfg.collapsed.includes(del)) cfg.collapsed = cfg.collapsed.filter(x => x !== del);
+      else cfg.collapsed = cfg.collapsed.concat(del);
       renderTestConfig();
     };
   });
   const toggleAll = document.getElementById('toggle-all-groups');
   if(toggleAll) toggleAll.onclick = () => {
-    cfg.collapsed = cfg.collapsed.length >= grupper.length ? [] : grupper.map(g => g.ko.id);
+    cfg.collapsed = cfg.collapsed.length >= delkapitel.length ? [] : delkapitel.map(d => d.del);
     renderTestConfig();
   };
   const clearDel = document.getElementById('clear-del');
@@ -9796,10 +9814,11 @@ function repSkippaPanel(){
   var mv = hs.match(/view=([a-z-]+)/i);
   if(mv && (mv[1] === 'test-config' || mv[1] === 'skattning')){
     if(mv[1] === 'test-config'){
-      // ?del= scopar provbyggaren till ett delkapitel (DELAR_KO-nyckel); okänt/utelämnat = hela kapitlet.
+      // ?del= filtrerar provbyggaren till ett BOK-delkapitel (d1–d8); okänt/utelämnat = hela kapitlet.
       var mdel = hs.match(/[?&]del=([a-z0-9-]+)/i);
-      state.testConfig.del = (mdel && DELAR_KO[mdel[1]]) ? mdel[1] : null;
-      state.testConfig.nodes = null; // härled urvalet ur färg-filtret för det nya scopet
+      state.testConfig.del = (mdel && BOK_DELKAPITEL.some(function(d){ return d.del === mdel[1]; })) ? mdel[1] : null;
+      state.testConfig.nodes = null;     // härled urvalet ur färg-filtret för det nya scopet
+      state.testConfig.collapsed = null; // räkna om default-hopfällning för vyn
     }
     renderKapitel();
     navTo(mv[1]);
@@ -9849,6 +9868,8 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-avrundning.js"></script>
 <script src="js/motor/metod/metod-d1-tillagg.js"></script>
 <script src="js/motor/potens/potens-drill.js"></script>
+<!-- Taxonomin (bok-delkapitel via visning.utbudslista) — provbyggaren driver väljaren ur den, som kartan/delkapitel-sidorna. -->
+<script src="js/data/k1-taxonomi.js"></script>
 <!-- Mastery-loggning (elev-lokal, localStorage). Observerar getTutorScore; rör ej drill-logik. -->
 <script src="js/mastery.js"></script>
 <!-- Engångs-migreringar av mastery-loggen (idempotent, localStorage). Efter mastery.js. -->
