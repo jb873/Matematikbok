@@ -105,8 +105,7 @@
 
   // ══════════════════════════ RENDER ══════════════════════════
   var CHECKS = [];
-  var EQS = '<span class="ovn-text ak8-eq">=</span>';
-  function ansWrap(role, extra){ return '<span class="ak8-ledwrap' + (extra ? ' ' + extra : '') + '">' + EQS + AK8_UI.ansCell(role) + '</span>'; }
+  var EQS = '<span class="ovn-text ak8-eq">=</span>';   // canonical använder EQS + bcell direkt; equality-kedjan använder AK8_UI.kedjaRadHTML
   function exprOf(scope, role){ return scope.querySelector('.ak8-cell[data-r="' + role + '"] .ak8-expr'); }
 
   function renderRad(r){
@@ -121,16 +120,12 @@
       r.cells.forEach(function(c, i){ html += EQS + bcell('k' + i, !!c.m); });
       return html + '</div>';
     }
-    // equality
+    // equality — DELAD kedje-helper (samma som d6 låna + division)
     CHECKS.push(function(el){
-      var celler = [].slice.call(el.querySelectorAll('.ak8-cell')).map(function(c){ return exprOf(el, c.dataset.r); });
-      var res = LR.provaKedja(celler, r.v, r.fin);
+      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
       return { ok: res.ok, facit: 'svar: ' + finText(r.fin) + ' (varje led = uttrycket)' };
     });
-    var celler = '';
-    for(var k = 0; k < 4; k++) celler += ansWrap('L' + k, k >= 2 ? 'ak8-extra' : '');
-    return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>' + celler
-      + '<button type="button" class="ak8-mer" data-mer>+ led</button></div>';
+    return AK8_UI.kedjaRadHTML(idx, r.q);
   }
 
   function renderBlad(mount, blad){
@@ -141,9 +136,7 @@
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
     html += AK8_UI.keypadHTML({ builders: true, ops: ['+', '−', '·', '/', ','] });
     mount.innerHTML = html;
-    mount.querySelectorAll('[data-mer]').forEach(function(btn){
-      btn.onclick = function(){ var d = btn.parentNode.querySelector('.ak8-extra'); if(d){ d.classList.remove('ak8-extra'); AK8_UI.grow(d.querySelector('input')); } };
-    });
+    // "+ led" (fri kedja) wiras i AK8_UI.bindSheet — ingen lokal wiring behövs.
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
     AK8_UI.bindSheet(mount);

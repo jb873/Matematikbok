@@ -40,6 +40,19 @@
     return html;
   }
 
+  // ── FRI EQUALITY-KEDJA (DELAD): "uttryck = [led] = [led] … + led". Används av d6 (låna),
+  //    d7 (förkorta/förenkla-innan) och division (två-varianter m.m.). EN ledruta = "=" + ansCell.
+  //    kedjeCeller() ger led-cellernas expr i ordning (mata Likhetsrattare.provaKedja). "+ led"-knappen
+  //    avslöjar nästa dolda extra-ruta (wiras i bindSheet). Ett enda "=" per del (inget efter uttrycket).
+  function ledWrap(role, extra){ return '<span class="ak8-ledwrap' + (extra ? ' ' + extra : '') + '"><span class="ovn-text ak8-eq">=</span>' + ansCell(role) + '</span>'; }
+  function kedjaRadHTML(idx, qHTML){
+    var celler = '';
+    for(var k = 0; k < 4; k++) celler += ledWrap('L' + k, k >= 2 ? 'ak8-extra' : '');
+    return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + qHTML + '</span>' + celler
+      + '<button type="button" class="ak8-mer" data-mer>+ led</button></div>';
+  }
+  function kedjaCeller(radEl){ return [].slice.call(radEl.querySelectorAll('.ak8-cell .ak8-expr')); }
+
   // ── AUTO-VÄXANDE RUTA ──
   function grow(inp){
     if(!inp) return;
@@ -180,6 +193,11 @@
       var b = e.target.closest && e.target.closest('.ak8-chip, .ak8-tal, .ak8-vf, .ak8-korval'); if(!b) return;
       var rad = b.closest('.ak8-rad'); if(rad) rensaRad(rad);
     }, true);
+    // "+ led" i fri equality-kedja: avslöja nästa dolda extra-ruta (delad för alla kedje-blad)
+    mount.addEventListener('click', function(e){
+      var b = e.target.closest && e.target.closest('[data-mer]'); if(!b) return;
+      var d = b.parentNode.querySelector('.ak8-extra'); if(d){ d.classList.remove('ak8-extra'); grow(d.querySelector('input')); }
+    });
     // initiala bredder + auto-fokus (utan att skrolla)
     mount.querySelectorAll('.ak8-in').forEach(grow);
     if(opts.focus !== false){ var f0 = mount.querySelector('.ak8-in:not([disabled])'); if(f0){ try { f0.focus({ preventScroll:true }); } catch(e){ f0.focus(); } } }
@@ -191,6 +209,7 @@
     pNum: pNum, evalArith: evalArith, inTal: inTal,
     gruppRubrik: gruppRubrik, injLabel: injLabel, renderGrupp: renderGrupp,
     grow: grow, ansCell: ansCell, cellRead: cellRead, exprSerialize: exprSerialize,
+    ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
     markera: markera, rensaRad: rensaRad
   };

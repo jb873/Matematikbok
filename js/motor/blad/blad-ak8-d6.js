@@ -90,8 +90,6 @@
 
   // ══════════════════════════ RENDER ══════════════════════════
   var CHECKS = [];
-  var EQ = '<span class="ovn-text ak8-eq">=</span>';
-  function ledWrap(role, forlangKlass){ return '<span class="ak8-ledwrap' + (forlangKlass ? ' ' + forlangKlass : '') + '">' + EQ + AK8_UI.ansCell(role) + '</span>'; }
   function exprOf(scope, role){ return scope.querySelector('.ak8-cell[data-r="' + role + '"] .ak8-expr'); }
 
   function finText(fin){ return fin.k === 'dec' ? String(fin.x).replace('.', ',') : fin.k === 'br' ? fin.t + '/' + fin.n : fin.h + ' ' + fin.t + '/' + fin.n; }
@@ -100,16 +98,11 @@
     var idx = CHECKS.length;
     if(r.lana){
       CHECKS.push(function(el){
-        // FRI equality-kedja via delade rättaren: varje ifyllt led = radens värde, sista = svaret i enklaste form (path-fritt)
-        var celler = [].slice.call(el.querySelectorAll('.ak8-cell')).map(function(c){ return exprOf(el, c.dataset.r); });
-        var res = LR.provaKedja(celler, r.v, r.fin);
+        // FRI equality-kedja via DELADE helpern + rättaren: varje ifyllt led = radens värde, sista = svaret i enklaste form (path-fritt)
+        var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
         return { ok: res.ok, facit: 'svar: ' + finText(r.fin) + (res.antal ? ' (varje led = uttrycket)' : '') };
       });
-      // fri kedja: fyra led-rutor + "lägg till"
-      var celler = '';
-      for(var k = 0; k < 4; k++) celler += ledWrap('L' + k, k >= 2 ? 'ak8-extra' : '');
-      return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>' + celler
-        + '<button type="button" class="ak8-mer" data-mer>+ led</button></div>';
+      return AK8_UI.kedjaRadHTML(idx, r.q);
     }
     // kanonisk kedja
     var cells = [], roll = 0;
@@ -129,7 +122,7 @@
       return { ok: ok && sett, facit: 'svar: ' + finText(r.fin) };
     });
     var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
-    cells.forEach(function(c){ html += ledWrap(c.role, c.fk); });
+    cells.forEach(function(c){ html += AK8_UI.ledWrap(c.role, c.fk); });
     return html + '</div>';
   }
 
@@ -143,10 +136,7 @@
     html += AK8_UI.keypadHTML({ builders: true, ops: ['+', '−', '·', '/', ','] });
     mount.innerHTML = html;
     var sheet = mount.querySelector('.ovn-sheet');
-    // LÅNA: "+ led" visar nästa dolda extra-ruta
-    mount.querySelectorAll('[data-mer]').forEach(function(btn){
-      btn.onclick = function(){ var d = btn.parentNode.querySelector('.ak8-extra'); if(d){ d.classList.remove('ak8-extra'); AK8_UI.grow(d.querySelector('input')); } };
-    });
+    // "+ led" (fri kedja) wiras i AK8_UI.bindSheet — ingen lokal wiring behövs.
     mount.querySelector('[data-forlang]').onclick = function(){ sheet.classList.toggle('visa-forlang'); this.classList.toggle('is-on'); this.textContent = sheet.classList.contains('visa-forlang') ? 'Dölj förlängning' : 'Visa förlängning'; };
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
