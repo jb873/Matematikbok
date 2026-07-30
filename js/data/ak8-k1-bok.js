@@ -81,6 +81,19 @@ window.AK8_K1_BOK = {
       ]
     },
     {
+      // Division med bråk (position 7) — sista bråk-delkapitlet. Division är sjuans fördjupning,
+      // promoterad till åk8-mål ({ak8:mal} redan i k2). Två Öva-blad + kombinerad mult/div-
+      // problemlösning (PROB_RUTA). Motor blad-ak8-d8.js: INVERTERA (reciprok), kanoniska metod-
+      // rutor (produktbråk via evalArith) + equality (två-varianter/förkorta-innan/blandade) via
+      // delade Likhetsrattare. Nya noder: brak-div-reciprok {ak8:mal}; brak-div-inv fick ak8:mal.
+      // förkorta-innan återanvänder brak-mult-forkorta. De 2 ordproblemen bor kvar i dk5. minNiva ej satt.
+      nr: 7, id: 'div-brak', titel: 'Division', fil: 'div-brak.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Division, blad 1', roll: 'mal', noder: ['brak-div-reciprok:rakna', 'brak-div-hb:rakna', 'brak-div-bh:rakna', 'brak-div-bb:rakna', 'brak-div-inv:rakna'] },
+        { nr: 2, titel: 'Division, blad 2', roll: 'mal', noder: ['brak-div-hb:rakna', 'brak-div-bh:rakna', 'brak-div-bb:rakna', 'brak-mult-forkorta:rakna'] }
+      ]
+    },
+    {
       nr: 3, id: 'negativa-tal', titel: 'Negativa tal', fil: 'negativa-tal.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Grunder',                     roll: 'repetition', noder: ['neg-begrepp:begrepp'] },

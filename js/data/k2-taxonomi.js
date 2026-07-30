@@ -377,15 +377,27 @@ window.K2_TAXONOMI = {
        egen logg (deeplink ?ko=brak-div-inv&formaga=rakna). roll fordjupning, ak7 endast. */
     {
       "id": "brak-div-inv", "namn": "Dividera bråktal med bråktal (invertera)", "parent": "brak-div", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": null, "generator": null,
       "begrepp": "Den kortare vägen: invertera nämnaren och multiplicera direkt – utan den utskrivna femstegskedjan. Kortare kommunikation som tecken på djupare förståelse, inte genväg.",
       "visning": null
     },
     {
       "id": "brak-div-inv:rakna", "namn": "Dividera bråktal med bråktal (invertera)", "parent": "brak-div-inv", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakBrak",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakBrak",
       "begrepp": "Invertera nämnaren och multiplicera direkt; svar i enklaste form. Ingen utskriven femstegskedja krävs.",
       "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 3, "titel": "Bråktal ÷ bråktal (invertera)", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+    {
+      "id": "brak-div-reciprok", "namn": "Skriva reciprok (invertera ett tal)", "parent": "brak-div", "niva": "deldoman",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Skriva det inverterade (reciproka) talet: byt plats på täljare och nämnare (4/7 → 7/4). Egen färdighet, skild från själva divisionen; den algebraiska varianten (2x/y → y/2x) knyter till algebra-kapitlet. Nytt mål i åttan.",
+      "visning": null
+    },
+    {
+      "id": "brak-div-reciprok:rakna", "namn": "Skriva reciprok", "parent": "brak-div-reciprok", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Skriv reciproken till ett bråk eller algebraiskt uttryck genom att byta plats på täljare och nämnare.",
+      "visning": null
     },
 
     /* ─────────────── Fördjupnings-strand · bråk och variabler (åk7-fördjupning) ───────────────
