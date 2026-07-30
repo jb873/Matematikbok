@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 9 · Taluppfattning</title>
+<!-- Självhostade fonter (GDPR: ingen extern begäran). Speglar INTE åk7-delkapitlets Google Fonts-länk. -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --navy-mid:#1a3045; --gold:#9a7228; --gold-lt:#c49a40; --blue:#1b4b8a; --green:#2d6a4f; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
+  *{ box-sizing:border-box; margin:0; padding:0; } body{ background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.6; }
+  .topnav{ position:sticky; top:0; z-index:100; background:var(--navy); border-bottom:1px solid rgba(255,255,255,.07); padding:0 28px; height:52px; display:flex; align-items:center; justify-content:space-between; }
+  .nav-brand{ font-family:var(--cinzel); font-size:13px; font-weight:500; letter-spacing:.14em; color:rgba(255,255,255,.9); text-transform:uppercase; display:flex; align-items:center; gap:10px; }
+  .nav-brand span{ color:var(--gold-lt); letter-spacing:.1em; } .nav-sep{ color:rgba(255,255,255,.2); margin:0 2px; }
+  .hero{ background:var(--navy); position:relative; overflow:hidden; padding:44px 28px 40px; text-align:center; }
+  .brodsmulor{ font-family:var(--cinzel); font-size:12px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; margin-bottom:18px; line-height:1.5; }
+  .brodsmulor a{ color:var(--gold-lt); text-decoration:none; } .brodsmulor a:hover{ text-decoration:underline; }
+  .brodsmulor .skiljare{ color:rgba(255,255,255,.32); margin:0 .55em; } .brodsmulor .aktuell{ color:rgba(255,255,255,.92); }
+  .hero-eyebrow{ font-family:var(--cinzel); font-size:11px; letter-spacing:.2em; color:var(--gold-lt); text-transform:uppercase; margin-bottom:10px; }
+  h1.hero-title{ font-family:var(--serif); font-size:clamp(30px,5vw,44px); font-weight:500; line-height:1.15; color:#fff; }
+  h1.hero-title em{ font-style:italic; color:var(--gold-lt); }
+  .hero-back{ display:inline-block; margin-top:22px; font-family:var(--cinzel); font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--gold-lt); text-decoration:none; padding:7px 16px; border:1px solid rgba(255,255,255,.2); border-radius:4px; }
+  .hero-back:hover{ background:rgba(255,255,255,.08); }
+  /* ärlig byggplats-notis */
+  .bygg-note{ max-width:900px; margin:26px auto 0; padding:0 28px; }
+  .bygg-note-inner{ display:flex; gap:14px; align-items:flex-start; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--gold); border-radius:8px; padding:16px 20px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
+  .bygg-note-inner .ikon{ font-size:20px; flex-shrink:0; }
+  /* utbudslista: tre spår, grupperad platt lista (åk7-mönstret) */
+  .utbud{ max-width:900px; margin:0 auto; padding:30px 28px 56px; }
+  .utbud-grupp{ margin-top:30px; } .utbud-grupp:first-of-type{ margin-top:8px; }
+  .utbud-rubrik{ font-family:var(--cinzel); font-size:12px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .utbud-rubrik::after{ content:''; flex:1; height:1px; background:var(--paper-dk); }
+  .utbud-rubrik .spar-tag{ font-size:10px; letter-spacing:.08em; color:var(--gold); background:rgba(154,114,40,.1); border-radius:3px; padding:2px 8px; }
+  .val-rad{ display:flex; flex-wrap:wrap; gap:10px; }
+  .val-chip{ display:inline-flex; align-items:center; gap:8px; font-family:var(--serif); font-size:15px; color:var(--ink-soft); background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:11px 17px; opacity:.62; cursor:default; }
+  .val-chip .kommer{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); background:var(--paper-dk); border-radius:3px; padding:2px 7px; }
+  footer{ border-top:1px solid var(--paper-dk); padding:26px 28px; display:flex; justify-content:space-between; align-items:center; max-width:900px; margin:0 auto; color:var(--ink-faint); font-size:12px; }
+  footer span{ font-family:var(--cinzel); font-size:11px; letter-spacing:.1em; }
+  @media(max-width:600px){ .topnav{ padding:0 16px; } .hero{ padding:36px 18px 32px; } }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 9</span></div>
+</nav>
+
+<header class="hero">
+  <nav class="brodsmulor" aria-label="Brödsmulor">
+    <a href="../../index.html">Matematik</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <a href="../index.html">Årskurs 9</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <a href="index.html">Taluppfattning</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <span class="aktuell" id="crumb-titel" aria-current="page">…</span>
+  </nav>
+  <div class="hero-eyebrow" id="del-eyebrow">Delkapitel · Kapitel 1</div>
+  <h1 class="hero-title" id="hero-titel">…</h1>
+  <a class="hero-back" href="index.html">← Alla delkapitel</a>
+</header>
+
+<div class="bygg-note">
+  <div class="bygg-note-inner">
+    <span class="ikon">🚧</span>
+    <div><strong>Det här delkapitlet byggs.</strong> Skelettet nedan visar de tre spåren och deras val-rader så
+    du ser vad som är på väg. Inget innehåll är inlagt ännu – öva och färdighetsträning kopplas in när
+    åk9-taxonomin taggas och bladen författas. Du kan öva på samma färdigheter i <a href="../../ak8/index.html">årskurs 8</a>
+    och <a href="../../ak7.html">årskurs 7</a> under tiden.</div>
+  </div>
+</div>
+
+<main class="utbud" id="utbud"></main>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span id="footer-del">Årskurs 9 · Kapitel 1</span>
+</footer>
+
+<script src="../../js/data/ak9-k1-bok.js"></script>
+<script>
+(function(){
+  var me = location.pathname.split('/').pop();
+  var bok = window.AK9_K1_BOK || { delkapitel: [] };
+  var dk = (bok.delkapitel || []).filter(function(d){ return d.fil === me; })[0] || { nr:'?', titel:'Delkapitel' };
+  document.getElementById('hero-titel').textContent = dk.titel;
+  document.getElementById('crumb-titel').textContent = dk.titel;
+  document.getElementById('del-eyebrow').textContent = 'Delkapitel ' + dk.nr + ' · Kapitel 1';
+  document.getElementById('footer-del').textContent = 'Årskurs 9 · Kapitel 1 · Delkapitel ' + dk.nr;
+  document.title = 'Matematik · Åk 9 · ' + dk.titel;
+
+  // TRE SPÅR (Joachims E-spåret / Åk 9 / Åk 9 + gymnasiet). Grupperad platt utbudslista (åk7-mönstret):
+  // rubrik = spår (ej klickbar), rad = val (direktlänk när innehållet finns). Nu: skelett, allt "kommer".
+  var SPAR = [
+    { rubrik: 'E-spåret', tag: 'grund', val: ['Öva', 'Färdighetsträning', 'Test'] },
+    { rubrik: 'Åk 9-spåret', tag: 'mål', val: ['Föreläsning', 'Öva', 'Färdighetsträning', 'Test'] },
+    { rubrik: 'Åk 9 + gymnasiet', tag: 'fördjupning', val: ['Fördjupning', 'Färdighetsträning'] }
+  ];
+  var wrap = document.getElementById('utbud');
+  SPAR.forEach(function(s){
+    var g = document.createElement('div'); g.className = 'utbud-grupp';
+    var r = document.createElement('div'); r.className = 'utbud-rubrik';
+    r.innerHTML = s.rubrik + '<span class="spar-tag">' + s.tag + '</span>';
+    var rad = document.createElement('div'); rad.className = 'val-rad';
+    s.val.forEach(function(v){
+      var c = document.createElement('span'); c.className = 'val-chip';
+      c.innerHTML = v + '<span class="kommer">kommer</span>';
+      rad.appendChild(c);
+    });
+    g.appendChild(r); g.appendChild(rad); wrap.appendChild(g);
+  });
+})();
+</script>
+</body>
+</html>

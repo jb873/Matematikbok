@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Årskurs 9</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* ============================================================
+   MATEMATIK · GEMENSAM STIL FÖR NAVIGATIONSSIDORNA
+   Speglad från ak8/index.html (år-översikt).
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.6;}
+.topnav{ position:sticky;top:0;z-index:100; background:var(--navy);border-bottom:1px solid rgba(255,255,255,.07); padding:0 28px;height:52px; display:flex;align-items:center;justify-content:space-between; }
+.nav-brand{ font-family:var(--cinzel);font-size:13px;font-weight:500;letter-spacing:.14em; color:rgba(255,255,255,.9);text-transform:uppercase; display:flex;align-items:center;gap:10px; }
+.nav-brand span{color:var(--gold-lt);letter-spacing:.1em}
+.nav-sep{color:rgba(255,255,255,.2);margin:0 2px}
+.nav-crumbs{ display:flex;align-items:center;gap:9px; font-family:var(--cinzel);font-size:11px;letter-spacing:.08em; color:rgba(255,255,255,.45); }
+.nav-crumbs a{ color:rgba(255,255,255,.6);text-decoration:none; transition:color .15s; }
+.nav-crumbs a:hover{color:var(--gold-lt)}
+.nav-crumbs .crumb-sep{color:rgba(255,255,255,.2)}
+.nav-crumbs .crumb-current{color:rgba(255,255,255,.85)}
+.hero{ background:var(--navy);position:relative;overflow:hidden; padding:64px 28px 56px;text-align:center; }
+.hero::before{ content:'';position:absolute;inset:0;pointer-events:none; background: linear-gradient(135deg, rgba(27,75,138,.15) 0%, transparent 60%), repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px); }
+.hero-eyebrow{ font-family:var(--cinzel);font-size:11px;font-weight:500;letter-spacing:.22em; color:var(--gold-lt);text-transform:uppercase;margin-bottom:18px; position:relative;display:inline-flex;align-items:center;gap:10px; }
+.hero-eyebrow::before,.hero-eyebrow::after{ content:'';display:block;width:28px;height:1px; background:var(--gold-lt);opacity:.5; }
+h1.hero-title{ font-family:var(--serif);font-size:clamp(38px, 6vw, 64px); font-weight:300;line-height:1.1;color:#fff;letter-spacing:-.01em; position:relative;margin-bottom:16px; }
+h1.hero-title em{font-style:italic;color:var(--gold-lt);}
+.hero-desc{ font-size:16px;font-weight:300;color:rgba(255,255,255,.55); max-width:500px;margin:0 auto;line-height:1.65;position:relative; }
+.hero-back{ position:relative;margin-top:26px;display:inline-block; font-family:var(--cinzel);font-size:11px;font-weight:500; letter-spacing:.1em;text-transform:uppercase; color:var(--gold-lt);text-decoration:none; padding:7px 16px;border:1px solid rgba(255,255,255,.2);border-radius:4px; transition:background .15s, border-color .15s; }
+.hero-back:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4)}
+.section-label{ font-family:var(--cinzel);font-size:10px;font-weight:500; letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint); display:flex;align-items:center;gap:12px; padding:40px 28px 18px;max-width:920px;margin:0 auto; }
+.section-label::after{content:'';flex:1;height:1px;background:var(--paper-dk);}
+.card-grid{ max-width:920px;margin:0 auto;padding:0 28px 56px; display:flex;flex-direction:column;gap:12px; }
+.nav-card{ display:flex;background:var(--paper-lt); border:1px solid var(--paper-dk);border-radius:4px;overflow:hidden; text-decoration:none;color:inherit;position:relative; transition:box-shadow .18s, transform .18s, border-color .18s; animation:fadeUp .4s ease both; }
+.nav-card:hover{ box-shadow:0 4px 20px rgba(0,0,0,.09); transform:translateX(3px);border-color:rgba(0,0,0,.12); }
+.nav-card.is-soon{opacity:.6;cursor:default;pointer-events:none;}
+.nav-card.is-soon:hover{transform:none;box-shadow:none}
+.nav-card:nth-child(1){animation-delay:.04s} .nav-card:nth-child(2){animation-delay:.08s} .nav-card:nth-child(3){animation-delay:.12s} .nav-card:nth-child(4){animation-delay:.16s} .nav-card:nth-child(5){animation-delay:.20s} .nav-card:nth-child(6){animation-delay:.24s} .nav-card:nth-child(7){animation-delay:.28s} .nav-card:nth-child(8){animation-delay:.32s} .nav-card:nth-child(9){animation-delay:.36s}
+.card-stripe{width:5px;flex-shrink:0;background:var(--blue);}
+.card-body{ flex:1;padding:19px 22px; display:flex;align-items:center;gap:18px; }
+.card-num{ font-family:var(--cinzel);font-size:12px;font-weight:500;letter-spacing:.1em; color:var(--ink-faint);flex-shrink:0;min-width:74px; }
+.card-main{flex:1}
+.card-title{ font-family:var(--serif);font-size:21px;font-weight:500;line-height:1.2; letter-spacing:-.01em;color:var(--ink);margin-bottom:4px; }
+.card-title em{font-style:italic}
+.card-desc{font-size:13px;color:var(--ink-faint);line-height:1.5;}
+.card-arrow{ font-size:20px;color:var(--ink-faint);font-family:var(--cinzel);flex-shrink:0; transition:color .15s, transform .15s; }
+.nav-card:hover .card-arrow{color:var(--ink);transform:translateX(3px);}
+.card-badge{ font-family:var(--cinzel);font-size:10px;font-weight:500; letter-spacing:.1em;text-transform:uppercase; padding:3px 10px;border-radius:2px;flex-shrink:0; }
+.card-badge.open{background:rgba(27,75,138,.1);color:var(--blue);}
+.card-badge.soon{background:var(--paper-dk);color:var(--ink-faint);}
+.card-badge.prov{background:rgba(154,114,40,.12);color:var(--gold);}
+footer{ border-top:1px solid var(--paper-dk);padding:26px 28px; display:flex;justify-content:space-between;align-items:center; max-width:920px;margin:0 auto; color:var(--ink-faint);font-size:12px;letter-spacing:.04em; }
+footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
+@keyframes fadeUp{ from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+@media(max-width:600px){ .card-body{flex-wrap:wrap;gap:12px} .card-num{min-width:auto} .hero{padding:48px 20px 44px} .topnav{padding:0 16px} .nav-crumbs{display:none} }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 9</span></div>
+  <div class="nav-crumbs">
+    <a href="../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Årskurs 9</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow">Årskurs 9</div>
+  <h1 class="hero-title">Matematik i <em>årskurs 9</em></h1>
+  <p class="hero-desc">Jobba med läsårets kapitel. Kapitel 1 – taluppfattning – är påbörjat (skelett); resten byggs under läsåret.</p>
+  <a class="hero-back" href="../index.html">← Byt årskurs</a>
+</header>
+
+<div class="section-label">Läsårets kapitel</div>
+
+<main class="card-grid" id="kapitel-grid"></main>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Årskurs 9</span>
+</footer>
+
+<script>
+// Läsårets kapitel i åk 9. status: 'open' | 'soon' · typ: 'kapitel' | 'prov' styr färg/badge.
+// Prov-kapitlen (4 Terminsprov, 9 NP) har typ:'prov' redan nu (guld-stripe + Prov-badge); status
+// flippar till 'open' när proven byggs. Bara Taluppfattning är påbörjad (skelett) i dagsläget.
+var KAPITEL = [
+  {nr:1, titel:'Taluppfattning', desc:'Tal och beräkning, bråk, negativa tal, potenser och tiopotenser, grundpotenser, kvadratrötter – på nians nivå.', fil:'k1/index.html', typ:'kapitel', status:'open'},
+  {nr:2, titel:'Funktioner', desc:'Räta linjens ekvation, proportionalitet, grafer och funktioner.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:3, titel:'Procent och sannolikhet', desc:'Procent, förändringsfaktor, ränta och sannolikhet.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:4, titel:'Terminsprov', desc:'Prov på höstterminens kapitel, med repetition och självskattning.', fil:null, typ:'prov', status:'soon'},
+  {nr:5, titel:'Algebra', desc:'Uttryck, ekvationer, olikheter och ekvationssystem.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:6, titel:'Geometri', desc:'Skala, likformighet, Pythagoras sats, area och volym.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:7, titel:'Statistik', desc:'Lägesmått och spridningsmått, tabeller och diagram – att samla in, visa och tolka data.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:8, titel:'Repetition inför NP', desc:'Tvärgående repetition över hela årskursen inför de nationella proven.', fil:null, typ:'kapitel', status:'soon'},
+  {nr:9, titel:'NP', desc:'Nationella provet, med repetition och självskattning.', fil:null, typ:'prov', status:'soon'}
+];
+
+var grid = document.getElementById('kapitel-grid');
+KAPITEL.forEach(function(k){
+  var stripe = k.typ === 'prov' ? 'var(--gold)' : 'var(--blue)';
+  var badge = k.status === 'open'
+    ? '<div class="card-badge open">Öppet</div><div class="card-arrow">›</div>'
+    : '<div class="card-badge ' + (k.typ === 'prov' ? 'prov' : 'soon') + '">'
+        + (k.typ === 'prov' ? 'Prov' : 'Kommer senare') + '</div>';
+  var inner =
+      '<div class="card-stripe" style="background:' + stripe + ';"></div>'
+    + '<div class="card-body">'
+      + '<div class="card-num">Kapitel ' + k.nr + '</div>'
+      + '<div class="card-main">'
+        + '<div class="card-title">' + k.titel + '</div>'
+        + '<div class="card-desc">' + k.desc + '</div>'
+      + '</div>'
+      + badge
+    + '</div>';
+  var el;
+  if(k.status === 'open' && k.fil){
+    el = document.createElement('a'); el.className = 'nav-card'; el.href = k.fil;
+  } else {
+    el = document.createElement('div'); el.className = 'nav-card is-soon';
+  }
+  el.innerHTML = inner;
+  grid.appendChild(el);
+});
+</script>
+
+</body>
+</html>

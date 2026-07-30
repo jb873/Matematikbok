@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 9 · Kapitel 1</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#1b4b8a; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
+  *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
+  .topnav{ background:var(--navy); color:#fff; padding:14px 26px; display:flex; align-items:center; justify-content:space-between; gap:14px; font-size:13px; }
+  .topnav .brand{ font-family:var(--cinzel); letter-spacing:.06em; }
+  .topnav a{ color:rgba(255,255,255,.8); text-decoration:none; }
+  .nav-crumbs{ display:flex; align-items:center; gap:8px; } .nav-crumbs a:hover{ color:var(--gold-lt); }
+  .nav-crumbs .crumb-sep{ opacity:.35; } .nav-crumbs .crumb-current{ color:rgba(255,255,255,.85); }
+  @media(max-width:560px){ .nav-crumbs .crumb-hem{ display:none; } }
+  .hero{ background:var(--navy); color:#fff; padding:26px 26px 46px; text-align:center; }
+  .hero .eyebrow{ font-family:var(--cinzel); font-size:12px; letter-spacing:.18em; color:var(--gold-lt); }
+  .hero h1{ font-family:var(--serif); font-size:40px; font-weight:500; margin:8px 0 6px; } .hero h1 em{ color:var(--gold-lt); font-style:italic; }
+  .hero p{ max-width:560px; margin:0 auto; color:rgba(255,255,255,.75); font-size:15px; line-height:1.6; }
+  .wrap{ max-width:860px; margin:0 auto; padding:28px 24px 60px; }
+  .bygg-banner{ display:flex; gap:13px; align-items:flex-start; margin:0 0 22px; padding:16px 20px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--gold); border-radius:8px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
+  .bygg-banner .ikon{ font-size:20px; flex-shrink:0; }
+  .karta-lank{ display:inline-flex; align-items:center; gap:8px; margin:0 0 22px; padding:10px 18px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--paper-dk); border-radius:8px; color:var(--ink-faint); font-size:14px; opacity:.7; cursor:default; }
+  .karta-lank .kommer{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); background:var(--paper-dk); border-radius:3px; padding:2px 8px; margin-left:auto; }
+  .del{ display:flex; align-items:flex-start; gap:16px; padding:16px 18px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:10px; margin-bottom:12px; text-decoration:none; color:inherit; }
+  .del.open:hover{ border-color:var(--gold-lt); box-shadow:0 3px 12px rgba(0,0,0,.05); }
+  .del-nr{ flex-shrink:0; width:38px; height:38px; border-radius:50%; background:var(--navy); color:#fff; font-family:var(--cinzel); display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .del-titel{ font-size:19px; font-weight:600; line-height:1.25; }
+  .del-blad{ margin-top:4px; color:var(--ink-faint); font-size:13.5px; }
+  .del-badge{ margin-left:auto; align-self:center; font-family:var(--cinzel); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); flex-shrink:0; }
+  footer{ text-align:center; padding:30px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--paper-dk); }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <span class="brand">Matematik · Åk 9</span>
+  <div class="nav-crumbs">
+    <a class="crumb-hem" href="../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../index.html">Årskurs 9</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Kapitel 1</span>
+  </div>
+</nav>
+<header class="hero">
+  <div class="eyebrow">Årskurs 9 · Kapitel 1</div>
+  <h1 id="hero-titel">Taluppfattning</h1>
+  <p>Kapitlets nio delkapitel. Öva-bladen och färdighetsträningen kommer att dela noder med åk 7 och 8 – samma färdigheter på högre nivå.</p>
+</header>
+<div class="wrap">
+  <div class="bygg-banner">
+    <span class="ikon">🚧</span>
+    <div><strong>Kapitlet byggs.</strong> Alla nio delkapitel finns som skelett – du kan klicka in och se strukturen (de tre spåren), men inget innehåll är inlagt ännu. Det fylls i under terminen. Öva på samma färdigheter i <a href="../../ak8/index.html">årskurs 8</a> så länge.</div>
+  </div>
+  <div class="karta-lank">🗺️ Begreppskartan (åk 9) <span class="kommer">kommer</span></div>
+  <div id="del-lista"></div>
+</div>
+<footer>Digitalt läromedel i matematik · Åk 9 · Kapitel 1</footer>
+
+<script src="../../js/data/ak9-k1-bok.js"></script>
+<script>
+(function(){
+  var bok = window.AK9_K1_BOK || { delkapitel: [] };
+  document.getElementById('hero-titel').textContent = bok.titel || 'Kapitel 1';
+  var lista = document.getElementById('del-lista');
+  var byggda = {}; (bok.delkapitel || []).forEach(function(d){ byggda[d.nr] = d; });
+  // Nio slottar; boken driver ordning/titel (single-source på nr). Alla är skelett i det här bygget.
+  for(var nr = 1; nr <= 9; nr++){
+    var d = byggda[nr];
+    if(d && d.fil){
+      var a = document.createElement('a'); a.className = 'del open'; a.href = d.fil;
+      a.innerHTML = '<div class="del-nr">' + nr + '</div>'
+        + '<div><div class="del-titel">' + d.titel + '</div><div class="del-blad">tre spår · innehåll byggs</div></div>'
+        + '<div class="del-badge">skelett</div>';
+      lista.appendChild(a);
+    } else {
+      var div = document.createElement('div'); div.className = 'del';
+      div.innerHTML = '<div class="del-nr">' + nr + '</div>'
+        + '<div><div class="del-titel">Delkapitel ' + nr + '</div><div class="del-blad">titel fastställs</div></div>'
+        + '<div class="del-badge">kommer</div>';
+      lista.appendChild(div);
+    }
+  }
+})();
+</script>
+</body>
+</html>
