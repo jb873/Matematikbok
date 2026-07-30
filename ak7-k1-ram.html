@@ -4211,9 +4211,30 @@ const TEST_GENERATORS = {
       return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
     })
   ]},
-  // OBS: räknelagarna (kommutativa/associativa/distributiva) delas i boken i tre EGNA noder
-  // (prio-lagar:kommutativa/:associativa/:distributiva). Min "vilken lag?"-flerval spänner alla
-  // tre och mappar inte rent → utelämnad här (byggs), egen skiva med per-lag-generatorer.
+  // SLICE 7: räknelagarna – EN generator per lag, bunden till sin karta-synliga bok-nod (d2).
+  // Format: TILLÄMPNING (numeric) – fyll i talet som saknas när lagen tillämpas. Det isolerar
+  // varje lag (man måste veta HUR just den lagen flyttar om) och ger ett entydigt svar.
+  'prio-lag-komm': { snabb: [
+    testNumericGen('lag-komm','Kommutativa lagen','prio-lagar', function(){
+      const a=rInt(2,20), b=rInt(2,20);
+      if(rInt(1,2)===1) return {key:'k+'+a+'-'+b, prompt:'Kommutativa lagen – fyll i:   '+a+' + '+b+' = '+b+' + ___', ans:a, expl:'Termerna byter plats: '+a+' + '+b+' = '+b+' + '+a+'.'};
+      return {key:'kx'+a+'-'+b, prompt:'Kommutativa lagen – fyll i:   '+a+' · '+b+' = '+b+' · ___', ans:a, expl:'Faktorerna byter plats: '+a+' · '+b+' = '+b+' · '+a+'.'};
+    })
+  ]},
+  'prio-lag-assoc': { snabb: [
+    testNumericGen('lag-assoc','Associativa lagen','prio-lagar', function(){
+      const a=rInt(2,12), b=rInt(2,12), c=rInt(2,12);
+      if(rInt(1,2)===1) return {key:'a+'+a+'-'+b+'-'+c, prompt:'Associativa lagen – fyll i:   ('+a+' + '+b+') + '+c+' = '+a+' + ('+b+' + ___)', ans:c, expl:'Parenteserna flyttas: ('+a+' + '+b+') + '+c+' = '+a+' + ('+b+' + '+c+').'};
+      return {key:'ax'+a+'-'+b+'-'+c, prompt:'Associativa lagen – fyll i:   ('+a+' · '+b+') · '+c+' = '+a+' · ('+b+' · ___)', ans:c, expl:'Parenteserna flyttas: ('+a+' · '+b+') · '+c+' = '+a+' · ('+b+' · '+c+').'};
+    })
+  ]},
+  'prio-lag-distr': { snabb: [
+    testNumericGen('lag-distr','Distributiva lagen','prio-lagar', function(){
+      const a=rInt(2,9), b=rInt(2,12), c=rInt(2,12);
+      if(rInt(1,2)===1) return {key:'d+'+a+'-'+b+'-'+c, prompt:'Distributiva lagen – fyll i:   '+a+' · ('+b+' + '+c+') = '+a+' · '+b+' + '+a+' · ___', ans:c, expl:a+' · ('+b+' + '+c+') = '+a+' · '+b+' + '+a+' · '+c+'.'};
+      return {key:'df'+a+'-'+b+'-'+c, prompt:'Distributiva lagen – fyll i:   '+a+' · ('+b+' + '+c+') = '+a+' · '+b+' + ___ · '+c, ans:a, expl:a+' · ('+b+' + '+c+') = '+a+' · '+b+' + '+a+' · '+c+'.'};
+    })
+  ]},
 
   'neg-begrepp': { snabb: [
     testNumericGen('neg-begr','Negativa tal: begrepp','neg-begrepp', function(){
@@ -4331,7 +4352,11 @@ const GEN_NOD = {
   // slice 6 – Del 8 avrundning (bokens 2 karta-noder; avrundning-räkning + -begrepp delar nod)
   'avr-rakna':      'avr-avrundning:begrepp',
   'avr-begr':       'avr-avrundning:begrepp',
-  'avr-overslag':   'avr-overslag:rakna'
+  'avr-overslag':   'avr-overslag:rakna',
+  // slice 7 – räknelagarna, en generator per lag → sin karta-synliga bok-nod (d2)
+  'lag-komm':       'prio-lagar:kommutativa',
+  'lag-assoc':      'prio-lagar:associativa',
+  'lag-distr':      'prio-lagar:distributiva'
 };
 
 // NOD_GENS: nod (koId:formagaKey) → generatorer som träffar den. Byggs genom att fråga varje
