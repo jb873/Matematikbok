@@ -4237,6 +4237,50 @@ const TEST_GENERATORS = {
       else { const b=rInt(2,6), q=rInt(2,9), a=b*q; s='−'+a+' / '+b; ans=-q; }
       return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
     })
+  ]},
+
+  // ═══ SLICE 6: Del 8 – Avrundning och överslagsräkning (bokens 2 karta-noder) ═══
+  // Del 8 har bara TVÅ karta-synliga noder: avr-avrundning:begrepp ("Avrundning") + avr-overslag:rakna.
+  // Avrundning-räkning (numeric) OCH avrundning-begrepp (flerval) binder båda till avr-avrundning:begrepp.
+  'avr-avrundning': { snabb: [
+    // avrundning – räkning: exakt avrundat värde (närmaste 10/100/1000 + decimaltal)
+    testNumericGen('avr-rakna','Avrundning','avr-avrundning', function(){
+      const t=rInt(1,4);
+      if(t===1){ const n=rInt(11,989),  a=Math.round(n/10)*10;   return {key:'e1-'+n, prompt:'Avrunda '+n+' till närmaste tiotal.',    ans:a, expl:n+' ≈ '+a+' (närmaste tiotal).'}; }
+      if(t===2){ const n=rInt(120,9800), a=Math.round(n/100)*100; return {key:'e2-'+n, prompt:'Avrunda '+n+' till närmaste hundratal.', ans:a, expl:n+' ≈ '+a+' (närmaste hundratal).'}; }
+      if(t===3){ const n=rInt(1200,98000), a=Math.round(n/1000)*1000; return {key:'e3-'+n, prompt:'Avrunda '+n+' till närmaste tusental.', ans:a, expl:n+' ≈ '+a+' (närmaste tusental).'}; }
+      // decimaltal: hundradelar → tiondel eller heltal (heltalscent undviker flyttalsbrus)
+      const cent=rInt(105,2995), n=cent/100;
+      if(rInt(1,2)===1){ const a=Math.round(cent/10)/10; return {key:'d1-'+cent, prompt:'Avrunda '+komma(n)+' till en decimal (tiondel).', ans:a, expl:komma(n)+' ≈ '+komma(a)+'.'}; }
+      const a=Math.round(cent/100); return {key:'d0-'+cent, prompt:'Avrunda '+komma(n)+' till närmaste heltal.', ans:a, expl:komma(n)+' ≈ '+a+'.'};
+    }),
+    // avrundning – begrepp: avrundningsregeln (flerval)
+    testFlervalGen('avr-begr','Avrundning: begrepp','avr-avrundning', function(){
+      const bank=[
+        {p:'Om siffran efter avrundningsplatsen är 5 eller mer – hur avrundar man?', o:['Uppåt','Nedåt','Ingen ändring','Bort'], a:'Uppåt'},
+        {p:'Om siffran efter avrundningsplatsen är 4 eller mindre – hur avrundar man?', o:['Nedåt','Uppåt','Alltid uppåt','Till noll'], a:'Nedåt'},
+        {p:'Vilken siffra avgör om 347 avrundas uppåt eller nedåt till närmaste tiotal?', o:['7','4','3','0'], a:'7'},
+        {p:'Vad blir 68 avrundat till närmaste tiotal?', o:['70','60','68','80'], a:'70'},
+        {p:'Vad blir 4,5 avrundat till närmaste heltal?', o:['5','4','4,5','6'], a:'5'}
+      ];
+      const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
+    })
+  ]},
+  'avr-overslag': { snabb: [
+    // överslagsräkning – flerval "vilket ligger närmast?" (inget enda exakt svar; se rapport)
+    testFlervalGen('avr-overslag','Överslagsräkning','avr-overslag', function(){
+      let a, b, exakt, sym;
+      if(rInt(1,2)===1){ a=rInt(120,880); b=rInt(120,880); exakt=a+b; sym='+'; }
+      else { a=rInt(18,49); b=rInt(11,29); exakt=a*b; sym='·'; }
+      const steg = exakt>2000 ? 1000 : 100;
+      const narmast = Math.round(exakt/steg)*steg;
+      if(Math.abs(exakt - narmast) > steg*0.35) return null;   // för nära bucket-gränsen → tvetydigt, hoppa
+      const opts=[narmast];
+      [steg, -steg, 2*steg].forEach(function(dd){ if(opts.length<4 && narmast+dd>0 && opts.indexOf(narmast+dd)<0) opts.push(narmast+dd); });
+      if(opts.length<3) return null;
+      return {key:sym+a+'-'+b, prompt:'Uppskatta med överslag: '+a+' '+sym+' '+b+'. Vilket ligger närmast?',
+              options:shuffle(opts).map(String), answer:String(narmast), expl:a+' '+sym+' '+b+' = '+exakt+' ≈ '+narmast+'.'};
+    })
   ]}
 };
 
@@ -4283,7 +4327,11 @@ const GEN_NOD = {
   'prio-uttryck':   'prio-prioritering:rakna',
   'neg-begr':       'neg-begrepp:begrepp',
   'neg-addsub':     'neg-rakna:addsub',
-  'neg-multdiv':    'neg-rakna:multdiv'
+  'neg-multdiv':    'neg-rakna:multdiv',
+  // slice 6 – Del 8 avrundning (bokens 2 karta-noder; avrundning-räkning + -begrepp delar nod)
+  'avr-rakna':      'avr-avrundning:begrepp',
+  'avr-begr':       'avr-avrundning:begrepp',
+  'avr-overslag':   'avr-overslag:rakna'
 };
 
 // NOD_GENS: nod (koId:formagaKey) → generatorer som träffar den. Byggs genom att fråga varje
