@@ -1128,6 +1128,12 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 }
 .config-checkbox .cb-text{flex:1;color:var(--ink);font-weight:500}
 .config-checkbox .cb-stub{font-size:11px;color:var(--ink-faint);font-style:italic;font-weight:400;display:block}
+.config-checkbox .cb-dot{
+  width:16px;height:16px;border-radius:50%;flex-shrink:0;
+  border:1px solid rgba(0,0,0,.18);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);
+}
+.config-checkbox.is-dimmed{opacity:.45}
+.config-checkbox.is-dimmed:hover{opacity:.7}
 
 .config-summary{
   background:var(--c-rakna-bg);border:1px solid var(--c-rakna);
@@ -3640,8 +3646,10 @@ function showKapitelComparison(allQuestions, answers){
 // Initial config
 state.testConfig = {
   antal: 6,
-  typ: 'snabb', // 'snabb' eller 'snabb-och-problem'
-  omraden: ['primtal'] // bara primtal är fullt implementerat
+  typ: 'snabb',          // 'snabb' eller 'snabb-och-problem'
+  del: null,             // delkapitel-scope (DELAR_KO-nyckel), sätts via ?del=; null = hela kapitlet
+  nodes: null,           // valda färdigheter (koId:formagaKey); null = härled ur färg-filtret
+  fargFilter: [0,1,2,3]  // mastery-färger som är med: 0 röd, 1 orange, 2 gul, 3 grön
 };
 state.test = null; // {questions:[], answers:{}, currentIdx:0}
 
@@ -3831,6 +3839,33 @@ const GEN_NOD = {
   'delbar-binary':  'delbarhet:rakna'
 };
 
+// NOD_GENS: nod (koId:formagaKey) → generatorer som träffar den. Byggs genom att fråga varje
+// generator en gång (throwaway seen) vilken generator-sträng den ger, och slå upp noden via GEN_NOD.
+// Det gör provbyggaren FÄRDIGHET-scopad: en färdighet är BYGGBAR om den har minst en generator här.
+const NOD_GENS = {};
+Object.keys(TEST_GENERATORS).forEach(function(ko){
+  ['snabb','problem'].forEach(function(kind){
+    (TEST_GENERATORS[ko][kind] || []).forEach(function(gen){
+      let node = null;
+      try { const probe = gen(new Set()); if(probe) node = GEN_NOD[probe.generator]; } catch(e){}
+      if(node){ (NOD_GENS[node] = NOD_GENS[node] || []).push({ko:ko, gen:gen, kind:kind}); }
+    });
+  });
+});
+// Färg-metadata (speglar karta-motorns FARG: 0 röd, 1 orange, 2 gul, 3 grön) + förmåge-etiketter.
+const FARG_INFO = [
+  {namn:'Röd',    bg:'#D14A40'},
+  {namn:'Orange', bg:'#E08529'},
+  {namn:'Gul',    bg:'#E4BC34'},
+  {namn:'Grön',   bg:'#6BA544'}
+];
+const FORMAGA_NAMN = {begrepp:'Begrepp', rakna:'Räkna', metod:'Metod', kommunikation:'Kommunikation', resonera:'Resonera', problem:'Problem'};
+// mastery-färg (0–3) för en nod, samma nyckel/logik som kartan läser.
+function nodFargState(node, matris){
+  if(!(window.Mastery && window.Mastery.masteryState)) return 0;
+  return window.Mastery.masteryState((matris||{})[node], null, false, false);
+}
+
 // Föreläsningstips per generator
 const FORELASNING_TIPS = {
   'primtal-binary': {titel:'Primtal och sammansatta tal', url:'https://www.youtube.com/playlist?list=PLGtBwluqUaSDFSvHdMgSZ6s1nLLYCjuTB'},
@@ -3841,7 +3876,8 @@ const FORELASNING_TIPS = {
 };
 
 function generateTest(config){
-  const {antal, typ, omraden} = config;
+  const {antal, typ} = config;
+  const nodes = config.nodes || [];
   let numProblem = 0, numSnabb = antal;
   if(typ === 'snabb-och-problem'){
     numProblem = Math.max(1, Math.round(antal * 0.3));
@@ -3851,40 +3887,38 @@ function generateTest(config){
   const seen = new Set();
   const questions = [];
 
-  // Bygg snabbfrågor – plocka från generatorer per valt område, slumpa
+  // Bygg snabbfrågor – plocka från generatorerna för de valda FÄRDIGHETERNA (noderna), slumpa
   const snabbGens = [];
-  for(const ko of omraden){
-    if(TEST_GENERATORS[ko] && TEST_GENERATORS[ko].snabb){
-      TEST_GENERATORS[ko].snabb.forEach(g => snabbGens.push({ko, gen:g}));
-    }
-  }
+  nodes.forEach(function(node){
+    (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'snabb') snabbGens.push(g); });
+  });
 
   // Slumpa men inte samma generator för många gånger i rad
-  let gensShuffled = shuffle([...snabbGens]);
-  let gIdx = 0;
-  let safetyCounter = 0;
-  while(questions.filter(q => q.kind === 'snabb').length < numSnabb && safetyCounter < 100){
-    safetyCounter++;
-    const {gen} = gensShuffled[gIdx % gensShuffled.length];
-    gIdx++;
-    const q = gen(seen);
-    if(q){
-      q.kind = 'snabb';
-      questions.push(q);
-    }
-    if(gIdx >= gensShuffled.length){
-      gensShuffled = shuffle([...snabbGens]);
-      gIdx = 0;
+  if(snabbGens.length){
+    let gensShuffled = shuffle([...snabbGens]);
+    let gIdx = 0;
+    let safetyCounter = 0;
+    while(questions.filter(q => q.kind === 'snabb').length < numSnabb && safetyCounter < 100){
+      safetyCounter++;
+      const {gen} = gensShuffled[gIdx % gensShuffled.length];
+      gIdx++;
+      const q = gen(seen);
+      if(q){
+        q.kind = 'snabb';
+        questions.push(q);
+      }
+      if(gIdx >= gensShuffled.length){
+        gensShuffled = shuffle([...snabbGens]);
+        gIdx = 0;
+      }
     }
   }
 
-  // Bygg problemfrågor
+  // Bygg problemfrågor – från de valda färdigheternas problem-generatorer
   const problemGens = [];
-  for(const ko of omraden){
-    if(TEST_GENERATORS[ko] && TEST_GENERATORS[ko].problem){
-      TEST_GENERATORS[ko].problem.forEach(g => problemGens.push({ko, gen:g}));
-    }
-  }
+  nodes.forEach(function(node){
+    (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'problem') problemGens.push(g); });
+  });
 
   safetyCounter = 0;
   while(questions.filter(q => q.kind === 'problem').length < numProblem && safetyCounter < 100){
@@ -3917,11 +3951,42 @@ function renderTestConfig(){
   const numProblem = cfg.typ === 'snabb-och-problem' ? Math.max(1, Math.round(cfg.antal * 0.3)) : 0;
   const numSnabb = cfg.antal - numProblem;
 
+  // Delkapitel-scope: ?del= väljer DELAR_KO[del]; annars hela kapitlet (alla KUNSKAPSOMRADEN).
+  const scopeKOs = (cfg.del && DELAR_KO[cfg.del]) ? DELAR_KO[cfg.del] : KUNSKAPSOMRADEN;
+  const delObj = cfg.del ? DELAR.find(d => d.id === cfg.del) : null;
+  const scopeNamn = delObj ? delObj.titel : 'Hela kapitlet';
+
+  // Färdighetslista ur taxonomin (samma noder som Färdighetsträningen/självskattningen): en rad
+  // per förmåga i scopens kunskapsområden. Byggbar = har en test-generator (NOD_GENS). Färg ur matrisen.
+  const matris = (window.Mastery && window.Mastery.lasMatris) ? window.Mastery.lasMatris() : {};
+  const fardigheter = [];
+  scopeKOs.forEach(ko => {
+    Object.keys(ko.formagor || {}).forEach(fk => {
+      const node = ko.id + ':' + fk;
+      const byggbar = !!NOD_GENS[node];
+      fardigheter.push({
+        node, koTitel: ko.titel, koNr: ko.nr, fk,
+        etikett: FORMAGA_NAMN[fk] || fk,
+        desc: (ko.formagor[fk].desc || ''),
+        byggbar,
+        farg: byggbar ? nodFargState(node, matris) : null
+      });
+    });
+  });
+  const byggbara = fardigheter.filter(f => f.byggbar);
+
+  // Färg-filtret härleder urvalet: nodes=null → förväljd ur filtret; annars manuellt justerat.
+  function synkaFranFilter(){
+    cfg.nodes = byggbara.filter(f => cfg.fargFilter.includes(f.farg)).map(f => f.node);
+  }
+  if(cfg.nodes === null) synkaFranFilter();
+  const valda = cfg.nodes || [];
+
   document.getElementById('test-config-body').innerHTML = `
     <div class="header-card">
-      <div class="header-eyebrow">Kapitel 1 · Öva mer</div>
+      <div class="header-eyebrow">Kapitel 1 · ${scopeNamn}</div>
       <h1 class="header-title">Skapa ditt eget test</h1>
-      <p class="header-sub">Välj hur många frågor, vilken typ och vilka områden du vill öva på. Du kan göra testet på skärmen eller skriva ut det.</p>
+      <p class="header-sub">Testet är scopat till <strong>${scopeNamn.toLowerCase()}</strong>. Välj antal, typ och vilka färdigheter du vill öva – filtrera på färg för att träffa rätt (t.ex. bara det halvlärda). Du gör testet på skärmen; det rättas och färgar kartan.</p>
     </div>
 
     <div class="test-config-card">
@@ -3950,16 +4015,31 @@ function renderTestConfig(){
     </div>
 
     <div class="test-config-card">
-      <h3>Områden</h3>
-      <p class="config-desc">Välj ett eller flera kunskapsområden att öva på.</p>
-      <div class="config-checkbox-list" id="config-omraden">
-        ${KUNSKAPSOMRADEN.map(ko => {
-          const implemented = !!TEST_GENERATORS[ko.id];   // valbart så fort området har en test-generator (Väg A)
-          const checked = cfg.omraden.includes(ko.id);
+      <h3>Visa färger</h3>
+      <p class="config-desc">Välj vilka mastery-färger som ska förväljas – som på kartan. T.ex. bara orange (halvlärt) eller allt utom grönt.</p>
+      <div class="config-options" id="config-farg">
+        ${FARG_INFO.map((f,i) => `
+          <button class="config-option ${cfg.fargFilter.includes(i)?'is-selected':''}" data-farg="${i}">
+            <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${f.bg};margin-right:7px;vertical-align:-1px;"></span>${f.namn}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="test-config-card">
+      <h3>Färdigheter</h3>
+      <p class="config-desc">${byggbara.length ? 'Färgprickar visar hur långt du kommit. Färdigheter utan test-generator är märkta "byggs".' : 'Inga färdigheter i det här delkapitlet har en test-generator ännu – de är märkta "byggs".'}</p>
+      <div class="config-checkbox-list" id="config-fardigheter">
+        ${fardigheter.map(f => {
+          const checked = valda.includes(f.node);
+          const dimmed = f.byggbar && !checked && !cfg.fargFilter.includes(f.farg);
+          const dot = f.byggbar
+            ? `<span class="cb-dot" style="background:${FARG_INFO[f.farg].bg};" title="${FARG_INFO[f.farg].namn}"></span>`
+            : `<span class="cb-num">${f.koNr}</span>`;
           return `
-            <div class="config-checkbox ${checked?'is-checked':''} ${!implemented?'is-disabled':''}" data-koid="${ko.id}" ${!implemented?'title="Kommer snart"':''}>
-              <span class="cb-num">${ko.nr}</span>
-              <div class="cb-text">${ko.titel}${!implemented?'<span class="cb-stub">Byggs nu</span>':''}</div>
+            <div class="config-checkbox ${checked?'is-checked':''} ${!f.byggbar?'is-disabled':''} ${dimmed?'is-dimmed':''}" data-node="${f.node}" ${!f.byggbar?'title="Byggs – ingen test-generator ännu"':''}>
+              ${dot}
+              <div class="cb-text">${f.koTitel} <span style="opacity:.6">·</span> ${f.etikett}${!f.byggbar?'<span class="cb-stub">byggs</span>':''}</div>
               <div class="cb-square">${checked?'✓':''}</div>
             </div>
           `;
@@ -3968,40 +4048,42 @@ function renderTestConfig(){
     </div>
 
     <div class="config-summary">
-      Du får <strong>${cfg.antal} frågor</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från ${cfg.omraden.length} ${cfg.omraden.length===1?'område':'områden'}.
+      Du får <strong>${cfg.antal} frågor</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från <strong>${valda.length}</strong> ${valda.length===1?'vald färdighet':'valda färdigheter'} i ${scopeNamn.toLowerCase()}.
     </div>
 
     <div style="text-align:center;margin-top:18px;">
-      <button class="btn primary" id="generate-test-btn" ${cfg.omraden.length===0?'disabled':''}>Skapa test -></button>
+      <button class="btn primary" id="generate-test-btn" ${valda.length===0?'disabled':''}>Skapa test -></button>
     </div>
   `;
 
   document.querySelectorAll('#config-antal .config-option').forEach(btn => {
-    btn.onclick = () => {
-      cfg.antal = parseInt(btn.dataset.antal);
-      renderTestConfig();
-    };
+    btn.onclick = () => { cfg.antal = parseInt(btn.dataset.antal); renderTestConfig(); };
   });
   document.querySelectorAll('#config-typ .config-option').forEach(btn => {
+    btn.onclick = () => { cfg.typ = btn.dataset.typ; renderTestConfig(); };
+  });
+  // Färg-chip: toggla färgen och HÄRLED urvalet på nytt (nodes=null → synk vid nästa render).
+  document.querySelectorAll('#config-farg .config-option').forEach(btn => {
     btn.onclick = () => {
-      cfg.typ = btn.dataset.typ;
+      const i = parseInt(btn.dataset.farg);
+      if(cfg.fargFilter.includes(i)) cfg.fargFilter = cfg.fargFilter.filter(x => x !== i);
+      else cfg.fargFilter = cfg.fargFilter.concat(i);
+      cfg.nodes = null; // härled om ur filtret
       renderTestConfig();
     };
   });
-  document.querySelectorAll('#config-omraden .config-checkbox').forEach(cb => {
+  // Färdighet-checkbox: manuell finjustering (byggbar = klickbar), lämnar filtret orört.
+  document.querySelectorAll('#config-fardigheter .config-checkbox').forEach(cb => {
     cb.onclick = () => {
       if(cb.classList.contains('is-disabled')) return;
-      const koid = cb.dataset.koid;
-      if(cfg.omraden.includes(koid)){
-        cfg.omraden = cfg.omraden.filter(x => x !== koid);
-      } else {
-        cfg.omraden.push(koid);
-      }
+      const node = cb.dataset.node;
+      const cur = cfg.nodes || [];
+      cfg.nodes = cur.includes(node) ? cur.filter(x => x !== node) : cur.concat(node);
       renderTestConfig();
     };
   });
   document.getElementById('generate-test-btn').onclick = () => {
-    if(cfg.omraden.length === 0) return;
+    if((cfg.nodes || []).length === 0) return;
     const questions = generateTest(cfg);
     state.test = {
       questions,
@@ -9181,6 +9263,12 @@ function repSkippaPanel(){
   if(mmx) window.RAM_MAXNIVA = parseInt(mmx[1], 10);
   var mv = hs.match(/view=([a-z-]+)/i);
   if(mv && (mv[1] === 'test-config' || mv[1] === 'skattning')){
+    if(mv[1] === 'test-config'){
+      // ?del= scopar provbyggaren till ett delkapitel (DELAR_KO-nyckel); okänt/utelämnat = hela kapitlet.
+      var mdel = hs.match(/[?&]del=([a-z0-9-]+)/i);
+      state.testConfig.del = (mdel && DELAR_KO[mdel[1]]) ? mdel[1] : null;
+      state.testConfig.nodes = null; // härled urvalet ur färg-filtret för det nya scopet
+    }
     renderKapitel();
     navTo(mv[1]);
     return;
