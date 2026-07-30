@@ -1134,6 +1134,20 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 }
 .config-checkbox.is-dimmed{opacity:.45}
 .config-checkbox.is-dimmed:hover{opacity:.7}
+.config-checkbox .cb-sub{font-size:11.5px;color:var(--ink-faint);font-weight:400;display:block;margin-top:1px}
+/* Grupperad väljare: område → färdighet (som kartan), hopfällbart */
+.config-group{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;background:var(--bg-soft)}
+.config-group-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;background:var(--bg-warm)}
+.config-group-head:hover{background:var(--primary-bg)}
+.config-group-head .cg-chev{font-size:12px;color:var(--ink-faint);width:14px;flex-shrink:0}
+.config-group-head .cg-titel{flex:1;font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink)}
+.config-group-head .cg-meta{font-family:var(--sans);font-size:12px;color:var(--ink-faint);flex-shrink:0}
+.config-group-body{display:flex;flex-direction:column;gap:8px;padding:10px}
+.config-group.is-collapsed .config-group-body{display:none}
+.config-group .config-checkbox{background:var(--bg-warm)}
+.config-filter-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--c-rakna-bg);border:1px solid var(--c-rakna);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:13.5px;color:var(--c-rakna)}
+.cfn-clear{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--primary);background:none;border:1px solid var(--primary);border-radius:6px;padding:5px 11px;cursor:pointer}
+.cfn-clear:hover{background:var(--primary-bg)}
 
 .config-summary{
   background:var(--c-rakna-bg);border:1px solid var(--c-rakna);
@@ -2801,6 +2815,9 @@ function primeFactorize(n){
 function sortAsc(a){return [...a].sort((x,y)=>x-y)}
 function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}          // slumpheltal [a,b]
+function komma(x){return String(x).replace('.',',')}                    // 0.04 → "0,04" (svensk decimal)
+function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// avrunda bort flyttalsbrus
 
 const PRIMES_50 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
 const PRIMES_100 = [...PRIMES_50,53,59,61,67,71,73,79,83,89,97];
@@ -3649,7 +3666,8 @@ state.testConfig = {
   typ: 'snabb',          // 'snabb' eller 'snabb-och-problem'
   del: null,             // delkapitel-scope (DELAR_KO-nyckel), sätts via ?del=; null = hela kapitlet
   nodes: null,           // valda färdigheter (koId:formagaKey); null = härled ur färg-filtret
-  fargFilter: [0,1,2,3]  // mastery-färger som är med: 0 röd, 1 orange, 2 gul, 3 grön
+  fargFilter: [0,1,2,3], // mastery-färger som är med: 0 röd, 1 orange, 2 gul, 3 grön
+  collapsed: null        // hopfällda område-id:n i väljaren; null = default (kollapsa tomma)
 };
 state.test = null; // {questions:[], answers:{}, currentIdx:0}
 
@@ -3673,6 +3691,7 @@ const TEST_GENERATORS = {
             label: String.fromCharCode(97+i) + ')',
             type: 'binary',
             q: `${n}`,
+            prompt: `Är ${n} ett primtal eller sammansatt?`,
             options: ['Primtal', 'Sammansatt'],
             answer: isPrime(n) ? 'Primtal' : 'Sammansatt',
             explanation: isPrime(n)
@@ -3815,6 +3834,7 @@ const TEST_GENERATORS = {
             label: String.fromCharCode(97+i) + ')',
             type: 'binary',
             q: 'Är ' + x.n + ' delbart med ' + x.d + '?',
+            prompt: 'Är ' + x.n + ' delbart med ' + x.d + '?',
             options: ['Ja', 'Nej'],
             answer: (x.n % x.d === 0) ? 'Ja' : 'Nej',
             explanation: (x.n % x.d === 0)
@@ -3822,6 +3842,190 @@ const TEST_GENERATORS = {
               : x.n + ' delat med ' + x.d + ' går inte jämnt ut (rest ' + (x.n % x.d) + ').'
           }))
         };
+      },
+
+      // delbarhet:begrepp — siffersumma (compute-and-check, återanvänder heltalsaritmetik)
+      function genSiffersumma(seen){
+        const pool = []; for(let n=100;n<=999;n++) pool.push(n);
+        const avail = pool.filter(n => !seen.has('ss-'+n));
+        if(avail.length < 3) return null;
+        const picked = shuffle(avail).slice(0,3);
+        picked.forEach(n => seen.add('ss-'+n));
+        return {
+          generator: 'siffersumma', title: 'Räkna ut siffersumman.', omrade: 'delbarhet',
+          subs: picked.map((n,i) => {
+            const h = Math.floor(n/100), t = Math.floor(n/10)%10, e = n%10, s = h+t+e;
+            return {
+              label: String.fromCharCode(97+i)+')', type: 'numeric',
+              prompt: 'Vad är siffersumman av ' + n + '?', answer: s,
+              explanation: h + ' + ' + t + ' + ' + e + ' = ' + s + '.'
+            };
+          })
+        };
+      }
+    ]
+  },
+
+  // ═══ SLICE 3: taluppfattnings kvarvarande färdigheter (Väg A: återanvänder matte-hjälparna) ═══
+  siffror: {
+    snabb: [
+      // siffror:begrepp — udda/jämnt (flerval via binary, samma format som drillen)
+      function genUddaJamn(seen){
+        const pool = []; for(let n=11;n<=999;n++) pool.push(n);
+        const avail = pool.filter(n => !seen.has('uj-'+n));
+        if(avail.length < 4) return null;
+        const picked = shuffle(avail).slice(0,4);
+        picked.forEach(n => seen.add('uj-'+n));
+        return {
+          generator: 'udda-jamn', title: 'Är talet udda eller jämnt?', omrade: 'siffror',
+          subs: picked.map((n,i) => ({
+            label: String.fromCharCode(97+i)+')', type: 'binary',
+            q: String(n), prompt: 'Är ' + n + ' udda eller jämnt?',
+            options: ['Udda','Jämnt'], answer: (n%2===0) ? 'Jämnt' : 'Udda',
+            explanation: n + ' slutar på ' + (n%10) + ', en ' + ((n%2===0)?'jämn':'udda') + ' siffra.'
+          }))
+        };
+      }
+    ]
+  },
+
+  position: {
+    snabb: [
+      // position:begrepp — platsvärde (compute-and-check)
+      function genPlatsvarde(seen){
+        const platser = [{namn:'tiotal',exp:1},{namn:'ental',exp:0},{namn:'tiondel',exp:-1},{namn:'hundradel',exp:-2}];
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 80){
+          tries++;
+          const d = {}; platser.forEach(p => { d[p.exp] = rInt(0,9); });
+          const cnt = {}; platser.forEach(p => { cnt[d[p.exp]] = (cnt[d[p.exp]]||0)+1; });
+          const nz = platser.filter(p => d[p.exp] > 0 && cnt[d[p.exp]] === 1); // nonzero + unik siffra (ej tvetydigt)
+          if(!nz.length) continue;
+          const p = randPick(nz), siffra = d[p.exp];
+          const tal = avr(d[1]*10 + d[0] + d[-1]*0.1 + d[-2]*0.01, 2);
+          const varde = avr(siffra*Math.pow(10,p.exp), 2);
+          const key = 'pv-'+tal+'-'+p.exp;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
+            prompt: 'Vilket värde har siffran ' + siffra + ' i talet ' + komma(tal) + '?', answer: varde,
+            explanation: 'Siffran ' + siffra + ' står på ' + p.namn + '-platsen → ' + komma(varde) + '.'
+          });
+        }
+        return subs.length ? {generator:'platsvarde', title:'Vilket värde har siffran?', omrade:'position', subs:subs} : null;
+      },
+
+      // position:rakna — fortsätt talföljden (compute-and-check)
+      function genTalfoljd(seen){
+        const steg = [1, 0.1, 0.01]; const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 60){
+          tries++;
+          const s = randPick(steg);
+          const t0 = avr(rInt(10,80)*s, 2), t1 = avr(t0+s,2), t2 = avr(t0+2*s,2), ans = avr(t0+3*s,2);
+          const key = 'tf-'+t0+'-'+s;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
+            prompt: 'Vilket tal kommer näst?   ' + komma(t0) + ',  ' + komma(t1) + ',  ' + komma(t2) + ',  ___', answer: ans,
+            explanation: 'Talföljden ökar med ' + komma(s) + ' varje steg → ' + komma(ans) + '.'
+          });
+        }
+        return subs.length ? {generator:'talfoljd', title:'Fortsätt talföljden.', omrade:'position', subs:subs} : null;
+      },
+
+      // position:resonera — jämför decimaltal (flerval via binary)
+      function genJamfor(seen){
+        const bank = [[9.1,9.09],[3.2,3.19],[5.5,5.45],[0.8,0.79],[7.3,7.29],[2.5,2.45],[4.6,4.59],[8.1,8.09],[6.4,6.39],[1.7,1.69],[4.05,4.5],[2.09,2.9]];
+        const avail = bank.filter(pr => !seen.has('jf-'+pr[0]+'-'+pr[1]));
+        if(avail.length < 3) return null;
+        const picked = shuffle(avail).slice(0,3);
+        picked.forEach(pr => seen.add('jf-'+pr[0]+'-'+pr[1]));
+        return {
+          generator: 'jamfor-tal', title: 'Vilket tal är störst?', omrade: 'position',
+          subs: picked.map((pr,i) => {
+            const a = pr[0], b = pr[1], stor = Math.max(a,b);
+            return {
+              label: String.fromCharCode(97+i)+')', type: 'binary',
+              q: komma(a) + ' eller ' + komma(b), prompt: 'Vilket tal är störst: ' + komma(a) + ' eller ' + komma(b) + '?',
+              options: shuffle([komma(a), komma(b)]), answer: komma(stor),
+              explanation: komma(stor) + ' är störst (jämför tiondelar, sedan hundradelar).'
+            };
+          })
+        };
+      }
+    ]
+  },
+
+  utvecklad: {
+    snabb: [
+      // utvecklad:metod — välj rätt utvecklad form (flerval via binary)
+      function genUtvValj(seen){
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 60){
+          tries++;
+          const tio = rInt(1,9), en = rInt(1,9), ti = rInt(1,9);
+          const tal = avr(tio*10 + en + ti*0.1, 1);
+          const key = 'uv-'+tal;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          const ratt = tio+'·10 + '+en+'·1 + '+ti+'·0,1';
+          const fel1 = tio+'·1 + '+en+'·10 + '+ti+'·0,1';
+          const fel2 = tio+'·10 + '+en+'·1 + '+ti+'·1';
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type: 'binary',
+            q: komma(tal), prompt: 'Vilken rad visar ' + komma(tal) + ' i utvecklad form?',
+            options: shuffle([ratt, fel1, fel2]), answer: ratt,
+            explanation: komma(tal) + ' = ' + ratt + '.'
+          });
+        }
+        return subs.length ? {generator:'utvform-valj', title:'Välj rätt utvecklad form.', omrade:'utvecklad', subs:subs} : null;
+      },
+
+      // utvecklad:rakna — läs ut talet ur utvecklad form (compute-and-check)
+      function genUtvLasut(seen){
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 60){
+          tries++;
+          const tio = rInt(1,9), en = rInt(0,9), ti = rInt(1,9);
+          const tal = avr(tio*10 + en + ti*0.1, 1);
+          const key = 'ul-'+tal;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
+            prompt: 'Vilket tal står på utvecklad form?    ' + tio+'·10 + '+en+'·1 + '+ti+'·0,1', answer: tal,
+            explanation: tio+'·10 + '+en+'·1 + '+ti+'·0,1 = ' + komma(tal) + '.'
+          });
+        }
+        return subs.length ? {generator:'utvform-lasut', title:'Läs ut talet.', omrade:'utvecklad', subs:subs} : null;
+      }
+    ]
+  },
+
+  rakneträning: {
+    snabb: [
+      // rakneträning:rakna — öka/minska med tiondel/hundradel/tusendel (compute-and-check)
+      function genOkaMinska(seen){
+        const steg = [{n:'en tiondel',v:0.1},{n:'en hundradel',v:0.01},{n:'en tusendel',v:0.001}];
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 70){
+          tries++;
+          const st = randPick(steg), oka = Math.random() < 0.5;
+          const start = avr(rInt(100,9990)*st.v, 3);
+          const ans = avr(oka ? start+st.v : start-st.v, 3);
+          if(ans < 0) continue;
+          const key = 'om-'+start+'-'+st.v+'-'+oka;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
+            prompt: (oka ? 'Öka ' : 'Minska ') + komma(start) + ' med ' + st.n + '.', answer: ans,
+            explanation: komma(start) + (oka ? ' + ' : ' − ') + komma(st.v) + ' = ' + komma(ans) + '.'
+          });
+        }
+        return subs.length ? {generator:'oka-minska', title:'Öka och minska.', omrade:'rakneträning', subs:subs} : null;
       }
     ]
   }
@@ -3836,7 +4040,16 @@ const GEN_NOD = {
   'faktorer':       'primtal:rakna',
   'primfakt':       'primtal:kommunikation',
   'gata':           'primtal:problem',
-  'delbar-binary':  'delbarhet:rakna'
+  'delbar-binary':  'delbarhet:rakna',
+  // slice 3 – taluppfattnings kvarvarande färdigheter
+  'siffersumma':    'delbarhet:begrepp',
+  'udda-jamn':      'siffror:begrepp',
+  'platsvarde':     'position:begrepp',
+  'talfoljd':       'position:rakna',
+  'jamfor-tal':     'position:resonera',
+  'utvform-valj':   'utvecklad:metod',
+  'utvform-lasut':  'utvecklad:rakna',
+  'oka-minska':     'rakneträning:rakna'
 };
 
 // NOD_GENS: nod (koId:formagaKey) → generatorer som träffar den. Byggs genom att fråga varje
@@ -3951,31 +4164,33 @@ function renderTestConfig(){
   const numProblem = cfg.typ === 'snabb-och-problem' ? Math.max(1, Math.round(cfg.antal * 0.3)) : 0;
   const numSnabb = cfg.antal - numProblem;
 
-  // Delkapitel-scope: ?del= väljer DELAR_KO[del]; annars hela kapitlet (alla KUNSKAPSOMRADEN).
-  const scopeKOs = (cfg.del && DELAR_KO[cfg.del]) ? DELAR_KO[cfg.del] : KUNSKAPSOMRADEN;
+  // KAPITELNIVÅ är primär: hela kapitlet (alla KUNSKAPSOMRADEN) syns. ?del= är ett FILTER som
+  // *minskar* till ett delkapitels kunskapsområden – inte längre ett scope. Färg-filtret verkar
+  // över det som visas (hela kapitlet om inget del-filter), så eleven kan bygga t.ex. "alla orange".
+  const filterKOs = (cfg.del && DELAR_KO[cfg.del]) ? DELAR_KO[cfg.del] : null;
+  const shownKOs = filterKOs || KUNSKAPSOMRADEN;
   const delObj = cfg.del ? DELAR.find(d => d.id === cfg.del) : null;
-  const scopeNamn = delObj ? delObj.titel : 'Hela kapitlet';
 
-  // Färdighetslista ur taxonomin (samma noder som Färdighetsträningen/självskattningen): en rad
-  // per förmåga i scopens kunskapsområden. Byggbar = har en test-generator (NOD_GENS). Färg ur matrisen.
+  // Färdighetslista ur taxonomin (samma noder som Färdighetsträningen/självskattningen), GRUPPERAD
+  // per kunskapsområde (som kartans område → färdighet). Byggbar = har en test-generator (NOD_GENS).
   const matris = (window.Mastery && window.Mastery.lasMatris) ? window.Mastery.lasMatris() : {};
-  const fardigheter = [];
-  scopeKOs.forEach(ko => {
-    Object.keys(ko.formagor || {}).forEach(fk => {
+  const grupper = shownKOs.map(ko => ({
+    ko,
+    rader: Object.keys(ko.formagor || {}).map(fk => {
       const node = ko.id + ':' + fk;
       const byggbar = !!NOD_GENS[node];
-      fardigheter.push({
-        node, koTitel: ko.titel, koNr: ko.nr, fk,
-        etikett: FORMAGA_NAMN[fk] || fk,
-        desc: (ko.formagor[fk].desc || ''),
-        byggbar,
-        farg: byggbar ? nodFargState(node, matris) : null
-      });
-    });
-  });
-  const byggbara = fardigheter.filter(f => f.byggbar);
+      return { node, fk, etikett: FORMAGA_NAMN[fk] || fk, desc: (ko.formagor[fk].desc || ''),
+               byggbar, farg: byggbar ? nodFargState(node, matris) : null };
+    })
+  }));
+  const byggbara = [].concat.apply([], grupper.map(g => g.rader)).filter(f => f.byggbar);
 
-  // Färg-filtret härleder urvalet: nodes=null → förväljd ur filtret; annars manuellt justerat.
+  // Default-hopfällning: kollapsa område utan byggbara färdigheter (håller vyn överblickbar).
+  if(cfg.collapsed === null){
+    cfg.collapsed = grupper.filter(g => !g.rader.some(r => r.byggbar)).map(g => g.ko.id);
+  }
+
+  // Färg-filtret härleder urvalet över det visade: nodes=null → förväljd ur filtret; annars manuellt.
   function synkaFranFilter(){
     cfg.nodes = byggbara.filter(f => cfg.fargFilter.includes(f.farg)).map(f => f.node);
   }
@@ -3984,10 +4199,12 @@ function renderTestConfig(){
 
   document.getElementById('test-config-body').innerHTML = `
     <div class="header-card">
-      <div class="header-eyebrow">Kapitel 1 · ${scopeNamn}</div>
+      <div class="header-eyebrow">Kapitel 1 · Taluppfattning</div>
       <h1 class="header-title">Skapa ditt eget test</h1>
-      <p class="header-sub">Testet är scopat till <strong>${scopeNamn.toLowerCase()}</strong>. Välj antal, typ och vilka färdigheter du vill öva – filtrera på färg för att träffa rätt (t.ex. bara det halvlärda). Du gör testet på skärmen; det rättas och färgar kartan.</p>
+      <p class="header-sub">Här ser du <strong>hela kapitlets</strong> färdigheter, grupperade per område. Fäll ihop det du inte vill se, filtrera på delkapitel eller mastery-färg för att fokusera (t.ex. alla dina orange färdigheter). Provet görs på skärmen; det rättas och färgar kartan.</p>
     </div>
+
+    ${delObj ? `<div class="config-filter-note">Filtrerat till delkapitlet <strong>${delObj.titel}</strong>. <button class="cfn-clear" id="clear-del">Visa hela kapitlet</button></div>` : ''}
 
     <div class="test-config-card">
       <h3>Antal frågor</h3>
@@ -4016,7 +4233,7 @@ function renderTestConfig(){
 
     <div class="test-config-card">
       <h3>Visa färger</h3>
-      <p class="config-desc">Välj vilka mastery-färger som ska förväljas – som på kartan. T.ex. bara orange (halvlärt) eller allt utom grönt.</p>
+      <p class="config-desc">Välj vilka mastery-färger som ska förväljas – som på kartan. T.ex. bara orange (halvlärt) eller allt utom grönt. Verkar över hela kapitlet.</p>
       <div class="config-options" id="config-farg">
         ${FARG_INFO.map((f,i) => `
           <button class="config-option ${cfg.fargFilter.includes(i)?'is-selected':''}" data-farg="${i}">
@@ -4027,20 +4244,39 @@ function renderTestConfig(){
     </div>
 
     <div class="test-config-card">
-      <h3>Färdigheter</h3>
-      <p class="config-desc">${byggbara.length ? 'Färgprickar visar hur långt du kommit. Färdigheter utan test-generator är märkta "byggs".' : 'Inga färdigheter i det här delkapitlet har en test-generator ännu – de är märkta "byggs".'}</p>
-      <div class="config-checkbox-list" id="config-fardigheter">
-        ${fardigheter.map(f => {
-          const checked = valda.includes(f.node);
-          const dimmed = f.byggbar && !checked && !cfg.fargFilter.includes(f.farg);
-          const dot = f.byggbar
-            ? `<span class="cb-dot" style="background:${FARG_INFO[f.farg].bg};" title="${FARG_INFO[f.farg].namn}"></span>`
-            : `<span class="cb-num">${f.koNr}</span>`;
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <h3 style="margin:0;">Färdigheter</h3>
+        <button class="cfn-clear" id="toggle-all-groups">${cfg.collapsed.length >= grupper.length ? 'Fäll ut alla' : 'Fäll ihop alla'}</button>
+      </div>
+      <p class="config-desc">Grupperat per område. Färgprickar visar hur långt du kommit; färdigheter utan test-generator är märkta "byggs".</p>
+      <div id="config-grupper">
+        ${grupper.map(g => {
+          const gByggbara = g.rader.filter(r => r.byggbar);
+          const gValda = g.rader.filter(r => valda.includes(r.node));
+          const collapsed = cfg.collapsed.includes(g.ko.id);
           return `
-            <div class="config-checkbox ${checked?'is-checked':''} ${!f.byggbar?'is-disabled':''} ${dimmed?'is-dimmed':''}" data-node="${f.node}" ${!f.byggbar?'title="Byggs – ingen test-generator ännu"':''}>
-              ${dot}
-              <div class="cb-text">${f.koTitel} <span style="opacity:.6">·</span> ${f.etikett}${!f.byggbar?'<span class="cb-stub">byggs</span>':''}</div>
-              <div class="cb-square">${checked?'✓':''}</div>
+            <div class="config-group ${collapsed?'is-collapsed':''}">
+              <div class="config-group-head" data-ko="${g.ko.id}">
+                <span class="cg-chev">${collapsed?'▸':'▾'}</span>
+                <span class="cg-titel">${g.ko.titel || g.ko.id}</span>
+                <span class="cg-meta">${gByggbara.length ? `${gValda.length}/${gByggbara.length} valda` : 'byggs'}</span>
+              </div>
+              <div class="config-group-body">
+                ${g.rader.map(f => {
+                  const checked = valda.includes(f.node);
+                  const dimmed = f.byggbar && !checked && !cfg.fargFilter.includes(f.farg);
+                  const dot = f.byggbar
+                    ? `<span class="cb-dot" style="background:${FARG_INFO[f.farg].bg};" title="${FARG_INFO[f.farg].namn}"></span>`
+                    : `<span class="cb-dot" style="background:transparent;border-style:dashed;box-shadow:none;"></span>`;
+                  return `
+                    <div class="config-checkbox ${checked?'is-checked':''} ${!f.byggbar?'is-disabled':''} ${dimmed?'is-dimmed':''}" data-node="${f.node}" ${!f.byggbar?'title="Byggs – ingen test-generator ännu"':''}>
+                      ${dot}
+                      <div class="cb-text">${f.etikett}${f.desc?`<span class="cb-sub">${f.desc}</span>`:''}${!f.byggbar?'<span class="cb-stub">byggs</span>':''}</div>
+                      <div class="cb-square">${checked?'✓':''}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
             </div>
           `;
         }).join('')}
@@ -4048,7 +4284,7 @@ function renderTestConfig(){
     </div>
 
     <div class="config-summary">
-      Du får <strong>${cfg.antal} frågor</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från <strong>${valda.length}</strong> ${valda.length===1?'vald färdighet':'valda färdigheter'} i ${scopeNamn.toLowerCase()}.
+      Du får <strong>${cfg.antal} frågor</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från <strong>${valda.length}</strong> ${valda.length===1?'vald färdighet':'valda färdigheter'}${delObj?` i ${delObj.titel.toLowerCase()}`:' i kapitlet'}.
     </div>
 
     <div style="text-align:center;margin-top:18px;">
@@ -4072,8 +4308,24 @@ function renderTestConfig(){
       renderTestConfig();
     };
   });
+  // Gruppuvud: fäll ihop / ut området.
+  document.querySelectorAll('#config-grupper .config-group-head').forEach(head => {
+    head.onclick = () => {
+      const ko = head.dataset.ko;
+      if(cfg.collapsed.includes(ko)) cfg.collapsed = cfg.collapsed.filter(x => x !== ko);
+      else cfg.collapsed = cfg.collapsed.concat(ko);
+      renderTestConfig();
+    };
+  });
+  const toggleAll = document.getElementById('toggle-all-groups');
+  if(toggleAll) toggleAll.onclick = () => {
+    cfg.collapsed = cfg.collapsed.length >= grupper.length ? [] : grupper.map(g => g.ko.id);
+    renderTestConfig();
+  };
+  const clearDel = document.getElementById('clear-del');
+  if(clearDel) clearDel.onclick = () => { cfg.del = null; cfg.nodes = null; renderTestConfig(); };
   // Färdighet-checkbox: manuell finjustering (byggbar = klickbar), lämnar filtret orört.
-  document.querySelectorAll('#config-fardigheter .config-checkbox').forEach(cb => {
+  document.querySelectorAll('#config-grupper .config-checkbox').forEach(cb => {
     cb.onclick = () => {
       if(cb.classList.contains('is-disabled')) return;
       const node = cb.dataset.node;
@@ -4263,6 +4515,15 @@ function renderSubInput(qNum, subIdx, s){
         <input type="text" class="test-sub-input" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-val">
       </div>
     `;
+  } else if(s.type === 'numeric'){
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-eq">Svar:</span>
+        <input type="text" class="test-sub-input" inputmode="decimal" style="width:120px;" data-sub-input="${idBase}-num">
+        ${s.enhet ? `<span class="test-sub-eq">${s.enhet}</span>` : ''}
+      </div>
+    `;
   }
 
   return `
@@ -4291,6 +4552,9 @@ function readSubAnswer(qNum, subIdx, s){
   } else if(s.type === 'gata'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-val"]`);
     return inp && inp.value.trim() ? inp.value.trim() : null;
+  } else if(s.type === 'numeric'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-num"]`);
+    return inp && inp.value.trim() ? inp.value.trim() : null;
   }
   return null;
 }
@@ -4316,6 +4580,9 @@ function restoreSubAnswer(qNum, subIdx, s, val){
     if(inp) inp.value = val;
   } else if(s.type === 'gata'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-val"]`);
+    if(inp) inp.value = val;
+  } else if(s.type === 'numeric'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-num"]`);
     if(inp) inp.value = val;
   }
 }
@@ -4369,6 +4636,11 @@ function gradeSub(s, ans){
     if(isNaN(num)) return {status:'wrong', given: ans};
     if(num === s.answer || (s.alt && s.alt.includes(num))) return {status:'correct', given: String(num)};
     return {status:'wrong', given: String(num)};
+  }
+  if(s.type === 'numeric'){
+    const v = parseFloat(String(ans).replace(',','.').replace(/\s/g,''));
+    if(isNaN(v)) return {status:'wrong', given: String(ans)};
+    return {status: Math.abs(v - s.answer) < 1e-6 ? 'correct' : 'wrong', given: String(ans)};
   }
   return {status:'skipped'};
 }
@@ -4484,7 +4756,7 @@ function renderReviewSub(sr){
   let correctAnswerText = '';
 
   if(sub.type === 'binary'){
-    questionText = `Är ${sub.q} primtal eller sammansatt?`;
+    questionText = sub.prompt || sub.q;
     correctAnswerText = sub.answer + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'sum'){
     questionText = `${sub.target} = ___ + ___ + ___`;
@@ -4498,6 +4770,9 @@ function renderReviewSub(sr){
   } else if(sub.type === 'gata'){
     questionText = `Gåta: ${sub.clues.join(' ')}`;
     correctAnswerText = `Talet är ${sub.answer}${sub.alt && sub.alt.length ? ` (eller ${sub.alt.join(', ')})` : ''}.`;
+  } else if(sub.type === 'numeric'){
+    questionText = sub.prompt;
+    correctAnswerText = komma(sub.answer) + (sub.enhet ? ` ${sub.enhet}` : '') + (sub.explanation ? ` — ${sub.explanation}` : '');
   }
 
   return `
