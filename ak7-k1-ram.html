@@ -1244,6 +1244,10 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .test-sub-operator{font-size:18px;color:var(--ink-soft);font-weight:600}
 .test-sub-target{font-weight:600;color:var(--c-metod);font-size:17px}
 .test-sub-eq{color:var(--ink-soft);font-weight:500;font-size:17px}
+/* stående bråk-input (täljare / streck / nämnare) för decimal→bråk */
+.test-sub-brak{display:inline-flex;flex-direction:column;align-items:center;gap:3px}
+.test-sub-brak .tsb-cell{width:64px;height:34px}
+.test-sub-brak .tsb-streck{width:64px;height:2px;background:var(--ink)}
 .test-sub-binary-row{display:flex;gap:8px;flex-wrap:wrap}
 .test-sub-binary-btn{
   flex:1;min-width:100px;
@@ -2819,6 +2823,7 @@ function sortAsc(a){return [...a].sort((x,y)=>x-y)}
 function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}          // slumpheltal [a,b]
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;} // för enklaste form (gcd=1)
 function komma(x){return String(x).replace('.',',')}                    // 0.04 → "0,04" (svensk decimal)
 function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// avrunda bort flyttalsbrus
 
@@ -3715,6 +3720,21 @@ function testProductGen(genId, titel, omrade, makeItem){
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
 }
+// Bråk-svar: makeItem → {key, prompt, talj, namn} där (talj/namn) är MÅL-bråket i enklaste form.
+// gradeSub rättar på värde + enklaste form (gcd=1), samma regel som övriga förkortnings-färdigheter.
+function testBrakGen(genId, titel, omrade, makeItem){
+  return function(seen){
+    const subs = []; let tries = 0;
+    while(subs.length < 4 && tries < 120){
+      tries++;
+      const it = makeItem();
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:it.prompt, talj:it.talj, namn:it.namn, explanation:it.expl||'' });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
 
 // Frågegeneratorer per kunskapsområde + typ
 const TEST_GENERATORS = {
@@ -4302,6 +4322,41 @@ const TEST_GENERATORS = {
       return {key:sym+a+'-'+b, prompt:'Uppskatta med överslag: '+a+' '+sym+' '+b+'. Vilket ligger närmast?',
               options:shuffle(opts).map(String), answer:String(narmast), expl:a+' '+sym+' '+b+' = '+exakt+' ≈ '+narmast+'.'};
     })
+  ]},
+
+  // ═══ SLICE 8: Del 4 – Bråkform och decimalform (bokens 4 karta-noder, alla RAKNA; ingen begrepp-nod) ═══
+  // Bråk→decimal & förläng→decimal → numeric; decimal→bråk → 'brak' (värde + enklaste form, gcd=1).
+  'bd-vaxla': { snabb: [
+    testNumericGen('bd-vaxla','Bråk → decimalform','bd-vaxla', function(){
+      const namn=randPick([2,4,5,8,10,20,25,50]), talj=rInt(1,namn-1);
+      const dec=avr(talj/namn,4);
+      return {key:talj+'/'+namn, prompt:'Skriv '+talj+'/'+namn+' som decimaltal.', ans:dec, expl:talj+'/'+namn+' = '+komma(dec)+'.'};
+    })
+  ]},
+  'bd-tillbrak': { snabb: [
+    testBrakGen('bd-tillbrak','Decimalform → bråk (enklaste form)','bd-tillbrak', function(){
+      const bank=[
+        {d:'0,5',t:1,n:2},{d:'0,25',t:1,n:4},{d:'0,75',t:3,n:4},{d:'0,2',t:1,n:5},{d:'0,4',t:2,n:5},{d:'0,6',t:3,n:5},{d:'0,8',t:4,n:5},
+        {d:'0,1',t:1,n:10},{d:'0,3',t:3,n:10},{d:'0,7',t:7,n:10},{d:'0,9',t:9,n:10},{d:'0,125',t:1,n:8},{d:'0,375',t:3,n:8},{d:'0,625',t:5,n:8},{d:'0,875',t:7,n:8}
+      ];
+      const b=randPick(bank); return {key:b.d, prompt:'Skriv '+b.d+' som bråk i enklaste form.', talj:b.t, namn:b.n, expl:b.d+' = '+b.t+'/'+b.n+'.'};
+    })
+  ]},
+  'bd-hundra': { snabb: [
+    testBrakGen('bd-hundra','Tiondelar & hundradelar → bråk','bd-hundra', function(){
+      const bank=[
+        {d:'0,05',t:1,n:20},{d:'0,15',t:3,n:20},{d:'0,35',t:7,n:20},{d:'0,45',t:9,n:20},{d:'0,25',t:1,n:4},{d:'0,75',t:3,n:4},
+        {d:'0,04',t:1,n:25},{d:'0,12',t:3,n:25},{d:'0,24',t:6,n:25},{d:'0,08',t:2,n:25},{d:'0,02',t:1,n:50},{d:'0,06',t:3,n:50}
+      ];
+      const b=randPick(bank); return {key:b.d, prompt:'Skriv '+b.d+' som bråk i enklaste form (förkorta).', talj:b.t, namn:b.n, expl:b.d+' = '+b.t+'/'+b.n+' (förkortat).'};
+    })
+  ]},
+  'bd-forlang': { snabb: [
+    testNumericGen('bd-forlang','Förläng till hundradelar → decimal','bd-forlang', function(){
+      const namn=randPick([4,5,20,25,50]), talj=rInt(1,namn-1);
+      const hundra=talj*(100/namn), dec=avr(hundra/100,2);
+      return {key:talj+'/'+namn, prompt:'Förläng '+talj+'/'+namn+' till hundradelar och skriv som decimaltal.', ans:dec, expl:talj+'/'+namn+' = '+hundra+'/100 = '+komma(dec)+'.'};
+    })
   ]}
 };
 
@@ -4356,7 +4411,12 @@ const GEN_NOD = {
   // slice 7 – räknelagarna, en generator per lag → sin karta-synliga bok-nod (d2)
   'lag-komm':       'prio-lagar:kommutativa',
   'lag-assoc':      'prio-lagar:associativa',
-  'lag-distr':      'prio-lagar:distributiva'
+  'lag-distr':      'prio-lagar:distributiva',
+  // slice 8 – Del 4 bråk/decimalform (bokens 4 RAKNA-noder, ingen begrepp-nod)
+  'bd-vaxla':       'bd-vaxla:rakna',
+  'bd-tillbrak':    'bd-tillbrak:rakna',
+  'bd-hundra':      'bd-hundra:rakna',
+  'bd-forlang':     'bd-forlang:rakna'
 };
 
 // NOD_GENS: nod (koId:formagaKey) → generatorer som träffar den. Byggs genom att fråga varje
@@ -4865,6 +4925,18 @@ function renderSubInput(qNum, subIdx, s){
         ${s.enhet ? `<span class="test-sub-eq">${s.enhet}</span>` : ''}
       </div>
     `;
+  } else if(s.type === 'brak'){
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-eq">Svar:</span>
+        <span class="test-sub-brak">
+          <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-t" aria-label="täljare">
+          <span class="tsb-streck"></span>
+          <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-n" aria-label="nämnare">
+        </span>
+      </div>
+    `;
   }
 
   return `
@@ -4896,6 +4968,11 @@ function readSubAnswer(qNum, subIdx, s){
   } else if(s.type === 'numeric'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-num"]`);
     return inp && inp.value.trim() ? inp.value.trim() : null;
+  } else if(s.type === 'brak'){
+    const t = document.querySelector(`[data-sub-input="${idBase}-t"]`);
+    const n = document.querySelector(`[data-sub-input="${idBase}-n"]`);
+    const tv = t && t.value.trim(), nv = n && n.value.trim();
+    return (tv || nv) ? [tv || '', nv || ''] : null;
   }
   return null;
 }
@@ -4925,6 +5002,11 @@ function restoreSubAnswer(qNum, subIdx, s, val){
   } else if(s.type === 'numeric'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-num"]`);
     if(inp) inp.value = val;
+  } else if(s.type === 'brak'){
+    if(Array.isArray(val)){
+      const t = document.querySelector(`[data-sub-input="${idBase}-t"]`); if(t) t.value = val[0] || '';
+      const n = document.querySelector(`[data-sub-input="${idBase}-n"]`); if(n) n.value = val[1] || '';
+    }
   }
 }
 
@@ -4982,6 +5064,14 @@ function gradeSub(s, ans){
     const v = parseFloat(String(ans).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
     if(isNaN(v)) return {status:'wrong', given: String(ans)};
     return {status: Math.abs(v - s.answer) < 1e-6 ? 'correct' : 'wrong', given: String(ans)};
+  }
+  if(s.type === 'brak'){
+    if(!Array.isArray(ans)) return {status:'skipped'};
+    const t = parseInt(ans[0]), n = parseInt(ans[1]);
+    if(isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: (ans[0]||'?')+'/'+(ans[1]||'?')};
+    const vardeOk = (t * s.namn === n * s.talj);   // t/n === talj/namn (samma värde)
+    const enklast = (gcd(t, n) === 1);             // enklaste form (gcd=1)
+    return {status: (vardeOk && enklast) ? 'correct' : 'wrong', given: t+'/'+n};
   }
   return {status:'skipped'};
 }
@@ -5114,6 +5204,9 @@ function renderReviewSub(sr){
   } else if(sub.type === 'numeric'){
     questionText = sub.prompt;
     correctAnswerText = komma(sub.answer) + (sub.enhet ? ` ${sub.enhet}` : '') + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'brak'){
+    questionText = sub.prompt;
+    correctAnswerText = sub.talj + '/' + sub.namn + ' (enklaste form)' + (sub.explanation ? ` — ${sub.explanation}` : '');
   }
 
   return `
