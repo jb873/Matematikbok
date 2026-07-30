@@ -3786,7 +3786,49 @@ const TEST_GENERATORS = {
         };
       }
     ]
+  },
+
+  // ── delbarhet (Väg A: bespoke test-generator som återanvänder befintlig matte, ingen motor rörd) ──
+  delbarhet: {
+    snabb: [
+      // Är talet delbart med d? (binary) — samma sub-typ som primtal-binary, rättas av gradeSub.
+      function genDelbar(seen){
+        const delare = [2,3,4,5,6,9,10], bank = [];
+        for(let n=12;n<=99;n++) delare.forEach(d => bank.push({n:n,d:d}));
+        const pool = bank.filter(x => !seen.has('db-'+x.n+'-'+x.d));
+        if(pool.length < 4) return null;
+        const picked = shuffle(pool).slice(0,4);
+        picked.forEach(x => seen.add('db-'+x.n+'-'+x.d));
+        return {
+          generator: 'delbar-binary',
+          title: 'Är talet delbart? Svara Ja eller Nej.',
+          omrade: 'delbarhet',
+          subs: picked.map((x,i) => ({
+            label: String.fromCharCode(97+i) + ')',
+            type: 'binary',
+            q: 'Är ' + x.n + ' delbart med ' + x.d + '?',
+            options: ['Ja', 'Nej'],
+            answer: (x.n % x.d === 0) ? 'Ja' : 'Nej',
+            explanation: (x.n % x.d === 0)
+              ? x.n + ' = ' + x.d + ' · ' + (x.n / x.d) + ', alltså delbart med ' + x.d + '.'
+              : x.n + ' delat med ' + x.d + ' går inte jämnt ut (rest ' + (x.n % x.d) + ').'
+          }))
+        };
+      }
+    ]
   }
+};
+
+// GEN_NOD: binder varje test-generator till sin TAXONOMI-nod (koId:formagaKey) — SAMMA nod som
+// Färdighetsträningens drill loggar till. Det är kopplingen som gör att ett prov färgar rätt cell
+// på kartan trots att generatorn är egen (Väg A). Ny generator → lägg till en rad här.
+const GEN_NOD = {
+  'primtal-binary': 'primtal:begrepp',
+  'termer':         'primtal:rakna',
+  'faktorer':       'primtal:rakna',
+  'primfakt':       'primtal:kommunikation',
+  'gata':           'primtal:problem',
+  'delbar-binary':  'delbarhet:rakna'
 };
 
 // Föreläsningstips per generator
@@ -3912,7 +3954,7 @@ function renderTestConfig(){
       <p class="config-desc">Välj ett eller flera kunskapsområden att öva på.</p>
       <div class="config-checkbox-list" id="config-omraden">
         ${KUNSKAPSOMRADEN.map(ko => {
-          const implemented = ko.id === 'primtal';
+          const implemented = !!TEST_GENERATORS[ko.id];   // valbart så fort området har en test-generator (Väg A)
           const checked = cfg.omraden.includes(ko.id);
           return `
             <div class="config-checkbox ${checked?'is-checked':''} ${!implemented?'is-disabled':''}" data-koid="${ko.id}" ${!implemented?'title="Kommer snart"':''}>
@@ -4266,10 +4308,16 @@ function renderTestResult(){
       if(result.status === 'correct') correctCount++;
       else if(result.status === 'wrong') wrongCount++;
       else skippedCount++;
+      // LOGGA per nod → mastery-matrisen (SAMMA hook som drillarna via GEN_NOD) → färgar kartan.
+      // En gång per prov (t.logged), bara försökta uppgifter (skippade loggas ej). Elev-lokalt, inget nät.
+      if(!t.logged && result.status !== 'skipped' && GEN_NOD[q.generator] && window.Mastery && window.Mastery.loggaForsok){
+        window.Mastery.loggaForsok(GEN_NOD[q.generator], result.status === 'correct' ? 'ratt' : 'fel');
+      }
       return {sub: s, result, key};
     });
     return {q, subResults};
   });
+  t.logged = true;   // provet loggas en gång; om-rendering av resultatet dubbelloggar inte
 
   const totalSubs = correctCount + wrongCount + skippedCount;
   const pct = totalSubs > 0 ? Math.round(correctCount / totalSubs * 100) : 0;
