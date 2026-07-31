@@ -425,19 +425,24 @@ function generateTest(config){
     (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'snabb') snabbGens.push(g); });
   });
 
+  // antal = SVARBARA ITEMS (a–d-uppgifter), inte frågemallar. Räkna subs mot totalen och trunkera
+  // sista frågan så att exakt `antal` items byggs ("6" → 6 saker att svara på).
+  const snabbItems = () => questions.filter(q => q.kind === 'snabb').reduce((s,q) => s + q.subs.length, 0);
   // Slumpa men inte samma generator för många gånger i rad
   if(snabbGens.length){
     let gensShuffled = shuffle([...snabbGens]);
     let gIdx = 0;
     let safetyCounter = 0;
-    while(questions.filter(q => q.kind === 'snabb').length < numSnabb && safetyCounter < 100){
+    while(snabbItems() < numSnabb && safetyCounter < 100){
       safetyCounter++;
       const {gen} = gensShuffled[gIdx % gensShuffled.length];
       gIdx++;
       const q = gen(seen);
-      if(q){
+      if(q && q.subs && q.subs.length){
         q.kind = 'snabb';
-        questions.push(q);
+        const kvar = numSnabb - snabbItems();
+        if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);   // trunkera sista frågan → exakt antalet
+        if(q.subs.length) questions.push(q);
       }
       if(gIdx >= gensShuffled.length){
         gensShuffled = shuffle([...snabbGens]);
@@ -452,15 +457,18 @@ function generateTest(config){
     (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'problem') problemGens.push(g); });
   });
 
+  const problemItems = () => questions.filter(q => q.kind === 'problem').reduce((s,q) => s + q.subs.length, 0);
   safetyCounter = 0;
-  while(questions.filter(q => q.kind === 'problem').length < numProblem && safetyCounter < 100){
+  while(problemItems() < numProblem && safetyCounter < 100){
     safetyCounter++;
     if(problemGens.length === 0) break;
     const {gen} = randPick(problemGens);
     const q = gen(seen);
-    if(q){
+    if(q && q.subs && q.subs.length){
       q.kind = 'problem';
-      questions.push(q);
+      const kvar = numProblem - problemItems();
+      if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);
+      if(q.subs.length) questions.push(q);
     } else {
       // No more available
       break;
@@ -540,12 +548,12 @@ function renderTestConfig(){
     ${cfg.del ? `<div class="config-filter-note">Filtrerat till delkapitlet <strong>${delNamn}</strong>. <button class="cfn-clear" id="clear-del">Visa hela kapitlet</button></div>` : ''}
 
     <div class="test-config-card">
-      <h3>Antal frågor</h3>
-      <p class="config-desc">Varje fråga kan ha flera deluppgifter (a, b, c).</p>
+      <h3>Antal uppgifter</h3>
+      <p class="config-desc">Så många uppgifter (a, b, c …) att svara på – de grupperas i frågor.</p>
       <div class="config-options" id="config-antal">
         ${[3,6,10,14].map(n => `
           <button class="config-option ${cfg.antal===n?'is-selected':''}" data-antal="${n}">
-            ${n} frågor
+            ${n} uppgifter
           </button>
         `).join('')}
       </div>
@@ -621,7 +629,7 @@ function renderTestConfig(){
     </div>
 
     <div class="config-summary">
-      Du får <strong>${cfg.antal} frågor</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från <strong>${valda.length}</strong> ${valda.length===1?'vald färdighet':'valda färdigheter'}${delNamn?` i ${delNamn.toLowerCase()}`:' i kapitlet'}.
+      Du får <strong>${cfg.antal} uppgifter</strong>${cfg.typ==='snabb-och-problem'?` (${numSnabb} snabb + ${numProblem} problem)`:''} från <strong>${valda.length}</strong> ${valda.length===1?'vald färdighet':'valda färdigheter'}${delNamn?` i ${delNamn.toLowerCase()}`:' i kapitlet'}.
     </div>
 
     <div style="text-align:center;margin-top:18px;">
