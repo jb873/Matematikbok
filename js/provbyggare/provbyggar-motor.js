@@ -86,11 +86,12 @@ function testBrakGen(genId, titel, omrade, makeItem){
 // Flerstegs (mellanled): makeItem → {key, prompt, led:[{fraga, varde, facit?}], slutTalj, slutNamn, expl}.
 // led = mellansteg (värde-rättade); slutTalj/slutNamn = slutsvar i enklaste form. Speglar drillens tresektion.
 function testMellanledGen(genId, titel, omrade, makeItem){
-  return function(seen){
+  // opts.variant (valfritt): config-vald variant vidarebefordras till makeItem, som får producera bara den.
+  return function(seen, opts){
     const subs = []; let tries = 0;
     while(subs.length < 4 && tries < 120){
       tries++;
-      const it = makeItem();
+      const it = makeItem(opts);
       if(!it || seen.has(genId+'-'+it.key)) continue;
       seen.add(genId+'-'+it.key);
       subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'mellanled', prompt:it.prompt, led:it.led, slutTalj:it.slutTalj, slutNamn:it.slutNamn, explanation:it.expl||'' });
@@ -470,7 +471,7 @@ function exempelFaktorer(target, antal){
     var FORELASNING_TIPS= config.forelasningTips || {};
     var FARG_INFO_C     = config.fargInfo || FARG_INFO;
     var FORMAGA_NAMN_C  = config.formagaNamn || FORMAGA_NAMN;
-    var state = { testConfig:{ antal:6, typ:'snabb', del:null, nodes:null, fargFilter:[0,1,2,3], collapsed:null }, test:null };
+    var state = { testConfig:{ antal:6, typ:'snabb', del:null, nodes:null, fargFilter:[0,1,2,3], collapsed:null, varianter:{} }, test:null };
     function navTo(v,o){ return config.nav.navTo(v, o||{}); }
     function showView(v){ return config.nav.showView(v); }
     function updateTutorContext(){ if(config.nav.updateTutorContext) config.nav.updateTutorContext(); }
@@ -506,8 +507,9 @@ function generateTest(config){
   // Bygg snabbfrågor – plocka från generatorerna för de valda FÄRDIGHETERNA (noderna), slumpa
   const snabbGens = [];
   nodes.forEach(function(node){
-    (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'snabb') snabbGens.push(g); });
+    (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'snabb') snabbGens.push({gen:g.gen, node:node}); });
   });
+  const variantFor = (node) => ({ variant: (config.varianter || {})[node] });
 
   // antal = SVARBARA ITEMS (a–d-uppgifter), inte frågemallar. Räkna subs mot totalen och trunkera
   // sista frågan så att exakt `antal` items byggs ("6" → 6 saker att svara på).
@@ -519,9 +521,9 @@ function generateTest(config){
     let safetyCounter = 0;
     while(snabbItems() < numSnabb && safetyCounter < 100){
       safetyCounter++;
-      const {gen} = gensShuffled[gIdx % gensShuffled.length];
+      const {gen, node} = gensShuffled[gIdx % gensShuffled.length];
       gIdx++;
-      const q = gen(seen);
+      const q = gen(seen, variantFor(node));
       if(q && q.subs && q.subs.length){
         q.kind = 'snabb';
         const kvar = numSnabb - snabbItems();
@@ -538,7 +540,7 @@ function generateTest(config){
   // Bygg problemfrågor – från de valda färdigheternas problem-generatorer
   const problemGens = [];
   nodes.forEach(function(node){
-    (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'problem') problemGens.push(g); });
+    (NOD_GENS[node] || []).forEach(function(g){ if(g.kind === 'problem') problemGens.push({gen:g.gen, node:node}); });
   });
 
   const problemItems = () => questions.filter(q => q.kind === 'problem').reduce((s,q) => s + q.subs.length, 0);
@@ -546,8 +548,8 @@ function generateTest(config){
   while(problemItems() < numProblem && safetyCounter < 100){
     safetyCounter++;
     if(problemGens.length === 0) break;
-    const {gen} = randPick(problemGens);
-    const q = gen(seen);
+    const {gen, node} = randPick(problemGens);
+    const q = gen(seen, variantFor(node));
     if(q && q.subs && q.subs.length){
       q.kind = 'problem';
       const kvar = numProblem - problemItems();
@@ -622,6 +624,23 @@ function renderTestConfig(){
   if(cfg.nodes === null) synkaFranFilter();
   const valda = cfg.nodes || [];
 
+  // Variant-väljare: en nod kan DEKLARERA varianter (config.varianter). Visas bara när noden är vald.
+  // Valet lagras i cfg.varianter[nod] och skickas till nodens generator i generateTest. (k1 saknar deklaration → dolt.)
+  const varDekl = config.varianter || {};
+  const variantCards = valda.filter(n => varDekl[n] && varDekl[n].alternativ && varDekl[n].alternativ.length).map(n => {
+    const dekl = varDekl[n];
+    const rad = allaRader.find(r => r.node === n);
+    const cur = cfg.varianter[n] || dekl.alternativ[0].key;
+    return `
+    <div class="test-config-card">
+      <h3>${dekl.titel}</h3>
+      <p class="config-desc">${dekl.beskrivning || `Välj vilken sorts uppgift provet ska öva${rad ? ` för <strong>${rad.etikett}</strong>` : ''}. Standard: blandat.`}</p>
+      <div class="config-options config-variant" data-node="${n}">
+        ${dekl.alternativ.map(a => `<button class="config-option ${cur===a.key?'is-selected':''}" data-vkey="${a.key}">${a.label}</button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
   document.getElementById('test-config-body').innerHTML = `
     <div class="header-card">
       <div class="header-eyebrow">Kapitel 1 · Taluppfattning</div>
@@ -667,6 +686,8 @@ function renderTestConfig(){
         `).join('')}
       </div>
     </div>
+
+    ${variantCards}
 
     <div class="test-config-card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
@@ -734,6 +755,14 @@ function renderTestConfig(){
       if(cfg.fargFilter.includes(i)) cfg.fargFilter = cfg.fargFilter.filter(x => x !== i);
       else cfg.fargFilter = cfg.fargFilter.concat(i);
       cfg.nodes = null; // härled om ur filtret
+      renderTestConfig();
+    };
+  });
+  // Variant-chip: lagra valet för noden (skickas till dess generator i generateTest).
+  document.querySelectorAll('#test-config-body .config-variant .config-option').forEach(btn => {
+    btn.onclick = () => {
+      const wrap = btn.closest('.config-variant');
+      cfg.varianter = Object.assign({}, cfg.varianter, { [wrap.dataset.node]: btn.dataset.vkey });
       renderTestConfig();
     };
   });
