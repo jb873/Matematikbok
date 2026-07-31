@@ -983,5 +983,20 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
 <script src="../../../js/motor/blad/blad-k1-d10.js"></script>
 
+<!-- Städa bort den redundanta "Självskattning"-gruppen ur plugg-menyn: den innehöll bara ett
+     klar:false-dokument (Självskattningsmatris), och den RIKTIGA självskattningen bor i kunskaps-
+     lägesvyn (hero-länken ovan → ?tab=sjalv). Att peka om hade skapat en dubbel väg dit; borttagning
+     är renast. Motorn/blad-filen (js/motor/) orörd — PLUGG_GRUPPER filtreras page-side, menyn ritas om. -->
+<script>
+(function(){
+  if(typeof PLUGG_GRUPPER === 'undefined') return;
+  for(var i = 0; i < PLUGG_GRUPPER.length; i++){
+    if(PLUGG_GRUPPER[i].id === 'sjalvskattning'){ PLUGG_GRUPPER.splice(i, 1); break; }
+  }
+  if(typeof renderGruppRad === 'function') renderGruppRad();
+  if(typeof renderDoklista === 'function') renderDoklista();
+})();
+</script>
+
 </body>
 </html>
