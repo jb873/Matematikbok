@@ -650,6 +650,90 @@ function blandadEngine(){
       else PB.render.result();
     } else { PB_SHELL = false; renderOversikt(); }
   }
+  // ── K2 BRÅK-TEST-GENERATORER (Väg A, bundna till karta-synliga noder via GEN_NOD) ──
+  // Content i k2:s ram; mekanismen (ProvbyggarMotor) orörd. Hjälpare lokala (undvik global-krock).
+  var G = ProvbyggarMotor.gen;
+  function rI(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+  function rP(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function gcd2(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=b; b=a%b; a=t; } return a||1; }
+  var K2_TEST_GENERATORS = {
+    // d1 — Andel av ett antal (numeric). Visuella andel-figur/tallinje hoppas (kan ej genereras entydigt i testformatet).
+    'andel-antal': { snabb: [ G.numeric('k2-andel-antal','Andel av ett antal','andel-antal', function(){
+      var n=rP([2,3,4,5,6,8]), t=rI(1,n-1), mult=rI(2,9), hel=n*mult;
+      return {key:t+'/'+n+'*'+hel, prompt:'Hur mycket är '+t+'/'+n+' av '+hel+'?', ans:t*mult, expl:t+'/'+n+' av '+hel+' = '+(t*mult)+'.'};
+    }) ] },
+    // d2 — Blandad form → oäkta bråk (brak; fraktionsdelen coprim → oäkta redan enklaste)
+    'brak-blandad': { snabb: [ G.brak('k2-blandad','Blandad form → oäkta bråk','brak-blandad', function(){
+      var hel=rI(1,4), n=rP([2,3,4,5,6,7,8]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var talj=hel*n+t;
+      return {key:hel+'-'+t+'-'+n, prompt:'Skriv '+hel+' '+t+'/'+n+' som oäkta bråk.', talj:talj, namn:n, expl:hel+' '+t+'/'+n+' = '+talj+'/'+n+'.'};
+    }) ] },
+    // d3 — Förlänga (numeric: nämnaren given, täljaren efterfrågas — förläng ⇒ EJ enklaste, så numeric) + Förkorta (brak, enklaste)
+    'brak-forlanga': { snabb: [ G.numeric('k2-forlanga','Förläng bråket','brak-forlanga', function(){
+      var n=rP([2,3,4,5,6]), t=rI(1,n-1), f=rP([2,3,4,5]);
+      return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = ___/'+(n*f), ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
+    }) ] },
+    'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
+      var N=rP([2,3,4,5,6]), T; do{ T=rI(1,N-1); }while(gcd2(T,N)!==1); var f=rP([2,3,4]);
+      return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+(T*f)+'/'+(N*f)+' till enklaste form.', talj:T, namn:N, expl:(T*f)+'/'+(N*f)+' = '+T+'/'+N+'.'};
+    }) ] },
+    // d4 — Jämför (flerval)
+    'brak-jmf-lika': { snabb: [ G.flerval('k2-jmf-lika','Jämför bråk (samma nämnare)','brak-jmf-lika', function(){
+      var n=rP([4,5,6,7,8,9]), a=rI(1,n-1), b; do{ b=rI(1,n-1); }while(b===a); var s=(a>b)?a:b;
+      return {key:a+'-'+b+'/'+n, prompt:'Vilket bråk är störst?', options:[a+'/'+n, b+'/'+n], answer:s+'/'+n, expl:'Samma nämnare → störst täljare: '+s+'/'+n+'.'};
+    }) ] },
+    'brak-jmf-riktmark': { snabb: [ G.flerval('k2-jmf-rikt','Jämför mot 1/2 och 1','brak-jmf-riktmark', function(){
+      var n=rP([3,4,5,6,7,8]), t=rI(1,n-1), mk=rP([[0.5,'1/2'],[1,'1']]), v=t/n;
+      if(Math.abs(v-mk[0])<1e-9) return null;
+      return {key:t+'/'+n+'-'+mk[1], prompt:'Är '+t+'/'+n+' större eller mindre än '+mk[1]+'?', options:['Större än '+mk[1],'Mindre än '+mk[1]], answer:(v>mk[0]?'Större':'Mindre')+' än '+mk[1], expl:t+'/'+n+' är '+(v>mk[0]?'större':'mindre')+' än '+mk[1]+'.'};
+    }) ] },
+    // d5 — Add/sub (brak, enklaste, hålls äkta)
+    'brak-add': { snabb: [ G.brak('k2-add','Addition med bråk','brak-add', function(){
+      var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
+      var talj=t1*n2+t2*n1, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+      if(T>=N) return null;   // håll svaret äkta (subtypen saknar hel-del)
+      return {key:t1+'/'+n1+'+'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' + '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' + '+t2+'/'+n2+' = '+T+'/'+N+'.'};
+    }) ] },
+    'brak-sub': { snabb: [ G.brak('k2-sub','Subtraktion med bråk','brak-sub', function(){
+      var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
+      var talj=t1*n2-t2*n1, namn=n1*n2; if(talj<=0) return null;
+      var g=gcd2(talj,namn), T=talj/g, N=namn/g;
+      return {key:t1+'/'+n1+'-'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' − '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' − '+t2+'/'+n2+' = '+T+'/'+N+'.'};
+    }) ] },
+    // d6 — Mult (brak, enklaste, äkta·äkta ⇒ äkta)
+    'brak-mult-rakna': { snabb: [ G.brak('k2-mult','Multiplikation med bråk','brak-mult-rakna', function(){
+      var n1=rP([2,3,4,5]), n2=rP([2,3,4,5]), t1=rI(1,n1-1), t2=rI(1,n2-1);
+      var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+      return {key:t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' · '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+T+'/'+N+'.'};
+    }) ] },
+    // d7 — Division (fördjupning, brak, enklaste; oäkta enklaste tillåts för heltal÷bråk)
+    'brak-div-bh': { snabb: [ G.brak('k2-div-bh','Bråk ÷ heltal','brak-div-bh', function(){
+      var n=rP([2,3,4,5]), t=rI(1,n-1), h=rI(2,6); var talj=t, namn=n*h, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+      return {key:t+'/'+n+'/'+h, prompt:'Räkna ut (enklaste form):    '+t+'/'+n+' / '+h, talj:T, namn:N, expl:t+'/'+n+' / '+h+' = '+t+'/'+(n*h)+' = '+T+'/'+N+'.'};
+    }) ] },
+    'brak-div-hb': { snabb: [ G.brak('k2-div-hb','Heltal ÷ bråk','brak-div-hb', function(){
+      var n=rP([2,3,4,5]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var h=rI(1,4);
+      var talj=h*n, namn=t, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+      return {key:h+'/'+t+'-'+n, prompt:'Räkna ut (enklaste form):    '+h+' / '+t+'/'+n, talj:T, namn:N, expl:h+' / '+t+'/'+n+' = '+h+' · '+n+'/'+t+' = '+T+'/'+N+'.'};
+    }) ] },
+    'brak-div-bb': { snabb: [ G.brak('k2-div-bb','Bråk ÷ bråk','brak-div-bb', function(){
+      var n1=rP([2,3,4,5]), t1=rI(1,n1-1), n2=rP([2,3,4,5]), t2=rI(1,n2-1);
+      var talj=t1*n2, namn=n1*t2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+      return {key:t1+'/'+n1+'//'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' / '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' / '+t2+'/'+n2+' = '+t1+'/'+n1+' · '+n2+'/'+t2+' = '+T+'/'+N+'.'};
+    }) ] },
+    'brak-div-inv': { snabb: [ G.brak('k2-div-inv','Invertera (omvända talet)','brak-div-inv', function(){
+      var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
+      return {key:'inv'+t+'/'+n, prompt:'Skriv det omvända talet (inversen) till '+t+'/'+n+':', talj:n, namn:t, expl:'Inversen av '+t+'/'+n+' är '+n+'/'+t+'.'};
+    }) ] }
+  };
+  var K2_GEN_NOD = {
+    'k2-andel-antal':'andel-antal:rakna', 'k2-blandad':'brak-blandad:rakna',
+    'k2-forlanga':'brak-forlanga:rakna', 'k2-forkorta':'brak-forkorta:rakna',
+    'k2-jmf-lika':'brak-jmf-lika:begrepp', 'k2-jmf-rikt':'brak-jmf-riktmark:begrepp',
+    'k2-add':'brak-add:rakna', 'k2-sub':'brak-sub:rakna', 'k2-mult':'brak-mult-rakna:rakna',
+    'k2-div-bh':'brak-div-bh:rakna', 'k2-div-hb':'brak-div-hb:rakna',
+    'k2-div-bb':'brak-div-bb:rakna', 'k2-div-inv':'brak-div-inv:rakna'
+  };
+
   var PB = ProvbyggarMotor.montera({
     taxonomi: function(){ return window.K2_TAXONOMI; },   // lat (samma mönster som k1)
     mastery:  function(){ return window.MasteryK2; },     // k2 använder MasteryK2 (bråk-matrisen)
@@ -662,7 +746,7 @@ function blandadEngine(){
       {del:'k2d6', titel:'Multiplikation med bråk'},
       {del:'k2d7', titel:'Division med bråk'}
     ],
-    generators: {}, genNod: {},   // inga bråk-generatorer än → alla noder visas "byggs"
+    generators: K2_TEST_GENERATORS, genNod: K2_GEN_NOD,   // 13 byggbara; visuella andel-noder = "byggs"
     nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
   });
   // Deeplink: ?view=test-config[&del=k2dN] (från delkapitlens "Visa vad du kan"-flik)
