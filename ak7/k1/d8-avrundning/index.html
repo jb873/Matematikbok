@@ -953,5 +953,74 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 })();
 </script>
 
+<!-- Öva-blad för avrundning + överslag, GENERERADE på sidan (blad-filen under js/motor/ orörd).
+     Samma mekaniska regel + talintervall som Färdighetsträningens renderAvrHelatal/Decimaltal/
+     Narmevarde; avrAvrunda är inline-kopia av ramens (rad 9437, ~4 rader) eftersom generatorn där
+     är motor-/ram-intern och inte återanvändbar (Joachim: sid-generator, samma regel). Interleavat,
+     inga nivåer, självrättande via 'enkel'-raden. Global bygg_blad överskuggar BLAD_TOM-stubben. -->
+<script>
+(function(){
+  // Avrundning – identisk med ramens avrAvrunda (flyttals-nudge). Ingen ny matematik.
+  function avrAvrunda(n, step){ var q = n/step; var r = Math.round(q + (q >= 0 ? 1e-9 : -1e-9)); return Math.round(r*step*1e6)/1e6; }
+  function ri(lo, hi){ return lo + Math.floor(Math.random()*(hi - lo + 1)); }
+  function komma(x){ return String(x).replace('.', ','); }
+  function redanAvrundat(n, step){ var r = n/step; return Math.abs(r - Math.round(r)) < 1e-9; }
+  function shuf(a){ a = a.slice(); for(var i = a.length-1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+  // AVRUNDNING – hela tal (steg 10/100/1000) + decimaler (heltal/tiondel/hundradel), samma intervall
+  // som renderAvrHelatal/renderAvrDecimaltal. Hoppar tal som redan är avrundade (som avrRoundEngine).
+  function avrHel(step, posNamn){
+    var lo, hi; if(step === 10){ lo = 23; hi = 989; } else if(step === 100){ lo = 212; hi = 9849; } else { lo = 2456; hi = 89789; }
+    var n, g = 0; do { n = ri(lo, hi); g++; } while(redanAvrundat(n, step) && g < 60);
+    return { typ:'enkel', vansterText:'Avrunda ' + n + ' till närmaste ' + posNamn + ':', svar: avrAvrunda(n, step) };
+  }
+  function avrDec(step, posNamn, div){
+    var lo, hi; if(step === 1){ lo = 11; hi = 989; } else if(step === 0.1){ lo = 105; hi = 9899; } else { lo = 1015; hi = 98999; }
+    var n, g = 0; do { n = Math.round(ri(lo, hi)/div * 1e6)/1e6; g++; } while(redanAvrundat(n, step) && g < 60);
+    return { typ:'enkel', vansterText:'Avrunda ' + komma(n) + ' till närmaste ' + posNamn + ':', svar: avrAvrunda(n, step) };
+  }
+  var AVR_BLAD = {
+    titel:'Avrundning',
+    intro:'Avrunda talet till den plats som står i uppgiften. Fyll i svaret och tryck på Kontrollera. Bladet är blandat – hela tal och decimaltal om vartannat.',
+    grupper:[ { rubrik:'Avrunda talet', rader: shuf([
+      avrHel(10,'tiotal'), avrHel(10,'tiotal'), avrHel(100,'hundratal'), avrHel(100,'hundratal'), avrHel(1000,'tusental'),
+      avrDec(1,'heltal',10), avrDec(1,'heltal',10), avrDec(0.1,'tiondel',100), avrDec(0.1,'tiondel',100), avrDec(0.01,'hundradel',1000), avrDec(0.01,'hundradel',1000), avrHel(1000,'tusental')
+    ]) } ]
+  };
+
+  // ÖVERSLAG – avrunda operanderna till angiven plats, räkna sedan. Deterministiskt svar (ett tal),
+  // så det kan självrättas; samma talstorlekar som renderAvrNarmevarde. (FT-drillen använder flerval;
+  // ett självrättande blad behöver ett entydigt svar → avrunda-operanderna-tekniken.)
+  function ovrAddSub(){
+    var op = Math.random() < 0.5 ? '+' : '−', place = Math.random() < 0.5 ? 10 : 100;
+    var lo, hi; if(place === 10){ lo = 13; hi = 89; } else { lo = 140; hi = 860; }
+    var a = ri(lo, hi), b = ri(lo, hi);
+    if(op === '−' && a < b){ var t = a; a = b; b = t; }
+    var ra = avrAvrunda(a, place), rb = avrAvrunda(b, place);
+    var pn = place === 10 ? 'tiotal' : 'hundratal';
+    return { typ:'enkel', vansterText:'Avrunda båda till närmaste ' + pn + ' och räkna: ' + a + ' ' + op + ' ' + b + ' ≈', svar: (op === '+' ? ra + rb : ra - rb) };
+  }
+  function ovrMult(){
+    var place = Math.random() < 0.5 ? 10 : 100, big, small = ri(3, 9);
+    if(place === 10){ big = ri(12, 79); } else { big = ri(210, 690); }
+    while(redanAvrundat(big, place)) big += 1;
+    var pn = place === 10 ? 'tiotal' : 'hundratal';
+    return { typ:'enkel', vansterText:'Avrunda ' + big + ' till närmaste ' + pn + ' och räkna: ' + big + ' · ' + small + ' ≈', svar: avrAvrunda(big, place) * small };
+  }
+  var OVR_BLAD = {
+    titel:'Överslagsräkning',
+    intro:'Gör ett överslag: avrunda först talen, räkna sedan i huvudet. Fyll i ditt överslag och tryck på Kontrollera.',
+    grupper:[ { rubrik:'Gör ett överslag', rader: shuf([
+      ovrAddSub(), ovrAddSub(), ovrAddSub(), ovrAddSub(), ovrAddSub(),
+      ovrMult(), ovrMult(), ovrMult(), ovrMult(), ovrMult()
+    ]) } ]
+  };
+
+  function mount(id, blad){ var el = document.getElementById(id); if(el && typeof bygg_blad === 'function') bygg_blad(el, blad); }
+  mount('sheet-avrundning', AVR_BLAD);
+  mount('sheet-overslag', OVR_BLAD);
+})();
+</script>
+
 </body>
 </html>
