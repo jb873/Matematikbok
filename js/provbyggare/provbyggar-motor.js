@@ -592,7 +592,7 @@ function renderTestConfig(){
             <div class="config-group ${collapsed?'is-collapsed':''}">
               <div class="config-group-head" data-del="${d.del}">
                 <span class="cg-chev">${collapsed?'▸':'▾'}</span>
-                <span class="cg-titel"><span class="cg-delnr">Del ${d.del.replace('d','')}</span> ${d.titel}</span>
+                <span class="cg-titel"><span class="cg-delnr">Del ${d.del.replace(/^.*?(\d+)$/, '$1')}</span> ${d.titel}</span>
                 <span class="cg-meta">${dByggbara.length ? `${dValda.length}/${dByggbara.length} valda` : 'byggs'}</span>
               </div>
               <div class="config-group-body">

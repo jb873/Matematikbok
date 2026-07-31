@@ -562,6 +562,9 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/ovamer/ovamer-k2-jmf.js"></script>
 <script src="js/motor/figur/svg-andel.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-andel.js"></script>
+<!-- Delad provbyggare (samma modul som k1 monterar). Monteras med K2-config i boot nedan. -->
+<link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
+<script src="js/provbyggare/provbyggar-motor.js"></script>
 <script>
 // ── Del 2 blandad-form-drill: oäkta ↔ blandad (genBlandad ur BrakDecimalGen). Ny nod
 //    brak-blandad:rakna. bråk↔decimal-delen sköts av k1-Del4-drillarna (delatMed). ──
@@ -622,6 +625,54 @@ function blandadEngine(){
     'andel-hela':        function(){ helaEngine(); },              // Del 1: skriva hela i bråkform (villkors-validering)
     'andel-kontra':      function(){ kontraEngine(); }             // Del 1: andel kontra antal (val)
   };
+
+  // ── PROVBYGGARE (delad modul, K2-config) — infrastruktur på plats; noderna "byggs" tills
+  //    bråk-generatorerna skrivs (nästa skiva). Väljaren läser K2_TAXONOMI kapitel-brett,
+  //    grupperad per bok-delkapitel, med färg-filter + spärr (allt i modulen). ──
+  var app = document.getElementById('app');
+  var PB_SHELL = false;
+  function pbShell(){
+    if(PB_SHELL) return;
+    app.innerHTML = '<div id="pb-host">'
+      + '<section class="pb-view" data-pbv="test-config"><div id="test-config-body"></div></section>'
+      + '<section class="pb-view" data-pbv="test-take" hidden><a href="#" class="hero-back" id="test-take-back">← Tillbaka till inställningar</a><div id="test-take-body"></div></section>'
+      + '<section class="pb-view" data-pbv="test-result" hidden><div id="test-result-body"></div></section>'
+      + '</div>';
+    PB_SHELL = true;
+  }
+  function pbShow(v){ var h = document.getElementById('pb-host'); if(!h) return;
+    h.querySelectorAll('.pb-view').forEach(function(el){ el.hidden = (el.dataset.pbv !== v); }); }
+  function pbNav(view){
+    if(view === 'test-config' || view === 'test-take' || view === 'test-result'){
+      pbShell();
+      if(view === 'test-config') PB.render.config();
+      else if(view === 'test-take') PB.render.take();
+      else PB.render.result();
+    } else { PB_SHELL = false; renderOversikt(); }
+  }
+  var PB = ProvbyggarMotor.montera({
+    taxonomi: function(){ return window.K2_TAXONOMI; },   // lat (samma mönster som k1)
+    mastery:  function(){ return window.MasteryK2; },     // k2 använder MasteryK2 (bråk-matrisen)
+    bokDelkapitel: [
+      {del:'k2d1', titel:'Andel och antal'},
+      {del:'k2d2', titel:'Byta form'},
+      {del:'k2d3', titel:'Förlänga och förkorta'},
+      {del:'k2d4', titel:'Jämföra bråk'},
+      {del:'k2d5', titel:'Addition och subtraktion med bråk'},
+      {del:'k2d6', titel:'Multiplikation med bråk'},
+      {del:'k2d7', titel:'Division med bråk'}
+    ],
+    generators: {}, genNod: {},   // inga bråk-generatorer än → alla noder visas "byggs"
+    nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
+  });
+  // Deeplink: ?view=test-config[&del=k2dN] (från delkapitlens "Visa vad du kan"-flik)
+  if(/[?&]view=test-config/i.test(hs)){
+    var mdel = hs.match(/[?&]del=([a-z0-9]+)/i);
+    PB.setDel(mdel ? mdel[1] : null);
+    pbNav('test-config');
+    return;
+  }
+
   if(/[?&]embed=1\b/.test(hs)){
     document.body.classList.add('embed');
     (function(){
