@@ -127,9 +127,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-tid:rakna", "namn": "Tid i bråk- och decimalform", "parent": "brak-tid", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "tidBrakEngine",
       "begrepp": "Växla mellan minuter/timmar och bråk- eller decimalform av en timme.",
-      "visning": null
+      "visning": { "utbudslista": "k2d2", "grupp": "Byta form", "gruppordning": 0, "radordning": 4, "titel": "Tid i bråkform", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 3 · Förlänga och förkorta (öppen) ─────────────── */
@@ -171,9 +171,9 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-likformig:rakna", "namn": "Likformiga bråk", "parent": "brak-likformig", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "likformigEngine",
       "begrepp": "Ge flera bråk som är lika med ett givet bråk genom förlängning (villkors-validering).",
-      "visning": null
+      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 2, "titel": "Likformiga bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 4 · Jämföra bråk (öppen; Öva = exakt-författat blad) ───────────────

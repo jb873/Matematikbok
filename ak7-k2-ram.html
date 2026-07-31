@@ -226,7 +226,7 @@ body.embed .wrap{ padding:12px 14px 24px; max-width:100%; }
 
 <script>
 // ============================================================
-// ALGEBRA – ÖVA MER (kapitel 3)
+// BRÅK – ÖVA MER (kapitel 2)
 // ============================================================
 
 // ---- STRUKTUR: kunskapsområden med undergrupper ----
@@ -562,6 +562,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/ovamer/ovamer-k2-jmf.js"></script>
 <script src="js/motor/figur/svg-andel.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-andel.js"></script>
+<script src="js/motor/ovamer/ovamer-k2-likvtid.js"></script>
 <!-- Delad provbyggare (samma modul som k1 monterar). Monteras med K2-config i boot nedan. -->
 <link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
 <script src="js/provbyggare/provbyggar-motor.js"></script>
@@ -606,8 +607,10 @@ function blandadEngine(){
   var hs = location.search;
   var K2_DRILL = {
     'brak-blandad':  function(){ blandadEngine(); },
+    'brak-tid':      function(){ tidBrakEngine(); },          // Del 2: minuter → del av en timme (bråkform)
     'brak-forlanga': function(){ forlangaEngine(); },
     'brak-forkorta': function(){ forkortaEngine(); },
+    'brak-likformig': function(){ likformigEngine(); },       // Del 3: förläng till given nämnare (likformiga bråk)
     'brak-add':      function(){ raknaEngine('addition'); },
     'brak-sub':      function(){ raknaEngine('subtraktion'); },
     'brak-mult-rakna': function(){ multBrakEngine(); },      // Del 6: multiplikation med bråk (mellanled vid stora tal)
@@ -711,6 +714,10 @@ function blandadEngine(){
       var hel=rI(1,4), n=rP([2,3,4,5,6,7,8]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var talj=hel*n+t;
       return {key:hel+'-'+t+'-'+n, prompt:'Skriv '+hel+' '+t+'/'+n+' som oäkta bråk.', talj:talj, namn:n, expl:hel+' '+t+'/'+n+' = '+talj+'/'+n+'.'};
     }) ] },
+    'brak-tid': { snabb: [ G.brak('k2-tid','Tid i bråkform','brak-tid', function(){
+      var m=rP([15,30,45,20,40,10,50,12,24,36,48,6,54,5,25,35,55,18,42]); var g=gcd2(m,60), t=m/g, n=60/g;
+      return {key:'tid'+m, prompt:'Skriv '+m+' min som del av en timme (enklaste form).', talj:t, namn:n, expl:m+' min = '+m+'/60 h = '+t+'/'+n+' h.'};
+    }) ] },
     // d3 — Förlänga (numeric: nämnaren given, täljaren efterfrågas — förläng ⇒ EJ enklaste, så numeric) + Förkorta (brak, enklaste)
     'brak-forlanga': { snabb: [ G.numeric('k2-forlanga','Förläng bråket','brak-forlanga', function(){
       var n=rP([2,3,4,5,6]), t=rI(1,n-1), f=rP([2,3,4,5]);
@@ -719,6 +726,10 @@ function blandadEngine(){
     'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
       var N=rP([2,3,4,5,6]), T; do{ T=rI(1,N-1); }while(gcd2(T,N)!==1); var f=rP([2,3,4]);
       return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+(T*f)+'/'+(N*f)+' till enklaste form.', talj:T, namn:N, expl:(T*f)+'/'+(N*f)+' = '+T+'/'+N+'.'};
+    }) ] },
+    'brak-likformig': { snabb: [ G.numeric('k2-likformig','Likformiga bråk','brak-likformig', function(){
+      var n=rP([2,3,4,5,6]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var k=rP([2,3,4,5]);
+      return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+t+'/'+n+':    '+t+'/'+n+' = ___/'+(n*k), ans:t*k, expl:t+'/'+n+' = '+(t*k)+'/'+(n*k)+' (förläng med '+k+').'};
     }) ] },
     // d4 — Jämför (flerval)
     'brak-jmf-lika': { snabb: [ G.flerval('k2-jmf-lika','Jämför bråk (samma nämnare)','brak-jmf-lika', function(){
@@ -812,8 +823,8 @@ function blandadEngine(){
     }) ] }
   };
   var K2_GEN_NOD = {
-    'k2-andel-antal':'andel-antal:rakna', 'k2-blandad':'brak-blandad:rakna',
-    'k2-forlanga':'brak-forlanga:rakna', 'k2-forkorta':'brak-forkorta:rakna',
+    'k2-andel-antal':'andel-antal:rakna', 'k2-blandad':'brak-blandad:rakna', 'k2-tid':'brak-tid:rakna',
+    'k2-forlanga':'brak-forlanga:rakna', 'k2-forkorta':'brak-forkorta:rakna', 'k2-likformig':'brak-likformig:rakna',
     'k2-jmf-lika':'brak-jmf-lika:begrepp', 'k2-jmf-rikt':'brak-jmf-riktmark:begrepp',
     'k2-add':'brak-add:rakna', 'k2-sub':'brak-sub:rakna', 'k2-mult':'brak-mult-rakna:rakna',
     'k2-div-bh':'brak-div-bh:rakna', 'k2-div-hb':'brak-div-hb:rakna',
@@ -832,7 +843,7 @@ function blandadEngine(){
       {del:'k2d6', titel:'Multiplikation med bråk'},
       {del:'k2d7', titel:'Division med bråk'}
     ],
-    generators: K2_TEST_GENERATORS, genNod: K2_GEN_NOD,   // 13 byggbara; visuella andel-noder = "byggs"
+    generators: K2_TEST_GENERATORS, genNod: K2_GEN_NOD,   // 15 byggbara; visuella andel-noder = "byggs"
     // OPT2: mult-noden är EN kartnod men erbjuder variant-VAL i provet (ingen taxonomi-split, motorn orörd).
     varianter: {
       'brak-mult-rakna:rakna': {
