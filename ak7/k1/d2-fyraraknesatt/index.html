@@ -1371,5 +1371,54 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 })();
 </script>
 
+<!-- Problem-Öva-blad (fyra räknesätt, lästal). Innehåll bor HÄR i sidan (blad-filen under
+     js/motor/ orörd); global bygg_blad överskuggar blad-filens GRUND_BLAD_TOM-stub i sheet-problem.
+     Moderat nivå (sen sexa / tidig sjua): korta enstegs-lästal + enstaka tvåstegs, vänliga tal,
+     vardagsnära. Numeriskt facit (data-svar) → självrättas som övriga blad. Joachim kalibrerar. -->
+<script>
+(function(){
+  var PROBLEM_BLAD_D2 = {
+    titel: 'Problemlösning – de fyra räknesätten',
+    intro: 'Läs uppgiften, skriv din uträkning i rutan och fyll i svaret med rätt enhet. Tryck sedan på Kontrollera. Varje blad har alla fyra räknesätten.',
+    grupper: [
+      {rubrik:'Blad 1', rader:[
+        {typ:'problem', fraga:'På en skola går 128 elever i årskurs 7 och 115 elever i årskurs 8. Hur många elever är det tillsammans? <em>Svara i antal elever (st).</em>', svar:243, enhet:'st'},
+        {typ:'problem', fraga:'En buss har 54 sittplatser. 37 av dem är upptagna. Hur många platser är lediga? <em>Svara i antal (st).</em>', svar:17, enhet:'st'},
+        {typ:'problem', fraga:'En kartong rymmer 8 burkar. Hur många burkar är det i 7 kartonger? <em>Svara i antal burkar (st).</em>', svar:56, enhet:'st'},
+        {typ:'problem', fraga:'72 pennor delas lika i 6 lådor. Hur många pennor blir det i varje låda? <em>Svara i antal (st).</em>', svar:12, enhet:'st'},
+        {typ:'problem', fraga:'Anna sparar 45 kr i januari och 68 kr i februari. Hur mycket har hon sparat totalt? <em>Svara i kronor (kr).</em>', svar:113, enhet:'kr'},
+        {typ:'problem', fraga:'Ett lag tränar 3 gånger i veckan, 90 minuter varje gång. Hur många minuter tränar de på en vecka? <em>Svara i minuter (min).</em>', svar:270, enhet:'min'}
+      ]},
+      {rubrik:'Blad 2', rader:[
+        {typ:'problem', fraga:'Ett paket mjölk kostar 14 kr. Du betalar med en 50-lapp. Hur mycket får du tillbaka? <em>Svara i kronor (kr).</em>', svar:36, enhet:'kr'},
+        {typ:'problem', fraga:'I en biosalong finns 12 rader med 9 stolar i varje. Hur många stolar finns det? <em>Svara i antal stolar (st).</em>', svar:108, enhet:'st'},
+        {typ:'problem', fraga:'En sträcka på 96 km delas i 4 lika långa etapper. Hur lång är varje etapp? <em>Svara i kilometer (km).</em>', svar:24, enhet:'km'},
+        {typ:'problem', fraga:'Ett bibliotek lånade ut 156 böcker på måndagen och 138 på tisdagen. Hur många böcker lånades ut totalt? <em>Svara i antal (st).</em>', svar:294, enhet:'st'},
+        {typ:'problem', fraga:'En vattentank rymmer 200 liter. 85 liter har använts. Hur mycket vatten finns kvar? <em>Svara i liter (l).</em>', svar:115, enhet:'l'},
+        {typ:'problem', fraga:'45 elever delas in i grupper med 5 elever i varje. Hur många grupper blir det? <em>Svara i antal grupper (st).</em>', svar:9, enhet:'st'}
+      ]},
+      {rubrik:'Blad 3', rader:[
+        {typ:'problem', fraga:'En godispåse innehåller 6 kolor. Hur många kolor är det i 9 påsar? <em>Svara i antal (st).</em>', svar:54, enhet:'st'},
+        {typ:'problem', fraga:'På en cykeltur åker Ali 17 km före lunch och 23 km efter lunch. Hur långt cyklar han totalt? <em>Svara i kilometer (km).</em>', svar:40, enhet:'km'},
+        {typ:'problem', fraga:'En klass har 250 kr i klasskassan. De köper bollar för 175 kr. Hur mycket finns kvar? <em>Svara i kronor (kr).</em>', svar:75, enhet:'kr'},
+        {typ:'problem', fraga:'84 äpplen packas i påsar med 7 äpplen i varje. Hur många påsar behövs? <em>Svara i antal påsar (st).</em>', svar:12, enhet:'st'},
+        {typ:'problem', fraga:'En förpackning väger 250 gram. Hur mycket väger 4 förpackningar? <em>Svara i gram (g).</em>', svar:1000, enhet:'g'},
+        {typ:'problem', fraga:'Ett flygplan flyger på 900 meters höjd och sjunker sedan 350 meter. På vilken höjd är planet nu? <em>Svara i meter (m).</em>', svar:550, enhet:'m'}
+      ]},
+      {rubrik:'Blad 4', rader:[
+        {typ:'problem', fraga:'I en simhall simmar 34 barn och 28 vuxna. Hur många personer simmar totalt? <em>Svara i antal (st).</em>', svar:62, enhet:'st'},
+        {typ:'problem', fraga:'Tre pizzor delas i 8 bitar var. Alla bitarna delas sedan lika mellan 6 personer. Hur många bitar får var och en? <em>Svara i antal bitar (st).</em>', svar:4, enhet:'st'},
+        {typ:'problem', fraga:'En affär säljer läsk i backar med 24 flaskor. Hur många flaskor är det i 5 backar? <em>Svara i antal flaskor (st).</em>', svar:120, enhet:'st'},
+        {typ:'problem', fraga:'Ett fullsatt tåg har 320 platser. Vid en station stiger 145 personer av. Hur många är kvar ombord? <em>Svara i antal (st).</em>', svar:175, enhet:'st'},
+        {typ:'problem', fraga:'Elin läser 48 sidor på lördagen och 57 sidor på söndagen. Hur många sidor läser hon under helgen? <em>Svara i antal sidor (st).</em>', svar:105, enhet:'st'},
+        {typ:'problem', fraga:'Varje elev behöver 3 pennor. Hur många pennor behövs till 25 elever? <em>Svara i antal (st).</em>', svar:75, enhet:'st'}
+      ]}
+    ]
+  };
+  var el = document.getElementById('sheet-problem');
+  if(el && typeof bygg_blad === 'function') bygg_blad(el, PROBLEM_BLAD_D2);
+})();
+</script>
+
 </body>
 </html>
