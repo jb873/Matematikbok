@@ -699,11 +699,18 @@ function blandadEngine(){
       var g=gcd2(talj,namn), T=talj/g, N=namn/g;
       return {key:t1+'/'+n1+'-'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' − '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' − '+t2+'/'+n2+' = '+T+'/'+N+'.'};
     }) ] },
-    // d6 — Mult (brak, enklaste, äkta·äkta ⇒ äkta)
-    'brak-mult-rakna': { snabb: [ G.brak('k2-mult','Multiplikation med bråk','brak-mult-rakna', function(){
+    // d6 — Mult MED MELLANLED (pilot): produkt-led (värde-rättat) → slutsvar (enklaste form).
+    // Spegel av drillens tresektion: KOMMUNIKATION i fokus — vägen (produkten) räknas, inte bara svaret.
+    'brak-mult-rakna': { snabb: [ G.mellanled('k2-mult','Multiplikation med bråk','brak-mult-rakna', function(){
       var n1=rP([2,3,4,5]), n2=rP([2,3,4,5]), t1=rI(1,n1-1), t2=rI(1,n2-1);
       var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
-      return {key:t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' · '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+T+'/'+N+'.'};
+      return {
+        key:t1+'/'+n1+'*'+t2+'/'+n2,
+        prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' · '+t2+'/'+n2,
+        led:[ { fraga:t1+'·'+t2+' / '+n1+'·'+n2, varde: talj/namn, facit: talj+'/'+namn } ],
+        slutTalj:T, slutNamn:N,
+        expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.'
+      };
     }) ] },
     // d7 — Division (fördjupning, brak, enklaste; oäkta enklaste tillåts för heltal÷bråk)
     'brak-div-bh': { snabb: [ G.brak('k2-div-bh','Bråk ÷ heltal','brak-div-bh', function(){

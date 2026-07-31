@@ -83,6 +83,21 @@ function testBrakGen(genId, titel, omrade, makeItem){
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
 }
+// Flerstegs (mellanled): makeItem → {key, prompt, led:[{fraga, varde, facit?}], slutTalj, slutNamn, expl}.
+// led = mellansteg (värde-rättade); slutTalj/slutNamn = slutsvar i enklaste form. Speglar drillens tresektion.
+function testMellanledGen(genId, titel, omrade, makeItem){
+  return function(seen){
+    const subs = []; let tries = 0;
+    while(subs.length < 4 && tries < 120){
+      tries++;
+      const it = makeItem();
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'mellanled', prompt:it.prompt, led:it.led, slutTalj:it.slutTalj, slutNamn:it.slutNamn, explanation:it.expl||'' });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
 
   // ── Färg-metadata + förmåge-etiketter (defaults; kan överskrivas via config) ──
 const FARG_INFO = [
@@ -163,6 +178,35 @@ function renderSubInput(qNum, subIdx, s){
         </span>
       </div>
     `;
+  } else if(s.type === 'mellanled'){
+    // Flerstegs-bråk: ett led-fält per mellansteg (värde-rättat) + slutsvar (enklaste form).
+    // Speglar drillens tresektions-rättning (mellanRatt/svarRatt) — drill-motorn orörd.
+    const ledRows = (s.led || []).map((L, i) => `
+      <div class="tsm-led">
+        <span class="tsm-fraga"><span class="num-inline">${L.fraga}</span></span>
+        <span class="test-sub-eq">=</span>
+        <span class="test-sub-brak">
+          <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="5" data-sub-input="${idBase}-L${i}-t" aria-label="mellanled täljare">
+          <span class="tsb-streck"></span>
+          <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="5" data-sub-input="${idBase}-L${i}-n" aria-label="mellanled nämnare">
+        </span>
+      </div>`).join('');
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-mellan">
+        ${ledRows}
+        <div class="tsm-led tsm-slut">
+          <span class="tsm-fraga">Svar</span>
+          <span class="test-sub-eq">=</span>
+          <span class="test-sub-brak">
+            <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-st" aria-label="slutsvar täljare">
+            <span class="tsb-streck"></span>
+            <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-sn" aria-label="slutsvar nämnare">
+          </span>
+          <span class="tsm-hint">enklaste form</span>
+        </div>
+      </div>
+    `;
   }
 
   return `
@@ -199,6 +243,17 @@ function readSubAnswer(qNum, subIdx, s){
     const n = document.querySelector(`[data-sub-input="${idBase}-n"]`);
     const tv = t && t.value.trim(), nv = n && n.value.trim();
     return (tv || nv) ? [tv || '', nv || ''] : null;
+  } else if(s.type === 'mellanled'){
+    const led = (s.led || []).map((L, i) => {
+      const t = document.querySelector(`[data-sub-input="${idBase}-L${i}-t"]`);
+      const n = document.querySelector(`[data-sub-input="${idBase}-L${i}-n"]`);
+      return [(t && t.value.trim()) || '', (n && n.value.trim()) || ''];
+    });
+    const st = document.querySelector(`[data-sub-input="${idBase}-st"]`);
+    const sn = document.querySelector(`[data-sub-input="${idBase}-sn"]`);
+    const slut = [(st && st.value.trim()) || '', (sn && sn.value.trim()) || ''];
+    const any = led.some(l => l[0] || l[1]) || slut[0] || slut[1];
+    return any ? { led, slut } : null;
   }
   return null;
 }
@@ -232,6 +287,15 @@ function restoreSubAnswer(qNum, subIdx, s, val){
     if(Array.isArray(val)){
       const t = document.querySelector(`[data-sub-input="${idBase}-t"]`); if(t) t.value = val[0] || '';
       const n = document.querySelector(`[data-sub-input="${idBase}-n"]`); if(n) n.value = val[1] || '';
+    }
+  } else if(s.type === 'mellanled'){
+    if(val && val.led){
+      val.led.forEach((l, i) => {
+        const t = document.querySelector(`[data-sub-input="${idBase}-L${i}-t"]`); if(t) t.value = l[0] || '';
+        const n = document.querySelector(`[data-sub-input="${idBase}-L${i}-n"]`); if(n) n.value = l[1] || '';
+      });
+      const st = document.querySelector(`[data-sub-input="${idBase}-st"]`); if(st) st.value = (val.slut && val.slut[0]) || '';
+      const sn = document.querySelector(`[data-sub-input="${idBase}-sn"]`); if(sn) sn.value = (val.slut && val.slut[1]) || '';
     }
   }
 }
@@ -295,6 +359,22 @@ function gradeSub(s, ans){
     const enklast = (gcd(t, n) === 1);             // enklaste form (gcd=1)
     return {status: (vardeOk && enklast) ? 'correct' : 'wrong', given: t+'/'+n};
   }
+  if(s.type === 'mellanled'){
+    if(!ans || !ans.led) return {status:'skipped'};
+    // Varje LED rättas på VÄRDE (valfri giltig korsförkortning godtas) — speglat från drillens mellanRatt.
+    const ledOk = (s.led || []).every((L, i) => {
+      const t = parseInt(ans.led[i] && ans.led[i][0]), n = parseInt(ans.led[i] && ans.led[i][1]);
+      if(isNaN(t) || isNaN(n) || n === 0) return false;
+      return Math.abs(t / n - L.varde) < 1e-9;
+    });
+    // SLUTSVAR på värde + enklaste form — speglat från drillens svarRatt.
+    const st = parseInt(ans.slut && ans.slut[0]), sn = parseInt(ans.slut && ans.slut[1]);
+    const slutOk = !isNaN(st) && !isNaN(sn) && sn !== 0
+      && (st * s.slutNamn === sn * s.slutTalj) && (gcd(st, sn) === 1);
+    const given = (s.led || []).map((L, i) => (ans.led[i] ? ans.led[i].join('/') : '?'))
+      .concat([ans.slut ? ans.slut.join('/') : '?']).join(' → ');
+    return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
+  }
   return {status:'skipped'};
 }
 
@@ -327,6 +407,10 @@ function renderReviewSub(sr){
   } else if(sub.type === 'brak'){
     questionText = sub.prompt;
     correctAnswerText = sub.talj + '/' + sub.namn + ' (enklaste form)' + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'mellanled'){
+    questionText = sub.prompt;
+    const ledFacit = (sub.led || []).map(L => L.facit || (L.varde)).join(' → ');
+    correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + sub.slutTalj + '/' + sub.slutNamn + ' (enklaste form)' + (sub.explanation ? ` — ${sub.explanation}` : '');
   }
 
   return `
@@ -917,6 +1001,6 @@ function renderTestResult(){
 
   window.ProvbyggarMotor = {
     montera: montera,
-    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen }
+    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen, mellanled: testMellanledGen }
   };
 })();
