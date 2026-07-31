@@ -686,18 +686,33 @@ function blandadEngine(){
       if(Math.abs(v-mk[0])<1e-9) return null;
       return {key:t+'/'+n+'-'+mk[1], prompt:'Är '+t+'/'+n+' större eller mindre än '+mk[1]+'?', options:['Större än '+mk[1],'Mindre än '+mk[1]], answer:(v>mk[0]?'Större':'Mindre')+' än '+mk[1], expl:t+'/'+n+' är '+(v>mk[0]?'större':'mindre')+' än '+mk[1]+'.'};
     }) ] },
-    // d5 — Add/sub (brak, enklaste, hålls äkta)
-    'brak-add': { snabb: [ G.brak('k2-add','Addition med bråk','brak-add', function(){
+    // d5 — Add/sub MED MELLANLED: summa/differens över gemensam nämnare (värde-rättat) → slutsvar enklaste.
+    // Spegel av drillens femledade add/sub: gemensam nämnare visas i ledets fråga, eleven räknar summan, förkortar sist.
+    'brak-add': { snabb: [ G.mellanled('k2-add','Addition med bråk','brak-add', function(){
       var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
-      var talj=t1*n2+t2*n1, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+      var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
+      var komb=nt1+nt2, g=gcd2(komb,L), T=komb/g, N=L/g;
       if(T>=N) return null;   // håll svaret äkta (subtypen saknar hel-del)
-      return {key:t1+'/'+n1+'+'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' + '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' + '+t2+'/'+n2+' = '+T+'/'+N+'.'};
+      return {
+        key:t1+'/'+n1+'+'+t2+'/'+n2,
+        prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' + '+t2+'/'+n2,
+        led:[ { fraga:nt1+'+'+nt2+' / '+L, varde: komb/L, facit: komb+'/'+L } ],
+        slutTalj:T, slutNamn:N,
+        expl:t1+'/'+n1+' + '+t2+'/'+n2+' = '+nt1+'/'+L+' + '+nt2+'/'+L+' = '+komb+'/'+L+' = '+T+'/'+N+'.'
+      };
     }) ] },
-    'brak-sub': { snabb: [ G.brak('k2-sub','Subtraktion med bråk','brak-sub', function(){
+    'brak-sub': { snabb: [ G.mellanled('k2-sub','Subtraktion med bråk','brak-sub', function(){
       var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
-      var talj=t1*n2-t2*n1, namn=n1*n2; if(talj<=0) return null;
-      var g=gcd2(talj,namn), T=talj/g, N=namn/g;
-      return {key:t1+'/'+n1+'-'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' − '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' − '+t2+'/'+n2+' = '+T+'/'+N+'.'};
+      var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
+      var komb=nt1-nt2; if(komb<=0) return null;
+      var g=gcd2(komb,L), T=komb/g, N=L/g;
+      return {
+        key:t1+'/'+n1+'-'+t2+'/'+n2,
+        prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' − '+t2+'/'+n2,
+        led:[ { fraga:nt1+'−'+nt2+' / '+L, varde: komb/L, facit: komb+'/'+L } ],
+        slutTalj:T, slutNamn:N,
+        expl:t1+'/'+n1+' − '+t2+'/'+n2+' = '+nt1+'/'+L+' − '+nt2+'/'+L+' = '+komb+'/'+L+' = '+T+'/'+N+'.'
+      };
     }) ] },
     // d6 — Mult MED MELLANLED (pilot): produkt-led (värde-rättat) → slutsvar (enklaste form).
     // Spegel av drillens tresektion: KOMMUNIKATION i fokus — vägen (produkten) räknas, inte bara svaret.
@@ -712,20 +727,49 @@ function blandadEngine(){
         expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.'
       };
     }) ] },
-    // d7 — Division (fördjupning, brak, enklaste; oäkta enklaste tillåts för heltal÷bråk)
-    'brak-div-bh': { snabb: [ G.brak('k2-div-bh','Bråk ÷ heltal','brak-div-bh', function(){
-      var n=rP([2,3,4,5]), t=rI(1,n-1), h=rI(2,6); var talj=t, namn=n*h, g=gcd2(talj,namn), T=talj/g, N=namn/g;
-      return {key:t+'/'+n+'/'+h, prompt:'Räkna ut (enklaste form):    '+t+'/'+n+' / '+h, talj:T, namn:N, expl:t+'/'+n+' / '+h+' = '+t+'/'+(n*h)+' = '+T+'/'+N+'.'};
+    // d7 — Division MED MELLANLED: invertera-led (skriv inversen) → produkt-led → slutsvar enklaste.
+    // Spegel av drillens divBrakBrak-tresektion (multiplicera med inverterade nämnaren → produkter → förkorta).
+    'brak-div-bh': { snabb: [ G.mellanled('k2-div-bh','Bråk ÷ heltal','brak-div-bh', function(){
+      var n=rP([2,3,4,5]), t=rI(1,n-1), h=rI(2,6);
+      var pt=t, pn=n*h, g=gcd2(pt,pn), T=pt/g, N=pn/g;
+      return {
+        key:t+'/'+n+'/'+h,
+        prompt:'Räkna ut steg för steg:    '+t+'/'+n+' ÷ '+h,
+        led:[
+          { fraga:'inversen av '+h, varde: 1/h, facit:'1/'+h },
+          { fraga:t+' / '+n+'·'+h, varde: pt/pn, facit: pt+'/'+pn }
+        ],
+        slutTalj:T, slutNamn:N,
+        expl:t+'/'+n+' ÷ '+h+' = '+t+'/'+n+' · 1/'+h+' = '+pt+'/'+pn+' = '+T+'/'+N+'.'
+      };
     }) ] },
-    'brak-div-hb': { snabb: [ G.brak('k2-div-hb','Heltal ÷ bråk','brak-div-hb', function(){
+    'brak-div-hb': { snabb: [ G.mellanled('k2-div-hb','Heltal ÷ bråk','brak-div-hb', function(){
       var n=rP([2,3,4,5]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var h=rI(1,4);
-      var talj=h*n, namn=t, g=gcd2(talj,namn), T=talj/g, N=namn/g;
-      return {key:h+'/'+t+'-'+n, prompt:'Räkna ut (enklaste form):    '+h+' / '+t+'/'+n, talj:T, namn:N, expl:h+' / '+t+'/'+n+' = '+h+' · '+n+'/'+t+' = '+T+'/'+N+'.'};
+      var pt=h*n, pn=t, g=gcd2(pt,pn), T=pt/g, N=pn/g;
+      return {
+        key:h+'-'+t+'/'+n,
+        prompt:'Räkna ut steg för steg:    '+h+' ÷ '+t+'/'+n,
+        led:[
+          { fraga:'inversen av '+t+'/'+n, varde: n/t, facit: n+'/'+t },
+          { fraga:h+'·'+n+' / '+t, varde: pt/pn, facit: pt+'/'+pn }
+        ],
+        slutTalj:T, slutNamn:N,
+        expl:h+' ÷ '+t+'/'+n+' = '+h+' · '+n+'/'+t+' = '+pt+'/'+pn+' = '+T+'/'+N+'.'
+      };
     }) ] },
-    'brak-div-bb': { snabb: [ G.brak('k2-div-bb','Bråk ÷ bråk','brak-div-bb', function(){
+    'brak-div-bb': { snabb: [ G.mellanled('k2-div-bb','Bråk ÷ bråk','brak-div-bb', function(){
       var n1=rP([2,3,4,5]), t1=rI(1,n1-1), n2=rP([2,3,4,5]), t2=rI(1,n2-1);
-      var talj=t1*n2, namn=n1*t2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
-      return {key:t1+'/'+n1+'//'+t2+'/'+n2, prompt:'Räkna ut (enklaste form):    '+t1+'/'+n1+' / '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' / '+t2+'/'+n2+' = '+t1+'/'+n1+' · '+n2+'/'+t2+' = '+T+'/'+N+'.'};
+      var pt=t1*n2, pn=n1*t2, g=gcd2(pt,pn), T=pt/g, N=pn/g;
+      return {
+        key:t1+'/'+n1+'//'+t2+'/'+n2,
+        prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' ÷ '+t2+'/'+n2,
+        led:[
+          { fraga:'inversen av '+t2+'/'+n2, varde: n2/t2, facit: n2+'/'+t2 },
+          { fraga:t1+'·'+n2+' / '+n1+'·'+t2, varde: pt/pn, facit: pt+'/'+pn }
+        ],
+        slutTalj:T, slutNamn:N,
+        expl:t1+'/'+n1+' ÷ '+t2+'/'+n2+' = '+t1+'/'+n1+' · '+n2+'/'+t2+' = '+pt+'/'+pn+' = '+T+'/'+N+'.'
+      };
     }) ] },
     'brak-div-inv': { snabb: [ G.brak('k2-div-inv','Invertera (omvända talet)','brak-div-inv', function(){
       var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
