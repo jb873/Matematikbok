@@ -158,10 +158,54 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
       return { key:'bl'+b+'_'+p+'_'+q+'_'+r, prompt:'Räkna ut med exponent-lagen:    ('+b+'^'+p+' · '+b+'^'+q+') / '+b+'^'+r,
         led:[ { fraga:'täljarens exponent: '+p+' + '+q, varde:s1, facit:String(s1) }, { fraga:'dela — dra bort '+r+': '+s1+' − '+r, varde:res3, facit:String(res3) } ],
         slutVarde:res3, slutHint:'svarets exponent, '+b+'^▢', expl:'('+b+'^'+p+' · '+b+'^'+q+') / '+b+'^'+r+' = '+b+'^('+p+'+'+q+'−'+r+') = '+b+'^'+res3+'.' };
+    }) ] },
+    // Batch 2 — potens-familjens övriga räkne-noder
+    'pot-addsub:rakna': { snabb: [ G.mellanledNum('gt-pot-addsub', 'Addition och subtraktion med potenser', 'pot-addsub:rakna', function(){
+      // EVALUERA-SEDAN-OPERERA (speglar genAddsub): led = de evaluerade potenserna, slut = resultatet.
+      var b1 = ri(2, 6), e1 = ri(2, 3), b2 = ri(2, 6), e2 = ri(2, 3);
+      while(Math.pow(b1, e1) > 130) e1 = ri(2, 3);
+      while(Math.pow(b2, e2) > 130) e2 = ri(2, 3);
+      var v1 = Math.pow(b1, e1), v2 = Math.pow(b2, e2), op = pick(['+', '−']);
+      var res = op === '+' ? v1 + v2 : v1 - v2;
+      return { key:'as'+b1+'_'+e1+op+b2+'_'+e2, prompt:'Räkna ut steg för steg:    '+b1+'^'+e1+' '+op+' '+b2+'^'+e2,
+        led:[ { fraga:b1+'^'+e1, varde:v1, facit:String(v1) }, { fraga:b2+'^'+e2, varde:v2, facit:String(v2) } ],
+        slutVarde:res, slutHint:v1+' '+op+' '+v2, expl:b1+'^'+e1+' '+op+' '+b2+'^'+e2+' = '+v1+' '+op+' '+v2+' = '+res+'.' };
+    }) ] },
+    'pot-multdiv:losut': { snabb: [ G.numeric('gt-pot-losut', 'Lös ut basen eller exponenten', 'pot-multdiv:losut', function(){
+      // Speglar genLosut (svar='varde'): x^e = V → basen, eller b^x = V → exponenten.
+      if(Math.random() < 0.5){
+        var b = ri(2, 9), e = ri(2, 5); while(Math.pow(b, e) > 100000){ b = ri(2, 9); e = ri(2, 5); } var V = Math.pow(b, e);
+        return { key:'lb'+b+'_'+e, prompt:'Vilket tal är x?    x^'+e+' = '+V, ans:b, expl:'x^'+e+' = '+V+' → x = '+b+' ('+b+'^'+e+' = '+V+').' };
+      }
+      var bb = pick([2, 3, 4, 5, 10]), x = ri(2, 4); while(Math.pow(bb, x) > 1e6) x = ri(2, 4); var V2 = Math.pow(bb, x);
+      return { key:'le'+bb+'_'+x, prompt:'Vilket tal är x?    '+bb+'^x = '+V2, ans:x, expl:bb+'^x = '+V2+' → x = '+x+' ('+bb+'^'+x+' = '+V2+').' };
+    }) ] },
+    'prio-potenser': { snabb: [ G.mellanledNum('gt-prio-potenser', 'Prioritering med potenser', 'prio-potenser', function(){
+      // VERKLIG LUCKA (ingen drill) — matte konsekvent med prio-reglerna: potens → gånger/delat → plus/minus.
+      var t = pick([0, 1, 2]);
+      if(t === 0){                                   // a + b · c^e
+        var a = ri(2, 9), b = ri(2, 5), c = ri(2, 4), e = ri(2, 3); while(Math.pow(c, e) > 50) e = ri(2, 3);
+        var pe = Math.pow(c, e), m = b * pe, res = a + m;
+        return { key:'p0_'+a+'_'+b+'_'+c+'_'+e, prompt:'Räkna ut steg för steg (potens först, sedan gånger, sedan plus/minus):    '+a+' + '+b+' · '+c+'^'+e,
+          led:[ { fraga:c+'^'+e, varde:pe, facit:String(pe) }, { fraga:b+' · '+pe, varde:m, facit:String(m) } ],
+          slutVarde:res, slutHint:a+' + '+m, expl:a+' + '+b+' · '+c+'^'+e+' = '+a+' + '+b+' · '+pe+' = '+a+' + '+m+' = '+res+'.' };
+      }
+      if(t === 1){                                   // a · b^e − c
+        var a1 = ri(2, 5), b1 = ri(2, 4), e1 = ri(2, 3), c1 = ri(2, 15); while(Math.pow(b1, e1) > 50) e1 = ri(2, 3);
+        var pe1 = Math.pow(b1, e1), m1 = a1 * pe1, res1 = m1 - c1;
+        return { key:'p1_'+a1+'_'+b1+'_'+e1+'_'+c1, prompt:'Räkna ut steg för steg:    '+a1+' · '+b1+'^'+e1+' − '+c1,
+          led:[ { fraga:b1+'^'+e1, varde:pe1, facit:String(pe1) }, { fraga:a1+' · '+pe1, varde:m1, facit:String(m1) } ],
+          slutVarde:res1, slutHint:m1+' − '+c1, expl:a1+' · '+b1+'^'+e1+' − '+c1+' = '+a1+' · '+pe1+' − '+c1+' = '+m1+' − '+c1+' = '+res1+'.' };
+      }
+      var a2 = ri(2, 5), b2 = ri(2, 6), c2 = ri(2, 6), pe2 = Math.pow(a2, 2), m2 = b2 * c2, res2 = pe2 - m2;   // a² − b · c (ofta negativt, som 25−6²)
+      return { key:'p2_'+a2+'_'+b2+'_'+c2, prompt:'Räkna ut steg för steg:    '+a2+'^2 − '+b2+' · '+c2,
+        led:[ { fraga:a2+'^2', varde:pe2, facit:String(pe2) }, { fraga:b2+' · '+c2, varde:m2, facit:String(m2) } ],
+        slutVarde:res2, slutHint:pe2+' − '+m2, expl:a2+'^2 − '+b2+' · '+c2+' = '+pe2+' − '+m2+' = '+res2+'.' };
     }) ] }
   };
   var AK8_GEN_NOD = {
-    'gt-pot-skriva':'pot-begrepp:skriva', 'gt-pot-eval':'pot-begrepp:evaluera', 'gt-pot-multdiv':'pot-multdiv:rakna'
+    'gt-pot-skriva':'pot-begrepp:skriva', 'gt-pot-eval':'pot-begrepp:evaluera', 'gt-pot-multdiv':'pot-multdiv:rakna',
+    'gt-pot-addsub':'pot-addsub:rakna', 'gt-pot-losut':'pot-multdiv:losut', 'gt-prio-potenser':'prio-potenser'
   };
 
   // ── PROVBYGGAR-HOST (egen ram → per-instans-state, ingen krock med k1/k2) ──
