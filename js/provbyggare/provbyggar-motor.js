@@ -99,6 +99,22 @@ function testMellanledGen(genId, titel, omrade, makeItem){
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
 }
+// Numerisk flerstegs (mellanled-num): makeItem → {key, prompt, led:[{fraga, varde, facit?}], slutVarde, slutHint?, expl}.
+// EN talruta per led (värde-rättat) + slutled på värde. Additiv variant av testMellanledGen för numeriska
+// färdigheter (potenser/tiopotenser/prioritering/stora tal). Bråk-mellanledet oförändrat.
+function testMellanledNumGen(genId, titel, omrade, makeItem){
+  return function(seen, opts){
+    const subs = []; let tries = 0;
+    while(subs.length < 4 && tries < 120){
+      tries++;
+      const it = makeItem(opts);
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'mellanled-num', prompt:it.prompt, led:it.led, slutVarde:it.slutVarde, slutHint:it.slutHint||'', explanation:it.expl||'' });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
 
   // ── Färg-metadata + förmåge-etiketter (defaults; kan överskrivas via config) ──
 const FARG_INFO = [
@@ -208,6 +224,27 @@ function renderSubInput(qNum, subIdx, s){
         </div>
       </div>
     `;
+  } else if(s.type === 'mellanled-num'){
+    // Numerisk flerstegs: EN talruta per led (värde-rättat) + slutled. Additiv variant av 'mellanled'
+    // för potenser/tiopotenser/prioritering/stora tal — bråk-mellanledet (täljare/nämnare) oförändrat.
+    const ledRows = (s.led || []).map((L, i) => `
+      <div class="tsm-led">
+        <span class="tsm-fraga"><span class="num-inline">${L.fraga}</span></span>
+        <span class="test-sub-eq">=</span>
+        <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="10" data-sub-input="${idBase}-L${i}-num" aria-label="mellanled värde">
+      </div>`).join('');
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-mellan">
+        ${ledRows}
+        <div class="tsm-led tsm-slut">
+          <span class="tsm-fraga">Svar</span>
+          <span class="test-sub-eq">=</span>
+          <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="10" data-sub-input="${idBase}-snum" aria-label="slutsvar värde">
+          ${s.slutHint ? `<span class="tsm-hint">${s.slutHint}</span>` : ''}
+        </div>
+      </div>
+    `;
   }
 
   return `
@@ -255,6 +292,15 @@ function readSubAnswer(qNum, subIdx, s){
     const slut = [(st && st.value.trim()) || '', (sn && sn.value.trim()) || ''];
     const any = led.some(l => l[0] || l[1]) || slut[0] || slut[1];
     return any ? { led, slut } : null;
+  } else if(s.type === 'mellanled-num'){
+    const led = (s.led || []).map((L, i) => {
+      const el = document.querySelector(`[data-sub-input="${idBase}-L${i}-num"]`);
+      return (el && el.value.trim()) || '';
+    });
+    const sEl = document.querySelector(`[data-sub-input="${idBase}-snum"]`);
+    const slut = (sEl && sEl.value.trim()) || '';
+    const any = led.some(v => v) || slut;
+    return any ? { led, slut } : null;
   }
   return null;
 }
@@ -297,6 +343,13 @@ function restoreSubAnswer(qNum, subIdx, s, val){
       });
       const st = document.querySelector(`[data-sub-input="${idBase}-st"]`); if(st) st.value = (val.slut && val.slut[0]) || '';
       const sn = document.querySelector(`[data-sub-input="${idBase}-sn"]`); if(sn) sn.value = (val.slut && val.slut[1]) || '';
+    }
+  } else if(s.type === 'mellanled-num'){
+    if(val && val.led){
+      val.led.forEach((v, i) => {
+        const el = document.querySelector(`[data-sub-input="${idBase}-L${i}-num"]`); if(el) el.value = v || '';
+      });
+      const sEl = document.querySelector(`[data-sub-input="${idBase}-snum"]`); if(sEl) sEl.value = val.slut || '';
     }
   }
 }
@@ -376,6 +429,20 @@ function gradeSub(s, ans){
       .concat([ans.slut ? ans.slut.join('/') : '?']).join(' → ');
     return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
   }
+  if(s.type === 'mellanled-num'){
+    if(!ans || !ans.led) return {status:'skipped'};
+    const num = (x) => parseFloat(String(x).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
+    // Varje LED rättas på VÄRDE (valfri giltig väg godtas) — samma princip som bråk-mellanledet.
+    const ledOk = (s.led || []).every((L, i) => {
+      const v = num(ans.led[i]);
+      return !isNaN(v) && Math.abs(v - L.varde) < 1e-6;
+    });
+    const sv = num(ans.slut);
+    const slutOk = !isNaN(sv) && Math.abs(sv - s.slutVarde) < 1e-6;
+    const given = (s.led || []).map((L, i) => (ans.led[i] != null && ans.led[i] !== '' ? ans.led[i] : '?'))
+      .concat([ans.slut != null && ans.slut !== '' ? ans.slut : '?']).join(' → ');
+    return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
+  }
   return {status:'skipped'};
 }
 
@@ -412,6 +479,10 @@ function renderReviewSub(sr){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit || (L.varde)).join(' → ');
     correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + sub.slutTalj + '/' + sub.slutNamn + ' (enklaste form)' + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'mellanled-num'){
+    questionText = sub.prompt;
+    const ledFacit = (sub.led || []).map(L => L.facit != null ? L.facit : L.varde).join(' → ');
+    correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + komma(sub.slutVarde) + (sub.slutHint ? ` (${sub.slutHint})` : '') + (sub.explanation ? ` — ${sub.explanation}` : '');
   }
 
   return `
@@ -643,7 +714,7 @@ function renderTestConfig(){
 
   document.getElementById('test-config-body').innerHTML = `
     <div class="header-card">
-      <div class="header-eyebrow">Kapitel 1 · Taluppfattning</div>
+      <div class="header-eyebrow">${config.eyebrow || 'Kapitel 1 · Taluppfattning'}</div>
       <h1 class="header-title">Skapa ditt eget test</h1>
       <p class="header-sub">Här ser du <strong>hela kapitlets</strong> färdigheter, grupperade efter <strong>bokens delkapitel</strong> – samma struktur som kartan. Fäll ihop det du inte vill se, filtrera på delkapitel eller mastery-färg för att fokusera (t.ex. alla dina orange färdigheter). Provet görs på skärmen; det rättas och färgar kartan.</p>
     </div>
@@ -1030,6 +1101,6 @@ function renderTestResult(){
 
   window.ProvbyggarMotor = {
     montera: montera,
-    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen, mellanled: testMellanledGen }
+    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen, mellanled: testMellanledGen, mellanledNum: testMellanledNumGen }
   };
 })();
