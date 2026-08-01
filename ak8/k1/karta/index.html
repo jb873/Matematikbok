@@ -39,23 +39,64 @@
   <p class="privacy" id="privacy"></p>
 </div>
 
-<!-- Åk 8: samma taxonomi + delad logg som åk7 (single-source), egen pref-nyckel + nivåbrygga N=3. -->
+<!-- Åk 8: taluppfattning ÄR ett kapitel som inkluderar bråk → union av k1- OCH k2-taxonomin
+     (single-source, källorna orörda), delad logg (k1+k2), egen pref-nyckel + nivåbrygga N=3. -->
 <script src="../../../js/data/k1-taxonomi.js"></script>
+<script src="../../../js/data/k2-taxonomi.js"></script>
 <script src="../../../js/mastery.js"></script>
+<script src="../../../js/mastery-k2.js"></script>
 <script src="../../../js/karta/karta-motor.js"></script>
 <script>
+(function(){
+  var K1 = (window.K1_TAXONOMI && (window.K1_TAXONOMI.noder || window.K1_TAXONOMI)) || [];
+  var K2 = (window.K2_TAXONOMI && (window.K2_TAXONOMI.noder || window.K2_TAXONOMI)) || [];
+  // Union — källtaxonomierna klonas inte, bara slås ihop i en ny lista (samma princip som provbyggarens montering).
+  var AK8_TAXONOMI = { kapitel: 'ak8-k1', noder: K1.concat(K2) };
+
+  // Kombinerad mastery (k1 + k2). masteryState delar logg-format → en implementation räcker; matriserna slås ihop.
+  var AK8_MASTERY = {
+    lasMatris: function(){
+      var m1 = (window.Mastery && window.Mastery.lasMatris && window.Mastery.lasMatris()) || {};
+      var m2 = (window.MasteryK2 && window.MasteryK2.lasMatris && window.MasteryK2.lasMatris()) || {};
+      return Object.assign({}, m1, m2);
+    },
+    masteryState: function(log, a, b, c){ return window.Mastery.masteryState(log, a, b, c); },
+    lasLard: function(){
+      var l1 = (window.Mastery && window.Mastery.lasLard && window.Mastery.lasLard()) || {};
+      var l2 = (window.MasteryK2 && window.MasteryK2.lasLard && window.MasteryK2.lasLard()) || {};
+      return Object.assign({}, l1, l2);
+    }
+  };
+
   KartaMotor.montera({
-    taxonomi: window.K1_TAXONOMI,
-    mastery: window.Mastery,
+    taxonomi: AK8_TAXONOMI,
+    mastery: AK8_MASTERY,
     prefKey: 'ak7.k1.taluppfattning.pref.v1',
     arskurs: 'ak8',
     malDefault: 'godkant',
     minNiva: 3,
     blekning: true,                         // glömskekurvan aktiv i åttans vy (åk7 + självskattning oförändrade)
-    ramPath: '../../../ak7-k1-ram.html',
+    ramPath: '../../../ak7-k1-ram.html',    // bas: taluppfattnings-drillar; bråk routas om nedan
     rotNamn: 'Taluppfattning',
     orsakFramtid: 'ej åk 8'
   });
+
+  // ── DEEPLINK-ROUTING (montage-lager, rör ej motorn): bråk-noderna (k2) ska till k2-ramens drillar,
+  //    inte k1-ramen. KartaMotor har en enda ramPath, så vi skriver om bråk-nodernas hrefs efter render.
+  //    Re-appliceras när kartan re-renderar (mål-toggle) via MutationObserver på #cols. ──
+  var K2_IDS = {}; K2.forEach(function(n){ K2_IDS[n.id] = 1; });
+  function routaBrak(){
+    var cols = document.getElementById('cols'); if(!cols) return;
+    var lankar = cols.querySelectorAll('a.node[href*="ak7-k1-ram.html"]');
+    [].forEach.call(lankar, function(a){
+      var href = a.getAttribute('href'); var m = href.match(/[?&]ko=([^&]+)/);
+      if(m && K2_IDS[decodeURIComponent(m[1])]) a.setAttribute('href', href.replace('ak7-k1-ram.html', 'ak7-k2-ram.html'));
+    });
+  }
+  routaBrak();
+  var cols = document.getElementById('cols');
+  if(cols && window.MutationObserver){ new MutationObserver(routaBrak).observe(cols, { childList: true, subtree: true }); }
+})();
 </script>
 </body>
 </html>
