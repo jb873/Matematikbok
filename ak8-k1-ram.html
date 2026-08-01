@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 8 · Kapitel 1 · Skapa eget test</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --primary:#B45309; --primary-soft:#FED7AA; --primary-bg:#FFF7ED;
+  --success:#16a34a; --success-bg:#dcfce7; --error:#dc2626; --error-bg:#fee2e2;
+  --line:#e5e0d8; --bg-card:#ffffff; --bg-soft:#f9f5f0; --bg-warm:#fdf6ec;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06); --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05); --shadow-lg:0 8px 24px rgba(0,0,0,.1);
+  --radius:10px; --radius-sm:6px; --radius-lg:14px;
+  --nav-bg:#0f1e2e; --nav-gold:#c49a40; --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --gold:#9a7228; --gold-lt:#c49a40;
+  --k1-color:#1b4b8a;
+  --c-begrepp:#2563EB; --c-begrepp-bg:#eff6ff; --c-rakna:#16a34a; --c-rakna-bg:#f0fdf4;
+  --c-metod:#B45309; --c-metod-bg:#FFF7ED; --c-kommunikation:#7c3aed; --c-kommunikation-bg:#f5f3ff;
+  --c-resonera:#be185d; --c-resonera-bg:#fdf2f8; --c-problem:#d97706; --c-problem-bg:#fffbeb;
+  --c-komm:#7c3aed; --c-komm-bg:#f5f3ff; --warning:#B45309; --warning-bg:#FEF3C7;
+  --cinzel:'Cinzel','Times New Roman',serif; --display:'Cormorant Garamond',Georgia,serif;
+  --serif:'Cormorant Garamond',Georgia,serif; --sans:'Source Serif 4',Georgia,serif; --mono:'Source Serif 4',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.topnav{background:var(--nav-bg);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.nav-brand{font-family:var(--cinzel);font-weight:700;letter-spacing:.08em;font-size:15px;}
+.nav-brand .nav-sep{margin:0 8px;color:var(--nav-gold);}
+.nav-crumbs{font-size:13px;color:rgba(255,255,255,.6);}
+.nav-crumbs a{color:rgba(255,255,255,.75);text-decoration:none;}
+.nav-crumbs a:hover{color:var(--nav-gold);}
+.crumb-sep{margin:0 7px;color:rgba(255,255,255,.3);}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 60px;}
+.hero-back{display:inline-block;color:var(--nav-gold);text-decoration:none;font-family:var(--cinzel);font-size:12px;letter-spacing:.12em;border:1px solid rgba(196,154,64,.4);padding:8px 18px;border-radius:6px;transition:background .15s;}
+.hero-back:hover{background:rgba(196,154,64,.12);}
+.btn{font-family:var(--cinzel);font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:11px 26px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:background .15s,transform .1s;}
+.btn.primary{background:var(--primary);color:#fff;}
+.btn.primary:hover{background:#9a4708;}
+.btn.subtle{background:transparent;color:var(--ink-faint);border-color:var(--line);}
+.btn:disabled{opacity:.5;cursor:default;}
+.pb-view[hidden]{display:none;}
+body.embed .topnav{display:none !important;}
+body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
+</style>
+<link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span>Åk 8</div>
+  <div class="nav-crumbs"><a href="index.html">Matematikbok</a><span class="crumb-sep">›</span><a href="ak8/index.html">Årskurs 8</a><span class="crumb-sep">›</span>Kapitel 1 · Skapa eget test</div>
+</nav>
+<div class="wrap"><div id="app"></div></div>
+
+<!-- Åk 8: delad taxonomi (k1+k2, single-source) + delad logg + delad provbyggar-modul. Motorn/taxonomin orörda. -->
+<script src="js/data/k1-taxonomi.js"></script>
+<script src="js/data/k2-taxonomi.js"></script>
+<script src="js/data/ak8-k1-bok.js"></script>
+<script src="js/mastery.js"></script>
+<script src="js/mastery-k2.js"></script>
+<script src="js/provbyggare/provbyggar-motor.js"></script>
+<script>
+(function(){
+  var hs = location.search || '';
+
+  // ── OPTION 3: syntetisera en åk8-PROVBYGGAR-TAXONOMI ur boken (projektion, källtaxonomin orörd) ──
+  // AK8_K1_BOK mappar delkapitel → noder (inverterat mot k1/k2). Vi klonar de refererade noderna och
+  // stämplar varje klon med visning.utbudslista = 'ak8d'+nr och grupp = delkapitlets titel, så modulens
+  // utbudslista-drivna gruppering visar exakt bokens delkapitel. Belief-noder (resonera + visuella figurer)
+  // utesluts — de bor i självskattningen, inte i provbyggaren.
+  var K1 = (window.K1_TAXONOMI && (window.K1_TAXONOMI.noder || window.K1_TAXONOMI)) || [];
+  var K2 = (window.K2_TAXONOMI && (window.K2_TAXONOMI.noder || window.K2_TAXONOMI)) || [];
+  var BY_ID = {}; K1.concat(K2).forEach(function(n){ if(!BY_ID[n.id]) BY_ID[n.id] = n; });
+
+  var BELIEF_FIGUR = { 'andel-figur:rakna':1, 'andel-tallinje:begrepp':1, 'pot-begrepp:figur':1 };
+  function isBelief(n){ return n.formaga === 'RESONERA' || !!BELIEF_FIGUR[n.id]; }
+
+  var BOK = (window.AK8_K1_BOK && window.AK8_K1_BOK.delkapitel || []).slice().sort(function(a,b){ return a.nr - b.nr; });
+  var AK8_BOK_DELKAPITEL = BOK.map(function(d){ return { del: 'ak8d' + d.nr, titel: d.titel }; });
+
+  var seen = {}, AK8_NODER = [];
+  BOK.forEach(function(d){
+    var rad = 0;
+    d.blad.forEach(function(b){
+      (b.noder || []).forEach(function(nid){
+        if(seen[nid]) return;                 // en färdighet visas en gång, i sitt första delkapitel
+        var src = BY_ID[nid]; if(!src) return; // okänt id → hoppa (rapporteras ej här; scan fångar det)
+        if(isBelief(src)){ seen[nid] = true; return; }  // belief → självskattningen, ej provbyggaren
+        seen[nid] = true;
+        var vis = src.visning || {};
+        AK8_NODER.push(Object.assign({}, src, {
+          visning: {
+            utbudslista: 'ak8d' + d.nr,
+            grupp: d.titel,
+            gruppordning: 0,
+            radordning: rad++,
+            titel: (vis.titel || src.namn),
+            etikett: (vis.etikett || ''),
+            formagaKey: (vis.formagaKey || String(src.formaga || '').toLowerCase()),
+            niva: null
+          }
+        }));
+      });
+    });
+  });
+  var AK8_TAXONOMI = { kapitel: 'ak8-k1', noder: AK8_NODER };
+
+  // Kombinerad mastery (k1 + k2). lasMatris slås ihop; masteryState anropas bara för byggbara noder
+  // (inga generatorer än → aldrig i denna fas). Delas byte-identiskt från de befintliga loggarna.
+  var AK8_MASTERY = {
+    lasMatris: function(){
+      var m1 = (window.Mastery && window.Mastery.lasMatris) ? window.Mastery.lasMatris() : {};
+      var m2 = (window.MasteryK2 && window.MasteryK2.lasMatris) ? window.MasteryK2.lasMatris() : {};
+      return Object.assign({}, m1, m2);
+    },
+    masteryState: function(cell, a, b, c){
+      var fn = (window.Mastery && window.Mastery.masteryState) || (window.MasteryK2 && window.MasteryK2.masteryState);
+      try { return fn ? fn(cell, a, b, c) : 0; } catch(e){ return 0; }
+    }
+  };
+
+  // ── PROVBYGGAR-HOST (egen ram → per-instans-state, ingen krock med k1/k2) ──
+  var app = document.getElementById('app');
+  var PB_SHELL = false;
+  function pbShell(){
+    if(PB_SHELL) return;
+    app.innerHTML = '<div id="pb-host">'
+      + '<section class="pb-view" data-pbv="test-config"><div id="test-config-body"></div></section>'
+      + '<section class="pb-view" data-pbv="test-take" hidden><a href="#" class="hero-back" id="test-take-back">← Tillbaka till inställningar</a><div id="test-take-body"></div></section>'
+      + '<section class="pb-view" data-pbv="test-result" hidden><div id="test-result-body"></div></section>'
+      + '</div>';
+    PB_SHELL = true;
+  }
+  function pbShow(v){ var h = document.getElementById('pb-host'); if(!h) return;
+    h.querySelectorAll('.pb-view').forEach(function(el){ el.hidden = (el.dataset.pbv !== v); }); }
+  function pbNav(view){
+    if(view === 'test-config' || view === 'test-take' || view === 'test-result'){
+      pbShell();
+      if(view === 'test-config') PB.render.config();
+      else if(view === 'test-take') PB.render.take();
+      else PB.render.result();
+    }
+  }
+
+  var PB = ProvbyggarMotor.montera({
+    taxonomi: function(){ return AK8_TAXONOMI; },     // lat (samma mönster som k1/k2)
+    mastery:  function(){ return AK8_MASTERY; },
+    bokDelkapitel: AK8_BOK_DELKAPITEL,                // 10 delkapitel ur AK8_K1_BOK
+    generators: {}, genNod: {},                      // inga generatorer än → alla noder "byggs" (nästa ordrar)
+    nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
+  });
+
+  // Deeplink: ?view=test-config[&del=ak8dN] (från delkapitlens "Visa vad du kan"-flik)
+  if(/[?&]view=test-config/i.test(hs)){
+    var mdel = hs.match(/[?&]del=([a-z0-9]+)/i);
+    PB.setDel(mdel ? mdel[1] : null);
+    pbNav('test-config');
+  } else {
+    pbNav('test-config');   // ramen har bara provbyggaren → öppna konfigvyn direkt
+  }
+
+  // Embed (om delkapitel-sidan bäddar in provbyggaren i iframe)
+  if(/[?&]embed=1\b/.test(hs)){
+    document.body.classList.add('embed');
+    (function(){
+      var sist = 0;
+      function rap(){ var h = Math.max(document.body.scrollHeight, document.body.offsetHeight) + 4; if(h && Math.abs(h - sist) > 2){ sist = h; try { parent.postMessage({ __fardHeight: h }, '*'); } catch(e){} } }
+      if(window.ResizeObserver){ try { new ResizeObserver(rap).observe(document.body); } catch(e){} }
+      window.addEventListener('load', rap); setTimeout(rap, 60); setTimeout(rap, 300);
+    })();
+  }
+})();
+</script>
+</body>
+</html>
