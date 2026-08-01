@@ -437,3 +437,6 @@
 .test-sub-mellan .tsm-slut{border-top:1px dashed var(--line,#d9d2c4);padding-top:9px;margin-top:2px}
 .test-sub-mellan .tsm-hint{font-size:12px;color:var(--ink-faint,#7a6e65);font-style:italic}
 .test-sub-mellan .tsn-cell{width:104px;height:34px;text-align:center}
+.test-sub-mellan .tsg-svar{display:inline-flex;align-items:center;gap:5px}
+.test-sub-mellan .tsg-svar .tsn-cell{width:70px}
+.test-sub-mellan .tsg-bas{font-family:var(--mono,monospace);font-size:16px;color:var(--ink,#12110f)}

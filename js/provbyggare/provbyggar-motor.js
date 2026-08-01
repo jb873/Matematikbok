@@ -115,6 +115,21 @@ function testMellanledNumGen(genId, titel, omrade, makeItem){
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
 }
+// Grundpotens (gp): makeItem → {key, prompt, led:[{fraga, varde, facit?}]?, slutKoeff, slutExp, expl}.
+// Valfria numeriska led + slutsvar i grundpotensform ▢·10^▢ (form-medveten: koeff i [1,10)). Speglar drillens gp-svar.
+function testGpGen(genId, titel, omrade, makeItem){
+  return function(seen, opts){
+    const subs = []; let tries = 0;
+    while(subs.length < 4 && tries < 120){
+      tries++;
+      const it = makeItem(opts);
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'gp', prompt:it.prompt, led:it.led||[], slutKoeff:it.slutKoeff, slutExp:it.slutExp, explanation:it.expl||'' });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
 
   // ── Färg-metadata + förmåge-etiketter (defaults; kan överskrivas via config) ──
 const FARG_INFO = [
@@ -245,6 +260,31 @@ function renderSubInput(qNum, subIdx, s){
         </div>
       </div>
     `;
+  } else if(s.type === 'gp'){
+    // Grundpotens: valfria numeriska led (värde-rättade) + slutsvar i grundpotensform ▢·10^▢.
+    // Form-medveten rättning (koeff i [1,10) + rätt värde) speglar drillens gp-check. Bråk-mellanledet orört.
+    const ledRows = (s.led || []).map((L, i) => `
+      <div class="tsm-led">
+        <span class="tsm-fraga"><span class="num-inline">${L.fraga}</span></span>
+        <span class="test-sub-eq">=</span>
+        <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="12" data-sub-input="${idBase}-L${i}-num" aria-label="mellanled värde">
+      </div>`).join('');
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-mellan">
+        ${ledRows}
+        <div class="tsm-led tsm-slut">
+          <span class="tsm-fraga">Svar</span>
+          <span class="test-sub-eq">=</span>
+          <span class="tsg-svar">
+            <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="6" data-sub-input="${idBase}-gk" aria-label="koefficient" placeholder="a">
+            <span class="tsg-bas">· 10^</span>
+            <input type="text" class="test-sub-input tsn-cell" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-ge" aria-label="exponent" placeholder="n">
+          </span>
+          <span class="tsm-hint">a·10ⁿ, 1 ≤ a &lt; 10</span>
+        </div>
+      </div>
+    `;
   }
 
   return `
@@ -301,6 +341,16 @@ function readSubAnswer(qNum, subIdx, s){
     const slut = (sEl && sEl.value.trim()) || '';
     const any = led.some(v => v) || slut;
     return any ? { led, slut } : null;
+  } else if(s.type === 'gp'){
+    const led = (s.led || []).map((L, i) => {
+      const el = document.querySelector(`[data-sub-input="${idBase}-L${i}-num"]`);
+      return (el && el.value.trim()) || '';
+    });
+    const gk = document.querySelector(`[data-sub-input="${idBase}-gk"]`);
+    const ge = document.querySelector(`[data-sub-input="${idBase}-ge"]`);
+    const koeff = (gk && gk.value.trim()) || '', exp = (ge && ge.value.trim()) || '';
+    const any = led.some(v => v) || koeff || exp;
+    return any ? { led, koeff, exp } : null;
   }
   return null;
 }
@@ -350,6 +400,12 @@ function restoreSubAnswer(qNum, subIdx, s, val){
         const el = document.querySelector(`[data-sub-input="${idBase}-L${i}-num"]`); if(el) el.value = v || '';
       });
       const sEl = document.querySelector(`[data-sub-input="${idBase}-snum"]`); if(sEl) sEl.value = val.slut || '';
+    }
+  } else if(s.type === 'gp'){
+    if(val){
+      (val.led || []).forEach((v, i) => { const el = document.querySelector(`[data-sub-input="${idBase}-L${i}-num"]`); if(el) el.value = v || ''; });
+      const gk = document.querySelector(`[data-sub-input="${idBase}-gk"]`); if(gk) gk.value = val.koeff || '';
+      const ge = document.querySelector(`[data-sub-input="${idBase}-ge"]`); if(ge) ge.value = val.exp || '';
     }
   }
 }
@@ -443,6 +499,18 @@ function gradeSub(s, ans){
       .concat([ans.slut != null && ans.slut !== '' ? ans.slut : '?']).join(' → ');
     return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
   }
+  if(s.type === 'gp'){
+    if(!ans) return {status:'skipped'};
+    const num = (x) => parseFloat(String(x).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
+    const ledOk = (s.led || []).every((L, i) => { const v = num(ans.led && ans.led[i]); return !isNaN(v) && Math.abs(v - L.varde) < 1e-6; });
+    const koeff = num(ans.koeff), exp = parseInt(ans.exp);
+    // FORM-MEDVETEN (speglar drillens gp-check): koeff normaliserad [1,10) + rätt koeff/exponent (15·10¹⁷ underkänns → 1,5·10¹⁸).
+    const slutOk = !isNaN(koeff) && koeff >= 1 && koeff < 10 && !isNaN(exp)
+      && Math.abs(koeff - s.slutKoeff) < 1e-9 && exp === s.slutExp;
+    const given = (s.led || []).map((L, i) => (ans.led && ans.led[i] != null && ans.led[i] !== '' ? ans.led[i] : '?'))
+      .concat([(ans.koeff || '?') + '·10^' + (ans.exp || '?')]).join(' → ');
+    return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
+  }
   return {status:'skipped'};
 }
 
@@ -483,6 +551,10 @@ function renderReviewSub(sr){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit != null ? L.facit : L.varde).join(' → ');
     correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + komma(sub.slutVarde) + (sub.slutHint ? ` (${sub.slutHint})` : '') + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'gp'){
+    questionText = sub.prompt;
+    const ledFacit = (sub.led || []).map(L => L.facit != null ? L.facit : L.varde).join(' → ');
+    correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + komma(sub.slutKoeff) + '·10^' + sub.slutExp + ' (grundpotensform)' + (sub.explanation ? ` — ${sub.explanation}` : '');
   }
 
   return `
@@ -1101,6 +1173,6 @@ function renderTestResult(){
 
   window.ProvbyggarMotor = {
     montera: montera,
-    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen, mellanled: testMellanledGen, mellanledNum: testMellanledNumGen }
+    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen, mellanled: testMellanledGen, mellanledNum: testMellanledNumGen, gp: testGpGen }
   };
 })();

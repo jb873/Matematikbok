@@ -130,6 +130,12 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
   var G = ProvbyggarMotor.gen;
   function ri(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
   function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+  // Grundpotens-hjälpare — speglar potens-drillens gp-lager BYTE-TROGET (facit = drillens).
+  function gpRound(x){ return Math.round(x * 1e9) / 1e9; }
+  function gpKoeff(){ return pick([1, 2, 3, 4, 5, 6, 7, 8, 9, 1.5, 2.5, 3.5, 4.5, 7.5]); }
+  function gpVal(k, e){ return k * Math.pow(10, e); }
+  function dec(x){ return String(x).replace('.', ','); }
+  function normalisera(k, e){ var f = 0; while(k >= 10){ k = gpRound(k / 10); e++; f++; } while(k > 0 && k < 1){ k = gpRound(k * 10); e--; f++; } return { koeff:k, exp:e, normaliserad:f > 0 }; }
   var AK8_TEST_GENERATORS = {
     // Del 8 · Potenser — kärnan (rent åttan-innehåll)
     'pot-begrepp:skriva': { snabb: [ G.numeric('gt-pot-skriva', 'Skriv som potens', 'pot-begrepp:skriva', function(){
@@ -201,11 +207,82 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
       return { key:'p2_'+a2+'_'+b2+'_'+c2, prompt:'Räkna ut steg för steg:    '+a2+'^2 − '+b2+' · '+c2,
         led:[ { fraga:a2+'^2', varde:pe2, facit:String(pe2) }, { fraga:b2+' · '+c2, varde:m2, facit:String(m2) } ],
         slutVarde:res2, slutHint:pe2+' − '+m2, expl:a2+'^2 − '+b2+' · '+c2+' = '+pe2+' − '+m2+' = '+res2+'.' };
+    }) ] },
+
+    // Del 9 · Tiopotenser (bas 10) — speglar tio-drillen (samma motor, basFn:10)
+    'tio-rakna:skriva': { snabb: [ G.numeric('gt-tio-skriva', 'Skriv som tiopotens', 'tio-rakna:skriva', function(){
+      var n = ri(2, 7), v = Math.pow(10, n);
+      return { key:'ts'+n, prompt:'Skriv som tiopotens — vilken exponent?    '+v+' = 10^▢', ans:n, expl:v+' = 10^'+n+'.' };
+    }) ] },
+    'tio-rakna:evaluera': { snabb: [ G.numeric('gt-tio-eval', 'Skriv tiopotensen som vanligt tal', 'tio-rakna:evaluera', function(){
+      var n = ri(0, 8), v = Math.pow(10, n);
+      return { key:'te'+n, prompt:'Skriv som vanligt tal:    10^'+n, ans:v, expl:'10^'+n+' = '+v+'.' };
+    }) ] },
+    'tio-rakna:rakna': { snabb: [ G.mellanledNum('gt-tio-multdiv', 'Exponent-lagen med tiopotenser', 'tio-rakna:rakna', function(){
+      if(pick(['mult', 'div']) === 'mult'){
+        var m = ri(2, 7), n = ri(2, 7); while(m + n > 14){ m = ri(2, 7); n = ri(2, 7); } var res = m + n;
+        return { key:'tm'+m+'_'+n, prompt:'Räkna ut med exponent-lagen:    10^'+m+' · 10^'+n,
+          led:[ { fraga:'lägg ihop exponenterna: '+m+' + '+n, varde:res, facit:String(res) } ],
+          slutVarde:res, slutHint:'svarets exponent, 10^▢', expl:'10^'+m+' · 10^'+n+' = 10^'+res+'.' };
+      }
+      var mm = ri(5, 14), nn = ri(2, mm - 1); var res2 = mm - nn;
+      return { key:'td'+mm+'_'+nn, prompt:'Räkna ut med exponent-lagen:    10^'+mm+' / 10^'+nn,
+        led:[ { fraga:'dra bort exponenterna: '+mm+' − '+nn, varde:res2, facit:String(res2) } ],
+        slutVarde:res2, slutHint:'svarets exponent, 10^▢', expl:'10^'+mm+' / 10^'+nn+' = 10^'+res2+'.' };
+    }) ] },
+    'tio-rakna:addsub': { snabb: [ G.mellanledNum('gt-tio-addsub', 'Addition och subtraktion med tiopotenser', 'tio-rakna:addsub', function(){
+      var e1 = ri(2, 6), e2 = ri(2, 6), op = pick(['+', '−']); var v1 = Math.pow(10, e1), v2 = Math.pow(10, e2);
+      var res = op === '+' ? v1 + v2 : v1 - v2;
+      return { key:'ta'+e1+op+e2, prompt:'Räkna ut steg för steg:    10^'+e1+' '+op+' 10^'+e2,
+        led:[ { fraga:'10^'+e1, varde:v1, facit:String(v1) }, { fraga:'10^'+e2, varde:v2, facit:String(v2) } ],
+        slutVarde:res, slutHint:v1+' '+op+' '+v2, expl:'10^'+e1+' '+op+' 10^'+e2+' = '+v1+' '+op+' '+v2+' = '+res+'.' };
+    }) ] },
+    'tio-rakna:losut': { snabb: [ G.numeric('gt-tio-losut', 'Lös ut exponenten (tiopotens)', 'tio-rakna:losut', function(){
+      var x = ri(2, 8), V = Math.pow(10, x);
+      return { key:'tl'+x, prompt:'Vilket tal är x?    10^x = '+V, ans:x, expl:'10^x = '+V+' → x = '+x+'.' };
+    }) ] },
+    'tio-rakna:prefix': { snabb: [ G.flerval('gt-tio-prefix', 'SI-prefix', 'tio-rakna:prefix', function(){   // VERKLIG LUCKA (gen=null)
+      var pf = [['kilo', 3], ['mega', 6], ['giga', 9], ['tera', 12]], t = pick(pf);
+      var fraga = 'Vilket SI-prefix motsvarar 10^'+t[1]+'?';
+      return { key:'pf'+t[1], q:fraga, prompt:fraga, options:pf.map(function(p){ return p[0]; }), answer:t[0], expl:t[0]+' = 10^'+t[1]+'.' };
+    }) ] },
+
+    // Del 10 · Grundpotenser (a·10ⁿ) — speglar gp-drillen; slutsvar i gp-form (form-medveten). Add/sub → numeric.
+    'gp-rakna:skriva': { snabb: [ G.gp('gt-gp-skriva', 'Skriv i grundpotensform', 'gp-rakna:skriva', function(){
+      var a = gpKoeff(), n = ri(3, 8), v = gpVal(a, n);
+      return { key:'gs'+a+'_'+n, prompt:'Skriv i grundpotensform (a·10ⁿ, 1 ≤ a < 10):    '+dec(v), slutKoeff:a, slutExp:n, expl:dec(v)+' = '+dec(a)+'·10^'+n+'.' };
+    }) ] },
+    'gp-rakna:multdiv': { snabb: [ G.gp('gt-gp-multdiv', 'Multiplikation och division i grundpotensform', 'gp-rakna:multdiv', function(){
+      if(pick(['mult', 'div']) === 'mult'){
+        var a = ri(1, 9), b = ri(1, 9), m = ri(2, 9), n = ri(2, 9); while(m + n > 18){ m = ri(2, 9); n = ri(2, 9); }
+        var ck = a * b, ce = m + n, norm = normalisera(ck, ce);
+        return { key:'gm'+a+'_'+m+'_'+b+'_'+n, prompt:'Räkna ut och skriv i grundpotensform:    '+dec(a)+'·10^'+m+' · '+dec(b)+'·10^'+n,
+          led:[ { fraga:'koefficienterna: '+a+' · '+b, varde:ck, facit:dec(ck) }, { fraga:'exponenterna: '+m+' + '+n, varde:ce, facit:String(ce) } ],
+          slutKoeff:norm.koeff, slutExp:norm.exp, expl:dec(a)+'·10^'+m+' · '+dec(b)+'·10^'+n+' = '+dec(ck)+'·10^'+ce+' = '+dec(norm.koeff)+'·10^'+norm.exp+' (normalisera).' };
+      }
+      var rk = ri(1, 9), b2 = pick([2, 3, 5, 1.5, 2.5]), a2 = gpRound(rk * b2), m2 = ri(6, 13), n2 = ri(2, m2 - 2);
+      var ce2 = m2 - n2, norm2 = normalisera(rk, ce2);
+      return { key:'gd'+a2+'_'+m2+'_'+b2+'_'+n2, prompt:'Räkna ut och skriv i grundpotensform:    '+dec(a2)+'·10^'+m2+' / '+dec(b2)+'·10^'+n2,
+        led:[ { fraga:'koefficienterna: '+dec(a2)+' / '+dec(b2), varde:rk, facit:String(rk) }, { fraga:'exponenterna: '+m2+' − '+n2, varde:ce2, facit:String(ce2) } ],
+        slutKoeff:norm2.koeff, slutExp:norm2.exp, expl:dec(a2)+'·10^'+m2+' / '+dec(b2)+'·10^'+n2+' = '+dec(rk)+'·10^'+ce2+'.' };
+    }) ] },
+    'gp-rakna:addsub': { snabb: [ G.numeric('gt-gp-addsub', 'Addition och subtraktion i grundpotensform', 'gp-rakna:addsub', function(){
+      var a = gpKoeff(), m = ri(3, 7), b = gpKoeff(), n = ri(2, m - 1), op = pick(['+', '−']);
+      var A = gpVal(a, m), B = gpVal(b, n), res = op === '+' ? A + B : A - B;
+      return { key:'ga'+a+'_'+m+op+b+'_'+n, prompt:'Räkna ut (svara som vanligt tal):    '+dec(a)+'·10^'+m+' '+op+' '+dec(b)+'·10^'+n, ans:res, expl:dec(a)+'·10^'+m+' '+op+' '+dec(b)+'·10^'+n+' = '+res+'.' };
+    }) ] },
+    'gp-rakna:losut': { snabb: [ G.gp('gt-gp-losut', 'Lös ut talet x', 'gp-rakna:losut', function(){
+      var xk = gpKoeff(), xe = ri(2, 6), ak = gpKoeff(), am = ri(2, 6);
+      var cn = normalisera(ak * xk, am + xe);
+      return { key:'gl'+ak+'_'+am+'_'+xk+'_'+xe, prompt:'Vilket tal är x (grundpotensform)?    '+dec(ak)+'·10^'+am+' · x = '+dec(cn.koeff)+'·10^'+cn.exp, slutKoeff:xk, slutExp:xe, expl:'x = '+dec(xk)+'·10^'+xe+'.' };
     }) ] }
   };
   var AK8_GEN_NOD = {
     'gt-pot-skriva':'pot-begrepp:skriva', 'gt-pot-eval':'pot-begrepp:evaluera', 'gt-pot-multdiv':'pot-multdiv:rakna',
-    'gt-pot-addsub':'pot-addsub:rakna', 'gt-pot-losut':'pot-multdiv:losut', 'gt-prio-potenser':'prio-potenser'
+    'gt-pot-addsub':'pot-addsub:rakna', 'gt-pot-losut':'pot-multdiv:losut', 'gt-prio-potenser':'prio-potenser',
+    'gt-tio-skriva':'tio-rakna:skriva', 'gt-tio-eval':'tio-rakna:evaluera', 'gt-tio-multdiv':'tio-rakna:rakna',
+    'gt-tio-addsub':'tio-rakna:addsub', 'gt-tio-losut':'tio-rakna:losut', 'gt-tio-prefix':'tio-rakna:prefix',
+    'gt-gp-skriva':'gp-rakna:skriva', 'gt-gp-multdiv':'gp-rakna:multdiv', 'gt-gp-addsub':'gp-rakna:addsub', 'gt-gp-losut':'gp-rakna:losut'
   };
 
   // ── PROVBYGGAR-HOST (egen ram → per-instans-state, ingen krock med k1/k2) ──
