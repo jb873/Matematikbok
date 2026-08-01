@@ -136,6 +136,72 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
   function gpVal(k, e){ return k * Math.pow(10, e); }
   function dec(x){ return String(x).replace('.', ','); }
   function normalisera(k, e){ var f = 0; while(k >= 10){ k = gpRound(k / 10); e++; f++; } while(k > 0 && k < 1){ k = gpRound(k * 10); e--; f++; } return { koeff:k, exp:e, normaliserad:f > 0 }; }
+  // ── Mirror av k2:s bråk-hjälpare (byte-troget ur ak7-k2-ram.html; facit = k2:s) ──
+  function rI(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+  function rP(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function gcd2(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=b; b=a%b; a=t; } return a||1; }
+  function multBB(){   // bråk · bråk
+    var n1=rP([2,3,4,5]), n2=rP([2,3,4,5]), t1=rI(1,n1-1), t2=rI(1,n2-1);
+    var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+    return { key:'bb:'+t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' · '+t2+'/'+n2,
+      led:[ { fraga:t1+'·'+t2+' / '+n1+'·'+n2, varde: talj/namn, facit: talj+'/'+namn } ],
+      slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+  }
+  function multHB(){   // heltal · bråk
+    var h=rI(2,6), n=rP([2,3,4,5,6]), t=rI(1,n-1);
+    var talj=h*t, namn=n, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+    return { key:'hb:'+h+'*'+t+'/'+n, prompt:'Räkna ut steg för steg:    '+h+' · '+t+'/'+n,
+      led:[ { fraga:h+'·'+t+' / '+n, varde: talj/namn, facit: talj+'/'+namn } ],
+      slutTalj:T, slutNamn:N, expl:h+' · '+t+'/'+n+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+  }
+  function multBlandad(){   // blandad · bråk: omvandla blandad → oäkta (led 1), multiplicera (led 2), förkorta
+    var hel=rI(1,3), n1=rP([2,3,4]), t1=rI(1,n1-1), n2=rP([2,3,4,5]), t2=rI(1,n2-1);
+    var ot1=hel*n1+t1;
+    var talj=ot1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+    return { key:'bl:'+hel+'_'+t1+'/'+n1+'*'+t2+'/'+n2,
+      prompt:'Räkna ut steg för steg:    '+hel+' '+t1+'/'+n1+' · '+t2+'/'+n2,
+      led:[ { fraga:'skriv '+hel+' '+t1+'/'+n1+' som oäkta bråk', varde: ot1/n1, facit: ot1+'/'+n1 },
+            { fraga:ot1+'·'+t2+' / '+n1+'·'+n2, varde: talj/namn, facit: talj+'/'+namn } ],
+      slutTalj:T, slutNamn:N,
+      expl:hel+' '+t1+'/'+n1+' · '+t2+'/'+n2+' = '+ot1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+  }
+  function multStora(){   // stora tal med korsförkortning
+    var p1=rI(1,3), q1=rI(2,4), p2=rI(1,3), q2=rI(2,4), g1=rP([2,3,4]), g2=rP([2,3,4]);
+    var t1=p1*g1, n1=q1*g2, t2=p2*g2, n2=q2*g1;
+    var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+    return { key:'st:'+t1+'/'+n1+'*'+t2+'/'+n2,
+      prompt:'Räkna ut steg för steg (förkorta gärna först):    '+t1+'/'+n1+' · '+t2+'/'+n2,
+      led:[ { fraga:t1+'·'+t2+' / '+n1+'·'+n2, varde: talj/namn, facit: talj+'/'+namn } ],
+      slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+  }
+  function multVariant(opts){
+    var v = (opts && opts.variant) || 'alla';
+    if(v === 'alla') v = rP(['hb','bb','blandad','stora']);
+    if(v === 'hb') return multHB();
+    if(v === 'blandad') return multBlandad();
+    if(v === 'stora') return multStora();
+    return multBB();
+  }
+  // ── Mirror av k1:s hjälpare (byte-troget ur ak7-k1-ram.html; behövs av k1-generatorerna) ──
+function isPrime(n){
+  if(n<2)return false;
+  if(n===2)return true;
+  if(n%2===0)return false;
+  for(let i=3;i*i<=n;i+=2)if(n%i===0)return false;
+  return true;
+}
+function primeFactorize(n){
+  const f=[];let x=n;
+  for(let p=2;p*p<=x;p++){while(x%p===0){f.push(p);x/=p}}
+  if(x>1)f.push(x);
+  return f;
+}
+function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}          // slumpheltal [a,b]
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;} // för enklaste form (gcd=1)
+function komma(x){return String(x).replace('.',',')}                    // 0.04 → "0,04" (svensk decimal)
+function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// avrunda bort flyttalsbrus
   var AK8_TEST_GENERATORS = {
     // Del 8 · Potenser — kärnan (rent åttan-innehåll)
     'pot-begrepp:skriva': { snabb: [ G.numeric('gt-pot-skriva', 'Skriv som potens', 'pot-begrepp:skriva', function(){
@@ -275,14 +341,438 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
       var xk = gpKoeff(), xe = ri(2, 6), ak = gpKoeff(), am = ri(2, 6);
       var cn = normalisera(ak * xk, am + xe);
       return { key:'gl'+ak+'_'+am+'_'+xk+'_'+xe, prompt:'Vilket tal är x (grundpotensform)?    '+dec(ak)+'·10^'+am+' · x = '+dec(cn.koeff)+'·10^'+cn.exp, slutKoeff:xk, slutExp:xe, expl:'x = '+dec(xk)+'·10^'+xe+'.' };
-    }) ] }
+    }) ] },
+
+    // ── Del 4–7 · BRÅK-KÄRNA — mirror av k2:s bråk-generatorer (byte-troget; facit = k2:s) ──
+    'brak-blandad': { snabb: [ G.brak('k2-blandad','Blandad form → oäkta bråk','brak-blandad', function(){
+      var hel=rI(1,4), n=rP([2,3,4,5,6,7,8]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var talj=hel*n+t;
+      return {key:hel+'-'+t+'-'+n, prompt:'Skriv '+hel+' '+t+'/'+n+' som oäkta bråk.', talj:talj, namn:n, expl:hel+' '+t+'/'+n+' = '+talj+'/'+n+'.'};
+    }) ] },
+    'brak-tid': { snabb: [ G.brak('k2-tid','Tid i bråkform','brak-tid', function(){
+      var m=rP([15,30,45,20,40,10,50,12,24,36,48,6,54,5,25,35,55,18,42]); var g=gcd2(m,60), t=m/g, n=60/g;
+      return {key:'tid'+m, prompt:'Skriv '+m+' min som del av en timme (enklaste form).', talj:t, namn:n, expl:m+' min = '+m+'/60 h = '+t+'/'+n+' h.'};
+    }) ] },
+    'brak-forlanga': { snabb: [ G.numeric('k2-forlanga','Förläng bråket','brak-forlanga', function(){
+      var n=rP([2,3,4,5,6]), t=rI(1,n-1), f=rP([2,3,4,5]);
+      return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = ___/'+(n*f), ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
+    }) ] },
+    'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
+      var N=rP([2,3,4,5,6]), T; do{ T=rI(1,N-1); }while(gcd2(T,N)!==1); var f=rP([2,3,4]);
+      return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+(T*f)+'/'+(N*f)+' till enklaste form.', talj:T, namn:N, expl:(T*f)+'/'+(N*f)+' = '+T+'/'+N+'.'};
+    }) ] },
+    'brak-likformig': { snabb: [ G.numeric('k2-likformig','Likformiga bråk','brak-likformig', function(){
+      var n=rP([2,3,4,5,6]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var k=rP([2,3,4,5]);
+      return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+t+'/'+n+':    '+t+'/'+n+' = ___/'+(n*k), ans:t*k, expl:t+'/'+n+' = '+(t*k)+'/'+(n*k)+' (förläng med '+k+').'};
+    }) ] },
+    'brak-jmf-lika': { snabb: [ G.flerval('k2-jmf-lika','Jämför bråk (samma nämnare)','brak-jmf-lika', function(){
+      var n=rP([4,5,6,7,8,9]), a=rI(1,n-1), b; do{ b=rI(1,n-1); }while(b===a); var s=(a>b)?a:b;
+      return {key:a+'-'+b+'/'+n, prompt:'Vilket bråk är störst?', options:[a+'/'+n, b+'/'+n], answer:s+'/'+n, expl:'Samma nämnare → störst täljare: '+s+'/'+n+'.'};
+    }) ] },
+    'brak-add': { snabb: [ G.mellanled('k2-add','Addition med bråk','brak-add', function(){
+      var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
+      var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
+      var komb=nt1+nt2, g=gcd2(komb,L), T=komb/g, N=L/g;
+      if(T>=N) return null;
+      return { key:t1+'/'+n1+'+'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' + '+t2+'/'+n2,
+        led:[ { fraga:nt1+'+'+nt2+' / '+L, varde: komb/L, facit: komb+'/'+L } ],
+        slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' + '+t2+'/'+n2+' = '+nt1+'/'+L+' + '+nt2+'/'+L+' = '+komb+'/'+L+' = '+T+'/'+N+'.' };
+    }) ] },
+    'brak-sub': { snabb: [ G.mellanled('k2-sub','Subtraktion med bråk','brak-sub', function(){
+      var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
+      var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
+      var komb=nt1-nt2; if(komb<=0) return null;
+      var g=gcd2(komb,L), T=komb/g, N=L/g;
+      return { key:t1+'/'+n1+'-'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' − '+t2+'/'+n2,
+        led:[ { fraga:nt1+'−'+nt2+' / '+L, varde: komb/L, facit: komb+'/'+L } ],
+        slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' − '+t2+'/'+n2+' = '+nt1+'/'+L+' − '+nt2+'/'+L+' = '+komb+'/'+L+' = '+T+'/'+N+'.' };
+    }) ] },
+    'brak-mult-rakna': { snabb: [ G.mellanled('k2-mult','Multiplikation med bråk','brak-mult-rakna', multVariant) ] },
+    'brak-div-bh': { snabb: [ G.mellanled('k2-div-bh','Bråk ÷ heltal','brak-div-bh', function(){
+      var n=rP([2,3,4,5]), t=rI(1,n-1), h=rI(2,6);
+      var pt=t, pn=n*h, g=gcd2(pt,pn), T=pt/g, N=pn/g;
+      return { key:t+'/'+n+'/'+h, prompt:'Räkna ut steg för steg:    '+t+'/'+n+' ÷ '+h,
+        led:[ { fraga:'inversen av '+h, varde: 1/h, facit:'1/'+h }, { fraga:t+' / '+n+'·'+h, varde: pt/pn, facit: pt+'/'+pn } ],
+        slutTalj:T, slutNamn:N, expl:t+'/'+n+' ÷ '+h+' = '+t+'/'+n+' · 1/'+h+' = '+pt+'/'+pn+' = '+T+'/'+N+'.' };
+    }) ] },
+    'brak-div-hb': { snabb: [ G.mellanled('k2-div-hb','Heltal ÷ bråk','brak-div-hb', function(){
+      var n=rP([2,3,4,5]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var h=rI(1,4);
+      var pt=h*n, pn=t, g=gcd2(pt,pn), T=pt/g, N=pn/g;
+      return { key:h+'-'+t+'/'+n, prompt:'Räkna ut steg för steg:    '+h+' ÷ '+t+'/'+n,
+        led:[ { fraga:'inversen av '+t+'/'+n, varde: n/t, facit: n+'/'+t }, { fraga:h+'·'+n+' / '+t, varde: pt/pn, facit: pt+'/'+pn } ],
+        slutTalj:T, slutNamn:N, expl:h+' ÷ '+t+'/'+n+' = '+h+' · '+n+'/'+t+' = '+pt+'/'+pn+' = '+T+'/'+N+'.' };
+    }) ] },
+    'brak-div-bb': { snabb: [ G.mellanled('k2-div-bb','Bråk ÷ bråk','brak-div-bb', function(){
+      var n1=rP([2,3,4,5]), t1=rI(1,n1-1), n2=rP([2,3,4,5]), t2=rI(1,n2-1);
+      var pt=t1*n2, pn=n1*t2, g=gcd2(pt,pn), T=pt/g, N=pn/g;
+      return { key:t1+'/'+n1+'//'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' ÷ '+t2+'/'+n2,
+        led:[ { fraga:'inversen av '+t2+'/'+n2, varde: n2/t2, facit: n2+'/'+t2 }, { fraga:t1+'·'+n2+' / '+n1+'·'+t2, varde: pt/pn, facit: pt+'/'+pn } ],
+        slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' ÷ '+t2+'/'+n2+' = '+t1+'/'+n1+' · '+n2+'/'+t2+' = '+pt+'/'+pn+' = '+T+'/'+N+'.' };
+    }) ] },
+    'brak-div-inv': { snabb: [ G.brak('k2-div-inv','Invertera (omvända talet)','brak-div-inv', function(){
+      var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
+      return {key:'inv'+t+'/'+n, prompt:'Skriv det omvända talet (inversen) till '+t+'/'+n+':', talj:n, namn:t, expl:'Inversen av '+t+'/'+n+' är '+n+'/'+t+'.'};
+    }) ] },
+    // ── Del 5–7 · MULT/DIV med 10/100/1000 & stora tal — mirror av k1 (byte-troget) ──
+  'mult-rakna': { snabb: [
+    ProvbyggarMotor.gen.numeric('mult-rakna-pow10','Multiplikation med 10, 100 och 1000','mult-rakna', function(){
+      const a=rInt(2,99), p=randPick([10,100,1000]); return {key:a+'x'+p, prompt:'Räkna ut:   '+a+' · '+p, ans:a*p, expl:a+' · '+p+' = '+(a*p)};
+    }),
+    ProvbyggarMotor.gen.numeric('mult-rakna-stora','Multiplikation med stora tal','mult-rakna', function(){
+      const a=rInt(12,49), b=rInt(3,9); return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
+    })
+  ]},
+  'div-rakna': { snabb: [
+    ProvbyggarMotor.gen.numeric('div-rakna-pow10','Division med 10, 100 och 1000','div-rakna', function(){
+      const p=randPick([10,100]), q=rInt(2,20), a=p*q; return {key:a+'/'+p, prompt:'Räkna ut:   '+a+' / '+p, ans:q, expl:a+' / '+p+' = '+q};
+    }),
+    ProvbyggarMotor.gen.numeric('div-rakna-stora','Division med stora tal','div-rakna', function(){
+      const b=rInt(3,9), q=rInt(11,20), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut:   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q};
+    })
+  ]},
+    // ── Del 3 · Negativa tal — mirror av k1 (byte-troget) ──
+  'neg-begrepp': { snabb: [
+    ProvbyggarMotor.gen.numeric('neg-begr','Negativa tal: begrepp','neg-begrepp', function(){
+      if(rInt(1,2)===1){ const a=rInt(1,20); return {key:'mot'+a, prompt:'Vilket är motsatta talet till −'+a+'?', ans:a, expl:'Motsatta talet till −'+a+' är '+a+'.'}; }
+      const start=rInt(-5,-1), step=rInt(1,3), t0=start, t1=start+step, t2=start+2*step, ans=start+3*step;
+      return {key:'tf'+start+'-'+step, prompt:'Vilket tal kommer näst?   '+t0+', '+t1+', '+t2+', ___', ans:ans, expl:'Ökar med '+step+' varje steg → '+ans+'.'};
+    })
+  ]},
+  'neg-rakna': { snabb: [
+    ProvbyggarMotor.gen.numeric('neg-addsub','Addition och subtraktion med negativa tal','neg-rakna', function(){
+      const t=rInt(1,3); let s, ans;
+      if(t===1){ const a=rInt(1,9), b=rInt(2,12); s='−'+a+' + '+b; ans=-a+b; }
+      else if(t===2){ const a=rInt(2,12), b=rInt(3,15); s=a+' − '+b; ans=a-b; }
+      else { const a=rInt(1,9), b=rInt(1,9); s='−'+a+' − '+b; ans=-a-b; }
+      return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
+    }),
+    ProvbyggarMotor.gen.numeric('neg-multdiv','Multiplikation och division med negativa tal','neg-rakna', function(){
+      const t=rInt(1,3); let s, ans;
+      if(t===1){ const a=rInt(2,9), b=rInt(2,9); s='−'+a+' · '+b; ans=-a*b; }
+      else if(t===2){ const b=rInt(2,6), q=rInt(2,9), a=b*q; s='−'+a+' / −'+b; ans=q; }
+      else { const b=rInt(2,6), q=rInt(2,9), a=b*q; s='−'+a+' / '+b; ans=-q; }
+      return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
+    })
+  ]},
+    // ── Del 1 · Position / Primtal / Delbarhet — mirror av k1 (custom multi-sub, byte-troget) ──
+  primtal: {
+    snabb: [
+      // Generator 1: Är talet primtal eller sammansatt?
+      function genPrimtalBinary(seen){
+        const allTal = [];
+        for(let n=4;n<=60;n++) allTal.push(n);
+        const candidates = allTal.filter(n => !seen.has(`pb-${n}`));
+        if(candidates.length < 3) return null;
+        const picked = shuffle(candidates).slice(0,4);
+        picked.forEach(n => seen.add(`pb-${n}`));
+        return {
+          generator: 'primtal-binary',
+          title: 'Är talet ett primtal eller ett sammansatt tal?',
+          omrade: 'primtal',
+          subs: picked.map((n,i) => ({
+            label: String.fromCharCode(97+i) + ')',
+            type: 'binary',
+            q: `${n}`,
+            prompt: `Är ${n} ett primtal eller sammansatt?`,
+            options: ['Primtal', 'Sammansatt'],
+            answer: isPrime(n) ? 'Primtal' : 'Sammansatt',
+            explanation: isPrime(n)
+              ? `${n} är ett primtal (delbart bara med 1 och ${n}).`
+              : `${n} = ${primeFactorize(n).join(' · ')}, alltså sammansatt.`
+          }))
+        };
+      },
+
+      // Generator 2: Dela upp i termer
+      function genTermer(seen){
+        const candidates = [];
+        for(let n=10;n<=50;n++) candidates.push(n);
+        const pool = candidates.filter(n => !seen.has(`tm-${n}`));
+        if(pool.length < 3) return null;
+        const picked = shuffle(pool).slice(0,3);
+        picked.forEach(n => seen.add(`tm-${n}`));
+        return {
+          generator: 'termer',
+          title: 'Dela upp talet i tre termer.',
+          omrade: 'primtal',
+          subs: picked.map((n,i) => ({
+            label: String.fromCharCode(97+i) + ')',
+            type: 'sum',
+            q: `${n} = ___ + ___ + ___`,
+            target: n,
+            operator: '+',
+            antal: 3,
+            answer: null // valideras dynamiskt
+          }))
+        };
+      },
+
+      // Generator 3: Dela upp i faktorer
+      function genFaktorer(seen){
+        const candidates = [];
+        for(let n=12;n<=100;n++){
+          if(primeFactorize(n).length >= 3) candidates.push(n);
+        }
+        const pool = candidates.filter(n => !seen.has(`fk-${n}`));
+        if(pool.length < 3) return null;
+        const picked = shuffle(pool).slice(0,3);
+        picked.forEach(n => seen.add(`fk-${n}`));
+        return {
+          generator: 'faktorer',
+          title: 'Dela upp talet i tre faktorer (alla större än 1).',
+          omrade: 'primtal',
+          subs: picked.map((n,i) => ({
+            label: String.fromCharCode(97+i) + ')',
+            type: 'product',
+            q: `${n} = ___ · ___ · ___`,
+            target: n,
+            operator: '·',
+            antal: 3,
+            answer: null
+          }))
+        };
+      },
+
+      // Generator 4: Primtalsfaktorisering
+      function genPrimfakt(seen){
+        const candidates = [];
+        for(let n=8;n<=60;n++){
+          const len = primeFactorize(n).length;
+          if(len >= 2 && len <= 4) candidates.push(n);
+        }
+        const pool = candidates.filter(n => !seen.has(`pf-${n}`));
+        if(pool.length < 3) return null;
+        const picked = shuffle(pool).slice(0,3);
+        picked.forEach(n => seen.add(`pf-${n}`));
+        return {
+          generator: 'primfakt',
+          title: 'Primtalsfaktorisera talet (skriv som produkt av enbart primtal).',
+          omrade: 'primtal',
+          subs: picked.map((n,i) => {
+            const factors = primeFactorize(n);
+            return {
+              label: String.fromCharCode(97+i) + ')',
+              type: 'primfakt',
+              q: `${n}`,
+              target: n,
+              answer: factors,
+              answerStr: factors.join(' · ')
+            };
+          })
+        };
+      }
+    ],
+
+    problem: [
+      // Generator 5: Vilket tal är jag?
+      function genGata(seen){
+        const bank = [
+          {clues:['Jag är ett primtal mellan 20 och 30.'], answer:23, alt:[29]},
+          {clues:['Jag är ett sammansatt tal under 20.', 'Jag är delbar med 3 och 5.'], answer:15, alt:[]},
+          {clues:['Jag är ett primtal.', 'Mitt tal är jämnt.'], answer:2, alt:[]},
+          {clues:['Jag är ett tvåsiffrigt tal.', 'Båda mina siffror är primtal.', 'Jag är själv ett primtal.'], answer:23, alt:[37,53,73]},
+          {clues:['Jag är ett tal mellan 30 och 40.', 'Jag har exakt tre primfaktorer.'], answer:30, alt:[]},
+          {clues:['Jag är produkten av de tre minsta primtalen.'], answer:30, alt:[]},
+          {clues:['Jag är ett sammansatt tal.', 'Min siffersumma är 9.', 'Jag är tvåsiffrig.'], answer:27, alt:[18,36,45,54,63,72,81,90,99]},
+          {clues:['Jag är ett primtal.', 'Mina siffror summerar till 7.', 'Jag är tvåsiffrig.'], answer:43, alt:[61]}
+        ];
+        const available = bank.filter(g => !seen.has(`g-${g.answer}-${g.clues.length}`));
+        if(available.length === 0) return null;
+        const g = randPick(available);
+        seen.add(`g-${g.answer}-${g.clues.length}`);
+        return {
+          generator: 'gata',
+          title: 'Vilket tal är jag?',
+          omrade: 'primtal',
+          subs: [{
+            label: '',
+            type: 'gata',
+            q: 'Använd ledtrådarna för att hitta talet.',
+            clues: g.clues,
+            answer: g.answer,
+            alt: g.alt || []
+          }]
+        };
+      }
+    ]
+  },
+  delbarhet: {
+    snabb: [
+      // Är talet delbart med d? (binary) — samma sub-typ som primtal-binary, rättas av gradeSub.
+      function genDelbar(seen){
+        const delare = [2,3,4,5,6,9,10], bank = [];
+        for(let n=12;n<=99;n++) delare.forEach(d => bank.push({n:n,d:d}));
+        const pool = bank.filter(x => !seen.has('db-'+x.n+'-'+x.d));
+        if(pool.length < 4) return null;
+        const picked = shuffle(pool).slice(0,4);
+        picked.forEach(x => seen.add('db-'+x.n+'-'+x.d));
+        return {
+          generator: 'delbar-binary',
+          title: 'Är talet delbart? Svara Ja eller Nej.',
+          omrade: 'delbarhet',
+          subs: picked.map((x,i) => ({
+            label: String.fromCharCode(97+i) + ')',
+            type: 'binary',
+            q: 'Är ' + x.n + ' delbart med ' + x.d + '?',
+            prompt: 'Är ' + x.n + ' delbart med ' + x.d + '?',
+            options: ['Ja', 'Nej'],
+            answer: (x.n % x.d === 0) ? 'Ja' : 'Nej',
+            explanation: (x.n % x.d === 0)
+              ? x.n + ' = ' + x.d + ' · ' + (x.n / x.d) + ', alltså delbart med ' + x.d + '.'
+              : x.n + ' delat med ' + x.d + ' går inte jämnt ut (rest ' + (x.n % x.d) + ').'
+          }))
+        };
+      },
+
+      // delbarhet:begrepp — siffersumma (compute-and-check, återanvänder heltalsaritmetik)
+      function genSiffersumma(seen){
+        const pool = []; for(let n=100;n<=999;n++) pool.push(n);
+        const avail = pool.filter(n => !seen.has('ss-'+n));
+        if(avail.length < 3) return null;
+        const picked = shuffle(avail).slice(0,3);
+        picked.forEach(n => seen.add('ss-'+n));
+        return {
+          generator: 'siffersumma', title: 'Räkna ut siffersumman.', omrade: 'delbarhet',
+          subs: picked.map((n,i) => {
+            const h = Math.floor(n/100), t = Math.floor(n/10)%10, e = n%10, s = h+t+e;
+            return {
+              label: String.fromCharCode(97+i)+')', type: 'numeric',
+              prompt: 'Vad är siffersumman av ' + n + '?', answer: s,
+              explanation: h + ' + ' + t + ' + ' + e + ' = ' + s + '.'
+            };
+          })
+        };
+      }
+    ]
+  },
+  position: {
+    snabb: [
+      // position:begrepp — platsvärde (compute-and-check)
+      function genPlatsvarde(seen){
+        const platser = [{namn:'tiotal',exp:1},{namn:'ental',exp:0},{namn:'tiondel',exp:-1},{namn:'hundradel',exp:-2}];
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 80){
+          tries++;
+          const d = {}; platser.forEach(p => { d[p.exp] = rInt(0,9); });
+          const cnt = {}; platser.forEach(p => { cnt[d[p.exp]] = (cnt[d[p.exp]]||0)+1; });
+          const nz = platser.filter(p => d[p.exp] > 0 && cnt[d[p.exp]] === 1); // nonzero + unik siffra (ej tvetydigt)
+          if(!nz.length) continue;
+          const p = randPick(nz), siffra = d[p.exp];
+          const tal = avr(d[1]*10 + d[0] + d[-1]*0.1 + d[-2]*0.01, 2);
+          const varde = avr(siffra*Math.pow(10,p.exp), 2);
+          const key = 'pv-'+tal+'-'+p.exp;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
+            prompt: 'Vilket värde har siffran ' + siffra + ' i talet ' + komma(tal) + '?', answer: varde,
+            explanation: 'Siffran ' + siffra + ' står på ' + p.namn + '-platsen → ' + komma(varde) + '.'
+          });
+        }
+        return subs.length ? {generator:'platsvarde', title:'Vilket värde har siffran?', omrade:'position', subs:subs} : null;
+      },
+
+      // position:rakna — fortsätt talföljden (compute-and-check)
+      function genTalfoljd(seen){
+        const steg = [1, 0.1, 0.01]; const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 60){
+          tries++;
+          const s = randPick(steg);
+          const t0 = avr(rInt(10,80)*s, 2), t1 = avr(t0+s,2), t2 = avr(t0+2*s,2), ans = avr(t0+3*s,2);
+          const key = 'tf-'+t0+'-'+s;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
+            prompt: 'Vilket tal kommer näst?   ' + komma(t0) + ',  ' + komma(t1) + ',  ' + komma(t2) + ',  ___', answer: ans,
+            explanation: 'Talföljden ökar med ' + komma(s) + ' varje steg → ' + komma(ans) + '.'
+          });
+        }
+        return subs.length ? {generator:'talfoljd', title:'Fortsätt talföljden.', omrade:'position', subs:subs} : null;
+      },
+
+      // position:resonera — jämför decimaltal (flerval via binary)
+      function genJamfor(seen){
+        const bank = [[9.1,9.09],[3.2,3.19],[5.5,5.45],[0.8,0.79],[7.3,7.29],[2.5,2.45],[4.6,4.59],[8.1,8.09],[6.4,6.39],[1.7,1.69],[4.05,4.5],[2.09,2.9]];
+        const avail = bank.filter(pr => !seen.has('jf-'+pr[0]+'-'+pr[1]));
+        if(avail.length < 3) return null;
+        const picked = shuffle(avail).slice(0,3);
+        picked.forEach(pr => seen.add('jf-'+pr[0]+'-'+pr[1]));
+        return {
+          generator: 'jamfor-tal', title: 'Vilket tal är störst?', omrade: 'position',
+          subs: picked.map((pr,i) => {
+            const a = pr[0], b = pr[1], stor = Math.max(a,b);
+            return {
+              label: String.fromCharCode(97+i)+')', type: 'binary',
+              q: komma(a) + ' eller ' + komma(b), prompt: 'Vilket tal är störst: ' + komma(a) + ' eller ' + komma(b) + '?',
+              options: shuffle([komma(a), komma(b)]), answer: komma(stor),
+              explanation: komma(stor) + ' är störst (jämför tiondelar, sedan hundradelar).'
+            };
+          })
+        };
+      }
+    ]
+  },
+  // ── NYA · Del 6/7 · mult/div små & stora–små tal (facit = värdet; verifierat i node) ──
+  'nym-sma': { snabb: [ G.numeric('nym-sma','Multiplikation med små tal','mult-rakna', function(){
+    var d=rP([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]), b=rI(2,9);
+    var ans=Math.round(d*b*10)/10;
+    return {key:d+'x'+b, prompt:'Räkna ut:   '+String(d).replace('.',',')+' · '+b, ans:ans, expl:String(d).replace('.',',')+' · '+b+' = '+String(ans).replace('.',',')};
+  }) ] },
+  'nyd-sma': { snabb: [ G.numeric('nyd-sma','Division med små tal','div-rakna', function(){
+    var ans=rP([0.2,0.4,0.5,0.6,0.8,1.5,2.5]), b=rP([2,4,5,8,10]);
+    var a=Math.round(ans*b*10)/10;
+    return {key:a+'/'+b, prompt:'Räkna ut:   '+String(a).replace('.',',')+' / '+b, ans:ans, expl:String(a).replace('.',',')+' / '+b+' = '+String(ans).replace('.',',')};
+  }) ] },
+  'nym-storasma': { snabb: [ G.numeric('nym-storasma','Multiplikation med stora och små tal','mult-rakna', function(){
+    var d=rP([0.2,0.5,1.5,2.5]), b=rI(11,40);
+    var ans=Math.round(d*b*10)/10;
+    return {key:d+'x'+b, prompt:'Räkna ut:   '+String(d).replace('.',',')+' · '+b, ans:ans, expl:String(d).replace('.',',')+' · '+b+' = '+String(ans).replace('.',',')};
+  }) ] },
+  'nyd-storasma': { snabb: [ G.numeric('nyd-storasma','Division med stora och små tal','div-rakna', function(){
+    var ans=rP([0.2,0.5,1.5,2.5]), b=rI(11,40);
+    var a=Math.round(ans*b*10)/10;
+    return {key:a+'/'+b, prompt:'Räkna ut:   '+String(a).replace('.',',')+' / '+b, ans:ans, expl:String(a).replace('.',',')+' / '+b+' = '+String(ans).replace('.',',')};
+  }) ] },
+  // ── NYA · bråk-luckor (k2:s G.brak-subtyper; facit verifierat i node) ──
+  'ny-lana': { snabb: [ G.brak('ny-lana','Låna i blandad form','brak-lana', function(){
+    var d=rP([3,4,5,6]), h1=rI(1,d-2), h2=rI(h1+1,d-1);
+    var m1=rI(3,4), m2=rI(1,m1-2);
+    var v1=m1*d+h1, v2=m2*d+h2;
+    var diff=v1-v2;
+    var g=gcd2(diff,d), T=diff/g, N=d/g;
+    return {key:m1+'_'+h1+'-'+m2+'_'+h2+'/'+d, prompt:'Räkna ut (enklaste form, oäkta bråk):    '+m1+' '+h1+'/'+d+' − '+m2+' '+h2+'/'+d, talj:T, namn:N, expl:m1+' '+h1+'/'+d+' − '+m2+' '+h2+'/'+d+' = '+diff+'/'+d+' = '+T+'/'+N+'.'};
+  }) ] },
+  'ny-mforkorta': { snabb: [ G.brak('ny-mforkorta','Förkorta innan multiplikation','brak-mult-forkorta', function(){
+    var t1=rI(1,5), n1=rI(t1+1,8), t2=rI(1,5), n2=rI(t2+1,8);
+    var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
+    if(g===1) return null;
+    return {key:t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Förkorta innan du multiplicerar (enklaste form):    '+t1+'/'+n1+' · '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.'};
+  }) ] },
+  'ny-reciprok': { snabb: [ G.brak('ny-reciprok','Skriva reciprok','brak-div-reciprok', function(){
+    var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
+    return {key:'rec'+t+'/'+n, prompt:'Skriv reciproken (omvända talet) till '+t+'/'+n+':', talj:n, namn:t, expl:'Reciproken av '+t+'/'+n+' är '+n+'/'+t+'.'};
+  }) ] }
   };
   var AK8_GEN_NOD = {
+    'k2-blandad':'brak-blandad:rakna', 'k2-tid':'brak-tid:rakna', 'k2-forlanga':'brak-forlanga:rakna',
+    'k2-forkorta':'brak-forkorta:rakna', 'k2-likformig':'brak-likformig:rakna', 'k2-jmf-lika':'brak-jmf-lika:begrepp',
+    'k2-add':'brak-add:rakna', 'k2-sub':'brak-sub:rakna', 'k2-mult':'brak-mult-rakna:rakna',
+    'k2-div-bh':'brak-div-bh:rakna', 'k2-div-hb':'brak-div-hb:rakna', 'k2-div-bb':'brak-div-bb:rakna', 'k2-div-inv':'brak-div-inv:rakna',
     'gt-pot-skriva':'pot-begrepp:skriva', 'gt-pot-eval':'pot-begrepp:evaluera', 'gt-pot-multdiv':'pot-multdiv:rakna',
     'gt-pot-addsub':'pot-addsub:rakna', 'gt-pot-losut':'pot-multdiv:losut', 'gt-prio-potenser':'prio-potenser',
     'gt-tio-skriva':'tio-rakna:skriva', 'gt-tio-eval':'tio-rakna:evaluera', 'gt-tio-multdiv':'tio-rakna:rakna',
     'gt-tio-addsub':'tio-rakna:addsub', 'gt-tio-losut':'tio-rakna:losut', 'gt-tio-prefix':'tio-rakna:prefix',
-    'gt-gp-skriva':'gp-rakna:skriva', 'gt-gp-multdiv':'gp-rakna:multdiv', 'gt-gp-addsub':'gp-rakna:addsub', 'gt-gp-losut':'gp-rakna:losut'
+    'gt-gp-skriva':'gp-rakna:skriva', 'gt-gp-multdiv':'gp-rakna:multdiv', 'gt-gp-addsub':'gp-rakna:addsub', 'gt-gp-losut':'gp-rakna:losut',
+    // mirror av k1:s GEN_NOD (byte-troget) + nya noder
+    'mult-rakna-pow10':'mult-rakna:pow10', 'mult-rakna-stora':'mult-rakna:stora',
+    'div-rakna-pow10':'div-rakna:pow10', 'div-rakna-stora':'div-rakna:stora',
+    'neg-begr':'neg-begrepp:begrepp', 'neg-addsub':'neg-rakna:addsub', 'neg-multdiv':'neg-rakna:multdiv',
+    'primtal-binary':'primtal:begrepp', 'termer':'primtal:rakna', 'faktorer':'primtal:rakna',
+    'delbar-binary':'delbarhet:rakna',
+    'platsvarde':'position:begrepp', 'talfoljd':'position:rakna',
+    'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
+    'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
+    'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'
   };
 
   // ── PROVBYGGAR-HOST (egen ram → per-instans-state, ingen krock med k1/k2) ──
@@ -312,7 +802,13 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
     taxonomi: function(){ return AK8_TAXONOMI; },     // lat (samma mönster som k1/k2)
     mastery:  function(){ return AK8_MASTERY; },
     bokDelkapitel: AK8_BOK_DELKAPITEL,                // 10 delkapitel ur AK8_K1_BOK
-    generators: AK8_TEST_GENERATORS, genNod: AK8_GEN_NOD,   // batch 1: potensernas kärna (3 noder byggbara)
+    generators: AK8_TEST_GENERATORS, genNod: AK8_GEN_NOD,   // hela boken: potens/tio/gp + mirror av k1/k2 + luckor
+    varianter: {   // mult-noden erbjuder variant-val (mirror av k2:s OPT2)
+      'brak-mult-rakna:rakna': { titel: 'Sorts multiplikation', alternativ: [
+        {key:'alla', label:'Alla (blandat)'}, {key:'hb', label:'Heltal × bråk'}, {key:'bb', label:'Bråk × bråk'},
+        {key:'blandad', label:'Blandad form'}, {key:'stora', label:'Stora tal'}
+      ] }
+    },
     eyebrow: 'Åk 8 · Taluppfattning — tal, räkning och bråk',   // bråk ÄR tal → ingår i taluppfattningen
     nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
   });

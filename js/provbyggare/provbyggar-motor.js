@@ -148,7 +148,7 @@ function renderSubInput(qNum, subIdx, s){
 
   if(s.type === 'binary'){
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.q}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${s.prompt || s.q}</span></div>
       <div class="test-sub-binary-row" data-sub-id="${idBase}">
         ${s.options.map(opt => `
           <button class="test-sub-binary-btn" data-val="${opt}">${opt}</button>
