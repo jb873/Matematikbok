@@ -105,8 +105,10 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
   });
   var AK8_TAXONOMI = { kapitel: 'ak8-k1', noder: AK8_NODER };
 
-  // Kombinerad mastery (k1 + k2). lasMatris slås ihop; masteryState anropas bara för byggbara noder
-  // (inga generatorer än → aldrig i denna fas). Delas byte-identiskt från de befintliga loggarna.
+  // Kombinerad mastery (k1 + k2). lasMatris slås ihop; masteryState + loggaForsok routas per nod
+  // (bråk → MasteryK2, övrigt → Mastery). Delas byte-identiskt från de befintliga loggarna.
+  var K2_IDS = {}; K2.forEach(function(n){ K2_IDS[n.id] = 1; });
+  function ak8MastFor(nod){ return (K2_IDS[nod] ? window.MasteryK2 : window.Mastery); }
   var AK8_MASTERY = {
     lasMatris: function(){
       var m1 = (window.Mastery && window.Mastery.lasMatris) ? window.Mastery.lasMatris() : {};
@@ -116,7 +118,50 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
     masteryState: function(cell, a, b, c){
       var fn = (window.Mastery && window.Mastery.masteryState) || (window.MasteryK2 && window.MasteryK2.masteryState);
       try { return fn ? fn(cell, a, b, c) : 0; } catch(e){ return 0; }
+    },
+    loggaForsok: function(nod, res){                 // parity: prov → rätt logg (k1/k2) → färgar rätt kart-cell
+      var m = ak8MastFor(nod); if(m && m.loggaForsok) m.loggaForsok(nod, res);
     }
+  };
+
+  // ── ÅTTAN TEST-GENERATORER (Väg A, bundna till karta-synliga noder via GEN_NOD) ──
+  // Content i åttans ram; mekanismen (ProvbyggarMotor) orörd. Facit speglar drillens matematik
+  // (potens-drill.js) — drillmotorn INTE anropad. Hjälpare lokala (undvik global-krock).
+  var G = ProvbyggarMotor.gen;
+  function ri(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+  var AK8_TEST_GENERATORS = {
+    // Del 8 · Potenser — kärnan (rent åttan-innehåll)
+    'pot-begrepp:skriva': { snabb: [ G.numeric('gt-pot-skriva', 'Skriv som potens', 'pot-begrepp:skriva', function(){
+      var b = ri(2, 9), e = ri(2, 6), mult = []; for(var i = 0; i < e; i++) mult.push(b);
+      return { key:'skriv'+b+'_'+e, prompt:'Skriv som en potens med basen '+b+' — vilken exponent?    '+mult.join(' · ')+' = '+b+'^▢', ans:e, expl:mult.join(' · ')+' = '+b+'^'+e+'.' };
+    }) ] },
+    'pot-begrepp:evaluera': { snabb: [ G.numeric('gt-pot-eval', 'Beräkna potensens värde', 'pot-begrepp:evaluera', function(){
+      var b, e, v; do { b = ri(2, 9); e = ri(2, 4); v = Math.pow(b, e); } while(v > 1000);
+      return { key:'eval'+b+'_'+e, prompt:'Beräkna:    '+b+'^'+e, ans:v, expl:b+'^'+e+' = '+v+'.' };
+    }) ] },
+    'pot-multdiv:rakna': { snabb: [ G.mellanledNum('gt-pot-multdiv', 'Exponent-lagen (mult och div)', 'pot-multdiv:rakna', function(){
+      var b = ri(2, 6), typ = pick(['mult', 'div', 'blandat']);
+      if(typ === 'mult'){
+        var m = ri(2, 7), n = ri(2, 7); while(m + n > 12){ m = ri(2, 7); n = ri(2, 7); } var res = m + n;
+        return { key:'m'+b+'_'+m+'_'+n, prompt:'Räkna ut med exponent-lagen:    '+b+'^'+m+' · '+b+'^'+n,
+          led:[ { fraga:'lägg ihop exponenterna: '+m+' + '+n, varde:res, facit:String(res) } ],
+          slutVarde:res, slutHint:'svarets exponent, '+b+'^▢', expl:b+'^'+m+' · '+b+'^'+n+' = '+b+'^('+m+'+'+n+') = '+b+'^'+res+'.' };
+      }
+      if(typ === 'div'){
+        var mm = ri(5, 12), nn = ri(2, mm - 1); if(mm - nn > 9) nn = mm - ri(1, 9); var res2 = mm - nn;
+        return { key:'d'+b+'_'+mm+'_'+nn, prompt:'Räkna ut med exponent-lagen:    '+b+'^'+mm+' / '+b+'^'+nn,
+          led:[ { fraga:'dra bort exponenterna: '+mm+' − '+nn, varde:res2, facit:String(res2) } ],
+          slutVarde:res2, slutHint:'svarets exponent, '+b+'^▢', expl:b+'^'+mm+' / '+b+'^'+nn+' = '+b+'^('+mm+'−'+nn+') = '+b+'^'+res2+'.' };
+      }
+      var p = ri(2, 6), q = ri(2, 6), r = ri(2, Math.min(p + q - 1, 8)); var s1 = p + q, res3 = s1 - r;
+      return { key:'bl'+b+'_'+p+'_'+q+'_'+r, prompt:'Räkna ut med exponent-lagen:    ('+b+'^'+p+' · '+b+'^'+q+') / '+b+'^'+r,
+        led:[ { fraga:'täljarens exponent: '+p+' + '+q, varde:s1, facit:String(s1) }, { fraga:'dela — dra bort '+r+': '+s1+' − '+r, varde:res3, facit:String(res3) } ],
+        slutVarde:res3, slutHint:'svarets exponent, '+b+'^▢', expl:'('+b+'^'+p+' · '+b+'^'+q+') / '+b+'^'+r+' = '+b+'^('+p+'+'+q+'−'+r+') = '+b+'^'+res3+'.' };
+    }) ] }
+  };
+  var AK8_GEN_NOD = {
+    'gt-pot-skriva':'pot-begrepp:skriva', 'gt-pot-eval':'pot-begrepp:evaluera', 'gt-pot-multdiv':'pot-multdiv:rakna'
   };
 
   // ── PROVBYGGAR-HOST (egen ram → per-instans-state, ingen krock med k1/k2) ──
@@ -146,7 +191,7 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
     taxonomi: function(){ return AK8_TAXONOMI; },     // lat (samma mönster som k1/k2)
     mastery:  function(){ return AK8_MASTERY; },
     bokDelkapitel: AK8_BOK_DELKAPITEL,                // 10 delkapitel ur AK8_K1_BOK
-    generators: {}, genNod: {},                      // inga generatorer än → alla noder "byggs" (nästa ordrar)
+    generators: AK8_TEST_GENERATORS, genNod: AK8_GEN_NOD,   // batch 1: potensernas kärna (3 noder byggbara)
     eyebrow: 'Åk 8 · Taluppfattning — tal, räkning och bråk',   // bråk ÄR tal → ingår i taluppfattningen
     nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
   });
