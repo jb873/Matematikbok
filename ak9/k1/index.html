@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Matematik · Åk 9 · Kapitel 1</title>
 <link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../js/fot/kapitel-fot.css">
 <style>
   :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#1b4b8a; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
   *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
@@ -21,8 +22,6 @@
   .wrap{ max-width:860px; margin:0 auto; padding:28px 24px 60px; }
   .bygg-banner{ display:flex; gap:13px; align-items:flex-start; margin:0 0 22px; padding:16px 20px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--gold); border-radius:8px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
   .bygg-banner .ikon{ font-size:20px; flex-shrink:0; }
-  .karta-lank{ display:inline-flex; align-items:center; gap:8px; margin:0 0 22px; padding:10px 18px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--paper-dk); border-radius:8px; color:var(--ink-faint); font-size:14px; opacity:.7; cursor:default; }
-  .karta-lank .kommer{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); background:var(--paper-dk); border-radius:3px; padding:2px 8px; margin-left:auto; }
   .del{ display:flex; align-items:flex-start; gap:16px; padding:16px 18px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:10px; margin-bottom:12px; text-decoration:none; color:inherit; }
   .del.open:hover{ border-color:var(--gold-lt); box-shadow:0 3px 12px rgba(0,0,0,.05); }
   .del-nr{ flex-shrink:0; width:38px; height:38px; border-radius:50%; background:var(--navy); color:#fff; font-family:var(--cinzel); display:flex; align-items:center; justify-content:center; font-size:16px; }
@@ -53,9 +52,12 @@
     <span class="ikon">🚧</span>
     <div><strong>Kapitlet byggs.</strong> Alla nio delkapitel finns som skelett – du kan klicka in och se strukturen (de tre spåren), men inget innehåll är inlagt ännu. Det fylls i under terminen. Öva på samma färdigheter i <a href="../../ak8/index.html">årskurs 8</a> så länge.</div>
   </div>
-  <div class="karta-lank">🗺️ Begreppskartan (åk 9) <span class="kommer">kommer</span></div>
   <div id="del-lista"></div>
 </div>
+
+<!-- Kapitel-fot (delad modul) — nian: allt "kommer" (ingen åk9-karta/provbyggare/självskattning än). -->
+<div id="kapitel-fot"></div>
+
 <footer>Digitalt läromedel i matematik · Åk 9 · Kapitel 1</footer>
 
 <script src="../../js/data/ak9-k1-bok.js"></script>
@@ -83,6 +85,14 @@
     }
   }
 })();
+</script>
+<script src="../../js/fot/kapitel-fot.js"></script>
+<script>
+  KapitelFot.montera({
+    kunskapslage:   { status: 'kommer' },
+    skapaTest:      { status: 'kommer' },
+    sjalvskattning: { status: 'kommer' }
+  });
 </script>
 </body>
 </html>

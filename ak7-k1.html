@@ -328,36 +328,10 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   .nav-crumbs{display:none}
 }
 
-/* ── Öva mer-banner (Metod- och färdighetsträning) ── */
-.ova-banner{display:flex;align-items:center;gap:22px;max-width:920px;margin:0 auto 10px;padding:26px 30px;
-  background:var(--nav-bg,#0f1e2e);border-radius:14px;text-decoration:none;position:relative;overflow:hidden;
-  transition:box-shadow .18s,transform .12s;}
-.ova-banner:hover{box-shadow:0 8px 30px rgba(0,0,0,.22);transform:translateY(-2px);}
-.ova-banner-icon{flex-shrink:0;width:58px;height:58px;border-radius:50%;background:#1c2c3e;border:1px solid rgba(196,154,64,.35);
-  display:flex;align-items:center;justify-content:center;font-size:26px;}
-.ova-banner-body{flex:1;min-width:0;}
-.ova-banner-eyebrow{font-family:var(--cinzel,'Cinzel');font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-lt,#c49a40);margin-bottom:6px;}
-.ova-banner-title{font-family:var(--serif,'Cormorant Garamond');font-size:26px;font-weight:600;color:#fff;letter-spacing:-.01em;margin-bottom:5px;}
-.ova-banner-desc{font-size:14px;color:rgba(255,255,255,.62);line-height:1.5;max-width:560px;}
-.ova-banner-btn{flex-shrink:0;font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.12em;text-transform:uppercase;
-  color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:7px;padding:11px 20px;white-space:nowrap;transition:background .15s;}
-.ova-banner:hover .ova-banner-btn{background:rgba(255,255,255,.1);}
-@media(max-width:640px){.ova-banner{flex-wrap:wrap;gap:14px;padding:20px;} .ova-banner-btn{width:100%;text-align:center;}}
-
-/* ── Träna inför provet (två kort längst ned) ── */
-.prov-grid{max-width:920px;margin:0 auto 10px;padding:0 28px;display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-.prov-card{display:flex;align-items:center;gap:18px;background:var(--paper-lt,#faf6ee);border:1px solid var(--paper-dk,#e6ddcb);
-  border-radius:8px;padding:22px 24px;text-decoration:none;transition:box-shadow .18s,transform .18s,border-color .18s;animation:fadeUp .4s ease both;}
-.prov-card:hover{box-shadow:0 6px 22px rgba(0,0,0,.10);transform:translateY(-2px);border-color:var(--gold,#c49a40);}
-.prov-card-icon{flex-shrink:0;width:48px;height:48px;border-radius:8px;background:#efe7d6;border:1px solid var(--paper-dk,#e6ddcb);
-  display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--navy,#0f1e2e);}
-.prov-card-body{flex:1;}
-.prov-card-title{font-family:var(--serif,'Cormorant Garamond');font-size:21px;font-weight:600;color:var(--ink,#12110f);margin-bottom:3px;letter-spacing:-.01em;}
-.prov-card-desc{font-size:13px;color:var(--ink-soft,#5d5347);line-height:1.5;}
-.prov-card-arrow{flex-shrink:0;color:var(--ink-faint,#9a8f7e);font-size:20px;}
+/* Fot-CSS (.ova-banner*, .prov-*) utbruten till js/fot/kapitel-fot.css (delad med åk8/åk9). */
 .nav-card.is-fordjupning{background:linear-gradient(135deg,#f3eef7 0%,#ede6f3 100%);border-color:#d9cce6;}
-@media(max-width:640px){.prov-grid{grid-template-columns:1fr;}}
 </style>
+<link rel="stylesheet" href="js/fot/kapitel-fot.css">
 </head>
 <body>
 
@@ -383,36 +357,8 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
 <main class="card-grid" id="delkapitel-grid"></main>
 
-<div class="section-label">Kunskapsläge</div>
-<a class="ova-banner" href="ak7/k1/kunskapslage/index.html">
-  <div class="ova-banner-icon">🧭</div>
-  <div class="ova-banner-body">
-    <div class="ova-banner-eyebrow">Begreppskarta · självskattning</div>
-    <div class="ova-banner-title">Kunskapsläge — var står jag?</div>
-    <div class="ova-banner-desc">Områdets framsida: en karta färgad av det du faktiskt övat, och en självskattning där du tar ställning själv. Se vad som sitter och vad som är kvar. Färdighetsträningen når du inne i varje delkapitel.</div>
-  </div>
-  <div class="ova-banner-btn">Öppna →</div>
-</a>
-
-<div class="section-label">Träna inför provet</div>
-<div class="prov-grid">
-  <a class="prov-card" href="ak7-k1-ram.html?view=test-config">
-    <div class="prov-card-icon">📝</div>
-    <div class="prov-card-body">
-      <div class="prov-card-title">Skapa eget test</div>
-      <div class="prov-card-desc">Välj 3–5 moment du vill testa dig på, så sätts ett eget övningstest ihop.</div>
-    </div>
-    <div class="prov-card-arrow">›</div>
-  </a>
-  <a class="prov-card" href="ak7/k1/kunskapslage/index.html?tab=sjalv">
-    <div class="prov-card-icon">✓</div>
-    <div class="prov-card-body">
-      <div class="prov-card-title">Självskattning</div>
-      <div class="prov-card-desc">Ta ställning själv: Kan · Osäker · Kan ej – för varje färdighet. Bredvid står evidensen från det du övat.</div>
-    </div>
-    <div class="prov-card-arrow">›</div>
-  </a>
-</div>
+<!-- Kapitel-fot (Kunskapsläge + Träna inför provet) — delad modul, monteras nedan. -->
+<div id="kapitel-fot"></div>
 
 <footer>
   <div>Digitalt läromedel i matematik</div>
@@ -466,6 +412,16 @@ DELKAPITEL.forEach(function(d){
   el.innerHTML = inner;
   grid.appendChild(el);
 });
+</script>
+
+<!-- Kapitel-fot: delad modul. Sjuan = alla tre live (byte-trogen extraktion). -->
+<script src="js/fot/kapitel-fot.js"></script>
+<script>
+  KapitelFot.montera({
+    kunskapslage:   { href: 'ak7/k1/kunskapslage/index.html', status: 'live' },
+    skapaTest:      { href: 'ak7-k1-ram.html?view=test-config', status: 'live' },
+    sjalvskattning: { href: 'ak7/k1/kunskapslage/index.html?tab=sjalv', status: 'live' }
+  });
 </script>
 
 </body>
