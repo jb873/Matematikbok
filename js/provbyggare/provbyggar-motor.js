@@ -614,7 +614,7 @@ function exempelFaktorer(target, antal){
     var FORELASNING_TIPS= config.forelasningTips || {};
     var FARG_INFO_C     = config.fargInfo || FARG_INFO;
     var FORMAGA_NAMN_C  = config.formagaNamn || FORMAGA_NAMN;
-    var state = { testConfig:{ antal:6, typ:'snabb', del:null, nodes:null, fargFilter:[0,1,2,3], collapsed:null, varianter:{} }, test:null };
+    var state = { testConfig:{ antal:6, typ:'snabb', del:null, nodes:null, fargFilter:[], collapsed:null, varianter:{}, _preselectDel:false }, test:null };
     function navTo(v,o){ return config.nav.navTo(v, o||{}); }
     function showView(v){ return config.nav.showView(v); }
     function updateTutorContext(){ if(config.nav.updateTutorContext) config.nav.updateTutorContext(); }
@@ -760,29 +760,19 @@ function renderTestConfig(){
     cfg.collapsed = delkapitel.filter(d => !d.undergrupper.some(u => u.rader.some(r => r.byggbar))).map(d => d.del);
   }
 
-  // Färg-filtret härleder urvalet över det visade: nodes=null → förväljd ur filtret; annars manuellt.
+  // OPT-IN: inget förvalt från start (fargFilter tom). Färg-chip bulk-väljer; ?del= förväljer delkapitlet.
   function synkaFranFilter(){
     cfg.nodes = byggbara.filter(r => cfg.fargFilter.includes(r.farg)).map(r => r.node);
   }
-  if(cfg.nodes === null) synkaFranFilter();
+  if(cfg.nodes === null){
+    if(cfg._preselectDel && delFilter){ cfg.nodes = byggbara.map(r => r.node); cfg._preselectDel = false; }   // deeplink → förvälj delkapitlet
+    else synkaFranFilter();
+  }
   const valda = cfg.nodes || [];
 
-  // Variant-väljare: en nod kan DEKLARERA varianter (config.varianter). Visas bara när noden är vald.
-  // Valet lagras i cfg.varianter[nod] och skickas till nodens generator i generateTest. (k1 saknar deklaration → dolt.)
+  // Variant-väljare: en nod kan DEKLARERA varianter (config.varianter). Visas INLINE vid sin färdighet
+  // i Färdigheter-listan när noden är vald (ej topp-panel). Valet lagras i cfg.varianter[nod].
   const varDekl = config.varianter || {};
-  const variantCards = valda.filter(n => varDekl[n] && varDekl[n].alternativ && varDekl[n].alternativ.length).map(n => {
-    const dekl = varDekl[n];
-    const rad = allaRader.find(r => r.node === n);
-    const cur = cfg.varianter[n] || dekl.alternativ[0].key;
-    return `
-    <div class="test-config-card">
-      <h3>${dekl.titel}</h3>
-      <p class="config-desc">${dekl.beskrivning || `Välj vilken sorts uppgift provet ska öva${rad ? ` för <strong>${rad.etikett}</strong>` : ''}. Standard: blandat.`}</p>
-      <div class="config-options config-variant" data-node="${n}">
-        ${dekl.alternativ.map(a => `<button class="config-option ${cur===a.key?'is-selected':''}" data-vkey="${a.key}">${a.label}</button>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
 
   document.getElementById('test-config-body').innerHTML = `
     <div class="header-card">
@@ -830,8 +820,6 @@ function renderTestConfig(){
       </div>
     </div>
 
-    ${variantCards}
-
     <div class="test-config-card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
         <h3 style="margin:0;">Färdigheter</h3>
@@ -856,16 +844,25 @@ function renderTestConfig(){
                   <div class="cg-subhead">${u.namn}</div>
                   ${u.rader.map(f => {
                     const checked = valda.includes(f.node);
-                    const dimmed = f.byggbar && !checked && !cfg.fargFilter.includes(f.farg);
+                    const dimmed = f.byggbar && !checked && cfg.fargFilter.length && !cfg.fargFilter.includes(f.farg);
                     const dot = f.byggbar
                       ? `<span class="cb-dot" style="background:${FARG_INFO[f.farg].bg};" title="${FARG_INFO[f.farg].namn}"></span>`
                       : `<span class="cb-dot" style="background:transparent;border-style:dashed;box-shadow:none;"></span>`;
+                    const vdek = varDekl[f.node];
+                    const variantInline = (vdek && checked && vdek.alternativ && vdek.alternativ.length) ? `
+                      <div class="config-variant-inline">
+                        <span class="cvi-label">${vdek.titel}</span>
+                        <div class="config-options config-variant" data-node="${f.node}">
+                          ${vdek.alternativ.map(a => `<button class="config-option ${(cfg.varianter[f.node]||vdek.alternativ[0].key)===a.key?'is-selected':''}" data-vkey="${a.key}">${a.label}</button>`).join('')}
+                        </div>
+                      </div>` : '';
                     return `
                       <div class="config-checkbox ${checked?'is-checked':''} ${!f.byggbar?'is-disabled':''} ${dimmed?'is-dimmed':''}" data-node="${f.node}" ${!f.byggbar?'title="Byggs – ingen test-generator ännu"':''}>
                         ${dot}
                         <div class="cb-text">${f.etikett}${f.formaga?`<span class="cb-sub">${f.formaga}</span>`:''}${!f.byggbar?'<span class="cb-stub">byggs</span>':''}</div>
                         <div class="cb-square">${checked?'✓':''}</div>
                       </div>
+                      ${variantInline}
                     `;
                   }).join('')}
                 `).join('')}
@@ -1166,7 +1163,7 @@ function renderTestResult(){
 
     return {
       render: { config: renderTestConfig, take: renderTestTake, result: renderTestResult },
-      setDel: function(d){ state.testConfig.del = d; state.testConfig.nodes = null; state.testConfig.collapsed = null; },
+      setDel: function(d){ state.testConfig.del = d; state.testConfig.nodes = null; state.testConfig.collapsed = null; state.testConfig._preselectDel = !!d; },
       state: state
     };
   }

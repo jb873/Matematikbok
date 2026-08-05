@@ -223,6 +223,12 @@
 
 .config-group-body .cg-subhead:first-child{margin-top:0;padding-top:0;border-top:none}
 
+/* Variant-väljare INLINE vid sin färdighet (ej topp-panel): sitter direkt under sin checkbox-rad. */
+.config-variant-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 4px 34px;padding:6px 10px;background:var(--bg-warm);border:1px dashed var(--line);border-radius:var(--radius-sm)}
+.config-variant-inline .cvi-label{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-faint)}
+.config-variant-inline .config-options{gap:6px;margin:0}
+.config-variant-inline .config-option{padding:4px 10px;font-size:12.5px}
+
 .config-filter-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--c-rakna-bg);border:1px solid var(--c-rakna);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:13.5px;color:var(--c-rakna)}
 
 .cfn-clear{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--primary);background:none;border:1px solid var(--primary);border-radius:6px;padding:5px 11px;cursor:pointer}
