@@ -287,7 +287,7 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-lana:rakna", "namn": "Låna i blandad form", "parent": "brak-lana", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "lanaEngine",
       "begrepp": "Räkna ut differensen i blandad form med lån från heltalet; flera giltiga vägar (låna eller via oäkta bråk). Öva-bladet rättar equality-baserat.",
       "visning": null
     },
@@ -319,7 +319,7 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-mult-forkorta:rakna", "namn": "Förkorta innan multiplikation", "parent": "brak-mult-forkorta", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "multForkortaEngine",
       "begrepp": "Korsförkorta täljare och nämnare (i valfri ordning) innan multiplikation; svar i enklaste/blandad form. Öva-bladet rättar equality-baserat (flera giltiga vägar).",
       "visning": null
     },
@@ -395,7 +395,7 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-div-reciprok:rakna", "namn": "Skriva reciprok", "parent": "brak-div-reciprok", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "reciprokEngine",
       "begrepp": "Skriv reciproken till ett bråk eller algebraiskt uttryck genom att byta plats på täljare och nämnare.",
       "visning": null
     },

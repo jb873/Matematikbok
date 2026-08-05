@@ -2644,7 +2644,7 @@ window.K1_TAXONOMI = {
       },
       "roll": "karna",
       "formaga": "BEGREPP",
-      "generator": null,
+      "generator": "renderTioPrefix",
       "begrepp": "Matcha tiopotens mot SI-prefix: kilo 10³, mega 10⁶, giga 10⁹, tera 10¹² (Öva-blad).",
       "visning": null
     }

@@ -563,6 +563,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/figur/svg-andel.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-andel.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-likvtid.js"></script>
+<script src="js/motor/ovamer/ovamer-k2-luckor.js"></script>
 <!-- Delad provbyggare (samma modul som k1 monterar). Monteras med K2-config i boot nedan. -->
 <link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
 <script src="js/provbyggare/provbyggar-motor.js"></script>
@@ -617,6 +618,9 @@ function blandadEngine(){
     'brak-div-bh':   function(){ divBrakHeltalEngine(); },   // Del 7: bråktal ÷ heltal (bara svaret)
     'brak-div-hb':   function(){ divHeltalBrakEngine(); },   // Del 7: heltal ÷ bråktal (bara svaret)
     'brak-div-bb':   function(){ divBrakBrakEngine(); },     // Del 7: bråktal ÷ bråktal (visa metod)
+    'brak-lana':          function(){ lanaEngine(); },            // Låna i blandad form (lucka-drill)
+    'brak-mult-forkorta': function(){ multForkortaEngine(); },    // Förkorta innan mult (lucka-drill)
+    'brak-div-reciprok':  function(){ reciprokEngine(); },        // Skriva reciprok (lucka-drill)
     'brak-jmf-lika':     function(){ klickaStorstEngine(); },     // Del 4: klicka störst
     'brak-jmf-riktmark': function(){ markeraRiktmarkEngine(); },  // Del 4: markera alla mot ½ och 1
     'brak-jmf-ordna':    function(){ storleksordnaEngine(); },    // Del 4: storleksordna

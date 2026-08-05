@@ -2575,7 +2575,9 @@ const FORMAGOR = {
   // Potenser (åk8): drill-kategorier
   skriva:       {label:'Skriv som potens',    tagClass:'tag-begrepp', pillClass:'p-begrepp'},
   evaluera:     {label:'Beräkna värdet',      tagClass:'tag-rakna', pillClass:'p-rakna'},
-  losut:        {label:'Lös ut bas/exponent', tagClass:'tag-rakna', pillClass:'p-rakna'}
+  losut:        {label:'Lös ut bas/exponent', tagClass:'tag-rakna', pillClass:'p-rakna'},
+  // Tiopotenser (åk8): SI-prefix-korval (matcha 10ⁿ mot kilo/mega/giga/tera)
+  prefix:       {label:'SI-prefix',           tagClass:'tag-begrepp', pillClass:'p-begrepp'}
 };
 
 // Kapitel 1 – Taluppfattning: positionssystem och räknesätt
@@ -5082,7 +5084,8 @@ const OVNING_RENDERS = {
     evaluera: (b)=> renderTioEvaluera(b),
     rakna:    (b)=> renderTioMultdiv(b),
     addsub:   (b)=> renderTioAddsub(b),
-    losut:    (b)=> renderTioLosut(b)
+    losut:    (b)=> renderTioLosut(b),
+    prefix:   (b)=> renderTioPrefix(b)
   },
   // Grundpotenser (åk8) — SAMMA exponentkärna (expLag), nytt koeff/normaliserings-lager (renderGp*).
   'gp-rakna':{
@@ -9167,6 +9170,7 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-avrundning.js"></script>
 <script src="js/motor/metod/metod-d1-tillagg.js"></script>
 <script src="js/motor/potens/potens-drill.js"></script>
+<script src="js/motor/potens/tio-prefix-drill.js"></script>
 <!-- Taxonomin (bok-delkapitel via visning.utbudslista) — provbyggaren driver väljaren ur den, som kartan/delkapitel-sidorna. -->
 <script src="js/data/k1-taxonomi.js"></script>
 <!-- Mastery-loggning (elev-lokal, localStorage). Observerar getTutorScore; rör ej drill-logik. -->
