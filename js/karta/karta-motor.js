@@ -27,7 +27,13 @@
     var RAM = config.ramPath;
     var byId = {}; TAX.forEach(function(n){ byId[n.id] = n; });
     function barnAv(id){ return TAX.filter(function(n){ return n.parent === id && !n.doljKarta; }); }
-    var OMRADEN = TAX.filter(function(n){ return n.niva === 'omrade' && n.implemented; });
+    // Kartan = boken: obyggda områden SYNS men är döda. Undantag: grupp:'avslutning' (plugg/
+    // kunskapsläge-meta-ytan) är öppen på landningssidan och bor UTANFÖR kartan (kartan ÄR den ytan).
+    var OMRADEN = TAX.filter(function(n){ return n.niva === 'omrade' && (n.implemented || n.grupp !== 'avslutning'); });
+    // "Kommer"-tillstånd (obyggt område + allt under det): synligt, märkt, DÖTT — visuellt skilt från
+    // scoping-grått. Räknas ALDRIG i rollup/completion (ett obyggt område är ingen svaghet hos eleven).
+    function omradeAv(node){ var n = node; while(n && n.parent != null){ n = byId[n.parent]; } return n; }
+    function arKommer(node){ var o = (node && node.niva === 'omrade') ? node : omradeAv(node); return !!(o && !o.implemented && o.grupp !== 'avslutning'); }
 
     // ── ELEV-LOKAL DATA · localStorage ENDAST. Lämnar ALDRIG enheten. ──
     function lasMatris(){
@@ -84,7 +90,10 @@
       3:{bg:'#6BA544',br:'#4E7D30',fg:'#fff'}
     };
     var GRA = { bg:'#EAE6DA', br:'#D3CDBE', fg:'#8A857A' };
+    // "Kommer" — sval, ljus ton + streckad ram (css) → tydligt skild från scoping-gråttets varma, fyllda beige.
+    var KOMMER = { bg:'#EEEFF4', br:'#C4C2CF', fg:'#77737F' };
     function nodStatus(node, pref, matris){
+      if(arKommer(node)) return { kommer:true };   // obyggt → eget tillstånd, aldrig färg/gra/rollup
       if(node.niva === 'lovnod'){
         var sc = scopeAv(node, pref);
         if(!sc.inScope) return { gra:true, orsak:sc.orsak };
@@ -95,7 +104,7 @@
       return { state: Math.min.apply(null, scoped.map(function(c){ return c.state; })) };
     }
     function rotStatus(pref, matris){
-      var scoped = OMRADEN.map(function(o){ return nodStatus(o, pref, matris); }).filter(function(c){ return !c.gra; });
+      var scoped = OMRADEN.map(function(o){ return nodStatus(o, pref, matris); }).filter(function(c){ return !c.gra && !c.kommer; });
       if(!scoped.length) return { gra:true, orsak:'framtid' };
       return { state: Math.min.apply(null, scoped.map(function(c){ return c.state; })) };
     }
@@ -114,22 +123,24 @@
     function nodBox(node, opts){
       opts = opts || {};
       var status = opts.rootStatus || nodStatus(node, PREF, MATRIS);
-      var farg = status.gra ? GRA : FARG[status.state];
-      var lankbar = node.niva === 'lovnod' && !status.gra && !!node.generator;   // concept-noder (utan generator) länkas ej
+      var kommer = !!status.kommer;
+      var farg = kommer ? KOMMER : (status.gra ? GRA : FARG[status.state]);
+      var lankbar = !kommer && node.niva === 'lovnod' && !status.gra && !!node.generator;   // concept/obyggda-noder länkas ej
       var b = document.createElement(lankbar ? 'a' : 'div');
-      b.className = 'node' + (opts.root ? ' root' : '') + (status.gra ? ' gra' : '')
-        + (node.niva === 'lovnod' && !status.gra && !node.generator ? ' nolink' : '');
+      b.className = 'node' + (opts.root ? ' root' : '') + (kommer ? ' kommer' : '') + (status.gra ? ' gra' : '')
+        + (node.niva === 'lovnod' && !status.gra && !kommer && !node.generator ? ' nolink' : '');
       b.style.background = farg.bg; b.style.borderColor = farg.br; b.style.color = farg.fg;
       var rollM = node.roll === 'breddning' ? '＋' : node.roll === 'fordjupning' ? '★' : '';
       var stodM = (node.arskursRelevans && node.arskursRelevans[PREF.arskurs] === 'stod') ? 'stöd' : '';
       var markM = stodM || rollM;
       var markTitle = stodM ? 'stöd – valbart stödspår' : node.roll;
       var orsak = status.gra ? '<span class="gra-orsak">' + (status.orsak === 'framtid' ? (config.orsakFramtid || 'framtid') : 'bortvalt') + '</span>' : '';
+      var kommerFlagga = kommer ? '<span class="kommer-flagga" title="Inte byggt än – kommer senare">kommer</span>' : '';
       // Kart-etikett: kortare kartLabel om taxonomin bär en, annars nodens fulla namn
       // (självskattningens namn rörs inte). Tvåradsbrytning sköts av css:en, inte av kapning.
       var label = node.kartLabel || node.namn;
-      b.innerHTML = '<span class="txt">' + label + orsak + '</span>'
-        + (markM && !status.gra ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '');
+      b.innerHTML = '<span class="txt">' + label + orsak + kommerFlagga + '</span>'
+        + (markM && !status.gra && !kommer ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '');
       if(lankbar){ b.href = deeplink(node); b.style.textDecoration = 'none'; }
       return b;
     }

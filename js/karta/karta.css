@@ -45,6 +45,9 @@ a.node{transition:box-shadow .12s, transform .12s;}
 a.node:hover{box-shadow:0 3px 12px rgba(0,0,0,.14);transform:translateX(1px);}
 .node.gra{opacity:.9;}
 .gra-orsak{display:block;font-size:10px;font-style:italic;opacity:.8;margin-top:1px;}
+/* "Kommer" = obyggt, dött. Streckad ram + chip → tydligt skilt från scoping-gråttets fyllda, valbara ruta. */
+.node.kommer{border-style:dashed;cursor:default;}
+.kommer-flagga{display:inline-block;margin-top:3px;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;background:rgba(120,115,127,.16);color:#6a6675;padding:1.5px 6px;border-radius:99px;}
 
 .legend{display:flex;flex-wrap:wrap;gap:20px;align-items:center;margin:18px 0 0;font-size:14px;color:var(--ink-soft);}
 .legend .item{display:flex;align-items:center;gap:8px;}
