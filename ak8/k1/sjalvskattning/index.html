@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Var står jag? · Åk 8 · Taluppfattning</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/karta/karta.css">
+<link rel="stylesheet" href="../../../js/karta/sjalvskattning.css">
+<style>
+  .sj-intro{font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:66ch;margin:0 0 22px;}
+  .sj-intro em{font-style:italic;color:var(--ink);}
+  .kl-lankrad{display:flex;gap:16px;flex-wrap:wrap;margin:2px 0 26px;font-size:13.5px;}
+  .kl-lankrad a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:1px;}
+  .kl-lankrad a:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="kl-tillbaka" href="../index.html">← Tillbaka till kapitlet</a>
+  <p class="eyebrow">Kapitel 1 · Åk 8 · Plugg till prov</p>
+  <h1>Var står jag?</h1>
+  <p class="lede"><em>Självskattningen</em> är din egen bild. Ta ställning FÖRST — <em>Kan</em>, <em>Osäker</em> eller <em>Kan ej</em> — sedan visas evidensen bredvid, samma färg som kartan. Där de möts syns bekräftelsen; där de skiljer sig syns vad som är värt att titta på.</p>
+  <p class="kl-lankrad"><a href="../karta/index.html">Se kartan (evidens) →</a><a href="../../../ak8-k1-ram.html?view=test-config">Skapa eget test →</a></p>
+
+  <p class="sj-intro">Markera för varje färdighet vad du själv tycker. Evidensen är dold tills du tagit ställning — du ska committa din egen tro innan du ser om den stämmer, annars blir skattningen bara en avskrift av kartan. Grön prick + <em>Kan</em> = bekräftat. Säger du <em>Kan</em> men pricken är röd får du en pluggplan; säger du <em>Kan ej</em> men pricken är grön är du bättre än du tror.</p>
+  <div id="sjalv-mount"></div>
+</div>
+
+<!-- Åk 8: taluppfattning ÄR ett kapitel som inkluderar bråk → union av k1- OCH k2-taxonomin
+     (single-source, källorna orörda), delad logg (k1+k2), egen belief-nyckel + nivåbrygga N=3.
+     Speglar åttans karta (../karta/index.html) exakt → matrisen faller ut per bok-delkapitel
+     identiskt med kartan. Självskattningen leder ALDRIG till en drill (belief ≠ evidens-väg). -->
+<script src="../../../js/data/k1-taxonomi.js"></script>
+<script src="../../../js/data/k2-taxonomi.js"></script>
+<script src="../../../js/mastery.js"></script>
+<script src="../../../js/mastery-k2.js"></script>
+<script src="../../../js/karta/sjalvskattning.js"></script>
+<script>
+(function(){
+  var K1 = (window.K1_TAXONOMI && (window.K1_TAXONOMI.noder || window.K1_TAXONOMI)) || [];
+  var K2 = (window.K2_TAXONOMI && (window.K2_TAXONOMI.noder || window.K2_TAXONOMI)) || [];
+  // Union — källtaxonomierna klonas inte, bara slås ihop (samma princip som kartan/provbyggaren).
+  var AK8_TAXONOMI = { kapitel: 'ak8-k1', noder: K1.concat(K2) };
+
+  // Kombinerad mastery (k1 + k2) — IDENTISK med åttans karta: en implementation räcker, matriserna slås ihop.
+  var AK8_MASTERY = {
+    lasMatris: function(){
+      var m1 = (window.Mastery && window.Mastery.lasMatris && window.Mastery.lasMatris()) || {};
+      var m2 = (window.MasteryK2 && window.MasteryK2.lasMatris && window.MasteryK2.lasMatris()) || {};
+      return Object.assign({}, m1, m2);
+    },
+    masteryState: function(log, a, b, c){ return window.Mastery.masteryState(log, a, b, c); }
+  };
+
+  window.Sjalvskattning.montera({
+    taxonomi: AK8_TAXONOMI,
+    mastery: AK8_MASTERY,
+    k1mastery: window.Mastery,               // delatMed-rader (k1-noder färgas ur k1-loggen)
+    beliefKey: 'ak8.taluppfattning.belief.v1',
+    prefKey: 'ak7.k1.taluppfattning.pref.v1', // delad med åttans karta → Visa: godkänt/allt i synk
+    arskurs: 'ak8',
+    malDefault: 'godkant',
+    minNiva: 3,                              // nivåbryggan N=3 (parity med kartan)
+    formagaEvidens: true,                    // konsumera likhetstecken-evidensen (prob-rutan → MasteryK2)
+    mountId: 'sjalv-mount'
+  });
+})();
+</script>
+</body>
+</html>

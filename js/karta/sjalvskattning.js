@@ -12,6 +12,8 @@
      beliefKey,    // 'k2.brak.belief.v1'
      prefKey,      // delad med kartan (bara mal läses)
      arskurs, malDefault, minNiva,
+     formagaEvidens, // opt-in: läs evidens för belief-only-förmågorna (likhetstecknet) ur mastery.
+                     //         utelämnad = ren belief-rad (sjuan, byte-identisk).
      ramPath,      // deeplink-bas för öva-länkar
      mountId       // container-id
    } */
@@ -157,7 +159,10 @@
     // Förmåge-dimensionen: belief-only-förmågor (modulen) + alla i-scope lövnoder som bär
     // KOMMUNIKATION/PROBLEM, tvärsöver områden.
     function formageRader(){
-      var rader = FORMAGA_ROWS.map(function(f){ return { id:f.id, namn:f.namn, roll:'karna', evidens:null, kalla:'formaga', formaga:f.formaga, omrade:f.omrade, beliefOnly:true }; });
+      // config.formagaEvidens (opt-in): läs evidens för belief-only-förmågorna ur mastery
+      // (t.ex. likhetstecknet, loggat av prob-rutan → MasteryK2). Utan flaggan (sjuan) = null,
+      // dvs ren belief-rad → byte-identiskt. Åttan skickar den → evidensen visas bredvid.
+      var rader = FORMAGA_ROWS.map(function(f){ return { id:f.id, namn:f.namn, roll:'karna', evidens: config.formagaEvidens ? evidensK2(f.id) : null, kalla:'formaga', formaga:f.formaga, omrade:f.omrade, beliefOnly: !config.formagaEvidens }; });
       TAX.filter(function(n){ return n.niva === 'lovnod' && arFormaga(n); }).forEach(function(n){
         var sc = scopeAv(n, PREF); if(!sc.inScope) return;
         var omr = omradeAv(n);
