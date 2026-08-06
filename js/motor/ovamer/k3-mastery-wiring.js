@@ -20,7 +20,8 @@
   'use strict';
   // Nod → [område, grupp]. En rad = en wirad generator (belägg: oppnaGrupp, ak7-k3-ram.html).
   var DEEPLINK = {
-    'alg-tolka:begrepp': ['uttryck', 'tolka']        // tolkaEngine (ovamer-k3.js:66)
+    'alg-tolka:begrepp':         ['uttryck', 'tolka'],     // tolkaEngine    (ovamer-k3.js:66)
+    'alg-skriva:kommunikation':  ['uttryck', 'skriva']     // skrivaEngine   (ovamer-k3.js:723)
   };
 
   function aktuellNod(){
