@@ -20,7 +20,8 @@
   'use strict';
   // Nod → FLIKAR-index. En rad = en wirad ekvationstyp (belägg: FLIKAR, ekvationer-balans.js:190-198).
   var SEKTION = {
-    'alg-ekv-ensidig:rakna': 1     // FLIKAR[1] = "Grunderna" (niva 0, ensidig)
+    'alg-ekv-ensidig:rakna': 1,    // FLIKAR[1] = "Grunderna" (niva 0, ensidig)
+    'alg-ekv-badaled:rakna': 2     // FLIKAR[2] = "Variabel i båda leden" (niva 1)
   };
 
   function aktuellNod(){
