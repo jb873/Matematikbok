@@ -62,11 +62,11 @@
       KAN(fr(1,5) + ' ÷ 6', [1,30], [{ t:'b', fin: BR(1,30) }]),
       KAN(fr(1,7) + ' ÷ 8', [1,56], [{ t:'b', fin: BR(1,56) }])
     ]),
-    G('Beräkna med metoden förlänga – visa mellanled, svara i enklaste form', [
-      KAN(fr(4,5) + ' ÷ ' + fr(2,3), [6,5], [{ t:'p' }, { t:'m', fin: MI(1,1,5) }]),
-      KAN(fr(3,4) + ' ÷ ' + fr(5,6), [9,10], [{ t:'p' }, { t:'b', fin: BR(9,10) }]),
-      KAN(fr(3,5) + ' ÷ ' + fr(2,7), [21,10], [{ t:'p' }, { t:'m', fin: MI(2,1,10) }])
-    ], 'Förläng så nämnaren blir 1 → täljaren blir (täljare·inverterade nämnaren). Skriv produkten i mellanledet.'),
+    G('Beräkna med metoden förlänga – visa mellanledet som staplat bråk, svara i enklaste form', [
+      KAN(fr(4,5) + ' ÷ ' + fr(2,3), [6,5], [{ t:'kb' }, { t:'m', fin: MI(1,1,5) }]),
+      KAN(fr(3,4) + ' ÷ ' + fr(5,6), [9,10], [{ t:'kb' }, { t:'b', fin: BR(9,10) }]),
+      KAN(fr(3,5) + ' ÷ ' + fr(2,7), [21,10], [{ t:'kb' }, { t:'m', fin: MI(2,1,10) }])
+    ], 'Skriv divisionen som ett staplat bråk och förläng täljare OCH nämnare med nämnarens invers, så nämnaren blir 1. Då står det som kvar är täljaren · inverterade nämnaren – det är därför invertera fungerar.'),
     G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', [
       KAN(fr(3,5) + ' ÷ ' + fr(6,7), [7,10], [{ t:'p' }, { t:'b', fin: BR(7,10) }]),
       KAN(fr(5,6) + ' ÷ ' + fr(3,8), [20,9], [{ t:'p' }, { t:'m', fin: MI(2,2,9) }]),
@@ -120,12 +120,13 @@
         var ok = true;
         r.cells.forEach(function(c, i){
           if(c.t === 'i'){ if(!LR.finalCheck(LR.finalForm(exprOf(el, 'k' + i)), c.fin)) ok = false; }
+          else if(c.t === 'kb'){ if(!likhet(LR.mixedEval(exprOf(el, 'k' + i)), r.v)) ok = false; }  // komplex-bråk = ett led, rättas på VÄRDE
           else { var rd = bread(el, 'k' + i); if(!likhet(rd.num, r.v)) ok = false; if(c.fin && !finOk(rd, c.fin)) ok = false; }
         });
         return { ok: ok, facit: 'svar: ' + finText(r.cells[r.cells.length - 1].fin) };
       });
       var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
-      r.cells.forEach(function(c, i){ html += EQS + (c.t === 'i' ? AK8_UI.ansCell('k' + i) : bcell('k' + i, c.t === 'm')); });
+      r.cells.forEach(function(c, i){ html += EQS + (c.t === 'i' ? AK8_UI.ansCell('k' + i) : c.t === 'kb' ? AK8_UI.komplexBrakCell('k' + i) : bcell('k' + i, c.t === 'm')); });
       return html + '</div>';
     }
     // equality — delad kedje-helper
@@ -142,7 +143,7 @@
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
       + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
-    html += AK8_UI.keypadHTML({ builders: true, ops: ['+', '−', '·', '/', ','] });
+    html += AK8_UI.keypadHTML({ builders: true, komplex: true, ops: ['+', '−', '·', '/', ','] });
     mount.innerHTML = html;
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };

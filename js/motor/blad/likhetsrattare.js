@@ -35,6 +35,12 @@
           else if(c === '='){ toks.push({ eq: true }); i++; }
           else { var m = /^\d*\.?\d+/.exec(s.slice(i)); if(m){ toks.push({ num: parseFloat(m[0]) }); i += m[0].length; } else i++; }
         }
+      } else if(ch.classList.contains('ovn-kbrak')){
+        // Staplat komplex-bråk: täljare/nämnare är nästlade uttrycks-celler → rekursera tokens+evalSeg
+        // in i dem och lägg värdet som ett bråk-token. (Additivt; platta .ovn-brak orörda.)
+        var top = ch.querySelector('.ovn-kbrak-topp .ak8-expr'), bot = ch.querySelector('.ovn-kbrak-botten .ak8-expr');
+        var tv = top ? evalSeg(tokens(top)) : NaN, bv = bot ? evalSeg(tokens(bot)) : NaN;
+        toks.push({ frac: (isFinite(tv) && isFinite(bv) && bv !== 0) ? tv / bv : NaN, t: tv, n: bv });
       } else if(ch.classList.contains('ovn-brak')){
         var t = pNum(ch.querySelector('.ak8-frt').value), n = pNum(ch.querySelector('.ak8-frn').value);
         toks.push({ frac: (isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN, t: t, n: n });

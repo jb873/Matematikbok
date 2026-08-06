@@ -76,12 +76,27 @@
   function fracHTML(){ return '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn" inputmode="text" autocomplete="off"></span></span>'; }
   function potHTML(){ return '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" inputmode="text" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"></sup></span>'; }
   function ansCell(role, ph){ return '<span class="ak8-cell" data-r="' + role + '"><span class="ak8-expr">' + txtHTML(ph) + '</span></span>'; }
+  // ── STAPLAT KOMPLEX-BRÅK (DELAD byggsten) — ett bråk vars täljare OCH nämnare själva är
+  //    uttrycks-celler (nästlade .ak8-expr). Låter förlänga-metoden VISA att nämnaren blir 1.
+  //    Återanvänds i algebrans division av rationella uttryck + nian. Additivt: befintliga
+  //    .ovn-brak-celler orörda. Serialisering/tokenisering rekurserar in i de nästlade cellerna. ──
+  function kbSubExpr(){ return '<span class="ak8-expr ak8-kbsub">' + fracHTML() + txtHTML() + '</span>'; }
+  function komplexBrakHTML(){
+    return '<span class="ovn-kbrak">'
+      + '<span class="ovn-kbrak-topp">' + kbSubExpr() + '</span>'
+      + '<span class="ovn-kbrak-streck"></span>'
+      + '<span class="ovn-kbrak-botten">' + kbSubExpr() + '</span>'
+      + '</span>';
+  }
+  // En hel svarscell (data-r) vars uttryck ÄR ett komplex-bråk (för mellanled i förlänga-metoden).
+  function komplexBrakCell(role){ return '<span class="ak8-cell" data-r="' + role + '"><span class="ak8-expr ak8-kbwrap">' + komplexBrakHTML() + '</span></span>'; }
   function exprSerialize(expr){
     var s = '';
     Array.prototype.forEach.call(expr.children, function(ch){
       if(ch.classList.contains('ak8-exprtxt')) s += ch.value;
       else if(ch.classList.contains('ovn-brak')) s += '(' + ch.querySelector('.ak8-frt').value + '/' + ch.querySelector('.ak8-frn').value + ')';
       else if(ch.classList.contains('ak8-pot')){ var b = pNum(ch.querySelector('.ak8-pbase').value), e = evalArith(ch.querySelector('.ak8-pexp').value); s += '(' + ((isFinite(b) && isFinite(e)) ? Math.pow(b, e) : 'NaN') + ')'; }
+      else if(ch.classList.contains('ovn-kbrak')){ var top = ch.querySelector('.ovn-kbrak-topp .ak8-expr'), bot = ch.querySelector('.ovn-kbrak-botten .ak8-expr'); s += '((' + (top ? exprSerialize(top) : '') + ')/(' + (bot ? exprSerialize(bot) : '') + '))'; }
     });
     return s;
   }
@@ -103,8 +118,9 @@
     var expr = active.closest('.ak8-expr'); if(!expr) return null;
     var slot = active; while(slot.parentNode && slot.parentNode !== expr) slot = slot.parentNode;
     if(slot.parentNode !== expr) return null;
-    slot.insertAdjacentHTML('afterend', (kind === 'frac' ? fracHTML() : potHTML()) + txtHTML());
-    return slot.nextElementSibling.querySelector('input');
+    var widget = kind === 'frac' ? fracHTML() : kind === 'pot' ? potHTML() : komplexBrakHTML();
+    slot.insertAdjacentHTML('afterend', widget + txtHTML());
+    return slot.nextElementSibling.querySelector('input');   // kbrak → första nästlade rutan (topp-bråkets täljare)
   }
   function removeWidgetIfEmpty(active){
     if(active.value !== '' || !/ak8-(frt|frn|pbase|pexp)/.test(active.className)) return null;
@@ -129,6 +145,8 @@
   // ── KEYPAD ──  opts: { ops:[...], builders:bool }
   var FRAC_ICON = '<span class="kp-frac"><span class="kp-frac-t"></span><span class="kp-frac-l"></span><span class="kp-frac-n"></span></span>';
   var POT_ICON = '<span class="kp-pot"><span class="kp-pot-b"></span><span class="kp-pot-e"></span></span>';
+  // Staplat komplex-bråk: två små bråk-glyfer kring ett tjockt streck (delad byggsten).
+  var KBRAK_ICON = '<span class="kp-kbrak"><span class="kp-kbrak-f"></span><span class="kp-kbrak-l"></span><span class="kp-kbrak-f"></span></span>';
   function keypadHTML(opts){
     opts = opts || {}; var ops = opts.ops || ['+', '−', '·', '/'];
     var digits = ['7','8','9','4','5','6','1','2','3'], html = '<div class="keypad"><div class="keypad-digits">';
@@ -136,7 +154,12 @@
     html += '<button type="button" class="kp-key span2" data-key="0">0</button>';
     html += '<button type="button" class="kp-key util" data-key="back">⌫</button></div>';
     if(ops.length){ html += '<div class="keypad-ops">'; for(var j = 0; j < ops.length; j++) html += '<button type="button" class="kp-key op" data-key="' + ops[j] + '">' + ops[j] + '</button>'; html += '</div>'; }
-    if(opts.builders){ html += '<div class="keypad-ops"><button type="button" class="kp-key op kp-fracbtn" data-key="frac" title="Bygg stående bråk">' + FRAC_ICON + '</button><button type="button" class="kp-key op kp-potbtn" data-key="pot" title="Bygg potens: bas och exponent">' + POT_ICON + '</button></div>'; }
+    if(opts.builders){
+      html += '<div class="keypad-ops"><button type="button" class="kp-key op kp-fracbtn" data-key="frac" title="Bygg stående bråk">' + FRAC_ICON + '</button><button type="button" class="kp-key op kp-potbtn" data-key="pot" title="Bygg potens: bas och exponent">' + POT_ICON + '</button>'
+        // komplex:true (opt-in) → knappen för staplat komplex-bråk. Utelämnad = befintlig keypad byte-identisk.
+        + (opts.komplex ? '<button type="button" class="kp-key op kp-kbrakbtn" data-key="kbrak" title="Bygg staplat komplex-bråk (bråk i täljare och nämnare)">' + KBRAK_ICON + '</button>' : '')
+        + '</div>';
+    }
     return html + '</div>';
   }
   function printKnappHTML(){ return '<button type="button" class="ovn-skriv-ut" data-print>↗ Skriv ut bladet</button>'; }
@@ -167,7 +190,7 @@
         e.preventDefault();
         if(!active || active.disabled){ var first = mount.querySelector('input:not([disabled])'); if(first) active = first; else return; }
         var k = btn.dataset.key;
-        if(k === 'frac' || k === 'pot'){ var f = insertWidget(active, k); if(f){ active = f; f.focus(); var xp = f.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); } return; }
+        if(k === 'frac' || k === 'pot' || k === 'kbrak'){ var f = insertWidget(active, k); if(f){ active = f; f.focus(); var xp = f.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); } return; }
         if(k === 'back'){ var moved = removeWidgetIfEmpty(active); if(moved){ active = moved; moved.focus(); return; } active.value = active.value.slice(0, -1); }
         else { active.value += k; }
         active.dispatchEvent(new Event('input', { bubbles:true }));
@@ -209,6 +232,7 @@
     pNum: pNum, evalArith: evalArith, inTal: inTal,
     gruppRubrik: gruppRubrik, injLabel: injLabel, renderGrupp: renderGrupp,
     grow: grow, ansCell: ansCell, cellRead: cellRead, exprSerialize: exprSerialize,
+    komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
     markera: markera, rensaRad: rensaRad
