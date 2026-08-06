@@ -1,0 +1,80 @@
+<!doctype html><meta charset="utf-8">
+<title>k3 mastery rök-vakt</title>
+<h1 style="font:16px monospace">k3 MasteryK3-loggnings-vakt</h1>
+<pre id="out" style="font:13px monospace;white-space:pre-wrap">KÖR…</pre>
+<iframe id="f" style="width:1000px;height:820px;border:1px solid #ccc"></iframe>
+<script>
+/* REGRESSIONS-VAKT (körs innan varje ny k3-drill byggs — se MELLANLED-REGISTER-k3.md).
+   Driver ett RÄTT svar i var och en av de fyra ovamer-k3-engines via deeplinken och failar om:
+     • noden inte fick EXAKT ETT event (signal borta → tyst loggnings-död), eller
+     • noden fick FLERA event per försök (#fb dubbelfyrar → överräkning), eller
+     • #fb.ex-feedback aldrig blev .correct (svaret togs inte / signalen ändrad).
+   Kör: chrome --headless --dump-dom js/motor/ovamer/k3-mastery-vakt.html | grep RESULTAT */
+var BAS='file:///c:/Arkiv%20-%20webbbok/Matematik/ak7-k3-ram.html';
+var TESTER=[
+  { nod:'alg-tolka:begrepp',        q:'?ko=alg-tolka&formaga=begrepp',        kat:'varde', solve:solveVarde },
+  { nod:'alg-skriva:kommunikation', q:'?ko=alg-skriva&formaga=kommunikation', kat:'text',  solve:solveSkriva },
+  { nod:'alg-berakna:rakna',        q:'?ko=alg-berakna&formaga=rakna',         kat:null,    solve:solveAttribut },
+  { nod:'alg-samla:rakna',          q:'?ko=alg-samla&formaga=rakna',           kat:'en',    solve:solveForenklaEn }
+];
+var f=document.getElementById('f'), out=[], fel=0, ti=0;
+function doc(){return f.contentDocument;} function win(){return f.contentWindow;}
+function log(s){ out.push(s); document.getElementById('out').textContent=out.join('\n'); }
+function fail(s){ fel++; log('  ✗ '+s); }
+
+// ── svars-lösare per engine ──
+function solveVarde(){ var t=fragaTxt(); var mn=t.match(/köper (\d+)[^0-9]+(\d+)/), mab=t.match(/a = (\d+) och b = (\d+)/);
+  if(!mn||!mab) return null; doc().getElementById('svar').value=String(+mn[1]*+mab[1]+ +mn[2]*+mab[2]); return true; }
+function solveSkriva(){ var t=fragaTxt(); var v=(t.match(/har ([xay]) /)||t.match(/är ([xay]) år/)||[])[1]; if(!v) return null; var m,a;
+  if((m=t.match(/får (\d+) till/)))a=v+'+'+m[1]; else if((m=t.match(/ger bort (\d+)/)))a=v+'-'+m[1];
+  else if((m=t.match(/(\d+) gånger så många/)))a=m[1]+v; else if(/hälften så många/.test(t))a=v+'/2';
+  else if((m=t.match(/(\d+) år äldre/)))a=v+'+'+m[1]; else if((m=t.match(/dubbelt så gammalt plus (\d+)/)))a='2'+v+'+'+m[1];
+  else if((m=t.match(/(\d+) fler.*tillsammans/)))a='2'+v+'+'+m[1]; else return null;
+  doc().getElementById('svar').value=a; return true; }
+function solveAttribut(){ var inps=[].slice.call(doc().querySelectorAll('.ex-in')); if(inps.length<2) return null;
+  inps.forEach(function(inp){ if(inp.dataset.form!==undefined) inp.value=decodeURIComponent(inp.dataset.form).split('|')[0];
+    else if(inp.dataset.svar!==undefined) inp.value=inp.dataset.svar; inp.dispatchEvent(new (win().Event)('input',{bubbles:true})); }); return true; }
+function solveForenklaEn(){ var fr=doc().querySelector('.ex-fraga.ex-num'); if(!fr) return null; var t=fr.textContent;
+  var v=(t.match(/[xya]/)||[])[0]; if(!v) return null; var re=new RegExp('(\\d*)'+v,'g'),m,sum=0; while((m=re.exec(t)))sum+=(m[1]===''?1:+m[1]);
+  doc().getElementById('svar').value=sum+v; return true; }
+function fragaTxt(){ var s=''; [].forEach.call(doc().querySelectorAll('.ex-fraga'),function(d){s+=' '+d.textContent;}); return s; }
+
+function poll(test,run,n){ var ok=false; try{ok=test();}catch(e){}
+  if(ok){run();return;} if(n>90){ fail('TIMEOUT'); nextTest(); return; } setTimeout(function(){poll(test,run,n+1);},80); }
+function korTest(){
+  if(ti>=TESTER.length){ finish(); return; }
+  var T=TESTER[ti]; log('• '+T.nod);
+  try{ win().localStorage.removeItem('k3.algebra.mastery.v1'); }catch(e){}
+  f.src=BAS+T.q;
+  f.onload=function(){
+    try{ win().localStorage.removeItem('k3.algebra.mastery.v1'); }catch(e){}
+    if(T.kat){ poll(function(){return !!doc().querySelector('[data-kat="'+T.kat+'"]');}, function(){
+      doc().querySelector('[data-kat="'+T.kat+'"]').click(); tillDrill(T); }, 0); }
+    else tillDrill(T);
+  };
+}
+function tillDrill(T){
+  poll(function(){ return !!doc().getElementById('check') && (doc().getElementById('svar')||doc().querySelector('.ex-in[data-svar]')); },
+    function(){
+      var r=T.solve(); if(r===null){ fail('kunde ej lösa uppgiften (parse)'); nextTest(); return; }
+      if(doc().getElementById('svar')) doc().getElementById('svar').dispatchEvent(new (win().Event)('input',{bubbles:true}));
+      doc().getElementById('check').click();
+      poll(function(){ var fb=doc().getElementById('fb'); return fb&&(fb.classList.contains('correct')||fb.classList.contains('wrong')); },
+        function(){
+          var fb=doc().getElementById('fb'), ratt=fb.classList.contains('correct');
+          if(!ratt){ fail('#fb blev "wrong" — rök-vakten kunde inte svara rätt (kolla svars-lösaren) eller rättningen ändrad'); }
+          setTimeout(function(){
+            var mtx=win().MasteryK3.lasMatris(), ev=mtx[T.nod]||[], keys=Object.keys(mtx);
+            if(ev.length===0){ fail('SIGNAL BORTA: noden fick 0 event (#fb-signalen sätts inte längre → tyst loggnings-död)'); }
+            else if(ev.length>1){ fail('DUBBELFYR: noden fick '+ev.length+' event på ETT försök (#fb fyrar flera ggr → överräkning)'); }
+            else if(keys.length!==1||keys[0]!==T.nod){ fail('FEL NOD: matris-nycklar=['+keys.join(',')+']'); }
+            else log('  ✓ exakt 1 event, rätt nod, resultat='+ev[0].resultat);
+            nextTest();
+          }, 140);
+        }, 0);
+    }, 0);
+}
+function nextTest(){ ti++; korTest(); }
+function finish(){ log('\nRESULTAT: '+(fel===0?'✅ ALLA 4 ENGINES PASS — loggnings-signalen intakt':'❌ '+fel+' FEL — se ovan')); }
+korTest();
+</script>

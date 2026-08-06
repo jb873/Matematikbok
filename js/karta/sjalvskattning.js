@@ -100,6 +100,21 @@
         { key:'lana',     namn:'Låna: gör om ett heltal till bråk' }
       ] },
 
+      // ── k3 algebra (öva-mer-motorerna loggar grovt per grupp → belief finare per kategori, väg 2).
+      //    Bara noder som lever i område-sektionerna (raderFor) expanderas; KOMMUNIKATION/PROBLEM-
+      //    lyfta noder (skriva, Del5, mönster-uttryck) ligger i förmåge-dimensionen och splittas ej här. ──
+      'alg-tolka:begrepp': { vantar:true, rader:[
+        { key:'bild',  namn:'Tolka ur bild' },
+        { key:'varde', namn:'Sätt in värdet' },
+        { key:'skriv', namn:'Skriv eget uttryck' }
+      ] },
+      'alg-samla:rakna': { vantar:true, rader:[
+        { key:'en',      namn:'En variabel' },
+        { key:'tva',     namn:'Två variabler' },
+        { key:'omkrets', namn:'Omkrets' },
+        { key:'brak',    namn:'Med division' }
+      ] },
+
       // ── k1 räknelagar + metod-noder (VÄG 1) ──────────────────────────────
       // vag1: egen evidensnyckel koId:key — äkta per-variant-evidens (drillen loggar
       //       per kategori via deeplinkarna i ramens OVNING_RENDERS). Ingen delad evidens.

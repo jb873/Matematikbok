@@ -87,6 +87,20 @@
 
 ---
 
+## REGRESSIONS-VAKT (körs INNAN varje ny k3-drill byggs)
+
+k3:s loggning hänger på en DOM-signal — `#fb.ex-feedback → .correct/.wrong`, satt exakt en gång per försök (`ovamer-k3.js:134/338/541/814`). Den är skörare än en Proxy: ändras signalen tystnar loggningen utan synligt fel, och kartan ljuger då "aldrig övat".
+
+**Vakt:** [js/motor/ovamer/k3-mastery-vakt.html](js/motor/ovamer/k3-mastery-vakt.html) — driver ett RÄTT svar i var och en av de fyra engines (tolka/skriva/berakna/forenkla) och failar om noden fick 0 event (signal borta), >1 event (dubbelfyr/överräkning) eller fel nod.
+
+**Kör:**
+```
+"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless --disable-gpu --no-sandbox \
+  --allow-file-access-from-files --virtual-time-budget=90000 --dump-dom \
+  "file:///c:/Arkiv - webbbok/Matematik/js/motor/ovamer/k3-mastery-vakt.html" | grep RESULTAT
+```
+Grönt = `RESULTAT: ✅ ALLA 4 ENGINES PASS`. **Kör detta innan du rör ovamer-k3.js eller bygger en ny k3-drill** — och lägg till en rad i vaktens `TESTER` för varje ny wirad generator.
+
 ## SAMMANFATTNING — vad varje kommande order MÅSTE hedra
 
 - **Tre distinkta rättnings-familjer:**

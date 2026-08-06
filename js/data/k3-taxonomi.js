@@ -137,7 +137,7 @@ window.K3_TAXONOMI = {
       "id": "alg-forenkla", "namn": "Förenkla uttryck", "parent": null, "niva": "omrade",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Förenkla uttryck med en eller flera variabler. Parenteser som fördjupning.",
-      "grupp": "algebra", "implemented": false,
+      "grupp": "algebra", "implemented": true,
       "delatMed": {
         "kalla": "k2-taxonomi", "riktning": "k2→k3", "hemvist": true,
         "beskrivning": "k3 är hemvist (arbete med variabler = algebra). k2:s fördjupnings-nod speglar denna färdighet och ska FORTSÄTTA synas i bråkkapitlet (extra träning). Reciprok pekare hör i k2 (ändras ej i denna order). Nyckeln 'speglasAv' (INTE 'noder') används med flit → självskattningsmodulen pull-in:ar inte k2-noderna i k3-vyn.",
