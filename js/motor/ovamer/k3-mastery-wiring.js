@@ -22,7 +22,8 @@
   var DEEPLINK = {
     'alg-tolka:begrepp':         ['uttryck', 'tolka'],     // tolkaEngine    (ovamer-k3.js:66)
     'alg-skriva:kommunikation':  ['uttryck', 'skriva'],    // skrivaEngine   (ovamer-k3.js:723)
-    'alg-berakna:rakna':         ['uttryck', 'berakna']    // beraknaEngine  (ovamer-k3.js:258)
+    'alg-berakna:rakna':         ['uttryck', 'berakna'],   // beraknaEngine  (ovamer-k3.js:258)
+    'alg-samla:rakna':           ['uttryck', 'forenkla']   // forenklaEngine (ovamer-k3.js:462) — Del3-sidan saknas, wirad mot ramen
   };
 
   function aktuellNod(){
