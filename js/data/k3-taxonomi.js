@@ -137,7 +137,12 @@ window.K3_TAXONOMI = {
       "id": "alg-forenkla", "namn": "Förenkla uttryck", "parent": null, "niva": "omrade",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Förenkla uttryck med en eller flera variabler. Parenteser som fördjupning.",
-      "grupp": "algebra", "implemented": false
+      "grupp": "algebra", "implemented": false,
+      "delatMed": {
+        "kalla": "k2-taxonomi", "riktning": "k2→k3", "hemvist": true,
+        "beskrivning": "k3 är hemvist (arbete med variabler = algebra). k2:s fördjupnings-nod speglar denna färdighet och ska FORTSÄTTA synas i bråkkapitlet (extra träning). Reciprok pekare hör i k2 (ändras ej i denna order). Nyckeln 'speglasAv' (INTE 'noder') används med flit → självskattningsmodulen pull-in:ar inte k2-noderna i k3-vyn.",
+        "speglasAv": ["fordjup-variabler:rakna"]
+      }
     },
     {
       "id": "alg-samla", "namn": "Samla lika termer", "parent": "alg-forenkla", "niva": "deldoman",
@@ -255,7 +260,12 @@ window.K3_TAXONOMI = {
       "id": "alg-fordjup", "namn": "Fördjupning", "parent": null, "niva": "omrade",
       "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
       "begrepp": "Utmaningar och fördjupande uppgifter – bl.a. faktorisera, bryta ut och konjugatregeln (knyter till k2:s fördjupnings-strand).",
-      "grupp": "algebra", "implemented": false
+      "grupp": "algebra", "implemented": false,
+      "delatMed": {
+        "kalla": "k2-taxonomi", "riktning": "k2→k3", "hemvist": true,
+        "beskrivning": "k3 är hemvist för faktorisera/bryta ut/konjugatregeln (algebra). k2:s ★-noder speglar dem och ska FORTSÄTTA synas i bråkkapitlets fördjupning. NÄR dessa får drillar ska de ha MELLANLED — metodstegen är kärnan, svaret utan vägen är värdelöst (se MELLANLED-REGISTER-k3.md). 'speglasAv' (ej 'noder') → ingen pull-in i k3-vyn.",
+        "speglasAv": ["fordjup-brytut:resonera", "fordjup-brytut:konjugat"]
+      }
     },
 
     /* ═══════════════ Del 7 · Plugg till prov (öppet; repetition) ═══════════════
