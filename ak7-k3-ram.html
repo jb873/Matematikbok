@@ -445,10 +445,13 @@ var VAROR = [
 // [motorerna utbrutna till js/motor/ovamer/ovamer-k3.js — laddas via <script src>]
 
 // ============================================================
-// START
+// START — översikt om ingen deeplink; ?ko=&formaga= öppnas av k3-mastery-wiring.js (laddas sist)
 // ============================================================
-renderOversikt();
+if(!/[?&]ko=[^&\s]/i.test(location.search)) renderOversikt();
 </script>
 <script src="js/motor/ovamer/ovamer-k3.js"></script>
+<!-- MasteryK3-loggning (elev-lokal, localStorage) + deeplink-router. Observerar #fb; rör ej motorn. -->
+<script src="js/mastery-k3.js"></script>
+<script src="js/motor/ovamer/k3-mastery-wiring.js"></script>
 </body>
 </html>
