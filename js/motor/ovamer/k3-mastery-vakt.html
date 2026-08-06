@@ -42,7 +42,7 @@ function fragaTxt(){ var s=''; [].forEach.call(doc().querySelectorAll('.ex-fraga
 function poll(test,run,n){ var ok=false; try{ok=test();}catch(e){}
   if(ok){run();return;} if(n>90){ fail('TIMEOUT'); nextTest(); return; } setTimeout(function(){poll(test,run,n+1);},80); }
 function korTest(){
-  if(ti>=TESTER.length){ finish(); return; }
+  if(ti>=TESTER.length){ balansTest(); return; }
   var T=TESTER[ti]; log('• '+T.nod);
   try{ win().localStorage.removeItem('k3.algebra.mastery.v1'); }catch(e){}
   f.src=BAS+T.q;
@@ -75,6 +75,33 @@ function tillDrill(T){
     }, 0);
 }
 function nextTest(){ ti++; korTest(); }
-function finish(){ log('\nRESULTAT: '+(fel===0?'✅ ALLA 4 ENGINES PASS — loggnings-signalen intakt':'❌ '+fel+' FEL — se ovan')); }
+
+// ── BALANSMETODEN (Del4, egen sida + egen signal .uppg-klar.show). En LÖST ekvation = ETT event. ──
+function balansTest(){
+  log('• alg-ekv-ensidig:rakna (balansmetoden)');
+  try{ win().localStorage.removeItem('k3.algebra.mastery.v1'); }catch(e){}
+  f.src='file:///c:/Arkiv%20-%20webbbok/Matematik/ak7/k3/d4-ekvationer/index.html?ko=alg-ekv-ensidig&formaga=rakna';
+  f.onload=function(){ try{win().localStorage.removeItem('k3.algebra.mastery.v1');}catch(e){}
+    poll(function(){return !!doc().querySelector('.uppgift .seg-text');}, solveBalans, 0); };
+}
+function solveBalans(){
+  var u0=win().uppgifter[0], sol=u0.startEkv.B/u0.startEkv.A, uA=doc().querySelectorAll('.uppgift')[0];
+  function s(i,v){ i.value=v; i.dispatchEvent(new (win().Event)('input',{bubbles:true})); }
+  s(uA.querySelector('.sida-vl .seg-text'),'x'); s(uA.querySelector('.sida-hl .seg-text'),String(sol));
+  [].slice.call(doc().querySelectorAll('#actions .btn')).filter(function(b){return /Kontrollera/.test(b.textContent);})[0].click();
+  setTimeout(function(){
+    var klar=uA.querySelector('.uppg-klar').classList.contains('show'), radOk=uA.querySelectorAll('.rad-ok').length;
+    setTimeout(function(){
+      var mtx=win().MasteryK3.lasMatris(), ev=mtx['alg-ekv-ensidig:rakna']||[], keys=Object.keys(mtx);
+      if(!klar){ fail('.uppg-klar.show sattes inte — löst-signalen ändrad'); }
+      else if(ev.length===0){ fail('SIGNAL BORTA: 0 event trots löst ekvation'); }
+      else if(ev.length>1){ fail('PER-RAD-LÄCKAGE: '+ev.length+' event för EN löst ekvation ('+radOk+' rader → ska ge 1)'); }
+      else if(keys.length!==1||keys[0]!=='alg-ekv-ensidig:rakna'){ fail('FEL NOD: ['+keys.join(',')+']'); }
+      else log('  ✓ en löst ekvation → exakt 1 event, rätt nod ('+radOk+' rad-ok ignorerade)');
+      finish();
+    },150);
+  },220);
+}
+function finish(){ log('\nRESULTAT: '+(fel===0?'✅ ALLA 5 (4 engines + balansmetoden) PASS — loggnings-signalerna intakta':'❌ '+fel+' FEL — se ovan')); }
 korTest();
 </script>

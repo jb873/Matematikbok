@@ -91,7 +91,7 @@
 
 k3:s loggning hänger på en DOM-signal — `#fb.ex-feedback → .correct/.wrong`, satt exakt en gång per försök (`ovamer-k3.js:134/338/541/814`). Den är skörare än en Proxy: ändras signalen tystnar loggningen utan synligt fel, och kartan ljuger då "aldrig övat".
 
-**Vakt:** [js/motor/ovamer/k3-mastery-vakt.html](js/motor/ovamer/k3-mastery-vakt.html) — driver ett RÄTT svar i var och en av de fyra engines (tolka/skriva/berakna/forenkla) och failar om noden fick 0 event (signal borta), >1 event (dubbelfyr/överräkning) eller fel nod.
+**Vakt:** [js/motor/ovamer/k3-mastery-vakt.html](js/motor/ovamer/k3-mastery-vakt.html) — driver ett RÄTT svar i var och en av de fyra engines (tolka/skriva/berakna/forenkla) **+ balansmetoden** (Del4, egen sida + egen signal `.uppg-klar.show`) och failar om noden fick 0 event (signal borta), >1 event (dubbelfyr / **per-rad-läckage** för balansmetoden) eller fel nod. Balansmetod-testet bevakar särskilt att EN löst ekvation ger ETT event, inte ett per rad.
 
 **Kör:**
 ```
