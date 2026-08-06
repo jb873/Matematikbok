@@ -7,6 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<!-- Provbyggaren (delad modul) + algebra-taxonomin (för väljaren). Motorn orörd; content nedan. -->
+<link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
+<script src="js/provbyggare/provbyggar-motor.js"></script>
+<script src="js/data/k3-taxonomi.js"></script>
+<script src="js/mastery-k3.js"></script>
 <style>
 :root{
   --primary:#B45309; --primary-soft:#FED7AA; --primary-bg:#FFF7ED;
@@ -445,13 +450,90 @@ var VAROR = [
 // [motorerna utbrutna till js/motor/ovamer/ovamer-k3.js — laddas via <script src>]
 
 // ============================================================
-// START — översikt om ingen deeplink; ?ko=&formaga= öppnas av k3-mastery-wiring.js (laddas sist)
+// PROVBYGGAREN — delad ProvbyggarMotor monterad med k3-config. Motorn (och drillarna) ORÖRDA;
+// generatorerna nedan SPEGLAR drillarnas rättningsprincip, lånar ingen drill-kod.
 // ============================================================
-if(!/[?&]ko=[^&\s]/i.test(location.search)) renderOversikt();
+var G = ProvbyggarMotor.gen;
+function rI(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+function rP(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+var K3_TEST_GENERATORS = {
+  // Del1 · Tolka uttryck — värde-varianten (ordproblem → tal). Speglar genTolkaVarde (plain numeric).
+  'alg-tolka': { snabb: [ G.numeric('k3-tolka-varde', 'Tolka uttryck – sätt in värdet', 'alg-tolka', function(){
+    var VAROR = [['glass','glassar'],['läsk','läsk'],['munk','munkar'],['pizza','pizzor'],['äpple','äpplen'],['banan','bananer']];
+    var v1 = rP(VAROR), v2; do { v2 = rP(VAROR); } while(v2 === v1);
+    var n1 = rI(2,5), n2 = rI(2,5), a = rI(5,30), b = rI(5,30), svar = n1*a + n2*b;
+    return { key:'tv'+n1+'_'+n2+'_'+a+'_'+b+'_'+v1[0]+v2[0],
+      prompt:'En '+v1[0]+' kostar a kr och en '+v2[0]+' kostar b kr. Anna köper '+n1+' '+v1[1]+' och '+n2+' '+v2[1]+'. Hur mycket betalar hon om a = '+a+' och b = '+b+'?',
+      ans: svar, expl: n1+'·'+a+' + '+n2+'·'+b+' = '+(n1*a)+' + '+(n2*b)+' = '+svar+' kr.' };
+  }) ] },
+  // Del1 · Beräkna med uttryck — insättning MED numeriskt mellanled (led: produkten a·val, ≠ slutvärde).
+  // Speglar drillens insättnings-kedja (blad-k3-d1 flerled); rättas på VÄRDE per led + slutvärde.
+  'alg-berakna': { snabb: [ G.mellanledNum('k3-berakna', 'Beräkna med uttryck (visa mellanled)', 'alg-berakna', function(){
+    var v = rP(['x','y','a']), a = rI(2,9), val = rI(2,9), c = rI(1,9), plus = Math.random() < 0.5;
+    var prod = a*val, res = plus ? prod + c : prod - c;
+    if(res <= 0){ plus = true; res = prod + c; }   // håll svaret positivt (subtypen visar heltal)
+    return { key:'b'+a+v+(plus?'p':'m')+c+'_'+val,
+      prompt:'Beräkna '+a+v+' '+(plus?'+':'−')+' '+c+' när '+v+' = '+val+'. Räkna steg för steg.',
+      led:[ { fraga:a+' · '+val, varde: prod, facit: String(prod) } ],
+      slutVarde: res, slutHint: prod+(plus?' + ':' − ')+c,
+      expl: a+v+' '+(plus?'+':'−')+' '+c+' = '+a+'·'+val+' '+(plus?'+':'−')+' '+c+' = '+prod+(plus?' + ':' − ')+c+' = '+res+'.' };
+  }) ] }
+};
+var K3_GEN_NOD = {
+  'k3-tolka-varde': 'alg-tolka:begrepp',
+  'k3-berakna':     'alg-berakna:rakna'
+};
+
+// Provbyggarens 3-panels-skal i k3-ramens #app (mirror k2:s pbShell/pbShow/pbNav).
+var PB_SHELL = false;
+function pbShell(){
+  if(PB_SHELL) return;
+  var hero = document.getElementById('hero'); if(hero) hero.style.display = 'none';
+  app.innerHTML = '<div id="pb-host">'
+    + '<section class="pb-view" data-pbv="test-config"><div id="test-config-body"></div></section>'
+    + '<section class="pb-view" data-pbv="test-take" hidden><a href="#" class="hero-back" id="test-take-back">← Tillbaka till inställningar</a><div id="test-take-body"></div></section>'
+    + '<section class="pb-view" data-pbv="test-result" hidden><div id="test-result-body"></div></section>'
+    + '</div>';
+  PB_SHELL = true;
+}
+function pbShow(v){ var h = document.getElementById('pb-host'); if(!h) return;
+  h.querySelectorAll('.pb-view').forEach(function(el){ el.hidden = (el.dataset.pbv !== v); }); }
+function pbNav(view){
+  if(view === 'test-config' || view === 'test-take' || view === 'test-result'){
+    pbShell();
+    if(view === 'test-config') PB.render.config();
+    else if(view === 'test-take') PB.render.take();
+    else PB.render.result();
+  } else { PB_SHELL = false; renderOversikt(); }   // 'kapitel'/okänd → tillbaka till k3-översikten
+}
+window.navTo = pbNav;   // motorns resultat-/tillbaka-knappar (inline onclick="navTo(...)") refererar global navTo
+
+var PB = ProvbyggarMotor.montera({
+  taxonomi: function(){ return window.K3_TAXONOMI; },
+  mastery:  function(){ return window.MasteryK3; },
+  eyebrow:  'Kapitel 3 · Algebra',
+  bokDelkapitel: [
+    { del:'k3d1', titel:'Algebraiska uttryck' },
+    { del:'k3d3', titel:'Förenkla uttryck' }
+  ],
+  // 2 byggbara nu (tolka värde, beräkna m. mellanled). skriva/samla = "byggs" (har visning, saknar prov-generator);
+  // ekvation-noderna väntar på ekvation-kedja-sub-typen (visning:null → ej i väljaren, ej karta-klickbara heller).
+  generators: K3_TEST_GENERATORS, genNod: K3_GEN_NOD,
+  nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
+});
+
+// ============================================================
+// START — provbyggar-deeplink, ko-deeplink, annars översikt
+// ============================================================
+if(/[?&]view=test-config/i.test(location.search)){
+  var _mdel = location.search.match(/[?&]del=([a-z0-9]+)/i);
+  PB.setDel((_mdel && /^k3d/.test(_mdel[1])) ? _mdel[1] : null);
+  pbNav('test-config');
+} else if(!/[?&]ko=[^&\s]/i.test(location.search)){ renderOversikt(); }
 </script>
 <script src="js/motor/ovamer/ovamer-k3.js"></script>
-<!-- MasteryK3-loggning (elev-lokal, localStorage) + deeplink-router. Observerar #fb; rör ej motorn. -->
-<script src="js/mastery-k3.js"></script>
+<!-- MasteryK3-loggning (elev-lokal, localStorage) laddas i head; deeplink-router + #fb-observatör här. -->
 <script src="js/motor/ovamer/k3-mastery-wiring.js"></script>
 </body>
 </html>

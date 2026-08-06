@@ -101,6 +101,13 @@ k3:s loggning hänger på en DOM-signal — `#fb.ex-feedback → .correct/.wrong
 ```
 Grönt = `RESULTAT: ✅ ALLA 4 ENGINES PASS`. **Kör detta innan du rör ovamer-k3.js eller bygger en ny k3-drill** — och lägg till en rad i vaktens `TESTER` för varje ny wirad generator.
 
+## ALGEBRA-SKILLNADEN mot k2:s "ihåliga led"-regel (för ekvation-kedja)
+
+k2 gav regeln: *ett led måste ha ett värde som skiljer sig från indata för att vara meningsfullt* — ett rent förläng-led är ihåligt. **Den regeln gäller INTE rakt av i algebra.**
+
+- **Numeriskt mellanled (t.ex. insättning, alg-berakna):** regeln gäller — ledet ska bära ett *nytt* värde. `alg-berakna`-generatorn har därför led `a·val` (värde `prod`) skilt från slutvärdet `prod ± c` (fuzz: 0 ihåliga led). ✓
+- **Ekvations-kedja (balansmetoden, alg-ekv-*):** regeln gäller INTE. Raden som visar operationen på båda sidor — `3x + 5 − 5 = 20 − 5` — SER ihålig ut (samma lösning som indata), men är **själva beviset** att eleven förstått att man får göra samma sak på båda sidor. Den lösnings-bevarande raden är pedagogiskt det viktigaste steget i hela kapitlet. **Nästa order (`ekvation-kedja`) MÅSTE tillåta och belöna lösnings-bevarande led — mät dem INTE med bråk-måttet.** Rättningen ska vara `sammaLosning` per rad (balansmetodens kontrakt), inte "värdet ändrades".
+
 ## SAMMANFATTNING — vad varje kommande order MÅSTE hedra
 
 - **Tre distinkta rättnings-familjer:**
