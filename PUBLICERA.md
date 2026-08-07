@@ -6,18 +6,29 @@ En checklista för att publicera läromedlet så att elever kan öppna det i web
 
 ---
 
-## 0. NULÄGE (läs detta först)
+## 0. NULÄGE — "varför ser jag inte matematiken på GitHub?"
 
-Kontrollera i en terminal, stående i projektmappen (`c:\Arkiv - webbbok\Matematik`):
+Kort svar: **för att den aldrig lagts upp där.** Kontrollera själv i en terminal, stående i projektmappen (`c:\Arkiv - webbbok\Matematik`):
 
 ```
 git remote -v
 git branch --show-current
+git rev-list --count HEAD
 ```
 
-Per 2026-08: **ingen remote är inställd**, och branchen heter **`master`**. Det betyder att repot ännu **inte** är kopplat till GitHub, och **GitHub Pages är inte aktivt**. Det finns ingen publik URL än. Avsnitt 1 sätter upp det (görs **en gång**). Avsnitt 2 är den återkommande publiceringen.
+Per 2026-08 blir svaret: `git remote -v` är **tomt** (ingen remote), branchen heter **`master`**, och det finns **252 lokala commits** med full historik.
+
+Det betyder:
+
+- Du har ett komplett, versionshanterat projekt **på din egen disk** — inget är förlorat.
+- Men det är **inte kopplat till GitHub**. Det är inte privat, inte på ett annat konto, inte i en annan organisation — **det finns inget matematik-repo på GitHub alls.** Därför ser du bara Geografi- och Historiaboken; bara de har pushats. **Matematiken har aldrig varit publik.**
+- **Ingen elev har någonsin laddat sidan** → ingen elev-IP har gått till Google. Font-CDN-fixen var därför inte brådskande — men den är redan gjord och committad, så den följer med i första pushen (fonterna självhostas i `fonts/`).
+
+Avsnitt 1 lägger upp projektet på GitHub (görs **en gång** — det är det du saknar). Avsnitt 2 är den återkommande publiceringen.
 
 Startsidan är `index.html` (titel "Matematik · Grundskola"). Den länkar vidare till `ak7.html` (Årskurs 7) → kapitlen.
+
+**Vad följer med i pushen?** `.gitignore` utesluter bara `Arkiv/` (gamla generationer), `ak7.zip` och OS-skräp (`Thumbs.db`, `.DS_Store`) — inget som behövs för sajten. De **13 självhostade fontfilerna** (`fonts/*.woff2` + `fonts/fonts.css`) är versionerade och följer med, så typografin fungerar publikt direkt.
 
 ---
 
