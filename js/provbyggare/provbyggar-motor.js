@@ -514,6 +514,67 @@ function gradeSub(s, ans){
   return {status:'skipped'};
 }
 
+// Svars-signatur för en fråga (variety i generateTest): läser BARA facit-fälten per sub-typ —
+// rör ingen generator. Två frågor med samma signatur = samma svar → förkastas om de hamnar i rad.
+function svarSignatur(q){
+  if(!q || !q.subs || !q.subs.length) return null;
+  var parts = q.subs.map(function(s){
+    switch(s.type){
+      case 'binary':        return 'b' + s.answer;
+      case 'sum':           return 'su' + s.target;
+      case 'product':       return 'pr' + s.target;
+      case 'primfakt':      return 'pf' + s.target;
+      case 'gata':          return 'g' + s.answer;
+      case 'numeric':       return 'n' + s.answer;
+      case 'brak':          { var d = gcd(s.talj, s.namn) || 1; return 'f' + (s.talj / d) + '/' + (s.namn / d); }
+      case 'mellanled':     { var e = gcd(s.slutTalj, s.slutNamn) || 1; return 'm' + (s.slutTalj / e) + '/' + (s.slutNamn / e); }
+      case 'mellanled-num': return 'mn' + s.slutVarde;
+      case 'gp':            return 'gp' + s.slutKoeff + 'e' + s.slutExp;
+      default:              return '?';
+    }
+  });
+  return parts.join('|');
+}
+
+// Konfetti-regn vid alla rätt (åttans test-take, config.rikTestUX). Speglar drillarnas/rammarnas
+// konfetti — självständigt DOM-mönster, .pb-konfetti-CSS åk8-scopad i ak8-k1-ram.html. Elev-lokalt.
+function visaKonfetti(){
+  var gammal = document.querySelector('.pb-konfetti-lager'); if(gammal) gammal.remove();
+  var lager = document.createElement('div'); lager.className = 'pb-konfetti-lager'; document.body.appendChild(lager);
+  var farger = ['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899','#06b6d4'];
+  for(var i = 0; i < 80; i++){
+    var b = document.createElement('span'); b.className = 'pb-konfetti';
+    b.style.left = (Math.random() * 100) + 'vw';
+    b.style.background = farger[Math.floor(Math.random() * farger.length)];
+    b.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+    b.style.animationDelay = (Math.random() * 0.8) + 's';
+    b.style.width = (6 + Math.random() * 8) + 'px';
+    b.style.height = (10 + Math.random() * 8) + 'px';
+    lager.appendChild(b);
+  }
+  setTimeout(function(){ if(lager.parentNode) lager.remove(); }, 6000);
+}
+
+// Keypad-bindning för test-take (åttan): AK8_UI.keypadHTML ger markupen; här styr vi aktiv
+// .test-sub-input (som öva-bladens bindSheet, men mot testets fält). Rör ej rättning/generering.
+function bindTestKeypad(scope){
+  var active = scope.querySelector('.test-sub-input');
+  scope.addEventListener('focusin', function(e){
+    if(e.target.classList && e.target.classList.contains('test-sub-input')) active = e.target;
+  });
+  scope.querySelectorAll('.kp-key').forEach(function(btn){
+    btn.addEventListener('mousedown', function(e){
+      e.preventDefault();
+      if(!active || active.disabled){ var f = scope.querySelector('.test-sub-input:not([disabled])'); if(f) active = f; else return; }
+      var k = btn.dataset.key;
+      if(k === 'back'){ active.value = active.value.slice(0, -1); }
+      else { active.value += k; }
+      active.dispatchEvent(new Event('input', { bubbles:true }));
+      active.focus();
+    });
+  });
+}
+
 function renderReviewSub(sr){
   const {sub, result} = sr;
   const cls = result.status; // correct, wrong, skipped
@@ -614,7 +675,7 @@ function exempelFaktorer(target, antal){
     var FORELASNING_TIPS= config.forelasningTips || {};
     var FARG_INFO_C     = config.fargInfo || FARG_INFO;
     var FORMAGA_NAMN_C  = config.formagaNamn || FORMAGA_NAMN;
-    var state = { testConfig:{ antal:6, typ:'snabb', del:null, nodes:null, fargFilter:[], collapsed:null, varianter:{}, _preselectDel:false }, test:null };
+    var state = { testConfig:{ antal:6, typ:'snabb', del:null, nodes:null, fargFilter:[], collapsed:null, varianter:{}, _preselectDel:false, rikUX: !!config.rikTestUX }, test:null };
     function navTo(v,o){ return config.nav.navTo(v, o||{}); }
     function showView(v){ return config.nav.showView(v); }
     function updateTutorContext(){ if(config.nav.updateTutorContext) config.nav.updateTutorContext(); }
@@ -662,16 +723,26 @@ function generateTest(config){
     let gensShuffled = shuffle([...snabbGens]);
     let gIdx = 0;
     let safetyCounter = 0;
-    while(snabbItems() < numSnabb && safetyCounter < 100){
+    // VARIETY (bara rikUX = åttan): undvik samma svar två gånger i rad. k1/k2 → rikUX false →
+    // hela grenen inaktiv + cap 100 = generering byte-identisk med tidigare.
+    let prevSig = null, varietyTries = 0;
+    while(snabbItems() < numSnabb && safetyCounter < (config.rikUX ? 200 : 100)){
       safetyCounter++;
       const {gen, node} = gensShuffled[gIdx % gensShuffled.length];
       gIdx++;
       const q = gen(seen, variantFor(node));
       if(q && q.subs && q.subs.length){
         q.kind = 'snabb';
-        const kvar = numSnabb - snabbItems();
-        if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);   // trunkera sista frågan → exakt antalet
-        if(q.subs.length) questions.push(q);
+        // Förkasta (bounded) om frågans svar matchar föregående fråga → nytt slumpat item nästa varv.
+        // Rör INTE item-generatorn; efter några försök godtas ändå så antalet alltid fylls.
+        const sig = svarSignatur(q);
+        if(config.rikUX && sig !== null && sig === prevSig && varietyTries < 6){
+          varietyTries++;
+        } else {
+          const kvar = numSnabb - snabbItems();
+          if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);   // trunkera sista frågan → exakt antalet
+          if(q.subs.length){ questions.push(q); prevSig = sig; varietyTries = 0; }
+        }
       }
       if(gIdx >= gensShuffled.length){
         gensShuffled = shuffle([...snabbGens]);
@@ -1059,6 +1130,13 @@ function renderTestTake(){
     });
   }
 
+  // Keypad (AK8_UI) — bara åttan (config.rikTestUX + AK8_UI laddad). k1/k2 → plain input, byte-identiskt.
+  if(config.rikTestUX && window.AK8_UI){
+    const kpWrap = document.createElement('div');
+    kpWrap.innerHTML = AK8_UI.keypadHTML({ builders:false, ops:[',', '·', '/', '−'] });
+    if(kpWrap.firstChild){ body.appendChild(kpWrap.firstChild); bindTestKeypad(body); }
+  }
+
   showView('test-take');
 }
 
@@ -1153,33 +1231,43 @@ function renderTestResult(){
     navTo('test-take');
   };
   document.getElementById('new-test').onclick = () => {
+    // Färdigt test → generera ett NYTT färdigt test för samma delkapitel (ej provbyggar-configen).
+    if(t.fardigt){ byggFardigt(t.fardigt); return; }
     state.test = null;
     navTo('test-config');
   };
+
+  // Konfetti vid ALLA rätt (åttan, config.rikTestUX) — samma belöning som drillarna.
+  if(config.rikTestUX && totalSubs > 0 && pct === 100) visaKonfetti();
 
   showView('test-result');
   updateTutorContext();
 }
 
+    // ── NY additiv metod: bygg ett FÖRVALT (färdigt) test och gå DIREKT till take. Opåkallad av
+    //    k1/k2 (de använder bara config-UI:t "Skapa test") → deras beteende är byte-identiskt.
+    //    Rör INTE generering/rättning — återanvänder generateTest + EXAKT samma state.test-form
+    //    som generate-test-btn (rad 937-944). Djup kan styras via opts.varianter (befintlig väg). ──
+    function byggFardigt(o){
+      o = o || {};
+      var cfg = state.testConfig;
+      cfg.nodes = (o.nodes || []).slice();
+      cfg.antal = o.antal || 12;
+      cfg.typ = o.typ || 'snabb';
+      if(o.varianter) cfg.varianter = o.varianter;
+      var questions = generateTest(cfg);
+      // fardigt-params stashas på provet → resultat-vyns "Nytt test" genererar ett NYTT färdigt test
+      // för SAMMA delkapitel (samma noder, nya tal), inte provbyggar-configen.
+      state.test = { questions: questions, answers: {}, currentIdx: -1, startedAt: Date.now(),
+        fardigt: { nodes: cfg.nodes.slice(), antal: cfg.antal, typ: cfg.typ, varianter: o.varianter || null } };
+      navTo('test-take');
+      return questions.reduce(function(s, q){ return s + q.subs.length; }, 0);   // antal svarbara items
+    }
+
     return {
       render: { config: renderTestConfig, take: renderTestTake, result: renderTestResult },
       setDel: function(d){ state.testConfig.del = d; state.testConfig.nodes = null; state.testConfig.collapsed = null; state.testConfig._preselectDel = !!d; },
-      // ── NY additiv metod: bygg ett FÖRVALT (färdigt) test och gå DIREKT till take. Opåkallad av
-      //    k1/k2 (de använder bara config-UI:t "Skapa test") → deras beteende är byte-identiskt.
-      //    Rör INTE generering/rättning — återanvänder generateTest + EXAKT samma state.test-form
-      //    som generate-test-btn (rad 937-944). Djup kan styras via opts.varianter (befintlig väg). ──
-      byggFardigt: function(o){
-        o = o || {};
-        var cfg = state.testConfig;
-        cfg.nodes = (o.nodes || []).slice();
-        cfg.antal = o.antal || 12;
-        cfg.typ = o.typ || 'snabb';
-        if(o.varianter) cfg.varianter = o.varianter;
-        var questions = generateTest(cfg);
-        state.test = { questions: questions, answers: {}, currentIdx: -1, startedAt: Date.now() };
-        navTo('test-take');
-        return questions.reduce(function(s, q){ return s + q.subs.length; }, 0);   // antal svarbara items
-      },
+      byggFardigt: byggFardigt,
       state: state
     };
   }

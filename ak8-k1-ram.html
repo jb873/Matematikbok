@@ -44,6 +44,21 @@ body.embed .topnav{display:none !important;}
 body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
 </style>
 <link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
+<style>
+/* Åttans test-take: keypad (AK8_UI-markup) + konfetti. Åk8-scopat här → delad provbyggar-CSS orörd.
+   Keypad-stilarna speglar js/motor/blad/ak8-blad-ui.css (samma klasser som keypadHTML producerar). */
+.keypad{ position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; padding:10px 12px; background:var(--paper-lt); border-top:1px solid var(--paper-dk); box-shadow:0 -3px 14px rgba(15,30,46,.08); }
+.keypad-digits{ display:grid; grid-template-columns:repeat(3,46px); gap:6px; }
+.keypad-ops{ display:grid; grid-template-columns:46px; gap:6px; align-content:start; }
+.kp-key{ height:44px; border:1.5px solid var(--paper-dk); border-radius:8px; background:#fff; font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; transition:transform .08s, background .1s; }
+.kp-key:hover{ background:var(--paper-dk); } .kp-key:active{ transform:scale(.92); }
+.kp-key.op{ color:var(--gold); font-weight:700; } .kp-key.util{ background:var(--paper); color:var(--ink-faint); font-size:15px; } .kp-key.span2{ grid-column:span 2; }
+.pb-view[data-pbv="test-take"]{ padding-bottom:170px; }   /* plats åt den fasta keypaden */
+.pb-konfetti-lager{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:9999; }
+.pb-konfetti{ position:absolute; width:10px; height:14px; top:-30px; border-radius:2px; opacity:0; animation:pb-konfetti-fall linear forwards; }
+@keyframes pb-konfetti-fall{ 0%{ transform:translateY(0) rotate(0deg); opacity:1; } 100%{ transform:translateY(110vh) rotate(720deg); opacity:1; } }
+@media print{ .keypad{ display:none !important; } }
+</style>
 </head>
 <body>
 <nav class="topnav">
@@ -59,6 +74,7 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
 <script src="js/data/ak8-fardiga-test.js"></script>
 <script src="js/mastery.js"></script>
 <script src="js/mastery-k2.js"></script>
+<script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/provbyggare/provbyggar-motor.js"></script>
 <script>
 (function(){
@@ -811,6 +827,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       ] }
     },
     eyebrow: 'Åk 8 · Taluppfattning — tal, räkning och bråk',   // bråk ÄR tal → ingår i taluppfattningen
+    rikTestUX: true,   // åttan: keypad (AK8_UI) i test-take + konfetti vid alla rätt. k1/k2 sätter ej flaggan → byte-identiska.
     nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
   });
 

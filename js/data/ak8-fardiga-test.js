@@ -70,7 +70,7 @@
     ramPath = ramPath || '../../ak8-k1-ram.html';
     var t = tester(delNr);
     var html = '<div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;color:var(--ink-soft);">'
-      + '<h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Visa vad du kan</h3>';
+      + '<h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Test</h3>';
     if(t.length){
       html += '<p style="font-size:14px;line-height:1.6;max-width:520px;margin:0 0 18px;">Ett färdigt test för det här delkapitlet – hopsatt åt dig ur momenten. Klicka och kör direkt.'
         + (t.length > 1 ? ' Det är uppdelat i två så att varje test håller lagom längd.' : '') + '</p>'
@@ -84,10 +84,8 @@
     } else {
       html += '<p style="font-size:14px;line-height:1.6;max-width:480px;">Färdigt test byggs för det här delkapitlet – öva på bladen och färdigheterna så länge.</p>';
     }
-    // "Skapa eget test →" bredvid — bygg vad du vill (provbyggaren).
-    html += '<div style="margin-top:20px;padding-top:16px;border-top:1px dashed var(--paper-dk);">'
-      + '<a href="' + ramPath + '?view=test-config&del=ak8d' + delNr + '" style="display:inline-block;font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);background:transparent;border:1px solid var(--paper-dk);padding:10px 20px;border-radius:5px;text-decoration:none;">Skapa eget test →</a>'
-      + '</div></div>';
+    // Test-fliken = bara det färdiga testet. "Skapa eget test" görs i provbyggaren (annat ställe).
+    html += '</div>';
     panelEl.innerHTML = html;
   }
 
