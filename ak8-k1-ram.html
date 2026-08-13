@@ -785,7 +785,11 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'div-rakna-pow10':'div-rakna:pow10', 'div-rakna-stora':'div-rakna:stora',
     'neg-begr':'neg-begrepp:begrepp', 'neg-addsub':'neg-rakna:addsub', 'neg-multdiv':'neg-rakna:multdiv',
     'primtal-binary':'primtal:begrepp', 'termer':'primtal:rakna', 'faktorer':'primtal:rakna',
-    'delbar-binary':'delbarhet:rakna',
+    // FAS1-breddning: bind tidigare obundna test-generatorer → quiz-bara typer når testen.
+    // primfakt/siffersumma är snabb → syns i det (snabb-bara) färdiga testet; gata är problem
+    // → når provbyggarens "skapa eget test", inte det färdiga (snabb-bara) testet.
+    'primfakt':'primtal:rakna', 'gata':'primtal:begrepp',
+    'delbar-binary':'delbarhet:rakna', 'siffersumma':'delbarhet:rakna',
     'platsvarde':'position:begrepp', 'talfoljd':'position:rakna',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
