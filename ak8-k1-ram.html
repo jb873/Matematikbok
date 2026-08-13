@@ -768,6 +768,64 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
   'ny-reciprok': { snabb: [ G.brak('ny-reciprok','Skriva reciprok','brak-div-reciprok', function(){
     var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
     return {key:'rec'+t+'/'+n, prompt:'Skriv reciproken (omvända talet) till '+t+'/'+n+':', talj:n, namn:t, expl:'Reciproken av '+t+'/'+n+' är '+n+'/'+t+'.'};
+  }) ] },
+  // ── FAS1-BREDDNING · quiz-bara typer (nya generatorer). Rättning i provbyggar-motorns typ-grenar
+  //    (numeric/binary befintliga; potensmult/blandad nya additiva). Belief/visuella lämnas i självskattningen. ──
+  // Grunder · baklänges "vilket tal saknas" (invers, numeric) → position:rakna
+  'position:rakna-inv': { snabb: [ G.numeric('pos-baklanges','Vilket tal saknas?','position', function(){
+    var typ = pick(['add','sub1','sub2']);
+    if(typ==='add'){ var b=ri(11,89), s=b+ri(6,60); return {key:'a'+b+'_'+s, prompt:'Vilket tal saknas?    ▢ + '+b+' = '+s, ans:s-b, expl:(s-b)+' + '+b+' = '+s+'.'}; }
+    if(typ==='sub1'){ var x=ri(20,99), d=ri(3,x-5); return {key:'s'+x+'_'+d, prompt:'Vilket tal saknas?    '+x+' − ▢ = '+(x-d), ans:d, expl:x+' − '+d+' = '+(x-d)+'.'}; }
+    var kn=ri(15,80), r=ri(6,50); return {key:'t'+kn+'_'+r, prompt:'Vilket tal saknas?    ▢ − '+kn+' = '+r, ans:kn+r, expl:(kn+r)+' − '+kn+' = '+r+'.'};
+  }) ] },
+  // Negativa · teckenekvation — vilket räknesätt gör likheten sann? (binary) → neg-rakna:addsub
+  'neg-rakna:tecken': { snabb: [ G.flerval('tecken-ekv','Vilket räknesätt saknas?','neg-rakna', function(){
+    var a = pick([-9,-8,-7,-6,-5,-4,-3,-2,3,4,5,6,7,8,9]), b = pick([2,3,4,5,6,7,8]);
+    var ops = { '+':a+b, '−':a-b, '·':a*b };
+    if(a % b === 0) ops['/'] = a/b;
+    var keys = Object.keys(ops), chosen = null;
+    shuffle(keys.slice()).some(function(k){ var v=ops[k]; if(keys.every(function(k2){ return k2===k || ops[k2]!==v; })){ chosen=k; return true; } return false; });
+    if(chosen === null) return null;
+    var rhs = ops[chosen], vis = (a<0 ? '('+a+')' : a);
+    return { key:a+chosen+b, prompt:'Vilket räknesätt gör likheten sann?    '+vis+' ▢ '+b+' = '+rhs,
+      options: shuffle(keys.slice()), answer: chosen, expl:vis+' '+chosen+' '+b+' = '+rhs+'.' };
+  }) ] },
+  // Potenser · skriv potensen som upprepad multiplikation (NY typ potensmult) → pot-begrepp:skriva
+  'pot-begrepp:skriva-mult': { snabb: [ function genSkrivMult(seen){
+    var subs = [], tries = 0;
+    while(subs.length < 3 && tries < 60){ tries++;
+      var b = ri(2,6), e = ri(2,5), key = 'sm'+b+'_'+e;
+      if(seen.has(key)) continue; seen.add(key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'potensmult', bas:b, exp:e, target:Math.pow(b,e), explanation:b+'^'+e+' = '+Array(e).fill(b).join(' · ')+'.' });
+    }
+    return subs.length ? { generator:'pot-skrivmult', title:'Skriv potensen som upprepad multiplikation', omrade:'pot-begrepp:skriva', subs:subs } : null;
+  } ] },
+  // Potenser · fyll i potenstabellen, samma bas (numeric) → pot-begrepp:tabell
+  'pot-begrepp:tabell': { snabb: [ function genPotenstabell(seen){
+    var b = ri(2,6), tries = 0; while(seen.has('pt-bas-'+b) && tries<10){ b = ri(2,6); tries++; }
+    seen.add('pt-bas-'+b);
+    var subs = [1,2,3,4].map(function(e,i){ return { label:String.fromCharCode(97+i)+')', type:'numeric', prompt:b+'^'+e, answer:Math.pow(b,e), explanation:b+'^'+e+' = '+Math.pow(b,e)+'.' }; });
+    return { generator:'pot-tabell', title:'Fyll i potenstabellen (basen '+b+')', omrade:'pot-begrepp:tabell', subs:subs };
+  } ] },
+  // Räkna med bråk · oäkta → blandad form (NY typ blandad) → brak-blandad:rakna
+  'brak-blandad:oakta': { snabb: [ function genOaktaBlandad(seen){
+    var subs = [], tries = 0;
+    while(subs.length < 4 && tries < 80){ tries++;
+      var n = ri(2,9), h = ri(1,4), r; do { r = ri(1,n-1); } while(gcd2(r,n)!==1);
+      var talj = h*n + r, key = 'ob-'+talj+'/'+n;
+      if(seen.has(key)) continue; seen.add(key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'blandad', prompt:'Skriv '+talj+'/'+n+' i blandad form (enklaste form):', talj:talj, namn:n, explanation:talj+'/'+n+' = '+h+' '+r+'/'+n+'.' });
+    }
+    return subs.length ? { generator:'brak-oakta-blandad', title:'Skriv i blandad form', omrade:'brak-blandad:rakna', subs:subs } : null;
+  } ] },
+  // Räkna med bråk · jämför bråk med olika nämnare (binary) → brak-jmf-lika:begrepp
+  'brak-jmf-olika': { snabb: [ G.flerval('brak-jmf-olika','Vilket bråk är störst?','brak-jmf-lika', function(){
+    var t1=ri(1,7), n1=ri(t1+1,9), t2=ri(1,7), n2=ri(t2+1,9);
+    if(n1===n2) return null;
+    var v1=t1/n1, v2=t2/n2;
+    if(Math.abs(v1-v2) < 1e-9) return null;
+    var a=t1+'/'+n1, b=t2+'/'+n2, stor = v1>v2 ? a : b;
+    return { key:a+'_'+b, prompt:'Vilket bråk är störst: '+a+' eller '+b+'?', options: shuffle([a,b]), answer: stor, expl:stor+' är störst.' };
   }) ] }
   };
   var AK8_GEN_NOD = {
@@ -791,6 +849,10 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'primfakt':'primtal:rakna', 'gata':'primtal:begrepp',
     'delbar-binary':'delbarhet:rakna', 'siffersumma':'delbarhet:rakna',
     'platsvarde':'position:begrepp', 'talfoljd':'position:rakna',
+    // FAS1-breddning: nya quiz-generatorer → rätt kart-cell (parity).
+    'pos-baklanges':'position:rakna', 'tecken-ekv':'neg-rakna:addsub',
+    'pot-skrivmult':'pot-begrepp:skriva', 'pot-tabell':'pot-begrepp:tabell',
+    'brak-oakta-blandad':'brak-blandad:rakna', 'brak-jmf-olika':'brak-jmf-lika:begrepp',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'

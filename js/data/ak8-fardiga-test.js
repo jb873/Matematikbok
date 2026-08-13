@@ -28,7 +28,8 @@
     'mult-rakna:stora','div-rakna:pow10','div-rakna:stora','neg-begrepp:begrepp','neg-rakna:addsub',
     'neg-rakna:multdiv','primtal:begrepp','primtal:rakna','delbarhet:rakna','position:begrepp',
     'position:rakna','mult-rakna:sma','div-rakna:sma','mult-rakna:storasma','div-rakna:storasma',
-    'brak-lana:rakna','brak-mult-forkorta:rakna','brak-div-reciprok:rakna'
+    'brak-lana:rakna','brak-mult-forkorta:rakna','brak-div-reciprok:rakna',
+    'pot-begrepp:tabell'   // FAS1-breddning: potenstabell (numeric) blir quiz-bar; pot-begrepp:figur lämnas (visuell → självskattning)
   ].forEach(function(n){ BYGGBARA[n] = 1; });
 
   function delkapitelFor(delNr){

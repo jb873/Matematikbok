@@ -285,6 +285,26 @@ function renderSubInput(qNum, subIdx, s){
         </div>
       </div>
     `;
+  } else if(s.type === 'potensmult'){
+    inputHtml = `
+      <div class="test-sub-q">Skriv <span class="num-inline">${s.bas}<sup>${s.exp}</sup></span> som en upprepad multiplikation:</div>
+      <div class="test-sub-input-row">
+        <input type="text" class="test-sub-input" style="width:220px;text-align:left;padding:0 10px;" placeholder="t.ex. ${s.bas} · ${s.bas} · …" data-sub-input="${idBase}-pm">
+      </div>
+    `;
+  } else if(s.type === 'blandad'){
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-eq">Svar:</span>
+        <input type="text" class="test-sub-input tsn-cell" inputmode="numeric" maxlength="3" style="width:44px;" data-sub-input="${idBase}-h" aria-label="heltal">
+        <span class="test-sub-brak">
+          <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-bt" aria-label="täljare">
+          <span class="tsb-streck"></span>
+          <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-bn" aria-label="nämnare">
+        </span>
+      </div>
+    `;
   }
 
   return `
@@ -351,6 +371,15 @@ function readSubAnswer(qNum, subIdx, s){
     const koeff = (gk && gk.value.trim()) || '', exp = (ge && ge.value.trim()) || '';
     const any = led.some(v => v) || koeff || exp;
     return any ? { led, koeff, exp } : null;
+  } else if(s.type === 'potensmult'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-pm"]`);
+    return inp && inp.value.trim() ? inp.value.trim() : null;
+  } else if(s.type === 'blandad'){
+    const h = document.querySelector(`[data-sub-input="${idBase}-h"]`);
+    const t = document.querySelector(`[data-sub-input="${idBase}-bt"]`);
+    const n = document.querySelector(`[data-sub-input="${idBase}-bn"]`);
+    const hv = h && h.value.trim(), tv = t && t.value.trim(), nv = n && n.value.trim();
+    return (hv || tv || nv) ? { hel: hv || '', t: tv || '', n: nv || '' } : null;
   }
   return null;
 }
@@ -406,6 +435,14 @@ function restoreSubAnswer(qNum, subIdx, s, val){
       (val.led || []).forEach((v, i) => { const el = document.querySelector(`[data-sub-input="${idBase}-L${i}-num"]`); if(el) el.value = v || ''; });
       const gk = document.querySelector(`[data-sub-input="${idBase}-gk"]`); if(gk) gk.value = val.koeff || '';
       const ge = document.querySelector(`[data-sub-input="${idBase}-ge"]`); if(ge) ge.value = val.exp || '';
+    }
+  } else if(s.type === 'potensmult'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-pm"]`); if(inp) inp.value = val;
+  } else if(s.type === 'blandad'){
+    if(val){
+      const h = document.querySelector(`[data-sub-input="${idBase}-h"]`); if(h) h.value = val.hel || '';
+      const t = document.querySelector(`[data-sub-input="${idBase}-bt"]`); if(t) t.value = val.t || '';
+      const n = document.querySelector(`[data-sub-input="${idBase}-bn"]`); if(n) n.value = val.n || '';
     }
   }
 }
@@ -511,6 +548,25 @@ function gradeSub(s, ans){
       .concat([(ans.koeff || '?') + '·10^' + (ans.exp || '?')]).join(' → ');
     return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
   }
+  // ── FAS1-breddning: nya quiz-typer (additiva; befintliga typer ovan är byte-identiska) ──
+  if(s.type === 'potensmult'){
+    // Skriv basen^exponent som upprepad multiplikation: rätt = exakt `exp` faktorer, alla = basen.
+    const parts = String(ans).replace(/\s/g,'').replace(/[·*x×]/g,',').split(',').filter(p => p !== '');
+    if(parts.length === 0) return {status:'wrong', given: ans};
+    const ok = parts.length === s.exp && parts.every(p => parseInt(p) === s.bas);
+    return {status: ok ? 'correct' : 'wrong', given: String(ans)};
+  }
+  if(s.type === 'blandad'){
+    // Oäkta → blandad form, enklaste form. talj/namn = det oäkta bråket.
+    if(!ans || typeof ans !== 'object') return {status:'skipped'};
+    const h = parseInt(ans.hel), t = parseInt(ans.t), n = parseInt(ans.n);
+    const given = (isNaN(h)?'?':h) + ' ' + (isNaN(t)?'?':t) + '/' + (isNaN(n)?'?':n);
+    if(isNaN(h) || isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: given};
+    const vardeOk = ((h * n + t) * s.namn === s.talj * n);   // h + t/n === talj/namn (samma värde)
+    const proper = (t >= 0 && t < n);                        // äkta bråkdel
+    const enklast = (gcd(t, n) === 1);                       // enklaste form
+    return {status: (vardeOk && proper && enklast) ? 'correct' : 'wrong', given: given};
+  }
   return {status:'skipped'};
 }
 
@@ -530,6 +586,8 @@ function svarSignatur(q){
       case 'mellanled':     { var e = gcd(s.slutTalj, s.slutNamn) || 1; return 'm' + (s.slutTalj / e) + '/' + (s.slutNamn / e); }
       case 'mellanled-num': return 'mn' + s.slutVarde;
       case 'gp':            return 'gp' + s.slutKoeff + 'e' + s.slutExp;
+      case 'potensmult':    return 'pm' + s.bas + '^' + s.exp;
+      case 'blandad':       return 'bl' + s.talj + '/' + s.namn;
       default:              return '?';
     }
   });
@@ -616,6 +674,13 @@ function renderReviewSub(sr){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit != null ? L.facit : L.varde).join(' → ');
     correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + komma(sub.slutKoeff) + '·10^' + sub.slutExp + ' (grundpotensform)' + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'potensmult'){
+    questionText = `Skriv ${sub.bas}^${sub.exp} som upprepad multiplikation`;
+    correctAnswerText = Array(sub.exp).fill(sub.bas).join(' · ') + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'blandad'){
+    questionText = sub.prompt;
+    const bh = Math.floor(sub.talj / sub.namn), br = sub.talj % sub.namn, bg = gcd(br, sub.namn) || 1;
+    correctAnswerText = bh + ' ' + (br / bg) + '/' + (sub.namn / bg) + (sub.explanation ? ` — ${sub.explanation}` : '');
   }
 
   return `
