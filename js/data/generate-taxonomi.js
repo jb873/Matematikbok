@@ -182,7 +182,29 @@ const EXTRA_NODER = [
   //    Här SI-prefix-noden (korval-drill renderTioPrefix, additiv fil tio-prefix-drill.js). ──
   { id:'tio-rakna:prefix', namn:'SI-prefix', parent:'tio-rakna', niva:'lovnod',
     arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'BEGREPP', generator:'renderTioPrefix',
-    begrepp:'Matcha tiopotens mot SI-prefix: kilo 10³, mega 10⁶, giga 10⁹, tera 10¹² (Öva-blad).', visning:null }
+    begrepp:'Matcha tiopotens mot SI-prefix: kilo 10³, mega 10⁶, giga 10⁹, tera 10¹² (Öva-blad).', visning:null },
+
+  // ── Metod-noder (grunder, åk7): hela metod-landskapet per räknesätt SYNS i kartan som "byggs"
+  //    (generator:null → nolink, ej klickbar) tills metod-bladen byggs (eget arbete). Uppställning-
+  //    familjen = karna; alternativa strategier = breddning (＋), som sub-metodernas okaminska/bakifran. ──
+  { id:'add-metoder:talsorterna', namn:'Talsorterna var för sig', parent:'add-metoder', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
+    begrepp:'Addera ental, tiotal och hundratal var för sig. Metod-blad byggs senare.', visning:null },
+  { id:'mult-metoder:uppstallning-stora', namn:'Uppställning (båda faktorerna > 10)', parent:'mult-metoder', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'karna', formaga:'METOD', generator:null,
+    begrepp:'Uppställning när båda faktorerna är större än 10. Metod-blad byggs senare.', visning:null },
+  { id:'mult-metoder:talsorterna', namn:'Talsorterna var för sig', parent:'mult-metoder', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
+    begrepp:'Multiplicera talsorterna var för sig. Metod-blad byggs senare.', visning:null },
+  { id:'mult-metoder:dubbla', namn:'Dubbla och halvera', parent:'mult-metoder', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
+    begrepp:'Dubbla den ena faktorn och halvera den andra. Metod-blad byggs senare.', visning:null },
+  { id:'mult-metoder:faktorer', namn:'Dela upp i faktorer', parent:'mult-metoder', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
+    begrepp:'Dela upp en faktor: 19·8 = 20·8 − 1·8. Metod-blad byggs senare.', visning:null },
+  { id:'mult-metoder:termer', namn:'Dela upp i termer (dubbelparentes)', parent:'mult-metoder', niva:'lovnod',
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
+    begrepp:'Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1). Metod-blad byggs senare.', visning:null }
 ];
 for(const n of EXTRA_NODER) noder.push(n);
 

@@ -863,6 +863,18 @@ window.K1_TAXONOMI = {
       }
     },
     {
+      "id": "add-metoder:talsorterna",
+      "namn": "Talsorterna var för sig",
+      "parent": "add-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": null,
+      "begrepp": "Addera ental, tiotal och hundratal var för sig. Metod-blad byggs senare.",
+      "visning": null
+    },
+    {
       "id": "add-problem",
       "namn": "Problemlösning",
       "parent": "addition",
@@ -1275,6 +1287,66 @@ window.K1_TAXONOMI = {
         "formagaKey": "uppstallning",
         "niva": null
       }
+    },
+    {
+      "id": "mult-metoder:uppstallning-stora",
+      "namn": "Uppställning (båda faktorerna > 10)",
+      "parent": "mult-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" },
+      "roll": "karna",
+      "formaga": "METOD",
+      "generator": null,
+      "begrepp": "Uppställning när båda faktorerna är större än 10. Metod-blad byggs senare.",
+      "visning": null
+    },
+    {
+      "id": "mult-metoder:talsorterna",
+      "namn": "Talsorterna var för sig",
+      "parent": "mult-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": null,
+      "begrepp": "Multiplicera talsorterna var för sig. Metod-blad byggs senare.",
+      "visning": null
+    },
+    {
+      "id": "mult-metoder:dubbla",
+      "namn": "Dubbla och halvera",
+      "parent": "mult-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": null,
+      "begrepp": "Dubbla den ena faktorn och halvera den andra. Metod-blad byggs senare.",
+      "visning": null
+    },
+    {
+      "id": "mult-metoder:faktorer",
+      "namn": "Dela upp i faktorer",
+      "parent": "mult-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": null,
+      "begrepp": "Dela upp en faktor: 19·8 = 20·8 − 1·8. Metod-blad byggs senare.",
+      "visning": null
+    },
+    {
+      "id": "mult-metoder:termer",
+      "namn": "Dela upp i termer (dubbelparentes)",
+      "parent": "mult-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" },
+      "roll": "breddning",
+      "formaga": "METOD",
+      "generator": null,
+      "begrepp": "Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1). Metod-blad byggs senare.",
+      "visning": null
     },
     {
       "id": "mult-rakna",
