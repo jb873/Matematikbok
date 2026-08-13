@@ -870,8 +870,8 @@ window.K1_TAXONOMI = {
       "arskursRelevans": { "ak7": "mal" },
       "roll": "breddning",
       "formaga": "METOD",
-      "generator": null,
-      "begrepp": "Addera ental, tiotal och hundratal var för sig. Metod-blad byggs senare.",
+      "generator": "renderTalsorternaAdd",
+      "begrepp": "Addera ental, tiotal och hundratal var för sig.",
       "visning": null
     },
     {
@@ -1296,8 +1296,8 @@ window.K1_TAXONOMI = {
       "arskursRelevans": { "ak7": "mal" },
       "roll": "karna",
       "formaga": "METOD",
-      "generator": null,
-      "begrepp": "Uppställning när båda faktorerna är större än 10. Metod-blad byggs senare.",
+      "generator": "renderUppstallningMult",
+      "begrepp": "Uppställning när båda faktorerna är större än 10.",
       "visning": null
     },
     {
@@ -1308,8 +1308,8 @@ window.K1_TAXONOMI = {
       "arskursRelevans": { "ak7": "mal" },
       "roll": "breddning",
       "formaga": "METOD",
-      "generator": null,
-      "begrepp": "Multiplicera talsorterna var för sig. Metod-blad byggs senare.",
+      "generator": "renderMultMetoder",
+      "begrepp": "Multiplicera talsorterna var för sig.",
       "visning": null
     },
     {
@@ -1320,8 +1320,8 @@ window.K1_TAXONOMI = {
       "arskursRelevans": { "ak7": "mal" },
       "roll": "breddning",
       "formaga": "METOD",
-      "generator": null,
-      "begrepp": "Dubbla den ena faktorn och halvera den andra. Metod-blad byggs senare.",
+      "generator": "renderMultMetoder",
+      "begrepp": "Dubbla den ena faktorn och halvera den andra.",
       "visning": null
     },
     {
@@ -1332,8 +1332,8 @@ window.K1_TAXONOMI = {
       "arskursRelevans": { "ak7": "mal" },
       "roll": "breddning",
       "formaga": "METOD",
-      "generator": null,
-      "begrepp": "Dela upp en faktor: 19·8 = 20·8 − 1·8. Metod-blad byggs senare.",
+      "generator": "renderMultMetoder",
+      "begrepp": "Dela upp en faktor: 19·8 = 20·8 − 1·8.",
       "visning": null
     },
     {
@@ -1344,8 +1344,8 @@ window.K1_TAXONOMI = {
       "arskursRelevans": { "ak7": "mal" },
       "roll": "breddning",
       "formaga": "METOD",
-      "generator": null,
-      "begrepp": "Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1). Metod-blad byggs senare.",
+      "generator": "renderMultMetoder",
+      "begrepp": "Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1).",
       "visning": null
     },
     {

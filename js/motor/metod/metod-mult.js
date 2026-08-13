@@ -499,7 +499,7 @@ function d3SpaceExpr(s){
   return t;
 }
 
-function renderMultMetoder(body){
+function renderMultMetoder(body, startMetod){
   const METODER = [
     {id:'uppstallning',  namn:'Uppställning', icon:'📐',
      kort:'Ställ upp talen under varandra och räkna kolumn för kolumn.'},
@@ -766,7 +766,8 @@ function renderMultMetoder(body){
     render();
   }
 
-  renderValjMetod();
+  // Deeplink: hoppa direkt in i en vald metod (kartan → nod). Utan param = välj-meny (oförändrat).
+  if(startMetod) openMetod(startMetod); else renderValjMetod();
 }
 
 // --- METOD: UPPSTÄLLNING (multiplikation) ---

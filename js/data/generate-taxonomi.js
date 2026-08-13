@@ -184,27 +184,28 @@ const EXTRA_NODER = [
     arskursRelevans:{ ak8:'mal' }, roll:'karna', formaga:'BEGREPP', generator:'renderTioPrefix',
     begrepp:'Matcha tiopotens mot SI-prefix: kilo 10³, mega 10⁶, giga 10⁹, tera 10¹² (Öva-blad).', visning:null },
 
-  // ── Metod-noder (grunder, åk7): hela metod-landskapet per räknesätt SYNS i kartan som "byggs"
-  //    (generator:null → nolink, ej klickbar) tills metod-bladen byggs (eget arbete). Uppställning-
+  // ── Metod-noder (grunder, åk7): hela metod-landskapet per räknesätt SYNS i kartan. Wirade till
+  //    befintliga öva-blad via generator + route i ak7-k1-ram.html (deeplink ?ko&formaga = id-del-2).
+  //    Öva-täckta men INGEN Färdighetsträning-drill (som brak-tid/brak-likformig). Uppställnings-
   //    familjen = karna; alternativa strategier = breddning (＋), som sub-metodernas okaminska/bakifran. ──
   { id:'add-metoder:talsorterna', namn:'Talsorterna var för sig', parent:'add-metoder', niva:'lovnod',
-    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
-    begrepp:'Addera ental, tiotal och hundratal var för sig. Metod-blad byggs senare.', visning:null },
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:'renderTalsorternaAdd',
+    begrepp:'Addera ental, tiotal och hundratal var för sig.', visning:null },
   { id:'mult-metoder:uppstallning-stora', namn:'Uppställning (båda faktorerna > 10)', parent:'mult-metoder', niva:'lovnod',
-    arskursRelevans:{ ak7:'mal' }, roll:'karna', formaga:'METOD', generator:null,
-    begrepp:'Uppställning när båda faktorerna är större än 10. Metod-blad byggs senare.', visning:null },
+    arskursRelevans:{ ak7:'mal' }, roll:'karna', formaga:'METOD', generator:'renderUppstallningMult',
+    begrepp:'Uppställning när båda faktorerna är större än 10.', visning:null },
   { id:'mult-metoder:talsorterna', namn:'Talsorterna var för sig', parent:'mult-metoder', niva:'lovnod',
-    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
-    begrepp:'Multiplicera talsorterna var för sig. Metod-blad byggs senare.', visning:null },
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:'renderMultMetoder',
+    begrepp:'Multiplicera talsorterna var för sig.', visning:null },
   { id:'mult-metoder:dubbla', namn:'Dubbla och halvera', parent:'mult-metoder', niva:'lovnod',
-    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
-    begrepp:'Dubbla den ena faktorn och halvera den andra. Metod-blad byggs senare.', visning:null },
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:'renderMultMetoder',
+    begrepp:'Dubbla den ena faktorn och halvera den andra.', visning:null },
   { id:'mult-metoder:faktorer', namn:'Dela upp i faktorer', parent:'mult-metoder', niva:'lovnod',
-    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
-    begrepp:'Dela upp en faktor: 19·8 = 20·8 − 1·8. Metod-blad byggs senare.', visning:null },
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:'renderMultMetoder',
+    begrepp:'Dela upp en faktor: 19·8 = 20·8 − 1·8.', visning:null },
   { id:'mult-metoder:termer', namn:'Dela upp i termer (dubbelparentes)', parent:'mult-metoder', niva:'lovnod',
-    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:null,
-    begrepp:'Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1). Metod-blad byggs senare.', visning:null }
+    arskursRelevans:{ ak7:'mal' }, roll:'breddning', formaga:'METOD', generator:'renderMultMetoder',
+    begrepp:'Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1).', visning:null }
 ];
 for(const n of EXTRA_NODER) noder.push(n);
 

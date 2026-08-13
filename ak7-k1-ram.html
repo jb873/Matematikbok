@@ -2570,6 +2570,12 @@ const FORMAGOR = {
   bakifran:     {label:'Addition bakifrån',   tagClass:'tag-metod', pillClass:'p-metod'},
   kort:         {label:'Kort division',       tagClass:'tag-metod', pillClass:'p-metod'},
   lang:         {label:'Lång division',       tagClass:'tag-metod', pillClass:'p-metod'},
+  // Karta-noder → öva-blad (add-metoder:* / mult-metoder:*): deeplink ?formaga=<nyckel> in i rätt metod
+  talsorterna:         {label:'Talsorterna var för sig',   tagClass:'tag-metod', pillClass:'p-metod'},
+  'uppstallning-stora':{label:'Uppställning · större tal',  tagClass:'tag-metod', pillClass:'p-metod'},
+  dubbla:              {label:'Dubbla och halvera',         tagClass:'tag-metod', pillClass:'p-metod'},
+  faktorer:            {label:'Dela upp i faktorer',        tagClass:'tag-metod', pillClass:'p-metod'},
+  termer:              {label:'Dela upp i termer',          tagClass:'tag-metod', pillClass:'p-metod'},
   // Potenser (åk8): drill-kategorier
   skriva:       {label:'Skriv som potens',    tagClass:'tag-begrepp', pillClass:'p-begrepp'},
   evaluera:     {label:'Beräkna värdet',      tagClass:'tag-rakna', pillClass:'p-rakna'},
@@ -4972,7 +4978,8 @@ const OVNING_RENDERS = {
   // Addition - KO 3: Metoder (picker + uppställnings-deeplink; uppställning loggar egen nod)
   'add-metoder':{
     metod:        (b)=> renderAddMetod(b),     // rika versionen (metod-addsub): uppställning m. minnessiffror, talsorterna på rad, flytta över m. mellanled
-    uppstallning: (b)=> renderAddUppstallning(b, ()=> renderAddMetod(b))
+    uppstallning: (b)=> renderAddUppstallning(b, ()=> renderAddMetod(b)),
+    talsorterna:  (b)=> renderTalsorternaAdd(b, null, ()=> renderAddMetod(b))   // karta-nod add-metoder:talsorterna (öva-täckt, ingen drill)
   },
   // Addition - KO 4: Problemlösning
   'add-problem':{
@@ -4991,7 +4998,13 @@ const OVNING_RENDERS = {
   // Del 3 - Metoder för multiplikation (picker + uppställnings-deeplink; uppställning loggar egen nod)
   'mult-metoder':{
     metod:        (b)=> renderMultMetoder(b),
-    uppstallning: (b)=> renderUppstallningMult(b, ()=> renderMultMetoder(b))
+    uppstallning: (b)=> renderUppstallningMult(b, ()=> renderMultMetoder(b)),
+    // karta-noder mult-metoder:* → deeplink direkt in i rätt picker-metod (öva-täckta, ingen drill)
+    'uppstallning-stora': (b)=> renderUppstallningMult(b, ()=> renderMultMetoder(b), {variant:'fler'}),  // båda faktorerna >10 = flersiffrig multiplikator
+    talsorterna:  (b)=> renderMultMetoder(b, 'talsorterna'),
+    dubbla:       (b)=> renderMultMetoder(b, 'dubbla'),
+    faktorer:     (b)=> renderMultMetoder(b, 'kompensation'),     // "dela upp i faktorer" 19·8 = 20·8 − 1·8 = kompensation
+    termer:       (b)=> renderMultMetoder(b, 'dubbelparentes')    // "dela upp i termer" 31·19 = (30+1)(20−1)
   },
   // Del 3 - Beräkningar (aggregat) + per-kategori-deeplinkar (Del 5/6 loggar till egen nod)
   'mult-rakna':{
