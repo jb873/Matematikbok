@@ -1164,6 +1164,22 @@ function renderTestResult(){
     return {
       render: { config: renderTestConfig, take: renderTestTake, result: renderTestResult },
       setDel: function(d){ state.testConfig.del = d; state.testConfig.nodes = null; state.testConfig.collapsed = null; state.testConfig._preselectDel = !!d; },
+      // ── NY additiv metod: bygg ett FÖRVALT (färdigt) test och gå DIREKT till take. Opåkallad av
+      //    k1/k2 (de använder bara config-UI:t "Skapa test") → deras beteende är byte-identiskt.
+      //    Rör INTE generering/rättning — återanvänder generateTest + EXAKT samma state.test-form
+      //    som generate-test-btn (rad 937-944). Djup kan styras via opts.varianter (befintlig väg). ──
+      byggFardigt: function(o){
+        o = o || {};
+        var cfg = state.testConfig;
+        cfg.nodes = (o.nodes || []).slice();
+        cfg.antal = o.antal || 12;
+        cfg.typ = o.typ || 'snabb';
+        if(o.varianter) cfg.varianter = o.varianter;
+        var questions = generateTest(cfg);
+        state.test = { questions: questions, answers: {}, currentIdx: -1, startedAt: Date.now() };
+        navTo('test-take');
+        return questions.reduce(function(s, q){ return s + q.subs.length; }, 0);   // antal svarbara items
+      },
       state: state
     };
   }

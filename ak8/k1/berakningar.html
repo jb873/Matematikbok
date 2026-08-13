@@ -125,6 +125,7 @@
 
 <!-- Blad-kärnan (fracSpan) + d1-bladen. Motorer/mellanled orörda (bygg-id: blad-ak8-d1). -->
 <script src="../../js/data/ak8-k1-bok.js"></script>
+<script src="../../js/data/ak8-fardiga-test.js"></script>
 <script src="../../js/motor/blad/blad-karna.js"></script>
 <script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/blad/blad-ak8-d1.js"></script>
@@ -136,9 +137,9 @@
   if(dk){
     var eb = document.getElementById('del-eyebrow'); if(eb) eb.textContent = 'Delkapitel ' + dk.nr + ' · Kapitel 1';
     var ft = document.getElementById('del-footer'); if(ft) ft.textContent = 'Digitalt läromedel i matematik · Åk 8 · Kapitel 1 · Delkapitel ' + dk.nr;
-    // "Skapa eget test" → åttans provbyggare (delad modul), deeplinkad till detta delkapitel.
-    var tp = document.querySelector('.tab-panel[data-panel="test"] > div');
-    if(tp){ var cta = document.createElement('a'); cta.href = '../../ak8-k1-ram.html?view=test-config&del=ak8d' + dk.nr; cta.textContent = 'Skapa eget test →'; cta.style.cssText = 'display:inline-block;margin-top:18px;font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--navy,#0f1e2e);padding:11px 22px;border-radius:5px;text-decoration:none;'; tp.appendChild(cta); }
+    // Färdiga delkapitel-test (auto-assemblerade) + "Skapa eget test" — via delad AK8_FARDIGA.
+    var tp = document.querySelector('.tab-panel[data-panel="test"]');
+    if(tp && window.AK8_FARDIGA){ AK8_FARDIGA.renderTestFlik(tp, dk.nr, "../../ak8-k1-ram.html"); }
   }
   window.visaAk8Konfetti = function(){ var g=document.querySelector('.konfetti-lager'); if(g) g.remove(); var l=document.createElement('div'); l.className='konfetti-lager'; document.body.appendChild(l); var f=['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899']; for(var i=0;i<70;i++){ var b=document.createElement('span'); b.className='konfetti'; b.style.left=(Math.random()*100)+'vw'; b.style.background=f[Math.floor(Math.random()*f.length)]; b.style.animationDuration=(2.5+Math.random()*2)+'s'; b.style.width=(6+Math.random()*8)+'px'; b.style.height=(10+Math.random()*8)+'px'; l.appendChild(b);} setTimeout(function(){ if(l) l.remove(); },5000); };
 
