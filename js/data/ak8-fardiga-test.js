@@ -32,6 +32,15 @@
     'pot-begrepp:tabell'   // FAS1-breddning: potenstabell (numeric) blir quiz-bar; pot-begrepp:figur lämnas (visuell → självskattning)
   ].forEach(function(n){ BYGGBARA[n] = 1; });
 
+  // Antal test-TYPER (snabb-generatorer) per nod — speglar AK8_GEN_NOD i ak8-k1-ram.html (håll i synk
+  // när generatorer läggs till). Styr coverage-kompletta splitten: noder packas i test så varje test
+  // täcker ALLA sina typer och testen TILLSAMMANS täcker delkapitlets alla quiz-bara typer. Default 1.
+  var TYP_PER_NOD = {
+    'position:rakna': 6, 'position:begrepp': 2, 'primtal:rakna': 3, 'delbarhet:rakna': 2,
+    'neg-rakna:addsub': 2, 'pot-begrepp:skriva': 2, 'brak-blandad:rakna': 2, 'brak-jmf-lika:begrepp': 2
+  };
+  function typCount(n){ return TYP_PER_NOD[n] || 1; }
+
   function delkapitelFor(delNr){
     var bok = window.AK8_K1_BOK || { delkapitel: [] };
     return (bok.delkapitel || []).filter(function(d){ return d.nr === delNr; })[0] || null;
@@ -47,21 +56,26 @@
     return ut;
   }
 
-  function antalFor(ns){ return Math.min(18, Math.max(10, ns.length * 3)); }   // 10–18 items
+  // items ≈ 3 per typ, klämt till 10–20 (matchar generateTest:s coverage-seedning i ramen).
+  function antalFor(ns){ var tot = ns.reduce(function(s, n){ return s + typCount(n); }, 0); return Math.min(20, Math.max(10, tot * 3)); }
 
-  // Färdiga test för ett delkapitel: [{ titel, nodes, antal }]. ≥6 noder → split (bredd) i två.
+  var TYP_CAP = 5;   // max typer per test (≥6-typ-nod hamnar ändå ensam) → 10–20 items när alla seedas
+
+  // COVERAGE-KOMPLETT SPLIT: packa noder i test så varje test ≤ TYP_CAP typer; testen TILLSAMMANS
+  // täcker delkapitlets alla quiz-bara typer. Antal test drivet av typ-antalet (ej fast). Bredd-axeln.
   function tester(delNr){
     var noder = byggbaraNoder(delNr);
     if(!noder.length) return [];
-    if(noder.length >= 6){
-      var mid = Math.ceil(noder.length / 2);
-      var a = noder.slice(0, mid), b = noder.slice(mid);
-      return [
-        { titel: 'Test 1', nodes: a, antal: antalFor(a) },
-        { titel: 'Test 2', nodes: b, antal: antalFor(b) }
-      ];
-    }
-    return [ { titel: 'Test', nodes: noder, antal: antalFor(noder) } ];
+    var tests = [], cur = [], curTyp = 0;
+    noder.forEach(function(n){
+      var tc = typCount(n);
+      if(cur.length && curTyp + tc > TYP_CAP){ tests.push(cur); cur = []; curTyp = 0; }
+      cur.push(n); curTyp += tc;
+    });
+    if(cur.length) tests.push(cur);
+    return tests.map(function(ns, i){
+      return { titel: tests.length > 1 ? 'Test ' + (i + 1) : 'Test', nodes: ns, antal: antalFor(ns) };
+    });
   }
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (länkar till ramens ?view=test-fardigt) +

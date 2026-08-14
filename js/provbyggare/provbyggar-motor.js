@@ -808,6 +808,19 @@ function generateTest(config){
   // antal = SVARBARA ITEMS (a–d-uppgifter), inte frågemallar. Räkna subs mot totalen och trunkera
   // sista frågan så att exakt `antal` items byggs ("6" → 6 saker att svara på).
   const snabbItems = () => questions.filter(q => q.kind === 'snabb').reduce((s,q) => s + q.subs.length, 0);
+  // COVERAGE-SEEDNING (färdigt test, config.coverage): seeda EN fråga per generator så ALLA valda
+  // noders typer garanterat kommer med (kompakt, ≤2 items/typ). Fyll-loopen nedan toppar sedan upp
+  // till antal. Skapa-eget/k1/k2 (coverage=false) hoppar detta helt → byte-identiskt.
+  if(config.coverage && snabbGens.length){
+    shuffle([...snabbGens]).forEach(function(sg){
+      const q = sg.gen(seen, variantFor(sg.node));
+      if(q && q.subs && q.subs.length){
+        q.kind = 'snabb';
+        if(q.subs.length > 2) q.subs = q.subs.slice(0, 2);
+        questions.push(q);
+      }
+    });
+  }
   // Slumpa men inte samma generator för många gånger i rad
   if(snabbGens.length){
     let gensShuffled = shuffle([...snabbGens]);
@@ -1095,6 +1108,7 @@ function renderTestConfig(){
   });
   document.getElementById('generate-test-btn').onclick = () => {
     if((cfg.nodes || []).length === 0) return;
+    cfg.coverage = false;   // skapa-eget: respektera valt antal (ingen coverage-seedning) → byte-identiskt
     const questions = generateTest(cfg);
     state.test = {
       questions,
@@ -1355,6 +1369,7 @@ function renderTestResult(){
       cfg.nodes = (o.nodes || []).slice();
       cfg.antal = o.antal || 12;
       cfg.typ = o.typ || 'snabb';
+      cfg.coverage = true;   // färdigt test: seeda ALLA valda noders typer → speglar öva-bladet fullt
       if(o.varianter) cfg.varianter = o.varianter;
       var questions = generateTest(cfg);
       // fardigt-params stashas på provet → resultat-vyns "Nytt test" genererar ett NYTT färdigt test
