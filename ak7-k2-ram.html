@@ -143,6 +143,16 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .keypad{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0 4px;}
 .kp-btn{width:46px;height:42px;font-family:var(--mono);font-size:19px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;transition:background .12s;}
 .kp-btn:hover{background:var(--bg-soft);}
+/* AK8_UI-keypad i färdigt/provbyggar-test (rikTestUX) — motorn renderar .keypad-digits/.keypad-ops/.kp-key */
+.keypad-digits{display:grid;grid-template-columns:repeat(3,46px);gap:6px;}
+.keypad-ops{display:grid;grid-template-columns:46px;gap:6px;align-content:start;}
+.kp-key{height:44px;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:var(--mono);font-size:19px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;transition:background .12s;}
+.kp-key:hover{background:var(--bg-soft);} .kp-key:active{transform:scale(.92);}
+.kp-key.op{color:var(--navy,#0f1e2e);font-weight:700;} .kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px;} .kp-key.span2{grid-column:span 2;}
+/* Konfetti vid alla rätt (rikTestUX) — provbyggar-motorns visaKonfetti */
+.pb-konfetti-lager{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999;}
+.pb-konfetti{position:absolute;width:10px;height:14px;top:-30px;border-radius:2px;opacity:0;animation:pb-konfetti-fall linear forwards;}
+@keyframes pb-konfetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:1;}}
 
 /* SUMMERINGSKORT */
 .summary{text-align:center;padding:14px 0 6px;}
@@ -554,6 +564,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/metod/metod-brak-decimal.js"></script>
 <script src="js/mastery-k2.js"></script>
 <script src="js/data/k2-taxonomi.js"></script>
+<script src="js/data/k2-fardiga-test.js"></script>
 <script src="js/motor/ovamer/ovamer-k2.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-div.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-mult.js"></script>
@@ -564,6 +575,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/ovamer/ovamer-k2-luckor.js"></script>
 <!-- Delad provbyggare (samma modul som k1 monterar). Monteras med K2-config i boot nedan. -->
 <link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
+<script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/provbyggare/provbyggar-motor.js"></script>
 <script>
 // ── Del 2 blandad-form-drill: oäkta ↔ blandad (genBlandad ur BrakDecimalGen). Ny nod
@@ -846,6 +858,7 @@ function blandadEngine(){
       {del:'k2d7', titel:'Division med bråk'}
     ],
     generators: K2_TEST_GENERATORS, genNod: K2_GEN_NOD,   // 15 byggbara; visuella andel-noder = "byggs"
+    rikTestUX: true,   // sjuan k2: keypad (AK8_UI) + konfetti + variety i test-take (som åttan)
     // OPT2: mult-noden är EN kartnod men erbjuder variant-VAL i provet (ingen taxonomi-split, motorn orörd).
     varianter: {
       'brak-mult-rakna:rakna': {
@@ -861,6 +874,16 @@ function blandadEngine(){
     },
     nav: { navTo: pbNav, showView: pbShow, updateTutorContext: function(){} }
   });
+  // Deeplink: ?view=test-fardigt&del=k2dN&test=M — FÄRDIGT delkapitel-test (förvalt urval via K2_FARDIGA)
+  // → PB.byggFardigt bygger (coverage-seedning + färdigt-läge) och går direkt till take.
+  if(/[?&]view=test-fardigt/i.test(hs)){
+    var mfd = hs.match(/[?&]del=([a-z0-9]+)/i), mft = hs.match(/[?&]test=([0-9]+)/i);
+    var ftester = (window.K2_FARDIGA && mfd) ? K2_FARDIGA.tester(mfd[1]) : [];
+    var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal }); }
+    else { PB.setDel(mfd ? mfd[1] : null); pbNav('test-config'); }
+    return;
+  }
   // Deeplink: ?view=test-config[&del=k2dN] (från delkapitlens "Visa vad du kan"-flik)
   if(/[?&]view=test-config/i.test(hs)){
     var mdel = hs.match(/[?&]del=([a-z0-9]+)/i);
