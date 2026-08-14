@@ -14,7 +14,11 @@
   ].forEach(function(n){ BYGGBARA[n] = 1; });
 
   // Antal test-TYPER (snabb-generatorer) per nod — spegel av K2_GEN_NOD. Default 1 (varje nod = en generator).
-  var TYP_PER_NOD = {};
+  var TYP_PER_NOD = {
+    // sjuan k2-sweep: noder som fick fler generatorer
+    'andel-antal:rakna': 2, 'brak-blandad:rakna': 4, 'brak-forlanga:rakna': 2,
+    'brak-jmf-lika:begrepp': 2, 'brak-add:rakna': 3, 'brak-mult-rakna:rakna': 2
+  };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
