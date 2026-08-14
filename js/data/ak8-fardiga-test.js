@@ -46,8 +46,8 @@
     'brak-tid:rakna': 2, 'brak-add:rakna': 2,
     // dk8/dk10 potens: +decimalbas/bråkbas (evaluera), +avkoda (gp skriva), +x-i-nämnaren (gp losut)
     'pot-begrepp:evaluera': 3, 'gp-rakna:skriva': 2, 'gp-rakna:losut': 2,
-    // prioritering: +parentesⁿ (prio-potenser), +prio-med-negativa (neg-rakna:multdiv)
-    'prio-potenser': 2, 'neg-rakna:multdiv': 3
+    // prioritering: +parentesⁿ (prio-potenser), +prio-med-negativa (neg-rakna:multdiv), +räkneordning-bråk (div-bb)
+    'prio-potenser': 2, 'neg-rakna:multdiv': 3, 'brak-div-bb:rakna': 2
   };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 

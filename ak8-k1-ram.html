@@ -1005,7 +1005,29 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     return {key:'npr'+a+op+b+'_'+c, prompt:'Räkna ut (tänk på räkneordningen):   '+a+' '+op+' '+b+' · ('+M(c)+')',
       led:[{fraga:'multiplikationen först: '+b+' · ('+M(c)+')', varde:prod, facit:M(prod)}],
       slutVarde:res, slutHint:'', expl:a+' '+op+' '+b+' · ('+M(c)+') = '+a+' '+op+' ('+M(prod)+') = '+M(res)+'.'};
-  }) ] }
+  }) ] },
+  // dk7: blandade räknesätt/räkneordning med bråk (begränsad: a/b ± c/d ·/÷ e/f, positivt) → brak-div-bb:rakna
+  'brak-div-bb:prio': { snabb: [ function genPrioBrak(seen){
+    var F=[[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[1,6],[5,6]], subs=[], tries=0;
+    while(subs.length<3 && tries<120){ tries++;
+      var mdOp=pick(['·','/']), asOp=pick(['+','−']), f1=pick(F), f2=pick(F), f3=pick(F);
+      var pt, pn;
+      if(mdOp==='·'){ pt=f2[0]*f3[0]; pn=f2[1]*f3[1]; } else { pt=f2[0]*f3[1]; pn=f2[1]*f3[0]; }
+      var pg=gcd2(pt,pn); pt=pt/pg; pn=pn/pg;
+      var st, sn;
+      if(asOp==='+'){ st=f1[0]*pn + pt*f1[1]; sn=f1[1]*pn; } else { st=f1[0]*pn - pt*f1[1]; sn=f1[1]*pn; }
+      if(st<=0) continue;
+      var sg=gcd2(st,sn); st=st/sg; sn=sn/sg;
+      var key='pb'+f1[0]+f1[1]+asOp+f2[0]+f2[1]+mdOp+f3[0]+f3[1];
+      if(seen.has(key)) continue; seen.add(key);
+      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'mellanled',
+        prompt:'Räkna ut (räkneordning, enklaste form):   '+f1[0]+'/'+f1[1]+' '+asOp+' '+f2[0]+'/'+f2[1]+' '+mdOp+' '+f3[0]+'/'+f3[1],
+        led:[{fraga:'räkna '+f2[0]+'/'+f2[1]+' '+mdOp+' '+f3[0]+'/'+f3[1]+' först', varde: pt/pn, facit: pt+'/'+pn}],
+        slutTalj: st, slutNamn: sn,
+        explanation:'= '+f1[0]+'/'+f1[1]+' '+asOp+' '+pt+'/'+pn+' = '+st+'/'+sn+'.'});
+    }
+    return subs.length? {generator:'prio-brak', title:'Räkneordning med bråk', omrade:'brak-div', subs:subs} : null;
+  } ] }
   };
   var AK8_GEN_NOD = {
     'k2-blandad':'brak-blandad:rakna', 'k2-tid':'brak-tid:rakna', 'k2-forlanga':'brak-forlanga:rakna',
@@ -1043,8 +1065,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'dec-brak':'brak-blandad:rakna', 'dec-blandad':'brak-blandad:rakna', 'tid-dec':'brak-tid:rakna', 'add-dec-brak':'brak-add:rakna',
     // öva-täckning potens dk8/dk10: decimalbas→värde, bråkbas→bråksvar, gp→vanligt tal, x-i-nämnaren
     'pot-eval-dec':'pot-begrepp:evaluera', 'pot-eval-brak':'pot-begrepp:evaluera', 'gp-avkoda':'gp-rakna:skriva', 'gp-losut-namn':'gp-rakna:losut',
-    // öva-täckning prioritering: parentesⁿ (potenser), prioritering med negativa (multdiv)
-    'pot-paren':'prio-potenser', 'neg-prio':'neg-rakna:multdiv',
+    // öva-täckning prioritering: parentesⁿ (potenser), prioritering med negativa (multdiv), räkneordning med bråk
+    'pot-paren':'prio-potenser', 'neg-prio':'neg-rakna:multdiv', 'prio-brak':'brak-div-bb:rakna',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'
