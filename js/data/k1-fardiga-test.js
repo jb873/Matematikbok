@@ -20,7 +20,10 @@
   ].forEach(function(n){ BYGGBARA[n] = 1; });
 
   // Antal test-TYPER (snabb-generatorer) per nod — spegel av GEN_NOD. Styr coverage-splitten. Default 1.
-  var TYP_PER_NOD = { 'primtal:rakna':2, 'add-rakna:rakna':2, 'sub-rakna:rakna':2, 'avr-avrundning:begrepp':2 };
+  var TYP_PER_NOD = { 'primtal:rakna':2, 'sub-rakna:rakna':2, 'avr-avrundning:begrepp':2,
+    // sjuan-sweep tillägg:
+    'add-rakna:rakna':4, 'neg-rakna:addsub':3, 'neg-begrepp:begrepp':2, 'position:rakna':3,
+    'mult-rakna:stora':2, 'div-rakna:stora':2 };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).

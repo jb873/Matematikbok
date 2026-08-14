@@ -3943,6 +3943,29 @@ const TEST_GENERATORS = {
         return subs.length ? {generator:'talfoljd', title:'Fortsätt talföljden.', omrade:'position', subs:subs} : null;
       },
 
+      // ÖVA-TÄCKNING d1: vilket tal ligger mittemellan (numeric) → position:rakna
+      function genMittemellan(seen){
+        var subs=[], tries=0;
+        while(subs.length<3 && tries<50){ tries++;
+          var d=randPick([1,0.1,0.01]), a=avr(rInt(5,90)*d,3), b=avr(a+d,3), mid=avr((a+b)/2,4), key='mm'+a+'_'+b;
+          if(seen.has(key)) continue; seen.add(key);
+          subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'numeric', prompt:'Vilket tal ligger mittemellan '+komma(a)+' och '+komma(b)+'?', answer:mid, explanation:'Mitten av '+komma(a)+' och '+komma(b)+' är '+komma(mid)+'.' });
+        }
+        return subs.length ? {generator:'mittemellan', title:'Vilket tal ligger mittemellan', omrade:'position', subs:subs} : null;
+      },
+
+      // ÖVA-TÄCKNING d1: skriv ett tal i ett intervall (intervall) → position:rakna
+      function genPosIntervall(seen){
+        var subs=[], tries=0;
+        while(subs.length<3 && tries<50){ tries++;
+          var strikt=randPick([false,true]), d=randPick([1,0.1,0.01]), lo=avr(rInt(3,80)*d,3), hi=avr(lo+(strikt?d:2*d),3), ex=avr((lo+hi)/2,4), key='iv'+lo+'_'+hi+(strikt?'s':'m');
+          if(seen.has(key)) continue; seen.add(key);
+          var prompt=strikt ? 'Skriv ett tal som är större än '+komma(lo)+' men mindre än '+komma(hi) : 'Skriv ett tal mellan '+komma(lo)+' och '+komma(hi);
+          subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'intervall', prompt:prompt, min:lo, max:hi, incLow:!strikt, incHigh:!strikt, exempel:komma(ex), explanation:'t.ex. '+komma(ex)+'.' });
+        }
+        return subs.length ? {generator:'pos-intervall', title:'Skriv ett tal i intervallet', omrade:'position', subs:subs} : null;
+      },
+
       // position:resonera — jämför decimaltal (flerval via binary)
       function genJamfor(seen){
         const bank = [[9.1,9.09],[3.2,3.19],[5.5,5.45],[0.8,0.79],[7.3,7.29],[2.5,2.45],[4.6,4.59],[8.1,8.09],[6.4,6.39],[1.7,1.69],[4.05,4.5],[2.09,2.9]];
@@ -4061,7 +4084,20 @@ const TEST_GENERATORS = {
     ProvbyggarMotor.gen.numeric('add-huvud','Huvudräkning: addition','add-rakna', function(){
       if(Math.random()<0.4){ const a=avr(rInt(11,89)+rInt(1,9)/10,1), b=avr(rInt(11,89)+rInt(1,9)/10,1); return {key:'d'+a+'+'+b, prompt:'Räkna ut:   '+komma(a)+' + '+komma(b), ans:avr(a+b,1), expl:komma(a)+' + '+komma(b)+' = '+komma(avr(a+b,1))}; }
       const a=rInt(13,89), b=rInt(13,89); return {key:a+'+'+b, prompt:'Räkna ut:   '+a+' + '+b, ans:a+b, expl:a+' + '+b+' = '+(a+b)};
-    })
+    }),
+    // ÖVA-TÄCKNING d2: två tal ur summa+differens (numeric)
+    ProvbyggarMotor.gen.numeric('add-tvatal','Två tal ur summa och differens','add-rakna', function(){
+      var S, D; do { S=rInt(8,40); D=rInt(2,S-2); } while((S+D)%2!==0);
+      var storre=(S+D)/2, mindre=(S-D)/2, vill=randPick(['större','mindre']), ans=vill==='större'?storre:mindre;
+      return {key:'tv'+S+'_'+D+vill, prompt:'Två tal har summan '+S+' och differensen '+D+'. Vilket är det '+vill+' talet?', ans:ans, expl:'Större = '+storre+', mindre = '+mindre+'.'};
+    }),
+    // ÖVA-TÄCKNING d2: dela upp talet i två termer (sum)
+    function genAddTerm(seen){
+      var subs=[], tries=0;
+      while(subs.length<3 && tries<40){ tries++; var n=rInt(10,40), key='at'+n; if(seen.has(key)) continue; seen.add(key);
+        subs.push({label:String.fromCharCode(97+subs.length)+')', type:'sum', q:n+' = ___ + ___', target:n, operator:'+', antal:2, answer:null}); }
+      return subs.length? {generator:'add-term', title:'Dela upp talet i två termer', omrade:'add-rakna', subs:subs} : null;
+    }
   ]},
   'add-metoder': { snabb: [
     ProvbyggarMotor.gen.numeric('add-uppst','Uppställning: addition','add-metoder', function(){
@@ -4124,6 +4160,13 @@ const TEST_GENERATORS = {
     }),
     ProvbyggarMotor.gen.numeric('mult-rakna-stora','Multiplikation med stora tal','mult-rakna', function(){
       const a=rInt(12,49), b=rInt(3,9); return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
+    }),
+    // ÖVA-TÄCKNING d6: multiplikation med små tal + decimaler (decimal·heltal, decimal·decimal, decimal·stort)
+    ProvbyggarMotor.gen.numeric('mult-sma-dec','Multiplikation med små tal och decimaler','mult-rakna', function(){
+      var typ=rInt(1,3);
+      if(typ===1){ var d=avr(rInt(1,9)/10,1), h=rInt(2,20); return {key:'m1'+d+'x'+h, prompt:'Räkna ut:   '+komma(d)+' · '+h, ans:avr(d*h,2), expl:komma(d)+' · '+h+' = '+komma(avr(d*h,2))}; }
+      if(typ===2){ var a=avr(rInt(1,9)/10,1), b=avr(rInt(1,9)/10,1); return {key:'m2'+a+'x'+b, prompt:'Räkna ut:   '+komma(a)+' · '+komma(b), ans:avr(a*b,2), expl:komma(a)+' · '+komma(b)+' = '+komma(avr(a*b,2))}; }
+      var dd=randPick([0.2,0.5,1.5,2.5,4.5]), st=rInt(2,40)*randPick([100,1000]); return {key:'m3'+dd+'x'+st, prompt:'Räkna ut:   '+komma(dd)+' · '+st, ans:avr(dd*st,1), expl:komma(dd)+' · '+st+' = '+komma(avr(dd*st,1))};
     })
   ]},
 
@@ -4154,6 +4197,11 @@ const TEST_GENERATORS = {
     }),
     ProvbyggarMotor.gen.numeric('div-rakna-stora','Division med stora tal','div-rakna', function(){
       const b=rInt(3,9), q=rInt(11,20), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut:   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q};
+    }),
+    // ÖVA-TÄCKNING d7: division med små tal / dela MED decimaltal (12/0,1=120, 6/0,2=30, 0,6/0,1=6)
+    ProvbyggarMotor.gen.numeric('div-sma-dec','Division med små tal och decimaler','div-rakna', function(){
+      if(rInt(1,2)===1){ var dividend=rInt(2,40), d=randPick([0.1,0.2,0.25,0.5]), ans=avr(dividend/d,2); return {key:'dd'+dividend+'/'+d, prompt:'Räkna ut:   '+dividend+' / '+komma(d), ans:ans, expl:dividend+' / '+komma(d)+' = '+ans}; }
+      var q=rInt(2,9), dd=randPick([0.1,0.2,0.5]), a=avr(q*dd,2); return {key:'ds'+a+'/'+dd, prompt:'Räkna ut:   '+komma(a)+' / '+komma(dd), ans:q, expl:komma(a)+' / '+komma(dd)+' = '+q};
     })
   ]},
 
@@ -4204,6 +4252,12 @@ const TEST_GENERATORS = {
       if(rInt(1,2)===1){ const a=rInt(1,20); return {key:'mot'+a, prompt:'Vilket är motsatta talet till −'+a+'?', ans:a, expl:'Motsatta talet till −'+a+' är '+a+'.'}; }
       const start=rInt(-5,-1), step=rInt(1,3), t0=start, t1=start+step, t2=start+2*step, ans=start+3*step;
       return {key:'tf'+start+'-'+step, prompt:'Vilket tal kommer näst?   '+t0+', '+t1+', '+t2+', ___', ans:ans, expl:'Ökar med '+step+' varje steg → '+ans+'.'};
+    }),
+    // ÖVA-TÄCKNING d3: fallande talföljd genom noll (numeric)
+    ProvbyggarMotor.gen.numeric('neg-fallande','Fallande talföljd','neg-begrepp', function(){
+      var M=function(n){return(''+n).replace('-','−');};
+      var step=rInt(2,5), start=rInt(2,9), t0=start, t1=start-step, t2=start-2*step, ans=start-3*step;
+      return {key:'ff'+start+'-'+step, prompt:'Vilket tal kommer näst?   '+M(t0)+', '+M(t1)+', '+M(t2)+', ___', ans:ans, expl:'Minskar med '+step+' varje steg → '+M(ans)+'.'};
     })
   ]},
   'neg-rakna': { snabb: [
@@ -4213,6 +4267,20 @@ const TEST_GENERATORS = {
       else if(t===2){ const a=rInt(2,12), b=rInt(3,15); s=a+' − '+b; ans=a-b; }
       else { const a=rInt(1,9), b=rInt(1,9); s='−'+a+' − '+b; ans=-a-b; }
       return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
+    }),
+    // ÖVA-TÄCKNING d3: lös ut okänt tal (baklänges) — numeric
+    ProvbyggarMotor.gen.numeric('neg-losut-as','Vilket tal saknas?','neg-rakna', function(){
+      var M=function(n){return(''+n).replace('-','−');};
+      var typ=rInt(1,3);
+      if(typ===1){ var a=rInt(1,9), r=rInt(-9,5), b=a-r; return {key:'sb'+a+'_'+r, prompt:'Vilket tal saknas?   '+a+' − ▢ = '+M(r), ans:b, expl:a+' − '+M(b)+' = '+M(r)+'.'}; }
+      if(typ===2){ var x=rInt(-9,9), b2=rInt(1,9), r2=x+b2; return {key:'ab'+x+'_'+b2, prompt:'Vilket tal saknas?   ▢ + '+b2+' = '+M(r2), ans:x, expl:M(x)+' + '+b2+' = '+M(r2)+'.'}; }
+      var x3=rInt(-9,9), b3=rInt(1,9), r3=x3-(-b3); return {key:'db'+x3+'_'+b3, prompt:'Vilket tal saknas?   ▢ − ('+M(-b3)+') = '+M(r3), ans:x3, expl:M(x3)+' − ('+M(-b3)+') = '+M(r3)+'.'};
+    }),
+    // ÖVA-TÄCKNING d3: dubbeltecken a + (−b), a − (−b) — numeric
+    ProvbyggarMotor.gen.numeric('neg-dubbel','Räkna ut','neg-rakna', function(){
+      var M=function(n){return(''+n).replace('-','−');};
+      var a=randPick([-9,-7,-5,-4,-3,4,5,6,8,10,12,15,17]), b=rInt(2,9), op=randPick(['−','+']), bb=-b, ans=op==='−'?a-bb:a+bb;
+      return {key:'du'+a+op+b, prompt:'Räkna ut:   '+M(a)+' '+op+' ('+M(bb)+')', ans:ans, expl:M(a)+' '+op+' ('+M(bb)+') = '+M(ans)+'.'};
     }),
     ProvbyggarMotor.gen.numeric('neg-multdiv','Multiplikation och division med negativa tal','neg-rakna', function(){
       const t=rInt(1,3); let s, ans;
@@ -4359,7 +4427,14 @@ const GEN_NOD = {
   'bd-vaxla':       'bd-vaxla:rakna',
   'bd-tillbrak':    'bd-tillbrak:rakna',
   'bd-hundra':      'bd-hundra:rakna',
-  'bd-forlang':     'bd-forlang:rakna'
+  'bd-forlang':     'bd-forlang:rakna',
+  // ── ÖVA-TÄCKNING (sjuan-sweep): nya generatorer → rätt kart-cell ──
+  'add-tvatal':     'add-rakna:rakna', 'add-term':        'add-rakna:rakna',       // d2
+  'neg-losut-as':   'neg-rakna:addsub', 'neg-dubbel':     'neg-rakna:addsub',      // d3
+  'neg-fallande':   'neg-begrepp:begrepp',                                          // d3
+  'mittemellan':    'position:rakna', 'pos-intervall':    'position:rakna',        // d1
+  'mult-sma-dec':   'mult-rakna:stora',                                             // d6
+  'div-sma-dec':    'div-rakna:stora'                                               // d7
 };
 // Bokens delkapitel (kapitel 1) — samma indelning som delkapitel-sidorna och kartan (via taxonomins
 // visning.utbudslista d1–d8). Provbyggaren grupperar väljaren efter DESSA, inte ram-modellens DELAR_KO,
