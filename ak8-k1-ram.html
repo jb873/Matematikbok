@@ -987,7 +987,25 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
         led:[], slutKoeff:xk, slutExp:xe, explanation:'x = '+dk+'·10^'+de+' / ('+c+'·10^'+k+') = '+xk+'·10^'+xe+'.'});
     }
     return subs.length? {generator:'gp-losut-namn', title:'Lös ut x i grundpotens-division', omrade:'gp-rakna', subs:subs} : null;
-  } ] }
+  } ] },
+  // ── ÖVA-TÄCKNING · prioritering/räkneordning (mellanledNum) ──
+  // dk8: parentes upphöjt till potens (12−5)²=49 → prio-potenser
+  'prio-potenser-paren': { snabb: [ G.mellanledNum('pot-paren','Parentes upphöjt till potens','prio-potenser', function(){
+    var a=ri(3,15), b=ri(1,a-1), op=pick(['−','+']), inner=op==='−'?a-b:a+b, e=pick([2,3]), res=Math.pow(inner,e);
+    while(res>500){ e=2; res=inner*inner; }
+    return {key:'pp'+a+op+b+'^'+e, prompt:'Räkna ut:   ('+a+' '+op+' '+b+')^'+e,
+      led:[{fraga:'räkna ut parentesen: '+a+' '+op+' '+b, varde:inner, facit:String(inner)}],
+      slutVarde:res, slutHint:'parentesen upphöjt till '+e, expl:'('+a+' '+op+' '+b+')^'+e+' = '+inner+'^'+e+' = '+res+'.'};
+  }) ] },
+  // dk3: prioritering med negativa tal 13+2·(−5)=3 → neg-rakna:multdiv
+  'neg-rakna:prio': { snabb: [ G.mellanledNum('neg-prio','Prioritering med negativa tal','neg-rakna', function(){
+    var M=function(n){return(''+n).replace('-','−');};
+    var a=rInt(1,15), b=pick([2,3,4,5,6]), c=pick([-9,-8,-7,-6,-5,-4,-3,-2,2,3,4,5,6,7,8,9]), op=pick(['+','−']);
+    var prod=b*c, res=op==='+'?a+prod:a-prod;
+    return {key:'npr'+a+op+b+'_'+c, prompt:'Räkna ut (tänk på räkneordningen):   '+a+' '+op+' '+b+' · ('+M(c)+')',
+      led:[{fraga:'multiplikationen först: '+b+' · ('+M(c)+')', varde:prod, facit:M(prod)}],
+      slutVarde:res, slutHint:'', expl:a+' '+op+' '+b+' · ('+M(c)+') = '+a+' '+op+' ('+M(prod)+') = '+M(res)+'.'};
+  }) ] }
   };
   var AK8_GEN_NOD = {
     'k2-blandad':'brak-blandad:rakna', 'k2-tid':'brak-tid:rakna', 'k2-forlanga':'brak-forlanga:rakna',
@@ -1025,6 +1043,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'dec-brak':'brak-blandad:rakna', 'dec-blandad':'brak-blandad:rakna', 'tid-dec':'brak-tid:rakna', 'add-dec-brak':'brak-add:rakna',
     // öva-täckning potens dk8/dk10: decimalbas→värde, bråkbas→bråksvar, gp→vanligt tal, x-i-nämnaren
     'pot-eval-dec':'pot-begrepp:evaluera', 'pot-eval-brak':'pot-begrepp:evaluera', 'gp-avkoda':'gp-rakna:skriva', 'gp-losut-namn':'gp-rakna:losut',
+    // öva-täckning prioritering: parentesⁿ (potenser), prioritering med negativa (multdiv)
+    'pot-paren':'prio-potenser', 'neg-prio':'neg-rakna:multdiv',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'
