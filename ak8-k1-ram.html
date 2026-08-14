@@ -953,7 +953,41 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     var ans = op==='+' ? avr(fr[2]+dec,2) : avr(fr[2]-dec,2);
     if(ans<0){ op='+'; ans=avr(fr[2]+dec,2); }
     return {key:'adb'+fr[0]+'/'+fr[1]+op+dec, prompt:'Räkna ut (svar i decimalform):   '+fr[0]+'/'+fr[1]+' '+op+' '+komma(dec), ans:ans, expl:komma(fr[2])+' '+op+' '+komma(dec)+' = '+komma(ans)+'.'};
-  }) ] }
+  }) ] },
+  // ── ÖVA-TÄCKNING · Potens-familjen (dk8, dk10) ──
+  // Potens med decimalbas → värde (numeric) → pot-begrepp:evaluera
+  'pot-begrepp:eval-dec': { snabb: [ G.numeric('pot-eval-dec','Beräkna decimalpotens','pot-begrepp', function(){
+    var b=pick([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]), e=pick([2,3]), ans=avr(Math.pow(b,e), e===2?2:3);
+    return {key:'ped'+b+'^'+e, prompt:'Beräkna:   '+komma(b)+'^'+e, ans:ans, expl:komma(b)+'^'+e+' = '+komma(ans)+'.'};
+  }) ] },
+  // Potens med bråkbas → bråksvar (brak) → pot-begrepp:evaluera
+  'pot-begrepp:eval-brak': { snabb: [ function genPotEvalBrak(seen){
+    var bank=[[1,2],[3,4],[2,3],[1,3],[1,4],[1,5],[2,5],[3,5]], subs=[], tries=0;
+    while(subs.length<3 && tries<50){ tries++;
+      var fr=pick(bank), e=pick([2,3]), t=Math.pow(fr[0],e), n=Math.pow(fr[1],e), g=gcd2(t,n), T=t/g, N=n/g;
+      var key='peb'+fr[0]+'/'+fr[1]+'^'+e; if(seen.has(key)) continue; seen.add(key);
+      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:'Beräkna (enklaste form):   ('+fr[0]+'/'+fr[1]+')^'+e, talj:T, namn:N, explanation:'('+fr[0]+'/'+fr[1]+')^'+e+' = '+T+'/'+N+'.'});
+    }
+    return subs.length? {generator:'pot-eval-brak', title:'Beräkna potens med bråkbas', omrade:'pot-begrepp', subs:subs} : null;
+  } ] },
+  // Grundpotensform → vanligt tal (avkodning, numeric) → gp-rakna:skriva
+  'gp-rakna:avkoda': { snabb: [ G.numeric('gp-avkoda','Skriv som vanligt tal','gp-rakna', function(){
+    var dec=pick([false,false,true]), koeff=dec? avr(ri(11,99)/10,1) : ri(1,9), e=pick([2,3,4,5,6]), ans=avr(koeff*Math.pow(10,e),0);
+    return {key:'gpa'+koeff+'e'+e, prompt:'Skriv som vanligt tal:   '+komma(koeff)+'·10^'+e, ans:ans, expl:komma(koeff)+'·10^'+e+' = '+ans+'.'};
+  }) ] },
+  // Lös ut x i nämnaren, grundpotens-division (gp) → gp-rakna:losut
+  'gp-rakna:losut-namn': { snabb: [ function genGpLosutNamn(seen){
+    var subs=[], tries=0;
+    while(subs.length<3 && tries<60){ tries++;
+      var xk=ri(1,4), c=ri(1,4); if(xk*c>9) continue;
+      var xe=ri(1,4), k=ri(1,3), dk=xk*c, de=xe+k, key='gln'+dk+'e'+de+'/'+c+'e'+k;
+      if(seen.has(key)) continue; seen.add(key);
+      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'gp',
+        prompt:'Lös ut x (svar i grundpotensform):   '+dk+'·10^'+de+' / x = '+c+'·10^'+k,
+        led:[], slutKoeff:xk, slutExp:xe, explanation:'x = '+dk+'·10^'+de+' / ('+c+'·10^'+k+') = '+xk+'·10^'+xe+'.'});
+    }
+    return subs.length? {generator:'gp-losut-namn', title:'Lös ut x i grundpotens-division', omrade:'gp-rakna', subs:subs} : null;
+  } ] }
   };
   var AK8_GEN_NOD = {
     'k2-blandad':'brak-blandad:rakna', 'k2-tid':'brak-tid:rakna', 'k2-forlanga':'brak-forlanga:rakna',
@@ -989,6 +1023,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'neg-losut-as':'neg-rakna:addsub', 'neg-losut-md':'neg-rakna:multdiv', 'neg-dubbel':'neg-rakna:addsub', 'neg-jmf':'neg-begrepp:begrepp',
     // öva-täckning bråk dk4/dk5: decimal↔bråk, min→decimaltimmar, bråk±decimal
     'dec-brak':'brak-blandad:rakna', 'dec-blandad':'brak-blandad:rakna', 'tid-dec':'brak-tid:rakna', 'add-dec-brak':'brak-add:rakna',
+    // öva-täckning potens dk8/dk10: decimalbas→värde, bråkbas→bråksvar, gp→vanligt tal, x-i-nämnaren
+    'pot-eval-dec':'pot-begrepp:evaluera', 'pot-eval-brak':'pot-begrepp:evaluera', 'gp-avkoda':'gp-rakna:skriva', 'gp-losut-namn':'gp-rakna:losut',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'

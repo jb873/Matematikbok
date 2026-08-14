@@ -43,7 +43,9 @@
     // dk3 Negativa: +lös-ut (addsub/multdiv), +dubbeltecken (addsub), +jämför (begrepp)
     'neg-rakna:addsub': 4, 'neg-rakna:multdiv': 2, 'neg-begrepp:begrepp': 2,
     // dk4/dk5 bråk: decimal→bråk + decimal→blandad (brak-blandad), min→dec (tid), bråk±dec (add)
-    'brak-tid:rakna': 2, 'brak-add:rakna': 2
+    'brak-tid:rakna': 2, 'brak-add:rakna': 2,
+    // dk8/dk10 potens: +decimalbas/bråkbas (evaluera), +avkoda (gp skriva), +x-i-nämnaren (gp losut)
+    'pot-begrepp:evaluera': 3, 'gp-rakna:skriva': 2, 'gp-rakna:losut': 2
   };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 
