@@ -880,7 +880,20 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
         min:lo, max:hi, incLow:!strikt, incHigh:!strikt, exempel:komma(ex), explanation:'t.ex. '+komma(ex)+'.' });
     }
     return subs.length ? {generator:'intervall', title:'Skriv ett tal i intervallet', omrade:'position', subs:subs} : null;
-  } ] }
+  } ] },
+  // ── ÖVA-TÄCKNING · Beräkningar (dk2): division MED decimaltal + decimal×decimal (numeric) ──
+  'div-rakna:sma-dec': { snabb: [ G.numeric('div-dec-sma','Dividera med ett decimaltal','div-rakna', function(){
+    var ans=ri(2,20)*pick([1,10]), d=pick([0.1,0.2,0.25,0.5]), dividend=avr(ans*d,3);
+    return {key:'dds'+dividend+'/'+d, prompt:'Räkna ut:   '+komma(dividend)+' / '+komma(d), ans:ans, expl:komma(dividend)+' / '+komma(d)+' = '+ans+'.'};
+  }) ] },
+  'div-rakna:storasma-dec': { snabb: [ G.numeric('div-dec-stora','Dividera med ett decimaltal','div-rakna', function(){
+    var ans=ri(2,99)*pick([10,100,1000]), d=pick([0.3,0.03,0.4,0.04,0.05,0.5]), dividend=avr(ans*d,4);
+    return {key:'ddl'+dividend+'/'+d, prompt:'Räkna ut:   '+komma(dividend)+' / '+komma(d), ans:ans, expl:komma(dividend)+' / '+komma(d)+' = '+ans+'.'};
+  }) ] },
+  'mult-rakna:sma-dec': { snabb: [ G.numeric('mult-dec-dec','Multiplicera två decimaltal','mult-rakna', function(){
+    var a=avr(ri(1,9)/10,1), b=avr(ri(1,9)/10,1), ans=avr(a*b,2);
+    return {key:'mdd'+a+'x'+b, prompt:'Räkna ut:   '+komma(a)+' · '+komma(b), ans:ans, expl:komma(a)+' · '+komma(b)+' = '+komma(ans)+'.'};
+  }) ] }
   };
   var AK8_GEN_NOD = {
     'k2-blandad':'brak-blandad:rakna', 'k2-tid':'brak-tid:rakna', 'k2-forlanga':'brak-forlanga:rakna',
@@ -910,6 +923,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     // öva-täckning Grunder (position): ord→tal, decimal-huvudräkning, N-delar större/mindre, mittemellan, intervall
     'skriv-tal':'position:begrepp', 'huvud-dec':'position:rakna', 'plats-steg':'position:rakna',
     'mittemellan':'position:rakna', 'intervall':'position:rakna',
+    // öva-täckning Beräkningar (dk2): division med decimaltal + decimal×decimal
+    'div-dec-sma':'div-rakna:sma', 'div-dec-stora':'div-rakna:storasma', 'mult-dec-dec':'mult-rakna:sma',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'

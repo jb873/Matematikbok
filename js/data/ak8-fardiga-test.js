@@ -37,7 +37,9 @@
   // täcker ALLA sina typer och testen TILLSAMMANS täcker delkapitlets alla quiz-bara typer. Default 1.
   var TYP_PER_NOD = {
     'position:rakna': 6, 'position:begrepp': 2, 'primtal:rakna': 3, 'delbarhet:rakna': 2,
-    'neg-rakna:addsub': 2, 'pot-begrepp:skriva': 2, 'brak-blandad:rakna': 2, 'brak-jmf-lika:begrepp': 2
+    'neg-rakna:addsub': 2, 'pot-begrepp:skriva': 2, 'brak-blandad:rakna': 2, 'brak-jmf-lika:begrepp': 2,
+    // dk2 Beräkningar: division med decimaltal + decimal×decimal
+    'div-rakna:sma': 2, 'div-rakna:storasma': 2, 'mult-rakna:sma': 2
   };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 
