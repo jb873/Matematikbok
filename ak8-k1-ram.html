@@ -893,6 +893,36 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
   'mult-rakna:sma-dec': { snabb: [ G.numeric('mult-dec-dec','Multiplicera två decimaltal','mult-rakna', function(){
     var a=avr(ri(1,9)/10,1), b=avr(ri(1,9)/10,1), ans=avr(a*b,2);
     return {key:'mdd'+a+'x'+b, prompt:'Räkna ut:   '+komma(a)+' · '+komma(b), ans:ans, expl:komma(a)+' · '+komma(b)+' = '+komma(ans)+'.'};
+  }) ] },
+  // ── ÖVA-TÄCKNING · Negativa tal (dk3) ──
+  // Lös ut okänt tal (missing operand) — add/sub → neg-rakna:addsub
+  'neg-rakna:addsub-losut': { snabb: [ G.numeric('neg-losut-as','Vilket tal saknas?','neg-rakna', function(){
+    var M=function(n){return(''+n).replace('-','−');};
+    var typ=pick(['subbox','addbox','boxsub']);
+    if(typ==='subbox'){ var a=rInt(1,9), r=rInt(-9,5), b=a-r; return {key:'sb'+a+'_'+r, prompt:'Vilket tal saknas?   '+a+' − ▢ = '+M(r), ans:b, expl:a+' − '+M(b)+' = '+M(r)+'.'}; }
+    if(typ==='addbox'){ var x=rInt(-9,9), b2=rInt(1,9), r2=x+b2; return {key:'ab'+x+'_'+b2, prompt:'Vilket tal saknas?   ▢ + '+b2+' = '+M(r2), ans:x, expl:M(x)+' + '+b2+' = '+M(r2)+'.'}; }
+    var x3=rInt(-9,9), b3=rInt(1,9), r3=x3-b3; return {key:'xb'+x3+'_'+b3, prompt:'Vilket tal saknas?   ▢ − '+b3+' = '+M(r3), ans:x3, expl:M(x3)+' − '+b3+' = '+M(r3)+'.'};
+  }) ] },
+  // Lös ut okänt tal — mult/div → neg-rakna:multdiv
+  'neg-rakna:multdiv-losut': { snabb: [ G.numeric('neg-losut-md','Vilket tal saknas?','neg-rakna', function(){
+    var M=function(n){return(''+n).replace('-','−');}, NZ=[-9,-8,-7,-6,-5,-4,-3,-2,2,3,4,5,6,7,8,9];
+    var typ=pick(['mul','divL','divR']);
+    if(typ==='mul'){ var a=pick(NZ), x=pick(NZ), p=a*x; return {key:'ml'+a+'_'+x, prompt:'Vilket tal saknas?   '+M(a)+' · ▢ = '+M(p), ans:x, expl:M(a)+' · '+M(x)+' = '+M(p)+'.'}; }
+    if(typ==='divL'){ var x2=pick(NZ), b=rInt(2,9), d=x2*b; return {key:'dl'+x2+'_'+b, prompt:'Vilket tal saknas?   ▢ / '+b+' = '+M(x2), ans:d, expl:M(d)+' / '+b+' = '+M(x2)+'.'}; }
+    var x4=rInt(2,9)*pick([-1,1]), q=pick(NZ), num=q*x4; return {key:'dr'+num+'_'+q, prompt:'Vilket tal saknas?   '+M(num)+' / ▢ = '+M(q), ans:x4, expl:M(num)+' / '+M(x4)+' = '+M(q)+'.'};
+  }) ] },
+  // Dubbeltecken: a − (−b), a + (−b) → neg-rakna:addsub
+  'neg-rakna:addsub-dubbel': { snabb: [ G.numeric('neg-dubbel','Räkna ut','neg-rakna', function(){
+    var M=function(n){return(''+n).replace('-','−');};
+    var a=pick([-9,-7,-5,-4,-3,4,5,6,8,10,12,15,17]), b=rInt(2,9), op=pick(['−','+']), bb=-b;
+    var ans = op==='−' ? a-bb : a+bb;
+    return {key:'db'+a+op+b, prompt:'Räkna ut:   '+M(a)+' '+op+' ('+M(bb)+')', ans:ans, expl:M(a)+' '+op+' ('+M(bb)+') = '+M(ans)+'.'};
+  }) ] },
+  // Jämför negativa tals storlek (< > =) → neg-begrepp:begrepp
+  'neg-begrepp:jmf': { snabb: [ G.flerval('neg-jmf','Vilket tecken? (< > =)','neg-begrepp', function(){
+    var M=function(n){return(''+n).replace('-','−');};
+    var a=rInt(-9,9), b=rInt(-9,9), ans=a<b?'<':a>b?'>':'=';
+    return {key:'jmf'+a+'_'+b, prompt:'Vilket tecken gör påståendet sant?   '+M(a)+' ▢ '+M(b), options:['<','>','='], answer:ans, expl:M(a)+' '+ans+' '+M(b)+'.'};
   }) ] }
   };
   var AK8_GEN_NOD = {
@@ -925,6 +955,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'mittemellan':'position:rakna', 'intervall':'position:rakna',
     // öva-täckning Beräkningar (dk2): division med decimaltal + decimal×decimal
     'div-dec-sma':'div-rakna:sma', 'div-dec-stora':'div-rakna:storasma', 'mult-dec-dec':'mult-rakna:sma',
+    // öva-täckning Negativa (dk3): lös ut okänt tal, dubbeltecken, jämför storlek
+    'neg-losut-as':'neg-rakna:addsub', 'neg-losut-md':'neg-rakna:multdiv', 'neg-dubbel':'neg-rakna:addsub', 'neg-jmf':'neg-begrepp:begrepp',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'
