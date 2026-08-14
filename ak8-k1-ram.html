@@ -923,6 +923,36 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     var M=function(n){return(''+n).replace('-','−');};
     var a=rInt(-9,9), b=rInt(-9,9), ans=a<b?'<':a>b?'>':'=';
     return {key:'jmf'+a+'_'+b, prompt:'Vilket tecken gör påståendet sant?   '+M(a)+' ▢ '+M(b), options:['<','>','='], answer:ans, expl:M(a)+' '+ans+' '+M(b)+'.'};
+  }) ] },
+  // ── ÖVA-TÄCKNING · Räkna med bråk (dk4) + Add/sub bråk (dk5): decimal↔bråk-omvandling ──
+  // Decimal → bråk (enklaste form, brak-typ) → brak-blandad:rakna
+  'brak-blandad:dec-brak': { snabb: [ function genDecBrak(seen){
+    var bank=[[0.5,1,2],[0.25,1,4],[0.75,3,4],[0.2,1,5],[0.4,2,5],[0.6,3,5],[0.8,4,5],[0.125,1,8],[0.375,3,8],[0.1,1,10],[0.3,3,10],[0.7,7,10]];
+    var subs=[],tries=0;
+    while(subs.length<4 && tries<60){ tries++; var b=pick(bank), key='db'+b[0]; if(seen.has(key)) continue; seen.add(key);
+      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:'Skriv '+komma(b[0])+' som bråk i enklaste form:', talj:b[1], namn:b[2], explanation:komma(b[0])+' = '+b[1]+'/'+b[2]+'.'}); }
+    return subs.length? {generator:'dec-brak', title:'Skriv decimaltal som bråk', omrade:'brak-blandad', subs:subs} : null;
+  } ] },
+  // Decimal → blandad form (blandad-typ) → brak-blandad:rakna
+  'brak-blandad:dec-blandad': { snabb: [ function genDecBlandad(seen){
+    var bank=[[1.6,8,5],[2.75,11,4],[1.5,3,2],[2.25,9,4],[1.2,6,5],[3.5,7,2],[1.25,5,4],[2.4,12,5],[1.75,7,4],[2.2,11,5]];
+    var subs=[],tries=0;
+    while(subs.length<4 && tries<60){ tries++; var b=pick(bank), key='dbl'+b[0]; if(seen.has(key)) continue; seen.add(key);
+      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'blandad', prompt:'Skriv '+komma(b[0])+' i blandad form (enklaste form):', talj:b[1], namn:b[2], explanation:komma(b[0])+' i blandad form.'}); }
+    return subs.length? {generator:'dec-blandad', title:'Skriv decimaltal i blandad form', omrade:'brak-blandad', subs:subs} : null;
+  } ] },
+  // Minuter → decimaltimmar (numeric) → brak-tid:rakna
+  'brak-tid:dec': { snabb: [ G.numeric('tid-dec','Tid i decimalform','brak-tid', function(){
+    var b=pick([[15,0.25],[30,0.5],[45,0.75],[6,0.1],[12,0.2],[36,0.6],[3,0.05],[9,0.15],[24,0.4],[48,0.8]]);
+    return {key:'td'+b[0], prompt:'Hur många timmar är '+b[0]+' minuter? (decimalform)', ans:b[1], enhet:'h', expl:b[0]+' min = '+komma(b[1])+' h.'};
+  }) ] },
+  // Bråk ± decimal, svar i decimalform (numeric) → brak-add:rakna
+  'brak-add:dec': { snabb: [ G.numeric('add-dec-brak','Bråk och decimaltal','brak-add', function(){
+    var fr=pick([[1,2,0.5],[1,4,0.25],[3,4,0.75],[1,5,0.2],[2,5,0.4],[3,5,0.6],[4,5,0.8],[1,10,0.1],[3,10,0.3]]);
+    var dec=pick([0.1,0.2,0.3,0.5]), op=pick(['+','−']);
+    var ans = op==='+' ? avr(fr[2]+dec,2) : avr(fr[2]-dec,2);
+    if(ans<0){ op='+'; ans=avr(fr[2]+dec,2); }
+    return {key:'adb'+fr[0]+'/'+fr[1]+op+dec, prompt:'Räkna ut (svar i decimalform):   '+fr[0]+'/'+fr[1]+' '+op+' '+komma(dec), ans:ans, expl:komma(fr[2])+' '+op+' '+komma(dec)+' = '+komma(ans)+'.'};
   }) ] }
   };
   var AK8_GEN_NOD = {
@@ -957,6 +987,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'div-dec-sma':'div-rakna:sma', 'div-dec-stora':'div-rakna:storasma', 'mult-dec-dec':'mult-rakna:sma',
     // öva-täckning Negativa (dk3): lös ut okänt tal, dubbeltecken, jämför storlek
     'neg-losut-as':'neg-rakna:addsub', 'neg-losut-md':'neg-rakna:multdiv', 'neg-dubbel':'neg-rakna:addsub', 'neg-jmf':'neg-begrepp:begrepp',
+    // öva-täckning bråk dk4/dk5: decimal↔bråk, min→decimaltimmar, bråk±decimal
+    'dec-brak':'brak-blandad:rakna', 'dec-blandad':'brak-blandad:rakna', 'tid-dec':'brak-tid:rakna', 'add-dec-brak':'brak-add:rakna',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'
