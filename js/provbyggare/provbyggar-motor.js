@@ -305,6 +305,14 @@ function renderSubInput(qNum, subIdx, s){
         </span>
       </div>
     `;
+  } else if(s.type === 'intervall'){
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-eq">Ditt tal:</span>
+        <input type="text" class="test-sub-input" inputmode="decimal" style="width:120px;" data-sub-input="${idBase}-iv">
+      </div>
+    `;
   }
 
   return `
@@ -380,6 +388,9 @@ function readSubAnswer(qNum, subIdx, s){
     const n = document.querySelector(`[data-sub-input="${idBase}-bn"]`);
     const hv = h && h.value.trim(), tv = t && t.value.trim(), nv = n && n.value.trim();
     return (hv || tv || nv) ? { hel: hv || '', t: tv || '', n: nv || '' } : null;
+  } else if(s.type === 'intervall'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-iv"]`);
+    return inp && inp.value.trim() ? inp.value.trim() : null;
   }
   return null;
 }
@@ -444,6 +455,8 @@ function restoreSubAnswer(qNum, subIdx, s, val){
       const t = document.querySelector(`[data-sub-input="${idBase}-bt"]`); if(t) t.value = val.t || '';
       const n = document.querySelector(`[data-sub-input="${idBase}-bn"]`); if(n) n.value = val.n || '';
     }
+  } else if(s.type === 'intervall'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-iv"]`); if(inp) inp.value = val;
   }
 }
 
@@ -567,6 +580,14 @@ function gradeSub(s, ans){
     const enklast = (gcd(t, n) === 1);                       // enklaste form
     return {status: (vardeOk && proper && enklast) ? 'correct' : 'wrong', given: given};
   }
+  if(s.type === 'intervall'){
+    // Skriv ett tal i ett intervall — range-rättning (öppet/slutet via incLow/incHigh), inte exakt värde.
+    const v = parseFloat(String(ans).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
+    if(isNaN(v)) return {status:'wrong', given: String(ans)};
+    const okLow = s.incLow ? (v >= s.min) : (v > s.min);
+    const okHigh = s.incHigh ? (v <= s.max) : (v < s.max);
+    return {status: (okLow && okHigh) ? 'correct' : 'wrong', given: String(ans)};
+  }
   return {status:'skipped'};
 }
 
@@ -588,6 +609,7 @@ function svarSignatur(q){
       case 'gp':            return 'gp' + s.slutKoeff + 'e' + s.slutExp;
       case 'potensmult':    return 'pm' + s.bas + '^' + s.exp;
       case 'blandad':       return 'bl' + s.talj + '/' + s.namn;
+      case 'intervall':     return 'iv' + s.min + '_' + s.max;
       default:              return '?';
     }
   });
@@ -681,6 +703,9 @@ function renderReviewSub(sr){
     questionText = sub.prompt;
     const bh = Math.floor(sub.talj / sub.namn), br = sub.talj % sub.namn, bg = gcd(br, sub.namn) || 1;
     correctAnswerText = bh + ' ' + (br / bg) + '/' + (sub.namn / bg) + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'intervall'){
+    questionText = sub.prompt;
+    correctAnswerText = 'ett tal ' + (sub.incLow ? '≥ ' : '> ') + komma(sub.min) + ' och ' + (sub.incHigh ? '≤ ' : '< ') + komma(sub.max) + (sub.exempel ? ' (t.ex. ' + sub.exempel + ')' : '');
   }
 
   return `

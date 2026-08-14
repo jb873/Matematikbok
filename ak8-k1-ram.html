@@ -830,7 +830,57 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     if(Math.abs(v1-v2) < 1e-9) return null;
     var a=t1+'/'+n1, b=t2+'/'+n2, stor = v1>v2 ? a : b;
     return { key:a+'_'+b, prompt:'Vilket bråk är störst: '+a+' eller '+b+'?', options: shuffle([a,b]), answer: stor, expl:stor+' är störst.' };
-  }) ] }
+  }) ] },
+  // ── ÖVA-TÄCKNING · Grunder (position): typer som öva-bladet har men testet saknade ──
+  // Tiosystemet · skriv som tal (N tiondelar/hundradelar/tusendelar + ord → siffror) → position:begrepp
+  'position:begrepp-skriv': { snabb: [ G.numeric('skriv-tal','Skriv som tal','position', function(){
+    var typ = pick(['tiondel','hundradel','tusendel','ord']);
+    if(typ==='tiondel'){ var a=ri(11,99); return {key:'td'+a, prompt:'Skriv som tal:   '+a+' tiondelar', ans:avr(a/10,3), expl:a+' tiondelar = '+komma(avr(a/10,3))+'.'}; }
+    if(typ==='hundradel'){ var b=ri(11,99); return {key:'hd'+b, prompt:'Skriv som tal:   '+b+' hundradelar', ans:avr(b/100,3), expl:b+' hundradelar = '+komma(avr(b/100,3))+'.'}; }
+    if(typ==='tusendel'){ var c=ri(101,999); return {key:'ts'+c, prompt:'Skriv som tal:   '+c+' tusendelar', ans:avr(c/1000,3), expl:c+' tusendelar = '+komma(avr(c/1000,3))+'.'}; }
+    var bank=[['åttatusen sjutton',8017],['femhundratre komma sju',503.7],['nitton komma nio',19.9],['tre tiotal och fem tiondelar',30.5],['sextio komma nollfyra',60.04],['ett hundra komma två',100.2]];
+    var w=pick(bank); return {key:'ord'+w[1], prompt:'Skriv med siffror:   '+w[0], ans:w[1], expl:w[0]+' = '+komma(w[1])+'.'};
+  }) ] },
+  // Räkna · huvudräkning med decimaltal (0,7+0,4; ±0,1/0,01/0,001) → position:rakna
+  'position:rakna-huvud': { snabb: [ G.numeric('huvud-dec','Huvudräkning med decimaltal','position', function(){
+    var typ = pick(['steg','add','sub']);
+    if(typ==='steg'){ var steg=pick([0.1,0.01,0.001]); var base=avr(ri(100,9999)/1000,3); var op=pick(['+','−']);
+      var ans=avr(op==='+'?base+steg:base-steg,3); if(ans<0){ op='+'; ans=avr(base+steg,3); }
+      return {key:'p'+base+op+steg, prompt:'Räkna ut:   '+komma(base)+' '+op+' '+komma(steg), ans:ans, expl:komma(base)+' '+op+' '+komma(steg)+' = '+komma(ans)+'.'}; }
+    var x=avr(ri(1,90)/10,1), y=avr(ri(1,90)/10,1);
+    if(typ==='add'){ return {key:'a'+x+'+'+y, prompt:'Räkna ut:   '+komma(x)+' + '+komma(y), ans:avr(x+y,2), expl:komma(x)+' + '+komma(y)+' = '+komma(avr(x+y,2))+'.'}; }
+    if(x<y){ var t=x; x=y; y=t; }
+    return {key:'s'+x+'-'+y, prompt:'Räkna ut:   '+komma(x)+' − '+komma(y), ans:avr(x-y,2), expl:komma(x)+' − '+komma(y)+' = '+komma(avr(x-y,2))+'.'};
+  }) ] },
+  // Räkna · N tiondelar/hundradelar/tusendelar större/mindre → position:rakna
+  'position:rakna-steg': { snabb: [ G.numeric('plats-steg','Större eller mindre','position', function(){
+    var enh=pick([['tiondel',0.1],['hundradel',0.01],['tusendel',0.001]]);
+    var n=ri(1,9), rikt=pick(['större','mindre']), x=avr(ri(10,995)/10,1), d=avr(n*enh[1],3);
+    var ans = rikt==='större' ? avr(x+d,4) : avr(x-d,4);
+    if(ans<0){ rikt='större'; ans=avr(x+d,4); }
+    var namn=(n===1?enh[0]:enh[0]+'ar');
+    return {key:'st'+x+'_'+n+enh[0]+rikt, prompt:'Vilket tal är '+n+' '+namn+' '+rikt+' än '+komma(x)+'?', ans:ans, expl:komma(x)+' '+(rikt==='större'?'+':'−')+' '+komma(d)+' = '+komma(ans)+'.'};
+  }) ] },
+  // Räkna · vilket tal ligger mittemellan → position:rakna
+  'position:rakna-mitt': { snabb: [ G.numeric('mittemellan','Vilket tal ligger mittemellan','position', function(){
+    var d=pick([1,0.1,0.01]), a=avr(ri(5,900)*d,3), b=avr(a+d,3), mid=avr((a+b)/2,4);
+    return {key:'mm'+a+'_'+b, prompt:'Vilket tal ligger mittemellan '+komma(a)+' och '+komma(b)+'?', ans:mid, expl:'Mitten av '+komma(a)+' och '+komma(b)+' är '+komma(mid)+'.'};
+  }) ] },
+  // Räkna · skriv ett tal i ett intervall (NY typ intervall, range-rättad) → position:rakna
+  'position:rakna-intervall': { snabb: [ function genIntervall(seen){
+    var subs=[], tries=0;
+    while(subs.length<3 && tries<60){ tries++;
+      var strikt=pick([false,true]), d=pick([1,0.1,0.01]);
+      var lo=avr(ri(3,800)*d,3), hi=avr(lo+(strikt?d:2*d),3), ex=avr((lo+hi)/2,4);
+      var key='iv'+lo+'_'+hi+(strikt?'s':'m');
+      if(seen.has(key)) continue; seen.add(key);
+      var prompt=strikt ? 'Skriv ett tal som är större än '+komma(lo)+' men mindre än '+komma(hi)
+                        : 'Skriv ett tal mellan '+komma(lo)+' och '+komma(hi);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'intervall', prompt:prompt,
+        min:lo, max:hi, incLow:!strikt, incHigh:!strikt, exempel:komma(ex), explanation:'t.ex. '+komma(ex)+'.' });
+    }
+    return subs.length ? {generator:'intervall', title:'Skriv ett tal i intervallet', omrade:'position', subs:subs} : null;
+  } ] }
   };
   var AK8_GEN_NOD = {
     'k2-blandad':'brak-blandad:rakna', 'k2-tid':'brak-tid:rakna', 'k2-forlanga':'brak-forlanga:rakna',
@@ -857,6 +907,9 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'pos-baklanges':'position:rakna', 'tecken-ekv':'neg-rakna:addsub',
     'pot-skrivmult':'pot-begrepp:skriva', 'pot-tabell':'pot-begrepp:tabell',
     'brak-oakta-blandad':'brak-blandad:rakna', 'brak-jmf-olika':'brak-jmf-lika:begrepp',
+    // öva-täckning Grunder (position): ord→tal, decimal-huvudräkning, N-delar större/mindre, mittemellan, intervall
+    'skriv-tal':'position:begrepp', 'huvud-dec':'position:rakna', 'plats-steg':'position:rakna',
+    'mittemellan':'position:rakna', 'intervall':'position:rakna',
     'nym-sma':'mult-rakna:sma', 'nyd-sma':'div-rakna:sma',
     'nym-storasma':'mult-rakna:storasma', 'nyd-storasma':'div-rakna:storasma',
     'ny-lana':'brak-lana:rakna', 'ny-mforkorta':'brak-mult-forkorta:rakna', 'ny-reciprok':'brak-div-reciprok:rakna'
