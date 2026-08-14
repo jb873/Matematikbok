@@ -1087,10 +1087,12 @@ function renderTestConfig(){
 function renderTestTake(){
   if(!state.test) { navTo('test-config'); return; }
   const t = state.test;
-  document.getElementById('test-take-back').onclick = (e) => {
-    e.preventDefault();
-    navTo('test-config');
-  };
+  // Färdigt test har inga inställningar → göm provbyggarens "Tillbaka till inställningar".
+  const takeBack = document.getElementById('test-take-back');
+  if(takeBack){
+    takeBack.style.display = t.fardigt ? 'none' : '';
+    takeBack.onclick = (e) => { e.preventDefault(); navTo('test-config'); };
+  }
 
   const body = document.getElementById('test-take-body');
 
@@ -1114,7 +1116,7 @@ function renderTestTake(){
         <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
           <button class="btn primary" id="start-test">Börja testet -></button>
           <button class="btn" onclick="window.print()">Skriv ut</button>
-          <button class="btn subtle" onclick="navTo('test-config')">Ändra inställningar</button>
+          ${t.fardigt ? '' : '<button class="btn subtle" onclick="navTo(\'test-config\')">Ändra inställningar</button>'}
         </div>
       </div>
     `;
@@ -1283,14 +1285,21 @@ function renderTestResult(){
     }).join('')}
 
     <div class="test-result-actions">
-      <button class="btn primary" id="retry-test">Gör om samma test</button>
-      <button class="btn" id="new-test">Nytt test</button>
-      <button class="btn" onclick="window.print()">Skriv ut resultatet</button>
-      <button class="btn subtle" onclick="navTo('kapitel')">Tillbaka till kapitlet</button>
+      ${t.fardigt ? `
+        <button class="btn primary" id="new-test">Gör ett nytt test</button>
+        ${t.fardigt.harderTest ? '<button class="btn" id="level2-test">Test nivå 2</button>' : ''}
+      ` : `
+        <button class="btn primary" id="retry-test">Gör om samma test</button>
+        <button class="btn" id="new-test">Nytt test</button>
+        <button class="btn" onclick="window.print()">Skriv ut resultatet</button>
+        <button class="btn subtle" onclick="navTo('kapitel')">Tillbaka till kapitlet</button>
+      `}
     </div>
   `;
 
-  document.getElementById('retry-test').onclick = () => {
+  // Färdigt test: ingen "Gör om samma"/skapa-eget — bara nytt färdigt test (+ ev. nivå 2 senare).
+  const retryBtn = document.getElementById('retry-test');
+  if(retryBtn) retryBtn.onclick = () => {
     t.answers = {};
     t.currentIdx = -1;
     navTo('test-take');
@@ -1301,6 +1310,8 @@ function renderTestResult(){
     state.test = null;
     navTo('test-config');
   };
+  const lvl2Btn = document.getElementById('level2-test');
+  if(lvl2Btn) lvl2Btn.onclick = () => { if(t.fardigt && t.fardigt.harderTest) byggFardigt(t.fardigt.harderTest); };
 
   // Konfetti vid ALLA rätt (åttan, config.rikTestUX) — samma belöning som drillarna.
   if(config.rikTestUX && totalSubs > 0 && pct === 100) visaKonfetti();
