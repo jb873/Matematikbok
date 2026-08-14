@@ -1849,6 +1849,10 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px}
 .kp-key.span2{grid-column:span 2}
 .kp-hint{text-align:center;font-size:12px;color:var(--ink-faint);margin-top:8px}
+/* Konfetti vid alla rätt i färdigt/provbyggar-test (rikTestUX) — provbyggar-motorns visaKonfetti */
+.pb-konfetti-lager{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
+.pb-konfetti{position:absolute;width:10px;height:14px;top:-30px;border-radius:2px;opacity:0;animation:pb-konfetti-fall linear forwards}
+@keyframes pb-konfetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:1}}
 
 /* ==== DEL 3: TABELLTRÄNING ==== */
 .tabell-level-grid{display:flex;flex-direction:column;gap:10px;margin-top:6px}
@@ -2536,6 +2540,7 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
   </div>
 </div>
 
+<script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/provbyggare/provbyggar-motor.js"></script>
 <script>
 // ============================================================
@@ -4387,6 +4392,7 @@ const PB = ProvbyggarMotor.montera({
   generators:      TEST_GENERATORS,
   genNod:          GEN_NOD,
   forelasningTips: FORELASNING_TIPS,
+  rikTestUX:       true,   // sjuan k1: keypad (AK8_UI) + konfetti + variety i test-take (som åttan)
   nav: {
     navTo: navTo, showView: showView,
     updateTutorContext: function(){ state.currentKO = null; state.currentFormaga = null; updateTutorContext(); }
@@ -9126,6 +9132,17 @@ function repSkippaPanel(){
   // adjustLevel-taket; utelämnad => 3 (default). Enkel-nivå (1) = ingen klätterstege.
   var mmx = hs.match(/[?&]maxniva=([1-3])\b/i);
   if(mmx) window.RAM_MAXNIVA = parseInt(mmx[1], 10);
+  // Deeplink: ?view=test-fardigt&del=dN&test=M — FÄRDIGT delkapitel-test (förvalt urval via K1_FARDIGA)
+  // → PB.byggFardigt bygger (coverage-seedning + färdigt-läge) och går direkt till take.
+  if(/[?&]view=test-fardigt/i.test(hs)){
+    var mfd = hs.match(/[?&]del=([a-z0-9-]+)/i), mft = hs.match(/[?&]test=([0-9]+)/i);
+    var ftester = (window.K1_FARDIGA && mfd) ? K1_FARDIGA.tester(mfd[1]) : [];
+    var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
+    renderKapitel();
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal }); }
+    else { PB.setDel(mfd ? mfd[1] : null); navTo('test-config'); }
+    return;
+  }
   var mv = hs.match(/view=([a-z-]+)/i);
   if(mv && (mv[1] === 'test-config' || mv[1] === 'skattning')){
     if(mv[1] === 'test-config'){
@@ -9184,6 +9201,7 @@ function repSkippaPanel(){
 <script src="js/motor/potens/tio-prefix-drill.js"></script>
 <!-- Taxonomin (bok-delkapitel via visning.utbudslista) — provbyggaren driver väljaren ur den, som kartan/delkapitel-sidorna. -->
 <script src="js/data/k1-taxonomi.js"></script>
+<script src="js/data/k1-fardiga-test.js"></script>
 <!-- Mastery-loggning (elev-lokal, localStorage). Observerar getTutorScore; rör ej drill-logik. -->
 <script src="js/mastery.js"></script>
 <!-- Engångs-migreringar av mastery-loggen (idempotent, localStorage). Efter mastery.js. -->
