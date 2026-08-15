@@ -205,10 +205,10 @@
 
     // FAS 3: INGEN dokumenträknare ("Dokument N / 4") — de fyra är en intern designgräns, inte nivåer.
     var origflagga = viewIdx === 0 ? 'Originaluppgifterna' : 'Samma uppgifter och metoder – andra tal';
-    // Varv-markering (BEHÅLLS oförändrad; reformulering föreslagen till Joachim, byggs ej här).
+    // Varv-markering: REN metod-uppmaning (Joachims val) — röjer inte cykeln (inget "varv"/"kommer igen").
+    // Visas när eleven är tillbaka på första dokumentet efter minst ett varv; neutral ikon.
     var varvHTML = (viewIdx === 0 && varv > 0)
-      ? '<div class="varv-banner"><span>🔁</span><div>Du har gått ' + (varv === 1 ? 'ett helt varv' : (varv + ' varv'))
-        + '. Uppgifterna kommer igen med de ursprungliga talen – pröva om du minns <em>metoden</em>, inte svaren.</div></div>'
+      ? '<div class="varv-banner"><span>💡</span><div>Fokusera på <em>hur</em> du räknar – inte på att minnas svaret.</div></div>'
       : '';
 
     var sheet = '<div class="ovn-sheet">';
