@@ -26,8 +26,17 @@
     'mult-rakna:stora':2, 'div-rakna:stora':2 };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 
+  // NIANS dk1 (Åk 9-spåret): explicit nod-scope. Öva 1–3:s ak9-noder spänner flera delkapitel
+  // (d2/d5/d6) → ingen enskild utbudslista fångar dem, så listan anges direkt. KonceptTÄCKER öva-
+  // bladen med ramens testbara noder: decimal-mult/div testas via mult-sma-dec/div-sma-dec, som i
+  // ramens GEN_NOD mappar till :stora-noderna (öva/ak9 loggar samma koncept till :sma/:storasma —
+  // ramen är kronjuvel/orörd, så testet loggar decimaler till :stora; båda noderna färgas, ingen
+  // evidens tappas). Ren additiv gren — d1–d8 orörda, åk7/åk8-testen byte-identiska.
+  var AK9_DK1_NODER = ['mult-rakna:pow10', 'div-rakna:pow10', 'mult-rakna:stora', 'div-rakna:stora', 'prio-prioritering:rakna'];
+
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
   function byggbaraNoder(del){
+    if(del === 'ak9-dk1') return AK9_DK1_NODER.filter(function(n){ return BYGGBARA[n]; });   // nians explicita scope
     var tax = window.K1_TAXONOMI; if(!tax || !tax.noder) return [];
     var ut = [];
     tax.noder.forEach(function(n){

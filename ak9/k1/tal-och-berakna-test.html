@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 9 · Taluppfattning · Test</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --navy-mid:#1a3045; --gold:#9a7228; --gold-lt:#c49a40; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
+  *{ box-sizing:border-box; margin:0; padding:0; } body{ background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.6; }
+  .topnav{ position:sticky; top:0; z-index:100; background:var(--navy); border-bottom:1px solid rgba(255,255,255,.07); padding:0 28px; height:52px; display:flex; align-items:center; }
+  .nav-brand{ font-family:var(--cinzel); font-size:13px; font-weight:500; letter-spacing:.14em; color:rgba(255,255,255,.9); text-transform:uppercase; display:flex; align-items:center; gap:10px; }
+  .nav-brand span{ color:var(--gold-lt); letter-spacing:.1em; } .nav-sep{ color:rgba(255,255,255,.2); margin:0 2px; }
+  .hero{ background:var(--navy); padding:40px 28px 34px; text-align:center; }
+  .brodsmulor{ font-family:var(--cinzel); font-size:12px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px; line-height:1.5; }
+  .brodsmulor a{ color:var(--gold-lt); text-decoration:none; } .brodsmulor a:hover{ text-decoration:underline; }
+  .brodsmulor .skiljare{ color:rgba(255,255,255,.32); margin:0 .55em; } .brodsmulor .aktuell{ color:rgba(255,255,255,.92); }
+  .hero-eyebrow{ font-family:var(--cinzel); font-size:11px; letter-spacing:.2em; color:var(--gold-lt); text-transform:uppercase; margin-bottom:10px; }
+  h1.hero-title{ font-family:var(--serif); font-size:clamp(28px,5vw,40px); font-weight:500; line-height:1.15; color:#fff; }
+  h1.hero-title em{ font-style:italic; color:var(--gold-lt); }
+  .hero p{ max-width:600px; margin:12px auto 0; color:rgba(255,255,255,.72); font-size:15px; }
+  .wrap{ max-width:720px; margin:0 auto; padding:30px 24px 60px; }
+  .test-intro{ color:var(--ink-soft); font-size:15px; margin-bottom:24px; }
+  .test-rad{ display:grid; grid-template-columns:1fr; gap:14px; }
+  .test-kort{ display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--gold); border-radius:10px; padding:18px 22px; text-decoration:none; color:inherit; transition:box-shadow .15s, border-color .15s; }
+  .test-kort:hover{ box-shadow:0 3px 14px rgba(15,30,46,.09); border-left-color:var(--gold-lt); }
+  .test-kort .k-titel{ font-size:18px; font-weight:600; color:var(--ink); }
+  .test-kort .k-sub{ font-size:13px; color:var(--ink-faint); margin-top:2px; }
+  .test-kort .k-antal{ font-family:var(--cinzel); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--navy-mid); border-radius:5px; padding:6px 12px; flex-shrink:0; }
+  .test-not{ font-size:12.5px; color:var(--ink-faint); margin-top:22px; line-height:1.6; }
+  .test-tom{ font-size:14px; color:var(--ink-faint); font-style:italic; }
+  footer{ border-top:1px solid var(--paper-dk); padding:24px 28px; display:flex; justify-content:space-between; align-items:center; max-width:720px; margin:0 auto; color:var(--ink-faint); font-size:12px; }
+  footer span{ font-family:var(--cinzel); font-size:11px; letter-spacing:.1em; }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 9</span></div>
+</nav>
+
+<header class="hero">
+  <nav class="brodsmulor" aria-label="Brödsmulor">
+    <a href="../../index.html">Matematik</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <a href="../index.html">Årskurs 9</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <a href="index.html">Taluppfattning</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <a href="tal-och-berakna.html">Tal och beräkningar</a>
+    <span class="skiljare" aria-hidden="true">›</span>
+    <span class="aktuell" aria-current="page">Test</span>
+  </nav>
+  <div class="hero-eyebrow">Åk 9-spåret · Test</div>
+  <h1 class="hero-title">Testa <em>allt</em></h1>
+  <p>Färdiga test hopsatta ur delkapitlets färdigheter – klicka och kör direkt.</p>
+</header>
+
+<main class="wrap">
+  <p class="test-intro">Testen täcker samma räknefärdigheter som Öva och Färdighetsträning: multiplikation och
+  division med tiopotenser, med decimaltal och stora tal, samt prioriteringsregeln. Rätt på ett test rör
+  kartans färg precis som en drill.</p>
+  <div class="test-rad" id="test-rad"></div>
+  <p class="test-not">Testet plockar nya tal varje gång. Klicka på "Gör ett nytt test" i slutet för en ny omgång.</p>
+</main>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Årskurs 9 · Kapitel 1 · Test</span>
+</footer>
+
+<script src="../../js/data/k1-taxonomi.js"></script>
+<script src="../../js/data/k1-fardiga-test.js"></script>
+<script>
+(function(){
+  'use strict';
+  var RAM = '../../ak7-k1-ram.html';   // ramens färdigt-läge (rikTestUX på i ramen) — motorn RÖRS EJ
+  var DEL = 'ak9-dk1';                  // nians explicita nod-scope i K1_FARDIGA (additiv gren)
+  var rad = document.getElementById('test-rad');
+  var tester = (window.K1_FARDIGA && K1_FARDIGA.tester(DEL)) || [];
+  if(!tester.length){ rad.innerHTML = '<p class="test-tom">Testet byggs.</p>'; return; }
+  tester.forEach(function(t, i){
+    var a = document.createElement('a'); a.className = 'test-kort';
+    a.href = RAM + '?view=test-fardigt&del=' + DEL + '&test=' + (i + 1);
+    a.innerHTML = '<span><span class="k-titel">' + (tester.length > 1 ? 'Test ' + (i + 1) : 'Test') + '</span>'
+      + '<span class="k-sub">' + (tester.length > 1 ? 'Del ' + (i + 1) + ' av ' + tester.length + ' – tillsammans täcker de hela delkapitlet' : 'Hela delkapitlet') + '</span></span>'
+      + '<span class="k-antal">' + t.antal + ' uppgifter</span>';
+    rad.appendChild(a);
+  });
+})();
+</script>
+<script src="../../js/elevfeedback.js" defer></script>
+</body>
+</html>
