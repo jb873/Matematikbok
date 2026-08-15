@@ -35,7 +35,7 @@
   // Öva 1: tiopotens FAST, operand FRI med samma antal decimaler (svårighet oförändrad).
   //  opFirst=true → operanden skrivs FÖRE tiopotensen (som i Joachims doc rad "602,04 · 1000").
   function tpMult(tp, dec, loInt, hiInt, orig, opFirst){
-    return { orig: Object.assign({ tp: tp }, orig),
+    return { orig: Object.assign({ tp: tp }, orig), logg: 'mult-rakna:pow10',   // Öva 1 — ×tiopotens
       sample: function(rng){ var m = ri(rng, loInt, hiInt) / Math.pow(10, dec); return { tp: tp, op: rund(m) }; },
       villkor: function(t){ return decimaler(t.op) === dec; },
       facit: function(t){ return rund(t.op * t.tp); },
@@ -43,7 +43,7 @@
       mellan: function(){ return null; } };
   }
   function tpDiv(tp, dec, loInt, hiInt, orig){
-    return { orig: Object.assign({ tp: tp }, orig),
+    return { orig: Object.assign({ tp: tp }, orig), logg: 'div-rakna:pow10',   // Öva 1 — ÷tiopotens
       sample: function(rng){ var m = ri(rng, loInt, hiInt) / Math.pow(10, dec); return { tp: tp, tal: rund(m) }; },
       villkor: function(t){ return decimaler(t.tal) === dec; },
       facit: function(t){ return rund(t.tal / t.tp); },
@@ -54,8 +54,12 @@
   // Öva 1: "vilket tal ska stå i rutan". ▢ = REN TIOPOTENS (villkoret på relationen). Rutans position fast.
   // form 'faktor-vanster': ▢ · a = a·▢ ;  'faktor-hoger': a · ▢ = ...  (ruta som faktor)
   // form 'namnare': a/▢ = a/tp  (ruta i nämnaren)
+  // LOGGAS INTE: förståelseträning. Poängen är att BRYTA rutinen (tänka baklänges), och en uppgift
+  // vars mål är att bryta rutin ska inte mata en mätare som belönar rutin (Joachims beslut). loggSkal
+  // står i klartext så nästa genomgång ser skillnaden mellan "omappad lucka" och "ska ej mappas".
+  var RUTA_SKAL = 'Förståelseträning — bryter rutin, loggas inte (Joachims beslut).';
   function rutaFaktor(boxFirst, dec, loInt, hiInt, orig){
-    return { orig: orig,
+    return { orig: orig, logg: null, loggSkal: RUTA_SKAL,
       sample: function(rng){ var a = rund(ri(rng, loInt, hiInt) / Math.pow(10, dec)); var box = rp(rng, TIOPOT); return { a: a, box: box }; },
       villkor: function(t){ return decimaler(t.a) === dec && TIOPOT.indexOf(t.box) >= 0; },
       facit: function(t){ return t.box; },                                  // sökt tal = rutan (tiopotensen)
@@ -64,7 +68,7 @@
       mellan: function(){ return null; } };
   }
   function rutaNamnare(dec, loInt, hiInt, orig){
-    return { orig: orig,
+    return { orig: orig, logg: null, loggSkal: RUTA_SKAL,
       sample: function(rng){ var a = rund(ri(rng, loInt, hiInt) / Math.pow(10, dec)); var box = rp(rng, TIOPOT); return { a: a, box: box }; },
       villkor: function(t){ return decimaler(t.a) === dec && TIOPOT.indexOf(t.box) >= 0; },
       facit: function(t){ return t.box; },
@@ -74,7 +78,7 @@
   // Öva 1 grupp 5: identitet där ▢ balanserar tiopotens-operationerna på SAMMA operand a.
   //  A: a/tp = a·▢   → ▢ = 1/tp ;  B: tp·a = a/▢  → ▢ = 1/tp ;  C: a/▢ = a·tp → ▢ = 1/tp ; D: a·▢ = a/tp → ▢ = 1/tp
   function rutaRelation(form, dec, loInt, hiInt, orig){
-    return { orig: orig,
+    return { orig: orig, logg: null, loggSkal: RUTA_SKAL,
       sample: function(rng){ var a = rund(ri(rng, loInt, hiInt) / Math.pow(10, dec)); var tp = rp(rng, TIOPOT); return { a: a, tp: tp }; },
       villkor: function(t){ return decimaler(t.a) === dec && TIOPOT.indexOf(t.tp) >= 0; },
       facit: function(t){ return rund(1 / t.tp); },                          // ▢ = reciprok tiopotens
@@ -88,7 +92,7 @@
 
   // Öva 2 grupp 1/3: ren decimal-multiplikation (endast svar). Decimalstruktur per faktor bevaras.
   function multDec(decA, loA, hiA, decB, loB, hiB, orig){
-    return { orig: orig,
+    return { orig: orig, logg: 'mult-rakna:sma',   // Öva 2 — decimal-multiplikation
       sample: function(rng){ return { a: rund(ri(rng, loA, hiA) / Math.pow(10, decA)), b: rund(ri(rng, loB, hiB) / Math.pow(10, decB)) }; },
       villkor: function(t){ return decimaler(t.a) === decA && decimaler(t.b) === decB; },
       facit: function(t){ return rund(t.a * t.b); },
@@ -99,7 +103,7 @@
   // Öva 2 grupp 2/4: division med mellanled = SKALA BÅDA LEDEN (×samma faktor → nämnaren blir helt tal).
   //  Skalfaktorn ges av divisorns decimaler. Villkor: skalad division går JÄMNT UT (avslutande decimal).
   function divSkala(divisorSet, dec, loInt, hiInt, orig){
-    return { orig: orig,
+    return { orig: orig, logg: 'div-rakna:sma',   // Öva 2 — division via förlängning (skala båda leden)
       sample: function(rng){ var d = rp(rng, divisorSet); var t = rund(ri(rng, loInt, hiInt) / Math.pow(10, dec)); return { tal: t, d: d }; },
       villkor: function(t){
         if(decimaler(t.tal) !== dec) return false;
@@ -117,7 +121,7 @@
 
   // Öva 2 grupp 5 a,b: stor heltalsmultiplikation (endast svar).
   function multStor(loA, hiA, stegA, loB, hiB, stegB, orig){
-    return { orig: orig,
+    return { orig: orig, logg: 'mult-rakna:stora',   // Öva 2 grupp 5 a,b — stora heltal
       sample: function(rng){ return { a: ri(rng, loA, hiA) * stegA, b: ri(rng, loB, hiB) * stegB }; },
       villkor: function(t){ return Number.isInteger(t.a) && Number.isInteger(t.b) && t.a > 0 && t.b > 0; },
       facit: function(t){ return t.a * t.b; },
@@ -126,7 +130,7 @@
   }
   // Öva 2 grupp 5 c,d: multiplikation med KOMPENSATION (÷10^p på a, ×10^p på b → båda HELA TAL).
   function multKomp(heltalLo, heltalHi, decB, orig){
-    return { orig: orig,
+    return { orig: orig, logg: 'mult-rakna:storasma',   // Öva 2 grupp 5 c,d — stora × liten (kompensation)
       sample: function(rng){
         var p = decB;                                                          // kompensations-exponent = b:s decimaler
         var aBas = ri(rng, heltalLo, heltalHi);                                // → a = aBas·10^p (delbart), b = bBas·10^-p
@@ -187,7 +191,7 @@
         multKomp(1, 9, 1, {a:7000, b:0.4, p:1, aKomp:700, bKomp:4}), multKomp(1, 9, 2, {a:33000, b:0.03, p:2, aKomp:330, bKomp:3}) ] }
     ] },
     ova3: { titel: 'Prioriteringsregeln', grupper: [
-      { rubrik: 'Beräkna – visa mellanled', uppgifter: [
+      { rubrik: 'Beräkna – visa mellanled', logg: 'prio-prioritering:rakna', uppgifter: [
         // a − b·c
         P({ orig:{a:29,b:9,c:3}, sample:function(r){return{a:ri(r,15,40),b:ri(r,3,9),c:ri(r,2,6)};},
           villkor:function(t){return t.a-t.b*t.c>=0;}, facit:function(t){return t.a-t.b*t.c;},
@@ -205,7 +209,7 @@
           villkor:function(t){return t.c-t.d>=0;}, facit:function(t){return t.a+t.b*(t.c-t.d);},
           prompt:function(t){return t.a+' + '+t.b+' · ('+t.c+' − '+t.d+')';}, mellan:function(t){return t.a+' + '+t.b+' · '+(t.c-t.d);} })
       ] },
-      { rubrik: 'Beräkna – visa mellanled', uppgifter: [
+      { rubrik: 'Beräkna – visa mellanled', logg: 'prio-prioritering:rakna', uppgifter: [
         // a·b·c − d
         P({ orig:{a:2,b:3,c:6,d:5}, sample:function(r){return{a:ri(r,2,5),b:ri(r,2,6),c:ri(r,2,7),d:ri(r,2,9)};},
           villkor:function(t){return t.a*t.b*t.c-t.d>=0;}, facit:function(t){return t.a*t.b*t.c-t.d;},
@@ -223,8 +227,8 @@
           villkor:function(t){return t.b-t.c*t.d>=0;}, facit:function(t){return t.a*(t.b-t.c*t.d)+t.e;},
           prompt:function(t){return t.a+' · ('+t.b+' − '+t.c+' · '+t.d+') + '+t.e;}, mellan:function(t){return t.a+' · '+(t.b-t.c*t.d)+' + '+t.e;} })
       ] },
-      { rubrik: 'Beräkna – visa mellanled', uppgifter: [
-        // (a·b − c)/d   — bråkstreck grupperar
+      { rubrik: 'Beräkna – visa mellanled', logg: 'prio-prioritering:rakna', uppgifter: [
+        // (a·b − c)/d   — bråkstreck grupperar (division i prio-noden, ingen egen bråk-nod)
         P({ orig:{a:3,b:7,c:6,d:5}, sample:function(r){return{a:ri(r,2,9),b:ri(r,2,9),c:ri(r,1,20),d:ri(r,2,9)};},
           villkor:function(t){var n=t.a*t.b-t.c;return n>=0 && n%t.d===0;}, facit:function(t){return (t.a*t.b-t.c)/t.d;},
           prompt:function(t){return 'BRAK('+t.a+' · '+t.b+' − '+t.c+')('+t.d+')';}, mellan:function(t){return 'BRAK('+(t.a*t.b-t.c)+')('+t.d+')';} }),
@@ -253,19 +257,25 @@
   };
 
   // ── GENERERING: en uppgift → {prompt, mellan, facit}. variantIndex 0 = orig; ≥1 = sampla tills villkor håller. ──
+  // logg = mastery-nod (ko:formaga) evidensen skrivs till; null = loggas EJ (loggSkal = skälet i klartext).
   function genUppgift(u, dokId, idx, variant){
-    if(variant === 0 && u.orig){ var t0 = u.orig; return { prompt: u.prompt(t0), mellan: u.mellan(t0), facit: u.facit(t0), tal: t0, _kastade: 0 }; }
+    var logg = ('logg' in u) ? u.logg : null, loggSkal = u.loggSkal || null;
+    if(variant === 0 && u.orig){ var t0 = u.orig; return { prompt: u.prompt(t0), mellan: u.mellan(t0), facit: u.facit(t0), tal: t0, logg: logg, loggSkal: loggSkal, _kastade: 0 }; }
     var rng = mkRng(seedOf(dokId, idx, variant) ^ 0x9E3779B9), kastade = 0, t;
     for(var i = 0; i < 400; i++){ t = u.sample(rng); if(u.villkor(t)){ break; } kastade++; t = null; }
     if(!t){ t = u.orig; }   // fallback: originalet (ska nästan aldrig hända)
-    return { prompt: u.prompt(t), mellan: u.mellan(t), facit: u.facit(t), tal: t, _kastade: kastade };
+    return { prompt: u.prompt(t), mellan: u.mellan(t), facit: u.facit(t), tal: t, logg: logg, loggSkal: loggSkal, _kastade: kastade };
   }
 
   function genereraDokument(dokId, variant){
     var mall = MALLAR[dokId]; if(!mall) return null;
     var idx = 0;
     return { dokId: dokId, variant: variant, titel: mall.titel, grupper: mall.grupper.map(function(g){
-      return { rubrik: g.rubrik, uppgifter: g.uppgifter.map(function(u){ return genUppgift(u, dokId, idx++, variant); }) };
+      return { rubrik: g.rubrik, uppgifter: g.uppgifter.map(function(u){
+        var t = genUppgift(u, dokId, idx++, variant);
+        if(t.logg == null && !t.loggSkal && g.logg) t.logg = g.logg;   // grupp-nivå fallback (Öva 3)
+        return t;
+      }) };
     }) };
   }
 

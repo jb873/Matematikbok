@@ -282,6 +282,20 @@ const OVERRIDES = {
   'prio-lagar:associativa':  { roll:'karna', visning:{ utbudslista:'d2', grupp:'Prioriteringsregeln', gruppordning:4, radordning:2.1, titel:'Associativa lagen',  etikett:'räkna', formagaKey:'associativa',  niva:null } },
   'prio-lagar:distributiva': { roll:'karna', visning:{ utbudslista:'d2', grupp:'Prioriteringsregeln', gruppordning:4, radordning:2.2, titel:'Distributiva lagen', etikett:'räkna', formagaKey:'distributiva', niva:null } }
 };
+
+// ---- AK9_RELEVANS: åk9-relevans som REGEL (regenererings-säker), SKILD från OVERRIDES ----
+// delArk är per-OMRÅDE och skulle övertagga begrepp/problem/metoder. Nians öva tränar enskilda
+// räkna-lövnoder → egen lövnods-regel som KOMPONERAR ak9 ovanpå befintlig ak7/ak8-relevans.
+// OVERRIDES förblir strukturella undantag; den här listan bär bara vilka lövnoder som ingår i
+// nians kurs. Fyll på en rad per nod när nians innehåll byggs (efter-hand billig).
+// Första inkrementet — nians dk1 Öva-dokument 1–3 (ingen minNiva sätts i år):
+const AK9_RELEVANS = {
+  'mult-rakna:pow10': 'mal', 'div-rakna:pow10': 'mal',                  // Öva 1 — tiopotenser (×/÷)
+  'mult-rakna:sma': 'mal',   'div-rakna:sma': 'mal',                    // Öva 2 — decimal × / ÷ via förlängning
+  'mult-rakna:stora': 'mal', 'mult-rakna:storasma': 'mal',             // Öva 2 grupp 5 — stora tal + kompensation
+  'prio-prioritering:rakna': 'mal'                                      // Öva 3 — prioritering (bråkstreck = division)
+};
+
 for(const n of noder){
   const o = OVERRIDES[n.id];
   if(o){
@@ -290,6 +304,8 @@ for(const n of noder){
     if('visning' in o){ n.visning = o.visning; if(o.visning && o.visning.titel) n.namn = o.visning.titel; }
     if(o.doljKarta) n.doljKarta = true;
   }
+  // ak9-regeln läggs SIST → komponeras ovanpå OVERRIDES slut-relevans (ersätter aldrig ak7/ak8).
+  if(AK9_RELEVANS[n.id]){ n.arskursRelevans = Object.assign({}, n.arskursRelevans, { ak9: AK9_RELEVANS[n.id] }); }
 }
 
 // ---- skriv fil ----

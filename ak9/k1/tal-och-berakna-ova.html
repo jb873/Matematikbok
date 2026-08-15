@@ -143,6 +143,8 @@
 </footer>
 
 <script src="../../js/motor/ak9-k1-ova-variant.js"></script>
+<!-- Öva-loggen: skriver evidens till samma k1-mastery-store som åttans blad (delad nod). GDPR: localStorage. -->
+<script src="../../js/mastery.js"></script>
 <script>
 (function(){
   'use strict';
@@ -202,7 +204,7 @@
   function bokstav(i){ return String.fromCharCode(97 + i); }   // 0→a, 1→b …
 
   function renderDoc(dokId, viewIdx){
-    vy.dokId = dokId; vy.viewIdx = viewIdx;
+    vy.dokId = dokId; vy.viewIdx = viewIdx; vy.loggat = false;   // evidens loggas en gång per dokument-visning
     var st = posFor(dokId), pos = st.pos, varv = st.varv;
     var doc = API.genereraDokument(dokId, viewIdx);
     document.getElementById('doc-titel').textContent = doc.titel;
@@ -242,7 +244,7 @@
         }
         // facit-data på svarsrutan för self-check
         var inp = rad.querySelector('.ova-ans') || rad.querySelector('input.ova-box');
-        if(inp){ inp.dataset.facit = u.facit; inp.addEventListener('input', uppdateraKlarknapp); }
+        if(inp){ inp.dataset.facit = u.facit; if(u.logg) inp.dataset.logg = u.logg; inp.addEventListener('input', uppdateraKlarknapp); }
         gr.appendChild(rad);
       });
       body.appendChild(gr);
@@ -271,11 +273,22 @@
 
   // facit: markera varje ruta rätt/fel + visa mellanled
   document.getElementById('btn-facit').addEventListener('click', function(){
+    var loggMast = window.Mastery && window.Mastery.loggaForsok;
     document.querySelectorAll('#doc-body input').forEach(function(inp){
       var f = Number(inp.dataset.facit);
       inp.classList.remove('ratt','fel');
-      if(inp.value.trim() !== '') inp.classList.add(ratt(inp.value, f) ? 'ratt' : 'fel');
+      if(inp.value.trim() !== ''){
+        var korrekt = ratt(inp.value, f);
+        inp.classList.add(korrekt ? 'ratt' : 'fel');
+        // EVIDENS till mastery-storen: bara BESVARADE rutor, bara loggade noder (▢-uppgifterna saknar
+        // dataset.logg → hoppas över), EN gång per dokument-visning. Kräver RÄTTAT (facit-koll), inte
+        // bara besvarat — framflyttningen i sekvens-storen går på besvarat och är en SKILD signal.
+        // Öva-källa: matar samma masteryState med SPARR (kollapsar öva+testa-burst) + blekning → långsam
+        // färg, ingen flip. Ingen ny evidensmodell (självrättning ≠ drill hanteras EJ i modellen; rapporterat).
+        if(loggMast && !vy.loggat && inp.dataset.logg){ loggMast(inp.dataset.logg, korrekt ? 'ratt' : 'fel'); }
+      }
     });
+    vy.loggat = true;
     document.querySelectorAll('#doc-body .facit-cell').forEach(function(c){ c.classList.add('visa'); });
     document.querySelectorAll('#doc-body .mellan-cell').forEach(function(c){ c.classList.add('visa'); });
     this.textContent = 'Facit visas';

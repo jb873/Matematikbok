@@ -1384,7 +1384,8 @@ window.K1_TAXONOMI = {
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal",
-        "ak8": "repetition"
+        "ak8": "repetition",
+        "ak9": "mal"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1408,7 +1409,8 @@ window.K1_TAXONOMI = {
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal",
-        "ak8": "repetition"
+        "ak8": "repetition",
+        "ak9": "mal"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1432,7 +1434,8 @@ window.K1_TAXONOMI = {
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal",
-        "ak8": "repetition"
+        "ak8": "repetition",
+        "ak9": "mal"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1456,7 +1459,8 @@ window.K1_TAXONOMI = {
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal",
-        "ak8": "repetition"
+        "ak8": "repetition",
+        "ak9": "mal"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1709,7 +1713,8 @@ window.K1_TAXONOMI = {
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal",
-        "ak8": "repetition"
+        "ak8": "repetition",
+        "ak9": "mal"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1781,7 +1786,8 @@ window.K1_TAXONOMI = {
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal",
-        "ak8": "repetition"
+        "ak8": "repetition",
+        "ak9": "mal"
       },
       "roll": "karna",
       "formaga": "RAKNA",
@@ -1892,7 +1898,8 @@ window.K1_TAXONOMI = {
       "parent": "prio-prioritering",
       "niva": "lovnod",
       "arskursRelevans": {
-        "ak7": "mal"
+        "ak7": "mal",
+        "ak9": "mal"
       },
       "roll": "karna",
       "formaga": "RAKNA",

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Begreppskarta · Åk 9 · Kapitel 1</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/karta/karta.css">
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Kapitel 1 · Begreppskarta · Åk 9</p>
+  <h1>Taluppfattning <span style="display:block;font-size:.46em;font-weight:400;color:var(--ink-faint,#7a6e65);letter-spacing:.02em;margin-top:6px;">tal, räkning och bråk</span></h1>
+  <p class="lede"><strong>Samma karta som åk 8 – nians vy.</strong> Hela taluppfattningen, bråk inräknat. Färgen är <em>data</em>, inte pynt: en röd ruta är precis det som ska övas, en grön är befäst över tid. Arbete i nians öva och via länkarna in i åk 8 landar på samma färdighet. Klicka dig in och öva det som är rött.</p>
+
+  <div class="meter" id="meter"></div>
+
+  <div class="controls">
+    <span>Visa:</span>
+    <span class="seg" id="mal-seg">
+      <button data-mal="godkant">Godkänt (kärna)</button>
+      <button data-mal="allt">Allt</button>
+    </span>
+    <span class="controls-note" id="scope-note"></span>
+  </div>
+
+  <div class="karta"><div class="cols" id="cols"></div></div>
+
+  <div class="legend">
+    <span class="item"><span class="sw" style="background:#D14A40"></span>Ej tränat</span>
+    <span class="item"><span class="sw" style="background:#E08529"></span>Visat en gång</span>
+    <span class="item"><span class="sw" style="background:#E4BC34"></span>Flera gånger, spritt</span>
+    <span class="item"><span class="sw" style="background:#6BA544"></span>Befäst över tid</span>
+    <span class="item"><span class="sw" style="background:#EAE6DA"></span>Grått = framtid / bortvalt</span>
+    <span class="item">＋ breddning · ★ fördjupning</span>
+    <span class="item"><span class="roll stod">stöd</span> stödspår</span>
+  </div>
+  <p class="foot">Längst ut ligger lövnoderna — de enskilda färdigheterna. Färgen rullar <em>uppåt</em>: en förälder kan aldrig vara grönare än sin svagaste del, så en grön ruta betyder att hela grenen sitter.</p>
+  <p class="privacy" id="privacy"></p>
+</div>
+
+<!-- Åk 9: samma karta som åk 8 — union av k1- OCH k2-taxonomin (single-source, källorna orörda),
+     delad logg (k1+k2). EGEN monteringspunkt (arskurs:'ak9', egen pref-nyckel) så nian senare kan
+     få minNiva + kvadratrötter utan att röra åttan. Ingen minNiva i år (ingen ärver grönt från åttan). -->
+<script src="../../../js/data/k1-taxonomi.js"></script>
+<script src="../../../js/data/k2-taxonomi.js"></script>
+<script src="../../../js/mastery.js"></script>
+<script src="../../../js/mastery-k2.js"></script>
+<script src="../../../js/karta/karta-motor.js"></script>
+<script>
+(function(){
+  var K1 = (window.K1_TAXONOMI && (window.K1_TAXONOMI.noder || window.K1_TAXONOMI)) || [];
+  var K2 = (window.K2_TAXONOMI && (window.K2_TAXONOMI.noder || window.K2_TAXONOMI)) || [];
+  // Union — källtaxonomierna klonas inte, bara slås ihop i en ny lista (samma princip som åttan).
+  var AK9_TAXONOMI = { kapitel: 'ak9-k1', noder: K1.concat(K2) };
+
+  // Kombinerad mastery (k1 + k2) — SAMMA nycklar som åttan → evidens från nians öva och från
+  // åttans blad är omöjlig att skilja åt i storen (det är vad som gör att E-spårets länkar räknas).
+  var AK9_MASTERY = {
+    lasMatris: function(){
+      var m1 = (window.Mastery && window.Mastery.lasMatris && window.Mastery.lasMatris()) || {};
+      var m2 = (window.MasteryK2 && window.MasteryK2.lasMatris && window.MasteryK2.lasMatris()) || {};
+      return Object.assign({}, m1, m2);
+    },
+    masteryState: function(log, a, b, c){ return window.Mastery.masteryState(log, a, b, c); },
+    lasLard: function(){
+      var l1 = (window.Mastery && window.Mastery.lasLard && window.Mastery.lasLard()) || {};
+      var l2 = (window.MasteryK2 && window.MasteryK2.lasLard && window.MasteryK2.lasLard()) || {};
+      return Object.assign({}, l1, l2);
+    }
+  };
+
+  KartaMotor.montera({
+    taxonomi: AK9_TAXONOMI,
+    mastery: AK9_MASTERY,
+    prefKey: 'ak9.k1.taluppfattning.pref.v1',   // egen pref (bara mal-toggle) → nian oberoende av åttan
+    arskurs: 'ak9',
+    malDefault: 'godkant',
+    // minNiva: SÄTTS INTE i år. Ingen elev har jobbat i den digitala boken → ingen ärver grönt
+    //   från åttan. Nästa års nior gör det; då sätts nivåbryggan här.
+    blekning: true,                             // glömskekurvan aktiv (öva-evidens faller tillbaka via disuse)
+    ramPath: '../../../ak7-k1-ram.html',        // bas: taluppfattnings-drillar; bråk routas om nedan
+    rotNamn: 'Taluppfattning',
+    orsakFramtid: 'ej åk 9'
+  });
+
+  // ── DEEPLINK-ROUTING (montage-lager, rör ej motorn): bråk-noderna (k2) → k2-ramens drillar.
+  //    KartaMotor har en enda ramPath, så vi skriver om bråk-nodernas hrefs efter render.
+  //    Re-appliceras när kartan re-renderar (mål-toggle) via MutationObserver på #cols. ──
+  var K2_IDS = {}; K2.forEach(function(n){ K2_IDS[n.id] = 1; });
+  function routaBrak(){
+    var cols = document.getElementById('cols'); if(!cols) return;
+    var lankar = cols.querySelectorAll('a.node[href*="ak7-k1-ram.html"]');
+    [].forEach.call(lankar, function(a){
+      var href = a.getAttribute('href'); var m = href.match(/[?&]ko=([^&]+)/);
+      if(m && K2_IDS[decodeURIComponent(m[1])]) a.setAttribute('href', href.replace('ak7-k1-ram.html', 'ak7-k2-ram.html'));
+    });
+  }
+  routaBrak();
+  var cols = document.getElementById('cols');
+  if(cols && window.MutationObserver){ new MutationObserver(routaBrak).observe(cols, { childList: true, subtree: true }); }
+})();
+</script>
+<script src="../../../js/elevfeedback.js" defer></script>
+</body>
+</html>
