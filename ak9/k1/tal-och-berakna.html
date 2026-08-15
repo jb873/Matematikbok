@@ -34,6 +34,9 @@
   .val-rad{ display:flex; flex-wrap:wrap; gap:10px; }
   .val-chip{ display:inline-flex; align-items:center; gap:8px; font-family:var(--serif); font-size:15px; color:var(--ink-soft); background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:11px 17px; opacity:.62; cursor:default; }
   .val-chip .kommer{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); background:var(--paper-dk); border-radius:3px; padding:2px 7px; }
+  /* Öppet val i eget spår (öva-varianterna finns) — full opacitet, klickbart. Ej en E-spårs-övergång. */
+  .val-chip.val-oppen{ opacity:1; cursor:pointer; text-decoration:none; color:var(--ink); font-weight:600; transition:box-shadow .15s, border-color .15s; }
+  .val-chip.val-oppen:hover{ border-color:var(--gold); box-shadow:0 2px 10px rgba(15,30,46,.08); }
   /* E-spårets levande övergångslänkar till annan årskurs (åk8 dk1/dk2 + hela sjuans k1). Full opacitet, klickbara. */
   .val-chip.val-live{ opacity:1; cursor:pointer; flex-direction:column; align-items:flex-start; gap:4px; text-decoration:none; max-width:290px; transition:box-shadow .15s, border-color .15s; }
   .val-chip.val-live:hover{ border-color:var(--gold); box-shadow:0 2px 10px rgba(15,30,46,.08); }
@@ -113,7 +116,7 @@
 
   var SPAR = [
     { rubrik: 'E-spåret', tag: 'grund', elankar: ELANKAR },
-    { rubrik: 'Åk 9-spåret', tag: 'mål', val: ['Föreläsning', 'Öva', 'Färdighetsträning', 'Test'] },
+    { rubrik: 'Åk 9-spåret', tag: 'mål', val: ['Föreläsning', { label:'Öva', href:'tal-och-berakna-ova.html' }, 'Färdighetsträning', 'Test'] },
     { rubrik: 'Åk 9 + gymnasiet', tag: 'fördjupning', val: ['Fördjupning', 'Färdighetsträning'] }
   ];
   var wrap = document.getElementById('utbud');
@@ -133,9 +136,14 @@
       });
     } else {
       s.val.forEach(function(v){
-        var c = document.createElement('span'); c.className = 'val-chip';
-        c.innerHTML = v + '<span class="kommer">kommer</span>';
-        rad.appendChild(c);
+        if(v && v.href){                                   // öppet val (materialet finns) → levande länk, samma årskurs
+          var a = document.createElement('a'); a.className = 'val-chip val-oppen'; a.href = v.href; a.textContent = v.label;
+          rad.appendChild(a);
+        } else {
+          var c = document.createElement('span'); c.className = 'val-chip';
+          c.innerHTML = v + '<span class="kommer">kommer</span>';
+          rad.appendChild(c);
+        }
       });
     }
     g.appendChild(r); g.appendChild(rad); wrap.appendChild(g);
