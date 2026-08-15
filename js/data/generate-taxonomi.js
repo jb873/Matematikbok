@@ -1,5 +1,29 @@
 // Genererar js/data/k1-taxonomi.js ur ak7-k1-ram.html + delkapitlens DEL.fardighet/FARD.
 // Läser faktisk data (gissar inte). Motorer/ram/Arkiv rörs inte. Kör: node js/data/generate-taxonomi.js
+
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// ⛔ KÖRSPÄRR — läs detta innan du tar bort den.
+// Den här generatorn är STALE relativt den committade, HANDKURERADE js/data/k1-taxonomi.js.
+// En regenerering ger ~137 raders diff (nod-namn utan "Metoder ·"-prefix, begrepp som ska vara
+// null blir textfyllda, kompakt kontra multi-line JSON, omordning) och REGRESSAR åk7:s och åk8:s
+// taxonomi — och därmed kartans byte-identitet. Kartan är kronjuvel.
+//
+// GÖR I STÄLLET: applicera taxonomi-ändringar FÖR HAND, kirurgiskt, direkt på k1-taxonomi.js
+// (så git-diffen blir exakt ändringen), och HÅLL motsvarande REGEL kvar här (t.ex. AK9_RELEVANS)
+// så den överlever en framtida försoning av generatorn mot den handkurerade filen.
+//
+// Ta bort spärren MEDVETET, som en del av just den försoningen — inte för att köra i förbifarten.
+// (Ingen miljövariabel/--force med flit: en bekväm förbikoppling blir använd av misstag.)
+// ─────────────────────────────────────────────────────────────────────────────────────────
+console.error([
+  '⛔ generate-taxonomi.js är AVSTÄNGD (körspärr).',
+  '   Generatorn är stale relativt den handkurerade js/data/k1-taxonomi.js.',
+  '   En körning REGRESSAR åk7/åk8-taxonomin och kartans byte-identitet (kronjuvel).',
+  '   Gör i stället: ändra k1-taxonomi.js för hand (kirurgiskt) och håll regeln (t.ex. AK9_RELEVANS) kvar här.',
+  '   Ta bort spärren högst upp i filen först när du MEDVETET försonar generatorn mot taxonomin.'
+].join('\n'));
+process.exit(1);
+
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
