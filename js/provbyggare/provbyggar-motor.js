@@ -1376,6 +1376,7 @@ function renderTestResult(){
       ${t.fardigt ? `
         <button class="btn primary" id="new-test">Gör ett nytt test</button>
         ${t.fardigt.harderTest ? '<button class="btn" id="level2-test">Test nivå 2</button>' : ''}
+        ${t.fardigt.retur ? `<button class="btn subtle" id="retur-test">${t.fardigt.returTxt || '← Tillbaka'}</button>` : ''}
       ` : `
         <button class="btn primary" id="retry-test">Gör om samma test</button>
         <button class="btn" id="new-test">Nytt test</button>
@@ -1400,6 +1401,10 @@ function renderTestResult(){
   };
   const lvl2Btn = document.getElementById('level2-test');
   if(lvl2Btn) lvl2Btn.onclick = () => { if(t.fardigt && t.fardigt.harderTest) byggFardigt(t.fardigt.harderTest); };
+  // Färdigt test med retur: "tillbaka till testsidan" → välj ett annat test (i st.f. att fastna i ramens
+  // kapitel-vy, som är sjuans). Samma retur som take-back.
+  const returBtn = document.getElementById('retur-test');
+  if(returBtn) returBtn.onclick = () => { window.location.href = t.fardigt.retur; };
 
   // Konfetti vid ALLA rätt (åttan, config.rikTestUX) — samma belöning som drillarna.
   if(config.rikTestUX && totalSubs > 0 && pct === 100) visaKonfetti();

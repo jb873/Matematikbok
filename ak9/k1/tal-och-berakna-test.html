@@ -78,9 +78,9 @@
   var rad = document.getElementById('test-rad');
   var tester = (window.K1_FARDIGA && K1_FARDIGA.tester(DEL)) || [];
   if(!tester.length){ rad.innerHTML = '<p class="test-tom">Testet byggs.</p>'; return; }
-  // FAS 4: retur till den här sidan (var eleven kom ifrån) → motorns take-back pekar hit.
-  var _tt = (document.title ? document.title.split(/[–—·|]/)[0].trim() : '') || 'Tal och beräkningar';
-  var RETUR = '&retur=' + encodeURIComponent(location.href) + '&retur_txt=' + encodeURIComponent('← ' + _tt);
+  // FAS 4: retur till DEN HÄR test-sidan → motorns take-back + resultat-vyns "tillbaka" pekar hit,
+  // så eleven kan välja ett annat test (i st.f. att hamna i ramens kapitel-vy, som är sjuans).
+  var RETUR = '&retur=' + encodeURIComponent(location.href) + '&retur_txt=' + encodeURIComponent('← Tillbaka till testen');
   tester.forEach(function(t, i){
     var a = document.createElement('a'); a.className = 'test-kort';
     a.href = RAM + '?view=test-fardigt&del=' + DEL + '&test=' + (i + 1) + RETUR;
