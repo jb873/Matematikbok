@@ -22,7 +22,13 @@
   function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
   function BR(t, n){ return 'BRAK(' + t + ')(' + n + ')'; }                 // stående bråk
   function BLAND(h, t, n){ return h + ' ' + BR(t, n); }                     // blandat tal
-  function forkortaFacit(t, n){ var g = gcd(t, n); return { t: t / g, n: n / g }; }
+  // Facit-former (öva-sidan renderar cell + rättar efter .form):
+  //   {form:'tal', v}  ·  {form:'brak', t, n}  ·  {form:'blandad', hel, t, n}  ·  {form:'forlang', t, n}
+  function brakForm(t, n){                                   // reducera; oäkta (|värde|>1) → BLANDAD form
+    var g = gcd(t, n), T = t / g, N = n / g;
+    if(Math.abs(T) >= N && N !== 1){ var hel = Math.trunc(T / N), rest = Math.abs(T) - Math.abs(hel) * N; return { form: 'blandad', hel: hel, t: rest, n: N }; }
+    return { form: 'brak', t: T, n: N };
+  }
 
   // ── MALLAR — låst uppgiftsordning + grupper/rubriker. orig = Joachims exakta tal (dokument 1). ──
   //  Varje uppgift: { logg, prompt(t), mellan(t)|null, facit(t), orig }. Öva 1:s VÄXLINGS-grupper
@@ -35,14 +41,14 @@
         [[2,5],[3,4],[3,2],[1,5],[5,4]].map(function(p){ return {
           logg: null, orig: { t: p[0], n: p[1] },
           prompt: function(x){ return BR(x.t, x.n) + ' ='; }, mellan: function(){ return null; },
-          facit: function(x){ return rund(x.t / x.n); } }; }) },   // NUMBER → öva-sidan rättar som decimal (typ 'tal')
+          facit: function(x){ return { form: 'tal', v: rund(x.t / x.n) }; } }; }) },
 
       // G2 — förkorta till enklaste form. logg brak-forkorta:rakna. facit = enklaste-form-bråket.
       { rubrik: 'Skriv i enklaste form', logg: 'brak-forkorta:rakna', uppgifter:
         [[8,12],[18,30],[24,32],[24,36]].map(function(p){ return {
           logg: 'brak-forkorta:rakna', orig: { t: p[0], n: p[1] },
           prompt: function(x){ return BR(x.t, x.n) + ' ='; }, mellan: function(){ return null; },
-          facit: function(x){ return forkortaFacit(x.t, x.n); } }; }) },
+          facit: function(x){ return brakForm(x.t, x.n); } }; }) },   // alla äkta här → {form:'brak'}
 
       // G3 — förläng med 3, visa mellanled. logg brak-forlanga:rakna. mellan = (t·3)/(n·3).
       { rubrik: 'Förläng följande bråk med 3 – visa mellanled', logg: 'brak-forlanga:rakna', uppgifter:
@@ -50,7 +56,7 @@
           logg: 'brak-forlanga:rakna', orig: { t: p[0], n: p[1], f: 3 },
           prompt: function(x){ return BR(x.t, x.n) + ' ='; },
           mellan: function(x){ return BR(x.t + ' · ' + x.f, x.n + ' · ' + x.f); },
-          facit: function(x){ return { t: x.t * x.f, n: x.n * x.f }; } }; }) },
+          facit: function(x){ return { form: 'forlang', t: x.t * x.f, n: x.n * x.f }; } }; }) },
 
       // G4 — förläng så att nämnaren blir 40, visa mellanled. logg brak-forlanga:rakna.
       { rubrik: 'Förläng följande bråk så att nämnaren blir 40 – visa mellanled', logg: 'brak-forlanga:rakna', uppgifter:
@@ -58,7 +64,7 @@
           logg: 'brak-forlanga:rakna', orig: { t: p[0], n: p[1], mål: 40 },
           prompt: function(x){ return BR(x.t, x.n) + ' ='; },
           mellan: function(x){ var f = x.mål / x.n; return BR(x.t + ' · ' + f, x.n + ' · ' + f); },
-          facit: function(x){ var f = x.mål / x.n; return { t: x.t * f, n: x.mål }; } }; }) },
+          facit: function(x){ var f = x.mål / x.n; return { form: 'forlang', t: x.t * f, n: x.mål }; } }; }) },
 
       // G5 — decimal → bråkform, enklaste form. OLOGGAD (① routing kvar). facit = enklaste-form-bråket.
       { rubrik: 'Byta form – skriv i bråkform, i enklaste form', logg: null, uppgifter:
@@ -66,7 +72,7 @@
           var dec = ('' + d).split('.')[1] || ''; var pot = Math.pow(10, dec.length);
           return { logg: null, orig: { d: d, t: Math.round(d * pot), n: pot },
             prompt: function(x){ return k(x.d) + ' ='; }, mellan: function(){ return null; },
-            facit: function(x){ return forkortaFacit(x.t, x.n); } }; }) }
+            facit: function(x){ return brakForm(x.t, x.n); } }; }) }   // 2,5→2 ½, 1,2→1 ⅕ blir {form:'blandad'}
     ] }
 
     // ova2–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.

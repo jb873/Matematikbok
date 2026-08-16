@@ -122,6 +122,9 @@
   function ev(s){ return UI.evalArith(s); }
   function bcellHTML(role){ return '<span class="ovn-brak ak8-bc" data-r="' + role + '"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-bt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-bn" inputmode="text" autocomplete="off"></span></span>'; }
   function bread(scope, role){ var c = scope.querySelector('.ak8-bc[data-r="' + role + '"]'); if(!c) return { num:NaN }; var t = ev(c.querySelector('.ak8-bt').value), n = ev(c.querySelector('.ak8-bn').value); return { t:t, n:n, num:(isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN }; }
+  // Trefältscell (blandad form: heltal + stående bråk) — speglad ur blad-ak8-d5 (mcellHTML/mread).
+  function mcellHTML(role){ return '<span class="ak8-mc"><input class="ak8-in ak8-mh" inputmode="text" autocomplete="off"></span>' + bcellHTML(role); }
+  function mread(scope, role){ var mh = pNum(scope.querySelector('.ak8-mh').value), b = bread(scope, role); var h = isFinite(mh) ? mh : 0; return { hel:h, t:b.t, n:b.n, num:(isFinite(b.num)) ? h + b.num : NaN }; }
 
   // BRAK(täljare)(nämnare) → stående bråk (uttrycks-prompt) ──
   function esc(s){ return ('' + s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -130,10 +133,10 @@
     while((m = re.exec(str))){ out += esc(str.slice(last, m.index)); out += fracHTML(m[1], m[2]); last = re.lastIndex; }
     return out + esc(str.slice(last)); }
 
-  // ── Rättnings-TYP härledd ur facit-form + mellanled (spec-villkor-k2: hela E-bandet canonical) ──
-  //  number → 'tal' (decimalvärde) · {t,n}+mellan → 'fl' (förläng: mellanled värde, svar exakt förlängt)
-  //  · {t,n} → 'br' (värde + enklaste form)
-  function typAv(u){ return (typeof u.facit === 'number') ? 'tal' : (u.mellan ? 'fl' : 'br'); }
+  // ── Rättnings-form ur facit (motorn sätter .form; hela E-bandet canonical, spec-villkor-k2) ──
+  //  'tal' (decimalvärde) · 'brak' (värde + enklaste form) · 'blandad' (heltal + äkta reducerat bråk)
+  //  · 'forlang' (mellanled = bråkets värde, svar = exakt det förlängda)
+  function typAv(u){ return u.facit.form; }
 
   var vy = { dokId:null, viewIdx:0, doc:null, loggat:false };
   var hubEl = document.getElementById('hub'), docEl = document.getElementById('doc'), docBody = document.getElementById('doc-body');
@@ -144,8 +147,9 @@
     var q = '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>';
     var eq = '<span class="ak8-eq">=</span>';
     var svar = (typ === 'tal') ? eq + '<input class="ak8-in" inputmode="text" autocomplete="off">'
-             : (typ === 'fl') ? eq + bcellHTML('mel') + eq + bcellHTML('fin')
-             : eq + bcellHTML('fin');
+             : (typ === 'forlang') ? eq + bcellHTML('mel') + eq + bcellHTML('fin')
+             : (typ === 'blandad') ? eq + mcellHTML('fin')
+             : eq + bcellHTML('fin');   // brak
     return '<div class="ak8-rad" data-typ="' + typ + '" data-ui="' + ui + '">' + label + q + svar + '</div>';
   }
 
@@ -215,22 +219,27 @@
     c.querySelector('[data-vidare]').disabled = !(påPos && allaBesvarade(c)); }
   function markInputs(scope, ok){ scope.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(ok ? 'ak8-ok' : 'ak8-fel'); }); }
 
-  // ── RÄTTA en rad canonical: tal (värde) · br (värde+enklaste form) · fl (mellanled värde, svar exakt förlängt) ──
+  function markBc(rad, role, ok){ var c = rad.querySelector('.ak8-bc[data-r="' + role + '"]'); if(c) c.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(ok ? 'ak8-ok' : 'ak8-fel'); }); }
+  // ── RÄTTA en rad canonical, efter facit.form ──
   function rattaRad(rad, u){
     var typ = rad.dataset.typ, f = u.facit;
-    if(typ === 'tal'){ var v = pNum(rad.querySelector('.ak8-in').value); var ok = nara(v, f); markInputs(rad, ok); return { ok:ok, facit:k(f) }; }
-    if(typ === 'br'){
-      var b = bread(rad, 'fin'); var mal = f.t / f.n;
-      var ok = nara(b.num, mal) && isFinite(b.t) && isFinite(b.n) && gcd(Math.round(b.t), Math.round(b.n)) === 1;   // värde + enklaste form
-      var fc = rad.querySelector('.ak8-bc[data-r="fin"]'); if(fc) fc.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(ok ? 'ak8-ok' : 'ak8-fel'); });
-      return { ok:ok, facit: f.t + '/' + f.n };
+    if(typ === 'tal'){ var v = pNum(rad.querySelector('.ak8-in').value); var ok = nara(v, f.v); markInputs(rad, ok); return { ok:ok, facit:k(f.v) }; }
+    if(typ === 'brak'){
+      var b = bread(rad, 'fin'), ok = nara(b.num, f.t / f.n) && isFinite(b.t) && isFinite(b.n) && gcd(Math.round(b.t), Math.round(b.n)) === 1;   // värde + enklaste form
+      markBc(rad, 'fin', ok); return { ok:ok, facit: f.t + '/' + f.n };
     }
-    // fl: mellanledet lika med bråkets VÄRDE (t.ex. 7·3/9·3 = 7/9), svaret exakt det förlängda (t/n)
+    if(typ === 'blandad'){
+      var m = mread(rad, 'fin'), mal = f.hel + f.t / f.n;
+      // värde + rätt heltal + äkta reducerad bråkdel (t<n, t>0, gcd=1)
+      var ok = nara(m.num, mal) && nara(m.hel, f.hel) && isFinite(m.t) && isFinite(m.n) && m.t > 0 && m.t < m.n && gcd(Math.round(m.t), Math.round(m.n)) === 1;
+      var mh = rad.querySelector('.ak8-mh'); if(mh){ mh.classList.remove('ak8-ok','ak8-fel'); mh.classList.add(ok ? 'ak8-ok' : 'ak8-fel'); }
+      markBc(rad, 'fin', ok); return { ok:ok, facit: f.hel + ' ' + f.t + '/' + f.n };
+    }
+    // forlang: mellanledet = bråkets VÄRDE (t.ex. 7·3/9·3 = 7/9), svaret exakt det förlängda (t/n)
     var mel = bread(rad, 'mel'), sv = bread(rad, 'fin'), mal = f.t / f.n;
-    var melOk = nara(mel.num, mal), svOk = nara(sv.t, f.t) && nara(sv.n, f.n), ok = melOk && svOk;
-    var mc = rad.querySelector('.ak8-bc[data-r="mel"]'); if(mc) mc.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(melOk ? 'ak8-ok' : 'ak8-fel'); });
-    var sc = rad.querySelector('.ak8-bc[data-r="fin"]'); if(sc) sc.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(svOk ? 'ak8-ok' : 'ak8-fel'); });
-    return { ok:ok, facit: f.t + '/' + f.n };
+    var melOk = nara(mel.num, mal), svOk = nara(sv.t, f.t) && nara(sv.n, f.n), okf = melOk && svOk;
+    markBc(rad, 'mel', melOk); markBc(rad, 'fin', svOk);
+    return { ok:okf, facit: f.t + '/' + f.n };
   }
 
   function kontrollera(c){
