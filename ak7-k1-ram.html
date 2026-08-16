@@ -9211,6 +9211,9 @@ function repSkippaPanel(){
   // → PB.byggFardigt bygger (coverage-seedning + färdigt-läge) och går direkt till take.
   if(/[?&]view=test-fardigt/i.test(hs)){
     var mfd = hs.match(/[?&]del=([a-z0-9-]+)/i), mft = hs.match(/[?&]test=([0-9]+)/i);
+    // Nians test lånar den här ramen — skicka topnav-tillbaka till nians område i stället för åk7.
+    // Villkorat på ak9-dk1 → sjuans egna test (del=dN) och åttan (annan ram) helt oförändrade.
+    if(mfd && mfd[1] === 'ak9-dk1'){ var _tb = document.querySelector('.topnav-back'); if(_tb){ _tb.setAttribute('href', 'ak9/k1/tal-och-berakna.html'); _tb.textContent = '← Tal och beräkningar'; } }
     var ftester = (window.K1_FARDIGA && mfd) ? K1_FARDIGA.tester(mfd[1]) : [];
     var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
     renderKapitel();
