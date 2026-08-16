@@ -34,7 +34,6 @@ FORELASNINGAR.forEach(function(f){
   card.className = 'lecture-card';
   card.innerHTML =
       '<div class="lecture-thumb">'
-        + '<img src="https://img.youtube.com/vi/' + f.id + '/mqdefault.jpg" alt="" loading="lazy">'
         + '<div class="lecture-play"><span>▶</span></div>'
       + '</div>'
     + '<div class="lecture-meta">'
