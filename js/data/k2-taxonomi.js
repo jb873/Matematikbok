@@ -289,7 +289,7 @@ window.K2_TAXONOMI = {
       "id": "brak-lana:rakna", "namn": "Låna i blandad form", "parent": "brak-lana", "niva": "lovnod",
       "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "lanaEngine",
       "begrepp": "Räkna ut differensen i blandad form med lån från heltalet; flera giltiga vägar (låna eller via oäkta bråk). Öva-bladet rättar equality-baserat.",
-      "visning": null
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 3, "titel": "Låna i blandad form", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 6 · Multiplikation med bråk (öppen; ram-drill byggs i wiring) ─────────────── */
@@ -321,7 +321,7 @@ window.K2_TAXONOMI = {
       "id": "brak-mult-forkorta:rakna", "namn": "Förkorta innan multiplikation", "parent": "brak-mult-forkorta", "niva": "lovnod",
       "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "multForkortaEngine",
       "begrepp": "Korsförkorta täljare och nämnare (i valfri ordning) innan multiplikation; svar i enklaste/blandad form. Öva-bladet rättar equality-baserat (flera giltiga vägar).",
-      "visning": null
+      "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 1, "titel": "Förkorta innan multiplikation", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 7 · Division med bråk (öppen; FÖRDJUPNING i åk7) ───────────────
@@ -397,7 +397,7 @@ window.K2_TAXONOMI = {
       "id": "brak-div-reciprok:rakna", "namn": "Skriva reciprok", "parent": "brak-div-reciprok", "niva": "lovnod",
       "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "reciprokEngine",
       "begrepp": "Skriv reciproken till ett bråk eller algebraiskt uttryck genom att byta plats på täljare och nämnare.",
-      "visning": null
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 4, "titel": "Skriva reciprok", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Fördjupnings-strand · bråk och variabler (åk7-fördjupning) ───────────────

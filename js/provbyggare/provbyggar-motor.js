@@ -934,7 +934,11 @@ function renderTestConfig(){
   const matris = (resolveMastery() && resolveMastery().lasMatris) ? resolveMastery().lasMatris() : {};
   const delFilter = (cfg.del && BOK_DELKAPITEL.some(d => d.del === cfg.del)) ? cfg.del : null;
   const delNamn = delFilter ? BOK_DELKAPITEL.find(d => d.del === delFilter).titel : null;
-  const bokNoder = TAX.filter(n => n.niva === 'lovnod' && n.visning && n.visning.utbudslista);
+  // ÅRSKURS-SCOPING (FAS 2.E): visa bara noder som är relevanta för ramens årskurs. Noder utan
+  // arskursRelevans = universella; noder scopade till ANNAN årskurs (t.ex. brak-lana {ak8:mal} i sjuans
+  // k2-ram) filtreras bort → åttan-mål-noder läcker inte in i sjuans skapa-eget. Utan config.arskurs = som förr.
+  const bokNoder = TAX.filter(n => n.niva === 'lovnod' && n.visning && n.visning.utbudslista
+    && (!config.arskurs || !n.arskursRelevans || n.arskursRelevans[config.arskurs]));
 
   function minGruppOrd(nodes, g){
     return Math.min.apply(null, nodes.filter(n => (n.visning.grupp || 'Övrigt') === g).map(n => n.visning.gruppordning || 0));
