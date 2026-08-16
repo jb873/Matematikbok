@@ -27,6 +27,10 @@ function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;} // för enklaste form (gcd=1)
 function komma(x){return String(x).replace('.',',')}                    // 0.04 → "0,04" (svensk decimal)
+// Seedbar PRNG (mulberry32) — BARA för seedad verifiering (byggFardigt seed). Ersätter Math.random
+// under EN testgenerering och återställs direkt efteråt → deterministisk dump utan att röra elevens
+// upplevelse (utan seed = native Math.random, byte-identiskt).
+function mulberry32(seed){var a=seed>>>0;return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;};}
 
   // ── Fabriker (bygg generators: ProvbyggarMotor.gen.numeric/flerval/product/brak) ──
 function testNumericGen(genId, titel, omrade, makeItem){
@@ -1373,7 +1377,12 @@ function renderTestResult(){
       cfg.typ = o.typ || 'snabb';
       cfg.coverage = true;   // färdigt test: seeda ALLA valda noders typer → speglar öva-bladet fullt
       if(o.varianter) cfg.varianter = o.varianter;
-      var questions = generateTest(cfg);
+      // FAS 4 — seedad verifiering: seed → deterministisk generering (Math.random ersätts bara här,
+      // återställs direkt). Verifierings-krok; utan seed exakt som förr. Seed:en stashas EJ → elevens
+      // "Nytt test" använder native slump.
+      var questions;
+      if(o.seed != null){ var _mr = Math.random; Math.random = mulberry32(o.seed); try { questions = generateTest(cfg); } finally { Math.random = _mr; } }
+      else { questions = generateTest(cfg); }
       // fardigt-params stashas på provet → resultat-vyns "Nytt test" genererar ett NYTT färdigt test
       // för SAMMA delkapitel (samma noder, nya tal), inte provbyggar-configen.
       state.test = { questions: questions, answers: {}, currentIdx: -1, startedAt: Date.now(),

@@ -9242,8 +9242,9 @@ function repSkippaPanel(){
     if(mfd && mfd[1] === 'ak9-dk1'){ var _tb = document.querySelector('.topnav-back'); if(_tb){ _tb.setAttribute('href', 'ak9/k1/tal-och-berakna.html'); _tb.textContent = '← Tal och beräkningar'; } }
     var ftester = (window.K1_FARDIGA && mfd) ? K1_FARDIGA.tester(mfd[1]) : [];
     var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
+    var mseed = hs.match(/[?&]seed=(\d+)/i);   // FAS 4: seedad verifiering (deterministisk dump)
     renderKapitel();
-    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter }); }
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter, seed: mseed ? parseInt(mseed[1], 10) : null }); }
     else { PB.setDel(mfd ? mfd[1] : null); navTo('test-config'); }
     return;
   }
