@@ -274,6 +274,12 @@ window.K2_TAXONOMI = {
       "visning": null
     },
     {
+      "id": "brak-sub:heltal", "namn": "Heltal minus bråk", "parent": "brak-sub", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
+      "begrepp": "Räkna ut heltal minus bråk direkt med taluppfattning (1 − 3/8 = 5/8) — se svaret, utan förlängning eller lån. Egen metod-nod (spec-kontroll ④) så den inte grönar den oliknämniga algoritmen.",
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0.5, "titel": "Heltal minus bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+    {
       "id": "brak-sub:rakna", "namn": "Subtraktion med bråk", "parent": "brak-sub", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut differensen; visa mellanledet (förläng till gemensam nämnare).",
