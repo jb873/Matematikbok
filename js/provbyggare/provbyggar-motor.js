@@ -825,26 +825,46 @@ function generateTest(config){
   // antal = SVARBARA ITEMS (a–d-uppgifter), inte frågemallar. Räkna subs mot totalen och trunkera
   // sista frågan så att exakt `antal` items byggs ("6" → 6 saker att svara på).
   const snabbItems = () => questions.filter(q => q.kind === 'snabb').reduce((s,q) => s + q.subs.length, 0);
-  // COVERAGE-SEEDNING (färdigt test, config.coverage): seeda EN fråga per generator så ALLA valda
-  // noders typer garanterat kommer med (kompakt, ≤2 items/typ). Fyll-loopen nedan toppar sedan upp
-  // till antal. Skapa-eget/k1/k2 (coverage=false) hoppar detta helt → byte-identiskt.
+  // COVERAGE-SEEDNING + BALANSERAD FYLL-UPP (färdigt test, config.coverage): seeda EN fråga per generator
+  // (ALLA valda typer med, ≤2 items) och toppa sedan upp till antal genom att ALLTID välja generatorn med
+  // FÄRRAST items (balans — FAS 3: föredra under-representerade i st.f. round-robin → jämn fördelning,
+  // fler uppgifter per nod). Tömda generatorer (unika slut, eller opt-out-variant → null) plockas bort.
+  // Skapa-eget (coverage=false) → OFÖRÄNDRAD round-robin nedan (byte-identiskt).
   if(config.coverage && snabbGens.length){
-    shuffle([...snabbGens]).forEach(function(sg){
-      const q = sg.gen(seen, variantFor(sg.node));
+    const pool = snabbGens.map(function(sg){ return { gen: sg.gen, node: sg.node, items: 0, dead: false }; });
+    shuffle(pool.slice()).forEach(function(p){
+      if(snabbItems() >= numSnabb) return;
+      const q = p.gen(seen, variantFor(p.node));
       if(q && q.subs && q.subs.length){
         q.kind = 'snabb';
         if(q.subs.length > 2) q.subs = q.subs.slice(0, 2);
-        questions.push(q);
+        const kvar0 = numSnabb - snabbItems();
+        if(q.subs.length > kvar0) q.subs = q.subs.slice(0, kvar0);
+        if(q.subs.length){ questions.push(q); p.items += q.subs.length; }
       }
     });
-  }
-  // Slumpa men inte samma generator för många gånger i rad
-  if(snabbGens.length){
+    let safetyCounter = 0, prevSig = null, varietyTries = 0;
+    while(snabbItems() < numSnabb && safetyCounter < (config.rikUX ? 400 : 200)){
+      safetyCounter++;
+      const alive = pool.filter(function(x){ return !x.dead; });
+      if(!alive.length) break;
+      const minI = Math.min.apply(null, alive.map(function(x){ return x.items; }));
+      const cand = alive.filter(function(x){ return x.items === minI; });
+      const p = cand[Math.floor(Math.random() * cand.length)];
+      const q = p.gen(seen, variantFor(p.node));
+      if(!q || !q.subs || !q.subs.length){ p.dead = true; continue; }   // unika slut / opt-out → plocka bort
+      q.kind = 'snabb';
+      const sig = svarSignatur(q);
+      if(config.rikUX && sig !== null && sig === prevSig && varietyTries < 6){ varietyTries++; continue; }
+      const kvar = numSnabb - snabbItems();
+      if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);   // trunkera sista frågan → exakt antalet
+      if(q.subs.length){ questions.push(q); p.items += q.subs.length; prevSig = sig; varietyTries = 0; }
+    }
+  } else if(snabbGens.length){
+    // Skapa-eget (coverage=false): OFÖRÄNDRAD round-robin → byte-identisk med tidigare.
     let gensShuffled = shuffle([...snabbGens]);
     let gIdx = 0;
     let safetyCounter = 0;
-    // VARIETY (bara rikUX = åttan): undvik samma svar två gånger i rad. k1/k2 → rikUX false →
-    // hela grenen inaktiv + cap 100 = generering byte-identisk med tidigare.
     let prevSig = null, varietyTries = 0;
     while(snabbItems() < numSnabb && safetyCounter < (config.rikUX ? 200 : 100)){
       safetyCounter++;
@@ -853,14 +873,12 @@ function generateTest(config){
       const q = gen(seen, variantFor(node));
       if(q && q.subs && q.subs.length){
         q.kind = 'snabb';
-        // Förkasta (bounded) om frågans svar matchar föregående fråga → nytt slumpat item nästa varv.
-        // Rör INTE item-generatorn; efter några försök godtas ändå så antalet alltid fylls.
         const sig = svarSignatur(q);
         if(config.rikUX && sig !== null && sig === prevSig && varietyTries < 6){
           varietyTries++;
         } else {
           const kvar = numSnabb - snabbItems();
-          if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);   // trunkera sista frågan → exakt antalet
+          if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);
           if(q.subs.length){ questions.push(q); prevSig = sig; varietyTries = 0; }
         }
       }
