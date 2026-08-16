@@ -16,11 +16,13 @@
    'div-begrepp:begrepp','div-tabell:rakna','div-metoder:kort','prio-samband:rakna','prio-prioritering:rakna',
    'prio-lagar:kommutativa','prio-lagar:associativa','prio-lagar:distributiva','neg-begrepp:begrepp',
    'neg-rakna:addsub','neg-rakna:multdiv','bd-vaxla:rakna','bd-tillbrak:rakna','bd-hundra:rakna','bd-forlang:rakna',
-   'mult-rakna:pow10','div-rakna:pow10','mult-rakna:stora','div-rakna:stora','avr-avrundning:begrepp','avr-overslag:rakna'
+   'mult-rakna:pow10','div-rakna:pow10','mult-rakna:stora','div-rakna:stora'
+   // avr-avrundning:begrepp + avr-overslag:rakna BORTTAGNA (spec-kontroll FAS 2.D): öva-bladet (d8)
+   // är BLAD_TOM ("byggs snart") → inget härledbart tak → nod-kan ej testas säkert. Åter in när bladet finns.
   ].forEach(function(n){ BYGGBARA[n] = 1; });
 
   // Antal test-TYPER (snabb-generatorer) per nod — spegel av GEN_NOD. Styr coverage-splitten. Default 1.
-  var TYP_PER_NOD = { 'primtal:rakna':2, 'sub-rakna:rakna':2, 'avr-avrundning:begrepp':2,
+  var TYP_PER_NOD = { 'primtal:rakna':2, 'sub-rakna:rakna':2,
     // sjuan-sweep tillägg:
     'add-rakna:rakna':4, 'neg-rakna:addsub':3, 'neg-begrepp:begrepp':2, 'position:rakna':3,
     'mult-rakna:stora':2, 'div-rakna:stora':2 };
