@@ -32,15 +32,20 @@
   // ramens GEN_NOD mappar till :stora-noderna (öva/ak9 loggar samma koncept till :sma/:storasma —
   // ramen är kronjuvel/orörd, så testet loggar decimaler till :stora; båda noderna färgas, ingen
   // evidens tappas). Ren additiv gren — d1–d8 orörda, åk7/åk8-testen byte-identiska.
-  var AK9_DK1_NODER = ['mult-rakna:pow10', 'div-rakna:pow10', 'mult-rakna:stora', 'div-rakna:stora', 'prio-prioritering:rakna'];
+  // Nians noder mappar mot vad Öva 1–3 faktiskt tränar: Öva 1 tiopotens (pow10), Öva 2 decimal ×/÷
+  // (sma/div:sma), stora + stora-och-små (stora/storasma), Öva 3 prioritering. div-rakna:stora UT
+  // (ingen öva-motsvarighet — Öva 2:s division är decimal via förlängning, inte "division med stora tal").
+  var AK9_DK1_NODER = ['mult-rakna:pow10', 'div-rakna:pow10', 'mult-rakna:sma', 'div-rakna:sma', 'mult-rakna:stora', 'mult-rakna:storasma', 'prio-prioritering:rakna'];
   // Feature-set per nod (nivå-parameter). Skickas som cfg.varianter → generatorns makeItem(features).
   // Talområde = första axeln; fler axlar (struktur) läggs till per färdighet efter hand. Noder utan
-  // entry → ingen feature → generatorns default (åk7-oförändrat). Författad tabell, fylls på per generator.
-  var AK9_DK1_VARIANTER = { 'mult-rakna:stora': { talomrade: 'nian' } };
+  // entry → ingen feature → generatorns default. Författad tabell, fylls på per generator.
+  var AK9_DK1_VARIANTER = { 'mult-rakna:stora': { talomrade: 'nian' }, 'mult-rakna:storasma': { talomrade: 'nian' } };
 
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
   function byggbaraNoder(del){
-    if(del === 'ak9-dk1') return AK9_DK1_NODER.filter(function(n){ return BYGGBARA[n]; });   // nians explicita scope
+    // Nians noder har EGNA ram-generatorer (decimal-mult/div, storasma) som medvetet INTE ligger i
+    // delade BYGGBARA — annars skulle de hamna i åk7:s d6/d7-färdigtest. Därför ingen BYGGBARA-filter här.
+    if(del === 'ak9-dk1') return AK9_DK1_NODER.slice();
     var tax = window.K1_TAXONOMI; if(!tax || !tax.noder) return [];
     var ut = [];
     tax.noder.forEach(function(n){

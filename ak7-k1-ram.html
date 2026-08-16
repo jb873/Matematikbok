@@ -4171,6 +4171,18 @@ const TEST_GENERATORS = {
       if(typ===1){ var d=avr(rInt(1,9)/10,1), h=rInt(2,20); return {key:'m1'+d+'x'+h, prompt:'Räkna ut:   '+komma(d)+' · '+h, ans:avr(d*h,2), expl:komma(d)+' · '+h+' = '+komma(avr(d*h,2))}; }
       if(typ===2){ var a=avr(rInt(1,9)/10,1), b=avr(rInt(1,9)/10,1); return {key:'m2'+a+'x'+b, prompt:'Räkna ut:   '+komma(a)+' · '+komma(b), ans:avr(a*b,2), expl:komma(a)+' · '+komma(b)+' = '+komma(avr(a*b,2))}; }
       var dd=randPick([0.2,0.5,1.5,2.5,4.5]), st=rInt(2,40)*randPick([100,1000]); return {key:'m3'+dd+'x'+st, prompt:'Räkna ut:   '+komma(dd)+' · '+st, ans:avr(dd*st,1), expl:komma(dd)+' · '+st+' = '+komma(avr(dd*st,1))};
+    }),
+    // NIANS decimal-multiplikation (mult-rakna:sma) — ej i åk7:s BYGGBARA → bara nians test + skapa-eget.
+    // FAS 2: heltal·decimal begränsas till huvudräkningsbara {0,5, 0,25, 0,2, 0,1}; decimal·decimal fritt.
+    ProvbyggarMotor.gen.numeric('mult-rakna-sma','Multiplikation med decimaltal','mult-rakna', function(){
+      if(rInt(1,2)===1){ var h=rInt(2,20), d=randPick([0.5,0.25,0.2,0.1]); return {key:'msm'+h+'x'+d, prompt:'Räkna ut:   '+h+' · '+komma(d), ans:avr(h*d,2), expl:h+' · '+komma(d)+' = '+komma(avr(h*d,2))}; }
+      var a=avr(rInt(1,9)/10,1), b=avr(rInt(1,9)/10,1); return {key:'mmm'+a+'x'+b, prompt:'Räkna ut:   '+komma(a)+' · '+komma(b), ans:avr(a*b,2), expl:komma(a)+' · '+komma(b)+' = '+komma(avr(a*b,2))};
+    }),
+    // NIANS stora och små tal (mult-rakna:storasma) — kompensation. Talområde via feature (default mindre).
+    ProvbyggarMotor.gen.numeric('mult-rakna-storasma','Multiplikation, stora och små tal','mult-rakna', function(f){
+      var b=randPick([0.4,0.2,0.03,0.05,0.5]);
+      var a=(f && f.talomrade==='nian') ? rInt(1,9)*1000 : rInt(2,9)*100;   // nian: 7 000 · 0,4
+      return {key:'sam'+a+'x'+b, prompt:'Räkna ut:   '+a+' · '+komma(b), ans:avr(a*b,2), expl:a+' · '+komma(b)+' = '+komma(avr(a*b,2))};
     })
   ]},
 
@@ -4206,6 +4218,12 @@ const TEST_GENERATORS = {
     ProvbyggarMotor.gen.numeric('div-sma-dec','Division med små tal och decimaler','div-rakna', function(){
       if(rInt(1,2)===1){ var dividend=rInt(2,40), d=randPick([0.1,0.2,0.25,0.5]), ans=avr(dividend/d,2); return {key:'dd'+dividend+'/'+d, prompt:'Räkna ut:   '+dividend+' / '+komma(d), ans:ans, expl:dividend+' / '+komma(d)+' = '+ans}; }
       var q=rInt(2,9), dd=randPick([0.1,0.2,0.5]), a=avr(q*dd,2); return {key:'ds'+a+'/'+dd, prompt:'Räkna ut:   '+komma(a)+' / '+komma(dd), ans:q, expl:komma(a)+' / '+komma(dd)+' = '+q};
+    }),
+    // NIANS decimal-division via förlängning (div-rakna:sma) — dela MED decimaltal, jämnt ut.
+    // Multiplikator-map i st.f. flyttalsdivision (7/0,1 = 70, inte 69,999…). Ej i åk7:s BYGGBARA.
+    ProvbyggarMotor.gen.numeric('div-rakna-sma','Division med decimaltal','div-rakna', function(){
+      var M={'0.5':2,'0.2':5,'0.1':10,'0.25':4}, d=randPick([0.5,0.2,0.1,0.25]), dividend=rInt(2,40);
+      return {key:'drs'+dividend+'/'+d, prompt:'Räkna ut:   '+dividend+' / '+komma(d), ans:dividend*M[String(d)], expl:dividend+' / '+komma(d)+' = '+(dividend*M[String(d)])};
     })
   ]},
 
@@ -4438,7 +4456,11 @@ const GEN_NOD = {
   'neg-fallande':   'neg-begrepp:begrepp',                                          // d3
   'mittemellan':    'position:rakna', 'pos-intervall':    'position:rakna',        // d1
   'mult-sma-dec':   'mult-rakna:stora',                                             // d6
-  'div-sma-dec':    'div-rakna:stora'                                               // d7
+  'div-sma-dec':    'div-rakna:stora',                                              // d7
+  // NIANS decimal-/kompensations-noder (öva/karta-noderna → evidensen förenas). Ej i åk7:s BYGGBARA.
+  'mult-rakna-sma':      'mult-rakna:sma',
+  'mult-rakna-storasma': 'mult-rakna:storasma',
+  'div-rakna-sma':       'div-rakna:sma'
 };
 // Bokens delkapitel (kapitel 1) — samma indelning som delkapitel-sidorna och kartan (via taxonomins
 // visning.utbudslista d1–d8). Provbyggaren grupperar väljaren efter DESSA, inte ram-modellens DELAR_KO,
