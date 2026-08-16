@@ -146,6 +146,17 @@ const FARG_INFO = [
 ];
 const FORMAGA_NAMN = {begrepp:'Begrepp', rakna:'Räkna', metod:'Metod', kommunikation:'Kommunikation', resonera:'Resonera', problem:'Problem', addsub:'Plus och minus', multdiv:'Gånger och delat'};
 
+  // BRAK(täljare)(nämnare) → stående bråk (.ovn-brak). Gate på 'BRAK(' → prompts UTAN bråk lämnas
+  // byte-identiska (åk7/åk8 orörda). Speglar öva-sidans uttryckHTML; bråkstreck = gruppering, aldrig /.
+function brakUt(s){
+  s = '' + s;
+  if(s.indexOf('BRAK(') < 0) return s;
+  return s.replace(/BRAK\(([^()]*)\)\(([^()]*)\)/g, function(m, num, den){
+    return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + num + '</span>'
+      + '<span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + den + '</span></span>';
+  });
+}
+
   // ── Sub-typ-hanterare (config-oberoende: render/läs/återställ/gradera/facit) ──
 function renderSubInput(qNum, subIdx, s){
   const idBase = `q${qNum}-s${subIdx}`;
@@ -255,7 +266,7 @@ function renderSubInput(qNum, subIdx, s){
         <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="10" data-sub-input="${idBase}-L${i}-num" aria-label="mellanled värde">
       </div>`).join('');
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${brakUt(s.prompt)}</span></div>
       <div class="test-sub-mellan">
         ${ledRows}
         <div class="tsm-led tsm-slut">

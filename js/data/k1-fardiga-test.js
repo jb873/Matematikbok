@@ -39,7 +39,14 @@
   // Feature-set per nod (nivå-parameter). Skickas som cfg.varianter → generatorns makeItem(features).
   // Talområde = första axeln; fler axlar (struktur) läggs till per färdighet efter hand. Noder utan
   // entry → ingen feature → generatorns default. Författad tabell, fylls på per generator.
-  var AK9_DK1_VARIANTER = { 'mult-rakna:stora': { talomrade: 'nian' }, 'mult-rakna:storasma': { talomrade: 'nian' } };
+  var AK9_DK1_VARIANTER = {
+    'mult-rakna:pow10': { talomrade: 'nian' },   // decimaloperander + decimala tiopotenser (öva 1)
+    'div-rakna:pow10':  { talomrade: 'nian' },
+    'mult-rakna:stora': { talomrade: 'nian' },
+    'mult-rakna:storasma': { talomrade: 'nian' },   // kompensations-mellanled
+    'div-rakna:sma': { talomrade: 'nian' },          // förlängnings-mellanled
+    'prio-prioritering:rakna': { struktur: ['parenteser','koefficient','brakstreck'] }  // öva 3-komplexitet + mellanled
+  };
 
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
   function byggbaraNoder(del){

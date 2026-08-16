@@ -1246,6 +1246,11 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .test-sub-brak{display:inline-flex;flex-direction:column;align-items:center;gap:3px}
 .test-sub-brak .tsb-cell{width:64px;height:34px}
 .test-sub-brak .tsb-streck{width:64px;height:2px;background:var(--ink)}
+/* Stående bråk i uttryck (nians prioritering, bråkstreck som gruppering) — speglar öva-sidans .ovn-brak */
+.ovn-brak{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px}
+.ovn-brak-taljare,.ovn-brak-namnare{padding:0 8px 2px;font-feature-settings:'tnum';white-space:nowrap}
+.ovn-brak-namnare{padding:2px 8px 0}
+.ovn-brak-strecket{height:2px;background:var(--ink);width:100%;min-width:36px}
 .test-sub-binary-row{display:flex;gap:8px;flex-wrap:wrap}
 .test-sub-binary-btn{
   flex:1;min-width:100px;
@@ -4155,7 +4160,13 @@ const TEST_GENERATORS = {
   // Beräkningar delade i bokens noder: ·10/100/1000 → d5 (pow10), stora tal → d6 (stora).
   // (Negativa beräkningar bor i neg-rakna:multdiv, d3 — inte här.)
   'mult-rakna': { snabb: [
-    ProvbyggarMotor.gen.numeric('mult-rakna-pow10','Multiplikation med 10, 100 och 1000','mult-rakna', function(){
+    ProvbyggarMotor.gen.numeric('mult-rakna-pow10','Multiplikation med 10, 100 och 1000','mult-rakna', function(f){
+      // NIVÅ-PARAMETER: nian får decimaloperander OCH decimala tiopotenser (öva 1: 5,3·100, 76,9·0,01).
+      if(f && f.talomrade === 'nian'){
+        var np=randPick([1000,100,10,0.1,0.01,0.001]);
+        var nbas=rInt(11,999), ndp=randPick([0,1,2]), na=(ndp===0)?nbas:avr(nbas/Math.pow(10,ndp),ndp), nans=avr(na*np,6);
+        return {key:'n'+na+'x'+np, prompt:'Räkna ut:   '+komma(na)+' · '+komma(np), ans:nans, expl:komma(na)+' · '+komma(np)+' = '+komma(nans)};
+      }
       const a=rInt(2,99), p=randPick([10,100,1000]); return {key:a+'x'+p, prompt:'Räkna ut:   '+a+' · '+p, ans:a*p, expl:a+' · '+p+' = '+(a*p)};
     }),
     ProvbyggarMotor.gen.numeric('mult-rakna-stora','Multiplikation med stora tal','mult-rakna', function(f){
@@ -4166,7 +4177,8 @@ const TEST_GENERATORS = {
       return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
     }),
     // ÖVA-TÄCKNING d6: multiplikation med små tal + decimaler (decimal·heltal, decimal·decimal, decimal·stort)
-    ProvbyggarMotor.gen.numeric('mult-sma-dec','Multiplikation med små tal och decimaler','mult-rakna', function(){
+    ProvbyggarMotor.gen.numeric('mult-sma-dec','Multiplikation med små tal och decimaler','mult-rakna', function(f){
+      if(f && f.talomrade === 'nian') return null;   // nians :stora = rent stora-tal; decimalerna hör till :sma/:storasma
       var typ=rInt(1,3);
       if(typ===1){ var d=avr(rInt(1,9)/10,1), h=rInt(2,20); return {key:'m1'+d+'x'+h, prompt:'Räkna ut:   '+komma(d)+' · '+h, ans:avr(d*h,2), expl:komma(d)+' · '+h+' = '+komma(avr(d*h,2))}; }
       if(typ===2){ var a=avr(rInt(1,9)/10,1), b=avr(rInt(1,9)/10,1); return {key:'m2'+a+'x'+b, prompt:'Räkna ut:   '+komma(a)+' · '+komma(b), ans:avr(a*b,2), expl:komma(a)+' · '+komma(b)+' = '+komma(avr(a*b,2))}; }
@@ -4180,9 +4192,25 @@ const TEST_GENERATORS = {
     }),
     // NIANS stora och små tal (mult-rakna:storasma) — kompensation. Talområde via feature (default mindre).
     ProvbyggarMotor.gen.numeric('mult-rakna-storasma','Multiplikation, stora och små tal','mult-rakna', function(f){
+      if(f && f.talomrade==='nian') return null;   // nian → kompensations-mellanled (mult-rakna-storasma-ml)
       var b=randPick([0.4,0.2,0.03,0.05,0.5]);
-      var a=(f && f.talomrade==='nian') ? rInt(1,9)*1000 : rInt(2,9)*100;   // nian: 7 000 · 0,4
+      var a=rInt(2,9)*100;
       return {key:'sam'+a+'x'+b, prompt:'Räkna ut:   '+a+' · '+komma(b), ans:avr(a*b,2), expl:a+' · '+komma(b)+' = '+komma(avr(a*b,2))};
+    }),
+    // NIANS stora×liten med KOMPENSATIONS-mellanled (öva 2 grupp 5 c,d: 7000·0,4 = 700·4). Speglar öva-
+    // metoden: dela stora talet och gångra det lilla med samma tiopotens → båda blir hela tal. Bara nian.
+    ProvbyggarMotor.gen.mellanledNum('mult-rakna-storasma-ml','Stora och små tal (kompensation)','mult-rakna', function(opts){
+      var v=opts&&opts.variant; if(!(v&&v.talomrade==='nian')) return null;
+      var p=randPick([1,2]);                                   // kompensations-exponent = b:s decimaler
+      var aBas=rInt(2,9), a=aBas*Math.pow(10,p+2);             // stort tal delbart med 10^p (2000..9000 / 20000..90000)
+      var bBas=rInt(1,9), b=avr(bBas/Math.pow(10,p),p);        // 0,4 ; 0,03
+      var aKomp=a/Math.pow(10,p), facit=aBas*bBas*100;         // 7000/10=700 ; 700·4=2800
+      var tio='10'+(p>1?('^'+p):'');
+      return { key:'sml'+a+'x'+b,
+        prompt:'Räkna ut:   '+a+' · '+komma(b),
+        led:[{ fraga:'Kompensera: gångra '+komma(b)+' med '+tio+' (→ '+bBas+') och dela '+a+' med '+tio+'. Vad blir '+a+' / '+tio+'?', varde:aKomp }],
+        slutVarde:facit,
+        expl:a+' · '+komma(b)+' = '+aKomp+' · '+bBas+' = '+facit };
     })
   ]},
 
@@ -4208,22 +4236,45 @@ const TEST_GENERATORS = {
     })
   ]},
   'div-rakna': { snabb: [
-    ProvbyggarMotor.gen.numeric('div-rakna-pow10','Division med 10, 100 och 1000','div-rakna', function(){
+    ProvbyggarMotor.gen.numeric('div-rakna-pow10','Division med 10, 100 och 1000','div-rakna', function(f){
+      // NIVÅ-PARAMETER: nian delar decimaltäljare med decimala tiopotenser (öva 1: 5,4/10, 32,5/0,1, 2,8/0,01).
+      if(f && f.talomrade === 'nian'){
+        var np=randPick([1000,100,10,0.1,0.01,0.001]);
+        var nbas=rInt(11,999), ndp=randPick([0,1,2]), na=(ndp===0)?nbas:avr(nbas/Math.pow(10,ndp),ndp), nans=avr(na/np,6);
+        return {key:'n'+na+'/'+np, prompt:'Räkna ut:   '+komma(na)+' / '+komma(np), ans:nans, expl:komma(na)+' / '+komma(np)+' = '+komma(nans)};
+      }
       const p=randPick([10,100]), q=rInt(2,20), a=p*q; return {key:a+'/'+p, prompt:'Räkna ut:   '+a+' / '+p, ans:q, expl:a+' / '+p+' = '+q};
     }),
     ProvbyggarMotor.gen.numeric('div-rakna-stora','Division med stora tal','div-rakna', function(){
       const b=rInt(3,9), q=rInt(11,20), a=b*q; return {key:a+'/'+b, prompt:'Räkna ut:   '+a+' / '+b, ans:q, expl:a+' / '+b+' = '+q};
     }),
     // ÖVA-TÄCKNING d7: division med små tal / dela MED decimaltal (12/0,1=120, 6/0,2=30, 0,6/0,1=6)
-    ProvbyggarMotor.gen.numeric('div-sma-dec','Division med små tal och decimaler','div-rakna', function(){
+    ProvbyggarMotor.gen.numeric('div-sma-dec','Division med små tal och decimaler','div-rakna', function(f){
+      if(f && f.talomrade==='nian') return null;   // nian → förlängnings-mellanled (div-rakna-sma-ml)
       if(rInt(1,2)===1){ var dividend=rInt(2,40), d=randPick([0.1,0.2,0.25,0.5]), ans=avr(dividend/d,2); return {key:'dd'+dividend+'/'+d, prompt:'Räkna ut:   '+dividend+' / '+komma(d), ans:ans, expl:dividend+' / '+komma(d)+' = '+ans}; }
       var q=rInt(2,9), dd=randPick([0.1,0.2,0.5]), a=avr(q*dd,2); return {key:'ds'+a+'/'+dd, prompt:'Räkna ut:   '+komma(a)+' / '+komma(dd), ans:q, expl:komma(a)+' / '+komma(dd)+' = '+q};
     }),
     // NIANS decimal-division via förlängning (div-rakna:sma) — dela MED decimaltal, jämnt ut.
     // Multiplikator-map i st.f. flyttalsdivision (7/0,1 = 70, inte 69,999…). Ej i åk7:s BYGGBARA.
-    ProvbyggarMotor.gen.numeric('div-rakna-sma','Division med decimaltal','div-rakna', function(){
+    ProvbyggarMotor.gen.numeric('div-rakna-sma','Division med decimaltal','div-rakna', function(f){
+      if(f && f.talomrade==='nian') return null;   // nian → förlängnings-mellanled (div-rakna-sma-ml)
       var M={'0.5':2,'0.2':5,'0.1':10,'0.25':4}, d=randPick([0.5,0.2,0.1,0.25]), dividend=rInt(2,40);
       return {key:'drs'+dividend+'/'+d, prompt:'Räkna ut:   '+dividend+' / '+komma(d), ans:dividend*M[String(d)], expl:dividend+' / '+komma(d)+' = '+(dividend*M[String(d)])};
+    }),
+    // NIANS förlängnings-mellanled (öva 2: skala BÅDA leden med 10^dec(divisor) → heltalsdivisor).
+    // 34,8 / 0,04 = 3480 / 4 = 870. Genererar rent facit (q·d ger täljaren). Bara nian.
+    ProvbyggarMotor.gen.mellanledNum('div-rakna-sma-ml','Division med decimaltal (förlängning)','div-rakna', function(opts){
+      var v=opts&&opts.variant; if(!(v&&v.talomrade==='nian')) return null;
+      var d=randPick([0.5,0.2,0.25,0.1,0.04,0.03,0.6,0.01]);
+      var dDec=(String(d).split('.')[1]||'').length, ff=Math.pow(10,dDec);
+      var q=rInt(11,98);
+      if(dDec===1 && rInt(1,3)===1) q=avr(q+randPick([0.1,0.2,0.5]),1);   // decimalsvar bara när divisorn har 1 dec
+      var t=avr(q*d,4), tSk=avr(t*ff,4), dSk=Math.round(d*ff);
+      return { key:'dsml'+t+'/'+d,
+        prompt:'Räkna ut:   '+komma(t)+' / '+komma(d),
+        led:[{ fraga:'Förläng täljare och nämnare med '+ff+' så nämnaren blir heltalet '+dSk+'. Ny täljare ('+komma(t)+' · '+ff+'):', varde:tSk }],
+        slutVarde:q,
+        expl:komma(t)+' / '+komma(d)+' = '+komma(tSk)+' / '+dSk+' = '+komma(q) };
     })
   ]},
 
@@ -4234,7 +4285,8 @@ const TEST_GENERATORS = {
     })
   ]},
   'prio-prioritering': { snabb: [
-    ProvbyggarMotor.gen.numeric('prio-uttryck','Prioriteringsregeln','prio-prioritering', function(){
+    ProvbyggarMotor.gen.numeric('prio-uttryck','Prioriteringsregeln','prio-prioritering', function(f){
+      if(f && f.struktur) return null;   // nian → komplex mellanled-generator (prio-uttryck-ml)
       const t=rInt(1,5); let s, ans;
       if(t===1){ const a=rInt(2,9),b=rInt(2,9),c=rInt(2,9); s=a+' + '+b+' · '+c; ans=a+b*c; }
       else if(t===2){ const a=rInt(2,9),b=rInt(2,9),c=rInt(2,20); s=a+' · '+b+' + '+c; ans=a*b+c; }
@@ -4242,6 +4294,31 @@ const TEST_GENERATORS = {
       else if(t===4){ const a=rInt(2,9),b=rInt(2,9),c=rInt(2,6); s='('+a+' + '+b+') · '+c; ans=(a+b)*c; }
       else { const a=rInt(15,40),b=rInt(2,6),c=rInt(2,6); s=a+' − '+b+' · '+c; ans=a-b*c; }
       return {key:s, prompt:'Räkna ut:   '+s, ans:ans, expl:s+' = '+ans};
+    }),
+    // NIANS prioritering (öva 3): 4–6 operationer, nästlade parenteser, koefficient framför parentes
+    // och BRÅKSTRECK som gruppering (BRAK() → stående bråk, aldrig / eller parentes). Visar mellanled
+    // (öva-rubriken "Beräkna – visa mellanled"). Alla del- och slutresultat heltal ≥ 0. Bara nian.
+    ProvbyggarMotor.gen.mellanledNum('prio-uttryck-ml','Prioriteringsregeln (mellanled)','prio-prioritering', function(opts){
+      var v=opts&&opts.variant; if(!(v&&v.struktur)) return null;
+      var T=[
+        function(){ var a=rInt(20,50),b=rInt(2,15),c=rInt(3,9),d=rInt(2,9); if(a-b<0) return null;
+          return {p:'('+a+' − '+b+') · '+c+' + '+d, lf:'Räkna parentesen ('+a+' − '+b+') först:', lv:a-b, f:(a-b)*c+d}; },
+        function(){ var a=rInt(5,20),b=rInt(2,6),c=rInt(4,12),d=rInt(1,8); if(c-d<0) return null;
+          return {p:a+' + '+b+' · ('+c+' − '+d+')', lf:'Räkna parentesen ('+c+' − '+d+') först:', lv:c-d, f:a+b*(c-d)}; },
+        function(){ var a=rInt(2,5),b=rInt(2,6),c=rInt(2,7),d=rInt(1,9),e=rInt(5,25); if(b*c-d<0) return null;
+          return {p:a+' · ('+b+' · '+c+' − '+d+') + '+e, lf:'Räkna parentesen ('+b+' · '+c+' − '+d+') först:', lv:b*c-d, f:a*(b*c-d)+e}; },
+        function(){ var a=rInt(5,15),b=rInt(1,9),c=rInt(4,12),d=rInt(1,8); if(c-d<0) return null;
+          return {p:'('+a+' + '+b+') · ('+c+' − '+d+')', lf:'Räkna parentesen ('+c+' − '+d+') först:', lv:c-d, f:(a+b)*(c-d)}; },
+        function(){ var a=rInt(2,9),b=rInt(2,9),c=rInt(1,20),d=rInt(2,9); var n=a*b-c; if(n<0||n%d!==0) return null;
+          return {p:'BRAK('+a+' · '+b+' − '+c+')('+d+')', lf:'Räkna täljaren ('+a+' · '+b+' − '+c+') först:', lv:n, f:n/d}; },
+        function(){ var a=rInt(5,30),b=rInt(5,30),c=rInt(1,6),d=rInt(1,6); var n=a+b,m=c+d; if(n%m!==0) return null;
+          return {p:'BRAK('+a+' + '+b+')('+c+' + '+d+')', lf:'Räkna nämnaren ('+c+' + '+d+') först:', lv:m, f:n/m}; },
+        function(){ var a=rInt(2,9),b=rInt(2,9),d=rInt(2,6),e=rInt(2,6),q=rInt(2,9); var c=d*e*q;
+          return {p:a+' · '+b+' + BRAK('+c+')('+d+' · '+e+')', lf:'Räkna nämnaren ('+d+' · '+e+') först:', lv:d*e, f:a*b+q}; }
+      ];
+      var pick=T[rInt(0,T.length-1)](); if(!pick) return null;
+      return { key:'pml'+pick.p, prompt:'Räkna ut:   '+pick.p,
+        led:[{ fraga:pick.lf, varde:pick.lv }], slutVarde:pick.f, expl:pick.p+' = … = '+pick.f };
     })
   ]},
   // SLICE 7: räknelagarna – EN generator per lag, bunden till sin karta-synliga bok-nod (d2).
@@ -4434,6 +4511,7 @@ const GEN_NOD = {
   'div-rakna-stora':'div-rakna:stora',          // stora tal → d7
   'prio-samband':   'prio-samband:rakna',
   'prio-uttryck':   'prio-prioritering:rakna',
+  'prio-uttryck-ml':'prio-prioritering:rakna',   // nian: komplex prioritering + mellanled + bråkstreck
   'neg-begr':       'neg-begrepp:begrepp',
   'neg-addsub':     'neg-rakna:addsub',
   'neg-multdiv':    'neg-rakna:multdiv',
@@ -4455,12 +4533,19 @@ const GEN_NOD = {
   'neg-losut-as':   'neg-rakna:addsub', 'neg-dubbel':     'neg-rakna:addsub',      // d3
   'neg-fallande':   'neg-begrepp:begrepp',                                          // d3
   'mittemellan':    'position:rakna', 'pos-intervall':    'position:rakna',        // d1
-  'mult-sma-dec':   'mult-rakna:stora',                                             // d6
-  'div-sma-dec':    'div-rakna:stora',                                              // d7
+  // MAPPNINGS-FIX (spec-kontroll FAS 2.C): div-sma-dec (ren decimal-division, 12/0,1) låg fel under
+  // :stora ("Stora tal") — hör till :sma. Remappad (åk7 d7:stora blir rent stora-tal). mult-sma-dec
+  // är SAMMANSATT (decimal·heltal + decimal·decimal + decimal·STORT 4,5·20000) → går ej att remappa
+  // rent (typ3 hör till :storasma). Kvar på :stora för åk7 (oförändrat), men OPT-OUT för nian (se
+  // generatorn) så nians :stora blir rent stora-tal. FLAGGAT: en ren split kräver Joachims beslut.
+  'mult-sma-dec':   'mult-rakna:stora',                                            // sammansatt — nian opt-out i generatorn
+  'div-sma-dec':    'div-rakna:sma',                                               // var :stora (fel) → rätt nod
   // NIANS decimal-/kompensations-noder (öva/karta-noderna → evidensen förenas). Ej i åk7:s BYGGBARA.
-  'mult-rakna-sma':      'mult-rakna:sma',
-  'mult-rakna-storasma': 'mult-rakna:storasma',
-  'div-rakna-sma':       'div-rakna:sma'
+  'mult-rakna-sma':         'mult-rakna:sma',
+  'mult-rakna-storasma':    'mult-rakna:storasma',
+  'mult-rakna-storasma-ml': 'mult-rakna:storasma',   // nian kompensations-mellanled
+  'div-rakna-sma':          'div-rakna:sma',
+  'div-rakna-sma-ml':       'div-rakna:sma'           // nian förlängnings-mellanled
 };
 // Bokens delkapitel (kapitel 1) — samma indelning som delkapitel-sidorna och kartan (via taxonomins
 // visning.utbudslista d1–d8). Provbyggaren grupperar väljaren efter DESSA, inte ram-modellens DELAR_KO,
