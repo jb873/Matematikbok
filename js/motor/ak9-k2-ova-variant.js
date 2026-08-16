@@ -20,6 +20,7 @@
   function rund(x){ return Math.round(x * 1e9) / 1e9; }
   function k(x){ return ('' + rund(x)).replace('.', ',').replace('-', '−'); }
   function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
+  function lcm(a, b){ return Math.abs(a) / gcd(a, b) * Math.abs(b); }
   function BR(t, n){ return 'BRAK(' + t + ')(' + n + ')'; }                 // stående bråk
   function BLAND(h, t, n){ return h + ' ' + BR(t, n); }                     // blandat tal
   // Facit-former (öva-sidan renderar cell + rättar efter .form):
@@ -111,10 +112,43 @@
           logg: 'brak-jmf-ordna:resonera', orig: { lista: lista },
           prompt: function(){ return null; }, mellan: function(){ return null; },
           facit: function(x){ return { form: 'ordna', lista: x.lista }; } }; }) }
+    ] },
+
+    ova3: { titel: 'Addition och subtraktion', grupper: [
+      // G1 — heltal − bråk/blandat tal, "se svaret utan lån" (④). DIREKT, inget mellanled. logg brak-sub:heltal.
+      //   Formen härleds ur svaret: 1−3/8=5/8 (brak), 4−5/6=3 1/6 (blandad), 3−1⅓=1 2/3 (blandad).
+      { rubrik: 'Beräkna', logg: 'brak-sub:heltal', uppgifter:
+        [{ H:1, s:{ hel:0, t:3, n:8 } }, { H:4, s:{ hel:0, t:5, n:6 } }, { H:3, s:{ hel:1, t:1, n:3 } }].map(function(o){ return {
+          logg: 'brak-sub:heltal', orig: o,
+          prompt: function(x){ var sub = x.s.hel > 0 ? BLAND(x.s.hel, x.s.t, x.s.n) : BR(x.s.t, x.s.n); return x.H + ' − ' + sub + ' ='; },
+          mellan: function(){ return null; },
+          facit: function(x){ var sn = x.s.n, st = x.s.hel * sn + x.s.t; return brakForm(x.H * sn - st, sn); } }; }) },
+
+      // G2 — oliknämnig ADDITION. Mellanled = förläng till gemensam nämnare (värde-rättat, valfri gem. nämnare),
+      //   svar canonical i enklaste form (form följer varje variants facit). logg brak-add:rakna.
+      { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-add:rakna', uppgifter:
+        [[[1,2],[1,6]],[[2,3],[1,2]],[[1,3],[5,12]],[[5,7],[3,4]]].map(function(p){ return addSubUppg('+', p[0], p[1], 'brak-add:rakna'); }) },
+
+      // G3 — oliknämnig SUBTRAKTION. Samma mellanled-metod. logg brak-sub:rakna (oliknämniga algoritmen).
+      { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-sub:rakna', uppgifter:
+        [[[5,6],[1,3]],[[3,4],[2,7]],[[2,5],[1,6]],[[6,7],[3,5]]].map(function(p){ return addSubUppg('−', p[0], p[1], 'brak-sub:rakna'); }) }
     ] }
 
-    // ova3–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.
+    // ova4–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.
   };
+
+  // ── addSub-uppgift: gemensam nämnare-mellanled + canonical svar. form 'addsub'. ──
+  function addSubUppg(op, a, b, logg){
+    return { logg: logg, orig: { op: op, a: a, b: b },
+      prompt: function(x){ return BR(x.a[0], x.a[1]) + ' ' + x.op + ' ' + BR(x.b[0], x.b[1]) + ' ='; },
+      mellan: function(){ return null; },   // mellanledet skrivs i egna celler; facit bär mellanled-talen
+      facit: function(x){
+        var L = lcm(x.a[1], x.b[1]);
+        var t1 = x.a[0] * (L / x.a[1]), t2 = x.b[0] * (L / x.b[1]);
+        var rt = (x.op === '+') ? t1 + t2 : t1 - t2;
+        return { form: 'addsub', op: x.op, a: x.a, b: x.b, m: [[t1, L], [t2, L]], svar: brakForm(rt, L) };
+      } };
+  }
 
   // ── GENERERING: en uppgift → {prompt, mellan, facit, logg}. variant 0 = orig (dokument 1). ──
   function genUppgift(u, dokId, idx, variant){
