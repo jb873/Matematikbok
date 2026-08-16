@@ -33,17 +33,18 @@
 
   function antalFor(ns){ var tot = ns.reduce(function(s, n){ return s + typCount(n); }, 0); return Math.min(20, Math.max(10, tot * 3)); }
 
-  var TYP_CAP = 5;
+  // INNEHÅLLS-SPLIT (spec-kontroll FAS 3): ett test per innehålls-GRUPP (visning.grupp), namngivet efter
+  // innehållet. Se k1-fardiga-test.js. Färre noder/test, fler test, testen täcker tillsammans delkapitlet.
+  function gruppAv(id){
+    var tax = window.K2_TAXONOMI;
+    var n = tax && tax.noder && tax.noder.filter(function(x){ return x.id === id; })[0];
+    return (n && n.visning && n.visning.grupp) || 'Övrigt';
+  }
   function tester(del){
     var noder = byggbaraNoder(del); if(!noder.length) return [];
-    var tests = [], cur = [], curTyp = 0;
-    noder.forEach(function(n){
-      var tc = typCount(n);
-      if(cur.length && curTyp + tc > TYP_CAP){ tests.push(cur); cur = []; curTyp = 0; }
-      cur.push(n); curTyp += tc;
-    });
-    if(cur.length) tests.push(cur);
-    return tests.map(function(ns, i){ return { titel: tests.length > 1 ? 'Test ' + (i + 1) : 'Test', nodes: ns, antal: antalFor(ns) }; });
+    var ordning = [], grupper = {};
+    noder.forEach(function(n){ var g = gruppAv(n); if(!grupper[g]){ grupper[g] = []; ordning.push(g); } grupper[g].push(n); });
+    return ordning.map(function(g){ var ns = grupper[g]; return { titel: g, nodes: ns, antal: antalFor(ns) }; });
   }
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (deeplink → ramens ?view=test-fardigt&del=k2dN&test=M).

@@ -65,19 +65,20 @@
 
   function antalFor(ns){ var tot = ns.reduce(function(s, n){ return s + typCount(n); }, 0); return Math.min(20, Math.max(10, tot * 3)); }
 
-  var TYP_CAP = 5;
-  // COVERAGE-KOMPLETT SPLIT: packa noder i test ≤ TYP_CAP typer; testen TILLSAMMANS täcker delkapitlet.
+  // INNEHÅLLS-SPLIT (spec-kontroll FAS 3): ETT test per innehålls-GRUPP (taxonomins visning.grupp),
+  // inte TYP_CAP-packning. Färre noder per test, fler test, och testet heter det det gäller ("Multiplikation")
+  // i st.f. "Test 1". Testen tillsammans täcker fortfarande hela delkapitlet.
+  function gruppAv(id){
+    var tax = window.K1_TAXONOMI;
+    var n = tax && tax.noder && tax.noder.filter(function(x){ return x.id === id; })[0];
+    return (n && n.visning && n.visning.grupp) || 'Övrigt';
+  }
   function tester(del){
     var noder = byggbaraNoder(del); if(!noder.length) return [];
-    var tests = [], cur = [], curTyp = 0;
-    noder.forEach(function(n){
-      var tc = typCount(n);
-      if(cur.length && curTyp + tc > TYP_CAP){ tests.push(cur); cur = []; curTyp = 0; }
-      cur.push(n); curTyp += tc;
-    });
-    if(cur.length) tests.push(cur);
+    var ordning = [], grupper = {};
+    noder.forEach(function(n){ var g = gruppAv(n); if(!grupper[g]){ grupper[g] = []; ordning.push(g); } grupper[g].push(n); });
     var varianter = (del === 'ak9-dk1') ? AK9_DK1_VARIANTER : undefined;
-    return tests.map(function(ns, i){ return { titel: tests.length > 1 ? 'Test ' + (i + 1) : 'Test', nodes: ns, antal: antalFor(ns), varianter: varianter }; });
+    return ordning.map(function(g){ var ns = grupper[g]; return { titel: g, nodes: ns, antal: antalFor(ns), varianter: varianter }; });
   }
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (deeplink → ramens ?view=test-fardigt&del=dN&test=M).

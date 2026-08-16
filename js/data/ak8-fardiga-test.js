@@ -69,23 +69,17 @@
   // items ≈ 3 per typ, klämt till 10–20 (matchar generateTest:s coverage-seedning i ramen).
   function antalFor(ns){ var tot = ns.reduce(function(s, n){ return s + typCount(n); }, 0); return Math.min(20, Math.max(10, tot * 3)); }
 
-  var TYP_CAP = 5;   // max typer per test (≥6-typ-nod hamnar ändå ensam) → 10–20 items när alla seedas
-
-  // COVERAGE-KOMPLETT SPLIT: packa noder i test så varje test ≤ TYP_CAP typer; testen TILLSAMMANS
-  // täcker delkapitlets alla quiz-bara typer. Antal test drivet av typ-antalet (ej fast). Bredd-axeln.
+  // INNEHÅLLS-SPLIT (spec-kontroll FAS 3): ETT test per BLAD (bokens naturliga innehålls-grupp), namngivet
+  // efter bladet ("Multiplikation med stora tal") i st.f. "Test 1". Färre noder/test, fler test; testen
+  // täcker tillsammans hela delkapitlet. Bara byggbara noder tas med; tomma blad hoppas.
   function tester(delNr){
-    var noder = byggbaraNoder(delNr);
-    if(!noder.length) return [];
-    var tests = [], cur = [], curTyp = 0;
-    noder.forEach(function(n){
-      var tc = typCount(n);
-      if(cur.length && curTyp + tc > TYP_CAP){ tests.push(cur); cur = []; curTyp = 0; }
-      cur.push(n); curTyp += tc;
-    });
-    if(cur.length) tests.push(cur);
-    return tests.map(function(ns, i){
-      return { titel: tests.length > 1 ? 'Test ' + (i + 1) : 'Test', nodes: ns, antal: antalFor(ns) };
-    });
+    var dk = delkapitelFor(delNr); if(!dk) return [];
+    var seen = {};   // en nod hamnar i sitt FÖRSTA blad (undvik dubbeltest när samma nod ligger i flera blad)
+    return (dk.blad || []).map(function(b){
+      var ns = (b.noder || []).filter(function(n){ return BYGGBARA[n] && !seen[n]; });
+      ns.forEach(function(n){ seen[n] = 1; });
+      return ns.length ? { titel: b.titel, nodes: ns, antal: antalFor(ns) } : null;
+    }).filter(Boolean);
   }
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (länkar till ramens ?view=test-fardigt) +
