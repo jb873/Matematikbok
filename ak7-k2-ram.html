@@ -831,9 +831,16 @@ function blandadEngine(){
         expl:t1+'/'+n1+' ÷ '+t2+'/'+n2+' = '+t1+'/'+n1+' · '+n2+'/'+t2+' = '+pt+'/'+pn+' = '+T+'/'+N+'.'
       };
     }) ] },
-    'brak-div-inv': { snabb: [ G.brak('k2-div-inv','Invertera (omvända talet)','brak-div-inv', function(){
-      var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
-      return {key:'inv'+t+'/'+n, prompt:'Skriv det omvända talet (inversen) till '+t+'/'+n+':', talj:n, namn:t, expl:'Inversen av '+t+'/'+n+' är '+n+'/'+t+'.'};
+    // SPEC-KONTROLL FAS 2.C: generatorn bad förr bara om reciproken — men noden brak-div-inv:rakna är
+    // DIREKT invertera-och-multiplicera (svar i enklaste form, ingen femstegskedja; brak-div-bb är den
+    // guidade varianten). Omskriven till full division a/b ÷ c/d = a/b · d/c → enklaste form.
+    'brak-div-inv': { snabb: [ G.brak('k2-div-inv','Dividera bråk med bråk (invertera)','brak-div-inv', function(){
+      var n1=rP([2,3,4,5]), t1=rI(1,n1-1), n2=rP([2,3,4,5]), t2=rI(1,n2-1);
+      var pt=t1*n2, pn=n1*t2, g=gcd2(pt,pn);
+      return {key:'divi'+t1+'/'+n1+'÷'+t2+'/'+n2,
+        prompt:'Räkna ut (invertera och multiplicera):   '+t1+'/'+n1+' ÷ '+t2+'/'+n2,
+        talj:pt/g, namn:pn/g,
+        expl:t1+'/'+n1+' ÷ '+t2+'/'+n2+' = '+t1+'/'+n1+' · '+n2+'/'+t2+' = '+pt+'/'+pn+(g>1?(' = '+(pt/g)+'/'+(pn/g)):'')+'.'};
     }) ] },
     // ── ÖVA-TÄCKNING (sjuan k2-sweep): quiz-bara luckor per delkapitel ──
     // k2d1: skriv andelen som bråk (antal→bråk, inversen av andel-noden) — brak
