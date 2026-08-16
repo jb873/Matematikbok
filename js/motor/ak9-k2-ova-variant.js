@@ -35,7 +35,7 @@
         [[2,5],[3,4],[3,2],[1,5],[5,4]].map(function(p){ return {
           logg: null, orig: { t: p[0], n: p[1] },
           prompt: function(x){ return BR(x.t, x.n) + ' ='; }, mellan: function(){ return null; },
-          facit: function(x){ return k(x.t / x.n); } }; }) },
+          facit: function(x){ return rund(x.t / x.n); } }; }) },   // NUMBER → öva-sidan rättar som decimal (typ 'tal')
 
       // G2 — förkorta till enklaste form. logg brak-forkorta:rakna. facit = enklaste-form-bråket.
       { rubrik: 'Skriv i enklaste form', logg: 'brak-forkorta:rakna', uppgifter:

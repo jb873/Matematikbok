@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 9 · Räkna med bråk · Öva</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --green:#2d6a4f; --red:#b23b34; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
+  *{ box-sizing:border-box; margin:0; padding:0; } body{ background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.6; }
+  .topnav{ position:sticky; top:0; z-index:100; background:var(--navy); border-bottom:1px solid rgba(255,255,255,.07); padding:0 28px; height:52px; display:flex; align-items:center; }
+  .nav-brand{ font-family:var(--cinzel); font-size:13px; font-weight:500; letter-spacing:.14em; color:rgba(255,255,255,.9); text-transform:uppercase; display:flex; align-items:center; gap:10px; }
+  .nav-brand span{ color:var(--gold-lt); letter-spacing:.1em; } .nav-sep{ color:rgba(255,255,255,.2); margin:0 2px; }
+  .hero{ background:var(--navy); padding:40px 28px 34px; text-align:center; }
+  .brodsmulor{ font-family:var(--cinzel); font-size:12px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px; line-height:1.5; }
+  .brodsmulor a{ color:var(--gold-lt); text-decoration:none; } .brodsmulor a:hover{ text-decoration:underline; }
+  .brodsmulor .skiljare{ color:rgba(255,255,255,.32); margin:0 .55em; } .brodsmulor .aktuell{ color:rgba(255,255,255,.92); }
+  .hero-eyebrow{ font-family:var(--cinzel); font-size:11px; letter-spacing:.2em; color:var(--gold-lt); text-transform:uppercase; margin-bottom:10px; }
+  h1.hero-title{ font-family:var(--serif); font-size:clamp(28px,5vw,40px); font-weight:500; line-height:1.15; color:#fff; }
+  h1.hero-title em{ font-style:italic; color:var(--gold-lt); }
+  .wrap{ max-width:820px; margin:0 auto; padding:26px 28px 40px; }
+  .hub-intro{ color:var(--ink-soft); font-size:15px; margin:0 0 22px; }
+  .kort-rad{ display:grid; grid-template-columns:1fr; gap:14px; }
+  .ova-kort{ display:flex; align-items:center; justify-content:space-between; gap:16px; text-align:left; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--gold); border-radius:10px; padding:18px 22px; cursor:pointer; font:inherit; color:inherit; transition:box-shadow .15s, border-color .15s; }
+  .ova-kort:hover{ box-shadow:0 3px 14px rgba(15,30,46,.09); border-left-color:var(--gold-lt); }
+  .ova-kort[disabled]{ opacity:.5; cursor:default; border-left-color:var(--paper-dk); }
+  .ova-kort .k-titel{ display:block; font-size:18px; font-weight:600; color:var(--ink); }
+  .ova-kort .k-sub{ display:block; font-size:13px; color:var(--ink-faint); margin-top:3px; }
+  .ova-kort .k-oppna{ font-family:var(--cinzel); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); flex-shrink:0; }
+  .doc-topp{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
+  .tillbaka{ font-family:var(--cinzel); font-size:11px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); background:none; border:none; cursor:pointer; padding:6px 0; }
+  .tillbaka:hover{ text-decoration:underline; }
+  .doc-eyebrow{ display:block; font-family:var(--cinzel); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); }
+  .doc-titel{ display:block; font-size:24px; font-weight:600; color:var(--ink); margin-top:4px; }
+  .doc-origflagga{ display:inline-block; font-size:12px; color:var(--ink-faint); font-style:italic; margin:4px 0 14px; }
+  .varv-banner{ display:flex; gap:10px; align-items:flex-start; background:#fbf4e4; border:1px solid var(--paper-dk); border-left:4px solid var(--gold-lt); border-radius:8px; padding:12px 16px; color:var(--ink-soft); font-size:13.5px; margin:0 0 18px; }
+  .ovn-wrap{ padding-bottom:320px; }
+  .ovn-sheet{ background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:22px 26px; }
+  .ovn-grupp{ margin-top:20px; } .ovn-grupp:first-of-type{ margin-top:2px; }
+  .ovn-grupp-rubrik{ font-size:17px; font-weight:600; margin-bottom:8px; color:var(--ink); }
+  .ovn-label{ font-size:15px; color:var(--ink-faint); margin-right:4px; }
+  .ak8-rad{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:9px 0; border-bottom:1px dotted var(--paper-dk); }
+  .ak8-rad:last-child{ border-bottom:none; }
+  .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:2px; flex-wrap:wrap; }
+  .ak8-eq{ font-family:var(--serif); font-size:18px; margin:0 4px; }
+  .ovn-brak{ display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; }
+  .ovn-brak-taljare,.ovn-brak-namnare{ padding:0 8px 2px; font-size:17px; font-feature-settings:'tnum'; white-space:nowrap; }
+  .ovn-brak-namnare{ padding:2px 8px 0; }
+  .ovn-brak-strecket{ height:2px; background:var(--ink); width:100%; min-width:40px; }
+  .ak8-fasit{ display:block; flex-basis:100%; margin-top:2px; padding-left:30px; font-size:13px; color:var(--red); }
+  .ovn-kontroll-rad{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:22px; padding-top:18px; border-top:1px solid var(--paper-dk); }
+  .btn{ font-family:var(--cinzel); font-size:12px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; border-radius:6px; padding:11px 18px; cursor:pointer; border:1px solid transparent; }
+  .btn-facit{ background:var(--gold); color:#fff; } .btn-facit:hover{ background:var(--gold-lt); }
+  .btn-vidare{ background:var(--paper); border-color:var(--paper-dk); color:var(--ink-soft); }
+  .btn-vidare:not(:disabled){ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .navrad{ display:flex; align-items:center; gap:6px; margin-left:auto; }
+  .navpil{ font-family:var(--cinzel); font-size:12px; letter-spacing:.04em; text-transform:uppercase; background:none; border:1px solid var(--paper-dk); border-radius:6px; padding:9px 13px; cursor:pointer; color:var(--ink-soft); }
+  .navpil:disabled{ opacity:.35; cursor:not-allowed; } .navpil:not(:disabled):hover{ border-color:var(--gold); }
+  footer{ border-top:1px solid var(--paper-dk); padding:24px 28px; display:flex; justify-content:space-between; align-items:center; max-width:820px; margin:0 auto; color:var(--ink-faint); font-size:12px; }
+  footer span{ font-family:var(--cinzel); font-size:11px; letter-spacing:.1em; }
+  .hidden{ display:none; }
+  @media(max-width:600px){ .topnav{ padding:0 16px; } .hero{ padding:32px 18px 26px; } .wrap{ padding:22px 18px 30px; } .navrad{ margin-left:0; width:100%; justify-content:space-between; } }
+</style>
+<!-- Delad UI-modul-CSS (keypad, cell, ✓/✗, .ak8-bc bråk-cell). Länkas efter inline så gemensamma regler vinner. -->
+<link rel="stylesheet" href="../../js/motor/blad/ak8-blad-ui.css">
+</head>
+<body>
+<nav class="topnav"><div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 9</span></div></nav>
+<header class="hero">
+  <nav class="brodsmulor" aria-label="Brödsmulor">
+    <a href="../../index.html">Matematik</a><span class="skiljare" aria-hidden="true">›</span>
+    <a href="../index.html">Årskurs 9</a><span class="skiljare" aria-hidden="true">›</span>
+    <a href="index.html">Taluppfattning</a><span class="skiljare" aria-hidden="true">›</span>
+    <a href="rakna-med-brak.html">Räkna med bråk</a><span class="skiljare" aria-hidden="true">›</span>
+    <span class="aktuell" aria-current="page">Öva</span>
+  </nav>
+  <div class="hero-eyebrow">E-spåret · Öva</div>
+  <h1 class="hero-title">Öva med <em>varianter</em></h1>
+</header>
+<main class="wrap">
+  <section id="hub">
+    <p class="hub-intro">Sex övningsdokument. Gör ett, kom tillbaka och få samma uppgifter med andra tal –
+    så övar du metoden, inte svaren.</p>
+    <div class="kort-rad" id="kort-rad"></div>
+  </section>
+  <section id="doc" class="hidden"><div id="doc-body"></div></section>
+</main>
+<footer><div>Digitalt läromedel i matematik</div><span>Årskurs 9 · Räkna med bråk · Öva</span></footer>
+
+<script src="../../js/motor/blad/ak8-blad-ui.js"></script>
+<script src="../../js/motor/ak9-k2-ova-variant.js"></script>
+<!-- Öva-loggen: bråk-evidens → MasteryK2 (samma store som åttans blad + nians union-karta läser). GDPR: localStorage. -->
+<script src="../../js/mastery-k2.js"></script>
+<script>
+(function(){
+  'use strict';
+  var API = window.AK9_K2_OVA, UI = window.AK8_UI, k = API._intern.k, gcd = API._intern.gcd;
+  var ANTAL_DOK = 1;   // FAS 3: bara dokument 1. FAS 4 höjer till 4 (dok 1 + 3 varianter).
+  var DOKS = [
+    { id:'ova1', namn:'Öva 1', sub:'Grunder i bråk', byggd:true },
+    { id:'ova2', namn:'Öva 2', sub:'Grunder – jämförelse och ordning', byggd:false },
+    { id:'ova3', namn:'Öva 3', sub:'Addition och subtraktion', byggd:false },
+    { id:'ova4', namn:'Öva 4', sub:'Blandad form och multiplikation', byggd:false },
+    { id:'ova5', namn:'Öva 5', sub:'Multiplikation och division med heltal', byggd:false },
+    { id:'ova6', namn:'Öva 6', sub:'Division', byggd:false }
+  ];
+  function docNamn(id){ for(var i=0;i<DOKS.length;i++){ if(DOKS[i].id===id) return DOKS[i].namn; } return ''; }
+
+  // ── Elev-lokal sekvens-store (localStorage; lämnar aldrig enheten) ──
+  var STORE_KEY = 'k2.rakna-med-brak.ovavariant.v1';
+  function lasStore(){ try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e){ return {}; } }
+  function sparStore(s){ try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(e){} }
+  function posFor(dokId){ var s = lasStore(); var d = s[dokId]; return d && typeof d.pos === 'number' ? d : { pos:0, varv:0 }; }
+  function framflytta(dokId){ var s = lasStore(); var d = s[dokId] || { pos:0, varv:0 };
+    var np = d.pos + 1, nv = d.varv || 0; if(np >= ANTAL_DOK){ np = 0; nv = nv + 1; }
+    s[dokId] = { pos:np, varv:nv }; sparStore(s); return s[dokId]; }
+
+  // ── Talformat + bråk-cell (bcellHTML/bread speglade byte-troget ur blad-ak8-d5.js) ──
+  function pNum(s){ if(s == null) return NaN; s = ('' + s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  function nara(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
+  function ev(s){ return UI.evalArith(s); }
+  function bcellHTML(role){ return '<span class="ovn-brak ak8-bc" data-r="' + role + '"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-bt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-bn" inputmode="text" autocomplete="off"></span></span>'; }
+  function bread(scope, role){ var c = scope.querySelector('.ak8-bc[data-r="' + role + '"]'); if(!c) return { num:NaN }; var t = ev(c.querySelector('.ak8-bt').value), n = ev(c.querySelector('.ak8-bn').value); return { t:t, n:n, num:(isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN }; }
+
+  // BRAK(täljare)(nämnare) → stående bråk (uttrycks-prompt) ──
+  function esc(s){ return ('' + s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fracHTML(num, den){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + esc(num) + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + esc(den) + '</span></span>'; }
+  function uttryckHTML(str){ var re = /BRAK\(([^()]*)\)\(([^()]*)\)/g, out = '', last = 0, m;
+    while((m = re.exec(str))){ out += esc(str.slice(last, m.index)); out += fracHTML(m[1], m[2]); last = re.lastIndex; }
+    return out + esc(str.slice(last)); }
+
+  // ── Rättnings-TYP härledd ur facit-form + mellanled (spec-villkor-k2: hela E-bandet canonical) ──
+  //  number → 'tal' (decimalvärde) · {t,n}+mellan → 'fl' (förläng: mellanled värde, svar exakt förlängt)
+  //  · {t,n} → 'br' (värde + enklaste form)
+  function typAv(u){ return (typeof u.facit === 'number') ? 'tal' : (u.mellan ? 'fl' : 'br'); }
+
+  var vy = { dokId:null, viewIdx:0, doc:null, loggat:false };
+  var hubEl = document.getElementById('hub'), docEl = document.getElementById('doc'), docBody = document.getElementById('doc-body');
+
+  function radHTML(u, ui){
+    var typ = typAv(u);
+    var label = '<span class="ovn-label">' + String.fromCharCode(97 + (ui % 26)) + ')</span>';
+    var q = '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>';
+    var eq = '<span class="ak8-eq">=</span>';
+    var svar = (typ === 'tal') ? eq + '<input class="ak8-in" inputmode="text" autocomplete="off">'
+             : (typ === 'fl') ? eq + bcellHTML('mel') + eq + bcellHTML('fin')
+             : eq + bcellHTML('fin');
+    return '<div class="ak8-rad" data-typ="' + typ + '" data-ui="' + ui + '">' + label + q + svar + '</div>';
+  }
+
+  function renderHub(){
+    var html = DOKS.map(function(d){
+      var attr = d.byggd ? ' data-dok="' + d.id + '"' : ' disabled';
+      return '<button type="button" class="ova-kort"' + attr + '><span class="k-vanster"><span class="k-titel">' + d.namn + '</span><span class="k-sub">' + esc(d.sub) + (d.byggd ? '' : ' · byggs') + '</span></span><span class="k-oppna">' + (d.byggd ? 'Öppna →' : '') + '</span></button>';
+    }).join('');
+    document.getElementById('kort-rad').innerHTML = html;
+    document.querySelectorAll('.ova-kort[data-dok]').forEach(function(b){
+      b.addEventListener('click', function(){ hubEl.classList.add('hidden'); docEl.classList.remove('hidden'); renderDoc(b.dataset.dok, posFor(b.dataset.dok).pos); });
+    });
+  }
+
+  function renderDoc(dokId, viewIdx){
+    vy.dokId = dokId; vy.viewIdx = viewIdx; vy.loggat = false;
+    var st = posFor(dokId), pos = st.pos, varv = st.varv;
+    var doc = vy.doc = API.genereraDokument(dokId, viewIdx);
+    var origflagga = viewIdx === 0 ? 'Originaluppgifterna' : 'Samma uppgifter och metoder – andra tal';
+    var varvHTML = (viewIdx === 0 && varv > 0)
+      ? '<div class="varv-banner"><span>💡</span><div>Fokusera på <em>hur</em> du räknar – inte på att minnas svaret.</div></div>' : '';
+
+    var sheet = '<div class="ovn-sheet">';
+    doc.grupper.forEach(function(g, gi){
+      sheet += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + (gi + 1) + '. ' + esc(g.rubrik) + '</div>';
+      g.uppgifter.forEach(function(u, ui){ sheet += radHTML(u, ui); });
+      sheet += '</div>';
+    });
+    sheet += '<div class="ovn-kontroll-rad">'
+      + '<button type="button" class="btn btn-facit" data-facit-btn>Kontrollera</button>'
+      + '<button type="button" class="btn btn-vidare" data-vidare disabled>Klar – nästa</button>'
+      + '<div class="navrad"><button type="button" class="navpil" data-bak>‹ Föregående</button>'
+      + '<button type="button" class="navpil" data-fram>Nästa ›</button></div>'
+      + UI.printKnappHTML() + '</div></div>';
+
+    var head = '<div class="ovn-wrap"><div class="doc-topp"><button type="button" class="tillbaka" data-tillbaka>‹ Alla övningar</button></div>'
+      + '<span class="doc-eyebrow">' + esc(docNamn(dokId)) + '</span>'
+      + '<span class="doc-titel">' + esc(doc.titel) + '</span>'
+      + '<span class="doc-origflagga">' + origflagga + '</span>' + varvHTML + sheet + '</div>';
+
+    docBody.innerHTML = '';
+    var c = document.createElement('div'); c.innerHTML = head + UI.keypadHTML({ ops:['+', '−', '·', '/', ','], builders:false });
+    docBody.appendChild(c);
+    UI.bindSheet(c);
+    c.addEventListener('input', function(e){ if(e.target.classList && e.target.classList.contains('ak8-in')) uppdateraKlar(); });
+    c.querySelector('[data-facit-btn]').addEventListener('click', function(){ kontrollera(c); });
+    c.querySelector('[data-vidare]').addEventListener('click', function(){ var ny = framflytta(vy.dokId); renderDoc(vy.dokId, ny.pos); });
+    c.querySelector('[data-bak]').addEventListener('click', function(){ if(vy.viewIdx > 0) renderDoc(vy.dokId, vy.viewIdx - 1); });
+    c.querySelector('[data-fram]').addEventListener('click', function(){ var s = posFor(vy.dokId); if(vy.viewIdx < s.pos) renderDoc(vy.dokId, vy.viewIdx + 1); });
+    c.querySelector('[data-tillbaka]').addEventListener('click', function(){ docEl.classList.add('hidden'); hubEl.classList.remove('hidden'); renderHub(); window.scrollTo(0, 0); });
+    c.querySelector('[data-bak]').disabled = viewIdx <= 0;
+    c.querySelector('[data-fram]').disabled = viewIdx >= pos;
+    uppdateraKlar();
+    window.scrollTo(0, 0);
+  }
+
+  // ── Svarsstatus (fin-cellen ifylld) ──
+  function radBesvarad(rad){
+    if(rad.dataset.typ === 'tal'){ var i = rad.querySelector('.ak8-in'); return !!i && i.value.trim() !== ''; }
+    var fin = rad.querySelector('.ak8-bc[data-r="fin"]'); if(!fin) return false;
+    return fin.querySelector('.ak8-bt').value.trim() !== '' && fin.querySelector('.ak8-bn').value.trim() !== '';
+  }
+  function allaBesvarade(c){ var rader = c.querySelectorAll('.ak8-rad'); if(!rader.length) return false;
+    for(var i = 0; i < rader.length; i++){ if(!radBesvarad(rader[i])) return false; } return true; }
+  function uppdateraKlar(){ var c = docBody.firstChild; if(!c) return;
+    var st = posFor(vy.dokId), påPos = vy.viewIdx === st.pos;
+    c.querySelector('[data-vidare]').disabled = !(påPos && allaBesvarade(c)); }
+  function markInputs(scope, ok){ scope.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(ok ? 'ak8-ok' : 'ak8-fel'); }); }
+
+  // ── RÄTTA en rad canonical: tal (värde) · br (värde+enklaste form) · fl (mellanled värde, svar exakt förlängt) ──
+  function rattaRad(rad, u){
+    var typ = rad.dataset.typ, f = u.facit;
+    if(typ === 'tal'){ var v = pNum(rad.querySelector('.ak8-in').value); var ok = nara(v, f); markInputs(rad, ok); return { ok:ok, facit:k(f) }; }
+    if(typ === 'br'){
+      var b = bread(rad, 'fin'); var mal = f.t / f.n;
+      var ok = nara(b.num, mal) && isFinite(b.t) && isFinite(b.n) && gcd(Math.round(b.t), Math.round(b.n)) === 1;   // värde + enklaste form
+      var fc = rad.querySelector('.ak8-bc[data-r="fin"]'); if(fc) fc.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(ok ? 'ak8-ok' : 'ak8-fel'); });
+      return { ok:ok, facit: f.t + '/' + f.n };
+    }
+    // fl: mellanledet lika med bråkets VÄRDE (t.ex. 7·3/9·3 = 7/9), svaret exakt det förlängda (t/n)
+    var mel = bread(rad, 'mel'), sv = bread(rad, 'fin'), mal = f.t / f.n;
+    var melOk = nara(mel.num, mal), svOk = nara(sv.t, f.t) && nara(sv.n, f.n), ok = melOk && svOk;
+    var mc = rad.querySelector('.ak8-bc[data-r="mel"]'); if(mc) mc.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(melOk ? 'ak8-ok' : 'ak8-fel'); });
+    var sc = rad.querySelector('.ak8-bc[data-r="fin"]'); if(sc) sc.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok','ak8-fel'); i.classList.add(svOk ? 'ak8-ok' : 'ak8-fel'); });
+    return { ok:ok, facit: f.t + '/' + f.n };
+  }
+
+  function kontrollera(c){
+    var loggMast = window.MasteryK2 && window.MasteryK2.loggaForsok;
+    var uppg = []; vy.doc.grupper.forEach(function(g){ g.uppgifter.forEach(function(u){ uppg.push(u); }); });
+    c.querySelectorAll('.ak8-rad').forEach(function(rad, i){
+      var u = uppg[i]; if(!u) return;
+      var gammal = rad.querySelector('.ak8-fasit'); if(gammal) gammal.remove();
+      var besvarad = radBesvarad(rad);
+      var res = rattaRad(rad, u);
+      if(besvarad && !res.ok){ var fEl = document.createElement('span'); fEl.className = 'ak8-fasit'; fEl.textContent = 'rätt: ' + res.facit; rad.appendChild(fEl); }
+      // EVIDENS: bara besvarade + loggade rader (växlings-grupperna har logg:null → loggas EJ), en gång/visning.
+      if(loggMast && !vy.loggat && u.logg && besvarad){ loggMast(u.logg, res.ok ? 'ratt' : 'fel'); }
+    });
+    vy.loggat = true;
+  }
+
+  renderHub();
+})();
+</script>
+</body>
+</html>
