@@ -24,10 +24,11 @@
   function BLAND(h, t, n){ return h + ' ' + BR(t, n); }                     // blandat tal
   // Facit-former (öva-sidan renderar cell + rättar efter .form):
   //   {form:'tal', v}  ·  {form:'brak', t, n}  ·  {form:'blandad', hel, t, n}  ·  {form:'forlang', t, n}
-  function brakForm(t, n){                                   // reducera; oäkta (|värde|>1) → BLANDAD form
+  function brakForm(t, n){                                   // reducera; HÄRLED form ur VÄRDET (per variant, ej ärvd)
     var g = gcd(t, n), T = t / g, N = n / g;
-    if(Math.abs(T) >= N && N !== 1){ var hel = Math.trunc(T / N), rest = Math.abs(T) - Math.abs(hel) * N; return { form: 'blandad', hel: hel, t: rest, n: N }; }
-    return { form: 'brak', t: T, n: N };
+    if(N === 1) return { form: 'tal', v: T };                             // heltal (t.ex. 5·4/5=4, 5÷⅓=15) → tal-ruta
+    if(Math.abs(T) >= N){ var hel = Math.trunc(T / N), rest = Math.abs(T) - Math.abs(hel) * N; return { form: 'blandad', hel: hel, t: rest, n: N }; }  // oäkta → blandad
+    return { form: 'brak', t: T, n: N };                                  // äkta → tvåfält
   }
 
   // ── MALLAR — låst uppgiftsordning + grupper/rubriker. orig = Joachims exakta tal (dokument 1). ──
