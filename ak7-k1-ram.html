@@ -4300,24 +4300,38 @@ const TEST_GENERATORS = {
     // (öva-rubriken "Beräkna – visa mellanled"). Alla del- och slutresultat heltal ≥ 0. Bara nian.
     ProvbyggarMotor.gen.mellanledNum('prio-uttryck-ml','Prioriteringsregeln (mellanled)','prio-prioritering', function(opts){
       var v=opts&&opts.variant; if(!(v&&v.struktur)) return null;
-      var T=[
-        function(){ var a=rInt(20,50),b=rInt(2,15),c=rInt(3,9),d=rInt(2,9); if(a-b<0) return null;
-          return {p:'('+a+' − '+b+') · '+c+' + '+d, lf:'Räkna parentesen ('+a+' − '+b+') först:', lv:a-b, f:(a-b)*c+d}; },
-        function(){ var a=rInt(5,20),b=rInt(2,6),c=rInt(4,12),d=rInt(1,8); if(c-d<0) return null;
-          return {p:a+' + '+b+' · ('+c+' − '+d+')', lf:'Räkna parentesen ('+c+' − '+d+') först:', lv:c-d, f:a+b*(c-d)}; },
-        function(){ var a=rInt(2,5),b=rInt(2,6),c=rInt(2,7),d=rInt(1,9),e=rInt(5,25); if(b*c-d<0) return null;
-          return {p:a+' · ('+b+' · '+c+' − '+d+') + '+e, lf:'Räkna parentesen ('+b+' · '+c+' − '+d+') först:', lv:b*c-d, f:a*(b*c-d)+e}; },
-        function(){ var a=rInt(5,15),b=rInt(1,9),c=rInt(4,12),d=rInt(1,8); if(c-d<0) return null;
-          return {p:'('+a+' + '+b+') · ('+c+' − '+d+')', lf:'Räkna parentesen ('+c+' − '+d+') först:', lv:c-d, f:(a+b)*(c-d)}; },
-        function(){ var a=rInt(2,9),b=rInt(2,9),c=rInt(1,20),d=rInt(2,9); var n=a*b-c; if(n<0||n%d!==0) return null;
-          return {p:'BRAK('+a+' · '+b+' − '+c+')('+d+')', lf:'Räkna täljaren ('+a+' · '+b+' − '+c+') först:', lv:n, f:n/d}; },
-        function(){ var a=rInt(5,30),b=rInt(5,30),c=rInt(1,6),d=rInt(1,6); var n=a+b,m=c+d; if(n%m!==0) return null;
-          return {p:'BRAK('+a+' + '+b+')('+c+' + '+d+')', lf:'Räkna nämnaren ('+c+' + '+d+') först:', lv:m, f:n/m}; },
-        function(){ var a=rInt(2,9),b=rInt(2,9),d=rInt(2,6),e=rInt(2,6),q=rInt(2,9); var c=d*e*q;
-          return {p:a+' · '+b+' + BRAK('+c+')('+d+' · '+e+')', lf:'Räkna nämnaren ('+d+' · '+e+') först:', lv:d*e, f:a*b+q}; }
-      ];
-      var pick=T[rInt(0,T.length-1)](); if(!pick) return null;
-      return { key:'pml'+pick.p, prompt:'Räkna ut:   '+pick.p,
+      // NIVÅ-STEGE HÄRLEDD UR ÖVA 3:s tre grupper (ak9-k1-ova-variant, ova3) — inga nya steg påhittade:
+      //  nivå 1 = grupp 1 (en operation + EN parentes), nivå 2 = grupp 2 (nästlad / koefficient framför
+      //  parentes), nivå 3 = grupp 3 (BRÅKSTRECK som gruppering). Öva-gruppen ÄR svårighetssteget.
+      var TIER = {
+        1: [
+          function(){ var a=rInt(20,50),b=rInt(2,15),c=rInt(3,9),d=rInt(2,9); if(a-b<0) return null;
+            return {p:'('+a+' − '+b+') · '+c+' + '+d, lf:'Räkna parentesen ('+a+' − '+b+') först:', lv:a-b, f:(a-b)*c+d}; },
+          function(){ var a=rInt(5,20),b=rInt(2,6),c=rInt(4,12),d=rInt(1,8); if(c-d<0) return null;
+            return {p:a+' + '+b+' · ('+c+' − '+d+')', lf:'Räkna parentesen ('+c+' − '+d+') först:', lv:c-d, f:a+b*(c-d)}; }
+        ],
+        2: [
+          function(){ var a=rInt(2,5),b=rInt(2,6),c=rInt(2,7),d=rInt(1,9),e=rInt(5,25); if(b*c-d<0) return null;
+            return {p:a+' · ('+b+' · '+c+' − '+d+') + '+e, lf:'Räkna parentesen ('+b+' · '+c+' − '+d+') först:', lv:b*c-d, f:a*(b*c-d)+e}; },
+          function(){ var a=rInt(5,15),b=rInt(1,9),c=rInt(4,12),d=rInt(1,8); if(c-d<0) return null;
+            return {p:'('+a+' + '+b+') · ('+c+' − '+d+')', lf:'Räkna parentesen ('+c+' − '+d+') först:', lv:c-d, f:(a+b)*(c-d)}; }
+        ],
+        3: [
+          function(){ var a=rInt(2,9),b=rInt(2,9),c=rInt(1,20),d=rInt(2,9); var n=a*b-c; if(n<0||n%d!==0) return null;
+            return {p:'BRAK('+a+' · '+b+' − '+c+')('+d+')', lf:'Räkna täljaren ('+a+' · '+b+' − '+c+') först:', lv:n, f:n/d}; },
+          function(){ var a=rInt(5,30),b=rInt(5,30),c=rInt(1,6),d=rInt(1,6); var n=a+b,m=c+d; if(n%m!==0) return null;
+            return {p:'BRAK('+a+' + '+b+')('+c+' + '+d+')', lf:'Räkna nämnaren ('+c+' + '+d+') först:', lv:m, f:n/m}; },
+          function(){ var a=rInt(2,9),b=rInt(2,9),d=rInt(2,6),e=rInt(2,6),q=rInt(2,9); var c=d*e*q;
+            return {p:a+' · '+b+' + BRAK('+c+')('+d+' · '+e+')', lf:'Räkna nämnaren ('+d+' · '+e+') först:', lv:d*e, f:a*b+q}; }
+        ]
+      };
+      // NIVÅ-SPRIDNING: slumpa nivå per fråga ur öva-stegen (v.nivaer, default alla tre) → samma nod ger
+      // lätta OCH svåra uppgifter i samma test, inom öva-taket.
+      var nivaer = (v.nivaer && v.nivaer.length) ? v.nivaer : [1,2,3];
+      var niv = nivaer[rInt(0, nivaer.length-1)];
+      var TL = TIER[niv] || TIER[1];
+      var pick = TL[rInt(0, TL.length-1)](); if(!pick) return null;
+      return { key:'pml'+niv+'-'+pick.p, prompt:'Räkna ut:   '+pick.p,
         led:[{ fraga:pick.lf, varde:pick.lv }], slutVarde:pick.f, expl:pick.p+' = … = '+pick.f };
     })
   ]},

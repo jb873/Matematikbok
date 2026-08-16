@@ -47,7 +47,7 @@
     'mult-rakna:stora': { talomrade: 'nian' },
     'mult-rakna:storasma': { talomrade: 'nian' },   // kompensations-mellanled
     'div-rakna:sma': { talomrade: 'nian' },          // förlängnings-mellanled
-    'prio-prioritering:rakna': { struktur: ['parenteser','koefficient','brakstreck'] }  // öva 3-komplexitet + mellanled
+    'prio-prioritering:rakna': { struktur: ['parenteser','koefficient','brakstreck'], nivaer: [1,2,3] }  // nivåer = öva 3:s tre grupper (spridning)
   };
 
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
