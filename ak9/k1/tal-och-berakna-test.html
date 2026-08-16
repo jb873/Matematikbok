@@ -78,9 +78,12 @@
   var rad = document.getElementById('test-rad');
   var tester = (window.K1_FARDIGA && K1_FARDIGA.tester(DEL)) || [];
   if(!tester.length){ rad.innerHTML = '<p class="test-tom">Testet byggs.</p>'; return; }
+  // FAS 4: retur till den här sidan (var eleven kom ifrån) → motorns take-back pekar hit.
+  var _tt = (document.title ? document.title.split(/[–—·|]/)[0].trim() : '') || 'Tal och beräkningar';
+  var RETUR = '&retur=' + encodeURIComponent(location.href) + '&retur_txt=' + encodeURIComponent('← ' + _tt);
   tester.forEach(function(t, i){
     var a = document.createElement('a'); a.className = 'test-kort';
-    a.href = RAM + '?view=test-fardigt&del=' + DEL + '&test=' + (i + 1);
+    a.href = RAM + '?view=test-fardigt&del=' + DEL + '&test=' + (i + 1) + RETUR;
     a.innerHTML = '<span><span class="k-titel">' + (tester.length > 1 ? 'Test ' + (i + 1) : 'Test') + '</span>'
       + '<span class="k-sub">' + (tester.length > 1 ? 'Del ' + (i + 1) + ' av ' + tester.length + ' – tillsammans täcker de hela delkapitlet' : 'Hela delkapitlet') + '</span></span>'
       + '<span class="k-antal">' + t.antal + ' uppgifter</span>';

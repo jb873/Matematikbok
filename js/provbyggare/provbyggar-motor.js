@@ -1146,8 +1146,18 @@ function renderTestTake(){
   // Färdigt test har inga inställningar → göm provbyggarens "Tillbaka till inställningar".
   const takeBack = document.getElementById('test-take-back');
   if(takeBack){
-    takeBack.style.display = t.fardigt ? 'none' : '';
-    takeBack.onclick = (e) => { e.preventDefault(); navTo('test-config'); };
+    // Färdigt test har inga inställningar. Kom eleven via en retur-länk (delkapitel-sidan) → visa
+    // "tillbaka dit" i st.f. att gömma knappen. Annars (byggt i ramen) göms den som förr.
+    var _ret = t.fardigt && t.fardigt.retur;
+    if(_ret){
+      takeBack.style.display = '';
+      takeBack.setAttribute('href', _ret);
+      if(t.fardigt.returTxt) takeBack.textContent = t.fardigt.returTxt;
+      takeBack.onclick = null;   // låt <a href> navigera normalt tillbaka till delkapitlet
+    } else {
+      takeBack.style.display = t.fardigt ? 'none' : '';
+      takeBack.onclick = (e) => { e.preventDefault(); navTo('test-config'); };
+    }
   }
 
   const body = document.getElementById('test-take-body');
@@ -1397,7 +1407,8 @@ function renderTestResult(){
       // fardigt-params stashas på provet → resultat-vyns "Nytt test" genererar ett NYTT färdigt test
       // för SAMMA delkapitel (samma noder, nya tal), inte provbyggar-configen.
       state.test = { questions: questions, answers: {}, currentIdx: -1, startedAt: Date.now(),
-        fardigt: { nodes: cfg.nodes.slice(), antal: cfg.antal, typ: cfg.typ, varianter: o.varianter || null } };
+        fardigt: { nodes: cfg.nodes.slice(), antal: cfg.antal, typ: cfg.typ, varianter: o.varianter || null,
+          retur: o.retur || null, returTxt: o.returTxt || null } };
       navTo('test-take');
       return questions.reduce(function(s, q){ return s + q.subs.length; }, 0);   // antal svarbara items
     }

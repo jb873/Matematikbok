@@ -82,6 +82,16 @@
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (deeplink → ramens ?view=test-fardigt&del=dN&test=M).
   // del = delkapitel-id ('d1'..'d8'). ramPath = relativ sökväg till ak7-k1-ram.html.
+  // FAS 4: retur-suffix till test-deeplinken — var eleven ska tillbaka (denna delkapitel-sida) + etikett.
+  // Motorns take-back pekar dit i st.f. att gömmas (färdigt test har inga inställningar att gå till).
+  function returSuffix(){
+    try {
+      if(typeof location === 'undefined' || !location.href) return '';
+      var titel = (typeof document !== 'undefined' && document.title) ? document.title.split(/[–—·|]/)[0].trim() : '';
+      return '&retur=' + encodeURIComponent(location.href) + '&retur_txt=' + encodeURIComponent('← ' + (titel || 'Tillbaka'));
+    } catch(e){ return ''; }
+  }
+
   function renderTestFlik(panelEl, del, ramPath){
     if(!panelEl) return;
     ramPath = ramPath || '../../../ak7-k1-ram.html';
@@ -91,8 +101,9 @@
       html += '<p style="margin:0 0 18px;">Färdiga test för det här delkapitlet – hopsatta ur momenten. Klicka och kör direkt.'
         + (t.length > 1 ? ' Uppdelat i ' + t.length + ' så att testen tillsammans täcker hela delkapitlet.' : '') + '</p>'
         + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+      var retur = returSuffix();   // FAS 4: skicka med var eleven ska tillbaka (delkapitel-sidan)
       t.forEach(function(test, i){
-        var url = ramPath + '?view=test-fardigt&del=' + del + '&test=' + (i + 1);
+        var url = ramPath + '?view=test-fardigt&del=' + del + '&test=' + (i + 1) + retur;
         html += '<a href="' + url + '">' + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
       });
       html += '</div>';

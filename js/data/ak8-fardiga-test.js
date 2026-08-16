@@ -90,6 +90,15 @@
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (länkar till ramens ?view=test-fardigt) +
   // "Skapa eget test →" bredvid. ramPath = relativ sökväg till ak8-k1-ram.html från sidan.
+  // FAS 4: retur-suffix till test-deeplinken (var eleven ska tillbaka + etikett). Se k1-fardiga-test.js.
+  function returSuffix(){
+    try {
+      if(typeof location === 'undefined' || !location.href) return '';
+      var titel = (typeof document !== 'undefined' && document.title) ? document.title.split(/[–—·|]/)[0].trim() : '';
+      return '&retur=' + encodeURIComponent(location.href) + '&retur_txt=' + encodeURIComponent('← ' + (titel || 'Tillbaka'));
+    } catch(e){ return ''; }
+  }
+
   function renderTestFlik(panelEl, delNr, ramPath){
     if(!panelEl) return;
     ramPath = ramPath || '../../ak8-k1-ram.html';
@@ -100,8 +109,9 @@
       html += '<p style="font-size:14px;line-height:1.6;max-width:520px;margin:0 0 18px;">Ett färdigt test för det här delkapitlet – hopsatt åt dig ur momenten. Klicka och kör direkt.'
         + (t.length > 1 ? ' Det är uppdelat i två så att varje test håller lagom längd.' : '') + '</p>'
         + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+      var retur = returSuffix();   // FAS 4
       t.forEach(function(test, i){
-        var url = ramPath + '?view=test-fardigt&del=ak8d' + delNr + '&test=' + (i + 1);
+        var url = ramPath + '?view=test-fardigt&del=ak8d' + delNr + '&test=' + (i + 1) + retur;
         html += '<a href="' + url + '" style="display:inline-block;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--gold,#9a7228);padding:12px 24px;border-radius:6px;text-decoration:none;">'
           + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
       });

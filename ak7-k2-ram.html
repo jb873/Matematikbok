@@ -945,7 +945,8 @@ function blandadEngine(){
     var mfd = hs.match(/[?&]del=([a-z0-9]+)/i), mft = hs.match(/[?&]test=([0-9]+)/i);
     var ftester = (window.K2_FARDIGA && mfd) ? K2_FARDIGA.tester(mfd[1]) : [];
     var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
-    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal }); }
+    var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);   // FAS 4: retur till delkapitel
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, retur: mret ? decodeURIComponent(mret[1]) : null, returTxt: mrtx ? decodeURIComponent(mrtx[1]) : null }); }
     else { PB.setDel(mfd ? mfd[1] : null); pbNav('test-config'); }
     return;
   }

@@ -9328,8 +9328,11 @@ function repSkippaPanel(){
     var ftester = (window.K1_FARDIGA && mfd) ? K1_FARDIGA.tester(mfd[1]) : [];
     var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
     var mseed = hs.match(/[?&]seed=(\d+)/i);   // FAS 4: seedad verifiering (deterministisk dump)
+    // FAS 4 (retur): delkapitel-sidan skickar var eleven ska tillbaka → motorns take-back pekar dit.
+    var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);
+    var retur = mret ? decodeURIComponent(mret[1]) : null, returTxt = mrtx ? decodeURIComponent(mrtx[1]) : null;
     renderKapitel();
-    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter, seed: mseed ? parseInt(mseed[1], 10) : null }); }
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter, seed: mseed ? parseInt(mseed[1], 10) : null, retur: retur, returTxt: returTxt }); }
     else { PB.setDel(mfd ? mfd[1] : null); navTo('test-config'); }
     return;
   }
