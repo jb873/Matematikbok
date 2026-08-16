@@ -30,11 +30,13 @@ function komma(x){return String(x).replace('.',',')}                    // 0.04 
 
   // ── Fabriker (bygg generators: ProvbyggarMotor.gen.numeric/flerval/product/brak) ──
 function testNumericGen(genId, titel, omrade, makeItem){
-  return function(seen){
+  // opts.variant (valfritt): feature-set vidarebefordras till makeItem. Utan → makeItem(undefined),
+  // och alla befintliga makeItem:s (function(){…}) ignorerar argumentet → byte-identiskt för åk7/åk8.
+  return function(seen, opts){
     const subs = []; let tries = 0;
     while(subs.length < 4 && tries < 120){
       tries++;
-      const it = makeItem();
+      const it = makeItem(opts && opts.variant);
       if(!it || seen.has(genId+'-'+it.key)) continue;
       seen.add(genId+'-'+it.key);
       subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'numeric', prompt:it.prompt, answer:it.ans, explanation:it.expl||'' });

@@ -33,6 +33,10 @@
   // ramen är kronjuvel/orörd, så testet loggar decimaler till :stora; båda noderna färgas, ingen
   // evidens tappas). Ren additiv gren — d1–d8 orörda, åk7/åk8-testen byte-identiska.
   var AK9_DK1_NODER = ['mult-rakna:pow10', 'div-rakna:pow10', 'mult-rakna:stora', 'div-rakna:stora', 'prio-prioritering:rakna'];
+  // Feature-set per nod (nivå-parameter). Skickas som cfg.varianter → generatorns makeItem(features).
+  // Talområde = första axeln; fler axlar (struktur) läggs till per färdighet efter hand. Noder utan
+  // entry → ingen feature → generatorns default (åk7-oförändrat). Författad tabell, fylls på per generator.
+  var AK9_DK1_VARIANTER = { 'mult-rakna:stora': { talomrade: 'nian' } };
 
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
   function byggbaraNoder(del){
@@ -58,7 +62,8 @@
       cur.push(n); curTyp += tc;
     });
     if(cur.length) tests.push(cur);
-    return tests.map(function(ns, i){ return { titel: tests.length > 1 ? 'Test ' + (i + 1) : 'Test', nodes: ns, antal: antalFor(ns) }; });
+    var varianter = (del === 'ak9-dk1') ? AK9_DK1_VARIANTER : undefined;
+    return tests.map(function(ns, i){ return { titel: tests.length > 1 ? 'Test ' + (i + 1) : 'Test', nodes: ns, antal: antalFor(ns), varianter: varianter }; });
   }
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (deeplink → ramens ?view=test-fardigt&del=dN&test=M).

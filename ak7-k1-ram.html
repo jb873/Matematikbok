@@ -4158,8 +4158,12 @@ const TEST_GENERATORS = {
     ProvbyggarMotor.gen.numeric('mult-rakna-pow10','Multiplikation med 10, 100 och 1000','mult-rakna', function(){
       const a=rInt(2,99), p=randPick([10,100,1000]); return {key:a+'x'+p, prompt:'Räkna ut:   '+a+' · '+p, ans:a*p, expl:a+' · '+p+' = '+(a*p)};
     }),
-    ProvbyggarMotor.gen.numeric('mult-rakna-stora','Multiplikation med stora tal','mult-rakna', function(){
-      const a=rInt(12,49), b=rInt(3,9); return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
+    ProvbyggarMotor.gen.numeric('mult-rakna-stora','Multiplikation med stora tal','mult-rakna', function(f){
+      // NIVÅ-PARAMETER (features): talområdet är första axeln. Default (ingen feature) = åk7, oförändrat.
+      let a, b;
+      if(f && f.talomrade === 'nian'){ a=rInt(1,9)*10000; b=rInt(1,9)*1000; }   // nian: 50 000 · 2 000 (ur öva-bladet)
+      else { a=rInt(12,49); b=rInt(3,9); }                                        // åk7 default (byte-identiskt)
+      return {key:a+'x'+b, prompt:'Räkna ut:   '+a+' · '+b, ans:a*b, expl:a+' · '+b+' = '+(a*b)};
     }),
     // ÖVA-TÄCKNING d6: multiplikation med små tal + decimaler (decimal·heltal, decimal·decimal, decimal·stort)
     ProvbyggarMotor.gen.numeric('mult-sma-dec','Multiplikation med små tal och decimaler','mult-rakna', function(){
@@ -9217,7 +9221,7 @@ function repSkippaPanel(){
     var ftester = (window.K1_FARDIGA && mfd) ? K1_FARDIGA.tester(mfd[1]) : [];
     var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
     renderKapitel();
-    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal }); }
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter }); }
     else { PB.setDel(mfd ? mfd[1] : null); navTo('test-config'); }
     return;
   }
