@@ -95,11 +95,11 @@
 <script>
 (function(){
   'use strict';
-  var API = window.AK9_K2_OVA, UI = window.AK8_UI, k = API._intern.k, gcd = API._intern.gcd;
+  var API = window.AK9_K2_OVA, UI = window.AK8_UI, k = API._intern.k, gcd = API._intern.gcd, BR = API._intern.BR;
   var ANTAL_DOK = 1;   // FAS 3: bara dokument 1. FAS 4 höjer till 4 (dok 1 + 3 varianter).
   var DOKS = [
     { id:'ova1', namn:'Öva 1', sub:'Grunder i bråk', byggd:true },
-    { id:'ova2', namn:'Öva 2', sub:'Grunder – jämförelse och ordning', byggd:false },
+    { id:'ova2', namn:'Öva 2', sub:'Grunder – jämförelse och ordning', byggd:true },
     { id:'ova3', namn:'Öva 3', sub:'Addition och subtraktion', byggd:false },
     { id:'ova4', namn:'Öva 4', sub:'Blandad form och multiplikation', byggd:false },
     { id:'ova5', namn:'Öva 5', sub:'Multiplikation och division med heltal', byggd:false },
@@ -141,9 +141,25 @@
   var vy = { dokId:null, viewIdx:0, doc:null, loggat:false };
   var hubEl = document.getElementById('hub'), docEl = document.getElementById('doc'), docBody = document.getElementById('doc-body');
 
+  function fracBtn(p){ return '<button type="button" class="ak8-tal ak8-korval" data-i="' + p.i + '">' + uttryckHTML(BR(p.tn[0], p.tn[1])) + '</button>'; }
   function radHTML(u, ui){
-    var typ = typAv(u);
+    var typ = typAv(u), f = u.facit;
     var label = '<span class="ovn-label">' + String.fromCharCode(97 + (ui % 26)) + ')</span>';
+    // ── Val-baserade former (jämför / tecken / storleksordna) ──
+    if(typ === 'val'){   // vilket är störst — klicka det största bråket
+      var btns = '<span class="ak8-ordna">' + fracBtn({ i:0, tn:f.a }) + fracBtn({ i:1, tn:f.b }) + '</span>';
+      return '<div class="ak8-rad" data-typ="val" data-ui="' + ui + '">' + label + '<span class="ak8-q">Vilket är störst?</span>' + btns + '</div>';
+    }
+    if(typ === 'tecken'){   // sätt =, <, > mellan talen (tre-vägs)
+      var parts = ('' + u.prompt).split('▢');
+      var teckenBtns = '<span class="ak8-ordna">' + ['<', '=', '>'].map(function(s){ return '<button type="button" class="ak8-tal ak8-korval" data-sign="' + s + '">' + s + '</button>'; }).join('') + '</span>';
+      return '<div class="ak8-rad" data-typ="tecken" data-ui="' + ui + '">' + label + '<span class="ak8-q">' + uttryckHTML(parts[0]) + '</span>' + teckenBtns + '<span class="ak8-q">' + uttryckHTML(parts[1] || '') + '</span></div>';
+    }
+    if(typ === 'ordna'){   // storleksordna — klicka i ordning, minsta först
+      var btns2 = '<span class="ak8-ordna">' + f.lista.map(function(p, i){ return '<button type="button" class="ak8-tal" data-i="' + i + '">' + uttryckHTML(BR(p[0], p[1])) + '<span class="ak8-ordnr"></span></button>'; }).join('') + '</span>';
+      return '<div class="ak8-rad" data-typ="ordna" data-ui="' + ui + '">' + label + '<span class="ak8-q">Minsta först:</span>' + btns2 + '</div>';
+    }
+    // ── Fraktions-/tal-former (svarscell efter facit.form) ──
     var q = '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>';
     var eq = '<span class="ak8-eq">=</span>';
     var svar = (typ === 'tal') ? eq + '<input class="ak8-in" inputmode="text" autocomplete="off">'
@@ -194,6 +210,18 @@
     var c = document.createElement('div'); c.innerHTML = head + UI.keypadHTML({ ops:['+', '−', '·', '/', ','], builders:false });
     docBody.appendChild(c);
     UI.bindSheet(c);
+    // Val/tecken = enkel-val (korval); storleksordna = klicka-i-ordning (speglat ur blad-ak8-d5).
+    c.querySelectorAll('.ak8-rad[data-typ="val"] .ak8-ordna, .ak8-rad[data-typ="tecken"] .ak8-ordna').forEach(function(grid){
+      grid.querySelectorAll('.ak8-korval').forEach(function(btn){ btn.onclick = function(){ grid.querySelectorAll('.ak8-korval').forEach(function(b){ b.classList.toggle('sel', b === btn); b.classList.remove('ak8-ok','ak8-fel'); }); uppdateraKlar(); }; });
+    });
+    c.querySelectorAll('.ak8-rad[data-typ="ordna"] .ak8-ordna').forEach(function(grid){
+      grid.querySelectorAll('.ak8-tal').forEach(function(btn){ btn.onclick = function(){
+        if(btn.classList.contains('sel')){ btn.classList.remove('sel'); btn.querySelector('.ak8-ordnr').textContent = '';
+          [].slice.call(grid.querySelectorAll('.ak8-tal.sel')).sort(function(a, b){ return (+a.querySelector('.ak8-ordnr').textContent) - (+b.querySelector('.ak8-ordnr').textContent); }).forEach(function(t, i){ t.querySelector('.ak8-ordnr').textContent = (i + 1); });
+        } else { btn.classList.add('sel'); btn.querySelector('.ak8-ordnr').textContent = grid.querySelectorAll('.ak8-tal.sel').length; }
+        uppdateraKlar();
+      }; });
+    });
     c.addEventListener('input', function(e){ if(e.target.classList && e.target.classList.contains('ak8-in')) uppdateraKlar(); });
     c.querySelector('[data-facit-btn]').addEventListener('click', function(){ kontrollera(c); });
     c.querySelector('[data-vidare]').addEventListener('click', function(){ var ny = framflytta(vy.dokId); renderDoc(vy.dokId, ny.pos); });
@@ -208,7 +236,10 @@
 
   // ── Svarsstatus (fin-cellen ifylld) ──
   function radBesvarad(rad){
-    if(rad.dataset.typ === 'tal'){ var i = rad.querySelector('.ak8-in'); return !!i && i.value.trim() !== ''; }
+    var typ = rad.dataset.typ;
+    if(typ === 'tal'){ var i = rad.querySelector('.ak8-in'); return !!i && i.value.trim() !== ''; }
+    if(typ === 'val' || typ === 'tecken'){ return !!rad.querySelector('.ak8-korval.sel'); }
+    if(typ === 'ordna'){ var g = rad.querySelector('.ak8-ordna'); return g.querySelectorAll('.ak8-tal.sel').length === g.querySelectorAll('.ak8-tal').length; }
     var fin = rad.querySelector('.ak8-bc[data-r="fin"]'); if(!fin) return false;
     return fin.querySelector('.ak8-bt').value.trim() !== '' && fin.querySelector('.ak8-bn').value.trim() !== '';
   }
@@ -223,6 +254,15 @@
   // ── RÄTTA en rad canonical, efter facit.form ──
   function rattaRad(rad, u){
     var typ = rad.dataset.typ, f = u.facit;
+    if(typ === 'val'){ var s = rad.querySelector('.ak8-korval.sel'); var ok = !!s && (+s.dataset.i) === f.ratt; if(s) s.classList.add(ok ? 'ratt' : 'fel'); return { ok:ok, facit: (f.ratt === 0 ? f.a[0] + '/' + f.a[1] : f.b[0] + '/' + f.b[1]) }; }
+    if(typ === 'tecken'){ var s = rad.querySelector('.ak8-korval.sel'); var ok = !!s && s.dataset.sign === f.ratt; if(s) s.classList.add(ok ? 'ratt' : 'fel'); return { ok:ok, facit: f.ratt }; }
+    if(typ === 'ordna'){
+      var ideal = f.lista.map(function(p, i){ return { i:i, v:p[0] / p[1] }; }).sort(function(a, b){ return a.v - b.v; }).map(function(x){ return x.i; });
+      var valda = [].slice.call(rad.querySelectorAll('.ak8-tal.sel')).sort(function(a, b){ return (+a.querySelector('.ak8-ordnr').textContent) - (+b.querySelector('.ak8-ordnr').textContent); });
+      var ok = valda.length === f.lista.length && valda.every(function(b, kk){ return (+b.dataset.i) === ideal[kk]; });
+      valda.forEach(function(b){ b.classList.add(ok ? 'ratt' : 'fel'); });
+      return { ok:ok, facit: ideal.map(function(i){ return f.lista[i][0] + '/' + f.lista[i][1]; }).join(' < ') };
+    }
     if(typ === 'tal'){ var v = pNum(rad.querySelector('.ak8-in').value); var ok = nara(v, f.v); markInputs(rad, ok); return { ok:ok, facit:k(f.v) }; }
     if(typ === 'brak'){
       var b = bread(rad, 'fin'), ok = nara(b.num, f.t / f.n) && isFinite(b.t) && isFinite(b.n) && gcd(Math.round(b.t), Math.round(b.n)) === 1;   // värde + enklaste form

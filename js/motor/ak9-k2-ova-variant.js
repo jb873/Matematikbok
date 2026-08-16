@@ -74,9 +74,46 @@
           return { logg: null, orig: { d: d, t: Math.round(d * pot), n: pot },
             prompt: function(x){ return k(x.d) + ' ='; }, mellan: function(){ return null; },
             facit: function(x){ return brakForm(x.t, x.n); } }; }) }   // 2,5→2 ½, 1,2→1 ⅕ blir {form:'blandad'}
+    ] },
+
+    ova2: { titel: 'Grunder i bråk – jämförelse och ordning', grupper: [
+      // G1 — blandat tal → OÄKTA bråk (formen FORCAS 'brak'; brakForm hade gett blandad). logg brak-blandad.
+      { rubrik: 'Skriv i bråkform', logg: 'brak-blandad:rakna', uppgifter:
+        [[6,3,5],[4,2,3],[1,5,7]].map(function(p){ return {
+          logg: 'brak-blandad:rakna', orig: { h: p[0], t: p[1], n: p[2] },
+          prompt: function(x){ return BLAND(x.h, x.t, x.n) + ' ='; }, mellan: function(){ return null; },
+          facit: function(x){ return { form: 'brak', t: x.h * x.n + x.t, n: x.n }; } }; }) },
+
+      // G2 — vilket bråk är störst (VAL mellan två). logg brak-jmf-lika:begrepp.
+      { rubrik: 'Vilket bråk är störst', logg: 'brak-jmf-lika:begrepp', uppgifter:
+        [[[1,2],[4,7]],[[3,7],[4,9]]].map(function(p){ return {
+          logg: 'brak-jmf-lika:begrepp', orig: { a: p[0], b: p[1] },
+          prompt: function(x){ return BR(x.a[0], x.a[1]) + '  eller  ' + BR(x.b[0], x.b[1]); }, mellan: function(){ return null; },
+          facit: function(x){ return { form: 'val', a: x.a, b: x.b, ratt: (x.a[0] / x.a[1] >= x.b[0] / x.b[1]) ? 0 : 1 }; } }; }) },
+
+      // G3 — oäkta bråk → BLANDAD form. brakForm ger blandad. logg brak-blandad.
+      { rubrik: 'Skriv i blandad form', logg: 'brak-blandad:rakna', uppgifter:
+        [[11,3],[9,5],[17,4],[20,9]].map(function(p){ return {
+          logg: 'brak-blandad:rakna', orig: { t: p[0], n: p[1] },
+          prompt: function(x){ return BR(x.t, x.n) + ' ='; }, mellan: function(){ return null; },
+          facit: function(x){ return brakForm(x.t, x.n); } }; }) },
+
+      // G4 — skriv rätt tecken =, <, > (TRE-vägs, likhetsfallet 1/3 = 3/9 ingår). ③. logg brak-jmf-lika.
+      { rubrik: 'Skriv rätt tecken mellan talen, välj mellan =, < och >', logg: 'brak-jmf-lika:begrepp', uppgifter:
+        [[[3,4],[10,12]],[[2,3],[8,15]],[[7,30],[1,6]],[[1,3],[3,9]]].map(function(p){ return {
+          logg: 'brak-jmf-lika:begrepp', orig: { a: p[0], b: p[1] },
+          prompt: function(x){ return BR(x.a[0], x.a[1]) + '  ▢  ' + BR(x.b[0], x.b[1]); }, mellan: function(){ return null; },
+          facit: function(x){ var av = x.a[0] / x.a[1], bv = x.b[0] / x.b[1]; return { form: 'tecken', ratt: Math.abs(av - bv) < 1e-9 ? '=' : (av < bv ? '<' : '>') }; } }; }) },
+
+      // G5 — storleksordna fyra bråk, minsta först (ORDNA). logg brak-jmf-ordna:resonera.
+      { rubrik: 'Storleksordna bråk, börja med det minsta', logg: 'brak-jmf-ordna:resonera', uppgifter:
+        [[[1,2],[2,3],[3,5],[3,4]],[[4,5],[4,7],[5,6],[7,6]]].map(function(lista){ return {
+          logg: 'brak-jmf-ordna:resonera', orig: { lista: lista },
+          prompt: function(){ return null; }, mellan: function(){ return null; },
+          facit: function(x){ return { form: 'ordna', lista: x.lista }; } }; }) }
     ] }
 
-    // ova2–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.
+    // ova3–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.
   };
 
   // ── GENERERING: en uppgift → {prompt, mellan, facit, logg}. variant 0 = orig (dokument 1). ──
