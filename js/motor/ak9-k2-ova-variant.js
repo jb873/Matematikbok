@@ -206,12 +206,13 @@
       facit: function(x){ return { form: 'reciprok', tSvar: '' + x.n, nSvar: '' + x.t }; } };
   }
 
-  // ── bråk · bråk: mellanled = oförkortad produkt (a·c)/(b·d), svar enklaste form. form 'multbrak'. ──
+  // ── bråk · bråk: "förkorta svaret", INGET mellanled (Öva 5 G1/G3 saknar "visa mellanled", parentesen
+  //   "Behövs inget mellanled" = builder-instruktion, se meta-svep). Svar = produkten i enklaste form. form 'multbrak'. ──
   function multBrakUppg(a, b, logg){
     return { logg: logg, orig: { a: a, b: b },
       prompt: function(x){ return BR(x.a[0], x.a[1]) + ' · ' + BR(x.b[0], x.b[1]) + ' ='; },
       mellan: function(){ return null; },
-      facit: function(x){ var pt = x.a[0] * x.b[0], pn = x.a[1] * x.b[1]; return { form: 'multbrak', a:x.a, b:x.b, m: { t:pt, n:pn }, svar: brakForm(pt, pn) }; } };
+      facit: function(x){ return { form: 'multbrak', a:x.a, b:x.b, svar: brakForm(x.a[0] * x.b[0], x.a[1] * x.b[1]) }; } };
   }
   // ── heltal ÷ bråk, VISAS som komplex-bråk BRAK(H)(BRAK(t)(n)). Direkt svar. form 'komplexdiv'. ──
   function komplexHBUppg(H, t, n, logg){

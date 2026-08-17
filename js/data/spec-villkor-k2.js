@@ -107,26 +107,28 @@
           kravs: { mellanled: true }, svarform: 'blandad', rattning: 'canonical' }
       ] } }
     },
-    'brak-sub:rakna': {           // Öva 3 G3 + Öva 4 G3 — oliknämnig subtraktion, äkta (samma nivå).
-      kalla: 'Öva 3 grupp 3 (5/6−1/3 …) + Öva 4 grupp 3 (5/6−7/18 …)',
-      _typindelning: 'Båda grupperna = oliknämnig subtraktion med äkta bråk. Samma svårighet, olika ' +
-        'tal → ingen stege, enstegs.',
+    'brak-sub:rakna': {           // Öva 3 G3 + Öva 4 G3 — oliknämnig subtraktion (samma nivå).
+      kalla: 'Öva 3 grupp 3 (5/6−1/3 …) + Öva 4 grupp 3 (5/6−7/18, 5/4−7/6 …)',
+      _typindelning: 'Båda grupperna = oliknämnig subtraktion. Samma svårighet, olika tal → ingen stege, enstegs.',
+      _formNot: 'tak.form = OPERANDENS form (ej svarets — det styrs av separata svarform). Öva 4 G3 har en OÄKTA ' +
+        'operand (5/4), så operanden får vara äkta ELLER oäkta ("valfri" + maxHeltal:0 ⇒ aldrig blandat). ' +
+        'svarform ("enklaste") är OBERÖRD av denna ändring — 7/6 kan aldrig passera som svar där enklaste form gäller.',
       spar: { E: {
-        tak: { maxNamnare: 18, form: 'proper', maxHeltal: 0, mellanled: 'forlang' },
+        tak: { maxNamnare: 18, maxTaljare: 7, form: 'valfri', maxHeltal: 0, mellanled: 'forlang' },   // form=operand: äkta/oäkta, ej blandat (maxHeltal 0)
         kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' } }
     },
 
     // ── Öva 4/5 · multiplikation ─────────────────────────────────────────────────────────────
-    'brak-mult-rakna:rakna': {    // Öva 4 G2 (heltal·bråk) → Öva 5 G1/G3 (bråk·bråk). STEGE.
+    'brak-mult-rakna:rakna': {    // Öva 4 G2 (heltal·bråk, MED mellanled) → Öva 5 G1/G3 (bråk·bråk, UTAN mellanled). STEGE.
       kalla: 'Öva 4 grupp 2 (5·4/5 …) + Öva 5 grupp 1/3 (2/3·2/7 …)',
       spar: { E: { nivaer: [
-        { niva: 1, kalla: 'Öva 4 G2', beskrivning: 'Heltal · bråk',
+        { niva: 1, kalla: 'Öva 4 G2', beskrivning: 'Heltal · bråk — rubrik "visa mellanled" → mellanled = OFÖRKORTAD produkt (H·t)/n',
           tak: { maxNamnare: 9, maxHeltal: 8, form: 'proper', mellanled: 'produktbrak' },
           kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
-        { niva: 2, kalla: 'Öva 5 G1/G3', beskrivning: 'Bråk · bråk — mellanled = OFÖRKORTAD produkt (korr. 1)',
-          tak: { maxNamnare: 9, maxTaljare: 8, form: 'proper', mellanled: 'produktbrak' },
-          kravs: { mellanled: true, oforkortadProdukt: true },   // korr. 1: mellanledet är den OFÖRKORTADE produkten (15/24), EJ (a·c)/(b·d)-steget
-          svarform: 'enklaste', rattning: 'canonical' }
+        { niva: 2, kalla: 'Öva 5 G1/G3', beskrivning: 'Bråk · bråk — "förkorta svaret", INGET mellanled (meta-svep: parentesen ' +
+            '"Behövs inget mellanled" är builder-instruktion; det genomräknade 15/24-exemplet renderas ej). Direkt svar i enklaste form.',
+          tak: { maxNamnare: 9, maxTaljare: 8, form: 'proper', mellanled: false },
+          kravs: {}, svarform: 'enklaste', rattning: 'canonical' }
       ] } }
     },
 
