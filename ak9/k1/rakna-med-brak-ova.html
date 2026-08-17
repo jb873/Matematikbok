@@ -102,7 +102,7 @@
     { id:'ova2', namn:'Öva 2', sub:'Grunder – jämförelse och ordning', byggd:true },
     { id:'ova3', namn:'Öva 3', sub:'Addition och subtraktion', byggd:true },
     { id:'ova4', namn:'Öva 4', sub:'Blandad form och multiplikation', byggd:true },
-    { id:'ova5', namn:'Öva 5', sub:'Multiplikation och division med heltal', byggd:false },
+    { id:'ova5', namn:'Öva 5', sub:'Multiplikation och division med heltal', byggd:true },
     { id:'ova6', namn:'Öva 6', sub:'Division', byggd:false }
   ];
   function docNamn(id){ for(var i=0;i<DOKS.length;i++){ if(DOKS[i].id===id) return DOKS[i].namn; } return ''; }
@@ -147,12 +147,24 @@
     markBc(rad, 'fin', ok3); return { ok:ok3, facit: sf.t + '/' + sf.n };
   }
 
-  // BRAK(täljare)(nämnare) → stående bråk (uttrycks-prompt) ──
+  // BRAK(täljare)(nämnare) → stående bråk (uttrycks-prompt). REKURSIV: klarar komplex-bråk
+  //  BRAK(5)(BRAK(1)(3)) (staplat bråk över bråk) via balanserad parentes-scanning.
   function esc(s){ return ('' + s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function fracHTML(num, den){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + esc(num) + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + esc(den) + '</span></span>'; }
-  function uttryckHTML(str){ var re = /BRAK\(([^()]*)\)\(([^()]*)\)/g, out = '', last = 0, m;
-    while((m = re.exec(str))){ out += esc(str.slice(last, m.index)); out += fracHTML(m[1], m[2]); last = re.lastIndex; }
-    return out + esc(str.slice(last)); }
+  function fracWrap(numH, denH){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + numH + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + denH + '</span></span>'; }
+  function lasBrak(str, i){   // i pekar på 'BRAK(' → { a, b, slut } eller null
+    var j = i + 5, depth = 1, a = '';
+    while(j < str.length){ var ch = str[j]; if(ch === '(') depth++; else if(ch === ')'){ depth--; if(depth === 0){ j++; break; } } a += ch; j++; }
+    if(str[j] !== '(') return null;
+    var kk = j + 1, d2 = 1, b = '';
+    while(kk < str.length){ var c2 = str[kk]; if(c2 === '(') d2++; else if(c2 === ')'){ d2--; if(d2 === 0){ kk++; break; } } b += c2; kk++; }
+    return { a:a, b:b, slut:kk };
+  }
+  function uttryckHTML(str){ str = '' + str; var out = '', i = 0;
+    while(i < str.length){
+      if(str.substr(i, 5) === 'BRAK('){ var r = lasBrak(str, i); if(r){ out += fracWrap(uttryckHTML(r.a), uttryckHTML(r.b)); i = r.slut; continue; } }
+      out += esc(str[i]); i++;
+    }
+    return out; }
 
   // ── Rättnings-form ur facit (motorn sätter .form; hela E-bandet canonical, spec-villkor-k2) ──
   //  'tal' (decimalvärde) · 'brak' (värde + enklaste form) · 'blandad' (heltal + äkta reducerat bråk)
@@ -187,11 +199,17 @@
         + bcellHTML('mel1') + '<span class="ak8-eq">' + f.op + '</span>' + bcellHTML('mel2')
         + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
     }
-    // ── Heltal · bråk: mellanled = oförkortad produkt (en bråkcell), svar-cell efter svar.form ──
-    if(typ === 'multheltal'){
-      return '<div class="ak8-rad" data-typ="multheltal" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
+    // ── Multiplikation (heltal·bråk ELLER bråk·bråk): mellanled = OFÖRKORTAD produkt, svar enklaste form ──
+    if(typ === 'multheltal' || typ === 'multbrak'){
+      return '<div class="ak8-rad" data-typ="' + typ + '" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
         + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
         + bcellHTML('mel') + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
+    }
+    // ── Komplex-bråk division (heltal÷bråk / bråk÷heltal): prompt = staplat bråk, direkt svar (inget mellanled) ──
+    if(typ === 'komplexdiv'){
+      return '<div class="ak8-rad ak8-rad-kdiv" data-typ="komplexdiv" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
+        + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
+        + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
     }
     // ── Blandad addition: mellanled = blandade tal med gemensam nämnare (blandade celler), svar blandad ──
     if(typ === 'blandadadd'){
@@ -283,7 +301,8 @@
     if(typ === 'ordna'){ var g = rad.querySelector('.ak8-ordna'); return g.querySelectorAll('.ak8-tal.sel').length === g.querySelectorAll('.ak8-tal').length; }
     function bcFilled(role){ var c = rad.querySelector('.ak8-bc[data-r="' + role + '"]'); return !!c && c.querySelector('.ak8-bt').value.trim() !== '' && c.querySelector('.ak8-bn').value.trim() !== ''; }
     if(typ === 'addsub' || typ === 'blandadadd'){ return bcFilled('mel1') && bcFilled('mel2') && finBesvarad(rad, rad.dataset.svarform); }
-    if(typ === 'multheltal'){ return bcFilled('mel') && finBesvarad(rad, rad.dataset.svarform); }
+    if(typ === 'multheltal' || typ === 'multbrak'){ return bcFilled('mel') && finBesvarad(rad, rad.dataset.svarform); }
+    if(typ === 'komplexdiv'){ return finBesvarad(rad, rad.dataset.svarform); }
     var fin = rad.querySelector('.ak8-bc[data-r="fin"]'); if(!fin) return false;
     return fin.querySelector('.ak8-bt').value.trim() !== '' && fin.querySelector('.ak8-bn').value.trim() !== '';
   }
@@ -316,13 +335,14 @@
       var melText = f.m[0][0] + '/' + f.m[0][1] + ' ' + f.op + ' ' + f.m[1][0] + '/' + f.m[1][1];
       return { ok: melOk && sv.ok, facit: melText + ' = ' + sv.facit };
     }
-    if(typ === 'multheltal'){
-      // MELLANLED = OFÖRKORTAD produkt (H·t)/n: behåll nämnaren, multiplicera täljaren.
+    if(typ === 'multheltal' || typ === 'multbrak'){
+      // MELLANLED = OFÖRKORTAD produkt (täljar·täljar)/(nämnar·nämnar): ev() godtar "5·3"/"6·4"-notation.
       var mel = bread(rad, 'mel'), melOk = nara(mel.t, f.m.t) && nara(mel.n, f.m.n);
       markBc(rad, 'mel', melOk);
       var sv = rattaSvar(rad, f.svar);
       return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
     }
+    if(typ === 'komplexdiv'){ var sv = rattaSvar(rad, f.svar); return { ok: sv.ok, facit: sv.facit }; }
     if(typ === 'blandadadd'){
       var m1 = mread(rad, 'mel1'), m2 = mread(rad, 'mel2');
       // MELLANLED (värde-rättat): bråkdelarnas nämnare lika (gemensam) + de blandade talens värden = originalen.

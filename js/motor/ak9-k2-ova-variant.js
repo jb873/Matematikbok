@@ -152,10 +152,51 @@
       // G4 — heltal · bråk (fler tal). Samma metod som G2. logg brak-mult-rakna:rakna.
       { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-mult-rakna:rakna', uppgifter:
         [[6,3,4],[4,5,6],[8,2,9]].map(function(p){ return multHeltalUppg(p[0], p[1], p[2], 'brak-mult-rakna:rakna'); }) }
+    ] },
+
+    ova5: { titel: 'Multiplikation och division med heltal', grupper: [
+      // G1 — bråk · bråk. Mellanled = OFÖRKORTAD produkt (a·c)/(b·d), svar förkortat (korr. 1). form 'multbrak'.
+      //   (INSTR-exemplet 5/6·3/4=15/24=5/8 renderas ALDRIG — författar-exempel, se plan.)
+      { rubrik: 'Beräkna med multiplikation – förkorta svaret', logg: 'brak-mult-rakna:rakna', uppgifter:
+        [[[2,3],[2,7]],[[4,5],[5,6]]].map(function(p){ return multBrakUppg(p[0], p[1], 'brak-mult-rakna:rakna'); }) },
+
+      // G2 — heltal ÷ bråk, VISAS som komplex-bråk (⑤ nians cellval). Direkt svar, inget mellanled. logg brak-div-hb.
+      { rubrik: 'Beräkna', logg: 'brak-div-hb:rakna', uppgifter:
+        [[5,1,3],[7,1,7],[6,1,5]].map(function(p){ return komplexHBUppg(p[0], p[1], p[2], 'brak-div-hb:rakna'); }) },
+
+      // G3 — bråk · bråk (fler tal). Samma metod som G1. logg brak-mult-rakna:rakna.
+      { rubrik: 'Beräkna med multiplikation – förkorta svaret', logg: 'brak-mult-rakna:rakna', uppgifter:
+        [[[3,7],[6,5]],[[3,8],[2,5]],[[5,9],[3,4]]].map(function(p){ return multBrakUppg(p[0], p[1], 'brak-mult-rakna:rakna'); }) },
+
+      // G4 — bråk ÷ heltal, VISAS som komplex-bråk. Direkt svar, inget mellanled. logg brak-div-bh.
+      { rubrik: 'Beräkna', logg: 'brak-div-bh:rakna', uppgifter:
+        [[1,5,4],[1,3,7],[1,8,3]].map(function(p){ return komplexBHUppg(p[0], p[1], p[2], 'brak-div-bh:rakna'); }) }
     ] }
 
-    // ova5–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.
+    // ova6 byggs sist (division via förläng/invertera + reciprok), verifieras mot transkriptionen.
   };
+
+  // ── bråk · bråk: mellanled = oförkortad produkt (a·c)/(b·d), svar enklaste form. form 'multbrak'. ──
+  function multBrakUppg(a, b, logg){
+    return { logg: logg, orig: { a: a, b: b },
+      prompt: function(x){ return BR(x.a[0], x.a[1]) + ' · ' + BR(x.b[0], x.b[1]) + ' ='; },
+      mellan: function(){ return null; },
+      facit: function(x){ var pt = x.a[0] * x.b[0], pn = x.a[1] * x.b[1]; return { form: 'multbrak', a:x.a, b:x.b, m: { t:pt, n:pn }, svar: brakForm(pt, pn) }; } };
+  }
+  // ── heltal ÷ bråk, VISAS som komplex-bråk BRAK(H)(BRAK(t)(n)). Direkt svar. form 'komplexdiv'. ──
+  function komplexHBUppg(H, t, n, logg){
+    return { logg: logg, orig: { H: H, t: t, n: n },
+      prompt: function(x){ return BR(x.H, BR(x.t, x.n)) + ' ='; },
+      mellan: function(){ return null; },
+      facit: function(x){ return { form: 'komplexdiv', svar: brakForm(x.H * x.n, x.t) }; } };
+  }
+  // ── bråk ÷ heltal, VISAS som komplex-bråk BRAK(BRAK(t)(n))(H). Direkt svar. form 'komplexdiv'. ──
+  function komplexBHUppg(t, n, H, logg){
+    return { logg: logg, orig: { t: t, n: n, H: H },
+      prompt: function(x){ return BR(BR(x.t, x.n), x.H) + ' ='; },
+      mellan: function(){ return null; },
+      facit: function(x){ return { form: 'komplexdiv', svar: brakForm(x.t, x.n * x.H) }; } };
+  }
 
   // ── blandad addition: mellanled = blandade tal med gemensam nämnare (förläng bråkdelen). form 'blandadadd'. ──
   function blandAddUppg(a, b, logg){
