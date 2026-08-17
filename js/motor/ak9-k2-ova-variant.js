@@ -171,10 +171,40 @@
       // G4 — bråk ÷ heltal, VISAS som komplex-bråk. Direkt svar, inget mellanled. logg brak-div-bh.
       { rubrik: 'Beräkna', logg: 'brak-div-bh:rakna', uppgifter:
         [[1,5,4],[1,3,7],[1,8,3]].map(function(p){ return komplexBHUppg(p[0], p[1], p[2], 'brak-div-bh:rakna'); }) }
+    ] },
+
+    ova6: { titel: 'Division', grupper: [
+      // G1 — bråk ÷ bråk via FÖRLÄNGNING. Prompt = komplex-bråk (a/b)/(c/d), mellanled = produktbråk
+      //   (a·d)/(b·c) VÄRDE-rättat (godtar oäkta 16/15), svar enklaste form. logg brak-div-bb. form 'divbrak'.
+      { rubrik: 'Beräkna – visa med förlängning, visa mellanled, svara i enklaste form', logg: 'brak-div-bb:rakna', uppgifter:
+        [[[2,7],[3,5]],[[3,4],[5,6]],[[2,3],[5,8]]].map(function(p){ return divBrakUppg(p[0], p[1], 'brak-div-bb:rakna'); }) },
+
+      // G2 — skriv det inverterade talet (reciprok). Sträng-swap (även algebraiskt 7x/2y ⑥). logg brak-div-reciprok.
+      { rubrik: 'Vilket är det inverterade talet till…', logg: 'brak-div-reciprok:rakna', uppgifter:
+        [[3,5],[2,9],['7x','2y']].map(function(p){ return reciprokUppg(p[0], p[1], 'brak-div-reciprok:rakna'); }) },
+
+      // G3 — bråk ÷ bråk via INVERTERING. Samma cellstruktur som G1 (produkten (a·d)/(b·c) är lika oavsett
+      //   metod); rubriken skiljer metoden. logg brak-div-inv. form 'divbrak'.
+      { rubrik: 'Beräkna med inverterat tal, visa mellanled, svara i enklaste form', logg: 'brak-div-inv:rakna', uppgifter:
+        [[[3,5],[1,4]],[[5,7],[2,3]],[[3,8],[5,9]]].map(function(p){ return divBrakUppg(p[0], p[1], 'brak-div-inv:rakna'); }) }
     ] }
 
-    // ova6 byggs sist (division via förläng/invertera + reciprok), verifieras mot transkriptionen.
   };
+
+  // ── bråk ÷ bråk, VISAS som komplex-bråk. Mellanled = produktbråk (a·d)/(b·c) VÄRDE-rättat. form 'divbrak'. ──
+  function divBrakUppg(a, b, logg){
+    return { logg: logg, orig: { a: a, b: b },
+      prompt: function(x){ return BR(BR(x.a[0], x.a[1]), BR(x.b[0], x.b[1])) + ' ='; },
+      mellan: function(){ return null; },
+      facit: function(x){ var pt = x.a[0] * x.b[1], pn = x.a[1] * x.b[0]; return { form: 'divbrak', a:x.a, b:x.b, m: { t:pt, n:pn }, svar: brakForm(pt, pn) }; } };
+  }
+  // ── inverterade talet (reciprok): svaret = swap av täljare/nämnare (strängar; klarar 7x/2y). form 'reciprok'. ──
+  function reciprokUppg(t, n, logg){
+    return { logg: logg, orig: { t: t, n: n },
+      prompt: function(x){ return BR(x.t, x.n) + ' ='; },
+      mellan: function(){ return null; },
+      facit: function(x){ return { form: 'reciprok', tSvar: '' + x.n, nSvar: '' + x.t }; } };
+  }
 
   // ── bråk · bråk: mellanled = oförkortad produkt (a·c)/(b·d), svar enklaste form. form 'multbrak'. ──
   function multBrakUppg(a, b, logg){

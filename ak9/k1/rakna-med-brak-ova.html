@@ -103,7 +103,7 @@
     { id:'ova3', namn:'Öva 3', sub:'Addition och subtraktion', byggd:true },
     { id:'ova4', namn:'Öva 4', sub:'Blandad form och multiplikation', byggd:true },
     { id:'ova5', namn:'Öva 5', sub:'Multiplikation och division med heltal', byggd:true },
-    { id:'ova6', namn:'Öva 6', sub:'Division', byggd:false }
+    { id:'ova6', namn:'Öva 6', sub:'Division', byggd:true }
   ];
   function docNamn(id){ for(var i=0;i<DOKS.length;i++){ if(DOKS[i].id===id) return DOKS[i].namn; } return ''; }
 
@@ -211,6 +211,18 @@
         + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
         + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
     }
+    // ── Bråk ÷ bråk (komplex-bråk-prompt): mellanled = produktbråk (värde-rättat), svar enklaste form ──
+    if(typ === 'divbrak'){
+      return '<div class="ak8-rad ak8-rad-kdiv" data-typ="divbrak" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
+        + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
+        + '<span class="ak8-eq">=</span>' + bcellHTML('mel') + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
+    }
+    // ── Inverterade talet (reciprok): svar = swap av täljare/nämnare (sträng, klarar 7x/2y) ──
+    if(typ === 'reciprok'){
+      return '<div class="ak8-rad" data-typ="reciprok" data-ui="' + ui + '">' + label
+        + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
+        + '<span class="ak8-eq">=</span>' + bcellHTML('sv') + '</div>';
+    }
     // ── Blandad addition: mellanled = blandade tal med gemensam nämnare (blandade celler), svar blandad ──
     if(typ === 'blandadadd'){
       return '<div class="ak8-rad" data-typ="blandadadd" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
@@ -301,8 +313,9 @@
     if(typ === 'ordna'){ var g = rad.querySelector('.ak8-ordna'); return g.querySelectorAll('.ak8-tal.sel').length === g.querySelectorAll('.ak8-tal').length; }
     function bcFilled(role){ var c = rad.querySelector('.ak8-bc[data-r="' + role + '"]'); return !!c && c.querySelector('.ak8-bt').value.trim() !== '' && c.querySelector('.ak8-bn').value.trim() !== ''; }
     if(typ === 'addsub' || typ === 'blandadadd'){ return bcFilled('mel1') && bcFilled('mel2') && finBesvarad(rad, rad.dataset.svarform); }
-    if(typ === 'multheltal' || typ === 'multbrak'){ return bcFilled('mel') && finBesvarad(rad, rad.dataset.svarform); }
+    if(typ === 'multheltal' || typ === 'multbrak' || typ === 'divbrak'){ return bcFilled('mel') && finBesvarad(rad, rad.dataset.svarform); }
     if(typ === 'komplexdiv'){ return finBesvarad(rad, rad.dataset.svarform); }
+    if(typ === 'reciprok'){ return bcFilled('sv'); }
     var fin = rad.querySelector('.ak8-bc[data-r="fin"]'); if(!fin) return false;
     return fin.querySelector('.ak8-bt').value.trim() !== '' && fin.querySelector('.ak8-bn').value.trim() !== '';
   }
@@ -343,6 +356,20 @@
       return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
     }
     if(typ === 'komplexdiv'){ var sv = rattaSvar(rad, f.svar); return { ok: sv.ok, facit: sv.facit }; }
+    if(typ === 'divbrak'){
+      // MELLANLED = produktbråk (a·d)/(b·c) VÄRDE-rättat (godtar oäkta/oförkortat, se plan mellanled-axel).
+      var mel = bread(rad, 'mel'), melOk = nara(mel.num, f.m.t / f.m.n);
+      markBc(rad, 'mel', melOk);
+      var sv = rattaSvar(rad, f.svar);
+      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
+    }
+    if(typ === 'reciprok'){   // sträng-swap: svarets täljare = origs nämnare, svarets nämnare = origs täljare
+      var c = rad.querySelector('.ak8-bc[data-r="sv"]');
+      var tv = c.querySelector('.ak8-bt').value.replace(/\s/g, ''), nv = c.querySelector('.ak8-bn').value.replace(/\s/g, '');
+      var ok = tv === ('' + f.tSvar) && nv === ('' + f.nSvar);
+      markBc(rad, 'sv', ok);
+      return { ok:ok, facit: f.tSvar + '/' + f.nSvar };
+    }
     if(typ === 'blandadadd'){
       var m1 = mread(rad, 'mel1'), m2 = mread(rad, 'mel2');
       // MELLANLED (värde-rättat): bråkdelarnas nämnare lika (gemensam) + de blandade talens värden = originalen.
