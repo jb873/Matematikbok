@@ -738,7 +738,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-begrepp:begrepp",
-      "namn": "Begrepp",
+      "namn": "Term och summa",
       "parent": "add-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -761,7 +761,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-begrepp:rakna",
-      "namn": "Begrepp · Räkna",
+      "namn": "Tiokompisar och dela upp tal",
       "parent": "add-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -927,7 +927,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-begrepp:begrepp",
-      "namn": "Begrepp",
+      "namn": "Term och differens",
       "parent": "sub-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1150,7 +1150,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-begrepp:begrepp",
-      "namn": "Begrepp",
+      "namn": "Faktor, produkt och primtal",
       "parent": "mult-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1173,7 +1173,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-begrepp:rakna",
-      "namn": "Begrepp · Räkna",
+      "namn": "Faktorisera tal",
       "parent": "mult-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1187,7 +1187,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-begrepp:metod",
-      "namn": "Begrepp · Metod",
+      "namn": "Faktorträd",
       "parent": "mult-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1530,7 +1530,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-begrepp:begrepp",
-      "namn": "Begrepp",
+      "namn": "Täljare, nämnare och kvot",
       "parent": "div-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1553,7 +1553,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-begrepp:rakna",
-      "namn": "Begrepp · Räkna",
+      "namn": "Delbarhetsregler",
       "parent": "div-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
