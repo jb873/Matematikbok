@@ -82,6 +82,36 @@ function bandKoll(band, tal, form){
   return fel.length ? fel.join('; ') : null;
 }
 
+// ── MELLANLEDS-KONSISTENS (tvåvägs mot bandet) ─────────────────────────────────────────────────
+//  Regeln (rättad): en mellanledscell ska finnas ⟺ bandets kravs.mellanled === true för noden/gruppen.
+//  (INTE rubriktexten — den strippades; INTE tak.mellanled — det är TYPEN/prompt-visningen, t.ex.
+//   'komplexbrak' för komplexdiv där komplex-bråket står i PROMPTEN, utan mellanledscell.)
+//  Formerna som RENDERAR en mellanledscell i öva-sidan (radHTML):
+var MEL_CELL_FORM = { forlang: true, addsub: true, blandadadd: true, multheltal: true, multbrak: true, divbrak: true };   // multbrak: oförkortad-produkt-mellanled återställd (FAS 2)
+function grupper(){
+  var out = [];
+  DOKS.forEach(function(dok){
+    API.MALLAR[dok].grupper.forEach(function(g, gi){
+      var u0 = API.genUppgift(g.uppgifter[0], dok, 0, 0);   // variant 0 → formen för gruppen
+      out.push({ dok: dok, gi: gi, rubrik: g.rubrik, logg: g.uppgifter[0].logg || g.logg || null, form: u0.facit.form });
+    });
+  });
+  return out;
+}
+function mellanledKoll(){
+  var rader = grupper(), fel = [], rows = [];
+  rader.forEach(function(r){
+    var cell = !!MEL_CELL_FORM[r.form];
+    var band = bandFor(r.logg, r.form);
+    var kravMel = !!(band && band.kravs && band.kravs.mellanled === true);
+    var takTyp = band && band.tak ? band.tak.mellanled : undefined;
+    var status = (cell === kravMel) ? 'OK' : (cell ? 'CELL-UTAN-KRAV' : 'KRAV-UTAN-CELL');
+    if(status !== 'OK') fel.push(r.dok + ' G' + (r.gi + 1) + ' (' + r.logg + ', form ' + r.form + '): cell=' + cell + ' band.kravs.mellanled=' + kravMel + ' → ' + status);
+    rows.push({ dok: r.dok, g: 'G' + (r.gi + 1), form: r.form, cell: cell, krav: kravMel, tak: takTyp, status: status });
+  });
+  return { fel: fel, rows: rows };
+}
+
 // ── walk MALLAR ──
 function uppgifter(){
   var lista = [];
@@ -123,13 +153,16 @@ rows.forEach(function(r){
 });
 
 // ── facit-diff: levererade variant 0–3 parvis olika tal per uppgift ──
+var FACIT_FRI = { val: 1, tecken: 1 };   // former där facit får upprepas (bunden val-mängd)
+var svarSig = API._intern.svarSig;
 rows.forEach(function(r){
   if(r.u.fixed) return;
-  var tal = [], facit = [];
-  for(var v = 0; v < 4; v++){ var gu = API.genUppgift(r.u, r.dok, r.idx, v); tal.push(JSON.stringify(gu.tal)); facit.push(JSON.stringify(gu.facit)); }
+  var tal = [], sig = [], form = null;
+  for(var v = 0; v < 4; v++){ var gu = API.genUppgift(r.u, r.dok, r.idx, v); tal.push(JSON.stringify(gu.tal)); sig.push(svarSig(gu.facit)); form = gu.facit.form; }
   var key = r.dok + '#' + r.idx;
   for(var a = 0; a < 4; a++) for(var b = a + 1; b < 4; b++){
     if(tal[a] === tal[b]) facitDiffFel.push(key + ': variant ' + a + ' & ' + b + ' SAMMA tal ' + tal[a]);
+    else if(sig[a] === sig[b] && !FACIT_FRI[form]) facitDiffFel.push(key + ' (' + form + '): variant ' + a + ' & ' + b + ' SAMMA svar ' + sig[a]);
   }
 });
 
@@ -137,6 +170,15 @@ rows.forEach(function(r){
 function head(s){ return '\n══ ' + s + ' ══'; }
 console.log('SPEC-FUZZ-K2 — nians dk2-variantmotor');
 console.log('Uppgifter: ' + rows.length + ' · sampel totalt: ' + totSampel + ' (mål ≥30 000)');
+
+// ── Mellanleds-konsistens (tvåvägs mot bandet) — körs över ALLA sex dokument ──
+var ml = mellanledKoll();
+console.log(head('Mellanleds-konsistens (cell ⟺ band.kravs.mellanled)'));
+ml.rows.forEach(function(r){
+  console.log('  ' + (r.dok + ' ' + r.g).padEnd(11) + ' form ' + r.form.padEnd(11) + ' cell=' + (r.cell ? 'JA' : 'nej').padEnd(3)
+    + ' band.krav=' + (r.krav ? 'JA' : 'nej').padEnd(3) + ' (tak.mellanled=' + (r.tak === undefined ? '—' : r.tak) + ')  ' + (r.status === 'OK' ? '✓' : '✗ ' + r.status));
+});
+console.log('  → mellanleds-avvikelser: ' + ml.fel.length);
 
 console.log(head('Förkastningstal per uppgift'));
 Object.keys(forkast).forEach(function(k){ var f = forkast[k];
@@ -151,6 +193,7 @@ console.log('  spec-villkor-avvikelser    : ' + specAvvik.length);    specAvvik.
 console.log('  facit-diff-fel (variant 0–3): ' + facitDiffFel.length); facitDiffFel.slice(0, 20).forEach(function(s){ console.log('    ✗ ' + s); });
 console.log('  distinkthets-larm          : ' + distinktLarm.length); distinktLarm.forEach(function(s){ console.log('    ⚠ ' + s); });
 
-var ok = !facitAvvik.length && !specAvvik.length && !facitDiffFel.length && !distinktLarm.length && totSampel >= 30000;
-console.log('\n' + (ok ? '✓ GRIND GRÖN — facit-diff 0, spec-villkor 0, fuzz ≥30k' : '✗ GRIND RÖD — se avvikelser ovan'));
+console.log('  mellanleds-avvikelser      : ' + ml.fel.length);       ml.fel.forEach(function(s){ console.log('    ✗ ' + s); });
+var ok = !facitAvvik.length && !specAvvik.length && !facitDiffFel.length && !distinktLarm.length && !ml.fel.length && totSampel >= 30000;
+console.log('\n' + (ok ? '✓ GRIND GRÖN — facit-diff 0, spec-villkor 0, mellanled-konsistens OK, fuzz ≥30k' : '✗ GRIND RÖD — se avvikelser ovan'));
 process.exit(ok ? 0 : 1);

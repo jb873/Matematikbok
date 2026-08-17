@@ -260,9 +260,10 @@
     return o;
   }
 
-  // ── bråk · bråk: "förkorta svaret", INGET mellanled (Öva 5 G1/G3 saknar "visa mellanled", parentesen
-  //   "Behövs inget mellanled" = builder-instruktion, se meta-svep). Svar = produkten i enklaste form. form 'multbrak'.
-  //   Band brak-mult niva2: äkta operander, maxNamnare 9, maxTaljare 8. Produkt av två äkta bråk ⇒ alltid äkta. ──
+  // ── bråk · bråk: mellanled = OFÖRKORTAD produkt (a·c)/(b·d), t.ex. 15/24 (korr. 1, Joachim-bekräftad).
+  //   INTE multiplikationssteget (5·3)/(6·4) — det ska EJ godtas (mellanledet kräver de literala produkt-talen).
+  //   Rubrikens "Behövs inget mellanled för beräkning" syftar på multiplikationssteget, inte mellanledet.
+  //   Svar = produkten i enklaste form. Band brak-mult niva2: äkta operander, maxNamnare 9, maxTaljare 8. form 'multbrak'. ──
   function multBrakUppg(a, b, logg){
     return { logg: logg, orig: { a: a, b: b },
       sample: function(rng){ return { a: sampProper(rng, 8, 9), b: sampProper(rng, 8, 9) }; },
@@ -270,7 +271,8 @@
         && gcd(x.a[0], x.a[1]) === 1 && gcd(x.b[0], x.b[1]) === 1; },   // operander i enklaste form
       prompt: function(x){ return BR(x.a[0], x.a[1]) + ' · ' + BR(x.b[0], x.b[1]) + ' ='; },
       mellan: function(){ return null; },
-      facit: function(x){ return { form: 'multbrak', a:x.a, b:x.b, svar: brakForm(x.a[0] * x.b[0], x.a[1] * x.b[1]) }; } };
+      facit: function(x){ var pt = x.a[0] * x.b[0], pn = x.a[1] * x.b[1];
+        return { form: 'multbrak', a:x.a, b:x.b, m: { t:pt, n:pn }, svar: brakForm(pt, pn) }; } };   // m = oförkortad produkt
   }
   // ── heltal ÷ bråk, VISAS som komplex-bråk BRAK(H)(BRAK(1)(n)). Direkt svar (heltal). form 'komplexdiv'.
   //   Stambråk (t=1); band brak-div-hb: maxHeltal 9, maxNamnare 9. Facit = H·n. ──
@@ -356,18 +358,44 @@
       } };
   }
 
-  // ── GENERERING: en uppgift → {prompt, mellan, facit, logg}. variant 0 = orig (dok 1); ≥1 = sampla tills
-  //   villkor håller OCH talet skiljer sig från alla lägre varianter (ingen slot upprepar värde mellan dok). ──
+  // ── GENERERING: en uppgift → {prompt, mellan, facit, logg}. variant 0 = orig (dok 1); ≥1 = sampla tills villkor
+  //   håller OCH både TALET och FACIT skiljer sig från alla lägre varianter (ingen slot upprepar värde/svar mellan
+  //   dok). Val/tecken undantas facit-kravet (bunden mängd val — kan inte ge fyra olika "svar"; talen räcker). ──
   function talKey(t){ return JSON.stringify(t); }
+  // svarSig = elevens SVAR (mellanled + slutsvar), UTAN operanderna (a/b ligger i .tal). Två varianter med
+  //   olika tal men samma svar (2/3·2/7 och 1/3·4/7 → båda 4/21) räknas som SAMMA facit och undviks.
+  function svarSig(f){
+    switch(f.form){
+      case 'tal': return 't:' + f.v;
+      case 'brak': return 'b:' + f.t + '/' + f.n;
+      case 'blandad': return 'bl:' + f.hel + ';' + f.t + '/' + f.n;
+      case 'forlang': return 'fl:' + f.t + '/' + f.n;
+      case 'val': return 'v:' + f.ratt;
+      case 'tecken': return 'tk:' + f.ratt;
+      case 'ordna': return 'o:' + f.lista.map(function(p){ return p[0] / p[1]; }).sort(function(a, b){ return a - b; }).join(',');
+      case 'reciprok': return 're:' + f.tSvar + '/' + f.nSvar;
+      case 'komplexdiv': return 'kd:' + svarSig(f.svar);
+      case 'addsub': case 'blandadadd': case 'multheltal': case 'multbrak': case 'divbrak':
+        return f.form + ':' + JSON.stringify(f.m) + '|' + svarSig(f.svar);
+      default: return JSON.stringify(f);
+    }
+  }
+  var FACIT_FRI = { val: 1, tecken: 1 };   // former där facit får upprepas (bara talen behöver skilja)
   function bygg(u, t, kastade){ return { prompt: u.prompt(t), mellan: u.mellan ? u.mellan(t) : null, facit: u.facit(t), logg: u.logg || null, tal: t, _kastade: kastade || 0 }; }
   //  undvik = tal-nycklar som (även) ska undvikas — grupp-syskon i SAMMA variant (ingen upprepning inom dok).
   function genUppgift(u, dokId, idx, variant, undvik){
     if(variant === 0 || u.fixed || !u.sample) return bygg(u, u.orig, 0);   // orig / algebraiskt fast tal (7x/2y)
-    var prior = {}; prior[talKey(u.orig)] = 1;
-    for(var j = 1; j < variant; j++){ prior[talKey(genUppgift(u, dokId, idx, j).tal)] = 1; }   // slotens lägre varianter
+    var priorT = {}, priorF = {};
+    priorT[talKey(u.orig)] = 1; priorF[svarSig(u.facit(u.orig))] = 1;
+    for(var j = 1; j < variant; j++){ var g = genUppgift(u, dokId, idx, j); priorT[talKey(g.tal)] = 1; priorF[svarSig(g.facit)] = 1; }
     var rng = mkRng(seedOf(dokId, idx, variant) ^ 0x9E3779B9), kastade = 0, t = null;
     for(var i = 0; i < 400; i++){ var cand = u.sample(rng), key = talKey(cand);
-      if(u.villkor(cand) && !prior[key] && !(undvik && undvik[key])){ t = cand; break; } kastade++; }
+      if(u.villkor(cand) && !priorT[key] && !(undvik && undvik[key])){
+        var f = u.facit(cand);                                              // facit-distinkthet (utom val/tecken)
+        if(FACIT_FRI[f.form] || !priorF[svarSig(f)]){ t = cand; break; }
+      }
+      kastade++;
+    }
     return bygg(u, t || u.orig, kastade);   // fallback orig (ska nästan aldrig hända — larmas i fuzz)
   }
   function genereraDokument(dokId, variant){
@@ -382,7 +410,7 @@
   }
 
   var API = { MALLAR: MALLAR, genereraDokument: genereraDokument, genUppgift: genUppgift,
-    _intern: { mkRng: mkRng, seedOf: seedOf, k: k, gcd: gcd, lcm: lcm, BR: BR, brakForm: brakForm, rund: rund } };
+    _intern: { mkRng: mkRng, seedOf: seedOf, k: k, gcd: gcd, lcm: lcm, BR: BR, brakForm: brakForm, rund: rund, svarSig: svarSig } };
   if(typeof window !== 'undefined') window.AK9_K2_OVA = API;
   if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

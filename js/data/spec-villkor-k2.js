@@ -125,10 +125,11 @@
         { niva: 1, kalla: 'Öva 4 G2', beskrivning: 'Heltal · bråk — rubrik "visa mellanled" → mellanled = OFÖRKORTAD produkt (H·t)/n',
           tak: { maxNamnare: 9, maxHeltal: 8, form: 'proper', mellanled: 'produktbrak' },
           kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
-        { niva: 2, kalla: 'Öva 5 G1/G3', beskrivning: 'Bråk · bråk — "förkorta svaret", INGET mellanled (meta-svep: parentesen ' +
-            '"Behövs inget mellanled" är builder-instruktion; det genomräknade 15/24-exemplet renderas ej). Direkt svar i enklaste form.',
-          tak: { maxNamnare: 9, maxTaljare: 8, form: 'proper', mellanled: false },
-          kravs: {}, svarform: 'enklaste', rattning: 'canonical' }
+        { niva: 2, kalla: 'Öva 5 G1/G3', beskrivning: 'Bråk · bråk — mellanled = OFÖRKORTAD produkt (15/24, korr. 1, Joachim-' +
+            'bekräftad). EJ multiplikationssteget (5·3)/(6·4). Rubrikens "Behövs inget mellanled" syftar på steget, ej mellanledet.',
+          tak: { maxNamnare: 9, maxTaljare: 8, form: 'proper', mellanled: 'produktbrak' },
+          kravs: { mellanled: true, oforkortadProdukt: true },   // exakt oförkortad produkt, ej värde-rättning
+          svarform: 'enklaste', rattning: 'canonical' }
       ] } }
     },
 

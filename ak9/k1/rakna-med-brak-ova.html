@@ -199,15 +199,15 @@
         + bcellHTML('mel1') + '<span class="ak8-eq">' + f.op + '</span>' + bcellHTML('mel2')
         + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
     }
-    // ── Heltal · bråk (Öva 4, rubrik "visa mellanled"): mellanled = OFÖRKORTAD produkt (H·t)/n, svar enklaste form ──
-    if(typ === 'multheltal'){
-      return '<div class="ak8-rad" data-typ="multheltal" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
+    // ── Multiplikation (heltal·bråk Öva 4 / bråk·bråk Öva 5): mellanled = OFÖRKORTAD produkt, svar enklaste form ──
+    if(typ === 'multheltal' || typ === 'multbrak'){
+      return '<div class="ak8-rad" data-typ="' + typ + '" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
         + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
         + bcellHTML('mel') + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
     }
-    // ── Direkt svar, INGET mellanled: bråk·bråk (Öva 5, "förkorta svaret", inget "visa mellanled") + komplex-bråk ÷ ──
-    if(typ === 'multbrak' || typ === 'komplexdiv'){
-      return '<div class="ak8-rad' + (typ === 'komplexdiv' ? ' ak8-rad-kdiv' : '') + '" data-typ="' + typ + '" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
+    // ── Direkt svar, INGET mellanled: komplex-bråk ÷ (heltal÷bråk / bråk÷heltal), komplex-bråket står i prompten ──
+    if(typ === 'komplexdiv'){
+      return '<div class="ak8-rad ak8-rad-kdiv" data-typ="komplexdiv" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
         + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
         + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
     }
@@ -313,8 +313,8 @@
     if(typ === 'ordna'){ var g = rad.querySelector('.ak8-ordna'); return g.querySelectorAll('.ak8-tal.sel').length === g.querySelectorAll('.ak8-tal').length; }
     function bcFilled(role){ var c = rad.querySelector('.ak8-bc[data-r="' + role + '"]'); return !!c && c.querySelector('.ak8-bt').value.trim() !== '' && c.querySelector('.ak8-bn').value.trim() !== ''; }
     if(typ === 'addsub' || typ === 'blandadadd'){ return bcFilled('mel1') && bcFilled('mel2') && finBesvarad(rad, rad.dataset.svarform); }
-    if(typ === 'multheltal' || typ === 'divbrak'){ return bcFilled('mel') && finBesvarad(rad, rad.dataset.svarform); }
-    if(typ === 'komplexdiv' || typ === 'multbrak'){ return finBesvarad(rad, rad.dataset.svarform); }
+    if(typ === 'multheltal' || typ === 'multbrak' || typ === 'divbrak'){ return bcFilled('mel') && finBesvarad(rad, rad.dataset.svarform); }
+    if(typ === 'komplexdiv'){ return finBesvarad(rad, rad.dataset.svarform); }
     if(typ === 'reciprok'){ return bcFilled('sv'); }
     var fin = rad.querySelector('.ak8-bc[data-r="fin"]'); if(!fin) return false;
     return fin.querySelector('.ak8-bt').value.trim() !== '' && fin.querySelector('.ak8-bn').value.trim() !== '';
@@ -355,8 +355,18 @@
       var sv = rattaSvar(rad, f.svar);
       return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
     }
-    // multbrak (Öva 5 "förkorta svaret") + komplexdiv: direkt svar, inget mellanled.
-    if(typ === 'komplexdiv' || typ === 'multbrak'){ var sv = rattaSvar(rad, f.svar); return { ok: sv.ok, facit: sv.facit }; }
+    if(typ === 'multbrak'){
+      // MELLANLED = OFÖRKORTAD produkt (a·c)/(b·d) t.ex. 15/24 — KRÄV de literala produkttalen.
+      // Multiplikationssteget "5·3"/"6·4" godtas EJ (till skillnad från multheltal): bara heltal i cellen (korr. 1).
+      var c = rad.querySelector('.ak8-bc[data-r="mel"]');
+      var tRaw = c.querySelector('.ak8-bt').value.replace(/\s/g, ''), nRaw = c.querySelector('.ak8-bn').value.replace(/\s/g, '');
+      var melOk = /^\d+$/.test(tRaw) && /^\d+$/.test(nRaw) && +tRaw === f.m.t && +nRaw === f.m.n;
+      markBc(rad, 'mel', melOk);
+      var sv = rattaSvar(rad, f.svar);
+      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
+    }
+    // komplexdiv: direkt svar, inget mellanled (komplex-bråket står i prompten).
+    if(typ === 'komplexdiv'){ var sv = rattaSvar(rad, f.svar); return { ok: sv.ok, facit: sv.facit }; }
     if(typ === 'divbrak'){
       // MELLANLED = produktbråk (a·d)/(b·c) VÄRDE-rättat (godtar oäkta/oförkortat, se plan mellanled-axel).
       var mel = bread(rad, 'mel'), melOk = nara(mel.num, f.m.t / f.m.n);
