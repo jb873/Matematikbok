@@ -10,7 +10,7 @@
      mastery,       // { lasMatris(), masteryState(log, minNiva), MATRIS_KEY }
      prefKey,       // localStorage-nyckel för pref (bara mal persistas; arskurs låst)
      arskurs,       // 'ak7' | 'ak8'  (fast)
-     malDefault,    // 'godkant' (default)
+     malDefault,    // DEPRECATED — ignoreras. Startläget är alltid 'allt' (elevens val persistas via prefKey).
      minNiva,       // null | 3   (nivåbryggan; masteryState får den)
      ramPath,       // deeplink-bas, t.ex. '../../../ak7-k2-ram.html'
      rotNamn,       // rotnodens namn, t.ex. 'Bråk'
@@ -41,7 +41,9 @@
       return MAST.lasMatris() || {};
     }
     function lasPref(){
-      var d = { arskurs: config.arskurs, mal: config.malDefault || 'godkant', minNiva: config.minNiva || null };
+      // STARTLÄGE = 'allt' (eleven väljer väg; en default är inget val). config.malDefault ignoreras
+      // (deprecated) — bytet bor här i motorn, inte per skal. Elevens EGET val persistas nedan.
+      var d = { arskurs: config.arskurs, mal: 'allt', minNiva: config.minNiva || null };
       try{ var s = JSON.parse(localStorage.getItem(config.prefKey)) || {}; if(s.mal) d.mal = s.mal; }catch(e){}  // bara mal; arskurs låst
       return d;
     }
