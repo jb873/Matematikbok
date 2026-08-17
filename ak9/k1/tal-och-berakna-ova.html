@@ -123,6 +123,7 @@
 
 <script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/ak9-k1-ova-variant.js"></script>
+<script src="../../js/motor/ova-sekvens.js"></script>
 <!-- Öva-loggen: skriver evidens till samma k1-mastery-store som åttans blad (delad nod). GDPR: localStorage. -->
 <script src="../../js/mastery.js"></script>
 <script>
@@ -138,17 +139,9 @@
   ];
   function docNamn(id){ for(var i=0;i<DOKS.length;i++){ if(DOKS[i].id===id) return DOKS[i].namn; } return ''; }
 
-  // ── Elev-lokal sekvens-store (localStorage; lämnar ALDRIG enheten). { ovaN: {pos, varv} }, pos 0..3. ──
-  var STORE_KEY = 'k1.taluppfattning.ovavariant.v1';
-  function lasStore(){ try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e){ return {}; } }
-  function sparStore(s){ try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(e){} }
-  function posFor(dokId){ var s = lasStore(); var d = s[dokId]; return d && typeof d.pos === 'number' ? d : { pos:0, varv:0 }; }
-  function framflytta(dokId){
-    var s = lasStore(); var d = s[dokId] || { pos:0, varv:0 };
-    var np = d.pos + 1, nv = d.varv || 0;
-    if(np >= ANTAL_DOK){ np = 0; nv = nv + 1; }             // wrap efter sista dokumentet → varvet om, varv++
-    s[dokId] = { pos:np, varv:nv }; sparStore(s); return s[dokId];
-  }
+  // ── Elev-lokal sekvens-store (delad modul OvaSekvens; localStorage, lämnar ALDRIG enheten). pos 0..3. ──
+  var _seq = OvaSekvens('k1.taluppfattning.ovavariant.v1', ANTAL_DOK);
+  var posFor = _seq.posFor, framflytta = _seq.framflytta;
 
   // ── Talformat + värde-jämförelse ──
   function parseSvar(str){ if(str == null) return NaN; var s = ('' + str).trim().replace(/\s/g,'').replace(/−/g,'-').replace(',', '.'); if(s === '') return NaN; return Number(s); }

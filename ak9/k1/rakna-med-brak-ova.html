@@ -90,13 +90,14 @@
 
 <script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/ak9-k2-ova-variant.js"></script>
+<script src="../../js/motor/ova-sekvens.js"></script>
 <!-- Öva-loggen: bråk-evidens → MasteryK2 (samma store som åttans blad + nians union-karta läser). GDPR: localStorage. -->
 <script src="../../js/mastery-k2.js"></script>
 <script>
 (function(){
   'use strict';
   var API = window.AK9_K2_OVA, UI = window.AK8_UI, k = API._intern.k, gcd = API._intern.gcd, BR = API._intern.BR;
-  var ANTAL_DOK = 1;   // Varianter byggda+verifierade (motorn); sekvenseringen wiras EJ förrän Joachim granskat (höj till 4).
+  var ANTAL_DOK = 4;   // Dok 1 (orig) + 3 varianter — INTERN gräns, döljs för eleven (samma som dk1).
   var DOKS = [
     { id:'ova1', namn:'Öva 1', sub:'Grunder i bråk', byggd:true },
     { id:'ova2', namn:'Öva 2', sub:'Grunder – jämförelse och ordning', byggd:true },
@@ -107,14 +108,9 @@
   ];
   function docNamn(id){ for(var i=0;i<DOKS.length;i++){ if(DOKS[i].id===id) return DOKS[i].namn; } return ''; }
 
-  // ── Elev-lokal sekvens-store (localStorage; lämnar aldrig enheten) ──
-  var STORE_KEY = 'k2.rakna-med-brak.ovavariant.v1';
-  function lasStore(){ try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e){ return {}; } }
-  function sparStore(s){ try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(e){} }
-  function posFor(dokId){ var s = lasStore(); var d = s[dokId]; return d && typeof d.pos === 'number' ? d : { pos:0, varv:0 }; }
-  function framflytta(dokId){ var s = lasStore(); var d = s[dokId] || { pos:0, varv:0 };
-    var np = d.pos + 1, nv = d.varv || 0; if(np >= ANTAL_DOK){ np = 0; nv = nv + 1; }
-    s[dokId] = { pos:np, varv:nv }; sparStore(s); return s[dokId]; }
+  // ── Elev-lokal sekvens-store (delad modul OvaSekvens; localStorage, lämnar aldrig enheten) ──
+  var _seq = OvaSekvens('k2.rakna-med-brak.ovavariant.v1', ANTAL_DOK);
+  var posFor = _seq.posFor, framflytta = _seq.framflytta;
 
   // ── Talformat + bråk-cell (bcellHTML/bread speglade byte-troget ur blad-ak8-d5.js) ──
   function pNum(s){ if(s == null) return NaN; s = ('' + s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
