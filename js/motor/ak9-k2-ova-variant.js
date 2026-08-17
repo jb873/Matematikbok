@@ -132,10 +132,49 @@
       // G3 — oliknämnig SUBTRAKTION. Samma mellanled-metod. logg brak-sub:rakna (oliknämniga algoritmen).
       { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-sub:rakna', uppgifter:
         [[[5,6],[1,3]],[[3,4],[2,7]],[[2,5],[1,6]],[[6,7],[3,5]]].map(function(p){ return addSubUppg('−', p[0], p[1], 'brak-sub:rakna'); }) }
+    ] },
+
+    ova4: { titel: 'Blandad form och multiplikation', grupper: [
+      // G1 — addition i BLANDAD form. Mellanled = förläng bråkdelarna till gemensam nämnare (blandade tal),
+      //   svar blandad i enklaste form. logg brak-add:rakna (stege niva 2). form 'blandadadd'.
+      { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-add:rakna', uppgifter:
+        [[{ hel:4, t:3, n:8 }, { hel:1, t:1, n:4 }], [{ hel:3, t:2, n:3 }, { hel:2, t:3, n:4 }], [{ hel:1, t:3, n:5 }, { hel:5, t:5, n:6 }]]
+          .map(function(p){ return blandAddUppg(p[0], p[1], 'brak-add:rakna'); }) },
+
+      // G2 — heltal · bråk. Mellanled = OFÖRKORTAD produkt (H·t)/n, svar enklaste form. logg brak-mult-rakna:rakna.
+      { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-mult-rakna:rakna', uppgifter:
+        [[5,4,5],[7,2,3],[3,4,7]].map(function(p){ return multHeltalUppg(p[0], p[1], p[2], 'brak-mult-rakna:rakna'); }) },
+
+      // G3 — oliknämnig subtraktion (äkta + en oäkta operand 5/4). Samma addsub-mellanled. logg brak-sub:rakna.
+      { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-sub:rakna', uppgifter:
+        [[[5,6],[7,18]],[[5,4],[7,6]],[[3,5],[4,7]]].map(function(p){ return addSubUppg('−', p[0], p[1], 'brak-sub:rakna'); }) },
+
+      // G4 — heltal · bråk (fler tal). Samma metod som G2. logg brak-mult-rakna:rakna.
+      { rubrik: 'Beräkna – visa mellanled och svara i enklaste form', logg: 'brak-mult-rakna:rakna', uppgifter:
+        [[6,3,4],[4,5,6],[8,2,9]].map(function(p){ return multHeltalUppg(p[0], p[1], p[2], 'brak-mult-rakna:rakna'); }) }
     ] }
 
-    // ova4–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.
+    // ova5–ova6 byggs i följd (samma mönster), verifieras mot transkriptionen per dokument.
   };
+
+  // ── blandad addition: mellanled = blandade tal med gemensam nämnare (förläng bråkdelen). form 'blandadadd'. ──
+  function blandAddUppg(a, b, logg){
+    return { logg: logg, orig: { a: a, b: b },
+      prompt: function(x){ return BLAND(x.a.hel, x.a.t, x.a.n) + ' + ' + BLAND(x.b.hel, x.b.t, x.b.n) + ' ='; },
+      mellan: function(){ return null; },
+      facit: function(x){
+        var L = lcm(x.a.n, x.b.n), at = x.a.t * (L / x.a.n), bt = x.b.t * (L / x.b.n);
+        var totT = (x.a.hel + x.b.hel) * L + at + bt;   // hela summan som oäkta över L
+        return { form: 'blandadadd', a: x.a, b: x.b, m: [{ hel:x.a.hel, t:at, n:L }, { hel:x.b.hel, t:bt, n:L }], svar: brakForm(totT, L) };
+      } };
+  }
+  // ── heltal · bråk: mellanled = oförkortad produkt (H·t)/n, svar canonical. form 'multheltal'. ──
+  function multHeltalUppg(H, t, n, logg){
+    return { logg: logg, orig: { H: H, t: t, n: n },
+      prompt: function(x){ return x.H + ' · ' + BR(x.t, x.n) + ' ='; },
+      mellan: function(){ return null; },
+      facit: function(x){ var pt = x.H * x.t; return { form: 'multheltal', H:x.H, t:x.t, n:x.n, m: { t:pt, n:x.n }, svar: brakForm(pt, x.n) }; } };
+  }
 
   // ── addSub-uppgift: gemensam nämnare-mellanled + canonical svar. form 'addsub'. ──
   function addSubUppg(op, a, b, logg){

@@ -101,7 +101,7 @@
     { id:'ova1', namn:'Öva 1', sub:'Grunder i bråk', byggd:true },
     { id:'ova2', namn:'Öva 2', sub:'Grunder – jämförelse och ordning', byggd:true },
     { id:'ova3', namn:'Öva 3', sub:'Addition och subtraktion', byggd:true },
-    { id:'ova4', namn:'Öva 4', sub:'Blandad form och multiplikation', byggd:false },
+    { id:'ova4', namn:'Öva 4', sub:'Blandad form och multiplikation', byggd:true },
     { id:'ova5', namn:'Öva 5', sub:'Multiplikation och division med heltal', byggd:false },
     { id:'ova6', namn:'Öva 6', sub:'Division', byggd:false }
   ];
@@ -123,8 +123,29 @@
   function bcellHTML(role){ return '<span class="ovn-brak ak8-bc" data-r="' + role + '"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-bt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-bn" inputmode="text" autocomplete="off"></span></span>'; }
   function bread(scope, role){ var c = scope.querySelector('.ak8-bc[data-r="' + role + '"]'); if(!c) return { num:NaN }; var t = ev(c.querySelector('.ak8-bt').value), n = ev(c.querySelector('.ak8-bn').value); return { t:t, n:n, num:(isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN }; }
   // Trefältscell (blandad form: heltal + stående bråk) — speglad ur blad-ak8-d5 (mcellHTML/mread).
-  function mcellHTML(role){ return '<span class="ak8-mc"><input class="ak8-in ak8-mh" inputmode="text" autocomplete="off"></span>' + bcellHTML(role); }
-  function mread(scope, role){ var mh = pNum(scope.querySelector('.ak8-mh').value), b = bread(scope, role); var h = isFinite(mh) ? mh : 0; return { hel:h, t:b.t, n:b.n, num:(isFinite(b.num)) ? h + b.num : NaN }; }
+  function mcellHTML(role){ return '<span class="ak8-mc" data-mr="' + role + '"><input class="ak8-in ak8-mh" inputmode="text" autocomplete="off">' + bcellHTML(role) + '</span>'; }
+  function mhEl(scope, role){ var box = scope.querySelector('.ak8-mc[data-mr="' + role + '"]'); return box ? box.querySelector('.ak8-mh') : scope.querySelector('.ak8-mh'); }
+  function mread(scope, role){ var el = mhEl(scope, role), mh = pNum(el ? el.value : ''), b = bread(scope, role); var h = isFinite(mh) ? mh : 0; return { hel:h, t:b.t, n:b.n, num:(isFinite(b.num)) ? h + b.num : NaN }; }
+
+  // ── Svarscell efter facit.svar.form (delas av addsub/multheltal/blandadadd) ──
+  function finCellHTML(form){ return (form === 'blandad') ? mcellHTML('fin')
+    : (form === 'tal') ? '<span class="ak8-fc"><input class="ak8-in ak8-ft" inputmode="text" autocomplete="off"></span>'
+    : bcellHTML('fin'); }   // brak
+  function markEl(el, ok){ if(el){ el.classList.remove('ak8-ok', 'ak8-fel'); el.classList.add(ok ? 'ak8-ok' : 'ak8-fel'); } }
+  function finBesvarad(rad, form){
+    if(form === 'tal'){ var ft = rad.querySelector('.ak8-ft'); return !!ft && ft.value.trim() !== ''; }
+    var fc = rad.querySelector('.ak8-bc[data-r="fin"]'); return !!fc && fc.querySelector('.ak8-bt').value.trim() !== '' && fc.querySelector('.ak8-bn').value.trim() !== '';
+  }
+  function rattaSvar(rad, sf){   // canonical rättning av svarscellen (enklaste form) → { ok, facit }
+    if(sf.form === 'blandad'){
+      var mm = mread(rad, 'fin'), mal = sf.hel + sf.t / sf.n;
+      var ok = nara(mm.num, mal) && nara(mm.hel, sf.hel) && isFinite(mm.t) && isFinite(mm.n) && mm.t > 0 && mm.t < mm.n && gcd(Math.round(mm.t), Math.round(mm.n)) === 1;
+      markEl(mhEl(rad, 'fin'), ok); markBc(rad, 'fin', ok); return { ok:ok, facit: sf.hel + ' ' + sf.t + '/' + sf.n };
+    }
+    if(sf.form === 'tal'){ var vv = pNum(rad.querySelector('.ak8-ft').value), ok2 = nara(vv, sf.v); markEl(rad.querySelector('.ak8-ft'), ok2); return { ok:ok2, facit: k(sf.v) }; }
+    var bb = bread(rad, 'fin'), ok3 = nara(bb.num, sf.t / sf.n) && isFinite(bb.t) && isFinite(bb.n) && gcd(Math.round(bb.t), Math.round(bb.n)) === 1;
+    markBc(rad, 'fin', ok3); return { ok:ok3, facit: sf.t + '/' + sf.n };
+  }
 
   // BRAK(täljare)(nämnare) → stående bråk (uttrycks-prompt) ──
   function esc(s){ return ('' + s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -161,14 +182,23 @@
     }
     // ── Add/sub oliknämnigt: prompt = uträkning, mellanled = gem.-nämnare-celler, svar-cell efter svar.form ──
     if(typ === 'addsub'){
-      var sf = f.svar;
-      var finCell = (sf.form === 'blandad') ? mcellHTML('fin')
-                  : (sf.form === 'tal') ? '<span class="ak8-fc"><input class="ak8-in ak8-ft" inputmode="text" autocomplete="off"></span>'
-                  : bcellHTML('fin');   // brak
-      return '<div class="ak8-rad" data-typ="addsub" data-svarform="' + sf.form + '" data-ui="' + ui + '">' + label
+      return '<div class="ak8-rad" data-typ="addsub" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
         + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
         + bcellHTML('mel1') + '<span class="ak8-eq">' + f.op + '</span>' + bcellHTML('mel2')
-        + '<span class="ak8-eq">=</span>' + finCell + '</div>';
+        + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
+    }
+    // ── Heltal · bråk: mellanled = oförkortad produkt (en bråkcell), svar-cell efter svar.form ──
+    if(typ === 'multheltal'){
+      return '<div class="ak8-rad" data-typ="multheltal" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
+        + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
+        + bcellHTML('mel') + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
+    }
+    // ── Blandad addition: mellanled = blandade tal med gemensam nämnare (blandade celler), svar blandad ──
+    if(typ === 'blandadadd'){
+      return '<div class="ak8-rad" data-typ="blandadadd" data-svarform="' + f.svar.form + '" data-ui="' + ui + '">' + label
+        + '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>'
+        + mcellHTML('mel1') + '<span class="ak8-eq">+</span>' + mcellHTML('mel2')
+        + '<span class="ak8-eq">=</span>' + finCellHTML(f.svar.form) + '</div>';
     }
     // ── Fraktions-/tal-former (svarscell efter facit.form) ──
     var q = '<span class="ak8-q">' + uttryckHTML(u.prompt) + '</span>';
@@ -251,14 +281,9 @@
     if(typ === 'tal'){ var i = rad.querySelector('.ak8-in'); return !!i && i.value.trim() !== ''; }
     if(typ === 'val' || typ === 'tecken'){ return !!rad.querySelector('.ak8-korval.sel'); }
     if(typ === 'ordna'){ var g = rad.querySelector('.ak8-ordna'); return g.querySelectorAll('.ak8-tal.sel').length === g.querySelectorAll('.ak8-tal').length; }
-    if(typ === 'addsub'){
-      var m1 = rad.querySelector('.ak8-bc[data-r="mel1"]'), m2 = rad.querySelector('.ak8-bc[data-r="mel2"]');
-      var melFilled = [m1, m2].every(function(cc){ return cc && cc.querySelector('.ak8-bt').value.trim() !== '' && cc.querySelector('.ak8-bn').value.trim() !== ''; });
-      var finFilled;
-      if(rad.dataset.svarform === 'tal'){ var ft = rad.querySelector('.ak8-ft'); finFilled = !!ft && ft.value.trim() !== ''; }
-      else { var fc = rad.querySelector('.ak8-bc[data-r="fin"]'); finFilled = !!fc && fc.querySelector('.ak8-bt').value.trim() !== '' && fc.querySelector('.ak8-bn').value.trim() !== ''; }
-      return melFilled && finFilled;
-    }
+    function bcFilled(role){ var c = rad.querySelector('.ak8-bc[data-r="' + role + '"]'); return !!c && c.querySelector('.ak8-bt').value.trim() !== '' && c.querySelector('.ak8-bn').value.trim() !== ''; }
+    if(typ === 'addsub' || typ === 'blandadadd'){ return bcFilled('mel1') && bcFilled('mel2') && finBesvarad(rad, rad.dataset.svarform); }
+    if(typ === 'multheltal'){ return bcFilled('mel') && finBesvarad(rad, rad.dataset.svarform); }
     var fin = rad.querySelector('.ak8-bc[data-r="fin"]'); if(!fin) return false;
     return fin.querySelector('.ak8-bt').value.trim() !== '' && fin.querySelector('.ak8-bn').value.trim() !== '';
   }
@@ -285,27 +310,28 @@
     if(typ === 'addsub'){
       var m1 = bread(rad, 'mel1'), m2 = bread(rad, 'mel2'), av = f.a[0] / f.a[1], bv = f.b[0] / f.b[1];
       // MELLANLED (värde-rättat): samma nämnare (valfri gemensam) + termernas värden = originalen. Godtar oförkortat.
-      var sameDen = isFinite(m1.n) && isFinite(m2.n) && Math.round(m1.n) === Math.round(m2.n);
-      var melOk = sameDen && nara(m1.num, av) && nara(m2.num, bv);
+      var melOk = isFinite(m1.n) && isFinite(m2.n) && Math.round(m1.n) === Math.round(m2.n) && nara(m1.num, av) && nara(m2.num, bv);
       markBc(rad, 'mel1', melOk); markBc(rad, 'mel2', melOk);
-      // SVAR (canonical, form följer varianten):
-      var sf = f.svar, svOk, svFacit;
-      if(sf.form === 'blandad'){
-        var mm = mread(rad, 'fin'), mal = sf.hel + sf.t / sf.n;
-        svOk = nara(mm.num, mal) && nara(mm.hel, sf.hel) && isFinite(mm.t) && isFinite(mm.n) && mm.t > 0 && mm.t < mm.n && gcd(Math.round(mm.t), Math.round(mm.n)) === 1;
-        var mh = rad.querySelector('.ak8-mh'); if(mh){ mh.classList.remove('ak8-ok', 'ak8-fel'); mh.classList.add(svOk ? 'ak8-ok' : 'ak8-fel'); }
-        markBc(rad, 'fin', svOk); svFacit = sf.hel + ' ' + sf.t + '/' + sf.n;
-      } else if(sf.form === 'tal'){
-        var vv = pNum(rad.querySelector('.ak8-ft').value); svOk = nara(vv, sf.v);
-        var ft = rad.querySelector('.ak8-ft'); if(ft){ ft.classList.remove('ak8-ok', 'ak8-fel'); ft.classList.add(svOk ? 'ak8-ok' : 'ak8-fel'); }
-        svFacit = k(sf.v);
-      } else {   // brak
-        var bb = bread(rad, 'fin');
-        svOk = nara(bb.num, sf.t / sf.n) && isFinite(bb.t) && isFinite(bb.n) && gcd(Math.round(bb.t), Math.round(bb.n)) === 1;
-        markBc(rad, 'fin', svOk); svFacit = sf.t + '/' + sf.n;
-      }
+      var sv = rattaSvar(rad, f.svar);   // SVAR canonical, form följer varianten
       var melText = f.m[0][0] + '/' + f.m[0][1] + ' ' + f.op + ' ' + f.m[1][0] + '/' + f.m[1][1];
-      return { ok: melOk && svOk, facit: melText + ' = ' + svFacit };
+      return { ok: melOk && sv.ok, facit: melText + ' = ' + sv.facit };
+    }
+    if(typ === 'multheltal'){
+      // MELLANLED = OFÖRKORTAD produkt (H·t)/n: behåll nämnaren, multiplicera täljaren.
+      var mel = bread(rad, 'mel'), melOk = nara(mel.t, f.m.t) && nara(mel.n, f.m.n);
+      markBc(rad, 'mel', melOk);
+      var sv = rattaSvar(rad, f.svar);
+      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
+    }
+    if(typ === 'blandadadd'){
+      var m1 = mread(rad, 'mel1'), m2 = mread(rad, 'mel2');
+      // MELLANLED (värde-rättat): bråkdelarnas nämnare lika (gemensam) + de blandade talens värden = originalen.
+      var av = f.a.hel + f.a.t / f.a.n, bv = f.b.hel + f.b.t / f.b.n;
+      var melOk = isFinite(m1.n) && isFinite(m2.n) && Math.round(m1.n) === Math.round(m2.n) && nara(m1.num, av) && nara(m2.num, bv);
+      markBc(rad, 'mel1', melOk); markBc(rad, 'mel2', melOk); markEl(mhEl(rad, 'mel1'), melOk); markEl(mhEl(rad, 'mel2'), melOk);
+      var sv = rattaSvar(rad, f.svar);
+      var mt = function(t){ return t.hel + ' ' + t.t + '/' + t.n; };
+      return { ok: melOk && sv.ok, facit: mt(f.m[0]) + ' + ' + mt(f.m[1]) + ' = ' + sv.facit };
     }
     if(typ === 'tal'){ var v = pNum(rad.querySelector('.ak8-in').value); var ok = nara(v, f.v); markInputs(rad, ok); return { ok:ok, facit:k(f.v) }; }
     if(typ === 'brak'){
