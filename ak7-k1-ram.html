@@ -1204,6 +1204,17 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 }
 .test-ql-text .tag.problem{background:var(--c-problem-bg);color:var(--c-problem);border-color:var(--c-problem)}
 
+/* Arbetsblad: hela testet på en sida (frågekorten staplas, egna marginaler nedan). */
+.test-ws-head{margin-bottom:18px}
+.test-ws-title{
+  font-family:var(--serif);font-weight:500;font-size:22px;
+  margin:0 0 8px;letter-spacing:-.01em;color:var(--ink);
+}
+.test-ws-desc{font-size:14px;color:var(--ink-soft);margin:0;max-width:60ch}
+.test-ws-actions{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  margin-top:22px;padding-top:18px;border-top:1px solid var(--line);
+}
 .test-take-question{
   background:var(--bg-card);border:1px solid var(--line);
   border-radius:var(--radius-lg);padding:22px;margin-bottom:16px;
@@ -1811,7 +1822,7 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 
 @media print{
   body{background:#fff !important}
-  .topbar, .tutor-fab, .tutor-panel, .breadcrumb, .test-progress-bar, .practice-cta-grid, .video-section, .test-result-actions, .test-take-actions, .btn{display:none !important}
+  .topbar, .tutor-fab, .tutor-panel, .breadcrumb, .test-progress-bar, .practice-cta-grid, .video-section, .test-result-actions, .test-take-actions, .test-ws-actions, .keypad, .btn{display:none !important}
   .view{padding:0 !important;max-width:100% !important}
   .test-take-question, .test-review-card, .test-overview, .header-card{break-inside:avoid;page-break-inside:avoid;box-shadow:none !important;border:1px solid #999 !important;margin-bottom:14px !important}
 }

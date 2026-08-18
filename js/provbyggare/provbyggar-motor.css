@@ -300,6 +300,18 @@
 
 .test-ql-text .tag.problem{background:var(--c-problem-bg);color:var(--c-problem);border-color:var(--c-problem)}
 
+/* Arbetsblad: hela testet på en sida (frågekorten staplas, egna marginaler nedan). */
+.test-ws-head{margin-bottom:18px}
+.test-ws-title{
+  font-family:var(--serif);font-weight:500;font-size:22px;
+  margin:0 0 8px;letter-spacing:-.01em;color:var(--ink);
+}
+.test-ws-desc{font-size:14px;color:var(--ink-soft);margin:0;max-width:60ch}
+.test-ws-actions{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  margin-top:22px;padding-top:18px;border-top:1px solid var(--line);
+}
+
 .test-take-question{
   background:var(--bg-card);border:1px solid var(--line);
   border-radius:var(--radius-lg);padding:22px;margin-bottom:16px;
@@ -446,3 +458,10 @@
 .test-sub-mellan .tsg-svar{display:inline-flex;align-items:center;gap:5px}
 .test-sub-mellan .tsg-svar .tsn-cell{width:70px}
 .test-sub-mellan .tsg-bas{font-family:var(--mono,monospace);font-size:16px;color:var(--ink,#12110f)}
+
+/* Skriv ut arbetsbladet: dölj knappraden + keypad så bara frågor och tomma svarsrutor skrivs ut.
+   Kompletterar ramarnas egna @media print-block (som redan döljer .btn/.keypad i olika grad). */
+@media print{
+  .test-ws-actions, .keypad{ display:none !important; }
+  .test-take-question{ break-inside:avoid; page-break-inside:avoid; }
+}
