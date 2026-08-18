@@ -35,61 +35,31 @@ window.K2_TAXONOMI = {
       "grupp": "brak", "implemented": true
     },
     {
-      "id": "andel-figur", "namn": "Andel av en figur", "parent": "brak-andel", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Hur stor andel av en delad figur som är färgad (kvadrat, cirkel, rektangel, hexagon).",
-      "visning": null
-    },
-    {
-      "id": "andel-figur:rakna", "namn": "Andel av en figur", "parent": "andel-figur", "niva": "lovnod",
+      "id": "andel-figur:rakna", "namn": "Andel av en figur", "parent": "brak-andel", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "andelFigurEngine",
       "begrepp": "Skriv andelen färgad del av figuren som bråk.",
       "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
-      "id": "andel-tallinje", "namn": "Bråk på tallinje", "parent": "brak-andel", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Avläsa vilket bråk (eller tal) en markör pekar på en tallinje.",
-      "visning": null
-    },
-    {
-      "id": "andel-tallinje:begrepp", "namn": "Bråk på tallinje", "parent": "andel-tallinje", "niva": "lovnod",
+      "id": "andel-tallinje:begrepp", "namn": "Bråk på tallinje", "parent": "brak-andel", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "BEGREPP", "generator": "tallinjeEngine",
       "begrepp": "Läs av bråket som pilen/punkten pekar på.",
       "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 1, "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
     {
-      "id": "andel-antal", "namn": "Andel av ett antal", "parent": "brak-andel", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Andel av en mängd objekt (kulor, djur) – hur stor del som har en viss egenskap.",
-      "visning": null
-    },
-    {
-      "id": "andel-antal:rakna", "namn": "Andel av ett antal", "parent": "andel-antal", "niva": "lovnod",
+      "id": "andel-antal:rakna", "namn": "Andel av ett antal", "parent": "brak-andel", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "antalEngine",
       "begrepp": "Skriv andelen (t.ex. blå kulor av alla) som bråk.",
       "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 2, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
-      "id": "andel-hela", "namn": "Skriva hela tal i bråkform", "parent": "brak-andel", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Skriva ett helt tal som bråk på flera sätt (2 = 2/1 = 4/2 = 6/3 …).",
-      "visning": null
-    },
-    {
-      "id": "andel-hela:resonera", "namn": "Skriva hela tal i bråkform", "parent": "andel-hela", "niva": "lovnod",
+      "id": "andel-hela:resonera", "namn": "Skriva hela tal i bråkform", "parent": "brak-andel", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RESONERA", "generator": "helaEngine",
       "begrepp": "Ge flera bråk som är lika med ett givet helt tal (villkors-validering).",
       "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 3, "titel": "Skriva hela i bråkform", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
     {
-      "id": "andel-kontra", "namn": "Andel kontra antal", "parent": "brak-andel", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Delkapitlets kärna: skilja 'flest' (antal) från 'störst andel' (proportion).",
-      "visning": null
-    },
-    {
-      "id": "andel-kontra:resonera", "namn": "Andel kontra antal", "parent": "andel-kontra", "niva": "lovnod",
+      "id": "andel-kontra:resonera", "namn": "Andel kontra antal", "parent": "brak-andel", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "kontraEngine",
       "begrepp": "Avgör vem som har flest respektive störst andel – och varför de kan skilja sig.",
       "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 4, "etikett": "resonera", "formagaKey": "resonera", "niva": null }
@@ -120,13 +90,7 @@ window.K2_TAXONOMI = {
       "visning": { "utbudslista": "k2d2", "grupp": "Byta form", "gruppordning": 0, "radordning": 3, "titel": "Blandad form", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
-      "id": "brak-tid", "namn": "Tid i bråk- och decimalform", "parent": "brak-byta", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Skriva minuter som del av en timme i bråkform (45 min = 3/4 h) och decimalform (15 min = 0,25 h).",
-      "visning": null
-    },
-    {
-      "id": "brak-tid:rakna", "namn": "Tid i bråk- och decimalform", "parent": "brak-tid", "niva": "lovnod",
+      "id": "brak-tid:rakna", "namn": "Tid i bråk- och decimalform", "parent": "brak-byta", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "tidBrakEngine",
       "begrepp": "Växla mellan minuter/timmar och bråk- eller decimalform av en timme.",
       "visning": { "utbudslista": "k2d2", "grupp": "Byta form", "gruppordning": 0, "radordning": 4, "titel": "Tid i bråkform", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
@@ -140,37 +104,19 @@ window.K2_TAXONOMI = {
       "grupp": "brak", "implemented": true
     },
     {
-      "id": "brak-forlanga", "namn": "Förlänga bråk", "parent": "brak-likv", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Förläng bråket till en given nämnare.",
-      "visning": null
-    },
-    {
-      "id": "brak-forlanga:rakna", "namn": "Förlänga bråk", "parent": "brak-forlanga", "niva": "lovnod",
+      "id": "brak-forlanga:rakna", "namn": "Förlänga bråk", "parent": "brak-likv", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "forlangaEngine",
       "begrepp": "Förläng täljare och nämnare med samma tal till given nämnare.",
       "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
-      "id": "brak-forkorta", "namn": "Förkorta bråk", "parent": "brak-likv", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Förkorta bråket till enklaste form.",
-      "visning": null
-    },
-    {
-      "id": "brak-forkorta:rakna", "namn": "Förkorta bråk", "parent": "brak-forkorta", "niva": "lovnod",
+      "id": "brak-forkorta:rakna", "namn": "Förkorta bråk", "parent": "brak-likv", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "forkortaEngine",
       "begrepp": "Dela täljare och nämnare med samma tal till enklaste form.",
       "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
-      "id": "brak-likformig", "namn": "Likformiga bråk", "parent": "brak-likv", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Skriva likformiga (ekvivalenta) bråk – samma värde men förlängda täljare och nämnare.",
-      "visning": null
-    },
-    {
-      "id": "brak-likformig:rakna", "namn": "Likformiga bråk", "parent": "brak-likformig", "niva": "lovnod",
+      "id": "brak-likformig:rakna", "namn": "Likformiga bråk", "parent": "brak-likv", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "likformigEngine",
       "begrepp": "Ge flera bråk som är lika med ett givet bråk genom förlängning (villkors-validering).",
       "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 2, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
@@ -212,37 +158,19 @@ window.K2_TAXONOMI = {
       "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 1, "titel": "Mot ½ och 1", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
     {
-      "id": "brak-jmf-ordna", "namn": "Storleksordna bråk", "parent": "brak-jamf", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Ordna flera bråk i storleksordning, med samma täljare/nämnare och blandat.",
-      "visning": null
-    },
-    {
-      "id": "brak-jmf-ordna:resonera", "namn": "Storleksordna bråk", "parent": "brak-jmf-ordna", "niva": "lovnod",
+      "id": "brak-jmf-ordna:resonera", "namn": "Storleksordna bråk", "parent": "brak-jamf", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RESONERA", "generator": "storleksordnaEngine",
       "begrepp": "Storleksordna en uppsättning bråk, börja med det minsta.",
       "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 2, "titel": "Storleksordna", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
     {
-      "id": "brak-jmf-summa", "namn": "Uppskatta summa mot 1", "parent": "brak-jamf", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Avgör om en summa av bråk är större eller mindre än 1 utan att räkna exakt.",
-      "visning": null
-    },
-    {
-      "id": "brak-jmf-summa:resonera", "namn": "Uppskatta summa mot 1", "parent": "brak-jmf-summa", "niva": "lovnod",
+      "id": "brak-jmf-summa:resonera", "namn": "Uppskatta summa mot 1", "parent": "brak-jamf", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "summaMot1Engine",
       "begrepp": "Bedöm summans storlek mot 1; hitta bråk som gör summan mindre än 1.",
       "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 3, "titel": "Summa mot 1", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
     {
-      "id": "brak-jmf-konstr", "namn": "Konstruera bråk med villkor", "parent": "brak-jamf", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Skriv ett bråk som uppfyller ett villkor, t.ex. mellan 1/2 och 1 med given täljare/nämnare.",
-      "visning": null
-    },
-    {
-      "id": "brak-jmf-konstr:resonera", "namn": "Konstruera bråk med villkor", "parent": "brak-jmf-konstr", "niva": "lovnod",
+      "id": "brak-jmf-konstr:resonera", "namn": "Konstruera bråk med villkor", "parent": "brak-jamf", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "konstrueraEngine",
       "begrepp": "Ge exempel på bråk i ett givet intervall eller med en given täljare/nämnare.",
       "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 4, "titel": "Konstruera bråk", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
@@ -256,13 +184,7 @@ window.K2_TAXONOMI = {
       "grupp": "brak", "implemented": true
     },
     {
-      "id": "brak-add", "namn": "Addition med bråk", "parent": "brak-as", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Addera bråk med samma och olika nämnare (mellanled: förläng till gemensam nämnare).",
-      "visning": null
-    },
-    {
-      "id": "brak-add:rakna", "namn": "Addition med bråk", "parent": "brak-add", "niva": "lovnod",
+      "id": "brak-add:rakna", "namn": "Addition med bråk", "parent": "brak-as", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut summan; visa mellanledet (förläng till gemensam nämnare).",
       "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
@@ -306,25 +228,13 @@ window.K2_TAXONOMI = {
       "grupp": "brak", "implemented": true
     },
     {
-      "id": "brak-mult-rakna", "namn": "Multiplikation med bråk", "parent": "brak-mult", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Multiplicera bråk · bråk, bråk · heltal och blandad form.",
-      "visning": null
-    },
-    {
-      "id": "brak-mult-rakna:rakna", "namn": "Multiplikation med bråk", "parent": "brak-mult-rakna", "niva": "lovnod",
+      "id": "brak-mult-rakna:rakna", "namn": "Multiplikation med bråk", "parent": "brak-mult", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "multBrakEngine",
       "begrepp": "Multiplicera bråk · bråk, heltal · bråk och blandad form; svar i enklaste/blandad form. Stora tal med förkortnings-mellanled.",
       "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
-      "id": "brak-mult-forkorta", "namn": "Förkorta innan multiplikation", "parent": "brak-mult", "niva": "deldoman",
-      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "När produkten är för stor för huvudräkning: förkorta (korsförkorta) täljare mot nämnare INNAN man multiplicerar. Nytt mål i åttan (höjt talområde).",
-      "visning": null
-    },
-    {
-      "id": "brak-mult-forkorta:rakna", "namn": "Förkorta innan multiplikation", "parent": "brak-mult-forkorta", "niva": "lovnod",
+      "id": "brak-mult-forkorta:rakna", "namn": "Förkorta innan multiplikation", "parent": "brak-mult", "niva": "lovnod",
       "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "multForkortaEngine",
       "begrepp": "Korsförkorta täljare och nämnare (i valfri ordning) innan multiplikation; svar i enklaste/blandad form. Öva-bladet rättar equality-baserat (flera giltiga vägar).",
       "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
@@ -343,25 +253,13 @@ window.K2_TAXONOMI = {
       "grupp": "brak", "implemented": true
     },
     {
-      "id": "brak-div-bh", "namn": "Dividera bråktal med heltal", "parent": "brak-div", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": null, "generator": null,
-      "begrepp": "Ett bråk delat med ett heltal – multiplicera nämnaren med heltalet.",
-      "visning": null
-    },
-    {
-      "id": "brak-div-bh:rakna", "namn": "Dividera bråktal med heltal", "parent": "brak-div-bh", "niva": "lovnod",
+      "id": "brak-div-bh:rakna", "namn": "Dividera bråktal med heltal", "parent": "brak-div", "niva": "lovnod",
       "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakHeltal",
       "begrepp": "Räkna ut kvoten av ett bråk och ett heltal, svar i enklaste form.",
       "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 0, "titel": "Bråktal ÷ heltal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
-      "id": "brak-div-hb", "namn": "Dividera heltal med bråktal", "parent": "brak-div", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": null, "generator": null,
-      "begrepp": "Ett heltal delat med ett bråk – multiplicera heltalet med det inverterade bråket.",
-      "visning": null
-    },
-    {
-      "id": "brak-div-hb:rakna", "namn": "Dividera heltal med bråktal", "parent": "brak-div-hb", "niva": "lovnod",
+      "id": "brak-div-hb:rakna", "namn": "Dividera heltal med bråktal", "parent": "brak-div", "niva": "lovnod",
       "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "fordjupning", "formaga": "RAKNA", "generator": "divHeltalBrak",
       "begrepp": "Räkna ut kvoten av ett heltal och ett bråk, svar i enklaste form.",
       "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 1, "titel": "Heltal ÷ bråktal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }

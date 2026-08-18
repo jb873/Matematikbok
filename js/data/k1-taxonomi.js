@@ -754,23 +754,9 @@ window.K1_TAXONOMI = {
       "visning": null
     },
     {
-      "id": "add-rakna",
-      "namn": "Huvudräkning",
-      "parent": "addition",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Räkna i huvudet med tiokompisar, decimaltal och tal i bråkform och blandad form.",
-      "visning": null
-    },
-    {
       "id": "add-rakna:rakna",
       "namn": "Huvudräkning",
-      "parent": "add-rakna",
+      "parent": "addition",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
@@ -939,23 +925,9 @@ window.K1_TAXONOMI = {
       "visning": null
     },
     {
-      "id": "sub-rakna",
-      "namn": "Huvudräkning",
-      "parent": "subtraktion",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Räkna i huvudet över tiotalsgränsen, med decimaltal och med bråkform.",
-      "visning": null
-    },
-    {
       "id": "sub-rakna:rakna",
       "namn": "Huvudräkning",
-      "parent": "sub-rakna",
+      "parent": "subtraktion",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
@@ -1170,23 +1142,9 @@ window.K1_TAXONOMI = {
       "visning": null
     },
     {
-      "id": "mult-tabell",
-      "namn": "Multiplikationstabellen",
-      "parent": "multiplikation",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Träna tabellerna snabbt – tre nivåer med stigande svårighet.",
-      "visning": null
-    },
-    {
       "id": "mult-tabell:rakna",
       "namn": "Multiplikationstabellen",
-      "parent": "mult-tabell",
+      "parent": "multiplikation",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
@@ -1528,23 +1486,9 @@ window.K1_TAXONOMI = {
       "visning": null
     },
     {
-      "id": "div-tabell",
-      "namn": "Divisionstabellen",
-      "parent": "division",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Träna divisionstabellen snabbt – tre nivåer med stigande nämnare.",
-      "visning": null
-    },
-    {
       "id": "div-tabell:rakna",
       "namn": "Divisionstabellen",
-      "parent": "div-tabell",
+      "parent": "division",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
@@ -1796,23 +1740,9 @@ window.K1_TAXONOMI = {
       }
     },
     {
-      "id": "prio-samband",
-      "namn": "Samband mellan räknesätt",
-      "parent": "prio",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Hur addition och subtraktion hänger ihop, och hur multiplikation och division hänger ihop. Fyll i talet som saknas.",
-      "visning": null
-    },
-    {
       "id": "prio-samband:rakna",
       "namn": "Samband mellan räknesätt",
-      "parent": "prio-samband",
+      "parent": "prio",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
@@ -1978,23 +1908,9 @@ window.K1_TAXONOMI = {
       }
     },
     {
-      "id": "neg-begrepp",
-      "namn": "Begrepp och förståelse",
-      "parent": "negativa",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Motsatta tal, storleksordna positiva och negativa tal samt talföljder.",
-      "visning": null
-    },
-    {
       "id": "neg-begrepp:begrepp",
       "namn": "Begrepp och förståelse",
-      "parent": "neg-begrepp",
+      "parent": "negativa",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
@@ -2218,23 +2134,9 @@ window.K1_TAXONOMI = {
       }
     },
     {
-      "id": "avr-avrundning",
-      "namn": "Avrundning",
-      "parent": "avrundning",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Begreppet närmevärde, avrundningsreglerna och att avrunda hela tal och decimaltal till olika platsvärden.",
-      "visning": null
-    },
-    {
       "id": "avr-avrundning:begrepp",
       "namn": "Avrundning",
-      "parent": "avr-avrundning",
+      "parent": "avrundning",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
@@ -2254,23 +2156,9 @@ window.K1_TAXONOMI = {
       }
     },
     {
-      "id": "avr-overslag",
-      "namn": "Överslagsräkning",
-      "parent": "avrundning",
-      "niva": "deldoman",
-      "arskursRelevans": {
-        "ak7": "mal"
-      },
-      "roll": "karna",
-      "formaga": null,
-      "generator": null,
-      "begrepp": "Använd avrundning för att snabbt göra ungefärliga beräkningar i alla räknesätt.",
-      "visning": null
-    },
-    {
       "id": "avr-overslag:rakna",
       "namn": "Överslagsräkning",
-      "parent": "avr-overslag",
+      "parent": "avrundning",
       "niva": "lovnod",
       "arskursRelevans": {
         "ak7": "mal"
