@@ -753,7 +753,7 @@ window.K1_TAXONOMI = {
         "grupp": "Addition",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Begrepp",
+        "titel": "Term och summa",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -826,7 +826,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-metoder:metod",
-      "namn": "Metoder · Metod",
+      "namn": "Välj metod",
       "parent": "add-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -890,7 +890,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "add-problem:problem",
-      "namn": "Problemlösning",
+      "namn": "Lästal",
       "parent": "add-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -905,7 +905,7 @@ window.K1_TAXONOMI = {
         "grupp": "Addition",
         "gruppordning": 0,
         "radordning": 3,
-        "titel": "Problemlösning",
+        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -942,7 +942,7 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 0,
-        "titel": "Begrepp",
+        "titel": "Term och differens",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -950,7 +950,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-begrepp:rakna",
-      "namn": "Begrepp · Räkna",
+      "namn": "Dela upp tal i termer",
       "parent": "sub-begrepp",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1015,7 +1015,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-metoder:metod",
-      "namn": "Metoder · Metod",
+      "namn": "Välj metod",
       "parent": "sub-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1113,7 +1113,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "sub-problem:problem",
-      "namn": "Problemlösning",
+      "namn": "Lästal",
       "parent": "sub-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1128,7 +1128,7 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 3,
-        "titel": "Problemlösning",
+        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -1165,7 +1165,7 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation",
         "gruppordning": 2,
         "radordning": 0,
-        "titel": "Begrepp",
+        "titel": "Faktor, produkt och primtal",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -1252,7 +1252,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-metoder:metod",
-      "namn": "Metoder för multiplikation · Metod",
+      "namn": "Välj metod",
       "parent": "mult-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1364,7 +1364,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-rakna:rakna",
-      "namn": "Beräkningar · Räkna",
+      "namn": "Blandade beräkningar",
       "parent": "mult-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1493,7 +1493,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "mult-problem:problem",
-      "namn": "Problemlösning",
+      "namn": "Lästal",
       "parent": "mult-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1508,7 +1508,7 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation",
         "gruppordning": 2,
         "radordning": 4,
-        "titel": "Problemlösning",
+        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -1545,7 +1545,7 @@ window.K1_TAXONOMI = {
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 0,
-        "titel": "Begrepp",
+        "titel": "Täljare, nämnare och kvot",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -1618,7 +1618,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-metoder:metod",
-      "namn": "Metoder · Metod",
+      "namn": "Välj metod",
       "parent": "div-metoder",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1693,7 +1693,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-rakna:rakna",
-      "namn": "Beräkningar · Räkna",
+      "namn": "Blandade beräkningar",
       "parent": "div-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1820,7 +1820,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "div-problem:problem",
-      "namn": "Problemlösning",
+      "namn": "Lästal",
       "parent": "div-problem",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1835,7 +1835,7 @@ window.K1_TAXONOMI = {
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 4,
-        "titel": "Problemlösning",
+        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -1918,7 +1918,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "prio-prioritering:metod",
-      "namn": "Prioriteringsregeln · Metod",
+      "namn": "Räkna steg för steg",
       "parent": "prio-prioritering",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -1946,7 +1946,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "prio-lagar:rakna",
-      "namn": "Räknelagar · Räkna",
+      "namn": "Använd räknelagarna",
       "parent": "prio-lagar",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -2435,7 +2435,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "pot-multdiv:rakna",
-      "namn": "Potenslagar (samma bas) · Räkna",
+      "namn": "Multiplicera och dividera potenser",
       "parent": "pot-multdiv",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -2463,7 +2463,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "pot-multdiv:resonera",
-      "namn": "Potenslagar (samma bas) · Resonera",
+      "namn": "Tolka potenslagarna",
       "parent": "pot-multdiv",
       "niva": "lovnod",
       "arskursRelevans": {
@@ -2519,7 +2519,7 @@ window.K1_TAXONOMI = {
     },
     {
       "id": "tio-rakna:rakna",
-      "namn": "Tiopotenser · Räkna",
+      "namn": "Multiplicera och dividera tiopotenser",
       "parent": "tio-rakna",
       "niva": "lovnod",
       "arskursRelevans": {
