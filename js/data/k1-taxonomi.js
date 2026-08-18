@@ -232,7 +232,6 @@ window.K1_TAXONOMI = {
         "grupp": "Siffror och tal",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Siffror och tal (udda/jämnt · antal · störst/minst)",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -255,7 +254,6 @@ window.K1_TAXONOMI = {
         "grupp": "Siffror och tal",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Talnamn ↔ siffror",
         "etikett": "begrepp",
         "formagaKey": "namn",
         "niva": null
@@ -292,7 +290,6 @@ window.K1_TAXONOMI = {
         "grupp": "Positionssystemet",
         "gruppordning": 1,
         "radordning": 0,
-        "titel": "Platsvärde & bygga tal",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": null
@@ -315,7 +312,6 @@ window.K1_TAXONOMI = {
         "grupp": "Positionssystemet",
         "gruppordning": 1,
         "radordning": 1,
-        "titel": "Tallinje, talföljder & storleksordna",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -338,7 +334,6 @@ window.K1_TAXONOMI = {
         "grupp": "Positionssystemet",
         "gruppordning": 1,
         "radordning": 2,
-        "titel": "Jämföra & mittemellan",
         "etikett": "resonera",
         "formagaKey": null,
         "niva": null
@@ -361,7 +356,6 @@ window.K1_TAXONOMI = {
         "grupp": "Positionssystemet",
         "gruppordning": 1,
         "radordning": 3,
-        "titel": "Enhetsbyten (tiotal, tiondelar …)",
         "etikett": "begrepp",
         "formagaKey": "enhet",
         "niva": null
@@ -398,7 +392,6 @@ window.K1_TAXONOMI = {
         "grupp": "Utvecklad form",
         "gruppordning": 2,
         "radordning": 0,
-        "titel": "Skriv i utvecklad form",
         "etikett": "metod",
         "formagaKey": null,
         "niva": null
@@ -421,7 +414,6 @@ window.K1_TAXONOMI = {
         "grupp": "Utvecklad form",
         "gruppordning": 2,
         "radordning": 1,
-        "titel": "Vilket tal står på utvecklad form?",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -458,7 +450,6 @@ window.K1_TAXONOMI = {
         "grupp": "Primtal & faktorträd",
         "gruppordning": 4,
         "radordning": 0,
-        "titel": "Primtal eller sammansatt?",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": null
@@ -481,7 +472,6 @@ window.K1_TAXONOMI = {
         "grupp": "Primtal & faktorträd",
         "gruppordning": 4,
         "radordning": 1,
-        "titel": "Faktorisera (2–4 faktorer)",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -504,7 +494,6 @@ window.K1_TAXONOMI = {
         "grupp": "Primtal & faktorträd",
         "gruppordning": 4,
         "radordning": 2,
-        "titel": "Bygg faktorträd",
         "etikett": "metod",
         "formagaKey": null,
         "niva": null
@@ -527,7 +516,6 @@ window.K1_TAXONOMI = {
         "grupp": "Primtal & faktorträd",
         "gruppordning": 4,
         "radordning": 3,
-        "titel": "Skriv hela primtalsfaktoriseringen",
         "etikett": "kommunikation",
         "formagaKey": null,
         "niva": null
@@ -550,7 +538,6 @@ window.K1_TAXONOMI = {
         "grupp": "Primtal & faktorträd",
         "gruppordning": 4,
         "radordning": 4,
-        "titel": "Förklara varför ett tal är primtal",
         "etikett": "resonera",
         "formagaKey": null,
         "niva": null
@@ -573,7 +560,6 @@ window.K1_TAXONOMI = {
         "grupp": "Primtal & faktorträd",
         "gruppordning": 4,
         "radordning": 5,
-        "titel": "Talgåtor: vilket tal är jag?",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -596,7 +582,6 @@ window.K1_TAXONOMI = {
         "grupp": "Primtal & faktorträd",
         "gruppordning": 4,
         "radordning": 6,
-        "titel": "Faktorisering baklänges",
         "etikett": "räkna",
         "formagaKey": "baklanges",
         "niva": null
@@ -633,7 +618,6 @@ window.K1_TAXONOMI = {
         "grupp": "Delbarhet",
         "gruppordning": 5,
         "radordning": 0,
-        "titel": "Vad är delbarhet?",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": null
@@ -656,7 +640,6 @@ window.K1_TAXONOMI = {
         "grupp": "Delbarhet",
         "gruppordning": 5,
         "radordning": 1,
-        "titel": "Avgör delbarhet snabbt",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -679,7 +662,6 @@ window.K1_TAXONOMI = {
         "grupp": "Delbarhet",
         "gruppordning": 5,
         "radordning": 2,
-        "titel": "Konstruera tal (delbarhet)",
         "etikett": "räkna",
         "formagaKey": "konstruera",
         "niva": null
@@ -716,7 +698,6 @@ window.K1_TAXONOMI = {
         "grupp": "Räkneträning",
         "gruppordning": 3,
         "radordning": 0,
-        "titel": "Öka & minska (tiondel · hundradel · tusendel)",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -753,7 +734,6 @@ window.K1_TAXONOMI = {
         "grupp": "Addition",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Term och summa",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -804,7 +784,6 @@ window.K1_TAXONOMI = {
         "grupp": "Addition",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Huvudräkning",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -856,7 +835,6 @@ window.K1_TAXONOMI = {
         "grupp": "Addition",
         "gruppordning": 0,
         "radordning": 2,
-        "titel": "Uppställning",
         "etikett": "metod",
         "formagaKey": "uppstallning",
         "niva": null
@@ -905,7 +883,6 @@ window.K1_TAXONOMI = {
         "grupp": "Addition",
         "gruppordning": 0,
         "radordning": 3,
-        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -942,7 +919,6 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 0,
-        "titel": "Term och differens",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -993,7 +969,6 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 1,
-        "titel": "Huvudräkning",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -1045,7 +1020,6 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 2,
-        "titel": "Uppställning",
         "etikett": "metod",
         "formagaKey": "uppstallning",
         "niva": null
@@ -1068,7 +1042,6 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 2.1,
-        "titel": "Öka och minska lika",
         "etikett": "metod",
         "formagaKey": "okaminska",
         "niva": null
@@ -1091,7 +1064,6 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 2.2,
-        "titel": "Addition bakifrån",
         "etikett": "metod",
         "formagaKey": "bakifran",
         "niva": null
@@ -1128,7 +1100,6 @@ window.K1_TAXONOMI = {
         "grupp": "Subtraktion",
         "gruppordning": 1,
         "radordning": 3,
-        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -1165,7 +1136,6 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation",
         "gruppordning": 2,
         "radordning": 0,
-        "titel": "Faktor, produkt och primtal",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -1230,7 +1200,6 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation",
         "gruppordning": 2,
         "radordning": 1,
-        "titel": "Multiplikationstabellen",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -1282,7 +1251,6 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation",
         "gruppordning": 2,
         "radordning": 2,
-        "titel": "Uppställning",
         "etikett": "metod",
         "formagaKey": "uppstallning",
         "niva": null
@@ -1396,7 +1364,6 @@ window.K1_TAXONOMI = {
         "grupp": "Räkna med 10, 100 och 1000",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Multiplikation med 10, 100 och 1000",
         "etikett": "räkna",
         "formagaKey": "pow10",
         "niva": null
@@ -1421,7 +1388,6 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation med stora och små tal",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Stora tal",
         "etikett": "räkna",
         "formagaKey": "stora",
         "niva": null
@@ -1446,7 +1412,6 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation med stora och små tal",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Små tal",
         "etikett": "räkna",
         "formagaKey": "sma",
         "niva": null
@@ -1471,7 +1436,6 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation med stora och små tal",
         "gruppordning": 0,
         "radordning": 2,
-        "titel": "Stora och små tal",
         "etikett": "räkna",
         "formagaKey": "storasma",
         "niva": null
@@ -1508,7 +1472,6 @@ window.K1_TAXONOMI = {
         "grupp": "Multiplikation",
         "gruppordning": 2,
         "radordning": 4,
-        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -1545,7 +1508,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 0,
-        "titel": "Täljare, nämnare och kvot",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": 2
@@ -1596,7 +1558,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 1,
-        "titel": "Divisionstabellen",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -1648,7 +1609,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 2,
-        "titel": "Kort division",
         "etikett": "metod",
         "formagaKey": "kort",
         "niva": null
@@ -1671,7 +1631,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 2.1,
-        "titel": "Lång division",
         "etikett": "metod",
         "formagaKey": "lang",
         "niva": null
@@ -1725,7 +1684,6 @@ window.K1_TAXONOMI = {
         "grupp": "Räkna med 10, 100 och 1000",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Division med 10, 100 och 1000",
         "etikett": "räkna",
         "formagaKey": "pow10",
         "niva": null
@@ -1749,7 +1707,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division med stora och små tal",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Stora tal",
         "etikett": "räkna",
         "formagaKey": "stora",
         "niva": null
@@ -1773,7 +1730,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division med stora och små tal",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Stora och små tal",
         "etikett": "räkna",
         "formagaKey": "storasma",
         "niva": null
@@ -1798,7 +1754,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division med stora och små tal",
         "gruppordning": 0,
         "radordning": 2,
-        "titel": "Små tal – förlängning",
         "etikett": "räkna",
         "formagaKey": "sma",
         "niva": null
@@ -1835,7 +1790,6 @@ window.K1_TAXONOMI = {
         "grupp": "Division",
         "gruppordning": 3,
         "radordning": 4,
-        "titel": "Lästal",
         "etikett": "problemlösning",
         "formagaKey": "problem",
         "niva": null
@@ -1872,7 +1826,6 @@ window.K1_TAXONOMI = {
         "grupp": "Prioriteringsregeln",
         "gruppordning": 4,
         "radordning": 0,
-        "titel": "Samband mellan räknesätt",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -1910,7 +1863,6 @@ window.K1_TAXONOMI = {
         "grupp": "Prioriteringsregeln",
         "gruppordning": 4,
         "radordning": 1,
-        "titel": "Prioriteringsregeln",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -1976,7 +1928,6 @@ window.K1_TAXONOMI = {
         "grupp": "Prioriteringsregeln",
         "gruppordning": 4,
         "radordning": 2,
-        "titel": "Kommutativa lagen",
         "etikett": "räkna",
         "formagaKey": "kommutativa",
         "niva": null
@@ -1999,7 +1950,6 @@ window.K1_TAXONOMI = {
         "grupp": "Prioriteringsregeln",
         "gruppordning": 4,
         "radordning": 2.1,
-        "titel": "Associativa lagen",
         "etikett": "räkna",
         "formagaKey": "associativa",
         "niva": null
@@ -2022,7 +1972,6 @@ window.K1_TAXONOMI = {
         "grupp": "Prioriteringsregeln",
         "gruppordning": 4,
         "radordning": 2.2,
-        "titel": "Distributiva lagen",
         "etikett": "räkna",
         "formagaKey": "distributiva",
         "niva": null
@@ -2059,7 +2008,6 @@ window.K1_TAXONOMI = {
         "grupp": "Negativa tal",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Begrepp och förståelse",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": null
@@ -2097,7 +2045,6 @@ window.K1_TAXONOMI = {
         "grupp": "Negativa tal",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Räkna: addition och subtraktion",
         "etikett": "räkna",
         "formagaKey": "addsub",
         "niva": null
@@ -2121,7 +2068,6 @@ window.K1_TAXONOMI = {
         "grupp": "Negativa tal",
         "gruppordning": 0,
         "radordning": 2,
-        "titel": "Räkna: multiplikation och division",
         "etikett": "räkna",
         "formagaKey": "multdiv",
         "niva": null
@@ -2158,7 +2104,6 @@ window.K1_TAXONOMI = {
         "grupp": "Bråkform och decimalform",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Bråk → decimal",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -2195,7 +2140,6 @@ window.K1_TAXONOMI = {
         "grupp": "Bråkform och decimalform",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Decimal → bråk",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -2232,7 +2176,6 @@ window.K1_TAXONOMI = {
         "grupp": "Bråkform och decimalform",
         "gruppordning": 0,
         "radordning": 2,
-        "titel": "Tiondelar & hundradelar",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -2269,7 +2212,6 @@ window.K1_TAXONOMI = {
         "grupp": "Bråkform och decimalform",
         "gruppordning": 0,
         "radordning": 3,
-        "titel": "Förläng till hundradelar",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null
@@ -2306,7 +2248,6 @@ window.K1_TAXONOMI = {
         "grupp": "Avrundning och överslag",
         "gruppordning": 0,
         "radordning": 0,
-        "titel": "Avrundning",
         "etikett": "begrepp",
         "formagaKey": null,
         "niva": null
@@ -2343,7 +2284,6 @@ window.K1_TAXONOMI = {
         "grupp": "Avrundning och överslag",
         "gruppordning": 0,
         "radordning": 1,
-        "titel": "Överslagsräkning",
         "etikett": "räkna",
         "formagaKey": "rakna",
         "niva": null

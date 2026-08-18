@@ -44,7 +44,7 @@ window.K2_TAXONOMI = {
       "id": "andel-figur:rakna", "namn": "Andel av en figur", "parent": "andel-figur", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "andelFigurEngine",
       "begrepp": "Skriv andelen färgad del av figuren som bråk.",
-      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 0, "titel": "Andel av en figur", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "andel-tallinje", "namn": "Bråk på tallinje", "parent": "brak-andel", "niva": "deldoman",
@@ -56,7 +56,7 @@ window.K2_TAXONOMI = {
       "id": "andel-tallinje:begrepp", "namn": "Bråk på tallinje", "parent": "andel-tallinje", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "BEGREPP", "generator": "tallinjeEngine",
       "begrepp": "Läs av bråket som pilen/punkten pekar på.",
-      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 1, "titel": "Bråk på tallinje", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 1, "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
     {
       "id": "andel-antal", "namn": "Andel av ett antal", "parent": "brak-andel", "niva": "deldoman",
@@ -68,7 +68,7 @@ window.K2_TAXONOMI = {
       "id": "andel-antal:rakna", "namn": "Andel av ett antal", "parent": "andel-antal", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "antalEngine",
       "begrepp": "Skriv andelen (t.ex. blå kulor av alla) som bråk.",
-      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 2, "titel": "Andel av ett antal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 2, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "andel-hela", "namn": "Skriva hela tal i bråkform", "parent": "brak-andel", "niva": "deldoman",
@@ -92,7 +92,7 @@ window.K2_TAXONOMI = {
       "id": "andel-kontra:resonera", "namn": "Andel kontra antal", "parent": "andel-kontra", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "kontraEngine",
       "begrepp": "Avgör vem som har flest respektive störst andel – och varför de kan skilja sig.",
-      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 4, "titel": "Andel kontra antal", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
+      "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 4, "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
 
     /* ─────────────── Del 2 · Byta form (öppen) ─────────────── */
@@ -149,7 +149,7 @@ window.K2_TAXONOMI = {
       "id": "brak-forlanga:rakna", "namn": "Förlänga bråk", "parent": "brak-forlanga", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "forlangaEngine",
       "begrepp": "Förläng täljare och nämnare med samma tal till given nämnare.",
-      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 0, "titel": "Förlänga bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-forkorta", "namn": "Förkorta bråk", "parent": "brak-likv", "niva": "deldoman",
@@ -161,7 +161,7 @@ window.K2_TAXONOMI = {
       "id": "brak-forkorta:rakna", "namn": "Förkorta bråk", "parent": "brak-forkorta", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "forkortaEngine",
       "begrepp": "Dela täljare och nämnare med samma tal till enklaste form.",
-      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 1, "titel": "Förkorta bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-likformig", "namn": "Likformiga bråk", "parent": "brak-likv", "niva": "deldoman",
@@ -173,7 +173,7 @@ window.K2_TAXONOMI = {
       "id": "brak-likformig:rakna", "namn": "Likformiga bråk", "parent": "brak-likformig", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "likformigEngine",
       "begrepp": "Ge flera bråk som är lika med ett givet bråk genom förlängning (villkors-validering).",
-      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 2, "titel": "Likformiga bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 2, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 4 · Jämföra bråk (öppen; Öva = exakt-författat blad) ───────────────
@@ -265,7 +265,7 @@ window.K2_TAXONOMI = {
       "id": "brak-add:rakna", "namn": "Addition med bråk", "parent": "brak-add", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut summan; visa mellanledet (förläng till gemensam nämnare).",
-      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0, "titel": "Addition med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-sub", "namn": "Subtraktion med bråk", "parent": "brak-as", "niva": "deldoman",
@@ -277,13 +277,13 @@ window.K2_TAXONOMI = {
       "id": "brak-sub:heltal", "namn": "Heltal minus bråk", "parent": "brak-sub", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut heltal minus bråk direkt med taluppfattning (1 − 3/8 = 5/8) — se svaret, utan förlängning eller lån. Egen metod-nod (spec-kontroll ④) så den inte grönar den oliknämniga algoritmen.",
-      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0.5, "titel": "Heltal minus bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 0.5, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-sub:rakna", "namn": "Subtraktion med bråk", "parent": "brak-sub", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "raknaEngine",
       "begrepp": "Räkna ut differensen; visa mellanledet (förläng till gemensam nämnare).",
-      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 1, "titel": "Subtraktion med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-lana", "namn": "Låna i blandad form", "parent": "brak-as", "niva": "deldoman",
@@ -295,7 +295,7 @@ window.K2_TAXONOMI = {
       "id": "brak-lana:rakna", "namn": "Låna i blandad form", "parent": "brak-lana", "niva": "lovnod",
       "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "lanaEngine",
       "begrepp": "Räkna ut differensen i blandad form med lån från heltalet; flera giltiga vägar (låna eller via oäkta bråk). Öva-bladet rättar equality-baserat.",
-      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 3, "titel": "Låna i blandad form", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d5", "grupp": "Addition och subtraktion", "gruppordning": 0, "radordning": 3, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 6 · Multiplikation med bråk (öppen; ram-drill byggs i wiring) ─────────────── */
@@ -315,7 +315,7 @@ window.K2_TAXONOMI = {
       "id": "brak-mult-rakna:rakna", "namn": "Multiplikation med bråk", "parent": "brak-mult-rakna", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "multBrakEngine",
       "begrepp": "Multiplicera bråk · bråk, heltal · bråk och blandad form; svar i enklaste/blandad form. Stora tal med förkortnings-mellanled.",
-      "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 0, "titel": "Multiplikation med bråk", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 0, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-mult-forkorta", "namn": "Förkorta innan multiplikation", "parent": "brak-mult", "niva": "deldoman",
@@ -327,7 +327,7 @@ window.K2_TAXONOMI = {
       "id": "brak-mult-forkorta:rakna", "namn": "Förkorta innan multiplikation", "parent": "brak-mult-forkorta", "niva": "lovnod",
       "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "multForkortaEngine",
       "begrepp": "Korsförkorta täljare och nämnare (i valfri ordning) innan multiplikation; svar i enklaste/blandad form. Öva-bladet rättar equality-baserat (flera giltiga vägar).",
-      "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 1, "titel": "Förkorta innan multiplikation", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d6", "grupp": "Multiplikation med bråk", "gruppordning": 0, "radordning": 1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Del 7 · Division med bråk (öppen; FÖRDJUPNING i åk7) ───────────────
@@ -403,7 +403,7 @@ window.K2_TAXONOMI = {
       "id": "brak-div-reciprok:rakna", "namn": "Skriva reciprok", "parent": "brak-div-reciprok", "niva": "lovnod",
       "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "reciprokEngine",
       "begrepp": "Skriv reciproken till ett bråk eller algebraiskt uttryck genom att byta plats på täljare och nämnare.",
-      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 4, "titel": "Skriva reciprok", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 4, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ─────────────── Fördjupnings-strand · bråk och variabler (åk7-fördjupning) ───────────────
