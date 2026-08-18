@@ -913,9 +913,24 @@ function generateTest(config){
     }
   }
 
-  // Numrera
-  questions.forEach((q, i) => q.number = i + 1);
-  return questions;
+  // FAS 2 — slå ihop upprepade uppgiftstyper: en typ (kind+generator+omrade+title) förekommer HÖGST
+  //   EN gång, med sina deluppgifter sammanslagna (två frågor à två → en fråga à fyra). Bevarar
+  //   deluppgifterna (prompt/facit/nod) exakt — bara grupperingen ändras. Ordning = första förekomsten.
+  const _mByTyp = {}, _merged = [];
+  questions.forEach(function(q){
+    const key = q.kind + '|' + q.generator + '|' + (q.omrade || '') + '|' + q.title;
+    if(_mByTyp[key]){ _mByTyp[key].subs = _mByTyp[key].subs.concat(q.subs); }
+    else { _mByTyp[key] = q; _merged.push(q); }
+  });
+
+  // Numrera frågorna och OM-etikettera deluppgifterna löpande (a, b, c … per fråga). Sammanslagningen
+  // konkatenerar subs som byggdes som skilda frågor, så deras label måste sättas om — annars blir det
+  // "a) b) a) b)". Bara subs som redan hade en etikett får en ny (rör inte de utan).
+  _merged.forEach(function(q, i){
+    q.number = i + 1;
+    q.subs.forEach(function(s, si){ if(s.label) s.label = (si < 26 ? String.fromCharCode(97 + si) : String(si + 1)) + ')'; });
+  });
+  return _merged;
 }
 
 function renderTestConfig(){
@@ -1184,108 +1199,53 @@ function renderTestTake(){
 
   const body = document.getElementById('test-take-body');
 
-  // Visa översikt
-  if(t.currentIdx === -1){
-    body.innerHTML = `
-      <div class="test-overview">
-        <h2>Ditt test – ${t.questions.length} frågor</h2>
-        <p class="ov-desc">Här är översikten. När du börjar tar du en fråga i taget. Du behöver inte svara på alla – det går bra att hoppa över.</p>
-        <div class="test-question-list">
-          ${t.questions.map(q => `
-            <div class="test-ql-item">
-              <div class="test-ql-num">${q.number}</div>
-              <div class="test-ql-text">
-                ${q.title}
-                ${q.kind === 'problem' ? '<span class="tag problem">Problem</span>' : ''}
-              </div>
-            </div>
-          `).join('')}
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-          <button class="btn primary" id="start-test">Börja testet -></button>
-          <button class="btn" onclick="window.print()">Skriv ut</button>
-          ${t.fardigt ? '' : '<button class="btn subtle" onclick="navTo(\'test-config\')">Ändra inställningar</button>'}
-        </div>
-      </div>
-    `;
-    document.getElementById('start-test').onclick = () => {
-      t.currentIdx = 0;
-      renderTestTake();
-    };
-    showView('test-take');
-    return;
-  }
-
-  // Visa fråga
-  const q = t.questions[t.currentIdx];
-  const progressPct = ((t.currentIdx) / t.questions.length) * 100;
-
+  // HELA TESTET som ETT arbetsblad — alla frågor på samma sida, i ordning. Ingen översikt, ingen
+  // steg-navigering, ingen progressrad. Eleven hoppar genom att lämna en ruta tom (som på papper).
   body.innerHTML = `
-    <div class="test-progress-bar">
-      <span class="tp-label">Fråga <span class="tp-num">${q.number}</span> av <span class="tp-num">${t.questions.length}</span></span>
-      <div class="test-progress-fill"><div style="width:${progressPct}%"></div></div>
-      <span class="tp-label">${Math.round(progressPct)}%</span>
-    </div>
-
-    <div class="test-take-question">
-      <div class="test-take-num">Fråga ${q.number}${q.kind==='problem'?' · Problemlösning':''}</div>
-      <h2 class="test-take-title">${q.title}</h2>
-      <div class="test-sub-list">
-        ${q.subs.map((s,i) => renderSubInput(q.number, i, s)).join('')}
+    <div class="test-worksheet">
+      <div class="test-ws-head">
+        <h2 class="test-ws-title">Ditt test – ${t.questions.length} ${t.questions.length === 1 ? 'fråga' : 'frågor'}</h2>
+        <p class="test-ws-desc">Räkna igenom hela testet. Du behöver inte svara på alla – lämna en ruta tom för att hoppa över, precis som på ett papper.</p>
       </div>
-      <div class="test-take-actions">
-        <div class="left-actions">
-          <button class="btn subtle" id="prev-q" ${t.currentIdx===0?'disabled':''}><- Föregående</button>
-        </div>
-        <div class="right-actions">
-          <button class="btn" id="skip-q">Hoppa över</button>
-          <button class="btn primary" id="next-q">${t.currentIdx === t.questions.length-1 ? 'Klar – se resultat' : 'Nästa fråga ->'}</button>
-        </div>
+      <div class="test-ws-questions">
+        ${t.questions.map(q => `
+          <div class="test-take-question" data-qnum="${q.number}">
+            <div class="test-take-num">Fråga ${q.number}${q.kind==='problem'?' · Problemlösning':''}</div>
+            <h3 class="test-take-title">${q.title}</h3>
+            <div class="test-sub-list">
+              ${q.subs.map((s,i) => renderSubInput(q.number, i, s)).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="test-ws-actions">
+        <button class="btn primary" id="finish-test">Klar – se resultat</button>
+        <button class="btn" id="print-test">Skriv ut</button>
+        ${t.fardigt ? '' : '<button class="btn subtle" id="change-cfg">Ändra inställningar</button>'}
       </div>
     </div>
   `;
 
-  // Restore tidigare svar om finns
-  q.subs.forEach((s,i) => {
+  // Återställ tidigare svar (alla frågor) om eleven kommer tillbaka till testet
+  t.questions.forEach(q => q.subs.forEach((s,i) => {
     const key = `q${q.number}-s${i}`;
     if(t.answers[key] !== undefined) restoreSubAnswer(q.number, i, s, t.answers[key]);
-  });
+  }));
 
-  document.getElementById('prev-q').onclick = () => {
-    saveCurrentAnswers();
-    t.currentIdx--;
-    renderTestTake();
-  };
-  document.getElementById('skip-q').onclick = () => {
-    // skip = lämna svar tomma
-    q.subs.forEach((s,i) => {
-      const key = `q${q.number}-s${i}`;
-      if(t.answers[key] === undefined) t.answers[key] = null; // explicit skipped
-    });
-    advance();
-  };
-  document.getElementById('next-q').onclick = () => {
-    saveCurrentAnswers();
-    advance();
-  };
-
-  function advance(){
-    if(t.currentIdx === t.questions.length - 1){
-      navTo('test-result');
-    } else {
-      t.currentIdx++;
-      renderTestTake();
-    }
-  }
-
-  function saveCurrentAnswers(){
-    q.subs.forEach((s,i) => {
+  function saveAllAnswers(){
+    t.questions.forEach(q => q.subs.forEach((s,i) => {
       const key = `q${q.number}-s${i}`;
       t.answers[key] = readSubAnswer(q.number, i, s);
-    });
+    }));
   }
 
-  // Keypad (AK8_UI) — bara åttan (config.rikTestUX + AK8_UI laddad). k1/k2 → plain input, byte-identiskt.
+  document.getElementById('finish-test').onclick = () => { saveAllAnswers(); navTo('test-result'); };
+  document.getElementById('print-test').onclick = () => { saveAllAnswers(); window.print(); };
+  const _chg = document.getElementById('change-cfg');
+  if(_chg) _chg.onclick = () => { saveAllAnswers(); navTo('test-config'); };
+
+  // Keypad (AK8_UI) — bara åttan (config.rikTestUX + AK8_UI laddad). EN keypad för hela sidan;
+  // bindTestKeypad följer den fokuserade rutan. k1/k2 → vanliga input-fält.
   if(config.rikTestUX && window.AK8_UI){
     const kpWrap = document.createElement('div');
     kpWrap.innerHTML = AK8_UI.keypadHTML({ builders:false, ops:[',', '·', '/', '−'] });
