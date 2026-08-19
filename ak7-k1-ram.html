@@ -4482,19 +4482,10 @@ const TEST_GENERATORS = {
       const cent=rInt(105,2995), n=cent/100;
       if(rInt(1,2)===1){ const a=Math.round(cent/10)/10; return {key:'d1-'+cent, prompt:'Avrunda '+komma(n)+' till en decimal (tiondel).', ans:a, expl:komma(n)+' ≈ '+komma(a)+'.'}; }
       const a=Math.round(cent/100); return {key:'d0-'+cent, prompt:'Avrunda '+komma(n)+' till närmaste heltal.', ans:a, expl:komma(n)+' ≈ '+a+'.'};
-    }),
-    // avrundning – begrepp: avrundningsregeln (flerval)
-    ProvbyggarMotor.gen.flerval('avr-begr','Avrundning: begrepp','avr-avrundning', function(){
-      const bank=[
-        {p:'Om siffran efter avrundningsplatsen är 5 eller mer – hur avrundar man?', o:['Uppåt','Nedåt','Ingen ändring','Bort'], a:'Uppåt'},
-        {p:'Om siffran efter avrundningsplatsen är 4 eller mindre – hur avrundar man?', o:['Nedåt','Uppåt','Alltid uppåt','Till noll'], a:'Nedåt'},
-        {p:'Vilken siffra avgör om 347 avrundas uppåt eller nedåt till närmaste tiotal?', o:['7','4','3','0'], a:'7'},
-        {p:'Vad blir 68 avrundat till närmaste tiotal?', o:['70','60','68','80'], a:'70'},
-        {p:'Vad blir 4,5 avrundat till närmaste heltal?', o:['5','4','4,5','6'], a:'5'}
-      ];
-      const b=randPick(bank); return {key:b.p, prompt:b.p, options:shuffle(b.o.slice()), answer:b.a};
     })
   ]},
+  // (avr-begr borttagen: flerval-regelfrågan övas varken i blad eller drill; noden avr-avrundning:begrepp
+  //  täcks ändå av avr-rakna. Beslut Joachim.)
   'avr-overslag': { snabb: [
     // överslagsräkning – flerval "vilket ligger närmast?" (inget enda exakt svar; se rapport)
     // Eleven SKRIVER överslaget (avrundade operander, sedan uträknat), som öva d10 "Beräkna med
@@ -4608,7 +4599,6 @@ const GEN_NOD = {
   'neg-multdiv':    'neg-rakna:multdiv',
   // slice 6 – Del 8 avrundning (bokens 2 karta-noder; avrundning-räkning + -begrepp delar nod)
   'avr-rakna':      'avr-avrundning:begrepp',
-  'avr-begr':       'avr-avrundning:begrepp',
   'avr-overslag':   'avr-overslag:rakna',
   // slice 7 – räknelagarna, en generator per lag → sin karta-synliga bok-nod (d2)
   'lag-komm':       'prio-lagar:kommutativa',
