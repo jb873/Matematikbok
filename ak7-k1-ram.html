@@ -3708,29 +3708,33 @@ const TEST_GENERATORS = {
   primtal: {
     snabb: [
       // Generator 1: Är talet primtal eller sammansatt?
+      // Markera primtalen / de sammansatta talen (markera-flera), som öva-bladet "Klicka på dem":
+      // sex tal, 2–4 rätta (varierar). Frågar omväxlande efter primtal eller sammansatta.
       function genPrimtalBinary(seen){
-        const allTal = [];
-        for(let n=4;n<=60;n++) allTal.push(n);
-        const candidates = allTal.filter(n => !seen.has(`pb-${n}`));
-        if(candidates.length < 3) return null;
-        const picked = shuffle(candidates).slice(0,4);
-        picked.forEach(n => seen.add(`pb-${n}`));
-        return {
-          generator: 'primtal-binary',
-          title: 'Är talet ett primtal eller ett sammansatt tal?',
-          omrade: 'primtal',
-          subs: picked.map((n,i) => ({
-            label: String.fromCharCode(97+i) + ')',
-            type: 'binary',
-            q: `${n}`,
-            prompt: `Är ${n} ett primtal eller sammansatt?`,
-            options: ['Primtal', 'Sammansatt'],
-            answer: isPrime(n) ? 'Primtal' : 'Sammansatt',
-            explanation: isPrime(n)
-              ? `${n} är ett primtal (delbart bara med 1 och ${n}).`
-              : `${n} = ${primeFactorize(n).join(' · ')}, alltså sammansatt.`
-          }))
-        };
+        const primes = [], comps = [];
+        for(let n=4;n<=60;n++){ (isPrime(n)?primes:comps).push(n); }
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 80){
+          tries++;
+          const fragaPrim = randPick([true,false]);
+          const antalRatta = rInt(2,4);
+          const rattPool = fragaPrim ? primes : comps, felPool = fragaPrim ? comps : primes;
+          if(rattPool.length < antalRatta || felPool.length < 6-antalRatta) continue;
+          const tal = shuffle(shuffle(rattPool).slice(0,antalRatta).concat(shuffle(felPool).slice(0,6-antalRatta)));
+          const key = 'pb-'+(fragaPrim?'p':'s')+'-'+tal.slice().sort((a,b)=>a-b).join(',');
+          if(seen.has(key)) continue;
+          seen.add(key);
+          const korrekt = tal.filter(n => fragaPrim ? isPrime(n) : !isPrime(n));
+          subs.push({
+            label: String.fromCharCode(97+subs.length) + ')',
+            type: 'markera',
+            prompt: fragaPrim ? 'Markera primtalen.' : 'Markera de sammansatta talen.',
+            options: tal.map(String),
+            correct: korrekt.map(String),
+            explanation: (fragaPrim ? 'Primtal: ' : 'Sammansatta: ') + korrekt.join(', ') + '.'
+          });
+        }
+        return subs.length ? {generator:'primtal-binary', title:'Vilka tal är primtal eller sammansatta?', omrade:'primtal', subs:subs} : null;
       },
 
       // Generator 2: Dela upp i termer
@@ -3907,21 +3911,29 @@ const TEST_GENERATORS = {
   siffror: {
     snabb: [
       // siffror:begrepp — udda/jämnt (flerval via binary, samma format som drillen)
+      // Markera de jämna / udda talen (markera-flera), som öva d1 EGEN "Vilka tal är jämna?":
+      // sex tal, 2–4 rätta (varierar). Frågar omväxlande efter jämna eller udda.
       function genUddaJamn(seen){
-        const pool = []; for(let n=11;n<=999;n++) pool.push(n);
-        const avail = pool.filter(n => !seen.has('uj-'+n));
-        if(avail.length < 4) return null;
-        const picked = shuffle(avail).slice(0,4);
-        picked.forEach(n => seen.add('uj-'+n));
-        return {
-          generator: 'udda-jamn', title: 'Är talet udda eller jämnt?', omrade: 'siffror',
-          subs: picked.map((n,i) => ({
-            label: String.fromCharCode(97+i)+')', type: 'binary',
-            q: String(n), prompt: 'Är ' + n + ' udda eller jämnt?',
-            options: ['Udda','Jämnt'], answer: (n%2===0) ? 'Jämnt' : 'Udda',
-            explanation: n + ' slutar på ' + (n%10) + ', en ' + ((n%2===0)?'jämn':'udda') + ' siffra.'
-          }))
-        };
+        const pool = []; for(let n=11;n<=99;n++) pool.push(n);
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 80){
+          tries++;
+          const jamn = randPick([true,false]);
+          const antalRatta = rInt(2,4);
+          const rattPool = pool.filter(n => (n%2===0)===jamn), felPool = pool.filter(n => (n%2===0)!==jamn);
+          const tal = shuffle(shuffle(rattPool).slice(0,antalRatta).concat(shuffle(felPool).slice(0,6-antalRatta)));
+          const key = 'uj-'+(jamn?'j':'u')+'-'+tal.slice().sort((a,b)=>a-b).join(',');
+          if(seen.has(key)) continue;
+          seen.add(key);
+          const korrekt = tal.filter(n => (n%2===0)===jamn);
+          subs.push({
+            label: String.fromCharCode(97+subs.length)+')', type:'markera',
+            prompt: jamn ? 'Markera de jämna talen.' : 'Markera de udda talen.',
+            options: tal.map(String), correct: korrekt.map(String),
+            explanation: (jamn?'Jämna: ':'Udda: ') + korrekt.join(', ') + '.'
+          });
+        }
+        return subs.length ? {generator:'udda-jamn', title:'Vilka tal är udda eller jämna?', omrade:'siffror', subs:subs} : null;
       }
     ]
   },
@@ -4017,9 +4029,10 @@ const TEST_GENERATORS = {
           subs: picked.map((pr,i) => {
             const a = pr[0], b = pr[1], stor = Math.max(a,b);
             return {
-              label: String.fromCharCode(97+i)+')', type: 'binary',
-              q: komma(a) + ' eller ' + komma(b), prompt: 'Vilket tal är störst: ' + komma(a) + ' eller ' + komma(b) + '?',
-              options: shuffle([komma(a), komma(b)]), answer: komma(stor),
+              // Eleven SKRIVER det större talet (ej flerval), som öva d10 "Skriv det större talet".
+              label: String.fromCharCode(97+i)+')', type: 'numeric',
+              prompt: 'Vilket tal är störst, ' + komma(a) + ' eller ' + komma(b) + '? Skriv det.',
+              answer: stor,
               explanation: komma(stor) + ' är störst (jämför tiondelar, sedan hundradelar).'
             };
           })
@@ -4121,11 +4134,21 @@ const TEST_GENERATORS = {
       const a=rInt(13,89), b=rInt(13,89); return {key:a+'+'+b, prompt:'Räkna ut:   '+a+' + '+b, ans:a+b, expl:a+' + '+b+' = '+(a+b)};
     }),
     // ÖVA-TÄCKNING d2: två tal ur summa+differens (numeric)
-    ProvbyggarMotor.gen.numeric('add-tvatal','Två tal ur summa och differens','add-rakna', function(){
-      var S, D; do { S=rInt(8,40); D=rInt(2,S-2); } while((S+D)%2!==0);
-      var storre=(S+D)/2, mindre=(S-D)/2, vill=randPick(['större','mindre']), ans=vill==='större'?storre:mindre;
-      return {key:'tv'+S+'_'+D+vill, prompt:'Två tal har summan '+S+' och differensen '+D+'. Vilket är det '+vill+' talet?', ans:ans, expl:'Större = '+storre+', mindre = '+mindre+'.'};
-    }),
+    // Eleven skriver BÅDA talen (två rutor, valfri ordning), som öva d2 "Vilka är talen?"
+    function genAddTvatal(seen){
+      var subs=[], tries=0;
+      while(subs.length<3 && tries<50){ tries++;
+        var S, D, g=0; do { S=rInt(8,40); D=rInt(2,S-2); g++; } while((S+D)%2!==0 && g<20);
+        if((S+D)%2!==0) continue;
+        var storre=(S+D)/2, mindre=(S-D)/2, key='tv'+S+'_'+D;
+        if(seen.has(key)) continue; seen.add(key);
+        subs.push({label:String.fromCharCode(97+subs.length)+')', type:'talfoljd', unordered:true,
+          prompt:'Två tal har summan '+S+' och differensen '+D+'. Vilka är talen?',
+          answers:[storre, mindre],
+          explanation:'Talen är '+storre+' och '+mindre+'.'});
+      }
+      return subs.length? {generator:'add-tvatal', title:'Två tal ur summa och differens', omrade:'add-rakna', subs:subs} : null;
+    },
     // ÖVA-TÄCKNING d2: dela upp talet i två termer (sum)
     function genAddTerm(seen){
       var subs=[], tries=0;
@@ -4396,12 +4419,23 @@ const TEST_GENERATORS = {
       const start=rInt(-5,-1), step=rInt(1,3), t0=start, t1=start+step, t2=start+2*step, ans=start+3*step;
       return {key:'tf'+start+'-'+step, prompt:'Vilket tal kommer näst?   '+t0+', '+t1+', '+t2+', ___', ans:ans, expl:'Ökar med '+step+' varje steg → '+ans+'.'};
     }),
-    // ÖVA-TÄCKNING d3: fallande talföljd genom noll (numeric)
-    ProvbyggarMotor.gen.numeric('neg-fallande','Fallande talföljd','neg-begrepp', function(){
+    // ÖVA-TÄCKNING d3: fallande talföljd genom noll — eleven skriver de TVÅ nästkommande talen
+    // (öva d3 "Skriv de två tal som saknas i talföljden").
+    function genNegFallande(seen){
       var M=function(n){return(''+n).replace('-','−');};
-      var step=rInt(2,5), start=rInt(2,9), t0=start, t1=start-step, t2=start-2*step, ans=start-3*step;
-      return {key:'ff'+start+'-'+step, prompt:'Vilket tal kommer näst?   '+M(t0)+', '+M(t1)+', '+M(t2)+', ___', ans:ans, expl:'Minskar med '+step+' varje steg → '+M(ans)+'.'};
-    })
+      var subs=[], tries=0;
+      while(subs.length<3 && tries<50){ tries++;
+        var step=rInt(2,5), start=rInt(2,9);
+        var t=[0,1,2,3,4].map(function(k){return start-k*step;});
+        var key='ff'+start+'-'+step;
+        if(seen.has(key)) continue; seen.add(key);
+        subs.push({label:String.fromCharCode(97+subs.length)+')', type:'talfoljd',
+          prompt:'Vilka två tal kommer näst?   '+M(t[0])+',  '+M(t[1])+',  '+M(t[2])+',  ___  ___',
+          answers:[t[3],t[4]],
+          explanation:'Minskar med '+step+' varje steg → '+M(t[3])+', '+M(t[4])+'.'});
+      }
+      return subs.length? {generator:'neg-fallande', title:'Fallande talföljd', omrade:'neg-begrepp', subs:subs} : null;
+    }
   ]},
   'neg-rakna': { snabb: [
     ProvbyggarMotor.gen.numeric('neg-addsub','Addition och subtraktion med negativa tal','neg-rakna', function(){
@@ -4463,19 +4497,22 @@ const TEST_GENERATORS = {
   ]},
   'avr-overslag': { snabb: [
     // överslagsräkning – flerval "vilket ligger närmast?" (inget enda exakt svar; se rapport)
-    ProvbyggarMotor.gen.flerval('avr-overslag','Överslagsräkning','avr-overslag', function(){
-      let a, b, exakt, sym;
-      if(rInt(1,2)===1){ a=rInt(120,880); b=rInt(120,880); exakt=a+b; sym='+'; }
-      else { a=rInt(18,49); b=rInt(11,29); exakt=a*b; sym='·'; }
-      const steg = exakt>2000 ? 1000 : 100;
-      const narmast = Math.round(exakt/steg)*steg;
-      if(Math.abs(exakt - narmast) > steg*0.35) return null;   // för nära bucket-gränsen → tvetydigt, hoppa
-      const opts=[narmast];
-      [steg, -steg, 2*steg].forEach(function(dd){ if(opts.length<4 && narmast+dd>0 && opts.indexOf(narmast+dd)<0) opts.push(narmast+dd); });
-      if(opts.length<3) return null;
-      return {key:sym+a+'-'+b, prompt:'Uppskatta med överslag: '+a+' '+sym+' '+b+'. Vilket ligger närmast?',
-              options:shuffle(opts).map(String), answer:String(narmast), expl:a+' '+sym+' '+b+' = '+exakt+' ≈ '+narmast+'.'};
-    })
+    // Eleven SKRIVER överslaget (avrundade operander, sedan uträknat), som öva d10 "Beräkna med
+    // överslagsräkning". Avrundar OPERANDERNA till ledande plats (ej det exakta svaret).
+    function genOverslag(seen){
+      var subs=[], tries=0;
+      while(subs.length<3 && tries<60){ tries++;
+        var a,b,sym,ra,rb,overslag;
+        if(rInt(1,2)===1){ a=rInt(120,880); b=rInt(120,880); sym='+'; ra=Math.round(a/100)*100; rb=Math.round(b/100)*100; overslag=ra+rb; }
+        else { a=rInt(18,49); b=rInt(11,29); sym='·'; ra=Math.round(a/10)*10; rb=Math.round(b/10)*10; overslag=ra*rb; }
+        var key='ov'+a+sym+b;
+        if(seen.has(key)) continue; seen.add(key);
+        subs.push({label:String.fromCharCode(97+subs.length)+')', type:'numeric',
+          prompt:'Gör ett överslag:   '+a+' '+sym+' '+b+'  ≈', answer: overslag,
+          explanation:'Avrunda operanderna: '+ra+' '+sym+' '+rb+' = '+overslag+'.'});
+      }
+      return subs.length? {generator:'avr-overslag', title:'Överslagsräkning', omrade:'avr-overslag', subs:subs} : null;
+    }
   ]},
 
   // ═══ SLICE 8: Del 4 – Bråkform och decimalform (bokens 4 karta-noder, alla RAKNA; ingen begrepp-nod) ═══
@@ -4506,11 +4543,21 @@ const TEST_GENERATORS = {
     })
   ]},
   'bd-forlang': { snabb: [
-    ProvbyggarMotor.gen.numeric('bd-forlang','Förläng till hundradelar → decimal','bd-forlang', function(){
-      const namn=randPick([4,5,20,25,50]), talj=rInt(1,namn-1);
-      const hundra=talj*(100/namn), dec=avr(hundra/100,2);
-      return {key:talj+'/'+namn, prompt:'Förläng '+talj+'/'+namn+' till hundradelar och skriv som decimaltal.', ans:dec, expl:talj+'/'+namn+' = '+hundra+'/100 = '+komma(dec)+'.'};
-    })
+    // Eleven visar __/100-steget OCH decimalen (öva d4 "Förläng till hundradelar" = två rutor).
+    function genBdForlang(seen){
+      var subs=[], tries=0;
+      while(subs.length<3 && tries<50){ tries++;
+        var namn=randPick([4,5,20,25,50]), talj=rInt(1,namn-1);
+        var hundra=talj*(100/namn), dec=avr(hundra/100,2), key='fl'+talj+'/'+namn;
+        if(seen.has(key)) continue; seen.add(key);
+        subs.push({label:String.fromCharCode(97+subs.length)+')', type:'mellanled-num',
+          prompt:'Förläng '+talj+'/'+namn+' till hundradelar och skriv som decimaltal:',
+          led:[{fraga:talj+'/'+namn+' i hundradelar, täljaren', varde:hundra}],
+          slutVarde:dec, slutHint:'decimaltal',
+          explanation:talj+'/'+namn+' = '+hundra+'/100 = '+komma(dec)+'.'});
+      }
+      return subs.length? {generator:'bd-forlang', title:'Förläng till hundradelar → decimal', omrade:'bd-forlang', subs:subs} : null;
+    }
   ]}
 };
 

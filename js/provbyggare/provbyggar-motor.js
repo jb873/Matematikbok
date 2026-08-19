@@ -690,11 +690,13 @@ function gradeSub(s, ans){
     return {status: (okLow && okHigh) ? 'correct' : 'wrong', given: String(ans)};
   }
   if(s.type === 'talfoljd'){
-    // Två nästkommande tal — BÅDA måste stämma (exakt värde).
+    // Två tal — BÅDA måste stämma (exakt värde). s.unordered=true → valfri ordning (t.ex. "vilka är talen?").
     if(!Array.isArray(ans)) return {status:'skipped'};
     const num = (x) => parseFloat(String(x).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
-    const v0 = num(ans[0]), v1 = num(ans[1]);
-    const ok = !isNaN(v0) && !isNaN(v1) && Math.abs(v0 - s.answers[0]) < 1e-6 && Math.abs(v1 - s.answers[1]) < 1e-6;
+    const v0 = num(ans[0]), v1 = num(ans[1]), eps = 1e-6;
+    const exakt = Math.abs(v0 - s.answers[0]) < eps && Math.abs(v1 - s.answers[1]) < eps;
+    const bytt = s.unordered && Math.abs(v0 - s.answers[1]) < eps && Math.abs(v1 - s.answers[0]) < eps;
+    const ok = !isNaN(v0) && !isNaN(v1) && (exakt || bytt);
     return {status: ok ? 'correct' : 'wrong', given: (ans[0]||'?') + ', ' + (ans[1]||'?')};
   }
   if(s.type === 'utvform'){
