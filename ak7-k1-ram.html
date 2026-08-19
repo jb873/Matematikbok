@@ -3950,18 +3950,25 @@ const TEST_GENERATORS = {
 
       // position:rakna — fortsätt talföljden (compute-and-check)
       function genTalfoljd(seen){
-        const steg = [1, 0.1, 0.01]; const subs = []; let tries = 0;
-        while(subs.length < 3 && tries < 60){
+        // Hopp av olika slag som KORSAR positionssystemet (bär över ett heltal), alltid decimaltal,
+        // aldrig steg 1 eller 0,01 (för lätt). Eleven skriver de TVÅ nästkommande talen.
+        const steg = [0.2, 0.3, 0.4, 0.5, 0.04, 0.05];
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 80){
           tries++;
           const s = randPick(steg);
-          const t0 = avr(rInt(10,80)*s, 2), t1 = avr(t0+s,2), t2 = avr(t0+2*s,2), ans = avr(t0+3*s,2);
+          const cross = rInt(2,4);          // heltal som talföljden ska korsa
+          const off = rInt(1,3);            // starta 1–3 steg under heltalet → korsning bland de 5 talen
+          const t0 = avr(cross - off*s, 2);
+          const t = [0,1,2,3,4].map(function(k){ return avr(t0 + k*s, 2); });
           const key = 'tf-'+t0+'-'+s;
-          if(seen.has(key)) continue;
+          if(t[0] <= 0 || seen.has(key)) continue;
           seen.add(key);
           subs.push({
-            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
-            prompt: 'Vilket tal kommer näst?   ' + komma(t0) + ',  ' + komma(t1) + ',  ' + komma(t2) + ',  ___', answer: ans,
-            explanation: 'Talföljden ökar med ' + komma(s) + ' varje steg → ' + komma(ans) + '.'
+            label: String.fromCharCode(97+subs.length)+')', type: 'talfoljd',
+            prompt: 'Vilka två tal kommer näst?   ' + komma(t[0]) + ',  ' + komma(t[1]) + ',  ' + komma(t[2]) + ',  ___  ___',
+            answers: [t[3], t[4]],
+            explanation: 'Talföljden ökar med ' + komma(s) + ' varje steg → ' + komma(t[3]) + ', ' + komma(t[4]) + '.'
           });
         }
         return subs.length ? {generator:'talfoljd', title:'Fortsätt talföljden.', omrade:'position', subs:subs} : null;
@@ -4015,7 +4022,7 @@ const TEST_GENERATORS = {
 
   utvecklad: {
     snabb: [
-      // utvecklad:metod — välj rätt utvecklad form (flerval via binary)
+      // utvecklad:metod — eleven SKRIVER talet i utvecklad form själv (ej flerval). Rättas på form.
       function genUtvValj(seen){
         const subs = []; let tries = 0;
         while(subs.length < 3 && tries < 60){
@@ -4025,17 +4032,13 @@ const TEST_GENERATORS = {
           const key = 'uv-'+tal;
           if(seen.has(key)) continue;
           seen.add(key);
-          const ratt = tio+'·10 + '+en+'·1 + '+ti+'·0,1';
-          const fel1 = tio+'·1 + '+en+'·10 + '+ti+'·0,1';
-          const fel2 = tio+'·10 + '+en+'·1 + '+ti+'·1';
           subs.push({
-            label: String.fromCharCode(97+subs.length)+')', type: 'binary',
-            q: komma(tal), prompt: 'Vilken rad visar ' + komma(tal) + ' i utvecklad form?',
-            options: shuffle([ratt, fel1, fel2]), answer: ratt,
-            explanation: komma(tal) + ' = ' + ratt + '.'
+            label: String.fromCharCode(97+subs.length)+')', type: 'utvform',
+            tal: komma(tal),
+            answer: tio+'·10 + '+en+'·1 + '+ti+'·0,1'
           });
         }
-        return subs.length ? {generator:'utvform-valj', title:'Välj rätt utvecklad form.', omrade:'utvecklad', subs:subs} : null;
+        return subs.length ? {generator:'utvform-valj', title:'Skriv i utvecklad form.', omrade:'utvecklad', subs:subs} : null;
       },
 
       // utvecklad:rakna — läs ut talet ur utvecklad form (compute-and-check)

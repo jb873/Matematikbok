@@ -344,6 +344,27 @@ function renderSubInput(qNum, subIdx, s){
         <input type="text" class="test-sub-input" inputmode="decimal" style="width:120px;" data-sub-input="${idBase}-iv">
       </div>
     `;
+  } else if(s.type === 'talfoljd'){
+    // Fortsätt talföljden: eleven skriver de TVÅ nästkommande talen (två rutor).
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-eq">Svar:</span>
+        <input type="text" class="test-sub-input" inputmode="decimal" style="width:90px;" data-sub-input="${idBase}-0">
+        <span class="test-sub-eq">och</span>
+        <input type="text" class="test-sub-input" inputmode="decimal" style="width:90px;" data-sub-input="${idBase}-1">
+      </div>
+    `;
+  } else if(s.type === 'utvform'){
+    // Skriv talet i utvecklad form (eleven skriver själv, ej flerval). Rättas på FORM (som öva-bladet).
+    inputHtml = `
+      <div class="test-sub-q">Skriv <span class="num-inline">${s.tal}</span> i utvecklad form:</div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-target">${s.tal}</span>
+        <span class="test-sub-eq">=</span>
+        <input type="text" class="test-sub-input" style="width:230px;text-align:left;padding:0 10px;" placeholder="utvecklad form" data-sub-input="${idBase}-str">
+      </div>
+    `;
   }
 
   return `
@@ -422,6 +443,14 @@ function readSubAnswer(qNum, subIdx, s){
   } else if(s.type === 'intervall'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-iv"]`);
     return inp && inp.value.trim() ? inp.value.trim() : null;
+  } else if(s.type === 'talfoljd'){
+    const a = document.querySelector(`[data-sub-input="${idBase}-0"]`);
+    const b = document.querySelector(`[data-sub-input="${idBase}-1"]`);
+    const av = a && a.value.trim(), bv = b && b.value.trim();
+    return (av || bv) ? [av || '', bv || ''] : null;
+  } else if(s.type === 'utvform'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-str"]`);
+    return inp && inp.value.trim() ? inp.value.trim() : null;
   }
   return null;
 }
@@ -488,6 +517,13 @@ function restoreSubAnswer(qNum, subIdx, s, val){
     }
   } else if(s.type === 'intervall'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-iv"]`); if(inp) inp.value = val;
+  } else if(s.type === 'talfoljd'){
+    if(Array.isArray(val)){
+      const a = document.querySelector(`[data-sub-input="${idBase}-0"]`); if(a) a.value = val[0] || '';
+      const b = document.querySelector(`[data-sub-input="${idBase}-1"]`); if(b) b.value = val[1] || '';
+    }
+  } else if(s.type === 'utvform'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-str"]`); if(inp) inp.value = val;
   }
 }
 
@@ -619,6 +655,21 @@ function gradeSub(s, ans){
     const okHigh = s.incHigh ? (v <= s.max) : (v < s.max);
     return {status: (okLow && okHigh) ? 'correct' : 'wrong', given: String(ans)};
   }
+  if(s.type === 'talfoljd'){
+    // Två nästkommande tal — BÅDA måste stämma (exakt värde).
+    if(!Array.isArray(ans)) return {status:'skipped'};
+    const num = (x) => parseFloat(String(x).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
+    const v0 = num(ans[0]), v1 = num(ans[1]);
+    const ok = !isNaN(v0) && !isNaN(v1) && Math.abs(v0 - s.answers[0]) < 1e-6 && Math.abs(v1 - s.answers[1]) < 1e-6;
+    return {status: ok ? 'correct' : 'wrong', given: (ans[0]||'?') + ', ' + (ans[1]||'?')};
+  }
+  if(s.type === 'utvform'){
+    // Rättas på FORM (som öva-bladets jamforUttryck): strippa ·×* + mellanslag, sortera tecken per term
+    // och termerna → tål notation/ordning men skiljer multiplikativ form från additiv. Additiv nekas.
+    const _normTerm = (t) => { var neg=false; if(t[0]==='+'){t=t.slice(1);} else if(t[0]==='-'){neg=true;t=t.slice(1);} return (neg?'-':'') + t.split('').sort().join(''); };
+    const _norm = (x) => { var str=String(x).toLowerCase().replace(/[·×*]/g,'').replace(/\s/g,'').replace(/[−–—]/g,'-').replace(/,/g,'.'); var termer=str.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';}); return termer.map(_normTerm).sort().join('+'); };
+    return {status: _norm(ans) === _norm(s.answer) ? 'correct' : 'wrong', given: String(ans)};
+  }
   return {status:'skipped'};
 }
 
@@ -641,6 +692,8 @@ function svarSignatur(q){
       case 'potensmult':    return 'pm' + s.bas + '^' + s.exp;
       case 'blandad':       return 'bl' + s.talj + '/' + s.namn;
       case 'intervall':     return 'iv' + s.min + '_' + s.max;
+      case 'talfoljd':      return 'tf' + (s.answers || []).join(',');
+      case 'utvform':       return 'uv' + s.answer;
       default:              return '?';
     }
   });
@@ -719,6 +772,12 @@ function renderReviewSub(sr){
   } else if(sub.type === 'intervall'){
     questionText = sub.prompt;
     correctAnswerText = 'ett tal ' + (sub.incLow ? '≥ ' : '> ') + komma(sub.min) + ' och ' + (sub.incHigh ? '≤ ' : '< ') + komma(sub.max) + (sub.exempel ? ' (t.ex. ' + sub.exempel + ')' : '');
+  } else if(sub.type === 'talfoljd'){
+    questionText = sub.prompt;
+    correctAnswerText = komma(sub.answers[0]) + ', ' + komma(sub.answers[1]) + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'utvform'){
+    questionText = `Skriv ${sub.tal} i utvecklad form`;
+    correctAnswerText = sub.tal + ' = ' + sub.answer;
   }
 
   return `
@@ -1248,7 +1307,7 @@ function renderTestTake(){
   // scrollar fram den aktiva rutan. Monteras när AK8_UI finns (alla fyra ramar laddar den nu).
   if(config.rikTestUX && window.AK8_UI){
     const kpWrap = document.createElement('div');
-    kpWrap.innerHTML = AK8_UI.keypadHTML({ builders:false, ops:[',', '·', '/', '−'] });
+    kpWrap.innerHTML = AK8_UI.keypadHTML({ builders:false, ops:[',', '+', '·', '/', '−'] });
     if(kpWrap.firstChild){ body.appendChild(kpWrap.firstChild); AK8_UI.bindKeypad(body); }
   }
 
