@@ -48,7 +48,7 @@ function renderPlatsvarde(body, backFn){
       var t, guard = 0;
       do { t = d1GenPlatsvarde(level); guard++; } while(t.svar === forra && guard < 10);   // ingen direkt upprepning
       forra = t.svar;
-      return { q:'Vilket värde har <span class="neg-expr">' + t.malSiffra + '</span>:an i talet <span class="neg-expr">' + t.talStr + '</span>?',
+      return { q:'Vilket platsvärde har <span class="neg-expr">' + t.malSiffra + '</span>:an i talet <span class="neg-expr">' + t.talStr + '</span>?',
                svar:t.svar, malSiffra:t.malSiffra };
     },
     valid:function(raw, t){ return d1NormPlats(raw) === d1NormPlats(t.svar); },

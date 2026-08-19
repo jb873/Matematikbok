@@ -976,12 +976,12 @@ var TIO_A = {
       {typ:'enkel', vansterText:'femtusen sjuhundra nittio',  svar:5790},
       {typ:'enkel', vansterText:'fjortontusen fem',           svar:14005}
     ]},
-    {rubrik:'Skriv i utvecklad form (t.ex. 500 + 60 + 7)', rader:[
-      {typ:'uttryck', likhet:true, fraga:'567',  svar:'500+60+7', accept:['500+60+7']},
-      {typ:'uttryck', likhet:true, fraga:'43',   svar:'40+3',     accept:['40+3']},
-      {typ:'uttryck', likhet:true, fraga:'5608', svar:'5000+600+8', accept:['5000+600+8']}
+    {rubrik:'Skriv i utvecklad form', rader:[
+      {typ:'uttryck', likhet:true, fraga:'567',  svar:'5·100+6·10+7·1', accept:['5·100+6·10+7·1']},
+      {typ:'uttryck', likhet:true, fraga:'43',   svar:'4·10+3·1',       accept:['4·10+3·1']},
+      {typ:'uttryck', likhet:true, fraga:'5608', svar:'5·1000+6·100+8·1', accept:['5·1000+6·100+8·1']}
     ]},
-    {rubrik:'Vilket värde har trean? (skriv med komma)', rader:[
+    {rubrik:'Vilket värde har trean?', rader:[
       {typ:'enkel', vansterText:'703',    svar:3},
       {typ:'enkel', vansterText:'12,03',  svar:0.03},
       {typ:'enkel', vansterText:'14,36',  svar:0.3},
@@ -1000,7 +1000,7 @@ var TIO_A = {
       {typ:'enkel', vansterText:'6,036',  svar:0.03},
       {typ:'enkel', vansterText:'7,0837', svar:0.03}
     ]},
-    {rubrik:'Skriv som tal (med komma där det behövs)', rader:[
+    {rubrik:'Skriv som tal', rader:[
       {typ:'enkel', vansterText:'17 tiotal',     svar:170},
       {typ:'enkel', vansterText:'19 hundradelar', svar:0.19},
       {typ:'enkel', vansterText:'23 tiondelar',  svar:2.3}
@@ -1012,10 +1012,10 @@ var TIO_A = {
       {typ:'enkel', vansterText:'1,9 = ___ hundradelar',   svar:190},
       {typ:'enkel', vansterText:'14,4 = ___ tiondelar',    svar:144}
     ]},
-    {rubrik:'Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
-      {typ:'uttryck', likhet:true, fraga:'63,9',   svar:'60+3+0,9',     accept:['60+3+0,9','60+3+0.9']},
-      {typ:'uttryck', likhet:true, fraga:'7,63',   svar:'7+0,6+0,03',   accept:['7+0,6+0,03','7+0.6+0.03']},
-      {typ:'uttryck', likhet:true, fraga:'70,809', svar:'70+0,8+0,009', accept:['70+0,8+0,009','70+0.8+0.009']}
+    {rubrik:'Skriv i utvecklad form', rader:[
+      {typ:'uttryck', likhet:true, fraga:'63,9',   svar:'6·10+3·1+9·0,1',   accept:['6·10+3·1+9·0,1','6·10+3·1+9·0.1']},
+      {typ:'uttryck', likhet:true, fraga:'7,63',   svar:'7·1+6·0,1+3·0,01', accept:['7·1+6·0,1+3·0,01','7·1+6·0.1+3·0.01']},
+      {typ:'uttryck', likhet:true, fraga:'70,809', svar:'7·10+8·0,1+9·0,001', accept:['7·10+8·0,1+9·0,001','7·10+8·0.1+9·0.001']}
     ]}
   ]
 };
@@ -1047,12 +1047,12 @@ var TIO_B = {
       {typ:'enkel', vansterText:'sextusen fyrahundra tjugo', svar:6420},
       {typ:'enkel', vansterText:'tjugotusen nio',            svar:20009}
     ]},
-    {rubrik:'Skriv i utvecklad form (t.ex. 300 + 80 + 4)', rader:[
-      {typ:'uttryck', likhet:true, fraga:'384',  svar:'300+80+4',   accept:['300+80+4']},
-      {typ:'uttryck', likhet:true, fraga:'72',   svar:'70+2',       accept:['70+2']},
-      {typ:'uttryck', likhet:true, fraga:'4309', svar:'4000+300+9', accept:['4000+300+9']}
+    {rubrik:'Skriv i utvecklad form', rader:[
+      {typ:'uttryck', likhet:true, fraga:'384',  svar:'3·100+8·10+4·1', accept:['3·100+8·10+4·1']},
+      {typ:'uttryck', likhet:true, fraga:'72',   svar:'7·10+2·1',       accept:['7·10+2·1']},
+      {typ:'uttryck', likhet:true, fraga:'4309', svar:'4·1000+3·100+9·1', accept:['4·1000+3·100+9·1']}
     ]},
-    {rubrik:'Vilket värde har sexan? (skriv med komma)', rader:[
+    {rubrik:'Vilket värde har sexan?', rader:[
       {typ:'enkel', vansterText:'608',    svar:600},
       {typ:'enkel', vansterText:'23,06',  svar:0.06},
       {typ:'enkel', vansterText:'17,68',  svar:0.6},
@@ -1071,7 +1071,7 @@ var TIO_B = {
       {typ:'enkel', vansterText:'8,062',  svar:0.06},
       {typ:'enkel', vansterText:'3,0625', svar:0.06}
     ]},
-    {rubrik:'Skriv som tal (med komma där det behövs)', rader:[
+    {rubrik:'Skriv som tal', rader:[
       {typ:'enkel', vansterText:'14 tiotal',      svar:140},
       {typ:'enkel', vansterText:'27 hundradelar', svar:0.27},
       {typ:'enkel', vansterText:'31 tiondelar',   svar:3.1}
@@ -1083,10 +1083,10 @@ var TIO_B = {
       {typ:'enkel', vansterText:'2,3 = ___ hundradelar',   svar:230},
       {typ:'enkel', vansterText:'18,6 = ___ tiondelar',    svar:186}
     ]},
-    {rubrik:'Skriv i utvecklad form (t.ex. 60 + 3 + 0,9)', rader:[
-      {typ:'uttryck', likhet:true, fraga:'48,2',   svar:'40+8+0,2',     accept:['40+8+0,2','40+8+0.2']},
-      {typ:'uttryck', likhet:true, fraga:'9,54',   svar:'9+0,5+0,04',   accept:['9+0,5+0,04','9+0.5+0.04']},
-      {typ:'uttryck', likhet:true, fraga:'50,607', svar:'50+0,6+0,007', accept:['50+0,6+0,007','50+0.6+0.007']}
+    {rubrik:'Skriv i utvecklad form', rader:[
+      {typ:'uttryck', likhet:true, fraga:'48,2',   svar:'4·10+8·1+2·0,1',   accept:['4·10+8·1+2·0,1','4·10+8·1+2·0.1']},
+      {typ:'uttryck', likhet:true, fraga:'9,54',   svar:'9·1+5·0,1+4·0,01', accept:['9·1+5·0,1+4·0,01','9·1+5·0.1+4·0.01']},
+      {typ:'uttryck', likhet:true, fraga:'50,607', svar:'5·10+6·0,1+7·0,001', accept:['5·10+6·0,1+7·0,001','5·10+6·0.1+7·0.001']}
     ]}
   ]
 };
@@ -1107,8 +1107,8 @@ var EGEN_A = {
       {typ:'valruta', flera:true, fraga:'Markera alla sammansatta tal:', alt:['3','9','11','17','25'], ratt:['9','25']}
     ]},
     {rubrik:'Vilka tal är jämnt delbara med …', rader:[
-      {typ:'valruta', flera:true, fraga:'a) … 2', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['72','70','98','100','568','490']},
-      {typ:'valruta', flera:true, fraga:'b) … 5', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['70','45','100','125','490']}
+      {typ:'valruta', flera:true, fraga:'… 2', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['72','70','98','100','568','490']},
+      {typ:'valruta', flera:true, fraga:'… 5', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['70','45','100','125','490']}
     ]},
     {rubrik:'Faktorisera talet i två faktorer (skriv t.ex. 3·5)', rader:[
       {typ:'uttryck', likhet:true, fraga:'15', svar:'3·5', accept:['3·5','5·3'], placeholder:'två faktorer'},
@@ -1117,10 +1117,10 @@ var EGEN_A = {
       {typ:'uttryck', likhet:true, fraga:'12', svar:'3·4', accept:['3·4','4·3','2·6','6·2'], placeholder:'två faktorer'}
     ]},
     {rubrik:'Vilka primfaktorer saknas i faktoriseringen?', rader:[
-      {typ:'uttryck', fraga:'a) 28 = 2 · 2 · ___', svar:'7', accept:['7'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'b) 60 = 2 · 2 · ___ · 5', svar:'3', accept:['3'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'c) 45 = ___ · ___ · 5  (skriv båda, t.ex. 3·3)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
-      {typ:'uttryck', fraga:'d) 90 = 2 · ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'}
+      {typ:'uttryck', fraga:'28 = 2 · 2 · ___', svar:'7', accept:['7'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'60 = 2 · 2 · ___ · 5', svar:'3', accept:['3'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'45 = ___ · ___ · 5  (skriv båda, t.ex. 3·3)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
+      {typ:'uttryck', fraga:'90 = 2 · ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'}
     ]},
     {rubrik:'Vilket tal har faktoriserats?', rader:[
       {typ:'enkel', vansterText:'2 · 2 · 2 · 2', svar:16},
@@ -1160,8 +1160,8 @@ var EGEN_B = {
       {typ:'valruta', flera:true, fraga:'Markera alla sammansatta tal:', alt:['5','8','13','21','29'], ratt:['8','21']}
     ]},
     {rubrik:'Vilka tal är jämnt delbara med …', rader:[
-      {typ:'valruta', flera:true, fraga:'a) … 2', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['84','60','200','432','310']},
-      {typ:'valruta', flera:true, fraga:'b) … 5', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['55','60','200','135','310']}
+      {typ:'valruta', flera:true, fraga:'… 2', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['84','60','200','432','310']},
+      {typ:'valruta', flera:true, fraga:'… 5', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['55','60','200','135','310']}
     ]},
     {rubrik:'Faktorisera talet i två faktorer (skriv t.ex. 3·7)', rader:[
       {typ:'uttryck', likhet:true, fraga:'21', svar:'3·7', accept:['3·7','7·3'], placeholder:'två faktorer'},
@@ -1170,10 +1170,10 @@ var EGEN_B = {
       {typ:'uttryck', likhet:true, fraga:'18', svar:'2·9', accept:['2·9','9·2','3·6','6·3'], placeholder:'två faktorer'}
     ]},
     {rubrik:'Vilka primfaktorer saknas i faktoriseringen?', rader:[
-      {typ:'uttryck', fraga:'a) 20 = 2 · 2 · ___', svar:'5', accept:['5'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'b) 84 = 2 · 2 · ___ · 7', svar:'3', accept:['3'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'c) 63 = ___ · ___ · 7  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
-      {typ:'uttryck', fraga:'d) 150 = 2 · 3 · ___ · ___  (skriv båda)', svar:'5·5', accept:['5·5'], placeholder:'två tal'}
+      {typ:'uttryck', fraga:'20 = 2 · 2 · ___', svar:'5', accept:['5'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'84 = 2 · 2 · ___ · 7', svar:'3', accept:['3'], placeholder:'tal'},
+      {typ:'uttryck', fraga:'63 = ___ · ___ · 7  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
+      {typ:'uttryck', fraga:'150 = 2 · 3 · ___ · ___  (skriv båda)', svar:'5·5', accept:['5·5'], placeholder:'två tal'}
     ]},
     {rubrik:'Vilket tal har faktoriserats?', rader:[
       {typ:'enkel', vansterText:'2 · 2 · 2 · 3', svar:24},
@@ -1289,8 +1289,8 @@ var STORLEK_B = {
       {typ:'ordna', tal:[1.05, 0.457, 0.9, 1.3, 0.10, 0.01]}
     ]},
     {rubrik:'Skriv ett tal som är', rader:[
-      {typ:'intervall', enkelt:true, vansterText:'a) större än 9,9 men mindre än 10',    min:9.9, max:10},
-      {typ:'intervall', enkelt:true, vansterText:'b) större än 10 men mindre än 10,01', min:10, max:10.01}
+      {typ:'intervall', enkelt:true, vansterText:'större än 9,9 men mindre än 10',    min:9.9, max:10},
+      {typ:'intervall', enkelt:true, vansterText:'större än 10 men mindre än 10,01', min:10, max:10.01}
     ]}
   ]
 };
@@ -1315,9 +1315,9 @@ var POSRAK_A = {
   intro:'Träna på huvudräkning med tiondelar och hundradelar, platsövergångar och tal som ligger mittemellan. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
     {rubrik:'Skriv två tal inom varje intervall', rader:[
-      {typ:'intervall', vansterText:'a) mellan 2,5 och 2,7', min:2.5, max:2.7},
-      {typ:'intervall', vansterText:'b) mellan 99 och 100',  min:99,  max:100},
-      {typ:'intervall', vansterText:'c) mellan 0,28 och 0,29', min:0.28, max:0.29}
+      {typ:'intervall', vansterText:'mellan 2,5 och 2,7', min:2.5, max:2.7},
+      {typ:'intervall', vansterText:'mellan 99 och 100',  min:99,  max:100},
+      {typ:'intervall', vansterText:'mellan 0,28 och 0,29', min:0.28, max:0.29}
     ]},
     {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'0,8 + 0,3',  svar:1.1},
@@ -1377,9 +1377,9 @@ var POSRAK_B = {
   intro:'Samma slags uppgifter som Blad A, men med andra tal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
     {rubrik:'Skriv två tal inom varje intervall', rader:[
-      {typ:'intervall', vansterText:'a) mellan 3,4 och 3,6', min:3.4, max:3.6},
-      {typ:'intervall', vansterText:'b) mellan 49 och 50',   min:49,  max:50},
-      {typ:'intervall', vansterText:'c) mellan 0,71 och 0,72', min:0.71, max:0.72}
+      {typ:'intervall', vansterText:'mellan 3,4 och 3,6', min:3.4, max:3.6},
+      {typ:'intervall', vansterText:'mellan 49 och 50',   min:49,  max:50},
+      {typ:'intervall', vansterText:'mellan 0,71 och 0,72', min:0.71, max:0.72}
     ]},
     {rubrik:'Räkna med huvudräkning', rader:[
       {typ:'enkel', vansterText:'0,7 + 0,5',  svar:1.2},

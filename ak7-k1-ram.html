@@ -3931,13 +3931,17 @@ const TEST_GENERATORS = {
           const key = 'pv-'+tal+'-'+p.exp;
           if(seen.has(key)) continue;
           seen.add(key);
+          // Facit = platsens NAMN (bokstäver): 7:an i 72 → tiotal, inte 70. Speglar åk8 + öva-bladets chip-format.
           subs.push({
-            label: String.fromCharCode(97+subs.length)+')', type: 'numeric',
-            prompt: 'Vilket värde har siffran ' + siffra + ' i talet ' + komma(tal) + '?', answer: varde,
-            explanation: 'Siffran ' + siffra + ' står på ' + p.namn + '-platsen → ' + komma(varde) + '.'
+            label: String.fromCharCode(97+subs.length)+')', type: 'binary',
+            q: 'siffran ' + siffra + ' i ' + komma(tal),
+            prompt: 'Vilket platsvärde har siffran ' + siffra + ' i talet ' + komma(tal) + '?',
+            options: shuffle(platser.map(function(x){ return x.namn; })),
+            answer: p.namn,
+            explanation: 'Siffran ' + siffra + ' står på ' + p.namn + '-platsen (värdet ' + komma(varde) + ').'
           });
         }
-        return subs.length ? {generator:'platsvarde', title:'Vilket värde har siffran?', omrade:'position', subs:subs} : null;
+        return subs.length ? {generator:'platsvarde', title:'Vilket platsvärde har siffran?', omrade:'position', subs:subs} : null;
       },
 
       // position:rakna — fortsätt talföljden (compute-and-check)

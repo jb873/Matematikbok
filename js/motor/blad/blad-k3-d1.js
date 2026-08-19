@@ -850,47 +850,47 @@ var BLAD_SKRIVA = {
   intro:'Skriv ett uttryck eller välj rätt alternativ. Använd x och de andra variablerna. Skriv · för gånger och / för delat. Tryck sedan på Kontrollera.',
   grupper:[
     {rubrik:'1. Nora har x stycken kapsyler. Välj det uttryck som visar hur många kapsyler Nora har om', rader:[
-      {typ:'valruta', fraga:'a) hon får fyra nya kapsyler', alt:['x − 4','x + 4','4x'], ratt:['x+4']},
-      {typ:'valruta', fraga:'b) hon ger bort tre kapsyler', alt:['x − 3','3x','x + 3'], ratt:['x-3']},
-      {typ:'valruta', fraga:'c) hon får dubbelt så många till', alt:['2x','3x','x/2'], ratt:['2x']}
+      {typ:'valruta', fraga:'hon får fyra nya kapsyler', alt:['x − 4','x + 4','4x'], ratt:['x+4']},
+      {typ:'valruta', fraga:'hon ger bort tre kapsyler', alt:['x − 3','3x','x + 3'], ratt:['x-3']},
+      {typ:'valruta', fraga:'hon får dubbelt så många till', alt:['2x','3x','x/2'], ratt:['2x']}
     ]},
     {rubrik:'2. Skriv ett uttryck för längden av den röda sträckan', rader:[
-      {typ:'bild', svarTyp:'uttryck', fraga:'a) Röda sträckan =', svar:'x+3', accept:['x+3','3+x'], placeholder:'uttryck',
+      {typ:'bild', svarTyp:'uttryck', fraga:'Röda sträckan =', svar:'x+3', accept:['x+3','3+x'], placeholder:'uttryck',
        svg:'<svg viewBox="0 0 320 70" width="320" height="70" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="22" x2="290" y2="22" stroke="#c0392b" stroke-width="3"/><line x1="30" y1="16" x2="30" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="290" y1="16" x2="290" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="30" y1="48" x2="180" y2="48" stroke="#333" stroke-width="2"/><line x1="180" y1="48" x2="290" y2="48" stroke="#333" stroke-width="2"/><line x1="30" y1="42" x2="30" y2="54" stroke="#333" stroke-width="2"/><line x1="180" y1="42" x2="180" y2="54" stroke="#333" stroke-width="2"/><line x1="290" y1="42" x2="290" y2="54" stroke="#333" stroke-width="2"/><text x="105" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text><text x="235" y="65" text-anchor="middle" font-size="14" font-style="italic">3</text></svg>'},
-      {typ:'bild', svarTyp:'uttryck', fraga:'b) Röda sträckan =', svar:'x+4', accept:['x+4','4+x'], placeholder:'uttryck',
+      {typ:'bild', svarTyp:'uttryck', fraga:'Röda sträckan =', svar:'x+4', accept:['x+4','4+x'], placeholder:'uttryck',
        svg:'<svg viewBox="0 0 320 70" width="320" height="70" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="22" x2="290" y2="22" stroke="#c0392b" stroke-width="3"/><line x1="30" y1="16" x2="30" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="290" y1="16" x2="290" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="30" y1="48" x2="110" y2="48" stroke="#333" stroke-width="2"/><line x1="110" y1="48" x2="290" y2="48" stroke="#333" stroke-width="2"/><line x1="30" y1="42" x2="30" y2="54" stroke="#333" stroke-width="2"/><line x1="110" y1="42" x2="110" y2="54" stroke="#333" stroke-width="2"/><line x1="290" y1="42" x2="290" y2="54" stroke="#333" stroke-width="2"/><text x="70" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text><text x="200" y="65" text-anchor="middle" font-size="14" font-style="italic">4</text></svg>'},
-      {typ:'bild', svarTyp:'uttryck', fraga:'c) Röda sträckan =', svar:'3x', accept:['3x','x+x+x'], placeholder:'uttryck',
+      {typ:'bild', svarTyp:'uttryck', fraga:'Röda sträckan =', svar:'3x', accept:['3x','x+x+x'], placeholder:'uttryck',
        svg:'<svg viewBox="0 0 320 70" width="320" height="70" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="22" x2="290" y2="22" stroke="#c0392b" stroke-width="3"/><line x1="30" y1="16" x2="30" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="290" y1="16" x2="290" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="30" y1="48" x2="290" y2="48" stroke="#333" stroke-width="2"/><line x1="30" y1="42" x2="30" y2="54" stroke="#333" stroke-width="2"/><line x1="117" y1="42" x2="117" y2="54" stroke="#333" stroke-width="2"/><line x1="204" y1="42" x2="204" y2="54" stroke="#333" stroke-width="2"/><line x1="290" y1="42" x2="290" y2="54" stroke="#333" stroke-width="2"/><text x="73" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text><text x="160" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text><text x="247" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text></svg>'}
     ]},
     {rubrik:'3. Tilde är a cm lång. Skriv ett uttryck för längden av en person som är', rader:[
-      {typ:'uttryck', fraga:'a) 10 cm längre än Tilde', svar:'a+10', accept:['a+10','10+a']},
-      {typ:'uttryck', fraga:'b) 18 cm kortare än Tilde', svar:'a−18', accept:['a-18']},
-      {typ:'uttryck', fraga:'c) dubbelt så lång som Tilde', svar:'2a', accept:['2a','a·2','a+a']},
-      {typ:'uttryck', fraga:'d) hälften så lång som Tilde', svar:'a/2', accept:['a/2']}
+      {typ:'uttryck', fraga:'10 cm längre än Tilde', svar:'a+10', accept:['a+10','10+a']},
+      {typ:'uttryck', fraga:'18 cm kortare än Tilde', svar:'a−18', accept:['a-18']},
+      {typ:'uttryck', fraga:'dubbelt så lång som Tilde', svar:'2a', accept:['2a','a·2','a+a']},
+      {typ:'uttryck', fraga:'hälften så lång som Tilde', svar:'a/2', accept:['a/2']}
     ]},
     {rubrik:'4. Elsa är x år gammal', rader:[
-      {typ:'uttryck', fraga:'a) Elsas bror är 2 år äldre än henne. Skriv ett uttryck för broderns ålder.', svar:'x+2', accept:['x+2','2+x']},
-      {typ:'uttryck', fraga:'b) Elsas syster är dubbelt så gammal som Elsa. Skriv ett uttryck för systerns ålder.', svar:'2x', accept:['2x','x·2','x+x']},
-      {typ:'uttryck', fraga:'c) Skriv ett uttryck för syskonens sammanlagda ålder (Elsa + bror + syster).', svar:'4x+2', accept:['4x+2','2+4x']}
+      {typ:'uttryck', fraga:'Elsas bror är 2 år äldre än henne. Skriv ett uttryck för broderns ålder.', svar:'x+2', accept:['x+2','2+x']},
+      {typ:'uttryck', fraga:'Elsas syster är dubbelt så gammal som Elsa. Skriv ett uttryck för systerns ålder.', svar:'2x', accept:['2x','x·2','x+x']},
+      {typ:'uttryck', fraga:'Skriv ett uttryck för syskonens sammanlagda ålder (Elsa + bror + syster).', svar:'4x+2', accept:['4x+2','2+4x']}
     ]},
     {rubrik:'5. Vilket eller vilka uttryck beskriver kvadratens omkrets? (sidan är z)', rader:[
       {typ:'valruta', flera:true, fraga:'Välj alla som stämmer:', alt:['4z','4 · z','4 + z','z + z + z + z'], ratt:['4z','4·z','z+z+z+z']}
     ]},
     {rubrik:'6. Skriv ett uttryck för figurens omkrets och förenkla det', rader:[
-      {typ:'bild', svarTyp:'uttryck', fraga:'a) Triangel:  omkrets =', svar:'12x', accept:['12x','3x+5x+4x'], placeholder:'förenkla',
+      {typ:'bild', svarTyp:'uttryck', fraga:'Triangel:  omkrets =', svar:'12x', accept:['12x','3x+5x+4x'], placeholder:'förenkla',
        svg:'<svg viewBox="0 0 200 150" width="200" height="150" xmlns="http://www.w3.org/2000/svg"><polygon points="40,120 40,40 150,120" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="26" y="82" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="105" y="74" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">5x</text><text x="95" y="138" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">4x</text></svg>'},
-      {typ:'bild', svarTyp:'uttryck', fraga:'b) Rektangel:  omkrets =', svar:'8x', accept:['8x','3x+x+3x+x'], placeholder:'förenkla',
+      {typ:'bild', svarTyp:'uttryck', fraga:'Rektangel:  omkrets =', svar:'8x', accept:['8x','3x+x+3x+x'], placeholder:'förenkla',
        svg:'<svg viewBox="0 0 220 120" width="220" height="120" xmlns="http://www.w3.org/2000/svg"><rect x="45" y="35" width="130" height="52" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="110" y="28" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="110" y="104" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="33" y="65" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">x</text><text x="187" y="65" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">x</text></svg>'}
     ]},
     {rubrik:'7. Para ihop genom att skriva rätt uttryck', rader:[
-      {typ:'uttryck', fraga:'a) 5 mer än b', svar:'b+5', accept:['b+5','5+b']},
-      {typ:'uttryck', fraga:'b) Hälften så mycket som b', svar:'b/2', accept:['b/2']},
-      {typ:'uttryck', fraga:'c) Dubbelt så mycket som b', svar:'2b', accept:['2b','b·2','b+b']},
-      {typ:'uttryck', fraga:'d) 5 mindre än b', svar:'b−5', accept:['b-5']}
+      {typ:'uttryck', fraga:'5 mer än b', svar:'b+5', accept:['b+5','5+b']},
+      {typ:'uttryck', fraga:'Hälften så mycket som b', svar:'b/2', accept:['b/2']},
+      {typ:'uttryck', fraga:'Dubbelt så mycket som b', svar:'2b', accept:['2b','b·2','b+b']},
+      {typ:'uttryck', fraga:'5 mindre än b', svar:'b−5', accept:['b-5']}
     ]},
     {rubrik:'8. En glass kostar x kr, en läsk kostar 5 kr mer än glassen och en smörgås kostar 10 kr mer än glassen', rader:[
-      {typ:'uttryck', fraga:'a) Skriv ett uttryck för vad en glass, en läsk och en smörgås kostar sammanlagt (förenklat).', svar:'3x+15', accept:['3x+15','15+3x']},
-      {typ:'enkel', vansterText:'b) Om allt tillsammans kostar 60 kr, vad kostar en glass? (kr)', svar:15}
+      {typ:'uttryck', fraga:'Skriv ett uttryck för vad en glass, en läsk och en smörgås kostar sammanlagt (förenklat).', svar:'3x+15', accept:['3x+15','15+3x']},
+      {typ:'enkel', vansterText:'Om allt tillsammans kostar 60 kr, vad kostar en glass? (kr)', svar:15}
     ]}
   ]
 };

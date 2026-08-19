@@ -207,7 +207,21 @@ function renderSubInput(qNum, subIdx, s){
       </div>
     `;
   } else if(s.type === 'numeric'){
-    inputHtml = `
+    // LIKHETSTECKEN: en "räkna ut ett uttryck"-uppgift ska visa uttrycket följt av = [ruta], så
+    // notationen motsvarar hur eleven skriver (0,8 + 0,3 = ▢), inte ett uttryck med en lös ruta under.
+    // Beräknings-prompter känns igen på ledordet (Räkna ut / Beräkna / Skriv som vanligt tal); ett
+    // explicit s.likhet (true/false) vinner över heuristiken. Lästal/frågor behåller "Svar:"-raden.
+    const isCompute = (s.likhet === true || s.likhet === false)
+      ? s.likhet
+      : /^\s*(Räkna ut|Beräkna|Skriv som vanligt tal)\b/.test(s.prompt || '');
+    inputHtml = isCompute ? `
+      <div class="test-sub-input-row">
+        <span class="num-inline">${s.prompt}</span>
+        <span class="test-sub-eq">=</span>
+        <input type="text" class="test-sub-input" inputmode="decimal" style="width:120px;" data-sub-input="${idBase}-num">
+        ${s.enhet ? `<span class="test-sub-eq">${s.enhet}</span>` : ''}
+      </div>
+    ` : `
       <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
@@ -928,7 +942,11 @@ function generateTest(config){
   // "a) b) a) b)". Bara subs som redan hade en etikett får en ny (rör inte de utan).
   _merged.forEach(function(q, i){
     q.number = i + 1;
-    q.subs.forEach(function(s, si){ if(s.label) s.label = (si < 26 ? String.fromCharCode(97 + si) : String(si + 1)) + ')'; });
+    q.subs.forEach(function(s, si){
+      if(s.label) s.label = (si < 26 ? String.fromCharCode(97 + si) : String(si + 1)) + ')';
+      // Renderaren äger märkningen: strippa en ev. ledande etikett ur källtexten så det aldrig blir "a) a)".
+      if(typeof s.prompt === 'string') s.prompt = s.prompt.replace(/^\s*[a-zA-Z]\)\s+/, '');
+    });
   });
   return _merged;
 }
