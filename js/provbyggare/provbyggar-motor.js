@@ -666,25 +666,7 @@ function visaKonfetti(){
   setTimeout(function(){ if(lager.parentNode) lager.remove(); }, 6000);
 }
 
-// Keypad-bindning för test-take (åttan): AK8_UI.keypadHTML ger markupen; här styr vi aktiv
-// .test-sub-input (som öva-bladens bindSheet, men mot testets fält). Rör ej rättning/generering.
-function bindTestKeypad(scope){
-  var active = scope.querySelector('.test-sub-input');
-  scope.addEventListener('focusin', function(e){
-    if(e.target.classList && e.target.classList.contains('test-sub-input')) active = e.target;
-  });
-  scope.querySelectorAll('.kp-key').forEach(function(btn){
-    btn.addEventListener('mousedown', function(e){
-      e.preventDefault();
-      if(!active || active.disabled){ var f = scope.querySelector('.test-sub-input:not([disabled])'); if(f) active = f; else return; }
-      var k = btn.dataset.key;
-      if(k === 'back'){ active.value = active.value.slice(0, -1); }
-      else { active.value += k; }
-      active.dispatchEvent(new Event('input', { bubbles:true }));
-      active.focus();
-    });
-  });
-}
+// (Keypad-bindningen bor numera i AK8_UI.bindKeypad — en delad implementation för alla ytor.)
 
 function renderReviewSub(sr){
   const {sub, result} = sr;
@@ -1262,12 +1244,12 @@ function renderTestTake(){
   const _chg = document.getElementById('change-cfg');
   if(_chg) _chg.onclick = () => { saveAllAnswers(); navTo('test-config'); };
 
-  // Keypad (AK8_UI) — bara åttan (config.rikTestUX + AK8_UI laddad). EN keypad för hela sidan;
-  // bindTestKeypad följer den fokuserade rutan. k1/k2 → vanliga input-fält.
+  // Keypad — EN delad implementation (AK8_UI): fast längst ned, följer fokus, döljs för ordsvar,
+  // scrollar fram den aktiva rutan. Monteras när AK8_UI finns (alla fyra ramar laddar den nu).
   if(config.rikTestUX && window.AK8_UI){
     const kpWrap = document.createElement('div');
     kpWrap.innerHTML = AK8_UI.keypadHTML({ builders:false, ops:[',', '·', '/', '−'] });
-    if(kpWrap.firstChild){ body.appendChild(kpWrap.firstChild); bindTestKeypad(body); }
+    if(kpWrap.firstChild){ body.appendChild(kpWrap.firstChild); AK8_UI.bindKeypad(body); }
   }
 
   showView('test-take');

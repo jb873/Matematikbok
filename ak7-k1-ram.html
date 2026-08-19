@@ -71,7 +71,9 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .layout{max-width:880px;margin:0 auto;padding:0 20px 120px}
 .view{display:none}
 .view.is-active{display:block;animation:fadeIn .2s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* Fade med enbart opacity — INGEN transform: en transform på .view skapar ett containing block
+   som bryter position:fixed för den fasta keypaden (den skulle annars ankras mot vyn, ej vyporten). */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 /* ── INBÄDDAT LÄGE (?embed=1): dölj ramens krom, visa bara övningskortet ── */
 body.embed .topnav-hist,
 body.embed [data-view="ovning"] .breadcrumb,
@@ -1849,7 +1851,9 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .tutor-send:disabled{background:var(--ink-faint);cursor:not-allowed}
 
 /* ==== DEL 3: SKÄRMTANGENTBORD ==== */
-.keypad{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:10px 12px;background:#faf8f4;border-top:1px solid #e7e1d6;box-shadow:0 -3px 14px rgba(15,30,46,.08)}
+.keypad-hidden{display:none !important}   /* döljs för ordsvars-rutor */
+#test-take-body{padding-bottom:180px}     /* plats åt den fasta keypaden */
 .keypad-digits{display:grid;grid-template-columns:repeat(3,46px);gap:6px}
 .keypad-ops{display:grid;grid-template-columns:46px;gap:6px;align-content:start}
 .keypad-ops.wide2{grid-template-columns:repeat(2,46px)}

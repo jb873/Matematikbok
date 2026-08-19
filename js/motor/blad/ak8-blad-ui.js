@@ -142,6 +142,20 @@
     inp.value = out; try { inp.setSelectionRange(np, np); } catch(e){}
   }
 
+  // ── FOKUS-BETEENDE (delat av bindSheet + bindKeypad) ──
+  // Ordsvars-ruta (platsvärde: ental/tiondel …) ska INTE ha sifferknappsats → keypaden döljs när en
+  // sådan ruta har fokus. Markören är data-nokeypad (opts.hideFor kan byta selektor).
+  function arOrdruta(inp, sel){ return !!(inp && inp.matches && sel && inp.matches(sel)); }
+  // Den fokuserade rutan får aldrig hamna bakom den fasta keypaden: hamnar den under keypadens
+  // överkant (eller ovanför vyn) scrollas den fram. Körs bara vid FOKUS-BYTE, ej vid varje tangenttryck.
+  function skrollaFram(kp, inp){
+    if(!inp || !kp || kp.classList.contains('keypad-hidden')) return;
+    var kr = kp.getBoundingClientRect(), ir = inp.getBoundingClientRect();
+    if(ir.bottom > kr.top - 12 || ir.top < 8){
+      try { inp.scrollIntoView({ block:'center', behavior:'smooth' }); } catch(e){ inp.scrollIntoView(); }
+    }
+  }
+
   // ── KEYPAD ──  opts: { ops:[...], builders:bool }
   var FRAC_ICON = '<span class="kp-frac"><span class="kp-frac-t"></span><span class="kp-frac-l"></span><span class="kp-frac-n"></span></span>';
   var POT_ICON = '<span class="kp-pot"><span class="kp-pot-b"></span><span class="kp-pot-e"></span></span>';
@@ -183,7 +197,14 @@
   function bindSheet(mount, opts){
     opts = opts || {};
     var active = mount.querySelector('input');
-    mount.addEventListener('focusin', function(e){ if(e.target.tagName === 'INPUT') active = e.target; });
+    var kpEl = mount.querySelector('.keypad'), sisteFram = null, doljSel = opts.hideFor || '[data-nokeypad]';
+    mount.addEventListener('focusin', function(e){
+      if(e.target.tagName !== 'INPUT') return;
+      active = e.target;
+      var dolj = arOrdruta(active, doljSel); if(kpEl) kpEl.classList.toggle('keypad-hidden', dolj);
+      if(!dolj && active !== sisteFram) skrollaFram(kpEl, active);
+      sisteFram = active;
+    });
     // keypad
     mount.querySelectorAll('.kp-key').forEach(function(btn){
       btn.addEventListener('mousedown', function(e){
@@ -228,8 +249,45 @@
     var pr = mount.querySelector('[data-print]'); if(pr) pr.onclick = function(){ window.print(); };
   }
 
+  // ── UNIVERSELL KEYPAD-BINDNING ──  för ytor UTAN ak8-widgets (öva-blad, prov, drillar, ovamer).
+  // keypadHTML(...) monteras i mount; denna binder EN keypad som följer fokus, döljer sig för
+  // ordsvars-rutor (data-nokeypad) och scrollar fram den aktiva rutan så den aldrig hamnar bakom
+  // keypaden. Ingen egen keypad ska skrivas — alla ytor mäter mot den här. opts: { hideFor, ops }.
+  function bindKeypad(mount, opts){
+    opts = opts || {};
+    var doljSel = opts.hideFor || '[data-nokeypad]';
+    var kp = mount.querySelector('.keypad') || document.querySelector('.keypad');
+    var active = mount.querySelector('input:not([disabled])'), sisteFram = null;
+    mount.addEventListener('focusin', function(e){
+      if(e.target.tagName !== 'INPUT') return;
+      active = e.target;
+      var dolj = arOrdruta(active, doljSel); if(kp) kp.classList.toggle('keypad-hidden', dolj);
+      if(!dolj && active !== sisteFram) skrollaFram(kp, active);
+      sisteFram = active;
+    });
+    if(kp) kp.querySelectorAll('.kp-key').forEach(function(btn){
+      btn.addEventListener('mousedown', function(e){
+        e.preventDefault();
+        if(!active || active.disabled){ var f = mount.querySelector('input:not([disabled])'); if(f) active = f; else return; }
+        var k = btn.dataset.key, ml = parseInt(active.getAttribute('maxlength') || '0', 10);
+        if(k === 'back'){ active.value = active.value.slice(0, -1); }
+        else if(!ml || active.value.length < ml){ active.value += k; }
+        active.dispatchEvent(new Event('input', { bubbles:true }));
+        active.focus({ preventScroll:true });
+      });
+    });
+    mount.addEventListener('keydown', function(e){
+      if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+      e.preventDefault();
+      var ins = Array.prototype.slice.call(mount.querySelectorAll('input:not([disabled])')), i = ins.indexOf(e.target);
+      if(i > -1 && ins[i + 1]) ins[i + 1].focus();
+    });
+    // initial spegling om en ruta redan har fokus vid montering
+    if(active){ var d0 = arOrdruta(active, doljSel); if(kp) kp.classList.toggle('keypad-hidden', d0); }
+  }
+
   window.AK8_UI = {
-    pNum: pNum, evalArith: evalArith, inTal: inTal,
+    pNum: pNum, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, renderGrupp: renderGrupp,
     grow: grow, ansCell: ansCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,

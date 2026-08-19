@@ -7,7 +7,9 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <!-- Provbyggaren (delad modul) + algebra-taxonomin (för väljaren). Motorn orörd; content nedan. -->
 <link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
+<link rel="stylesheet" href="js/motor/blad/ak8-blad-ui.css">
 <script src="js/provbyggare/provbyggar-motor.js"></script>
+<script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/data/k3-taxonomi.js"></script>
 <script src="js/mastery-k3.js"></script>
 <style>
@@ -141,7 +143,9 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .btn:disabled{opacity:.5;cursor:default;}
 
 /* KEYPAD */
-.keypad{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0 4px;}
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px 12px;background:#faf8f4;border-top:1px solid #e7e1d6;box-shadow:0 -3px 14px rgba(15,30,46,.08)}
+.keypad-hidden{display:none !important}   /* döljs för ordsvars-rutor */
+#test-take-body{padding-bottom:180px}     /* plats åt den fasta keypaden */
 .kp-btn{width:46px;height:42px;font-family:var(--mono);font-size:19px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;transition:background .12s;}
 .kp-btn:hover{background:var(--bg-soft);}
 
@@ -511,6 +515,8 @@ var PB = ProvbyggarMotor.montera({
   taxonomi: function(){ return window.K3_TAXONOMI; },
   mastery:  function(){ return window.MasteryK3; },
   eyebrow:  'Kapitel 3 · Algebra',
+  rikTestUX: true,   // fast keypad (AK8_UI) i test-take, som k1/k2/åk8
+
   bokDelkapitel: [
     { del:'k3d1', titel:'Algebraiska uttryck' },
     { del:'k3d3', titel:'Förenkla uttryck' }

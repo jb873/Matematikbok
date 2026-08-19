@@ -26,6 +26,7 @@
 
 /* ── keypad fast längst ned på skärmen ── */
 .keypad{ position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; padding:10px 12px; background:var(--paper-lt); border-top:1px solid var(--paper-dk); box-shadow:0 -3px 14px rgba(15,30,46,.08); }
+.keypad-hidden{ display:none !important; }   /* döljs när en ordsvars-ruta (data-nokeypad) har fokus */
 .keypad-digits{ display:grid; grid-template-columns:repeat(3,46px); gap:6px; }
 .keypad-ops{ display:grid; grid-template-columns:46px; gap:6px; align-content:start; }
 .kp-key{ height:44px; border:1.5px solid var(--paper-dk); border-radius:8px; background:#fff; font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; transition:transform .08s, background .1s; }
