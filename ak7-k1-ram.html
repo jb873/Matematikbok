@@ -5209,16 +5209,10 @@ const OVNING_RENDERS = {
     problem:     (b)=> renderPrimtalProblem(b),
     baklanges:   (b)=> renderFaktoriseringBaklanges(b)
   },
-  // Del 2 - Begrepp
-  'begrepp-as':{
-    begrepp: (b)=> renderBegreppASBegrepp(b),
-    rakna:   (b)=> renderBegreppASRakna(b)
-  },
-  // Del 2 - Addition
-  add:{
-    rakna: (b)=> renderAddRakna(b),
-    metod: (b)=> renderAddMetod(b)
-  },
+  // Del 2 (RETIRERAD): 'begrepp-as' + 'add' pekade på kombinerade drillar som loggade fantomnoder
+  // utan kartcell. Ersatta av per-räknesätt-KO:na nedan (add-begrepp/sub-begrepp/add-rakna/
+  // add-metoder), som loggar riktiga noder. Repetitionspanelen (REP_GRUPPER) pekar nu dit. Gammal
+  // evidens i fantomhinkarna flyttas av mastery.js:migreraFantomhinkar vid load.
   // Subtraktion - KO 1: Begrepp
   'sub-begrepp':{
     begrepp: (b)=> renderSubBegrepp(b),
@@ -9086,20 +9080,20 @@ var REP_GRUPPER = [
   {id:'taluppfattning', titel:'positionssystem och talförståelse',
     items:[
       {ko:'siffror',  f:'begrepp'},
-      {ko:'positionssystem', f:'begrepp'},
+      {ko:'position', f:'begrepp'},
       {ko:'primtal',  f:'begrepp'}, {ko:'primtal', f:'rakna'},
       {ko:'primtal',  f:'metod'},   {ko:'primtal', f:'kommunikation'},
       {ko:'primtal',  f:'resonera'},{ko:'primtal', f:'problem'}
     ]},
   {id:'addition', titel:'addition',
-    items:[{ko:'begrepp-as', f:'begrepp'}, {ko:'begrepp-as', f:'rakna'},
-           {ko:'add', f:'rakna'}, {ko:'add', f:'metod'}]},
+    items:[{ko:'add-begrepp', f:'begrepp'},
+           {ko:'add-rakna', f:'rakna'}, {ko:'add-metoder', f:'metod'}]},
   {id:'subtraktion', titel:'subtraktion',
-    items:[{ko:'sub-rakna', f:'rakna'}, {ko:'sub-rakna', f:'enkel'},
+    items:[{ko:'sub-begrepp', f:'begrepp'}, {ko:'sub-rakna', f:'rakna'},
            {ko:'sub-metoder', f:'metod'}]},
   {id:'multiplikation', titel:'multiplikation',
-    items:[{ko:'mult-tabell', f:'rakna'}, {ko:'mult-tabell', f:'metod'},
-           {ko:'mult-uppstall', f:'metod'}, {ko:'mult-faktorisera', f:'metod'}]},
+    items:[{ko:'mult-tabell', f:'rakna'}, {ko:'mult-metoder', f:'uppstallning'},
+           {ko:'mult-begrepp', f:'rakna'}]},
   {id:'division', titel:'division',
     items:[{ko:'div-begrepp', f:'begrepp'}, {ko:'div-rakna', f:'rakna'},
            {ko:'div-metoder', f:'metod'}, {ko:'div-problem', f:'problem'}]},

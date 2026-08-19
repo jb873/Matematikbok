@@ -1,211 +1,10 @@
 /* ============================================================
-   FAMILJ B · MOTOR: addsub-grundmotorerna (begrepp-as + add + sub + räkneträning-AS (AI-fritt kluster; delade sub-renderare))
+   FAMILJ B · MOTOR: addsub-metoddrillarna (add-metoder + sub-metoder; delade sub-renderare)
+   (De gamla kombinerade begrepp-as/add/räkneträning-AS-drillarna är retirerade — de loggade
+    fantomnoder utan kartcell; ersatta av per-räknesätt-KO:na i ak7-k1-ram.html.)
    Byte-identiskt utbrutet ur ak7-k1-ram.html. Kräver delade hjälpare
    (metod-karna.js vid fristående körning; finns inline i ram-B vid omkoppling).
    ============================================================ */
-
-function renderBegreppASBegrepp(body){
-  let level = 1;
-  let omgang = [];
-  let idx = 0;
-  let omgangResults = [];
-
-  function genOmgang(){
-    return shuffle([...BEGREPP_AS_KORT]).slice(0, 6);
-  }
-
-  function render(){
-    if(idx >= omgang.length){
-      const right = omgangResults.filter(x=>x).length;
-      const total = omgangResults.length;
-      const adj = adjustLevel(level, right, total);
-      level = adj.level;
-      body.innerHTML = `<div class="exercise-card">${exerciseHeader('Begrepp · term, summa, differens', `Du klarade ${right} av ${total}.`, level)}${renderSummaryCard({right, total, level, levelChange: adj.change})}</div>`;
-      document.getElementById('summary-next-btn').onclick = ()=>{ omgang=genOmgang(); idx=0; omgangResults=[]; render(); };
-      return;
-    }
-    const k = omgang[idx];
-    body.innerHTML = `
-      <div class="exercise-card">
-        ${exerciseHeader('Begrepp · term, summa, differens', 'Välj rätt matematiskt begrepp.', level)}
-        <div class="flashcard">
-          <div class="flashcard-prompt" style="font-size:13px;margin-bottom:6px;">${k.fråga}</div>
-          <div style="font-size:13px;color:var(--ink-soft);font-style:italic;margin-bottom:16px;">${k.definition}</div>
-          <div class="flashcard-actions" id="fc-actions">
-            ${shuffle(k.options).map(opt=>`<button class="fc-btn" data-val="${opt}">${opt}</button>`).join('')}
-          </div>
-          <div class="flashcard-explanation" id="fc-exp"></div>
-          <div class="fc-progress">Fråga ${idx+1} av ${omgang.length}</div>
-        </div>
-      </div>
-    `;
-    document.querySelectorAll('#fc-actions .fc-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const correct = btn.dataset.val === k.svar;
-        btn.classList.add(correct?'correct':'wrong');
-        if(!correct) document.querySelector(`#fc-actions [data-val="${k.svar}"]`).classList.add('correct');
-        document.getElementById('fc-exp').textContent = `${k.begrepp}: ${k.exempel}`;
-        document.querySelectorAll('#fc-actions .fc-btn').forEach(b=>b.disabled=true);
-        omgangResults.push(correct);
-        const ts = getTutorScore('begrepp-as','begrepp'); ts.total++; if(correct) ts.correct++;
-        setTimeout(()=>{ idx++; render(); }, 1500);
-      });
-    });
-  }
-  omgang = genOmgang();
-  render();
-}
-
-// ============================================================
-// BEGREPP-AS: RÄKNA (enkla snabbfrågor)
-// ============================================================
-function renderBegreppASRakna(body){
-  let level = 1;
-  let omgang = [];
-  let idx = 0;
-  let omgangResults = [];
-
-  function genOmgang(){
-    const seen = new Set();
-    const items = [];
-    let attempts = 0;
-    while(items.length < 8 && attempts < 200){
-      attempts++;
-      const useAdd = Math.random() < 0.5;
-      const task = useAdd ? genAddTask(level) : genSubTask(level);
-      const key = `${task.a}${task.op}${task.b}`;
-      if(!seen.has(key)){ seen.add(key); items.push(task); }
-    }
-    return items;
-  }
-
-  function render(){
-    if(idx >= omgang.length){
-      const right = omgangResults.filter(x=>x).length;
-      const total = omgangResults.length;
-      const adj = adjustLevel(level, right, total);
-      level = adj.level;
-      body.innerHTML = `<div class="exercise-card">${exerciseHeader('Räkna · addition och subtraktion', `Du klarade ${right} av ${total}.`, level)}${renderSummaryCard({right, total, level, levelChange: adj.change})}</div>`;
-      document.getElementById('summary-next-btn').onclick = ()=>{ omgang=genOmgang(); idx=0; omgangResults=[]; render(); };
-      return;
-    }
-    const task = omgang[idx];
-    body.innerHTML = `
-      <div class="exercise-card">
-        ${exerciseHeader('Räkna · addition och subtraktion', 'Räkna ut svaret.', level)}
-        ${renderScoreBarSimple(omgangResults.filter(x=>x).length, omgangResults.filter(x=>!x).length, omgang.length, idx)}
-        <div class="rakna-uppdela-task">
-          <div class="rakna-uppdela-line" style="font-size:28px;gap:14px;padding:24px;">
-            <span class="rakna-uppdela-target">${task.a}</span>
-            <span style="color:var(--ink-soft);font-weight:600;">${task.op}</span>
-            <span class="rakna-uppdela-target">${task.b}</span>
-            <span style="color:var(--ink-soft);">=</span>
-            <input type="text" class="rakna-factor-input" id="main-input" inputmode="numeric" maxlength="6" style="width:90px;" autofocus>
-          </div>
-          <div class="rakna-uppdela-feedback" id="fb"></div>
-          <div style="margin-top:14px;text-align:center;">
-            <button class="btn primary" id="check-btn">Kontrollera</button>
-          </div>
-        </div>
-      </div>
-    `;
-    const inp = document.getElementById('main-input');
-    const check = ()=>{
-      const val = parseInt(inp.value.trim());
-      const fb = document.getElementById('fb');
-      fb.classList.add('show');
-      inp.disabled = true;
-      document.getElementById('check-btn').disabled = true;
-      const ts = getTutorScore('begrepp-as','rakna'); ts.total++;
-      if(val === task.answer){
-        inp.classList.add('correct'); fb.classList.add('correct'); fb.textContent = `Rätt! ${task.a} ${task.op} ${task.b} = ${task.answer}`;
-        ts.correct++; omgangResults.push(true);
-      } else {
-        inp.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = `${task.a} ${task.op} ${task.b} = ${task.answer}`;
-        omgangResults.push(false);
-      }
-      setTimeout(()=>{ idx++; render(); }, 1600);
-    };
-    document.getElementById('check-btn').onclick = check;
-    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault();check();} });
-    setTimeout(()=>inp.focus(), 50);
-  }
-  omgang = genOmgang();
-  render();
-}
-
-// ============================================================
-// ADDITION: RÄKNA
-// ============================================================
-function renderAddRakna(body){
-  let level = 1;
-  let omgang = [];
-  let idx = 0;
-  let omgangResults = [];
-
-  function genOmgang(){
-    const seen = new Set();
-    const items = [];
-    let attempts = 0;
-    while(items.length < 8 && attempts < 200){
-      attempts++;
-      const task = genAddTask(level);
-      const key = `${task.a}+${task.b}`;
-      if(!seen.has(key)){ seen.add(key); items.push(task); }
-    }
-    return items;
-  }
-
-  function render(){
-    if(idx >= omgang.length){
-      const right = omgangResults.filter(x=>x).length;
-      const total = omgangResults.length;
-      const adj = adjustLevel(level, right, total);
-      level = adj.level;
-      body.innerHTML = `<div class="exercise-card">${exerciseHeader('Räkna · addition', `Du klarade ${right} av ${total}.`, level)}${renderSummaryCard({right, total, level, levelChange: adj.change})}</div>`;
-      document.getElementById('summary-next-btn').onclick = ()=>{ omgang=genOmgang(); idx=0; omgangResults=[]; render(); };
-      return;
-    }
-    const task = omgang[idx];
-    body.innerHTML = `
-      <div class="exercise-card">
-        ${exerciseHeader('Räkna · addition', 'Räkna ut summan.', level)}
-        ${renderScoreBarSimple(omgangResults.filter(x=>x).length, omgangResults.filter(x=>!x).length, omgang.length, idx)}
-        <div class="rakna-uppdela-task">
-          <div class="rakna-uppdela-line" style="font-size:28px;gap:14px;padding:24px;">
-            <span class="rakna-uppdela-target">${task.a}</span>
-            <span style="color:var(--ink-soft);font-weight:600;">+</span>
-            <span class="rakna-uppdela-target">${task.b}</span>
-            <span style="color:var(--ink-soft);">=</span>
-            <input type="text" class="rakna-factor-input" id="main-input" inputmode="numeric" maxlength="6" style="width:90px;">
-          </div>
-          <div class="rakna-uppdela-feedback" id="fb"></div>
-          <div style="margin-top:14px;text-align:center;"><button class="btn primary" id="check-btn">Kontrollera</button></div>
-        </div>
-      </div>
-    `;
-    const inp = document.getElementById('main-input');
-    const check = ()=>{
-      const val = parseInt(inp.value.trim());
-      const fb = document.getElementById('fb'); fb.classList.add('show');
-      inp.disabled = true; document.getElementById('check-btn').disabled = true;
-      const ts = getTutorScore('add','rakna'); ts.total++;
-      if(val === task.answer){
-        inp.classList.add('correct'); fb.classList.add('correct'); fb.textContent = `Rätt! ${task.a} + ${task.b} = ${task.answer}`;
-        ts.correct++; omgangResults.push(true);
-      } else {
-        inp.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = `${task.a} + ${task.b} = ${task.answer}`;
-        omgangResults.push(false);
-      }
-      setTimeout(()=>{ idx++; render(); }, 1600);
-    };
-    document.getElementById('check-btn').onclick = check;
-    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault();check();} });
-    setTimeout(()=>inp.focus(), 50);
-  }
-  omgang = genOmgang();
-  render();
-}
 
 // ============================================================
 // ADDITION: METOD
@@ -540,7 +339,7 @@ function renderUppstallningAdd(body, metod, backFn){
 
       const fb = document.getElementById('fb'); fb.classList.add('show');
       document.getElementById('check-btn').disabled = true;
-      const ts = getTutorScore('add','metod'); ts.total++;
+      const ts = getTutorScore('add-metoder','metod'); ts.total++;
       omgangResults.push(correct);
 
       if(correct){
@@ -696,7 +495,7 @@ function renderTalsorternaAdd(body, metod, backFn){
       document.getElementById('ts-check').disabled = true;
       termInputs.forEach(inp => inp.disabled = true);
       document.getElementById('ts-final-ans').disabled = true;
-      const ts = getTutorScore('add','metod'); ts.total++;
+      const ts = getTutorScore('add-metoder','metod'); ts.total++;
       const termSum = termVals.reduce((x,y) => x+y, 0);
       const termsOK = termVals.length >= 2 && near(termSum, answer);   // måste dela upp, inte bara skriva svaret
       const finalOK = !isNaN(finalVal) && near(finalVal, answer);
@@ -724,7 +523,6 @@ function renderTalsorternaAdd(body, metod, backFn){
 
   render();
 }
-
 
 // --- METOD: FLYTTA ÖVER (addition) ---
 function renderFlyttaOver(body, metod, backFn){
@@ -835,7 +633,7 @@ function renderFlyttaOver(body, metod, backFn){
       flEl.disabled=true;
       document.getElementById('fo-check').disabled=true;
 
-      var ts = getTutorScore('add','metod'); ts.total++;
+      var ts = getTutorScore('add-metoder','metod'); ts.total++;
       var flyttStammer = flytt>0 && ((near(aVal,a+flytt) && near(bVal,b-flytt)) || (near(aVal,a-flytt) && near(bVal,b+flytt)));
       var mellanledOK  = !isNaN(aVal) && !isNaN(bVal) && near(aVal+bVal, answer);
       var sumOK        = !isNaN(sumVal) && near(sumVal, answer);
@@ -866,81 +664,6 @@ function renderFlyttaOver(body, metod, backFn){
 
   render();
 }
-
-// ============================================================
-// SUBTRAKTION: RÄKNA
-// ============================================================
-function renderSubRakna(body){
-  let level = 1;
-  let omgang = [];
-  let idx = 0;
-  let omgangResults = [];
-
-  function genOmgang(){
-    const seen = new Set();
-    const items = [];
-    let attempts = 0;
-    while(items.length < 8 && attempts < 200){
-      attempts++;
-      const task = genSubTask(level);
-      const key = `${task.a}-${task.b}`;
-      if(!seen.has(key)){ seen.add(key); items.push(task); }
-    }
-    return items;
-  }
-
-  function render(){
-    if(idx >= omgang.length){
-      const right = omgangResults.filter(x=>x).length;
-      const total = omgangResults.length;
-      const adj = adjustLevel(level, right, total);
-      level = adj.level;
-      body.innerHTML = `<div class="exercise-card">${exerciseHeader('Räkna · subtraktion', `Du klarade ${right} av ${total}.`, level)}${renderSummaryCard({right, total, level, levelChange: adj.change})}</div>`;
-      document.getElementById('summary-next-btn').onclick = ()=>{ omgang=genOmgang(); idx=0; omgangResults=[]; render(); };
-      return;
-    }
-    const task = omgang[idx];
-    body.innerHTML = `
-      <div class="exercise-card">
-        ${exerciseHeader('Räkna · subtraktion', 'Räkna ut differensen.', level)}
-        ${renderScoreBarSimple(omgangResults.filter(x=>x).length, omgangResults.filter(x=>!x).length, omgang.length, idx)}
-        <div class="rakna-uppdela-task">
-          <div class="rakna-uppdela-line" style="font-size:28px;gap:14px;padding:24px;">
-            <span class="rakna-uppdela-target">${task.a}</span>
-            <span style="color:var(--ink-soft);font-weight:600;">−</span>
-            <span class="rakna-uppdela-target">${task.b}</span>
-            <span style="color:var(--ink-soft);">=</span>
-            <input type="text" class="rakna-factor-input" id="main-input" inputmode="numeric" maxlength="6" style="width:90px;">
-          </div>
-          <div class="rakna-uppdela-feedback" id="fb"></div>
-          <div style="margin-top:14px;text-align:center;"><button class="btn primary" id="check-btn">Kontrollera</button></div>
-        </div>
-      </div>
-    `;
-    const inp = document.getElementById('main-input');
-    const check = ()=>{
-      const val = parseInt(inp.value.trim());
-      const fb = document.getElementById('fb'); fb.classList.add('show');
-      inp.disabled = true; document.getElementById('check-btn').disabled = true;
-      const ts = getTutorScore('sub-rakna','rakna'); ts.total++;
-      const tsGr = getTutorScore('sub-rakna','enkel'); tsGr.total++;
-      if(val === task.answer){
-        inp.classList.add('correct'); fb.classList.add('correct'); fb.textContent = `Rätt! ${task.a} − ${task.b} = ${task.answer}`;
-        ts.correct++; tsGr.correct++; omgangResults.push(true);
-      } else {
-        inp.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = `${task.a} − ${task.b} = ${task.answer}`;
-        omgangResults.push(false);
-      }
-      setTimeout(()=>{ idx++; render(); }, 1600);
-    };
-    document.getElementById('check-btn').onclick = check;
-    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault();check();} });
-    setTimeout(()=>inp.focus(), 50);
-  }
-  omgang = genOmgang();
-  render();
-}
-
 // ============================================================
 // SUBTRAKTION: METOD
 // Tre metoder: uppställning, öka-och-minska-lika, addition-bakifran
@@ -1004,7 +727,6 @@ function renderSubMetod(body){
 
   renderValjMetod();
 }
-
 
 // --- SUB METOD: UPPSTÄLLNING (subtraktion) ---
 // 15 nivåer: heltal (1-10) + decimaltal (11-15)
@@ -1295,7 +1017,6 @@ function renderUppstallningSubEnkel(body, metod, backFn){
 
   render();
 }
-
 
 // --- SUB METOD: ÖKA OCH MINSKA LIKA ---
 function renderOkaMinska(body, metod, backFn){
@@ -1606,83 +1327,3 @@ function renderAdditionBakifran(body, metod, backFn){
   }
   render();
 }
-
-// ============================================================
-// RÄKNETRÄNING ADD/SUB (blandat, adaptiv)
-// ============================================================
-function renderRaknetraningAS(body){
-  let level = 1;
-  let omgang = [];
-  let idx = 0;
-  let omgangResults = [];
-
-  function genOmgang(){
-    const seen = new Set();
-    const items = [];
-    let attempts = 0;
-    while(items.length < 10 && attempts < 300){
-      attempts++;
-      const useAdd = Math.random() < 0.5;
-      const task = useAdd ? genAddTask(level) : genSubTask(level);
-      const key = `${task.a}${task.op}${task.b}`;
-      if(!seen.has(key)){ seen.add(key); items.push(task); }
-    }
-    return items;
-  }
-
-  function render(){
-    if(idx >= omgang.length){
-      const right = omgangResults.filter(x=>x).length;
-      const total = omgangResults.length;
-      const adj = adjustLevel(level, right, total);
-      level = adj.level;
-      body.innerHTML = `<div class="exercise-card">${exerciseHeader('Räkneträning · add & sub', `Du klarade ${right} av ${total}.`, level)}${renderSummaryCard({right, total, level, levelChange: adj.change})}</div>`;
-      document.getElementById('summary-next-btn').onclick = ()=>{ omgang=genOmgang(); idx=0; omgangResults=[]; render(); };
-      return;
-    }
-    const task = omgang[idx];
-    body.innerHTML = `
-      <div class="exercise-card">
-        ${exerciseHeader('Räkneträning · addition och subtraktion', 'Välj valfri metod.', level)}
-        ${renderScoreBarSimple(omgangResults.filter(x=>x).length, omgangResults.filter(x=>!x).length, omgang.length, idx)}
-        <div class="rakna-uppdela-task">
-          <div class="rakna-uppdela-line" style="font-size:28px;gap:14px;padding:24px;">
-            <span class="rakna-uppdela-target">${task.a}</span>
-            <span style="color:var(--ink-soft);font-weight:600;">${task.op}</span>
-            <span class="rakna-uppdela-target">${task.b}</span>
-            <span style="color:var(--ink-soft);">=</span>
-            <input type="text" class="rakna-factor-input" id="main-input" inputmode="numeric" maxlength="6" style="width:90px;">
-          </div>
-          <div class="rakna-uppdela-feedback" id="fb"></div>
-          <div style="margin-top:14px;text-align:center;"><button class="btn primary" id="check-btn">Kontrollera</button></div>
-        </div>
-      </div>
-    `;
-    const inp = document.getElementById('main-input');
-    const check = ()=>{
-      const val = parseInt(inp.value.trim());
-      const fb = document.getElementById('fb'); fb.classList.add('show');
-      inp.disabled = true; document.getElementById('check-btn').disabled = true;
-      const ts = getTutorScore('raknetraning-as','rakna'); ts.total++;
-      if(val === task.answer){
-        inp.classList.add('correct'); fb.classList.add('correct'); fb.textContent = `Rätt! ${task.a} ${task.op} ${task.b} = ${task.answer}`;
-        ts.correct++; omgangResults.push(true);
-      } else {
-        inp.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = `${task.a} ${task.op} ${task.b} = ${task.answer}`;
-        omgangResults.push(false);
-      }
-      setTimeout(()=>{ idx++; render(); }, 1600);
-    };
-    document.getElementById('check-btn').onclick = check;
-    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault();check();} });
-    setTimeout(()=>inp.focus(), 50);
-  }
-  omgang = genOmgang();
-  render();
-}
-
-
-// ============================================================
-// DEL 3 – ÖVNINGAR: BEGREPP FÖR MULTIPLIKATION
-// ============================================================
-
