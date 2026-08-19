@@ -282,8 +282,10 @@
       var ins = Array.prototype.slice.call(mount.querySelectorAll('input:not([disabled])')), i = ins.indexOf(e.target);
       if(i > -1 && ins[i + 1]) ins[i + 1].focus();
     });
-    // initial spegling om en ruta redan har fokus vid montering
-    if(active){ var d0 = arOrdruta(active, doljSel); if(kp) kp.classList.toggle('keypad-hidden', d0); }
+    // Keypaden är SYNLIG som standard; döljs först när en ordsvars-ruta FAKTISKT har fokus (ej bara
+    // för att sidans första ruta råkar vara ett ordsvar). Kolla document.activeElement, inte första input.
+    var _af = document.activeElement;
+    if(kp) kp.classList.toggle('keypad-hidden', !!(_af && _af.tagName === 'INPUT' && arOrdruta(_af, doljSel)));
   }
 
   window.AK8_UI = {
