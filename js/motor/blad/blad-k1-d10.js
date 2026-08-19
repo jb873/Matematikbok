@@ -1167,9 +1167,9 @@ var PLUGG_DOKUMENT = {
         {typ:'ordna', tal:['0,1','2,5','0,5','3,0','0,4'], ordning:['0,1','0,4','0,5','2,5','3,0']}
       ]},
       {rubrik:'Skriv talen i utvecklad form', rader:[
-        {typ:'text', fraga:'176', svar:'1·100+7·10+6·1', accept:['1·100+7·10+6·1','100+70+6']},
-        {typ:'text', fraga:'34,6', svar:'3·10+4·1+6·0,1', accept:['3·10+4·1+6·0,1','30+4+0,6']},
-        {typ:'text', fraga:'8702', svar:'8·1000+7·100+2·1', accept:['8·1000+7·100+2·1','8000+700+2']}
+        {typ:'text', fraga:'176', svar:'1·100+7·10+6·1', accept:['1·100+7·10+6·1']},
+        {typ:'text', fraga:'34,6', svar:'3·10+4·1+6·0,1', accept:['3·10+4·1+6·0,1','3·10+4·1+6·0.1']},
+        {typ:'text', fraga:'8702', svar:'8·1000+7·100+2·1', accept:['8·1000+7·100+2·1']}
       ]},
       {rubrik:'Skriv talen på vanligt sätt', rader:[
         {typ:'enkel', vansterText:'5 · 10 =', svar:50},
@@ -1191,9 +1191,9 @@ var PLUGG_DOKUMENT = {
         {typ:'ordna', tal:['1,023','1,2','1,32','1,03'], ordning:['1,023','1,03','1,2','1,32']}
       ]},
       {rubrik:'Skriv i utvecklad form', rader:[
-        {typ:'text', fraga:'657', svar:'6·100+5·10+7·1', accept:['6·100+5·10+7·1','600+50+7']},
-        {typ:'text', fraga:'23,4', svar:'2·10+3·1+4·0,1', accept:['2·10+3·1+4·0,1','20+3+0,4']},
-        {typ:'text', fraga:'4,72', svar:'4·1+7·0,1+2·0,01', accept:['4·1+7·0,1+2·0,01','4+0,7+0,02']}
+        {typ:'text', fraga:'657', svar:'6·100+5·10+7·1', accept:['6·100+5·10+7·1']},
+        {typ:'text', fraga:'23,4', svar:'2·10+3·1+4·0,1', accept:['2·10+3·1+4·0,1','2·10+3·1+4·0.1']},
+        {typ:'text', fraga:'4,72', svar:'4·1+7·0,1+2·0,01', accept:['4·1+7·0,1+2·0,01','4·1+7·0.1+2·0.01']}
       ]},
       {rubrik:'Använd siffrorna 7, 5, 8 och 4', rader:[
         {typ:'text', fraga:'Skriv det största talet du kan', svar:'8754'},

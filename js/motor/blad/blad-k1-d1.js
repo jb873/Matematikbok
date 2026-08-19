@@ -953,11 +953,11 @@ var TIO_A = {
   titel:'Tiosystemet – Blad A', stegvis:true,
   intro:'Träna på siffrans värde, att bygga tal, utvecklad form och decimaltal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'Vilket värde har sjuan i talet?', rader:[
-      {typ:'enkel', vansterText:'74',     svar:70},
-      {typ:'enkel', vansterText:'67',     svar:7},
-      {typ:'enkel', vansterText:'17 523', svar:7000},
-      {typ:'enkel', vansterText:'73 508', svar:70000}
+    {rubrik:'Vilket platsvärde har sjuan i talet?', rader:[
+      {typ:'ordtext', fraga:'74', svar:'tiotal', accept:['tiotal','tiotalet']},
+      {typ:'ordtext', fraga:'67', svar:'ental', accept:['ental','entalet']},
+      {typ:'ordtext', fraga:'17 523', svar:'tusental', accept:['tusental','tusentalet']},
+      {typ:'ordtext', fraga:'73 508', svar:'tiotusental', accept:['tiotusental','tiotusentalet']}
     ]},
     {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'7 hundratal, 6 tiotal och 3 ental', svar:763},
@@ -981,12 +981,12 @@ var TIO_A = {
       {typ:'uttryck', likhet:true, fraga:'43',   svar:'4·10+3·1',       accept:['4·10+3·1']},
       {typ:'uttryck', likhet:true, fraga:'5608', svar:'5·1000+6·100+8·1', accept:['5·1000+6·100+8·1']}
     ]},
-    {rubrik:'Vilket värde har trean?', rader:[
-      {typ:'enkel', vansterText:'703',    svar:3},
-      {typ:'enkel', vansterText:'12,03',  svar:0.03},
-      {typ:'enkel', vansterText:'14,36',  svar:0.3},
-      {typ:'enkel', vansterText:'348,12', svar:300},
-      {typ:'enkel', vansterText:'1,003',  svar:0.003}
+    {rubrik:'Vilket platsvärde har trean?', rader:[
+      {typ:'ordtext', fraga:'703', svar:'ental', accept:['ental','entalet']},
+      {typ:'ordtext', fraga:'12,03', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']},
+      {typ:'ordtext', fraga:'14,36', svar:'tiondel', accept:['tiondel','tiondelar','tiondelen']},
+      {typ:'ordtext', fraga:'348,12', svar:'hundratal', accept:['hundratal','hundratalet']},
+      {typ:'ordtext', fraga:'1,003', svar:'tusendel', accept:['tusendel','tusendelar','tusendelen']}
     ]},
     {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'3 ental och 2 tiondelar',                 svar:3.2},
@@ -994,11 +994,11 @@ var TIO_A = {
       {typ:'enkel', vansterText:'2 tiondelar och 4 hundradelar',           svar:0.24},
       {typ:'enkel', vansterText:'6 ental, 9 tiondelar och 7 tusendelar',   svar:6.907}
     ]},
-    {rubrik:'Vilket värde har trean i talet?', rader:[
-      {typ:'enkel', vansterText:'35,2',  svar:30},
-      {typ:'enkel', vansterText:'5,34',  svar:0.3},
-      {typ:'enkel', vansterText:'6,036',  svar:0.03},
-      {typ:'enkel', vansterText:'7,0837', svar:0.03}
+    {rubrik:'Vilket platsvärde har trean i talet?', rader:[
+      {typ:'ordtext', fraga:'35,2', svar:'tiotal', accept:['tiotal','tiotalet']},
+      {typ:'ordtext', fraga:'5,34', svar:'tiondel', accept:['tiondel','tiondelar','tiondelen']},
+      {typ:'ordtext', fraga:'6,036', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']},
+      {typ:'ordtext', fraga:'7,0837', svar:'tusendel', accept:['tusendel','tusendelar','tusendelen']}
     ]},
     {rubrik:'Skriv som tal', rader:[
       {typ:'enkel', vansterText:'17 tiotal',     svar:170},
@@ -1024,11 +1024,11 @@ var TIO_B = {
   titel:'Tiosystemet – Blad B', stegvis:true,
   intro:'Samma slags uppgifter som Blad A, men med andra tal. Skriv decimaltal med komma. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'Vilket värde har femman i talet?', rader:[
-      {typ:'enkel', vansterText:'52',     svar:50},
-      {typ:'enkel', vansterText:'85',     svar:5},
-      {typ:'enkel', vansterText:'45 217', svar:5000},
-      {typ:'enkel', vansterText:'56 304', svar:50000}
+    {rubrik:'Vilket platsvärde har femman i talet?', rader:[
+      {typ:'ordtext', fraga:'52', svar:'tiotal', accept:['tiotal','tiotalet']},
+      {typ:'ordtext', fraga:'85', svar:'ental', accept:['ental','entalet']},
+      {typ:'ordtext', fraga:'45 217', svar:'tusental', accept:['tusental','tusentalet']},
+      {typ:'ordtext', fraga:'56 304', svar:'tiotusental', accept:['tiotusental','tiotusentalet']}
     ]},
     {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'8 hundratal, 3 tiotal och 9 ental', svar:839},
@@ -1052,12 +1052,12 @@ var TIO_B = {
       {typ:'uttryck', likhet:true, fraga:'72',   svar:'7·10+2·1',       accept:['7·10+2·1']},
       {typ:'uttryck', likhet:true, fraga:'4309', svar:'4·1000+3·100+9·1', accept:['4·1000+3·100+9·1']}
     ]},
-    {rubrik:'Vilket värde har sexan?', rader:[
-      {typ:'enkel', vansterText:'608',    svar:600},
-      {typ:'enkel', vansterText:'23,06',  svar:0.06},
-      {typ:'enkel', vansterText:'17,68',  svar:0.6},
-      {typ:'enkel', vansterText:'651,29', svar:600},
-      {typ:'enkel', vansterText:'2,006',  svar:0.006}
+    {rubrik:'Vilket platsvärde har sexan?', rader:[
+      {typ:'ordtext', fraga:'608', svar:'hundratal', accept:['hundratal','hundratalet']},
+      {typ:'ordtext', fraga:'23,06', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']},
+      {typ:'ordtext', fraga:'17,68', svar:'tiondel', accept:['tiondel','tiondelar','tiondelen']},
+      {typ:'ordtext', fraga:'651,29', svar:'hundratal', accept:['hundratal','hundratalet']},
+      {typ:'ordtext', fraga:'2,006', svar:'tusendel', accept:['tusendel','tusendelar','tusendelen']}
     ]},
     {rubrik:'Skriv det tal som består av', rader:[
       {typ:'enkel', vansterText:'5 ental och 4 tiondelar',                 svar:5.4},
@@ -1065,11 +1065,11 @@ var TIO_B = {
       {typ:'enkel', vansterText:'3 tiondelar och 7 hundradelar',           svar:0.37},
       {typ:'enkel', vansterText:'4 ental, 2 tiondelar och 5 tusendelar',   svar:4.205}
     ]},
-    {rubrik:'Vilket värde har sexan i talet?', rader:[
-      {typ:'enkel', vansterText:'6,42',   svar:6},
-      {typ:'enkel', vansterText:'902,6',  svar:0.6},
-      {typ:'enkel', vansterText:'8,062',  svar:0.06},
-      {typ:'enkel', vansterText:'3,0625', svar:0.06}
+    {rubrik:'Vilket platsvärde har sexan i talet?', rader:[
+      {typ:'ordtext', fraga:'6,42', svar:'ental', accept:['ental','entalet']},
+      {typ:'ordtext', fraga:'902,6', svar:'tiondel', accept:['tiondel','tiondelar','tiondelen']},
+      {typ:'ordtext', fraga:'8,062', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']},
+      {typ:'ordtext', fraga:'3,0625', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']}
     ]},
     {rubrik:'Skriv som tal', rader:[
       {typ:'enkel', vansterText:'14 tiotal',      svar:140},

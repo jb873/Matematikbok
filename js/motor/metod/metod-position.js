@@ -10,43 +10,6 @@ function renderPositionBegrepp(body){
     {namn:'tiotal', faktor:10}, {namn:'ental', faktor:1},
     {namn:'tiondel', faktor:0.1}, {namn:'hundradel', faktor:0.01}, {namn:'tusendel', faktor:0.001}
   ];
-  var PLATSVARDE = {
-    header:'Platsvärde', formagaKey:'begrepp', koId:'position', scoreKey:'platsvarde',
-    sub:'Vilket värde har den markerade siffran?', backLabel:'Tillbaka till kategorier', ops:[','],
-    exempel:'<strong>Tänk så här:</strong> Varje plats har ett värde.<br>'
-      +'<span class="ex-rad">I 4&nbsp;367 har 3:an värdet 300.</span><br>'
-      +'<span class="ex-rad">I 9,28 har 8:an värdet 0,08.</span>',
-    gen:function(level){
-      var dec = level===1?0 : (level===2?2:3);
-      var intSiffror = level===1? d3RandInt(3,4) : 2;
-      var heltalDel='';
-      for(var i=0;i<intSiffror;i++) heltalDel += String(d3RandInt(i===0?1:0,9));
-      var decDel='';
-      for(var j=0;j<dec;j++) decDel += String(d3RandInt(0,9));
-      var talStr = dec? heltalDel+','+decDel : heltalDel;
-      // välj en position som inte är 0
-      var alla = (heltalDel+decDel).split('');
-      var posIdx; var guard=0;
-      do { posIdx = d3RandInt(0, alla.length-1); guard++; } while(alla[posIdx]==='0' && guard<20);
-      var siffra = alla[posIdx];
-      // räkna ut platsvärde: position relativt decimalkomma
-      var heltalLen = heltalDel.length;
-      var exponent = heltalLen - 1 - posIdx; // 0=ental
-      var varde = parseInt(siffra,10) * Math.pow(10, exponent);
-      varde = Math.round(varde*1e6)/1e6;
-      // markera siffran i visning
-      var visa='';
-      var allaMedKomma = talStr.split('');
-      var rawIdx=0;
-      for(var k=0;k<allaMedKomma.length;k++){
-        if(allaMedKomma[k]===','){ visa+=','; continue; }
-        if(rawIdx===posIdx) visa+='<span class="pos-markerad">'+allaMedKomma[k]+'</span>';
-        else visa+=allaMedKomma[k];
-        rawIdx++;
-      }
-      return {display:'Vilket värde har '+visa+' ?', answerNum:varde, answerStr:posKomma(varde)};
-    }
-  };
   var SKRIVTAL = {
     header:'Skriv talet med siffror', formagaKey:'begrepp', koId:'position', scoreKey:'skrivtal',
     sub:'Sätt ihop talet från platsvärdena.', backLabel:'Tillbaka till kategorier', ops:[','],
@@ -57,7 +20,7 @@ function renderPositionBegrepp(body){
   };
   function picker(){
     var kort=[
-      {id:'platsvarde', nr:1, namn:'Platsvärde', desc:'Vilket värde har den markerade siffran?'},
+      {id:'platsvarde', nr:1, namn:'Platsvärde', desc:'Vilket platsvärde har den markerade siffran?'},
       {id:'skrivtal', nr:2, namn:'Skriv talet med siffror', desc:'3 ental, 5 hundradelar … = 3,05'}
     ];
     body.innerHTML='<div class="exercise-card">'
