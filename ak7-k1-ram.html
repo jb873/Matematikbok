@@ -1276,6 +1276,10 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .test-sub-binary-btn.is-selected{
   background:var(--primary-bg);border-color:var(--primary);color:var(--primary);
 }
+.test-sub-markera-row{display:flex;gap:8px;flex-wrap:wrap}
+.test-sub-markera-btn{min-width:56px;padding:10px 16px;border:2px solid var(--line);background:#fff;border-radius:var(--radius);cursor:pointer;font-size:16px;font-family:var(--sans);font-weight:600;color:var(--ink);transition:all .15s}
+.test-sub-markera-btn:hover{border-color:var(--ink-soft)}
+.test-sub-markera-btn.is-selected{background:var(--primary-bg);border-color:var(--primary);color:var(--primary)}
 .test-sub-clues{
   margin:8px 0;padding-left:20px;color:var(--ink-soft);
   font-size:14px;line-height:1.6;
@@ -3846,30 +3850,35 @@ const TEST_GENERATORS = {
   // ── delbarhet (Väg A: bespoke test-generator som återanvänder befintlig matte, ingen motor rörd) ──
   delbarhet: {
     snabb: [
-      // Är talet delbart med d? (binary) — samma sub-typ som primtal-binary, rättas av gradeSub.
+      // Markera de tal som är delbara med d (markera-flera), som öva-bladet: sex tal, 2–4 rätta
+      // (varierar → eleven kan inte utgå från ett fast antal). Speglar öva d10/EGEN "klicka på dem".
       function genDelbar(seen){
-        const delare = [2,3,4,5,6,9,10], bank = [];
-        for(let n=12;n<=99;n++) delare.forEach(d => bank.push({n:n,d:d}));
-        const pool = bank.filter(x => !seen.has('db-'+x.n+'-'+x.d));
-        if(pool.length < 4) return null;
-        const picked = shuffle(pool).slice(0,4);
-        picked.forEach(x => seen.add('db-'+x.n+'-'+x.d));
-        return {
-          generator: 'delbar-binary',
-          title: 'Är talet delbart? Svara Ja eller Nej.',
-          omrade: 'delbarhet',
-          subs: picked.map((x,i) => ({
-            label: String.fromCharCode(97+i) + ')',
-            type: 'binary',
-            q: 'Är ' + x.n + ' delbart med ' + x.d + '?',
-            prompt: 'Är ' + x.n + ' delbart med ' + x.d + '?',
-            options: ['Ja', 'Nej'],
-            answer: (x.n % x.d === 0) ? 'Ja' : 'Nej',
-            explanation: (x.n % x.d === 0)
-              ? x.n + ' = ' + x.d + ' · ' + (x.n / x.d) + ', alltså delbart med ' + x.d + '.'
-              : x.n + ' delat med ' + x.d + ' går inte jämnt ut (rest ' + (x.n % x.d) + ').'
-          }))
-        };
+        const delare = [2,3,4,5,6,9,10];
+        const subs = []; let tries = 0;
+        while(subs.length < 3 && tries < 80){
+          tries++;
+          const d = randPick(delare);
+          const antalRatta = rInt(2,4);
+          const mult = []; for(let n=Math.ceil(12/d)*d; n<=99; n+=d) mult.push(n);
+          const nonMult = []; for(let n=12;n<=99;n++) if(n % d !== 0) nonMult.push(n);
+          if(mult.length < antalRatta || nonMult.length < 6-antalRatta) continue;
+          const ratta = shuffle(mult).slice(0, antalRatta);
+          const fel = shuffle(nonMult).slice(0, 6-antalRatta);
+          const tal = shuffle(ratta.concat(fel));
+          const key = 'db-'+d+'-'+tal.slice().sort((a,b)=>a-b).join(',');
+          if(seen.has(key)) continue;
+          seen.add(key);
+          const korrekt = tal.filter(n => n % d === 0);
+          subs.push({
+            label: String.fromCharCode(97+subs.length) + ')',
+            type: 'markera',
+            prompt: 'Markera de tal som är delbara med ' + d + '.',
+            options: tal.map(String),
+            correct: korrekt.map(String),
+            explanation: 'Delbara med ' + d + ': ' + korrekt.join(', ') + '.'
+          });
+        }
+        return subs.length ? {generator:'delbar-binary', title:'Vilka tal är delbara?', omrade:'delbarhet', subs:subs} : null;
       },
 
       // delbarhet:begrepp — siffersumma (compute-and-check, återanvänder heltalsaritmetik)
@@ -3935,12 +3944,11 @@ const TEST_GENERATORS = {
           const key = 'pv-'+tal+'-'+p.exp;
           if(seen.has(key)) continue;
           seen.add(key);
-          // Facit = platsens NAMN (bokstäver): 7:an i 72 → tiotal, inte 70. Speglar åk8 + öva-bladets chip-format.
+          // Eleven SKRIVER platsvärdets ord (7:an i 72 → tiotal), som öva-bladen k1 (d1 ordtext, d10 text).
+          // Ej flerval. Rättas ordbaserat (tål plural/böjning).
           subs.push({
-            label: String.fromCharCode(97+subs.length)+')', type: 'binary',
-            q: 'siffran ' + siffra + ' i ' + komma(tal),
+            label: String.fromCharCode(97+subs.length)+')', type: 'ordsvar',
             prompt: 'Vilket platsvärde har siffran ' + siffra + ' i talet ' + komma(tal) + '?',
-            options: shuffle(platser.map(function(x){ return x.namn; })),
             answer: p.namn,
             explanation: 'Siffran ' + siffra + ' står på ' + p.namn + '-platsen (värdet ' + komma(varde) + ').'
           });

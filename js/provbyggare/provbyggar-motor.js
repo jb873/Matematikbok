@@ -365,6 +365,23 @@ function renderSubInput(qNum, subIdx, s){
         <input type="text" class="test-sub-input" style="width:230px;text-align:left;padding:0 10px;" placeholder="utvecklad form" data-sub-input="${idBase}-str">
       </div>
     `;
+  } else if(s.type === 'markera'){
+    // Markera FLERA tal som uppfyller villkoret (klicka-toggle). Speglar öva-bladets markera-flera.
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-markera-row" data-sub-id="${idBase}">
+        ${s.options.map(opt => `<button class="test-sub-markera-btn" data-val="${opt}">${opt}</button>`).join('')}
+      </div>
+    `;
+  } else if(s.type === 'ordsvar'){
+    // Skriv svaret med ORD (t.ex. platsvärde: tiotal). Rättas mot ordet (tål plural/böjning).
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-eq">Svar:</span>
+        <input type="text" class="test-sub-input" data-nokeypad inputmode="text" style="width:170px;text-align:left;padding:0 10px;" placeholder="svar med ord" data-sub-input="${idBase}-ord">
+      </div>
+    `;
   }
 
   return `
@@ -451,6 +468,13 @@ function readSubAnswer(qNum, subIdx, s){
   } else if(s.type === 'utvform'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-str"]`);
     return inp && inp.value.trim() ? inp.value.trim() : null;
+  } else if(s.type === 'markera'){
+    const sel = document.querySelectorAll(`[data-sub-id="${idBase}"] .is-selected`);
+    const vals = Array.prototype.map.call(sel, b => b.dataset.val);
+    return vals.length ? vals : null;
+  } else if(s.type === 'ordsvar'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-ord"]`);
+    return inp && inp.value.trim() ? inp.value.trim() : null;
   }
   return null;
 }
@@ -524,8 +548,18 @@ function restoreSubAnswer(qNum, subIdx, s, val){
     }
   } else if(s.type === 'utvform'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-str"]`); if(inp) inp.value = val;
+  } else if(s.type === 'markera'){
+    if(Array.isArray(val)) val.forEach(v => { const b = document.querySelector(`[data-sub-id="${idBase}"] [data-val="${v}"]`); if(b) b.classList.add('is-selected'); });
+  } else if(s.type === 'ordsvar'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-ord"]`); if(inp) inp.value = val;
   }
 }
+
+// Markera-flera: klick TOGGLAR (flera samtidigt), till skillnad från binary (välj EN).
+document.addEventListener('click', (e) => {
+  const mbtn = e.target.closest('.test-sub-markera-btn');
+  if(mbtn){ mbtn.classList.toggle('is-selected'); return; }
+});
 
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.test-sub-binary-btn');
@@ -670,6 +704,17 @@ function gradeSub(s, ans){
     const _norm = (x) => { var str=String(x).toLowerCase().replace(/[·×*]/g,'').replace(/\s/g,'').replace(/[−–—]/g,'-').replace(/,/g,'.'); var termer=str.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';}); return termer.map(_normTerm).sort().join('+'); };
     return {status: _norm(ans) === _norm(s.answer) ? 'correct' : 'wrong', given: String(ans)};
   }
+  if(s.type === 'markera'){
+    // Markera-flera: EXAKT rätt mängd markerad — alla rätta med, inga fel med.
+    if(!Array.isArray(ans)) return {status:'skipped'};
+    const valt = ans.slice().sort().join(','), ratt = (s.correct || []).slice().sort().join(',');
+    return {status: valt === ratt ? 'correct' : 'wrong', given: ans.join(', ') || '(inga)'};
+  }
+  if(s.type === 'ordsvar'){
+    // Rättas mot ordet, tål plural/böjning (tiotal/tiotalet, tiondel/tiondelar/tiondelen) — som öva-bladet.
+    const _norm = (x) => String(x).toLowerCase().replace(/[^a-zåäö]/g,'').replace(/(arna|erna|ar|er|na|en|et|s)$/,'');
+    return {status: _norm(ans) === _norm(s.answer) ? 'correct' : 'wrong', given: String(ans)};
+  }
   return {status:'skipped'};
 }
 
@@ -694,6 +739,8 @@ function svarSignatur(q){
       case 'intervall':     return 'iv' + s.min + '_' + s.max;
       case 'talfoljd':      return 'tf' + (s.answers || []).join(',');
       case 'utvform':       return 'uv' + s.answer;
+      case 'markera':       return 'mk' + (s.correct || []).slice().sort().join(',');
+      case 'ordsvar':       return 'os' + s.answer;
       default:              return '?';
     }
   });
@@ -778,6 +825,12 @@ function renderReviewSub(sr){
   } else if(sub.type === 'utvform'){
     questionText = `Skriv ${sub.tal} i utvecklad form`;
     correctAnswerText = sub.tal + ' = ' + sub.answer;
+  } else if(sub.type === 'markera'){
+    questionText = sub.prompt;
+    correctAnswerText = (sub.correct || []).join(', ') + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'ordsvar'){
+    questionText = sub.prompt;
+    correctAnswerText = sub.answer + (sub.explanation ? ` — ${sub.explanation}` : '');
   }
 
   return `
