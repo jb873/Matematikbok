@@ -146,7 +146,7 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 /* KEYPAD */
 .keypad{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px 12px;background:#faf8f4;border-top:1px solid #e7e1d6;box-shadow:0 -3px 14px rgba(15,30,46,.08)}
 .keypad-hidden{display:none !important}   /* döljs för ordsvars-rutor */
-#test-take-body{padding-bottom:180px}     /* plats åt den fasta keypaden */
+#test-take-body{}     /* keypad-clearance.js reserverar body-padding mätt mot keypaden */
 .kp-btn{width:46px;height:42px;font-family:var(--mono);font-size:19px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;transition:background .12s;}
 .kp-btn:hover{background:var(--bg-soft);}
 
@@ -540,6 +540,7 @@ if(/[?&]view=test-config/i.test(location.search)){
 <script src="js/motor/ovamer/ovamer-k3.js"></script>
 <!-- MasteryK3-loggning (elev-lokal, localStorage) laddas i head; deeplink-router + #fb-observatör här. -->
 <script src="js/motor/ovamer/k3-mastery-wiring.js"></script>
+<script src="js/motor/keypad-clearance.js"></script>
 <script src="js/elevfeedback.js" defer></script>
 </body>
 </html>

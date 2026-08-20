@@ -1397,6 +1397,10 @@ function renderTestResult(){
   const totalSubs = correctCount + wrongCount + skippedCount;
   const pct = totalSubs > 0 ? Math.round(correctCount / totalSubs * 100) : 0;
 
+  // FAS 2: nästa test i delkapitlet (bara om resultatet kom från ett färdigt test med känt del+nr).
+  // null när man är på det SISTA testet → ingen "Nästa test"-knapp (retur leder tillbaka till översikten).
+  const nastaT = (t.fardigt && t.fardigt.del && t.fardigt.nr && config.nastaTest) ? config.nastaTest(t.fardigt.del, t.fardigt.nr) : null;
+
   // Hitta vilka generatorer som hade fel/överhoppade för föreläsningstips
   const weakGens = new Set();
   graded.forEach(({q, subResults}) => {
@@ -1448,7 +1452,8 @@ function renderTestResult(){
 
     <div class="test-result-actions">
       ${t.fardigt ? `
-        <button class="btn primary" id="new-test">Gör ett nytt test</button>
+        ${nastaT ? `<button class="btn primary" id="nasta-test">Nästa test: ${nastaT.titel} →</button>` : ''}
+        <button class="btn${nastaT ? '' : ' primary'}" id="new-test">Gör ett nytt test</button>
         ${t.fardigt.harderTest ? '<button class="btn" id="level2-test">Test nivå 2</button>' : ''}
         ${t.fardigt.retur ? `<button class="btn subtle" id="retur-test">${t.fardigt.returTxt || '← Tillbaka'}</button>` : ''}
       ` : `
@@ -1479,6 +1484,15 @@ function renderTestResult(){
   // kapitel-vy, som är sjuans). Samma retur som take-back.
   const returBtn = document.getElementById('retur-test');
   if(returBtn) returBtn.onclick = () => { window.location.href = t.fardigt.retur; };
+  // FAS 2: Nästa test → deeplink till nästa i delkapitlet (samma ram, samma retur, ev. embed bevaras).
+  const nastaBtn = document.getElementById('nasta-test');
+  if(nastaBtn) nastaBtn.onclick = () => {
+    const f = t.fardigt;
+    let url = location.pathname + '?view=test-fardigt&del=' + encodeURIComponent(f.del) + '&test=' + (f.nr + 1);
+    if(f.retur) url += '&retur=' + encodeURIComponent(f.retur) + '&retur_txt=' + encodeURIComponent(f.returTxt || '← Tillbaka');
+    if(/[?&]embed=1\b/.test(location.search)) url += '&embed=1';
+    window.location.href = url;
+  };
 
   // Konfetti vid ALLA rätt (åttan, config.rikTestUX) — samma belöning som drillarna.
   if(config.rikTestUX && totalSubs > 0 && pct === 100) visaKonfetti();
@@ -1509,7 +1523,8 @@ function renderTestResult(){
       // för SAMMA delkapitel (samma noder, nya tal), inte provbyggar-configen.
       state.test = { questions: questions, answers: {}, currentIdx: -1, startedAt: Date.now(),
         fardigt: { nodes: cfg.nodes.slice(), antal: cfg.antal, typ: cfg.typ, varianter: o.varianter || null,
-          retur: o.retur || null, returTxt: o.returTxt || null } };
+          retur: o.retur || null, returTxt: o.returTxt || null,
+          del: o.del || null, nr: o.nr || null } };   // FAS 2: delkapitel + testnummer → resultatvyns "Nästa test"
       navTo('test-take');
       return questions.reduce(function(s, q){ return s + q.subs.length; }, 0);   // antal svarbara items
     }

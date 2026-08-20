@@ -1861,7 +1861,7 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 /* ==== DEL 3: SKÄRMTANGENTBORD ==== */
 .keypad{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:10px 12px;background:#faf8f4;border-top:1px solid #e7e1d6;box-shadow:0 -3px 14px rgba(15,30,46,.08)}
 .keypad-hidden{display:none !important}   /* döljs för ordsvars-rutor */
-#test-take-body{padding-bottom:180px}     /* plats åt den fasta keypaden */
+#test-take-body{}     /* keypad-clearance.js reserverar body-padding mätt mot keypaden */
 .keypad-digits{display:grid;grid-template-columns:repeat(3,46px);gap:6px}
 .keypad-ops{display:grid;grid-template-columns:46px;gap:6px;align-content:start}
 .keypad-ops.wide2{grid-template-columns:repeat(2,46px)}
@@ -4679,6 +4679,7 @@ const PB = ProvbyggarMotor.montera({
   genNod:          GEN_NOD,
   forelasningTips: FORELASNING_TIPS,
   rikTestUX:       true,   // sjuan k1: keypad (AK8_UI) + konfetti + variety i test-take (som åttan)
+  nastaTest:       function(del, nr){ return (window.K1_FARDIGA && K1_FARDIGA.nastaTest) ? K1_FARDIGA.nastaTest(del, nr) : null; },   // FAS 2: resultatvyns "Nästa test"
   nav: {
     navTo: navTo, showView: showView,
     updateTutorContext: function(){ state.currentKO = null; state.currentFormaga = null; updateTutorContext(); }
@@ -9426,7 +9427,7 @@ function repSkippaPanel(){
     var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);
     var retur = mret ? decodeURIComponent(mret[1]) : null, returTxt = mrtx ? decodeURIComponent(mrtx[1]) : null;
     renderKapitel();
-    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter, seed: mseed ? parseInt(mseed[1], 10) : null, retur: retur, returTxt: returTxt }); }
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter, seed: mseed ? parseInt(mseed[1], 10) : null, retur: retur, returTxt: returTxt, del: mfd ? mfd[1] : null, nr: mft ? parseInt(mft[1], 10) : 1 }); }
     else { PB.setDel(mfd ? mfd[1] : null); navTo('test-config'); }
     return;
   }
@@ -9497,6 +9498,7 @@ function repSkippaPanel(){
 <script src="js/mastery.js"></script>
 <!-- Engångs-migreringar av mastery-loggen (idempotent, localStorage). Efter mastery.js. -->
 <script src="js/mastery-migrering.js"></script>
+<script src="js/motor/keypad-clearance.js"></script>
 <script src="js/elevfeedback.js" defer></script>
 </body>
 </html>

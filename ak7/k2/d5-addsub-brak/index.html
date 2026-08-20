@@ -322,7 +322,7 @@ h1.hero-title em{font-style:italic;color:var(--gold-lt);}
 }
 .tab-btn:hover{color:var(--ink);}
 .tab-btn.is-active{color:var(--blue);border-bottom-color:var(--blue);}
-.tab-panel{display:none;animation:fadeUp .35s ease both;}
+.tab-panel{display:none;animation:panelIn .35s ease both;}
 .tab-panel.is-active{display:block;}
 
 /* ── FÖRELÄSNINGSKORT ── */
@@ -414,6 +414,7 @@ footer{
 }
 footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 
+@keyframes panelIn{from{opacity:0}to{opacity:1}}
 @keyframes fadeUp{
   from{opacity:0;transform:translateY(18px)}
   to{opacity:1;transform:translateY(0)}
@@ -1053,6 +1054,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 })();
 </script>
 
+<script src="../../../js/motor/keypad-clearance.js"></script>
 <script src="../../../js/elevfeedback.js" defer></script>
 </body>
 </html>

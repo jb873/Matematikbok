@@ -38,8 +38,8 @@
 .kp-pot{ display:inline-flex; align-items:flex-start; }
 .kp-pot-b{ width:14px; height:14px; border:1.6px solid currentColor; border-radius:2px; } .kp-pot-e{ width:8px; height:8px; border:1.6px solid currentColor; border-radius:2px; margin-left:1px; margin-top:-4px; }
 
-/* plats så sista raderna kan scrollas ovanför den fasta keypaden */
-.ovn-wrap{ padding-bottom:300px; }
+/* Bottenutrymme mot den fasta keypaden sätts nu MÄTT på <body> av keypad-clearance.js
+   (varierar med keypadens faktiska höjd). Den gamla gissade .ovn-wrap-paddingen är borttagen. */
 
 /* ══ d5 (Räkna med bråk): förrenderade stående bråk-svar, blandad form, ordna, jämföra, tallinje, andel ══ */
 .ak8-hint{ font-size:13px; color:var(--ink-faint); font-style:italic; margin:0 0 8px; }

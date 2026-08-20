@@ -53,7 +53,7 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
 .kp-key{ height:44px; border:1.5px solid var(--paper-dk); border-radius:8px; background:#fff; font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; transition:transform .08s, background .1s; }
 .kp-key:hover{ background:var(--paper-dk); } .kp-key:active{ transform:scale(.92); }
 .kp-key.op{ color:var(--gold); font-weight:700; } .kp-key.util{ background:var(--paper); color:var(--ink-faint); font-size:15px; } .kp-key.span2{ grid-column:span 2; }
-.pb-view[data-pbv="test-take"]{ padding-bottom:170px; }   /* plats åt den fasta keypaden */
+.pb-view[data-pbv="test-take"]{}   /* keypad-clearance.js reserverar body-padding mätt mot keypaden */
 .pb-konfetti-lager{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:9999; }
 .pb-konfetti{ position:absolute; width:10px; height:14px; top:-30px; border-radius:2px; opacity:0; animation:pb-konfetti-fall linear forwards; }
 @keyframes pb-konfetti-fall{ 0%{ transform:translateY(0) rotate(0deg); opacity:1; } 100%{ transform:translateY(110vh) rotate(720deg); opacity:1; } }
@@ -1141,6 +1141,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
   }
 })();
 </script>
+<script src="js/motor/keypad-clearance.js"></script>
 <script src="js/elevfeedback.js" defer></script>
 </body>
 </html>

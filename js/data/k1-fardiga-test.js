@@ -115,7 +115,15 @@
     panelEl.innerHTML = html;
   }
 
-  window.K1_FARDIGA = { BYGGBARA: BYGGBARA, byggbaraNoder: byggbaraNoder, tester: tester, renderTestFlik: renderTestFlik };
+  // FAS 2: nästa test i delkapitlets lista (samma ordning som renderTestFlik). nr = 1-baserat nummer
+  // på testet som just kördes. Returnerar { titel, nr } för nästa, eller null om nr var det SISTA.
+  function nastaTest(del, nr){
+    var t = tester(del); var i = (nr | 0);   // nästa index (0-baserat) = nr, eftersom current är nr-1
+    if(!t.length || i < 1 || i >= t.length) return null;   // sista test (eller okänt) → ingen nästa
+    return { titel: t[i].titel, nr: i + 1, antal: t[i].antal };
+  }
+
+  window.K1_FARDIGA = { BYGGBARA: BYGGBARA, byggbaraNoder: byggbaraNoder, tester: tester, nastaTest: nastaTest, renderTestFlik: renderTestFlik };
 
   // Auto-init på delkapitel-sidor: finns en Test-flik-panel + del-id i URL → rendera Test-knapparna.
   // Ramen (ak7-k1-ram.html) saknar denna panel → hoppas; den wirar färdiga test via boot-deeplinken.

@@ -41,7 +41,7 @@
   .varv-banner{ display:flex; gap:10px; align-items:flex-start; background:#fbf4e4; border:1px solid var(--paper-dk); border-left:4px solid var(--gold-lt); border-radius:8px; padding:12px 16px; color:var(--ink-soft); font-size:13.5px; margin:0 0 18px; }
 
   /* ── BLAD (monterat på AK8_UI: bas-stilar; ak8-blad-ui.css länkas för keypad/cell/mark) ── */
-  .ovn-wrap{ padding-bottom:320px; }                              /* plats ovanför den fasta keypaden */
+  /* keypad-clearance.js reserverar body-padding mätt mot keypaden (gissad .ovn-wrap-padding borttagen) */
   .ovn-sheet{ background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:22px 26px; }
   .ovn-grupp{ margin-top:20px; } .ovn-grupp:first-of-type{ margin-top:2px; }
   .ovn-grupp-rubrik{ font-size:17px; font-weight:600; margin-bottom:8px; color:var(--ink); }
@@ -315,6 +315,7 @@
     hubEl.classList.add('hidden'); docEl.classList.remove('hidden'); renderDoc(h, posFor(h).pos); } })();
 })();
 </script>
+<script src="../../js/motor/keypad-clearance.js"></script>
 <script src="../../js/elevfeedback.js" defer></script>
 </body>
 </html>
