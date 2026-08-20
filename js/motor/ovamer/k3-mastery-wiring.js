@@ -34,9 +34,25 @@
 
   // ── 1. Router ──
   function route(){
-    if(nod && DEEPLINK[nod] && typeof oppnaGrupp === 'function'){ oppnaGrupp(DEEPLINK[nod][0], DEEPLINK[nod][1]); }
+    if(nod && DEEPLINK[nod] && typeof oppnaGrupp === 'function'){ oppnaGrupp(DEEPLINK[nod][0], DEEPLINK[nod][1]); injiceraTillKarta(); }
     else if(nod && typeof renderOversikt === 'function'){ renderOversikt(); }   // okänd deeplink → översikt
     // ingen deeplink: ramen renderade redan översikten (ak7-k3-ram.html:450)
+  }
+
+  // FAS 4: väg tillbaka till begreppskartan från k3-drillen (hero-backen döljs av oppnaGrupp).
+  // Med retur → dit eleven kom; utan → neutral fallback. INTE i embed (arbetssidan äger navet).
+  function injiceraTillKarta(){
+    try {
+      var hs = location.search;
+      if(/[?&]embed=1\b/.test(hs)) return;
+      var app = document.getElementById('app'); if(!app || document.getElementById('till-karta-back')) return;
+      var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);
+      var url = mret ? decodeURIComponent(mret[1]) : 'ak7/k3/kunskapslage/index.html';
+      var txt = (mret && mrtx) ? decodeURIComponent(mrtx[1]) : '← Till kunskapsläget';
+      var a = document.createElement('a');
+      a.id = 'till-karta-back'; a.className = 'hero-back till-karta-back'; a.setAttribute('href', url); a.textContent = txt;
+      app.insertBefore(a, app.firstChild);
+    } catch(e){}
   }
 
   // ── 2. Observerande loggning (bara för en wirad nod) ──
