@@ -132,6 +132,7 @@
     var svar = mount.querySelectorAll('.ak8-svar[data-idx]'), tot = 0, ratt = 0;
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
+      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
       el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       var rad = el.closest('.ak8-rad'); AK8_UI.markera(rad || el, res.ok);

@@ -192,6 +192,15 @@
     var f = rowEl.querySelector('.ak8-fasit'); if(f) f.remove();
     var oram = rowEl.querySelector('.ak8-ok-ram, .ak8-fel-ram'); if(oram) oram.classList.remove('ak8-ok-ram', 'ak8-fel-ram');
   }
+  // Är svars-elementet BESVARAT? (minst en ifylld ruta eller ett markerat val). Kontrollera ska
+  // bara rätta det som är ifyllt → "X av Y" räknar besvarade, inte alla (obesvarade hoppas över).
+  function besvarad(el){
+    if(!el) return false;
+    if(el.querySelector('.sel')) return true;   // markerat val (korval/chip/tal/vf/ordna)
+    var ins = el.querySelectorAll('.ak8-in');
+    for(var i = 0; i < ins.length; i++){ if(ins[i].value && ins[i].value.trim()) return true; }
+    return false;
+  }
 
   // ── BIND (efter mount.innerHTML): keypad + grow + fokus + enter + clear-on-edit + skriv-ut ──
   function bindSheet(mount, opts){
@@ -295,6 +304,6 @@
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
-    markera: markera, rensaRad: rensaRad
+    markera: markera, rensaRad: rensaRad, besvarad: besvarad
   };
 })();

@@ -329,6 +329,7 @@
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;   // flaggad rad utan facit — räknas ej
+      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
       el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); });
       var old = el.parentNode.querySelector('.ak8-fasit'); if(old) old.remove();

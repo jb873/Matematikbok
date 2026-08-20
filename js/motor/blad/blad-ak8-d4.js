@@ -421,6 +421,7 @@
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;
+      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
       if(res.korval){ var s = el.querySelector('.ak8-korval.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel'); }
       else { el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }

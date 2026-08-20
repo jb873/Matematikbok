@@ -804,13 +804,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     }
     return subs.length ? { generator:'pot-skrivmult', title:'Skriv potensen som upprepad multiplikation', omrade:'pot-begrepp:skriva', subs:subs } : null;
   } ] },
-  // Potenser · fyll i potenstabellen, samma bas (numeric) → pot-begrepp:tabell
-  'pot-begrepp:tabell': { snabb: [ function genPotenstabell(seen){
-    var b = ri(2,6), tries = 0; while(seen.has('pt-bas-'+b) && tries<10){ b = ri(2,6); tries++; }
-    seen.add('pt-bas-'+b);
-    var subs = [1,2,3,4].map(function(e,i){ return { label:String.fromCharCode(97+i)+')', type:'numeric', prompt:b+'^'+e, answer:Math.pow(b,e), explanation:b+'^'+e+' = '+Math.pow(b,e)+'.' }; });
-    return { generator:'pot-tabell', title:'Fyll i potenstabellen (basen '+b+')', omrade:'pot-begrepp:tabell', subs:subs };
-  } ] },
+  // Potenstabell-generatorn BORTTAGEN (certifiering FAS 2): noden pot-begrepp:tabell tränades varken
+  // av öva-blad eller drill → testade något ingen kunde öva. Samma åtgärd som avr-begr i sjuan.
   // Räkna med bråk · oäkta → blandad form (NY typ blandad) → brak-blandad:rakna
   'brak-blandad:oakta': { snabb: [ function genOaktaBlandad(seen){
     var subs = [], tries = 0;
@@ -1052,7 +1047,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'platsvarde':'position:begrepp', 'talfoljd':'position:rakna',
     // FAS1-breddning: nya quiz-generatorer → rätt kart-cell (parity).
     'pos-baklanges':'position:rakna', 'tecken-ekv':'neg-rakna:addsub',
-    'pot-skrivmult':'pot-begrepp:skriva', 'pot-tabell':'pot-begrepp:tabell',
+    'pot-skrivmult':'pot-begrepp:skriva',
     'brak-oakta-blandad':'brak-blandad:rakna', 'brak-jmf-olika':'brak-jmf-lika:begrepp',
     // öva-täckning Grunder (position): ord→tal, decimal-huvudräkning, N-delar större/mindre, mittemellan, intervall
     'skriv-tal':'position:begrepp', 'huvud-dec':'position:rakna', 'plats-steg':'position:rakna',

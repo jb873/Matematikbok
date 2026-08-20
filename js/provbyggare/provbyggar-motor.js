@@ -261,12 +261,13 @@ function renderSubInput(qNum, subIdx, s){
         <div class="tsm-led tsm-slut">
           <span class="tsm-fraga">Svar</span>
           <span class="test-sub-eq">=</span>
+          <input type="text" class="test-sub-input tsb-hel" style="width:34px;text-align:center;margin-right:5px" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-shel" aria-label="slutsvar heltalsdel (blandad form)">
           <span class="test-sub-brak">
             <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-st" aria-label="slutsvar täljare">
             <span class="tsb-streck"></span>
             <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-sn" aria-label="slutsvar nämnare">
           </span>
-          <span class="tsm-hint">enklaste form</span>
+          <span class="tsm-hint">enklaste form, blandad om oäkta</span>
         </div>
       </div>
     `;
@@ -426,9 +427,11 @@ function readSubAnswer(qNum, subIdx, s){
     });
     const st = document.querySelector(`[data-sub-input="${idBase}-st"]`);
     const sn = document.querySelector(`[data-sub-input="${idBase}-sn"]`);
+    const shel = document.querySelector(`[data-sub-input="${idBase}-shel"]`);
     const slut = [(st && st.value.trim()) || '', (sn && sn.value.trim()) || ''];
-    const any = led.some(l => l[0] || l[1]) || slut[0] || slut[1];
-    return any ? { led, slut } : null;
+    const slutHel = (shel && shel.value.trim()) || '';
+    const any = led.some(l => l[0] || l[1]) || slut[0] || slut[1] || slutHel;
+    return any ? { led, slut, slutHel } : null;
   } else if(s.type === 'mellanled-num'){
     const led = (s.led || []).map((L, i) => {
       const el = document.querySelector(`[data-sub-input="${idBase}-L${i}-num"]`);
@@ -517,6 +520,7 @@ function restoreSubAnswer(qNum, subIdx, s, val){
       });
       const st = document.querySelector(`[data-sub-input="${idBase}-st"]`); if(st) st.value = (val.slut && val.slut[0]) || '';
       const sn = document.querySelector(`[data-sub-input="${idBase}-sn"]`); if(sn) sn.value = (val.slut && val.slut[1]) || '';
+      const shel = document.querySelector(`[data-sub-input="${idBase}-shel"]`); if(shel) shel.value = val.slutHel || '';
     }
   } else if(s.type === 'mellanled-num'){
     if(val && val.led){
@@ -628,12 +632,24 @@ function gradeSub(s, ans){
       if(isNaN(t) || isNaN(n) || n === 0) return false;
       return Math.abs(t / n - L.varde) < 1e-9;
     });
-    // SLUTSVAR på värde + enklaste form — speglat från drillens svarRatt.
+    // SLUTSVAR: enklaste form OCH blandad form när facit är oäkta (täljare > nämnare) — speglar
+    // öva-bladens finOk (blad-ak8-d7): 'mi' = heltalsdel + äkta bråkdel för oäkta, 'br' = äkta bråk
+    // utan heltalsdel. Valfri heltals-ruta (shel) före bråket. Facit reducerat (gcd=1) av generatorn.
     const st = parseInt(ans.slut && ans.slut[0]), sn = parseInt(ans.slut && ans.slut[1]);
-    const slutOk = !isNaN(st) && !isNaN(sn) && sn !== 0
-      && (st * s.slutNamn === sn * s.slutTalj) && (gcd(st, sn) === 1);
+    const shelStr = ans.slutHel, harHel = !(shelStr == null || String(shelStr).trim() === '');
+    const shel = harHel ? parseInt(shelStr) : 0;
+    const brakTom = !(ans.slut && (String(ans.slut[0]).trim() || String(ans.slut[1]).trim()));
+    let slutOk = false;
+    if(s.slutNamn === 1){                                   // facit är ett heltal
+      slutOk = harHel && !isNaN(shel) && shel === s.slutTalj && (brakTom || st === 0);
+    } else if(!isNaN(st) && !isNaN(sn) && sn !== 0 && !isNaN(shel)){
+      const vardeOk = Math.abs((shel + st / sn) - s.slutTalj / s.slutNamn) < 1e-9;
+      const aktaDel = (st >= 0 && st < sn && gcd(st, sn) === 1);   // äkta + enklaste bråkdel
+      if(s.slutTalj > s.slutNamn){ slutOk = vardeOk && harHel && shel !== 0 && aktaDel; }   // oäkta → blandad krävs
+      else { slutOk = vardeOk && !harHel && aktaDel; }             // äkta → äkta bråk utan heltalsdel
+    }
     const given = (s.led || []).map((L, i) => (ans.led[i] ? ans.led[i].join('/') : '?'))
-      .concat([ans.slut ? ans.slut.join('/') : '?']).join(' → ');
+      .concat([(harHel ? shel + ' ' : '') + (ans.slut ? ans.slut.join('/') : '?')]).join(' → ');
     return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
   }
   if(s.type === 'mellanled-num'){
@@ -802,7 +818,10 @@ function renderReviewSub(sr){
   } else if(sub.type === 'mellanled'){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit || (L.varde)).join(' → ');
-    correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + sub.slutTalj + '/' + sub.slutNamn + ' (enklaste form)' + (sub.explanation ? ` — ${sub.explanation}` : '');
+    const slutText = (sub.slutNamn === 1) ? String(sub.slutTalj)
+      : (sub.slutTalj > sub.slutNamn) ? (Math.floor(sub.slutTalj / sub.slutNamn) + ' ' + (sub.slutTalj % sub.slutNamn) + '/' + sub.slutNamn + ' (blandad form)')
+      : (sub.slutTalj + '/' + sub.slutNamn + ' (enklaste form)');
+    correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + slutText + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'mellanled-num'){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit != null ? L.facit : L.varde).join(' → ');

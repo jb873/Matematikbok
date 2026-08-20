@@ -154,6 +154,7 @@
     var rader = mount.querySelectorAll('.ak8-rad[data-idx]'), tot = 0, ratt = 0;
     rader.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
+      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
       el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       AK8_UI.markera(el, res.ok);

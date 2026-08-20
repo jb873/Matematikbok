@@ -6,9 +6,8 @@
    Assembly (ren beräkning ur AK8_K1_BOK + BYGGBARA):
      • byggbara noder per delkapitel = delkapitlets blad-noder ∩ BYGGBARA (= AK8_GEN_NOD-värden).
      • cap 10–18 svarbara items/test (motorn räknar items rätt: 1.a,b,c = 3).
-     • SPLIT (BREDD) vid ≥6 byggbara noder → två test, nod-mängden delad i två (test 1 / test 2 efter
-       VAD som testas). Färre noder → ETT test. (DJUP-split kräver generatorer med läsbar nivå-opt;
-       åk8-generatorerna randomiserar formen internt och exponerar ingen nivå → BREDD är axeln här.)
+     • SPLIT per innehålls-grupp: ETT test per blad/grupp (tester() nedan) → testen tillsammans
+       täcker hela delkapitlet. Antal test = antal grupper (varierar per delkapitel, ej alltid två).
 
    BYGGBARA speglar AK8_GEN_NOD-värdena i ak8-k1-ram.html (håll i synk om noder läggs till där).
    Laddas av ak8-k1-ram.html (för ?view=test-fardigt → PB.byggFardigt) OCH av delkapitel-sidorna
@@ -101,7 +100,7 @@
       + '<h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Test</h3>';
     if(t.length){
       html += '<p style="font-size:14px;line-height:1.6;max-width:520px;margin:0 0 18px;">Ett färdigt test för det här delkapitlet – hopsatt åt dig ur momenten. Klicka och kör direkt.'
-        + (t.length > 1 ? ' Det är uppdelat i två så att varje test håller lagom längd.' : '') + '</p>'
+        + (t.length > 1 ? ' Uppdelat i ' + t.length + ' så att testen tillsammans täcker hela delkapitlet.' : '') + '</p>'
         + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
       var retur = returSuffix();   // FAS 4
       t.forEach(function(test, i){

@@ -302,6 +302,7 @@
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;
+      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
       if(res.ordna){
         el.querySelector('.ak8-ordna').classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram');
