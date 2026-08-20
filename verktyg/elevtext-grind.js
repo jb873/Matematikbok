@@ -37,6 +37,7 @@ function kallor() {
   for (const f of fs.readdirSync(path.join(ROOT, 'js/motor'))) if (/^ak9.*\.js$/.test(f)) list.push('js/motor/' + f);
   for (const r of ['ak7-k1-ram.html', 'ak7-k2-ram.html', 'ak7-k3-ram.html', 'ak8-k1-ram.html']) list.push(r);
   list.push('js/data/k1-fardiga-test.js');   // FAS 3: elevtext-varningen vid flikbyte under prov
+  list.push('js/data/ak8-fardiga-test.js');  // åk8: samma flikbyte-varning (certifiering)
   return list;
 }
 

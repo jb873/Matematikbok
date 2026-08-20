@@ -1468,7 +1468,6 @@
   "title | Dela upp talet i tre faktorer (alla större än 1).",
   "title | Dela upp talet i tre termer.",
   "title | Fortsätt talföljden.",
-  "title | Fyll i potenstabellen (basen {})",
   "title | Lös ut x i grundpotens-division",
   "title | Primtalsfaktorisera talet (skriv som produkt av enbart primtal).",
   "title | Räkna ut siffersumman.",
@@ -1485,6 +1484,9 @@
   "title | Är talet ett primtal eller ett sammansatt tal?"
  ],
  "js/data/k1-fardiga-test.js": [
+  "varning | Om du lämnar testet nu försvinner svaren du har fyllt i. Vill du lämna testet?"
+ ],
+ "js/data/ak8-fardiga-test.js": [
   "varning | Om du lämnar testet nu försvinner svaren du har fyllt i. Vill du lämna testet?"
  ]
 }

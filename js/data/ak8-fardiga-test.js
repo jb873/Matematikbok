@@ -92,30 +92,95 @@
     } catch(e){ return ''; }
   }
 
+  // FAS 2: nästa test i delkapitlet (samma ordning som renderTestFlik). nr = 1-baserat nummer.
+  function nastaTest(delNr, nr){
+    var t = tester(delNr); var i = (nr | 0);
+    if(!t.length || i < 1 || i >= t.length) return null;   // sista test → ingen nästa
+    return { titel: t[i].titel, nr: i + 1, antal: t[i].antal };
+  }
+
+  // FAS 3: elevtext — varning när eleven lämnar ett påbörjat prov med minst ett ifyllt svar.
+  // Fält-form (varning:) → fångas av elevtext-låset. Samma text som sjuan.
+  var FAS3_TEXT = { varning: 'Om du lämnar testet nu försvinner svaren du har fyllt i. Vill du lämna testet?' };
+
+  // Har det inbäddade testet minst ETT ifyllt svar? (same-origin iframe → contentDocument).
+  function testHarIfyllt(panelEl){
+    var f = panelEl && panelEl.querySelector('iframe.test-embed-frame');
+    if(!f) return false;
+    try {
+      var doc = f.contentDocument; if(!doc) return false;
+      var body = doc.getElementById('test-take-body') || doc.body; if(!body) return false;
+      if(body.querySelector('.is-selected')) return true;
+      var ins = body.querySelectorAll('[data-sub-input]');
+      for(var i = 0; i < ins.length; i++){ if(ins[i].value && ins[i].value.trim()) return true; }
+    } catch(e){}
+    return false;
+  }
+
+  // FAS 3: bädda IN testet i Test-panelen (som färdighetsträningen) → flikraden ligger kvar.
+  // Fast-höjd iframe med intern scroll (fast keypad fungerar i testet), parent-sidans pinnade
+  // flikrad ovanför. Ramen öppnas med &embed=1. renderTestFlik kallar även initFlikrad (sidorna orörda).
   function renderTestFlik(panelEl, delNr, ramPath){
     if(!panelEl) return;
     ramPath = ramPath || '../../ak8-k1-ram.html';
     var t = tester(delNr);
-    var html = '<div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;color:var(--ink-soft);">'
-      + '<h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Test</h3>';
-    if(t.length){
-      html += '<p style="font-size:14px;line-height:1.6;max-width:520px;margin:0 0 18px;">Ett färdigt test för det här delkapitlet – hopsatt åt dig ur momenten. Klicka och kör direkt.'
-        + (t.length > 1 ? ' Uppdelat i ' + t.length + ' så att testen tillsammans täcker hela delkapitlet.' : '') + '</p>'
-        + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
-      var retur = returSuffix();   // FAS 4
-      t.forEach(function(test, i){
-        var url = ramPath + '?view=test-fardigt&del=ak8d' + delNr + '&test=' + (i + 1) + retur;
-        html += '<a href="' + url + '" style="display:inline-block;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--gold,#9a7228);padding:12px 24px;border-radius:6px;text-decoration:none;">'
-          + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
-      });
-      html += '</div>';
-    } else {
-      html += '<p style="font-size:14px;line-height:1.6;max-width:480px;">Färdigt test byggs för det här delkapitlet – öva på bladen och färdigheterna så länge.</p>';
+    var retur = returSuffix();   // FAS 4
+    function stickyHojd(){
+      var tn = document.querySelector('.topnav'), tr = document.getElementById('tab-row');
+      return (tn ? tn.offsetHeight : 0) + (tr ? tr.offsetHeight : 0);
     }
-    // Test-fliken = bara det färdiga testet. "Skapa eget test" görs i provbyggaren (annat ställe).
-    html += '</div>';
-    panelEl.innerHTML = html;
+    function ritaLista(){
+      var html = '<div style="max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;color:var(--ink-soft);">'
+        + '<h3 style="font-family:var(--cinzel);font-size:20px;color:var(--ink);margin-bottom:8px;">Test</h3>';
+      if(t.length){
+        html += '<p style="font-size:14px;line-height:1.6;max-width:520px;margin:0 0 18px;">Ett färdigt test för det här delkapitlet – hopsatt åt dig ur momenten. Klicka och kör direkt.'
+          + (t.length > 1 ? ' Uppdelat i ' + t.length + ' så att testen tillsammans täcker hela delkapitlet.' : '') + '</p>'
+          + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+        t.forEach(function(test, i){
+          var deep = ramPath + '?view=test-fardigt&del=ak8d' + delNr + '&test=' + (i + 1) + '&embed=1' + retur;
+          html += '<a href="#" class="test-lank" data-deep="' + encodeURIComponent(deep) + '" style="display:inline-block;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--gold,#9a7228);padding:12px 24px;border-radius:6px;text-decoration:none;">'
+            + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
+        });
+        html += '</div>';
+      } else {
+        html += '<p style="font-size:14px;line-height:1.6;max-width:480px;">Färdigt test byggs för det här delkapitlet – öva på bladen och färdigheterna så länge.</p>';
+      }
+      html += '</div>';
+      panelEl.innerHTML = html;
+      panelEl.querySelectorAll('.test-lank').forEach(function(a){
+        a.addEventListener('click', function(e){ e.preventDefault(); oppnaTest(decodeURIComponent(a.getAttribute('data-deep'))); });
+      });
+    }
+    function oppnaTest(src){
+      var h = stickyHojd() + 40;
+      panelEl.innerHTML = '<div style="max-width:920px;margin:16px auto 0;padding:0 24px;">'
+        + '<button type="button" class="test-tillbaka" style="font-family:var(--cinzel);font-size:12px;letter-spacing:.06em;color:var(--gold);background:none;border:1px solid var(--paper-dk);border-radius:6px;padding:8px 16px;cursor:pointer;margin-bottom:12px;">← Testlista</button>'
+        + '<iframe class="test-embed-frame" title="Test" src="' + src + '" style="width:100%;border:0;display:block;background:#fff;border-radius:8px;height:calc(100vh - ' + h + 'px);min-height:440px;"></iframe></div>';
+      panelEl.querySelector('.test-tillbaka').addEventListener('click', function(){
+        if(testHarIfyllt(panelEl) && !window.confirm(FAS3_TEXT.varning)) return;
+        ritaLista();
+      });
+    }
+    ritaLista();
+    initFlikrad();
   }
 
-  window.AK8_FARDIGA = { BYGGBARA: BYGGBARA, byggbaraNoder: byggbaraNoder, tester: tester, renderTestFlik: renderTestFlik };
+  // FAS 3: pinna flikraden + varna vid flikbyte bort från ett påbörjat prov.
+  function initFlikrad(){
+    var topnav = document.querySelector('.topnav'), tabRow = document.getElementById('tab-row');
+    if(!tabRow || tabRow.__fas3) return; tabRow.__fas3 = true;
+    tabRow.style.position = 'sticky';
+    tabRow.style.top = (topnav ? topnav.offsetHeight : 0) + 'px';
+    tabRow.style.zIndex = '90';
+    var bg = getComputedStyle(tabRow).backgroundColor;
+    if(!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') tabRow.style.background = 'var(--paper, #f6f1e8)';
+    tabRow.addEventListener('click', function(e){
+      var btn = e.target.closest && e.target.closest('.tab-btn'); if(!btn) return;
+      var testPanel = document.querySelector('.tab-panel[data-panel="test"]');
+      if(!testPanel || !testPanel.classList.contains('is-active') || btn.dataset.tab === 'test') return;
+      if(testHarIfyllt(testPanel) && !window.confirm(FAS3_TEXT.varning)){ e.stopImmediatePropagation(); e.preventDefault(); }
+    }, true);
+  }
+
+  window.AK8_FARDIGA = { BYGGBARA: BYGGBARA, byggbaraNoder: byggbaraNoder, tester: tester, nastaTest: nastaTest, renderTestFlik: renderTestFlik };
 })();
