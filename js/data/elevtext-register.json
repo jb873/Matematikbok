@@ -1483,5 +1483,8 @@
   "title | Vilket tal är störst?",
   "title | Är talet delbart? Svara Ja eller Nej.",
   "title | Är talet ett primtal eller ett sammansatt tal?"
+ ],
+ "js/data/k1-fardiga-test.js": [
+  "varning | Om du lämnar testet nu försvinner svaren du har fyllt i. Vill du lämna testet?"
  ]
 }

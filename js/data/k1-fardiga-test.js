@@ -93,26 +93,88 @@
     } catch(e){ return ''; }
   }
 
+  // FAS 3: elevtext — varning när eleven lämnar ett påbörjat prov med minst ett ifyllt svar.
+  // Fält-form (varning:) → fångas av elevtext-låset (verktyg/elevtext-grind.js scannar denna fil).
+  var FAS3_TEXT = { varning: 'Om du lämnar testet nu försvinner svaren du har fyllt i. Vill du lämna testet?' };
+
+  // Har det inbäddade testet minst ETT ifyllt svar? (same-origin iframe → contentDocument).
+  // Kollar test-take-vyns rutor: markerade val (.is-selected) eller ifyllda textrutor ([data-sub-input]).
+  function testHarIfyllt(panelEl){
+    var f = panelEl && panelEl.querySelector('iframe.test-embed-frame');
+    if(!f) return false;
+    try {
+      var doc = f.contentDocument; if(!doc) return false;
+      var body = doc.getElementById('test-take-body') || doc.body; if(!body) return false;
+      if(body.querySelector('.is-selected')) return true;
+      var ins = body.querySelectorAll('[data-sub-input]');
+      for(var i = 0; i < ins.length; i++){ if(ins[i].value && ins[i].value.trim()) return true; }
+    } catch(e){}
+    return false;
+  }
+
+  // FAS 3: bädda IN testet i Test-panelen (som färdighetsträningen) så flikraden ligger kvar.
+  // Fast-höjd iframe med INTERN scroll → den fasta keypaden fungerar inuti testet; parent-sidans
+  // pinnade topnav + flikrad står kvar ovanför. ramPath öppnas med &embed=1 (ramen döljer eget krom).
   function renderTestFlik(panelEl, del, ramPath){
     if(!panelEl) return;
     ramPath = ramPath || '../../../ak7-k1-ram.html';
     var t = tester(del);
-    var html = '<div class="test-note" style="text-align:left;"><h3>Test</h3>';
-    if(t.length){
-      html += '<p style="margin:0 0 18px;">Färdiga test för det här delkapitlet – hopsatta ur momenten. Klicka och kör direkt.'
-        + (t.length > 1 ? ' Uppdelat i ' + t.length + ' så att testen tillsammans täcker hela delkapitlet.' : '') + '</p>'
-        + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
-      var retur = returSuffix();   // FAS 4: skicka med var eleven ska tillbaka (delkapitel-sidan)
-      t.forEach(function(test, i){
-        var url = ramPath + '?view=test-fardigt&del=' + del + '&test=' + (i + 1) + retur;
-        html += '<a href="' + url + '">' + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
-      });
-      html += '</div>';
-    } else {
-      html += '<p>Färdigt test byggs för det här delkapitlet – öva på bladen och färdigheterna så länge.</p>';
+    var retur = returSuffix();   // FAS 4: var eleven ska tillbaka (delkapitel-sidan)
+
+    function stickyHojd(){
+      var tn = document.querySelector('.topnav'), tr = document.getElementById('tab-row');
+      return (tn ? tn.offsetHeight : 0) + (tr ? tr.offsetHeight : 0);
     }
-    html += '</div>';
-    panelEl.innerHTML = html;
+    function ritaLista(){
+      var html = '<div class="test-note" style="text-align:left;"><h3>Test</h3>';
+      if(t.length){
+        html += '<p style="margin:0 0 18px;">Färdiga test för det här delkapitlet – hopsatta ur momenten. Klicka och kör direkt.'
+          + (t.length > 1 ? ' Uppdelat i ' + t.length + ' så att testen tillsammans täcker hela delkapitlet.' : '') + '</p>'
+          + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+        t.forEach(function(test, i){
+          var deep = ramPath + '?view=test-fardigt&del=' + del + '&test=' + (i + 1) + '&embed=1' + retur;
+          html += '<a href="#" class="test-lank" data-deep="' + encodeURIComponent(deep) + '">' + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
+        });
+        html += '</div>';
+      } else {
+        html += '<p>Färdigt test byggs för det här delkapitlet – öva på bladen och färdigheterna så länge.</p>';
+      }
+      html += '</div>';
+      panelEl.innerHTML = html;
+      panelEl.querySelectorAll('.test-lank').forEach(function(a){
+        a.addEventListener('click', function(e){ e.preventDefault(); oppnaTest(decodeURIComponent(a.getAttribute('data-deep'))); });
+      });
+    }
+    function oppnaTest(src){
+      var h = stickyHojd() + 40;
+      panelEl.innerHTML = '<div class="test-embed-topp" style="margin:0 0 12px;">'
+        + '<button type="button" class="test-tillbaka">← Testlista</button></div>'
+        + '<iframe class="test-embed-frame" title="Test" src="' + src + '" '
+        + 'style="width:100%;border:0;display:block;background:#fff;border-radius:10px;height:calc(100vh - ' + h + 'px);min-height:440px;"></iframe>';
+      panelEl.querySelector('.test-tillbaka').addEventListener('click', function(){
+        if(testHarIfyllt(panelEl) && !window.confirm(FAS3_TEXT.varning)) return;   // navigering bort från provet
+        ritaLista();
+      });
+    }
+    ritaLista();
+  }
+
+  // FAS 3: pinna flikraden (som embed-topnaven) + varna vid flikbyte bort från ett påbörjat prov.
+  function initFlikrad(){
+    var topnav = document.querySelector('.topnav'), tabRow = document.getElementById('tab-row');
+    if(!tabRow) return;
+    tabRow.style.position = 'sticky';
+    tabRow.style.top = (topnav ? topnav.offsetHeight : 0) + 'px';
+    tabRow.style.zIndex = '90';
+    var bg = getComputedStyle(tabRow).backgroundColor;
+    if(!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') tabRow.style.background = 'var(--paper, #f6f1e8)';
+    // Capture → körs FÖRE bladets flik-handler. Lämnar man Test-fliken med ifyllt svar: varna, spara ej.
+    tabRow.addEventListener('click', function(e){
+      var btn = e.target.closest && e.target.closest('.tab-btn'); if(!btn) return;
+      var testPanel = document.querySelector('.tab-panel[data-panel="test"]');
+      if(!testPanel || !testPanel.classList.contains('is-active') || btn.dataset.tab === 'test') return;
+      if(testHarIfyllt(testPanel) && !window.confirm(FAS3_TEXT.varning)){ e.stopImmediatePropagation(); e.preventDefault(); }
+    }, true);
   }
 
   // FAS 2: nästa test i delkapitlets lista (samma ordning som renderTestFlik). nr = 1-baserat nummer
@@ -131,7 +193,7 @@
     if(typeof document !== 'undefined' && document.querySelector){
       var _tp = document.querySelector('.tab-panel[data-panel="test"]');
       var _m = (location.pathname || '').match(/\/(d\d+)-/);
-      if(_tp && _m) renderTestFlik(_tp, _m[1], '../../../ak7-k1-ram.html');
+      if(_tp && _m){ renderTestFlik(_tp, _m[1], '../../../ak7-k1-ram.html'); initFlikrad(); }
     }
   } catch(e){}
 })();

@@ -23,7 +23,7 @@ const ROOT = path.resolve(__dirname, '..');
 const REGISTER = path.join(ROOT, 'js/data/elevtext-register.json');
 
 // Elevtext-fält: värdet av dessa är text som eleven läser.
-const FALT = ['prompt', 'rubrik', 'fraga', 'title', 'titel', 'q', 'vansterText', 'sub', 'intro', 'placeholder', 'hint', 'exempel'];
+const FALT = ['prompt', 'rubrik', 'fraga', 'title', 'titel', 'q', 'vansterText', 'sub', 'intro', 'placeholder', 'hint', 'exempel', 'varning'];
 const FALT_RE = new RegExp('(?:^|[\\s,{(\\[])(' + FALT.join('|') + ')\\s*:', 'g');
 
 // Källor: öva-blad, drillar, ak9-variantmotorer, och ramarnas inbäddade generatorer.
@@ -36,6 +36,7 @@ function kallor() {
   }
   for (const f of fs.readdirSync(path.join(ROOT, 'js/motor'))) if (/^ak9.*\.js$/.test(f)) list.push('js/motor/' + f);
   for (const r of ['ak7-k1-ram.html', 'ak7-k2-ram.html', 'ak7-k3-ram.html', 'ak8-k1-ram.html']) list.push(r);
+  list.push('js/data/k1-fardiga-test.js');   // FAS 3: elevtext-varningen vid flikbyte under prov
   return list;
 }
 

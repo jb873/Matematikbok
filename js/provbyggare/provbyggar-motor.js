@@ -1296,7 +1296,12 @@ function renderTestTake(){
   const t = state.test;
   // Färdigt test har inga inställningar → göm provbyggarens "Tillbaka till inställningar".
   const takeBack = document.getElementById('test-take-back');
+  // FAS 3: i embed-läge (testet inbäddat i delkapitlets Test-panel) sköter parent-sidans flikrad +
+  // "← Testlista" navigeringen → göm testets egen tillbaka-länk (den skulle nästla delkapitel-sidan).
+  var _embed = !!(document.body && document.body.classList.contains('embed'));
   if(takeBack){
+    if(_embed){ takeBack.style.display = 'none'; }
+    else {
     // Färdigt test har inga inställningar. Kom eleven via en retur-länk (delkapitel-sidan) → visa
     // "tillbaka dit" i st.f. att gömma knappen. Annars (byggt i ramen) göms den som förr.
     var _ret = t.fardigt && t.fardigt.retur;
@@ -1308,6 +1313,7 @@ function renderTestTake(){
     } else {
       takeBack.style.display = t.fardigt ? 'none' : '';
       takeBack.onclick = (e) => { e.preventDefault(); navTo('test-config'); };
+    }
     }
   }
 
@@ -1400,6 +1406,8 @@ function renderTestResult(){
   // FAS 2: nästa test i delkapitlet (bara om resultatet kom från ett färdigt test med känt del+nr).
   // null när man är på det SISTA testet → ingen "Nästa test"-knapp (retur leder tillbaka till översikten).
   const nastaT = (t.fardigt && t.fardigt.del && t.fardigt.nr && config.nastaTest) ? config.nastaTest(t.fardigt.del, t.fardigt.nr) : null;
+  // FAS 3: i embed (inbäddat test) navigerar parent-flikraden/"← Testlista" → göm testets egen retur-knapp.
+  const _embedR = !!(document.body && document.body.classList.contains('embed'));
 
   // Hitta vilka generatorer som hade fel/överhoppade för föreläsningstips
   const weakGens = new Set();
@@ -1455,7 +1463,7 @@ function renderTestResult(){
         ${nastaT ? `<button class="btn primary" id="nasta-test">Nästa test: ${nastaT.titel} →</button>` : ''}
         <button class="btn${nastaT ? '' : ' primary'}" id="new-test">Gör ett nytt test</button>
         ${t.fardigt.harderTest ? '<button class="btn" id="level2-test">Test nivå 2</button>' : ''}
-        ${t.fardigt.retur ? `<button class="btn subtle" id="retur-test">${t.fardigt.returTxt || '← Tillbaka'}</button>` : ''}
+        ${(t.fardigt.retur && !_embedR) ? `<button class="btn subtle" id="retur-test">${t.fardigt.returTxt || '← Tillbaka'}</button>` : ''}
       ` : `
         <button class="btn primary" id="retry-test">Gör om samma test</button>
         <button class="btn" id="new-test">Nytt test</button>
