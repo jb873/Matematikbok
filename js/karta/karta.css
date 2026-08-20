@@ -43,6 +43,19 @@ h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:52px
 .node.root{font-family:"Cormorant Garamond",serif;font-size:15.5px;font-weight:600;width:150px;flex-basis:150px;}
 a.node{transition:box-shadow .12s, transform .12s;}
 a.node:hover{box-shadow:0 3px 12px rgba(0,0,0,.14);transform:translateX(1px);}
+/* Utfällningsmarkör (▸ stängd / ▾ öppen) — EGEN symbol, till VÄNSTER, skild från ＋/★ till höger.
+   currentColor+opacity → funkar mot alla fyra färgbottnar. En gren-ruta är klickbar (fäller). */
+.node.gren{cursor:pointer;transition:box-shadow .12s, transform .12s;}
+.node.gren:hover{box-shadow:0 3px 12px rgba(0,0,0,.14);transform:translateX(1px);}
+.node .km-fold{flex:0 0 auto;width:11px;font-size:10px;line-height:1;text-align:center;opacity:.75;}
+.node .km-count{flex:0 0 auto;font-size:10.5px;font-weight:600;opacity:.72;font-variant-numeric:tabular-nums;}
+/* Lövnod = länk bort till färdighetsträningen: liten pil så det syns att man lämnar kartan. */
+.node .km-out{flex:0 0 auto;font-size:11px;opacity:.55;}
+a.node.lov-lank:hover .km-out{opacity:.9;}
+/* Inkommande nod (retur/deeplink) markeras kort så eleven hittar det hon just gjorde. */
+.node.km-anlant{animation:kmAnlant 1.8s ease 1;}
+@keyframes kmAnlant{0%,70%{box-shadow:0 0 0 3px rgba(51,48,42,.35);}100%{box-shadow:0 0 0 3px rgba(51,48,42,0);}}
+@media (prefers-reduced-motion:reduce){.node.km-anlant{animation:none;}}
 .node.gra{opacity:.9;}
 .gra-orsak{display:block;font-size:10px;font-style:italic;opacity:.8;margin-top:1px;}
 /* "Kommer" = obyggt, dött. Streckad ram + chip → tydligt skilt från scoping-gråttets fyllda, valbara ruta. */

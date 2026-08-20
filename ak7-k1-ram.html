@@ -335,6 +335,10 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .nav-back .nav-back-arrow{font-size:17px;line-height:1;color:var(--ink-soft)}
 .nav-back:hover .nav-back-arrow{color:var(--ink)}
 .nav-back-top{margin-bottom:18px}
+/* FAS 4: vägen tillbaka till begreppskartan (lämnar drillen). Pill, skild från den vanliga
+   område-backen, så eleven alltid har en väg upp till kunskapsläget. */
+.ovning-till-karta{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.02em;color:var(--ink-soft);text-decoration:none;margin:0 0 18px;padding:6px 13px;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-card);transition:all .15s}
+.ovning-till-karta:hover{border-color:var(--ink-soft);color:var(--ink);background:var(--bg-soft)}
 .nav-back-bottom{
   display:flex;justify-content:center;
   margin:28px 0 8px;padding-top:22px;
@@ -2500,6 +2504,7 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
       <span class="current" id="ovning-breadcrumb"></span>
     </nav>
     <button class="nav-back nav-back-top" id="ovning-back-top"><span class="nav-back-arrow">←</span> <span id="ovning-back-top-label">Tillbaka till området</span></button>
+    <a href="#" id="ovning-till-karta" class="ovning-till-karta"></a>
     <div id="ovning-body"></div>
   </div>
 
@@ -3323,6 +3328,20 @@ function renderOvning(koId, formagaKey){
   if(ovningBackTop){
     ovningBackTopLabel.textContent = `Tillbaka till ${ko.titel}`;
     ovningBackTop.onclick = ()=> navTo('ko', {koId, delId: state.currentDel});
+  }
+
+  // FAS 4: väg tillbaka till kartan. Med retur → dit eleven kom (rätt karta, gren utfälld, rullat).
+  // ALLTID en väg upp: utan retur (deeplink/direkt) → neutral fallback till k1-kunskapsläget.
+  // INTE i embed-läge: då sitter drillen i arbetssidans Färdighetsträning-iframe (värden äger navet).
+  const tillKarta = document.getElementById('ovning-till-karta');
+  if(tillKarta){
+    if(document.body.classList.contains('embed')){ tillKarta.style.display = 'none'; }
+    else {
+      const r = state.returTillKarta;
+      tillKarta.style.display = '';
+      tillKarta.setAttribute('href', (r && r.url) ? r.url : 'ak7/k1/kunskapslage/index.html');
+      tillKarta.textContent = (r && r.url && r.txt) ? r.txt : '← Till kunskapsläget';
+    }
   }
 
   const body = document.getElementById('ovning-body');
@@ -9428,6 +9447,10 @@ function repSkippaPanel(){
   var mk = hs.match(/[?&]ko=([^&\s]+)/i), mf = hs.match(/[?&]formaga=([^&\s]+)/i);
   var koId = mk && decodeURIComponent(mk[1]), fmg = mf && decodeURIComponent(mf[1]);
   if(koId && fmg && OVNING_RENDERS[koId] && OVNING_RENDERS[koId][fmg]){
+    // Väg tillbaka till kartan (FAS 4): kartan skickar ?retur=<karta-url>&retur_txt=. Fångas här
+    // och matas till övnings-vyns "Till kunskapsläget"-länk. Utan retur → neutral fallback i renderOvning.
+    var mret2 = hs.match(/[?&]retur=([^&\s]+)/i), mrtx2 = hs.match(/[?&]retur_txt=([^&\s]+)/i);
+    state.returTillKarta = { url: mret2 ? decodeURIComponent(mret2[1]) : null, txt: mrtx2 ? decodeURIComponent(mrtx2[1]) : null };
     renderKapitel();
     navTo('ovning', {koId: koId, formaga: fmg});
     return;

@@ -27,6 +27,18 @@
     var RAM = config.ramPath;
     var byId = {}; TAX.forEach(function(n){ byId[n.id] = n; });
     function barnAv(id){ return TAX.filter(function(n){ return n.parent === id && !n.doljKarta; }); }
+    // Antal tränbara lövnoder (färdigheter) under en gren, i-scope — för utfällningsräknaren "(7)".
+    // Räknar HELA underträdet, oberoende av utfällning; samma räckvidd som rollup-färgen.
+    function lovAntalUnder(node){
+      var n = 0;
+      barnAv(node.id).forEach(function(c){
+        if(c.niva === 'lovnod'){ var sc = scopeAv(c, PREF); if(c.generator && !c.doljKarta && sc.inScope && !sc.stod) n++; }
+        else n += lovAntalUnder(c);
+      });
+      return n;
+    }
+    // Föräldrakedjan (närmast → rot) för auto-utfällning av en inkommande nods gren.
+    function forfader(id){ var ut = [], n = byId[id]; while(n && n.parent != null){ n = byId[n.parent]; if(n && n.id != null) ut.push(n.id); } return ut; }
     // Kartan = boken: obyggda områden SYNS men är döda. Undantag: grupp:'avslutning' (plugg/
     // kunskapsläge-meta-ytan) är öppen på landningssidan och bor UTANFÖR kartan (kartan ÄR den ytan).
     var OMRADEN = TAX.filter(function(n){ return n.niva === 'omrade' && (n.implemented || n.grupp !== 'avslutning'); });
@@ -43,11 +55,12 @@
     function lasPref(){
       // STARTLÄGE = 'allt' (eleven väljer väg; en default är inget val). config.malDefault ignoreras
       // (deprecated) — bytet bor här i motorn, inte per skal. Elevens EGET val persistas nedan.
-      var d = { arskurs: config.arskurs, mal: 'allt', minNiva: config.minNiva || null };
-      try{ var s = JSON.parse(localStorage.getItem(config.prefKey)) || {}; if(s.mal) d.mal = s.mal; }catch(e){}  // bara mal; arskurs låst
+      // expanded = elevens utfällda grenar (minns mellan besök, samma nyckel som mal).
+      var d = { arskurs: config.arskurs, mal: 'allt', minNiva: config.minNiva || null, expanded: [] };
+      try{ var s = JSON.parse(localStorage.getItem(config.prefKey)) || {}; if(s.mal) d.mal = s.mal; if(Array.isArray(s.expanded)) d.expanded = s.expanded; }catch(e){}  // arskurs låst
       return d;
     }
-    function sparPref(p){ try{ localStorage.setItem(config.prefKey, JSON.stringify({ mal: p.mal })); }catch(e){} }
+    function sparPref(p){ try{ localStorage.setItem(config.prefKey, JSON.stringify({ mal: p.mal, expanded: Array.from(EXPANDED) })); }catch(e){} }
     function demoMatris(){
       var m = {}, nu = Date.now(), D = 86400000;
       var monster = [ {n:6, spann:30}, {n:3, spann:5}, {n:1, spann:0}, {n:0, spann:0} ];
@@ -112,26 +125,62 @@
     }
 
     // ── DEEPLINK till drillen (rör ej drillen — bara länkar in) ──
+    // Bär med retur = DENNA karta + ?nod=<lövnod> så färdighetsträningen kan länka tillbaka och
+    // kartan öppnar rätt gren + rullar till noden vid återkomst. Samma retur/retur_txt-kontrakt
+    // som testet (k1-fardiga-test.js:returSuffix), absolut location.href-bas.
+    function returUrl(nodeId){
+      var bas = location.href.split('#')[0].split('?')[0];
+      return bas + '?nod=' + encodeURIComponent(nodeId) + '&mal=' + PREF.mal;
+    }
     function deeplink(node){
       var ko, formaga, p = node.id.split(':');
       if(p.length === 2){ ko = p[0]; formaga = p[1]; }
       else if(node.visning && node.visning.formagaKey){ ko = node.parent; formaga = node.visning.formagaKey; }
       else { ko = node.parent; formaga = 'rakna'; }
-      return RAM + '?ko=' + encodeURIComponent(ko) + '&formaga=' + encodeURIComponent(formaga);
+      return RAM + '?ko=' + encodeURIComponent(ko) + '&formaga=' + encodeURIComponent(formaga)
+        + '&retur=' + encodeURIComponent(returUrl(node.id))
+        + '&retur_txt=' + encodeURIComponent('← Till kunskapsläget');
     }
 
-    // ── RENDER (vågrätt tankekartsträd: rot vänster → växer höger, hela trädet synligt) ──
+    // ── RENDER (vågrätt tankekartsträd: rot vänster → växer höger; grenar HOPFÄLLDA från start) ──
     // Bara presentation. nodBox ritar EN nod; nodTree bygger [box][barn-kolumn] rekursivt.
+    // Synliga barn = barnAv filtrerat på mål (godkänt döljer grå). SAMMA lista i markör + render,
+    // så "(N)"/triangeln och det som faktiskt fälls ut aldrig kan glida isär.
+    function synligaBarn(node, isRoot){
+      var barn = isRoot ? OMRADEN : barnAv(node.id);
+      // Godkänt fäller ihop de grå grenarna (bortvalt + framtid) → kortare vy; Allt visar hela
+      // trädet inkl. grå. Rör bara synligheten — rollup/scoping oförändrat.
+      if(PREF.mal === 'godkant'){ barn = barn.filter(function(c){ return !nodStatus(c, PREF, MATRIS).gra; }); }
+      return barn;
+    }
+    // Fäll ut/ihop en gren, minns valet, behåll rullningsläget. Rollup-FÄRGEN räknas i nodStatus
+    // över hela underträdet oberoende av detta — en hopfälld gren blir aldrig grön av att vara stängd.
+    function toggla(id){
+      if(EXPANDED.has(id)) EXPANDED.delete(id); else EXPANDED.add(id);
+      sparPref(PREF);
+      var sx = window.scrollX, sy = window.scrollY;
+      render();
+      window.scrollTo(sx, sy);
+    }
     function nodBox(node, opts){
       opts = opts || {};
       var status = opts.rootStatus || nodStatus(node, PREF, MATRIS);
       var kommer = !!status.kommer;
       var farg = kommer ? KOMMER : (status.gra ? GRA : FARG[status.state]);
       var lankbar = !kommer && node.niva === 'lovnod' && !status.gra && !!node.generator;   // concept/obyggda-noder länkas ej
+      var isLov = node.niva === 'lovnod';
+      var grenBarn = (!isLov && !opts.root) ? synligaBarn(node, false) : [];
+      var arGren = grenBarn.length > 0;                 // fällbar gren (har synliga barn)
+      var utfalld = arGren && EXPANDED.has(node.id);
+      var antal = arGren ? lovAntalUnder(node) : 0;     // färdigheter i hela grenen (rollup-räckvidd)
       var b = document.createElement(lankbar ? 'a' : 'div');
       b.className = 'node' + (opts.root ? ' root' : '') + (kommer ? ' kommer' : '') + (status.gra ? ' gra' : '')
-        + (node.niva === 'lovnod' && !status.gra && !kommer && !node.generator ? ' nolink' : '');
+        + (arGren ? ' gren' : '') + (isLov && lankbar ? ' lov-lank' : '')
+        + (isLov && !status.gra && !kommer && !node.generator ? ' nolink' : '');
+      if(node.id != null) b.setAttribute('data-nodid', node.id);
       b.style.background = farg.bg; b.style.borderColor = farg.br; b.style.color = farg.fg;
+      // Utfällningsmarkör: EGEN symbol (▸ stängd / ▾ öppen) — ALDRIG ＋/★ som betyder breddning/fördjupning.
+      var foldM = arGren ? '<span class="km-fold" aria-hidden="true">' + (utfalld ? '▾' : '▸') + '</span>' : '';
       var rollM = node.roll === 'breddning' ? '＋' : node.roll === 'fordjupning' ? '★' : '';
       var stodM = (node.arskursRelevans && node.arskursRelevans[PREF.arskurs] === 'stod') ? 'stöd' : '';
       var markM = stodM || rollM;
@@ -141,20 +190,22 @@
       // Kart-etikett: kortare kartLabel om taxonomin bär en, annars nodens fulla namn
       // (självskattningens namn rörs inte). Tvåradsbrytning sköts av css:en, inte av kapning.
       var label = node.kartLabel || node.namn;
-      b.innerHTML = '<span class="txt">' + label + orsak + kommerFlagga + '</span>'
-        + (markM && !status.gra && !kommer ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '');
+      b.innerHTML = foldM + '<span class="txt">' + label + orsak + kommerFlagga + '</span>'
+        + (arGren && antal ? '<span class="km-count" title="' + antal + ' färdigheter i grenen">' + antal + '</span>' : '')
+        + (markM && !status.gra && !kommer ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '')
+        + (lankbar ? '<span class="km-out" aria-hidden="true" title="öppnar färdighetsträningen">↗</span>' : '');
       if(lankbar){ b.href = deeplink(node); b.style.textDecoration = 'none'; }
+      if(arGren){ b.addEventListener('click', function(ev){ ev.preventDefault(); toggla(node.id); }); }
       return b;
     }
-    // Rekursiv gren: [nodens ruta][kolumn med barn-grenar]. Rot = syntetisk vänsternod.
+    // Rekursiv gren: [nodens ruta][kolumn med barn-grenar]. Rot = syntetisk vänsternod (alltid utfälld).
+    // Barn-kolumnen ritas BARA om grenen är utfälld — hopfälld = bara rutan (färgen bär rollupen).
     function nodTree(node, isRoot){
       var wrap = document.createElement('div'); wrap.className = 'km-node';
       wrap.appendChild(nodBox(node, isRoot ? { rootStatus: rotStatus(PREF, MATRIS), root:true } : {}));
-      var barn = isRoot ? OMRADEN : barnAv(node.id);
-      // Godkänt fäller ihop de grå grenarna (bortvalt + framtid) → kortare default-vy;
-      // Allt visar hela trädet inkl. grå. Rör bara synligheten — rollup/scoping oförändrat.
-      if(PREF.mal === 'godkant'){ barn = barn.filter(function(c){ return !nodStatus(c, PREF, MATRIS).gra; }); }
-      if(barn.length){
+      var barn = synligaBarn(node, isRoot);
+      var utfalld = isRoot || EXPANDED.has(node.id);
+      if(barn.length && utfalld){
         var kids = document.createElement('div'); kids.className = 'km-kids';
         barn.forEach(function(c){ kids.appendChild(nodTree(c, false)); });
         wrap.appendChild(kids);
@@ -191,6 +242,9 @@
 
     // ── init ──
     var PREF = lasPref();
+    // Utfällda grenar (elevens sparade + auto-öppnade). Default: allt hopfällt (bara PREF.expanded).
+    var EXPANDED = new Set(PREF.expanded || []);
+    var SCROLL_TILL = null;
     var MATRIS = lasMatris();
     // Glömskekurvan: bara åk8-kartan (config.blekning) blekner. ?blekveckor=N är en test-hook
     // som skjuter blekklockan framåt N veckor (simulerar inaktivitet headless) — 0 i drift.
@@ -200,6 +254,10 @@
     try{ if(BLEKNING){ var bw = parseFloat(new URLSearchParams(location.search).get('blekveckor')); if(bw > 0) BLEKNING.nu += bw * 7 * 86400000; } }catch(e){}
     try{ var q = new URLSearchParams(location.search);
       if(q.get('mal') === 'allt' || q.get('mal') === 'godkant') PREF.mal = q.get('mal');
+      // Inkommande nod (?nod=<id> från retur-länken, en drill eller ett delkapitel): öppna dess
+      // gren (hela föräldrakedjan) och rulla dit, så eleven möter det hon just gjorde utfällt.
+      var nodParam = q.get('nod');
+      if(nodParam){ var nid = decodeURIComponent(nodParam); if(byId[nid]){ forfader(nid).forEach(function(id){ EXPANDED.add(id); }); SCROLL_TILL = nid; } }
     }catch(e){}
     document.querySelectorAll('#mal-seg button').forEach(function(btn){
       btn.addEventListener('click', function(){ PREF.mal = btn.dataset.mal; sparPref(PREF); render(); });
@@ -207,6 +265,8 @@
     var priv = document.getElementById('privacy');
     if(priv) priv.textContent = 'Din progress sparas bara på den här enheten (localStorage) och skickas aldrig någonstans. Kartan hämtar inget från nätet utom typsnitten.';
     render();
+    // Rulla den inkommande noden i sikte efter första render (retur/deeplink till en gren).
+    if(SCROLL_TILL){ try{ var mal = document.querySelector('[data-nodid="' + SCROLL_TILL + '"]'); if(mal && mal.scrollIntoView){ mal.scrollIntoView({ block:'center', inline:'center' }); mal.classList.add('km-anlant'); } }catch(e){} }
     return { render: render };
   }
 })();

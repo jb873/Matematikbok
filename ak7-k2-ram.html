@@ -45,6 +45,7 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .hero-desc{max-width:560px;margin:0 auto 18px;color:rgba(255,255,255,.72);font-size:15px;}
 .hero-back{display:inline-block;color:var(--nav-gold);text-decoration:none;font-family:var(--cinzel);font-size:12px;letter-spacing:.12em;border:1px solid rgba(196,154,64,.4);padding:8px 18px;border-radius:6px;transition:background .15s;}
 .hero-back:hover{background:rgba(196,154,64,.12);}
+.till-karta-back{margin:0 0 20px;}
 
 /* LAYOUT */
 .wrap{max-width:920px;margin:0 auto;padding:36px 24px 60px;}
@@ -973,8 +974,21 @@ function blandadEngine(){
   }
   var mk = hs.match(/[?&]ko=([^&\s]+)/i);
   var ko = mk && decodeURIComponent(mk[1]);
-  if(ko && K2_DRILL[ko]){ K2_DRILL[ko](); return; }
+  if(ko && K2_DRILL[ko]){ K2_DRILL[ko](); injiceraTillKarta(hs); return; }
   renderOversikt();
+
+  // FAS 4: väg tillbaka till begreppskartan från k2-drillen (hero-backen är dold i drilläge).
+  // Med retur → dit eleven kom; utan → neutral fallback. INTE i embed (arbetssidans Färdighetsträning).
+  function injiceraTillKarta(hs){
+    if(/[?&]embed=1\b/.test(hs)) return;
+    var app = document.getElementById('app'); if(!app || document.getElementById('till-karta-back')) return;
+    var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);
+    var url = mret ? decodeURIComponent(mret[1]) : 'ak7/k2/kunskapslage/index.html';
+    var txt = (mret && mrtx) ? decodeURIComponent(mrtx[1]) : '← Till kunskapsläget';
+    var a = document.createElement('a');
+    a.id = 'till-karta-back'; a.className = 'hero-back till-karta-back'; a.setAttribute('href', url); a.textContent = txt;
+    app.insertBefore(a, app.firstChild);
+  }
 })();
 </script>
 <script src="js/elevfeedback.js" defer></script>
