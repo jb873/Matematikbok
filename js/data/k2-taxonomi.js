@@ -121,6 +121,12 @@ window.K2_TAXONOMI = {
       "begrepp": "Ge flera bråk som är lika med ett givet bråk genom förlängning (villkors-validering).",
       "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 2, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
+    {
+      "id": "brak-mgn:rakna", "namn": "Minsta gemensamma nämnare", "parent": "brak-likv", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "mgnEngine",
+      "begrepp": "Skriv två bråk med deras minsta gemensamma nämnare (ej bara en gemensam). Egen färdighet skild från att göra ETT bråk likformigt.",
+      "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 3, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
 
     /* ─────────────── Del 4 · Jämföra bråk (öppen; Öva = exakt-författat blad) ───────────────
        Öva-bladet (blad-k2-d4.js) är EXAKT det Joachim författat i "Jämföra bråk.docx"
@@ -162,6 +168,12 @@ window.K2_TAXONOMI = {
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RESONERA", "generator": "storleksordnaEngine",
       "begrepp": "Storleksordna en uppsättning bråk, börja med det minsta.",
       "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 2, "titel": "Storleksordna", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
+    },
+    {
+      "id": "brak-jmf-narmevarde:resonera", "namn": "Storleksordna med närmevärde", "parent": "brak-jamf", "niva": "lovnod",
+      "arskursRelevans": { "ak9": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "narmevardeOrdnaEngine",
+      "begrepp": "Storleksordna bråk genom att avrunda till närmevärde (avrundningsregel) — egen metod skild från jämförelse via gemensam nämnare.",
+      "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 3, "titel": "Ordna med närmevärde", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
     {
       "id": "brak-jmf-summa:resonera", "namn": "Uppskatta summa mot 1", "parent": "brak-jamf", "niva": "lovnod",
