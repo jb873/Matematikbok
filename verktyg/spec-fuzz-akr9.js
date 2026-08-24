@@ -57,7 +57,7 @@ function facitWF(f){
     case 'ordna': return (f.lista && f.lista.length === 5) ? null : 'ordna.lista ≠ 5';
     case 'tecken': return (['<', '>'].indexOf(f.ratt) >= 0) ? null : 'tecken.ratt ogiltig';
     case 'mgn': return (Number.isInteger(f.L) && f.L >= 2 && Number.isInteger(f.a[0] * f.L / f.a[1]) && Number.isInteger(f.b[0] * f.L / f.b[1])) ? null : 'mgn felform';
-    case 'reciprok': return (f.tSvar && f.nSvar) ? null : 'reciprok tom';
+    case 'reciprok': return (f.facitT && f.facitN) ? null : 'reciprok tom';
     case 'kedja': return (isFinite(f.v) && f.fin) ? finWF(f.fin) : 'kedja.v/fin saknas';
     case 'addsub': case 'multheltal': case 'multbrak': case 'divbrak': case 'komplexdiv': case 'decbrak':
       return svarWF(f.svar);

@@ -93,6 +93,8 @@
 <script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <!-- Delad equality-rättare (fri kedja: låna / förkorta / förenkla innan mult). FÖRE motorn. -->
 <script src="../../js/motor/blad/likhetsrattare.js"></script>
+<!-- Delad algebra-rättare (invertera-gruppens algebraiska tal: värde + enklaste form). -->
+<script src="../../js/motor/alg-brak.js"></script>
 <script src="../../js/motor/ak9-k2-akr9-ova-variant.js"></script>
 <script src="../../js/motor/ova-sekvens.js"></script>
 <!-- Loggen: k2-noder → MasteryK2 (k2.brak-store). K1-lån (byta form, bd-tillbrak:rakna) → Mastery (k1-store).
@@ -379,10 +381,13 @@
       return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
     }
     if(typ === 'reciprok'){
+      // AlgBrak: värde + enklaste form. 'form' = rätt värde men ej förenklat (t.ex. rå vändning xy³/2x).
       var c = rad.querySelector('.ak8-bc[data-r="sv"]');
-      var tv = c.querySelector('.ak8-bt').value.replace(/\s/g, ''), nv = c.querySelector('.ak8-bn').value.replace(/\s/g, '');
-      var ok = tv === ('' + f.tSvar) && nv === ('' + f.nSvar);
-      markBc(rad, 'sv', ok); return { ok:ok, facit: f.tSvar + '/' + f.nSvar };
+      var tv = c.querySelector('.ak8-bt').value, nv = c.querySelector('.ak8-bn').value;
+      var res = window.AlgBrak.grade(tv, nv, f.facitT, f.facitN), ok = res.status === 'ratt';
+      markBc(rad, 'sv', ok);
+      if(res.status === 'form') return { ok:false, facit: f.facitT + '/' + f.facitN, meddelande: 'Rätt värde – förenkla svaret mer (svaret är ' + f.facitT + '/' + f.facitN + ').' };
+      return { ok:ok, facit: f.facitT + '/' + f.facitN };
     }
     return { ok:false, facit:'' };
   }
@@ -394,7 +399,7 @@
       var gammal = rad.querySelector('.ak8-fasit'); if(gammal) gammal.remove();
       var besvarad = radBesvarad(rad);
       var res = rattaRad(rad, u);
-      if(besvarad && !res.ok){ var fEl = document.createElement('span'); fEl.className = 'ak8-fasit'; fEl.textContent = 'rätt: ' + res.facit; rad.appendChild(fEl); }
+      if(besvarad && !res.ok){ var fEl = document.createElement('span'); fEl.className = 'ak8-fasit'; fEl.textContent = res.meddelande || ('rätt: ' + res.facit); rad.appendChild(fEl); }
       // EVIDENS: bara besvarade + loggade rader, en gång/visning. STORE-ROUTING: k1-lån → Mastery, k2 → MasteryK2.
       if(!vy.loggat && u.logg && besvarad){
         var mod = (u.loggStore === 'k1') ? window.Mastery : window.MasteryK2;

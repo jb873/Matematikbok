@@ -222,11 +222,13 @@
       facit: function(x){ var pt = x.a[0] * x.b[1], pn = x.a[1] * x.b[0];
         return { form: 'divbrak', a: x.a, b: x.b, m: { t: pt, n: pn }, svar: brakForm(pt, pn) }; } };
   }
-  // inverterade talet (reciprok): svar = swap. fixed=true ⇒ algebraiskt fast tal (5x/y, 2x/xy^3), ingen variant.
-  function reciprokUppg(t, n, logg, fixed){
+  // inverterade talet (reciprok). Rättas via AlgBrak (värde + enklaste form) — facit = FÖRENKLADE reciproken.
+  //   Numeriskt (3/7): swap 7/3 (redan enklast, operanden reducerad). fixed=true ⇒ algebraiskt fast tal;
+  //   då bär `facit` den förenklade formen (5x/y → y/5x, 2x/xy^3 → y^3/2), inte den råa vändningen.
+  function reciprokUppg(t, n, logg, fixed, facit){
     var o = { logg: logg, orig: { t: t, n: n }, mellan: function(){ return null; },
       prompt: function(x){ return BR(x.t, x.n); },
-      facit: function(x){ return { form: 'reciprok', tSvar: '' + x.n, nSvar: '' + x.t }; } };
+      facit: function(x){ return { form: 'reciprok', facitT: facit ? facit.t : ('' + x.n), facitN: facit ? facit.n : ('' + x.t) }; } };
     if(fixed){ o.fixed = true; }
     else {
       o.sample = function(rng){ var f = sampProper(rng, 7, 9); return { t: f[0], n: f[1] }; };
@@ -349,8 +351,8 @@
 
       { rubrik: 'Invertera talet', logg: 'brak-div-reciprok:rakna', uppgifter: [
           reciprokUppg(3, 7, 'brak-div-reciprok:rakna'),
-          reciprokUppg('5x', 'y', 'brak-div-reciprok:rakna', true),
-          reciprokUppg('2x', 'xy^3', 'brak-div-reciprok:rakna', true) ] },
+          reciprokUppg('5x', 'y', 'brak-div-reciprok:rakna', true, { t: 'y', n: '5x' }),      // y/5x (redan enklast)
+          reciprokUppg('2x', 'xy^3', 'brak-div-reciprok:rakna', true, { t: 'y^3', n: '2' }) ] },   // xy^3/2x → y^3/2
 
       { rubrik: 'Beräkna', logg: 'brak-div-hb:rakna', uppgifter: [
           komplexHBUppg(4, 1, 5, 'brak-div-hb:rakna'),
@@ -389,7 +391,7 @@
       case 'tecken': return 'tk:' + f.ratt;
       case 'ordna': return 'o:' + f.lista.map(function(p){ return p[0] / p[1]; }).sort(function(a, b){ return a - b; }).join(',');
       case 'mgn': return 'mgn:' + f.L + ':' + (f.a[0] * f.L / f.a[1]) + '/' + (f.b[0] * f.L / f.b[1]);
-      case 'reciprok': return 're:' + f.tSvar + '/' + f.nSvar;
+      case 'reciprok': return 're:' + f.facitT + '/' + f.facitN;
       case 'decbrak': case 'komplexdiv': return f.form + ':' + svarSig(f.svar);
       case 'kedja': return 'ke:' + finSig(f.fin);
       case 'addsub': case 'multheltal': case 'multbrak': case 'divbrak':
