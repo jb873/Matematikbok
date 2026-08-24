@@ -123,7 +123,8 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-mgn:rakna", "namn": "Minsta gemensamma nämnare", "parent": "brak-likv", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "mgnEngine",
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "_generatorTodo": "mgnEngine — drill/provbyggargenerator EJ byggd; noden genereras i dag av Åk9-spårets öva-motor (ak9-k2-akr9-ova-variant.js). generator=null tills engine finns (annars länkar kartan till en drill som inte existerar).",
       "begrepp": "Skriv två bråk med deras minsta gemensamma nämnare (ej bara en gemensam). Egen färdighet skild från att göra ETT bråk likformigt.",
       "visning": { "utbudslista": "k2d3", "grupp": "Förlänga och förkorta", "gruppordning": 0, "radordning": 3, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
@@ -171,7 +172,8 @@ window.K2_TAXONOMI = {
     },
     {
       "id": "brak-jmf-narmevarde:resonera", "namn": "Storleksordna med närmevärde", "parent": "brak-jamf", "niva": "lovnod",
-      "arskursRelevans": { "ak9": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": "narmevardeOrdnaEngine",
+      "arskursRelevans": { "ak9": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "_generatorTodo": "narmevardeOrdnaEngine — drill/provbyggargenerator EJ byggd; noden genereras i dag av Åk9-spårets öva-motor. generator=null tills engine finns (annars länkar kartan till en drill som inte existerar).",
       "begrepp": "Storleksordna bråk genom att avrunda till närmevärde (avrundningsregel) — egen metod skild från jämförelse via gemensam nämnare.",
       "visning": { "utbudslista": "k2d4", "grupp": "Jämföra bråk", "gruppordning": 0, "radordning": 3, "titel": "Ordna med närmevärde", "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
