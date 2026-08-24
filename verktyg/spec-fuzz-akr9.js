@@ -14,24 +14,27 @@
 var path = require('path');
 var ROOT = path.resolve(__dirname, '..');
 var API = require(path.join(ROOT, 'js/motor/ak9-k2-akr9-ova-variant.js'));
+var SPEC = require(path.join(ROOT, 'js/data/spec-villkor-k2.js'));
 var gcd = API._intern.gcd, mkRng = API._intern.mkRng, seedOf = API._intern.seedOf, svarSig = API._intern.svarSig;
 var SAMPLES_PER_UPPG = 1000;   // × ~51 variabla uppgifter ⇒ ≥ 30k
 var DOKS = ['ova1', 'ova2'];
 
-// ── NIANS BAND (härlett ur Öva 1–2; tak = uppgifterna). maxT gäller |täljare| (negativ tillåten). ──
-var NIAN_BAND = {
-  ordna:      { maxN: 120, maxT: 120 },   // täljare < nämnare ändå; värdefönstret (≤0,20) är den pedagogiska gränsen
-  tecken:     { maxN: 13,  maxT: 12 },
-  mgn:        { maxN: 64,  maxT: 63 },
-  addsub:     { maxN: 36,  maxT: 11 },
-  decbrak:    { maxN: 12,  maxT: 11, maxHel: 9 },
-  multheltal: { maxN: 13,  maxT: 12, maxMul: 8 },
-  multbrak:   { maxN: 9,   maxT: 8,  maxHel: 5 },
-  komplexdiv: { maxN: 9,   maxT: 8,  maxMul: 12 },
-  divbrak:    { maxN: 8,   maxT: 5 },
-  reciprok:   { maxN: 9,   maxT: 7 },
-  kedja:      { maxN: 22,  maxT: 22, maxHel: 8 }
-};
+// ── NIANS BAND läses ur spec-villkor-k2.js (spar.nian) — inte längre inline (redigerbar data, en hemvist). ──
+//   bandFor(logg, form) → tak {maxNamnare, maxTaljare, maxHeltal, maxMultiplikator, maxResultNamnare}.
+//   Noder som spänner två former (add/sub, mult-rakna, div-inv) har nivaer; niva väljs ur formen (som E:s bandFor).
+function nivaForForm(logg, form){
+  if(logg === 'brak-add:rakna' || logg === 'brak-sub:rakna') return form === 'kedja' ? 2 : 1;
+  if(logg === 'brak-mult-rakna:rakna') return form === 'multbrak' ? 2 : 1;
+  if(logg === 'brak-div-inv:rakna') return form === 'kedja' ? 2 : 1;
+  return 1;
+}
+function bandFor(logg, form){
+  var P = SPEC.band(logg, 'nian'); if(!P) return null;
+  if(!P.nivaer) return P.tak;
+  var niva = nivaForForm(logg, form);
+  for(var i = 0; i < P.nivaer.length; i++){ if(P.nivaer[i].niva === niva) return P.nivaer[i].tak; }
+  return P.nivaer[0].tak;
+}
 
 // ── facit välformat ──
 function brakOK(t, n, tillatOakta){ return Number.isInteger(t) && Number.isInteger(n) && n >= 2 && Math.abs(t) >= 1 && gcd(Math.abs(t), n) === 1 && (tillatOakta || Math.abs(t) < n); }
@@ -76,19 +79,19 @@ function samla(form, tal){
   else if(form === 'kedja'){ if(tal.faktorer){ tal.faktorer.forEach(function(op){ pushOp(op, F); }); } else if(tal.a && tal.b){ pushOp(tal.a, F); pushOp(tal.b, F); } }
   return F;
 }
-function bandKoll(form, tal){
-  var B = NIAN_BAND[form]; if(!B) return 'inget band för ' + form;
+function bandKoll(logg, form, tal){
+  var T = bandFor(logg, form); if(!T) return 'inget nian-band för ' + logg + '/' + form;
   var F = samla(form, tal), fel = [];
-  F.fracs.forEach(function(f){ if(f.n > B.maxN) fel.push('nämnare ' + f.n + ' > ' + B.maxN); if(Math.abs(f.t) > B.maxT) fel.push('täljare ' + f.t + ' > ' + B.maxT); });
-  F.hels.forEach(function(h){ if(h > (B.maxHel || 0)) fel.push('heltal ' + h + ' > ' + (B.maxHel || 0)); });
-  F.muls.forEach(function(m){ if(m > (B.maxMul || 0)) fel.push('multiplikator ' + m + ' > ' + (B.maxMul || 0)); });
+  F.fracs.forEach(function(f){ if(f.n > T.maxNamnare) fel.push('nämnare ' + f.n + ' > ' + T.maxNamnare); if(Math.abs(f.t) > T.maxTaljare) fel.push('täljare ' + f.t + ' > ' + T.maxTaljare); });
+  F.hels.forEach(function(h){ if(h > (T.maxHeltal || 0)) fel.push('heltal ' + h + ' > ' + (T.maxHeltal || 0)); });
+  F.muls.forEach(function(m){ if(m > (T.maxMultiplikator || 0)) fel.push('multiplikator ' + m + ' > ' + (T.maxMultiplikator || 0)); });
   return fel.length ? fel.join('; ') : null;
 }
-// SVARETS nämnare aldrig svårare än orig (tak per form). kedja=40 (löst; villkoret binder 20/24/40 per grupp).
-var MAX_RESULT_N = { addsub: 99, multbrak: 45, divbrak: 40, komplexdiv: 72, kedja: 40 };
+// SVARETS nämnare aldrig svårare än orig — taket (maxResultNamnare) läses ur nodens nian-band.
 function resultN(f){ var s = f.svar || f.fin; if(!s) return 1;
   if(s.form === 'blandad' || s.form === 'brak') return s.n; if(s.k === 'br' || s.k === 'mi') return s.n; return 1; }
-function resultKoll(f){ var cap = MAX_RESULT_N[f.form]; if(!cap) return null; var n = resultN(f); return n > cap ? 'svarsnämnare ' + n + ' > ' + cap : null; }
+function resultKoll(logg, f){ var T = bandFor(logg, f.form); var cap = T && T.maxResultNamnare; if(!cap) return null;
+  var n = resultN(f); return n > cap ? 'svarsnämnare ' + n + ' > ' + cap : null; }
 
 // ── walk MALLAR (idx per DOKUMENT, som genereraDokument) ──
 function uppgifter(){
@@ -116,7 +119,7 @@ rows.forEach(function(r){
     pass++;
     var f = u.facit(cand), wf = facitWF(f);
     if(wf) facitAvvik.push(key + ' ' + wf + ' [' + JSON.stringify(cand) + ']');
-    var bk = bandKoll(f.form, cand) || resultKoll(f);
+    var bk = bandKoll(r.logg, f.form, cand) || resultKoll(r.logg, f);
     if(bk) specAvvik.push(key + ' (' + r.logg + ') ' + bk + ' [' + JSON.stringify(cand) + ']');
     distinkta[JSON.stringify(cand)] = 1;
   }

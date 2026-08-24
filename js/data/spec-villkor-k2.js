@@ -40,6 +40,10 @@
       kalla: 'Öva 1 grupp 5 (0,8 · 0,75 · 2,5 · 0,125 · 1,2)',
       spar: { E: {
         tak: { maxDecimaler: 3, maxVarde: 2.5, mellanled: false },   // 0,125 = 3 dec; 2,5/1,2 = >1
+        kravs: {}, svarform: 'enklaste', rattning: 'canonical' },
+      nian: {   // nian Åk9-spåret Öva 1 G5 — decimal + bråk i samma uttryck (byta form för att räkna)
+        kalla: 'nian Öva 1 grupp 5 (0,2+2/3, 5/6+7, 1/9−0,6, 0,7−2/3)',
+        tak: { maxNamnare: 12, maxTaljare: 11, maxHeltal: 9, mellanled: false },
         kravs: {}, svarform: 'enklaste', rattning: 'canonical' } }
     },
     'brak-forkorta:rakna': {      // Öva 1 G2 — förkorta till enklaste form.
@@ -79,7 +83,11 @@
           tak: { maxNamnare: 30, form: 'proper', mellanled: false }, svarform: 'tecken',
           kravs: { likhetsfall: true },   // korr. 2: likheten (1/3 = 3/9) MÅSTE finnas + vara rättbar som RÄTT
           rattning: 'canonical' }
-      ] } }
+      ] },
+      nian: {   // nian Åk9-spåret Öva 1 G2 — tecken TVÅvägs (> eller <), nära bråk (inga lika-par)
+        kalla: 'nian Öva 1 grupp 2 (5/8·6/9, 7/13·6/12 …)',
+        tak: { maxNamnare: 13, maxTaljare: 12, form: 'proper', mellanled: false },
+        kravs: {}, svarform: 'tecken', rattning: 'canonical' } }
     },
     'brak-jmf-ordna:resonera': {  // Öva 2 G5 — storleksordna fyra bråk.
       kalla: 'Öva 2 grupp 5 (storleksordna 4 bråk, minsta först)',
@@ -105,6 +113,14 @@
         { niva: 2, kalla: 'Öva 4 G1', beskrivning: 'Addition i blandad form',
           tak: { maxNamnare: 6, form: 'blandad', maxHeltal: 5, mellanled: 'forlang' },
           kravs: { mellanled: true }, svarform: 'blandad', rattning: 'canonical' }
+      ] },
+      nian: { nivaer: [   // nian Åk9-spåret: G4 (oliknämnig, MINSTA gem. nämnare-mellanled) → G6 (blandad, fri kedja)
+        { niva: 1, kalla: 'nian Öva 1 G4', beskrivning: 'Oliknämnig addition, mellanled = MINSTA gem. nämnare (ej förlängning); negativt svar tillåtet',
+          tak: { maxNamnare: 36, maxTaljare: 11, maxHeltal: 0, maxResultNamnare: 99, form: 'proper', mellanled: 'produktbrak' },
+          kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
+        { niva: 2, kalla: 'nian Öva 1 G6', beskrivning: 'Blandade tal, addition — fri equality-kedja',
+          tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'blandad', mellanled: 'kedja' },
+          kravs: {}, svarform: 'blandad', rattning: 'equality' }
       ] } }
     },
     'brak-sub:rakna': {           // Öva 3 G3 + Öva 4 G3 — oliknämnig subtraktion (samma nivå).
@@ -115,7 +131,15 @@
         'svarform ("enklaste") är OBERÖRD av denna ändring — 7/6 kan aldrig passera som svar där enklaste form gäller.',
       spar: { E: {
         tak: { maxNamnare: 18, maxTaljare: 7, form: 'valfri', maxHeltal: 0, mellanled: 'forlang' },   // form=operand: äkta/oäkta, ej blandat (maxHeltal 0)
-        kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' } }
+        kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
+      nian: { nivaer: [   // nian Åk9-spåret: G4 (oliknämnig, MINSTA gem. nämnare) → G6 (blandad, fri kedja)
+        { niva: 1, kalla: 'nian Öva 1 G4', beskrivning: 'Oliknämnig subtraktion, mellanled = MINSTA gem. nämnare; negativt svar tillåtet',
+          tak: { maxNamnare: 36, maxTaljare: 11, maxHeltal: 0, maxResultNamnare: 99, form: 'proper', mellanled: 'produktbrak' },
+          kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
+        { niva: 2, kalla: 'nian Öva 1 G6', beskrivning: 'Blandade tal, subtraktion — fri equality-kedja',
+          tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'blandad', mellanled: 'kedja' },
+          kravs: {}, svarform: 'blandad', rattning: 'equality' }
+      ] } }
     },
 
     // ── Öva 4/5 · multiplikation ─────────────────────────────────────────────────────────────
@@ -130,6 +154,14 @@
           tak: { maxNamnare: 9, maxTaljare: 8, form: 'proper', mellanled: 'produktbrak' },
           kravs: { mellanled: true, oforkortadProdukt: true },   // exakt oförkortad produkt, ej värde-rättning
           svarform: 'enklaste', rattning: 'canonical' }
+      ] },
+      nian: { nivaer: [   // nian Åk9-spåret: G1 (heltal·bråk) → G2 (bråk·bråk + blandade)
+        { niva: 1, kalla: 'nian Öva 2 G1', beskrivning: 'Heltal · bråk, ett mellanled = OFÖRKORTAD produkt (H·t)/n',
+          tak: { maxNamnare: 13, maxTaljare: 12, maxMultiplikator: 8, form: 'proper', mellanled: 'produktbrak' },
+          kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
+        { niva: 2, kalla: 'nian Öva 2 G2', beskrivning: 'Bråk · bråk (+ blandade tal via oäkta form), mellanled = OFÖRKORTAD produkt',
+          tak: { maxNamnare: 9, maxTaljare: 8, maxHeltal: 5, maxResultNamnare: 45, form: 'valfri', mellanled: 'produktbrak' },
+          kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' }
       ] } }
     },
 
@@ -140,19 +172,31 @@
       kalla: 'Öva 5 grupp 2 (5 ÷ 1/3, 7 ÷ 1/7, 6 ÷ 1/5)',
       spar: { E: {
         tak: { maxNamnare: 9, maxHeltal: 9, form: 'proper', mellanled: 'komplexbrak' },
-        kravs: {}, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' } }   // ⑤: nians dok visar komplex-bråk
+        kravs: {}, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' },   // ⑤: nians dok visar komplex-bråk
+      nian: {   // nian Åk9-spåret Öva 2 G6 — heltal ÷ bråk (komplex-bråk), direkt svar (inget mellanled)
+        kalla: 'nian Öva 2 grupp 6 (4/(1/5), 7/(1/6), 2/(3/4), 12/(4/7))',
+        tak: { maxNamnare: 9, maxTaljare: 8, maxMultiplikator: 12, maxResultNamnare: 72, form: 'proper', mellanled: false },
+        kravs: {}, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' } }
     },
     'brak-div-bh:rakna': {        // Öva 5 G4 — bråk ÷ heltal (komplex-bråk).
       kalla: 'Öva 5 grupp 4 ((1/5) ÷ 4, (1/3) ÷ 7, (1/8) ÷ 3)',
       spar: { E: {
         tak: { maxNamnare: 8, maxHeltal: 7, form: 'proper', mellanled: 'komplexbrak' },
+        kravs: {}, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' },
+      nian: {   // nian Åk9-spåret Öva 2 G3 — bråk ÷ heltal (komplex-bråk), direkt svar (inget mellanled)
+        kalla: 'nian Öva 2 grupp 3 ((1/5)/2, (1/7)/8, (2/7)/3, (7/9)/2)',
+        tak: { maxNamnare: 9, maxTaljare: 8, maxMultiplikator: 8, maxResultNamnare: 72, form: 'proper', mellanled: false },
         kravs: {}, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' } }
     },
     'brak-div-bb:rakna': {        // Öva 6 G1 — bråk ÷ bråk via FÖRLÄNGNING (komplex-bråk + produktbråk).
       kalla: 'Öva 6 grupp 1 ((2/7)÷(3/5), (3/4)÷(5/6), (2/3)÷(5/8))',
       spar: { E: {
         tak: { maxNamnare: 8, maxTaljare: 5, form: 'proper', mellanled: 'komplexbrak' },
-        kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' } }
+        kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' },
+      nian: {   // nian Åk9-spåret Öva 2 G7 — bråk ÷ bråk via FÖRLÄNGNING (mellanled = produktbråk)
+        kalla: 'nian Öva 2 grupp 7 ((4/5)/(2/3), (3/7)/(5/8))',
+        tak: { maxNamnare: 8, maxTaljare: 5, maxResultNamnare: 40, form: 'proper', mellanled: 'produktbrak' },
+        kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' } }
     },
     'brak-div-inv:rakna': {       // Öva 6 G3 — bråk ÷ bråk via INVERTERING.
       kalla: 'Öva 6 grupp 3 ((3/5)÷(1/4), (5/7)÷(2/3), (3/8)÷(5/9))',
@@ -160,7 +204,15 @@
         'grupp (inställning) — bandet kräver bara mellanled; cellformen (komplexbrak) sätts i FAS 3.',
       spar: { E: {
         tak: { maxNamnare: 9, maxTaljare: 5, form: 'proper', mellanled: 'produktbrak' },
-        kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' } }
+        kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical', cellval: 'komplexbrak' },
+      nian: { nivaer: [   // nian Åk9-spåret: G8 (bråk ÷ bråk via invertering) → G9 (invertering + förenkla, fri kedja)
+        { niva: 1, kalla: 'nian Öva 2 G8', beskrivning: 'Bråk ÷ bråk via invertering (mellanled = produktbråk)',
+          tak: { maxNamnare: 8, maxTaljare: 5, maxResultNamnare: 40, form: 'proper', mellanled: 'produktbrak' },
+          kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
+        { niva: 2, kalla: 'nian Öva 2 G9', beskrivning: 'Invertering + förenkla innan multiplikation — fri equality-kedja',
+          tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'valfri', mellanled: 'kedja' },
+          kravs: {}, svarform: 'enklaste', rattning: 'equality' }
+      ] } }
     },
     'brak-div-reciprok:rakna': {  // Öva 6 G2 — skriv inverterade talet (inkl algebraiskt 7x/2y).
       kalla: 'Öva 6 grupp 2 (3/5, 2/9, 7x/2y)',
@@ -168,7 +220,39 @@
         'klarar den (sträng-swap). Bandet gäller bara de numeriska.',
       spar: { E: {
         tak: { maxNamnare: 9, maxTaljare: 7, form: 'proper', mellanled: false },
+        kravs: {}, svarform: 'brak', rattning: 'canonical' },
+      nian: {   // nian Åk9-spåret Öva 2 G5 — invertera talet (numeriskt; algebraiska 5x/y, 2x/xy^3 är FASTA)
+        kalla: 'nian Öva 2 grupp 5 (3/7 numeriskt; 5x/y, 2x/xy^3 fasta)',
+        tak: { maxNamnare: 9, maxTaljare: 7, form: 'proper', mellanled: false },
         kravs: {}, svarform: 'brak', rattning: 'canonical' } }
+    },
+
+    // ── nian Åk9-spåret · noder utan E-motsvarighet (nian-only band) ──────────────────────────
+    'brak-jmf-narmevarde:resonera': {   // nian Öva 1 G1 — storleksordna med närmevärde (avrundningsregel).
+      kalla: 'nian Öva 1 grupp 1 (3/11, 2/9, 4/12, 9/31, 32/111)',
+      spar: { nian: {
+        tak: { antal: 5, maxNamnare: 120, maxTaljare: 120, form: 'proper', mellanled: false },
+        kravs: { parvisOlika: 5, fonster: 0.20 },   // fem NÄRA bråk (värdefönster ≤0,20 → avrundning krävs)
+        svarform: 'ordning', rattning: 'canonical' } }
+    },
+    'brak-mgn:rakna': {   // nian Öva 1 G3 — skriv båda bråken med MINSTA gemensamma nämnare.
+      kalla: 'nian Öva 1 grupp 3 (11/18·7/24, 7/8·5/12, 5/27·11/36, 31/64·13/24)',
+      spar: { nian: {
+        tak: { maxNamnare: 64, maxTaljare: 63, form: 'proper', mellanled: false },
+        kravs: { gemensamFaktor: true },   // nämnarna delar en gemensam faktor (minsta < produkt)
+        svarform: 'brak', rattning: 'canonical' } }
+    },
+    'brak-lana:rakna': {   // nian Öva 1 G6 sista — blandad subtraktion med LÅN (fri kedja).
+      kalla: 'nian Öva 1 grupp 6 d (5 5/9 − 2 11/12)',
+      spar: { nian: {
+        tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'blandad', mellanled: 'kedja' },
+        kravs: { lan: true }, svarform: 'blandad', rattning: 'equality' } }
+    },
+    'brak-mult-forkorta:rakna': {   // nian Öva 2 G4 — förkorta innan multiplikation (fri kedja).
+      kalla: 'nian Öva 2 grupp 4 (5/27·9/15 … 3 3/5·1 1/9·2 1/2)',
+      spar: { nian: {
+        tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'valfri', mellanled: 'kedja' },
+        kravs: { forkortbar: true }, svarform: 'enklaste', rattning: 'equality' } }
     }
 
   };
