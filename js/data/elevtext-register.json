@@ -1037,6 +1037,24 @@
   "titel | Multiplikation och division med decimaltal",
   "titel | Prioriteringsregeln"
  ],
+ "js/motor/ak9-k2-akr9-ova-variant.js": [
+  "rubrik | Beräkna",
+  "rubrik | Beräkna genom att byta form – svara i enklaste form",
+  "rubrik | Beräkna – förkorta innan multiplikation, visa mellanled, svara i enklaste form",
+  "rubrik | Beräkna – svara i enklaste form – visa ett mellanled",
+  "rubrik | Beräkna – svara i enklaste form – visa mellanled",
+  "rubrik | Beräkna – visa mellanled med förlängning, svara i enklaste form",
+  "rubrik | Beräkna – visa mellanled med invertering, förenkla innan multiplikation",
+  "rubrik | Beräkna – visa mellanled med invertering, svara i enklaste form",
+  "rubrik | Beräkna – visa mellanled, svara i enklaste form",
+  "rubrik | Beräkna – visa mellanledet med minsta gemensamma nämnare (inte förlängningen), svara i enklaste form",
+  "rubrik | Invertera talet",
+  "rubrik | Ordna bråken i storleksordning, börja med det minsta – avrunda till närmevärde",
+  "rubrik | Skriv bråken med minsta gemensamma nämnare",
+  "rubrik | Vilket tecken ska stå mellan bråken, > eller <",
+  "titel | Grunder, addition och subtraktion",
+  "titel | Multiplikation och division"
+ ],
  "js/motor/ak9-k2-ova-variant.js": [
   "prompt | {} eller",
   "rubrik | Beräkna",
