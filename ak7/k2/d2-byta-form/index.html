@@ -994,11 +994,11 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     delade.forEach(function(id){
       var n = k1noder.filter(function(x){ return x.id === id; })[0];
       if(!n || !n.visning) return; var v = n.visning;
-      rader.push({ titel: v.titel, formaga: v.etikett, ko: n.parent, formagaKey: v.formagaKey || 'rakna', ram: 'k1', ord: v.radordning });
+      rader.push({ titel: (v.titel || n.namn), formaga: v.etikett, ko: n.parent, formagaKey: v.formagaKey || 'rakna', ram: 'k1', ord: v.radordning });
     });
     // k2:s egna k2d2-lövnoder (Blandad form)
     k2noder.filter(function(n){ return n.niva === 'lovnod' && n.visning && n.visning.utbudslista === 'k2d2'; }).forEach(function(n){
-      var v = n.visning; rader.push({ titel: v.titel, formaga: v.etikett, ko: n.parent, formagaKey: v.formagaKey || 'rakna', ram: 'k2', ord: v.radordning });
+      var v = n.visning; rader.push({ titel: (v.titel || n.namn), formaga: v.etikett, ko: n.parent, formagaKey: v.formagaKey || 'rakna', ram: 'k2', ord: v.radordning });
     });
     rader.sort(function(a, b){ return a.ord - b.ord; });
     return rader.length ? [{ ko: 'Byta form', drills: rader }] : [];

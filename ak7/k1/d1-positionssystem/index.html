@@ -1032,7 +1032,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
         gr.rader.sort(function(a, b){ return a.visning.radordning - b.visning.radordning; });
         return { ko: gr.rubrik, drills: gr.rader.map(function(n){
           var v = n.visning;
-          return { titel: v.titel, formaga: v.etikett, ko: n.parent,
+          return { titel: (v.titel || n.namn), formaga: v.etikett, ko: n.parent,
                    formagaKey: v.formagaKey || undefined, niva: v.niva || undefined };
         }) };
       });
