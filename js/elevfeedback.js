@@ -58,6 +58,7 @@
   }
 
   function skapaKnapp() {
+    if (document.querySelector('.feedback-knapp')) { return; }   // redan skapad i detta dokument
     var knapp = nyEl('button', 'feedback-knapp');
     knapp.type = 'button';
     knapp.setAttribute('aria-label', 'Tipsa oss om förbättringar');
@@ -67,6 +68,7 @@
   }
 
   function skapaModal() {
+    if (document.querySelector('.feedback-overlay')) { return; }   // redan skapad i detta dokument
     var overlay = nyEl('div', 'feedback-overlay');
     overlay.id = 'feedback-overlay';
 
@@ -153,6 +155,10 @@
   }
 
   function start() {
+    // I inbäddat läge (ramen körs i en iframe på en hub-/färdighetsträningssida) äger VÄRDsidan
+    // TIPSA-knappen. Utan detta skapar både värden och den inbäddade ramen var sin knapp → två
+    // staplade i nedre högra hörnet. Undertryck i iframe; fristående ram behåller sin knapp.
+    if (window.self !== window.top) { return; }
     injiceraStil();
     skapaKnapp();
     skapaModal();

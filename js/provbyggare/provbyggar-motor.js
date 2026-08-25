@@ -1388,7 +1388,22 @@ function renderTestTake(){
   if(config.rikTestUX && window.AK8_UI){
     const kpWrap = document.createElement('div');
     kpWrap.innerHTML = AK8_UI.keypadHTML({ builders:false, ops:[',', '+', '·', '/', '−'] });
-    if(kpWrap.firstChild){ body.appendChild(kpWrap.firstChild); AK8_UI.bindKeypad(body); }
+    if(kpWrap.firstChild){
+      body.appendChild(kpWrap.firstChild); AK8_UI.bindKeypad(body);
+      // Keypaden ska BARA synas när ett skriv-fält har fokus. bindKeypad döljer den för ordsvars-rutor,
+      // men flervalsfrågor har inga input-fält alls → deras knappfokus triggar aldrig döljningen. Här
+      // döljs keypaden så snart fokus INTE ligger på ett skrivbart fält (flerval, ingen fokus, ordsvar).
+      const kp = body.querySelector('.keypad') || document.querySelector('.keypad');
+      const uppdateraKeypad = function(){
+        if(!kp) return;
+        const af = document.activeElement;
+        const skrivbar = !!(af && af.tagName === 'INPUT' && !af.matches('[data-nokeypad]') && body.contains(af));
+        kp.classList.toggle('keypad-hidden', !skrivbar);
+      };
+      body.addEventListener('focusin', uppdateraKeypad);
+      body.addEventListener('focusout', function(){ setTimeout(uppdateraKeypad, 0); });
+      uppdateraKeypad();   // initialt dold tills ett skriv-fält fokuseras
+    }
   }
 
   showView('test-take');
