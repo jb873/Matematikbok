@@ -232,15 +232,17 @@
       kalla: 'nian Öva 1 grupp 1 (3/11, 2/9, 4/12, 9/31, 32/111)',
       spar: { nian: {
         tak: { antal: 5, maxNamnare: 120, maxTaljare: 120, form: 'proper', mellanled: false },
-        kravs: { parvisOlika: 5, fonster: 0.20 },   // fem NÄRA bråk (värdefönster ≤0,20 → avrundning krävs)
+        kravs: { parvisOlika: 5, fonster: 0.12, fonsterMin: 0.075, minGap: 0.010 },   // fem NÄRA bråk: spridning 0,075–0,12
+        // fonster (max 0,12): nära nog att exakt jämförelse är omständlig. fonsterMin (0,075) + minGap (0,010):
+        // ej KLUSTRADE — klustrade bråk avrundas till samma närmevärde = SVÅRARE än orig (metoden slutar hjälpa).
         svarform: 'ordning', rattning: 'canonical' } }
     },
     'brak-mgn:rakna': {   // nian Öva 1 G3 — skriv båda bråken med MINSTA gemensamma nämnare.
       kalla: 'nian Öva 1 grupp 3 (11/18·7/24, 7/8·5/12, 5/27·11/36, 31/64·13/24)',
       spar: { nian: {
-        tak: { maxNamnare: 64, maxTaljare: 63, form: 'proper', mellanled: false },
-        kravs: { gemensamFaktor: true },   // nämnarna delar en gemensam faktor (minsta < produkt)
-        svarform: 'brak', rattning: 'canonical' } }
+        tak: { maxNamnare: 64, maxTaljare: 63, maxResultNamnare: 192, form: 'proper', mellanled: false },
+        kravs: { gemensamFaktor: true },   // nämnarna delar en gemensam faktor (minsta gem. nämnare < produkt); svarsnämnare ≤ 192
+        svarform: 'mgn', rattning: 'canonical' } }   // två celler, båda bråken över MINSTA gem. nämnaren; ej-minsta underkänns
     },
     'brak-lana:rakna': {   // nian Öva 1 G6 sista — blandad subtraktion med LÅN (fri kedja).
       kalla: 'nian Öva 1 grupp 6 d (5 5/9 − 2 11/12)',

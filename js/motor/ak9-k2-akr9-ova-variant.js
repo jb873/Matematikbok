@@ -51,27 +51,39 @@
 
   // ── FORM-KONSTRUKTORER (orig + sample/villkor). variant 0 = orig; ≥1 samplas i bandet. ──
 
-  // G1 — storleksordna med närmevärde: fem PARVIS OLIKA, NÄRA bråk (kräver avrundning). Fönster ≤0,20.
+  // G1 — storleksordna med närmevärde: fem PARVIS OLIKA, NÄRA bråk (kräver avrundning). Fönster ≤0,12
+  //   (spar.nian, orig-spridning ~0,11). Håll i synk med spec-villkor-k2.js brak-jmf-narmevarde.
   function ordnaUppg(lista, logg){
     return { logg: logg, orig: { lista: lista }, prompt: function(){ return null; }, mellan: function(){ return null; },
+      // Sprid fem bråk JÄMNT över ett fönster (bredd 0,08–0,12) med min-gap, så avrundning skiljer dem
+      //   (klustrade bråk vore SVÅRARE än orig — närmevärde slutar hjälpa). Fönster [fonsterMin, fonster].
       sample: function(rng){
-        var dens = [7, 8, 9, 11, 12, 13, 16, 19, 24, 31, 37, 41, 53, 111];
-        for(var attempt = 0; attempt < 40; attempt++){
-          var center = 0.22 + rng() * 0.42, out = [], seen = {};
-          for(var g = 0; g < 80 && out.length < 5; g++){
-            var n = rp(rng, dens), t = Math.round(center * n); if(t < 1) t = 1; if(t > n - 1) t = n - 1;
-            var val = t / n, kv = Math.round(val * 1e6);
-            if(Math.abs(val - center) <= 0.09 && !seen[kv] && !seen['n' + n]){ seen[kv] = 1; seen['n' + n] = 1; out.push([t, n]); }
+        var dens = [7, 8, 9, 11, 12, 13, 14, 16, 17, 19, 23, 24, 29, 31, 37, 41, 53, 111];
+        for(var attempt = 0; attempt < 60; attempt++){
+          var width = 0.085 + rng() * 0.035, lo = 0.15 + rng() * (0.60 - width);
+          var out = [], seenN = {}, vals = [], ok = true;
+          for(var i = 0; i < 5; i++){
+            var target = lo + (i / 4) * width, best = null, bestErr = 1;
+            for(var tr = 0; tr < 50; tr++){
+              var n = rp(rng, dens); if(seenN[n]) continue;
+              var t = Math.round(target * n); if(t < 1) t = 1; if(t > n - 1) t = n - 1;
+              var v0 = t / n, e = Math.abs(v0 - target);
+              if(e < bestErr && vals.every(function(x){ return Math.abs(x - v0) > 0.012; })){ best = [t, n]; bestErr = e; }
+            }
+            if(!best){ ok = false; break; }
+            seenN[best[1]] = 1; vals.push(best[0] / best[1]); out.push(best);
           }
-          if(out.length === 5) return { lista: out };
+          if(ok && out.length === 5) return { lista: out };
         }
         return { lista: lista };
       },
       villkor: function(x){
         if(!x.lista || x.lista.length !== 5) return false; var vs = [];
         for(var i = 0; i < 5; i++){ var p = x.lista[i]; if(p[1] < 5 || p[1] > 120 || p[0] < 1 || p[0] >= p[1]) return false; vs.push(p[0] / p[1]); }
-        vs.sort(function(a, b){ return a - b; }); for(var j = 1; j < 5; j++){ if(vs[j] - vs[j - 1] < 1e-6) return false; }
-        return (vs[4] - vs[0]) <= 0.20;
+        vs.sort(function(a, b){ return a - b; });
+        for(var j = 1; j < 5; j++){ if(vs[j] - vs[j - 1] < 0.010) return false; }   // min-gap: avrundning skiljer intilliggande
+        var spann = vs[4] - vs[0];
+        return spann >= 0.075 && spann <= 0.12;   // ej klustrat (≥0,075), ej bredare än orig-taket (≤0,12)
       },
       facit: function(x){ return { form: 'ordna', lista: x.lista }; } };
   }
