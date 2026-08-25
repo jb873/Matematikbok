@@ -567,6 +567,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/metod/metod-brak-decimal.js"></script>
 <script src="js/mastery-k2.js"></script>
 <script src="js/data/k2-taxonomi.js"></script>
+<script src="js/data/spec-villkor-k2.js"></script>
 <script src="js/data/k2-fardiga-test.js"></script>
 <script src="js/motor/ovamer/ovamer-k2.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-div.js"></script>
@@ -576,6 +577,8 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/ovamer/ovamer-k2-andel.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-likvtid.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-luckor.js"></script>
+<!-- Nians två band-drivna dk2-drillar (mgn + närmevärde-ordna); läser band ur spec-villkor-k2.js. -->
+<script src="js/motor/ovamer/ovamer-k2-nian.js"></script>
 <!-- Delad provbyggare (samma modul som k1 monterar). Monteras med K2-config i boot nedan. -->
 <link rel="stylesheet" href="js/provbyggare/provbyggar-motor.css">
 <script src="js/motor/blad/ak8-blad-ui.js"></script>
@@ -625,6 +628,7 @@ function blandadEngine(){
     'brak-forlanga': function(){ forlangaEngine(); },
     'brak-forkorta': function(){ forkortaEngine(); },
     'brak-likformig': function(){ likformigEngine(); },       // Del 3: förläng till given nämnare (likformiga bråk)
+    'brak-mgn':      function(){ mgnEngine(); },              // nian: minsta gemensamma nämnare (två celler, band-driven)
     'brak-add':      function(){ raknaEngine('addition'); },
     'brak-sub':      function(){ raknaEngine('subtraktion'); },
     'brak-mult-rakna': function(){ multBrakEngine(); },      // Del 6: multiplikation med bråk (mellanled vid stora tal)
@@ -637,6 +641,7 @@ function blandadEngine(){
     'brak-jmf-lika':     function(){ klickaStorstEngine(); },     // Del 4: klicka störst
     'brak-jmf-riktmark': function(){ markeraRiktmarkEngine(); },  // Del 4: markera alla mot ½ och 1
     'brak-jmf-ordna':    function(){ storleksordnaEngine(); },    // Del 4: storleksordna
+    'brak-jmf-narmevarde': function(){ narmevardeOrdnaEngine(); }, // nian: storleksordna med närmevärde (band-driven)
     'brak-jmf-summa':    function(){ summaMot1Engine(); },        // Del 4: summa mot 1 (binärt)
     'brak-jmf-konstr':   function(){ konstrueraEngine(); },       // Del 4: konstruera (villkors-validering)
     'andel-figur':       function(){ andelFigurEngine(); },       // Del 1: hur stor andel är färgad

@@ -67,6 +67,7 @@
             for(var tr = 0; tr < 50; tr++){
               var n = rp(rng, dens); if(seenN[n]) continue;
               var t = Math.round(target * n); if(t < 1) t = 1; if(t > n - 1) t = n - 1;
+              if(gcd(t, n) !== 1) continue;   // reducerade bråk (rent talurval; håll i synk med drillen ovamer-k2-nian)
               var v0 = t / n, e = Math.abs(v0 - target);
               if(e < bestErr && vals.every(function(x){ return Math.abs(x - v0) > 0.012; })){ best = [t, n]; bestErr = e; }
             }
