@@ -514,26 +514,26 @@ function renderDivTabell(body){
       if(correct) ts.correct++;
       var fb = document.getElementById('divtab-fb');
       input.disabled = true;
-      document.getElementById('divtab-svara').disabled = true;
+      var svarBtn = document.getElementById('divtab-svara');
       if(correct){
         input.classList.add('correct');
         fb.className = 'tabell-feedback correct';
-        fb.textContent = 'Rätt!';
-        setTimeout(function(){ idx++; renderFraga(); }, 350);
+        fb.textContent = '✓ Rätt!';
       } else {
         input.classList.add('wrong');
         fb.className = 'tabell-feedback wrong';
-        fb.textContent = t.taljare + ' / ' + t.n + ' = ' + facit;
-        setTimeout(function(){ idx++; renderFraga(); }, 200);
+        fb.textContent = '✗ ' + t.taljare + ' / ' + t.n + ' = ' + facit;
       }
+      // BEKRÄFTELSESTEG: svaret är låst + loggat (rätt ELLER fel). Andra Enter/klick går vidare.
+      svarBtn.textContent = 'Nästa →';
+      svarBtn.onclick = function(){ idx++; renderFraga(); };
+      svarBtn.focus();
     }
-    input.addEventListener('input', function(){
-      if(input.value.trim() === facit) advance(true);
-    });
+    // Ingen auto-advance på input — annars registreras aldrig ett fel. Enter/knapp RÄTTAR (loggar rätt ELLER fel).
     input.addEventListener('keydown', function(e){
       if(e.key === 'Enter'){
         e.preventDefault();
-        if(input.value.trim() !== '') advance(input.value.trim() === facit);
+        if(!done && input.value.trim() !== '') advance(input.value.trim() === facit);
       }
     });
     document.getElementById('divtab-svara').onclick = function(){

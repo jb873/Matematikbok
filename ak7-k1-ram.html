@@ -5897,26 +5897,28 @@ function renderKompisar(body, backFn){
       if(correct){ ts.correct++; tsG.correct++; }
       const fb = document.getElementById('kompis-fb');
       input.disabled = true;
-      document.getElementById('kompis-svara').disabled = true;
+      const svarBtn = document.getElementById('kompis-svara');
       if(correct){
         input.classList.add('correct');
         fb.className = 'tabell-feedback correct';
-        fb.textContent = 'Rätt!';
-        setTimeout(function(){ idx++; renderFraga(); }, 400);
+        fb.textContent = '✓ Rätt!';
       } else {
         input.classList.add('wrong');
         fb.className = 'tabell-feedback wrong';
-        fb.textContent = t.x + ' + ' + t.svar + ' = ' + (t.typ==='tio'?'10':'100');
-        setTimeout(function(){ idx++; renderFraga(); }, 1300);
+        fb.textContent = '✗ ' + t.x + ' + ' + t.svar + ' = ' + (t.typ==='tio'?'10':'100');
       }
+      // BEKRÄFTELSESTEG: svaret är låst + loggat (rätt ELLER fel). Andra Enter/klick går vidare.
+      svarBtn.textContent = 'Nästa →';
+      svarBtn.onclick = function(){ idx++; renderFraga(); };
+      svarBtn.focus();
     }
     function matches(){
       const v = parseInt(input.value, 10);
       return !isNaN(v) && v === t.svar;
     }
-    input.addEventListener('input', function(){ if(matches()) advance(true); });
+    // Ingen auto-advance på input — annars registreras aldrig ett fel. Enter/knapp RÄTTAR (loggar rätt ELLER fel).
     input.addEventListener('keydown', function(e){
-      if(e.key === 'Enter'){ e.preventDefault(); if(input.value.trim() !== '') advance(matches()); }
+      if(e.key === 'Enter'){ e.preventDefault(); if(!done && input.value.trim() !== '') advance(matches()); }
     });
     document.getElementById('kompis-svara').onclick = function(){
       if(input.value.trim() !== '') advance(matches());

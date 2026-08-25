@@ -454,28 +454,27 @@ function renderMultTabell(body){
       if(correct) ts.correct++;
       const fb = document.getElementById('tabell-fb');
       input.disabled = true;
-      document.getElementById('tabell-svara').disabled = true;
+      const svarBtn = document.getElementById('tabell-svara');
       if(correct){
         input.classList.add('correct');
         fb.className = 'tabell-feedback correct';
-        fb.textContent = 'Rätt!';
-        setTimeout(function(){ idx++; renderFraga(); }, 350);
+        fb.textContent = '✓ Rätt!';
       } else {
         input.classList.add('wrong');
         fb.className = 'tabell-feedback wrong';
-        fb.textContent = t.a + ' · ' + t.b + ' = ' + facit;
-        setTimeout(function(){ idx++; renderFraga(); }, 200);
+        fb.textContent = '✗ ' + t.a + ' · ' + t.b + ' = ' + facit;
       }
+      // BEKRÄFTELSESTEG: svaret är låst + loggat (rätt ELLER fel). Andra Enter/klick går vidare.
+      svarBtn.textContent = 'Nästa →';
+      svarBtn.onclick = function(){ idx++; renderFraga(); };
+      svarBtn.focus();
     }
 
-    // Rätt svar → byt direkt
-    input.addEventListener('input', function(){
-      if(input.value.trim() === facit) advance(true);
-    });
+    // Ingen auto-advance på input — annars registreras aldrig ett fel. Enter/knapp RÄTTAR (loggar rätt ELLER fel).
     input.addEventListener('keydown', function(e){
       if(e.key === 'Enter'){
         e.preventDefault();
-        if(input.value.trim() !== '') advance(input.value.trim() === facit);
+        if(!done && input.value.trim() !== '') advance(input.value.trim() === facit);
       }
     });
     document.getElementById('tabell-svara').onclick = function(){
@@ -1413,26 +1412,27 @@ function renderRaknaPow10(body, cfg, backFn){
       if(correct){ ts.correct++; tsG.correct++; }
       const fb = document.getElementById('pow-fb');
       input.disabled = true;
-      document.getElementById('pow-svara').disabled = true;
+      const svarBtn = document.getElementById('pow-svara');
       if(correct){
         input.classList.add('correct');
         fb.className = 'tabell-feedback correct';
-        fb.textContent = 'Rätt!';
-        setTimeout(function(){ idx++; renderFraga(); }, 400);
+        fb.textContent = '✓ Rätt!';
       } else {
         input.classList.add('wrong');
         fb.className = 'tabell-feedback wrong';
-        fb.textContent = t.display + ' = ' + t.facit;
-        setTimeout(function(){ idx++; renderFraga(); }, 1200);
+        fb.textContent = '✗ ' + t.display + ' = ' + t.facit;
       }
+      // BEKRÄFTELSESTEG: svaret är låst + loggat (rätt ELLER fel). Andra Enter/klick går vidare.
+      svarBtn.textContent = 'Nästa →';
+      svarBtn.onclick = function(){ idx++; renderFraga(); };
+      svarBtn.focus();
     }
 
-    // Rätt svar → byt direkt
-    input.addEventListener('input', function(){ if(matches()) advance(true); });
+    // Ingen auto-advance på input — annars registreras aldrig ett fel. Enter/knapp RÄTTAR (loggar rätt ELLER fel).
     input.addEventListener('keydown', function(e){
       if(e.key === 'Enter'){
         e.preventDefault();
-        if(input.value.trim() !== '') advance(matches());
+        if(!done && input.value.trim() !== '') advance(matches());
       }
     });
     document.getElementById('pow-svara').onclick = function(){
