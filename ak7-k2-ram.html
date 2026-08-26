@@ -768,6 +768,21 @@ function blandadEngine(){
       if(Math.abs(v-mk[0])<1e-9) return null;
       return {key:t+'/'+n+'-'+mk[1], prompt:'Är '+t+'/'+n+' större eller mindre än '+mk[1]+'?', options:['Större än '+mk[1],'Mindre än '+mk[1]], answer:(v>mk[0]?'Större':'Mindre')+' än '+mk[1], expl:t+'/'+n+' är '+(v>mk[0]?'större':'mindre')+' än '+mk[1]+'.'};
     }) ] },
+    // nian dk2 — MGN (numeriskt: minsta gem. nämnare) + närmevärde (flerval: störst/minst bland nära bråk).
+    // Återanvänder de band-drivna talgeneratorerna (window.genMgn/genNarmevardeOrdna). KONCEPT-täcker öva-
+    // bladen utan att spegla formatet (två-cells-MGN / klick-i-ordning). Fallback om modulen ej laddad.
+    'brak-mgn': { snabb: [ G.numeric('k2-mgn','Minsta gemensamma nämnare','brak-mgn', function(){
+      if(typeof window.genMgn !== 'function') return null;
+      var u = window.genMgn(Math.random);
+      return { key:u.a[0]+'/'+u.a[1]+'-'+u.b[0]+'/'+u.b[1], prompt:'Vad är den minsta gemensamma nämnaren för '+u.a[0]+'/'+u.a[1]+' och '+u.b[0]+'/'+u.b[1]+'?', ans:u.L, expl:'Minsta gemensamma nämnaren för '+u.a[1]+' och '+u.b[1]+' är '+u.L+'.' };
+    }) ] },
+    'brak-jmf-narmevarde': { snabb: [ G.flerval('k2-narmevarde','Storleksordna med närmevärde','brak-jmf-narmevarde', function(){
+      if(typeof window.genNarmevardeOrdna !== 'function') return null;
+      var u = window.genNarmevardeOrdna(Math.random), vals = u.lista.map(function(f){ return f[0]/f[1]; });
+      var mi=0, ma=0; for(var i=1;i<vals.length;i++){ if(vals[i]<vals[mi]) mi=i; if(vals[i]>vals[ma]) ma=i; }
+      var minst = Math.random()<0.5, ti = minst?mi:ma, opts = u.lista.map(function(f){ return f[0]+'/'+f[1]; });
+      return { key:(minst?'min':'max')+':'+opts.join(','), prompt:'Vilket bråk är '+(minst?'minst':'störst')+'? (avrunda till närmevärde)', options:opts, answer:opts[ti], expl:(minst?'Minst':'Störst')+': '+opts[ti]+' ≈ '+(Math.round(vals[ti]*100)/100)+'.' };
+    }) ] },
     // d5 — Add/sub MED MELLANLED: summa/differens över gemensam nämnare (värde-rättat) → slutsvar enklaste.
     // Spegel av drillens femledade add/sub: gemensam nämnare visas i ledets fråga, eleven räknar summan, förkortar sist.
     'brak-add': { snabb: [ G.mellanled('k2-add','Addition med bråk','brak-add', function(){
@@ -914,6 +929,7 @@ function blandadEngine(){
     'k2-add':'brak-add:rakna', 'k2-sub':'brak-sub:rakna', 'k2-mult':'brak-mult-rakna:rakna',
     'k2-div-bh':'brak-div-bh:rakna', 'k2-div-hb':'brak-div-hb:rakna',
     'k2-div-bb':'brak-div-bb:rakna', 'k2-div-inv':'brak-div-inv:rakna',
+    'k2-mgn':'brak-mgn:rakna', 'k2-narmevarde':'brak-jmf-narmevarde:resonera',   // nian dk2
     // ── ÖVA-TÄCKNING (sjuan k2-sweep) → rätt kart-cell ──
     'andel-brak':'andel-antal:rakna',                                                    // k2d1
     'brak-dec':'brak-blandad:rakna', 'dec-brak':'brak-blandad:rakna', 'oakta-blandad':'brak-blandad:rakna', // k2d2
@@ -956,7 +972,7 @@ function blandadEngine(){
   // Deeplink: ?view=test-fardigt&del=k2dN&test=M — FÄRDIGT delkapitel-test (förvalt urval via K2_FARDIGA)
   // → PB.byggFardigt bygger (coverage-seedning + färdigt-läge) och går direkt till take.
   if(/[?&]view=test-fardigt/i.test(hs)){
-    var mfd = hs.match(/[?&]del=([a-z0-9]+)/i), mft = hs.match(/[?&]test=([0-9]+)/i);
+    var mfd = hs.match(/[?&]del=([a-z0-9-]+)/i), mft = hs.match(/[?&]test=([0-9]+)/i);   // bindestreck för nians 'ak9-dk2'
     var ftester = (window.K2_FARDIGA && mfd) ? K2_FARDIGA.tester(mfd[1]) : [];
     var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
     var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);   // FAS 4: retur till delkapitel

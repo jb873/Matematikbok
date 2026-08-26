@@ -10,8 +10,18 @@
   var BYGGBARA = {};
   ['andel-antal:rakna','brak-blandad:rakna','brak-tid:rakna','brak-forlanga:rakna','brak-forkorta:rakna',
    'brak-likformig:rakna','brak-jmf-lika:begrepp','brak-jmf-riktmark:begrepp','brak-add:rakna','brak-sub:rakna',
-   'brak-mult-rakna:rakna','brak-div-bh:rakna','brak-div-hb:rakna','brak-div-bb:rakna','brak-div-inv:rakna'
+   'brak-mult-rakna:rakna','brak-div-bh:rakna','brak-div-hb:rakna','brak-div-bb:rakna','brak-div-inv:rakna',
+   'brak-mgn:rakna','brak-jmf-narmevarde:resonera'   // nian dk2 (nya test-generatorer k2-mgn/k2-narmevarde)
   ].forEach(function(n){ BYGGBARA[n] = 1; });
+
+  // NIANS dk2 (Åk9-spåret · Räkna med bråk): explicit nod-scope, additiv gren (som dk1 i k1-fardiga-test).
+  // Baskoncepten + de två nya (MGN, närmevärde); låna/förkorta-innan/reciprok täcks konceptuellt av
+  // bas-operationerna (Joachims val a). Noderna delar test-generatorer + mastery-store med åttans blad.
+  var AK9_DK2_NODER = [
+    'brak-jmf-narmevarde:resonera', 'brak-jmf-lika:begrepp', 'brak-mgn:rakna',
+    'brak-add:rakna', 'brak-sub:rakna', 'brak-mult-rakna:rakna',
+    'brak-div-bh:rakna', 'brak-div-hb:rakna', 'brak-div-bb:rakna', 'brak-div-inv:rakna'
+  ];
 
   // Antal test-TYPER (snabb-generatorer) per nod — spegel av K2_GEN_NOD. Default 1 (varje nod = en generator).
   var TYP_PER_NOD = {
@@ -23,6 +33,7 @@
 
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
   function byggbaraNoder(del){
+    if(del === 'ak9-dk2') return AK9_DK2_NODER.filter(function(n){ return BYGGBARA[n]; });   // nian: explicit scope
     var tax = window.K2_TAXONOMI; if(!tax || !tax.noder) return [];
     var ut = [];
     tax.noder.forEach(function(n){

@@ -78,6 +78,10 @@
     return { lista: [[3, 11], [2, 9], [4, 12], [9, 31], [32, 111]], ordning: [1, 0, 4, 3, 2] };   // fallback = orig
   }
 
+  // Exponera talgeneratorerna på window så ramens provbyggar-testgeneratorer (K2_TEST_GENERATORS) kan
+  // återanvända dem — testet koncept-testar samma tal, i provbyggarens format (numeriskt / flerval).
+  if(typeof window !== 'undefined'){ window.genMgn = genMgn; window.genNarmevardeOrdna = genNarmevardeOrdna; }
+
   // ── ENGINES (browser: kräver de delade korOvning*-looparna + frac/fracBoxes/valFor ur ramen) ──
   if(typeof window !== 'undefined' && typeof window.korOvningOrdna === 'function'){
     window.narmevardeOrdnaEngine = function(){
