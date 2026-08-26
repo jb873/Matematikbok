@@ -170,6 +170,11 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 .view{animation:fadeUp .35s ease both;}
+/* Provbyggarens CSS (provbyggar-motor.css) sätter .view{display:none} + .view.is-active{display:block}
+   för sin egen vy-växling. Ovamer-drillarna (korOvning) renderar <div class="view"> UTAN is-active,
+   som direkt barn till #app → dolda. Visa dem specifikt (provbyggarens egna vyer bor i #app #pb-host
+   .view, djupare, och rörs ej). Utan detta blev alla k2-drillar osynliga via deeplink. */
+#app > .view{ display:block; }
 
 footer{text-align:center;padding:30px 20px;color:var(--ink-faint);border-top:1px solid var(--paper-dk);margin-top:30px;}
 footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;}
