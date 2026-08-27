@@ -23,6 +23,11 @@
     'brak-div-bh:rakna', 'brak-div-hb:rakna', 'brak-div-bb:rakna', 'brak-div-inv:rakna'
   ];
 
+  // Per-nod-variant för nians dk2-test (skickas som cfg.varianter → generatorns makeItem(opts.variant),
+  // samma väg som AK9_DK1_VARIANTER). Subtraktionen körs i BLANDAD form som kräver växling → täcker
+  // låne-konceptet (brak-lana) utan egen generator; källa nian Öva 1 G6. Åk7 (utan varianter) oförändrat.
+  var AK9_DK2_VARIANTER = { 'brak-sub:rakna': 'blandad' };
+
   // Antal test-TYPER (snabb-generatorer) per nod — spegel av K2_GEN_NOD. Default 1 (varje nod = en generator).
   var TYP_PER_NOD = {
     // sjuan k2-sweep: noder som fick fler generatorer
@@ -55,7 +60,8 @@
     var noder = byggbaraNoder(del); if(!noder.length) return [];
     var ordning = [], grupper = {};
     noder.forEach(function(n){ var g = gruppAv(n); if(!grupper[g]){ grupper[g] = []; ordning.push(g); } grupper[g].push(n); });
-    return ordning.map(function(g){ var ns = grupper[g]; return { titel: g, nodes: ns, antal: antalFor(ns) }; });
+    var varianter = (del === 'ak9-dk2') ? AK9_DK2_VARIANTER : undefined;
+    return ordning.map(function(g){ var ns = grupper[g]; return { titel: g, nodes: ns, antal: antalFor(ns), varianter: varianter }; });
   }
 
   // Rendera Test-flikens innehåll: färdig-test-knappar (deeplink → ramens ?view=test-fardigt&del=k2dN&test=M).

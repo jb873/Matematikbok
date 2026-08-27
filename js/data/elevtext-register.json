@@ -1336,6 +1336,7 @@
   "prompt | Räkna ut (svar i decimalform): {}/{} {}",
   "prompt | Räkna ut steg för steg (förkorta gärna först): {}/{} · {}/",
   "prompt | Räkna ut steg för steg: {} {}/{} · {}/",
+  "prompt | Räkna ut steg för steg: {} {}/{} − {} {}/",
   "prompt | Räkna ut steg för steg: {} · {}/",
   "prompt | Räkna ut steg för steg: {} ÷ {}/",
   "prompt | Räkna ut steg för steg: {}/{} + {}/",

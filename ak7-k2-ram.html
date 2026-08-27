@@ -798,7 +798,37 @@ function blandadEngine(){
         expl:t1+'/'+n1+' + '+t2+'/'+n2+' = '+nt1+'/'+L+' + '+nt2+'/'+L+' = '+komb+'/'+L+' = '+T+'/'+N+'.'
       };
     }) ] },
-    'brak-sub': { snabb: [ G.mellanled('k2-sub','Subtraktion med bråk','brak-sub', function(){
+    'brak-sub': { snabb: [ G.mellanled('k2-sub','Subtraktion med bråk','brak-sub', function(opts){
+      var v = (opts && opts.variant) || 'proper';
+      if(v === 'blandad'){
+        // NIAN dk2 (källa: nian Öva 1 G6): blandad-tal-subtraktion som KRÄVER växling — täcker
+        // brak-lana-konceptet UTAN egen generator (Joachims order). Heltalsdelar skiljer med 1 och
+        // minuendens bråkdel är mindre → svaret blir ett ÄKTA bråk (< 1), vilket både ryms i talj/namn
+        // och ÄR blandad-svarformen. Gating gör att åk7 (band maxHeltal:0) förblir byte-identiskt.
+        // Band: nian brak-sub niva2 — maxNamnare 22, maxHeltal 8, maxResultNamnare 40.
+        for(var k=0;k<200;k++){
+          var na=rP([3,4,5,6,8]), nb=rP([3,4,5,6,8]);
+          var ta=rI(1,na-1), tb=rI(1,nb-1);
+          if(gcd2(ta,na)!==1 || gcd2(tb,nb)!==1) continue;      // reducerade bråkdelar
+          if(ta/na >= tb/nb) continue;                          // KRÄVER växling: minuendens bråkdel mindre
+          var Lb=na*nb/gcd2(na,nb); if(Lb>40) continue;         // maxResultNamnare
+          var A=rI(2,6), B=A-1;                                 // skiljer med 1 → resultat < 1
+          var pa=A*na+ta, pb=B*nb+tb, m1=pa*(Lb/na), m2=pb*(Lb/nb), kb=m1-m2;
+          if(kb<=0) continue;
+          var gb=gcd2(kb,Lb), Tb=kb/gb, Nb=Lb/gb;
+          if(Tb>=Nb) continue;                                  // säkerställ äkta svar (ryms i talj/namn)
+          return {
+            key:'bl-'+A+'.'+ta+'/'+na+'-'+B+'.'+tb+'/'+nb,
+            prompt:'Räkna ut steg för steg:    '+A+' '+ta+'/'+na+' − '+B+' '+tb+'/'+nb,
+            led:[ { fraga:m1+'−'+m2+' / '+Lb, varde: kb/Lb, facit: kb+'/'+Lb } ],
+            slutTalj:Tb, slutNamn:Nb,
+            expl:A+' '+ta+'/'+na+' − '+B+' '+tb+'/'+nb+': bråkdelen i det första talet är mindre, så '
+              +'växla 1 heltal ('+A+' '+ta+'/'+na+' = '+B+' '+(na+ta)+'/'+na+'). Som oäkta bråk: '
+              +pa+'/'+na+' − '+pb+'/'+nb+' = '+m1+'/'+Lb+' − '+m2+'/'+Lb+' = '+kb+'/'+Lb+' = '+Tb+'/'+Nb+'.'
+          };
+        }
+        return null;
+      }
       var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
       var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
       var komb=nt1-nt2; if(komb<=0) return null;
@@ -976,7 +1006,7 @@ function blandadEngine(){
     var ftester = (window.K2_FARDIGA && mfd) ? K2_FARDIGA.tester(mfd[1]) : [];
     var ft = ftester[mft ? (parseInt(mft[1], 10) - 1) : 0] || ftester[0];
     var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);   // FAS 4: retur till delkapitel
-    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, retur: mret ? decodeURIComponent(mret[1]) : null, returTxt: mrtx ? decodeURIComponent(mrtx[1]) : null }); }
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter || null, retur: mret ? decodeURIComponent(mret[1]) : null, returTxt: mrtx ? decodeURIComponent(mrtx[1]) : null }); }
     else { PB.setDel(mfd ? mfd[1] : null); pbNav('test-config'); }
     return;
   }
