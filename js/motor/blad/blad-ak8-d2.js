@@ -159,6 +159,18 @@
 
   // ═══════════════ RENDER + SJÄLVRÄTTNING ═══════════════
   var CHECKS = [];   // data-idx → check(el) → { ok, facit }
+  var CUR_NEG = false;   // FAS3: sätts per grupp i renderBlad — styr om brak-rader får teckenruta (grupp-härlett, ej per uppgift)
+  // FAS2: en uppgift KRÄVER omskrivningscell när den subtraherar ett negativt tal (a − (−b) = a + b) —
+  // detekteras ur uttrycket (bandet bär kravet, inte rubriken), tvåvägs (cell finns exakt då mönstret finns).
+  function harDubbelMinus(fraga){ return /[−–-]\s*\(\s*[−–-]/.test(String(fraga)); }
+  // Kanonisk omskrivning för facit-visning: slår ihop yttre operator med inre tecken, tar bort parentesen.
+  function skrivOm(f){ return String(f).replace(/([+−–-])\s*\(\s*([+−–-]?)\s*([0-9]+(?:[.,][0-9]+)?)\s*\)/g,
+    function(m, yttre, inre, tal){ var neg = (/[−–-]/.test(yttre)) !== (/[−–-]/.test(inre)); return (neg ? ' − ' : ' + ') + tal; }); }
+  // FAS3: kan NÅGOT svar i gruppen bli negativt? (styr teckenrutans närvaro, ej enskild uppgifts facit)
+  function gruppKanNeg(u){ return (u.rader || []).some(function(r){
+    return (typeof r.facit === 'number' && r.facit < 0) || (typeof r.ft === 'number' && r.ft < 0) || (typeof r.svar === 'number' && r.svar < 0)
+      || (Array.isArray(r.tal) && r.tal.some(function(v){ return v < 0; }))
+      || (Array.isArray(r.facit) && r.facit.some(function(v){ return v < 0; })); }); }
   function inTal(){ return '<input class="ak8-in" inputmode="text" autocomplete="off">'; }
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   // data-val avkodas av webbläsaren (&lt; → <); facit i datan är entity-form för display.
@@ -166,7 +178,7 @@
 
   // Liten aritmetik-utvärderare (+ − × / parenteser, unärt minus) — ingen eval.
   function evalArith(s){
-    s = String(s).replace(/−/g, '-').replace(/[·×]/g, '*').replace(/÷/g, '/').replace(/,/g, '.').replace(/\s+/g, '');
+    s = String(s).replace(/[−–—]/g, '-').replace(/[·×]/g, '*').replace(/÷/g, '/').replace(/,/g, '.').replace(/\s+/g, '');   // FAS1: alla minus-varianter
     var i = 0;
     function expr(){ var v = term(); while(s[i] === '+' || s[i] === '-'){ var op = s[i++]; var t = term(); v = op === '+' ? v + t : v - t; } return v; }
     function term(){ var v = factor(); while(s[i] === '*' || s[i] === '/'){ var op = s[i++]; var f = factor(); v = op === '*' ? v * f : v / f; } return v; }
@@ -186,14 +198,36 @@
   function renderRad(r){
     var idx = CHECKS.length;
     if(r.typ === 'tal'){
+      if(harDubbelMinus(r.fraga) && r.facit != null){
+        // FAS2: omskrivningscell (skriv om utan dubbeltecken) + svarscell. BÅDA rättas på VÄRDE (evalArith
+        // på omskrivningen → godtar valfri giltig form), så metodsteget krävs men skrivsättet är fritt.
+        CHECKS.push(function(el){
+          var ins = el.querySelectorAll('.ak8-in');
+          var oms = evalArith(ins[0].value), sv = pNum(ins[1].value);
+          return { ok: likhetOk(oms, r.facit) && likhetOk(sv, r.facit), facit: skrivOm(r.fraga) + ' ' + fmt(r.facit) };
+        });
+        return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">'
+          + '<input class="ak8-in ak8-in-oms" inputmode="text" autocomplete="off" placeholder="skriv om" style="width:96px;">'
+          + '<span class="ovn-text" style="margin:0 6px;">=</span>' + inTal() + '</span>'
+          + (r.flagg ? '<span class="ak8-flagg" title="' + r.flagg + '">⚑</span>' : '') + '</div>';
+      }
       CHECKS.push(function(el){ if(r.facit == null) return { flagg:true }; return { ok: likhetOk(pNum(el.querySelector('.ak8-in').value), r.facit), facit: fmt(r.facit) }; });
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + inTal() + '</span>'
         + (r.flagg ? '<span class="ak8-flagg" title="' + r.flagg + '">⚑</span>' : '') + '</div>';
     }
     if(r.typ === 'brak'){
-      CHECKS.push(function(el){ var t = pNum(el.querySelector('.ak8-bt').value), n = pNum(el.querySelector('.ak8-bn').value); return { ok: isFinite(t) && isFinite(n) && n !== 0 && Math.abs(t / n - r.ft / r.fn) < 1e-9, facit: (r.ft < 0 ? '−' : '') + Math.abs(r.ft) + '/' + r.fn }; });
+      // FAS3: teckenruta FRAMFÖR bråket när gruppen kan ge negativt svar (annars finns den inte alls → avslöjar
+      // inget). Tom ruta = positivt svar (giltigt). Tecknet normaliseras enligt FAS1 och multipliceras med bråket.
+      var teckenruta = CUR_NEG;
+      CHECKS.push(function(el){
+        var t = pNum(el.querySelector('.ak8-bt').value), n = pNum(el.querySelector('.ak8-bn').value), sign = 1;
+        if(teckenruta){ var sb = el.querySelector('.ak8-sign'); var sraw = String(sb ? sb.value : '').replace(/[−–—\s]/g, '-'); sign = sraw === '' ? 1 : (sraw === '-' ? -1 : NaN); }
+        var v = sign * (t / n);
+        return { ok: isFinite(v) && isFinite(t) && isFinite(n) && n !== 0 && Math.abs(v - r.ft / r.fn) < 1e-9, facit: (r.ft < 0 ? '−' : '') + Math.abs(r.ft) + '/' + r.fn };
+      });
+      var signBox = teckenruta ? '<input class="ak8-in ak8-sign" inputmode="text" autocomplete="off" maxlength="1" aria-label="tecken (skriv − eller lämna tomt)" style="width:26px;text-align:center;margin-right:4px;vertical-align:middle;">' : '';
       var box = '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in ak8-bt" inputmode="text" style="width:48px;text-align:center;"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in ak8-bn" inputmode="text" style="width:48px;text-align:center;"></span></span>';
-      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + box + '</span></div>';
+      return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + signBox + box + '</span></div>';
     }
     if(r.typ === 'fracruta'){
       CHECKS.push(function(el){ return { ok: likhetOk(pNum(el.querySelector('.fr-ruta').value), r.facit), facit: fmt(r.facit) }; });
@@ -277,6 +311,7 @@
       if(u.typ === 'figur'){ html += renderRad(u); return; }
       if(u.grupp){ html += '<h3 class="ak8-grupp">' + u.grupp + '</h3>'; return; }
       grpN++;
+      CUR_NEG = gruppKanNeg(u);   // FAS3: teckenruta-styrning för brak-rader i denna grupp
       html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + grpN + '. ' + u.rubrik + (u.villkorNot ? ' <span class="ak8-flagg" title="Precedenstvetydig — villkors-validering, villkoret saknas">⚑</span>' : '') + '</div>';
       if(u.hint) html += '<p class="ak8-hint">' + u.hint + '</p>';
       var bokN = 0;
