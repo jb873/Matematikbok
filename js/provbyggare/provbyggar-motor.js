@@ -670,7 +670,7 @@ function gradeSub(s, ans){
     if(!ans) return {status:'skipped'};
     const num = (x) => parseFloat(String(x).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
     const ledOk = (s.led || []).every((L, i) => { const v = num(ans.led && ans.led[i]); return !isNaN(v) && Math.abs(v - L.varde) < 1e-6; });
-    const koeff = num(ans.koeff), exp = parseInt(ans.exp);
+    const koeff = num(ans.koeff), exp = parseInt(String(ans.exp).replace(/[−–—]/g,'-'), 10);   // FAS1: neg. exponent med U+2212 → -
     // FORM-MEDVETEN (speglar drillens gp-check): koeff normaliserad [1,10) + rätt koeff/exponent (15·10¹⁷ underkänns → 1,5·10¹⁸).
     const slutOk = !isNaN(koeff) && koeff >= 1 && koeff < 10 && !isNaN(exp)
       && Math.abs(koeff - s.slutKoeff) < 1e-9 && exp === s.slutExp;

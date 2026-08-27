@@ -1116,7 +1116,7 @@ function d3DecStr(intVal, dec){
   return (neg ? '-' : '') + (frac === '' ? whole : whole + ',' + frac);
 }
 function d3ParseNum(str){
-  const s = str.trim().replace(/\s/g,'').replace('−','-').replace(',', '.');
+  const s = str.trim().replace(/\s/g,'').replace(/[−–—]/g,'-').replace(',', '.');   // FAS1: alla minus-varianter, globalt (var: bara första U+2212)
   if(s === '' || !/^-?[0-9]*\.?[0-9]+$/.test(s)) return null;
   return Number(s);
 }

@@ -43,7 +43,7 @@
   // ── Parser (rekursiv nedstigning) → RatFunc. Klarar +−·/ ^ parenteser, variabler, decimaler,
   //    implicit multiplikation (2x, 3(x+1), xy, (x-1)(x+1)) och BRAK(a)(b). ──
   function parse(str){
-    var s = ('' + str).replace(/−/g, '-').replace(/·/g, '*').replace(/×/g, '*').replace(/,(\d)/g, '.$1').replace(/\s+/g, '');
+    var s = ('' + str).replace(/[−–—]/g, '-').replace(/·/g, '*').replace(/×/g, '*').replace(/,(\d)/g, '.$1').replace(/\s+/g, '');   // FAS1: även en-/em-dash
     var i = 0;
     function peek(){ return s[i]; }
     function eof(){ return i >= s.length; }

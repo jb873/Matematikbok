@@ -16,7 +16,7 @@
   'use strict';
   var F = { fracSpan: window.fracSpan };
   function frac(t, n){ return F.fracSpan(t, n); }
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // FAS1: minus-varianter → U+002D
   function fmt(x){ var r = Math.round(x * 1e9) / 1e9, s = String(r).replace('.', ','); return s; }
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
 

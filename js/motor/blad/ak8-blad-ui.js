@@ -12,7 +12,7 @@
   'use strict';
 
   // ── numerik (samma normalisering som motorerna) ──
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // FAS1: även en-/em-dash, ej bara U+2212
   // Aritmetik-utvärderare (byte-identisk med mellanleds-motorn): + − · / parenteser.
   function evalArith(s){
     s = String(s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(/[·×x]/g, '*').replace(/÷/g, '/').replace(/,/g, '.');

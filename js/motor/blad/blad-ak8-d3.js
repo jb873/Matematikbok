@@ -8,7 +8,7 @@
   'use strict';
 
   // ── Facit-numerik (identiskt beteende som d1/d2) ──
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // FAS1: minus-varianter → U+002D
   function fmt(x){ var r = Math.round(x * 1e9) / 1e9, s = String(r).replace('.', ','); return s; }
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function inTal(sm){ return '<input class="ak8-in' + (sm ? ' ak8-in-sm' : '') + '" inputmode="text" autocomplete="off">'; }

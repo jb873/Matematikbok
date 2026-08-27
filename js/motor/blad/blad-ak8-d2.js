@@ -20,7 +20,9 @@
   'use strict';
   var F = { fracSpan: window.fracSpan, fracRuta: window.fracRuta };
   function frac(t, n){ return F.fracSpan(t, n); }
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/\s/g, '').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  // FAS1: normalisera ALLA minus-varianter (U+2212 matematiskt minus / U+2013 en-dash / U+2014 em-dash)
+  // → U+002D innan parseFloat. Keypaden matar in U+2212; utan detta gav parseFloat('−2')=NaN → rätt svar rött.
+  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/\s/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
   function fmt(x){ return String(x).replace('.', ','); }
   function neg(html){ return '<span class="ovn-text">−</span>' + html; }   // minus framför stående bråk
 
