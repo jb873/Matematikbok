@@ -280,7 +280,7 @@ function bindKeypad(cardEl){
 
 // Evaluerar ett uttryck: tillåter · , och implicit multiplikation (20-1)(30-1)
 function d3EvalExpr(seg){
-  let s = seg.replace(/\s/g,'').replace(/[·×]/g,'*').replace(/,/g,'.');
+  let s = seg.replace(/\s/g,'').replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/,/g,'.');   // FAS1: minus-varianter → U+002D
   s = s.replace(/\)\(/g,')*(').replace(/(\d)\(/g,'$1*(').replace(/\)(\d)/g,')*$1');
   if(s === '' || !/^[0-9+\-*/().]+$/.test(s)) return null;
   try {

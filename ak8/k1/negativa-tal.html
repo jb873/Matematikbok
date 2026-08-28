@@ -199,9 +199,9 @@
 
   // FÄRDIGHETSTRÄNING: 3 noder → ramens drillar
   var RAM='../../ak7-k1-ram.html';
-  var DRILLS=[ {titel:'Grunder', formaga:'BEGREPP', ko:'neg-begrepp', f:'begrepp'}, {titel:'Addition och subtraktion', formaga:'RÄKNA', ko:'neg-rakna', f:'addsub'}, {titel:'Multiplikation och division', formaga:'RÄKNA', ko:'neg-rakna', f:'multdiv'} ];
+  var DRILLS=[ {titel:'Grunder', formaga:'BEGREPP', ko:'neg-begrepp', f:'begrepp'}, {titel:'Addition och subtraktion', formaga:'RÄKNA', ko:'neg-rakna', f:'addsub', oms:true}, {titel:'Multiplikation och division', formaga:'RÄKNA', ko:'neg-rakna', f:'multdiv'} ];
   var lista=document.getElementById('fard-lista'), frame=document.getElementById('fard-frame'), scen=document.getElementById('fard-scen'), alla=[];
-  DRILLS.forEach(function(d){ var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.innerHTML='<span class="fard-skill-titel">'+d.titel+'</span><span class="fard-skill-formaga">'+d.formaga+'</span>'; b.onclick=function(){ alla.forEach(function(x){ x.classList.remove('is-active'); }); b.classList.add('is-active'); frame.src=RAM+'?ko='+encodeURIComponent(d.ko)+'&formaga='+encodeURIComponent(d.f)+'&embed=1'; scen.classList.add('har-drill'); }; lista.appendChild(b); alla.push(b); });
+  DRILLS.forEach(function(d){ var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.innerHTML='<span class="fard-skill-titel">'+d.titel+'</span><span class="fard-skill-formaga">'+d.formaga+'</span>'; b.onclick=function(){ alla.forEach(function(x){ x.classList.remove('is-active'); }); b.classList.add('is-active'); frame.src=RAM+'?ko='+encodeURIComponent(d.ko)+'&formaga='+encodeURIComponent(d.f)+'&embed=1'+(d.oms?'&omskrivning=1':''); scen.classList.add('har-drill'); }; lista.appendChild(b); alla.push(b); });
   // Ramen postar innehållshöjd i inbäddat läge → iframen växer utan intern scroll.
   window.addEventListener('message', function(e){ if(!frame || !e || !e.data || typeof e.data.__fardHeight !== 'number') return; frame.style.height = Math.max(320, Math.min(e.data.__fardHeight, 2200)) + 'px'; });
 })();

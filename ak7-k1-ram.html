@@ -8602,7 +8602,8 @@ function renderNegAddSub(body){
   negCalcEngine(body, {
     title:'Addition och subtraktion', koId:'neg-rakna', forKey:'addsub', scoreKey:'addsub',
     sub:'Räkna ut uttrycket. Tänk på att minus framför en parentes byter tecken.',
-    keypadOps:['−',','], OMG:6, gen:negAddSubGen
+    keypadOps:['−',','], OMG:6, gen:negAddSubGen,
+    omskrivning: /[?&]omskrivning=1/.test(location.search || '')   // åk8-gate (deeplink-flagga) → omskrivningscell vid dubbeltecken; åk7 utan → byte-identiskt
   }, function(){ navTo('ko', {koId:'neg-rakna', delId: state.currentDel}); });
 }
 function renderNegMultDiv(body){
@@ -8650,11 +8651,17 @@ function negCalcEngine(body, cfg, backFn){
       return;
     }
     var task = omgang[idx];
+    // FAS2 (åk8-gatad): omskrivningscell vid dubbeltecken (a − (−b) = a + b). cfg.omskrivning sätts av
+    // åttans deeplink (?omskrivning=1); åk7 utan flaggan → enkel input = byte-identiskt.
+    // [PASS TVÅ: ersätt cfg.omskrivning med band.kravs.mellanled — inte ligga kvar bredvid.]
+    var oms = !!cfg.omskrivning && /[−–-]\s*\(\s*[−–-]/.test(task.q);
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(cfg.title, cfg.sub, level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="neg-fraga">' + task.q + '</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off" placeholder="?"></div>'
+      + (oms
+          ? '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-oms" inputmode="text" maxlength="16" autocomplete="off" placeholder="skriv om" style="width:130px;"><span class="ovn-text" style="margin:0 8px;">=</span><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off" placeholder="?"></div>'
+          : '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off" placeholder="?"></div>')
       + '<div class="rakna-uppdela-feedback" id="neg-fb"></div>'
       + keypadHTML(cfg.keypadOps || ['−'])
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
@@ -8665,21 +8672,23 @@ function negCalcEngine(body, cfg, backFn){
     var card = body.querySelector('.exercise-card');
     bindKeypad(card);
     var input = document.getElementById('neg-input');
-    setTimeout(function(){ input.focus(); }, 50);
-    input.addEventListener('keydown', function(e){
-      if(e.key === 'Enter'){ e.preventDefault(); check(); }
-    });
+    var omsInput = oms ? document.getElementById('neg-oms') : null;
+    setTimeout(function(){ (omsInput || input).focus(); }, 50);
+    [input, omsInput].forEach(function(el){ if(el) el.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } }); });
     document.getElementById('neg-tillbaka').onclick = backFn;
     function check(){
       var fb = document.getElementById('neg-fb');
       fb.className = 'rakna-uppdela-feedback show';
       var stu = d3ParseNum(input.value);
+      var omsOk = true;
+      if(oms){ var ov = d3EvalExpr(omsInput.value); omsOk = ov !== null && Math.abs(ov - task.answer) < 1e-6; omsInput.disabled = true; omsInput.classList.add(omsOk ? 'correct' : 'wrong'); }
       input.disabled = true;
       document.getElementById('neg-check').disabled = true;
       var ts = getTutorScore(cfg.koId, cfg.forKey);
       var tsG = getTutorScore(cfg.koId, cfg.scoreKey);
       ts.total++; tsG.total++;
-      var ok = stu !== null && Math.abs(stu - task.answer) < 1e-6;
+      var svarOk = stu !== null && Math.abs(stu - task.answer) < 1e-6;
+      var ok = svarOk && omsOk;   // omskrivningen (värde-rättad) måste stämma OCH slutsvaret
       if(ok){
         input.classList.add('correct');
         fb.classList.add('correct');
@@ -8688,7 +8697,9 @@ function negCalcEngine(body, cfg, backFn){
       } else {
         input.classList.add('wrong');
         fb.classList.add('wrong');
-        fb.textContent = 'Inte rätt. Rätt svar är ' + prioNum(task.answer) + '.';
+        fb.textContent = (oms && !omsOk && svarOk)
+          ? 'Svaret stämmer, men skriv om uttrycket utan dubbeltecken i första rutan (t.ex. − (−8) blir + 8).'
+          : 'Inte rätt. Rätt svar är ' + prioNum(task.answer) + '.';
       }
       results.push(ok);
       setTimeout(function(){ idx++; render(); }, ok ? 1700 : 2900);
