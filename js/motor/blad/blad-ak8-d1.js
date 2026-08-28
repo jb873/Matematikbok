@@ -22,7 +22,7 @@
 
   // Liten aritmetik-utvärderare för mellanledet (ingen eval): + − · / parenteser.
   function evalArith(s){
-    s = String(s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(/[·×x]/g, '*').replace(/÷/g, '/').replace(/,/g, '.');
+    s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(/[·×x]/g, '*').replace(/÷/g, '/').replace(/,/g, '.');   // sanering: en-/em-dash (var ordagrann kopia av AK8_UI.evalArith)
     if(!/^[-0-9.*/+()]*$/.test(s) || s === '') return NaN;
     var i = 0;
     function expr(){ var v = term(); while(s[i] === '+' || s[i] === '-'){ var o = s[i++], t = term(); v = o === '+' ? v + t : v - t; } return v; }
