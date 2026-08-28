@@ -574,6 +574,20 @@ document.addEventListener('click', (e) => {
   btn.classList.add('is-selected');
 });
 
+// Uttrycks-evaluerare (+ − · / parenteser, unärt minus, minus-varianter FAS1) — ingen eval/Function.
+// Används av mellanled-num-led så en OMSKRIVNING ('17 + 8', '−7 + 8') värde-rättas som i öva-bladet;
+// ett rent tal ('25') evalueras till sig självt → bakåtkompatibelt för befintliga mellanled-num-generatorer.
+function pbEvalArith(str){
+  var s = String(str).replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/÷/g,'/').replace(/,/g,'.').replace(/\s+/g,'');
+  if(s === '' || !/^[-+*/().0-9]+$/.test(s)) return NaN;
+  var i = 0;
+  function expr(){ var v = term(); while(s[i]==='+'||s[i]==='-'){ var o=s[i++]; var t=term(); v = o==='+'?v+t:v-t; } return v; }
+  function term(){ var v = factor(); while(s[i]==='*'||s[i]==='/'){ var o=s[i++]; var f=factor(); v = o==='*'?v*f:v/f; } return v; }
+  function factor(){ if(s[i]==='+'){ i++; return factor(); } if(s[i]==='-'){ i++; return -factor(); }
+    if(s[i]==='('){ i++; var v=expr(); if(s[i]===')') i++; return v; }
+    var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]); }
+  var r = expr(); return i === s.length ? r : NaN;
+}
 function gradeSub(s, ans){
   if(ans === null || ans === undefined || ans === '') return {status:'skipped'};
 
@@ -654,7 +668,7 @@ function gradeSub(s, ans){
   }
   if(s.type === 'mellanled-num'){
     if(!ans || !ans.led) return {status:'skipped'};
-    const num = (x) => parseFloat(String(x).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
+    const num = (x) => pbEvalArith(x);   // FAS2: led kan vara en OMSKRIVNING ('−7 + 8'), ej bara ett tal — värde-rättas
     // Varje LED rättas på VÄRDE (valfri giltig väg godtas) — samma princip som bråk-mellanledet.
     const ledOk = (s.led || []).every((L, i) => {
       const v = num(ans.led[i]);

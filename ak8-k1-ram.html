@@ -906,12 +906,22 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     if(typ==='divL'){ var x2=pick(NZ), b=rInt(2,9), d=x2*b; return {key:'dl'+x2+'_'+b, prompt:'Vilket tal saknas?   ▢ / '+b+' = '+M(x2), ans:d, expl:M(d)+' / '+b+' = '+M(x2)+'.'}; }
     var x4=rInt(2,9)*pick([-1,1]), q=pick(NZ), num=q*x4; return {key:'dr'+num+'_'+q, prompt:'Vilket tal saknas?   '+M(num)+' / ▢ = '+M(q), ans:x4, expl:M(num)+' / '+M(x4)+' = '+M(q)+'.'};
   }) ] },
-  // Dubbeltecken: a − (−b), a + (−b) → neg-rakna:addsub
-  'neg-rakna:addsub-dubbel': { snabb: [ G.numeric('neg-dubbel','Räkna ut','neg-rakna', function(){
+  // Dubbeltecken: a − (−b), a + (−b) → neg-rakna:addsub. FAS2: SUBTRAKTION av negativt (a − (−b) = a + b)
+  // får en omskrivningscell (mellanled-num, led = omskrivningen värde-rättad); a + (−b) får ingen (som öva-
+  // bladet — ingen dubbelminus). Tvåvägs i EN generator via led:[…] resp. led:[].
+  'neg-rakna:addsub-dubbel': { snabb: [ G.mellanledNum('neg-dubbel','Räkna ut','neg-rakna', function(){
     var M=function(n){return(''+n).replace('-','−');};
     var a=pick([-9,-7,-5,-4,-3,4,5,6,8,10,12,15,17]), b=rInt(2,9), op=pick(['−','+']), bb=-b;
     var ans = op==='−' ? a-bb : a+bb;
-    return {key:'db'+a+op+b, prompt:'Räkna ut:   '+M(a)+' '+op+' ('+M(bb)+')', ans:ans, expl:M(a)+' '+op+' ('+M(bb)+') = '+M(ans)+'.'};
+    var dubbelMinus = (op==='−');                       // − (−b) → omskrivning; + (−b) → ingen cell
+    var oms = M(a)+' + '+b;                              // a − (−b) = a + b
+    return {
+      key:'db'+a+op+b,
+      prompt: (dubbelMinus ? 'Skriv om utan dubbeltecken och räkna ut:   ' : 'Räkna ut:   ')+M(a)+' '+op+' ('+M(bb)+')',
+      led: dubbelMinus ? [{ fraga:'skriv om utan parentes', varde:ans, facit:oms }] : [],
+      slutVarde: ans, slutHint:'',
+      expl: dubbelMinus ? (M(a)+' − ('+M(bb)+') = '+oms+' = '+M(ans)+'.') : (M(a)+' '+op+' ('+M(bb)+') = '+M(ans)+'.')
+    };
   }) ] },
   // Jämför negativa tals storlek (< > =) → neg-begrepp:begrepp
   'neg-begrepp:jmf': { snabb: [ G.flerval('neg-jmf','Vilket tecken? (< > =)','neg-begrepp', function(){
