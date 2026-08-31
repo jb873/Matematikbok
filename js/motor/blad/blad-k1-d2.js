@@ -300,7 +300,7 @@ function bladHTML(blad){
         // Dela upp ett tal i summa av termer – godtar alla korrekta uppdelningar
         html += '<span class="ovn-text" style="min-width:140px;">' + rad.fraga + '</span>';
         html += '<input class="ovn-in bred" data-term="' + rad.summa + '" data-antal="' + (rad.antal||2)
-          + '" inputmode="text" autocomplete="off" placeholder="t.ex. 10+8">';
+          + '" inputmode="text" autocomplete="off" placeholder="två termer">';   // platshållare: ledning, ej exempel (10+8=18 var facit-läcka)
       } else if(rad.typ === 'tvatal'){
         // Två tal i valfri ordning
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';

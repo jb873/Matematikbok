@@ -27,8 +27,8 @@ function gSample(arr, k){
 }
 
 var BTFORM_HINT = '<strong>Tänk på:</strong> skriv decimaltal med <strong>komma</strong> (t.ex. 0,75) '
-  + 'och bråk i <strong>enklaste form</strong> (t.ex. 0,5 = 1/2).';
-var BTFORM_HINT2 = BTFORM_HINT + ' Här finns även <strong>åttondelar</strong> – t.ex. 1/8 = 0,125 och 3/8 = 0,375.';
+  + 'och bråk i <strong>enklaste form</strong>.';
+var BTFORM_HINT2 = BTFORM_HINT + ' Här finns även <strong>åttondelar</strong>.';
 
 // Bygg ett blad ur poolerna för given nivå
 function bladBTform(niva, forsta){
@@ -86,8 +86,8 @@ function radForlang(t, n){
   return {typ:'brakForlang', taljare:t, namnare:n, hundra: t * 100 / n, decSvar: avr(t / n, 6)};
 }
 
-var HUNDRA_HINT = '<strong>Tänk på:</strong> en tiondel skrivs med nämnaren <strong>10</strong> och en hundradel med nämnaren <strong>100</strong> (0,7 = 7/10, 0,25 = 25/100). '
-  + 'När du förlänger ett bråk till hundradelar kan du läsa av decimaltalet direkt: 3/4 = 75/100 = 0,75.';
+var HUNDRA_HINT = '<strong>Tänk på:</strong> en tiondel skrivs med nämnaren <strong>10</strong> och en hundradel med nämnaren <strong>100</strong>. '
+  + 'När du förlänger ett bråk till hundradelar kan du läsa av decimaltalet direkt.';
 var HUNDRA_HINT2 = HUNDRA_HINT + ' På den här nivån finns även bråk vars nämnare är 20, 25 eller 50 – förläng dem till hundradelar.';
 
 function bladHundra(niva, forsta){

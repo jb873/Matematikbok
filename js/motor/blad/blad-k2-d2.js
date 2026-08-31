@@ -675,7 +675,7 @@ function radBlandadBada(t, n){
 
 var BL_HINT = '<strong>Tänk på:</strong> blandad form skrivs som heltal + bråk (t.ex. 1 och 3/4), och bråket ska vara i <strong>enklaste form</strong>. '
   + 'I bråkform skriver du bara täljare och nämnare (t.ex. 7/4).';
-var BL_HINT2 = BL_HINT + ' På den här nivån finns även blandade tal vars bråkdel är ett oäkta bråk – skriv om dem i enklaste form (t.ex. 2 och 7/6 = 3 och 1/6).';
+var BL_HINT2 = BL_HINT + ' På den här nivån finns även blandade tal vars bråkdel är ett oäkta bråk – skriv om dem i enklaste form.';
 
 // ── Nya radtyper för blandad form ↔ bråkform ──
 // Oäkta bråk → blandad form (visar t/n, svar = blandad form)
@@ -917,7 +917,7 @@ var RK_G3_N2 = [
 
 var RAKNA_HINT  = '<strong>Tänk på:</strong> gör om alla tal till <strong>samma form</strong> innan du räknar. '
   + 'Skriv svaret som decimaltal med komma (t.ex. 0,75). Tecknet ≈ betyder att svaret är avrundat.';
-var RAKNA_HINT2 = RAKNA_HINT + ' På den här nivån kan svaret bli <strong>negativt</strong> – skriv då minustecken framför (t.ex. −0,45).';
+var RAKNA_HINT2 = RAKNA_HINT + ' På den här nivån kan svaret bli <strong>negativt</strong> – skriv då minustecken framför.';
 
 function bladRakna(niva, forsta){
   var p1 = niva === 2 ? RK_G1_N2 : RK_G1_N1;

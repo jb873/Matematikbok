@@ -1081,7 +1081,7 @@ var EGEN_A = {
       {typ:'valruta', flera:true, fraga:'… 2', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['72','70','98','100','568','490']},
       {typ:'valruta', flera:true, fraga:'… 5', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['70','45','100','125','490']}
     ]},
-    {rubrik:'Faktorisera talet i två faktorer (skriv t.ex. 3·5)', rader:[
+    {rubrik:'Faktorisera talet i två faktorer', rader:[
       {typ:'uttryck', likhet:true, fraga:'15', svar:'3·5', accept:['3·5','5·3'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'27', svar:'3·9', accept:['3·9','9·3'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'36', svar:'6·6', accept:['6·6','4·9','9·4','3·12','12·3','2·18','18·2'], placeholder:'två faktorer'},
@@ -1090,7 +1090,7 @@ var EGEN_A = {
     {rubrik:'Vilka primfaktorer saknas i faktoriseringen?', rader:[
       {typ:'uttryck', fraga:'28 = 2 · 2 · ___', svar:'7', accept:['7'], placeholder:'tal'},
       {typ:'uttryck', fraga:'60 = 2 · 2 · ___ · 5', svar:'3', accept:['3'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'45 = ___ · ___ · 5  (skriv båda, t.ex. 3·3)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
+      {typ:'uttryck', fraga:'45 = ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
       {typ:'uttryck', fraga:'90 = 2 · ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'}
     ]},
     {rubrik:'Vilket tal har faktoriserats?', rader:[
@@ -1134,7 +1134,7 @@ var EGEN_B = {
       {typ:'valruta', flera:true, fraga:'… 2', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['84','60','200','432','310']},
       {typ:'valruta', flera:true, fraga:'… 5', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['55','60','200','135','310']}
     ]},
-    {rubrik:'Faktorisera talet i två faktorer (skriv t.ex. 3·7)', rader:[
+    {rubrik:'Faktorisera talet i två faktorer', rader:[
       {typ:'uttryck', likhet:true, fraga:'21', svar:'3·7', accept:['3·7','7·3'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'32', svar:'4·8', accept:['4·8','8·4','2·16','16·2'], placeholder:'två faktorer'},
       {typ:'uttryck', likhet:true, fraga:'24', svar:'4·6', accept:['4·6','6·4','3·8','8·3','2·12','12·2'], placeholder:'två faktorer'},

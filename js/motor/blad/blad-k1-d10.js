@@ -153,7 +153,7 @@ function bladHTML(blad){
         html += '<span class="ovn-label">' + bokstav + ')</span>';
         html += '<span class="ovn-text ovn-num">' + rad.tal + ' =</span>';
         html += '<input class="ovn-in bred" data-faktor="' + rad.tal + '" data-antal="' + rad.antal
-          + '" inputmode="text" autocomplete="off" placeholder="' + (rad.antal===2?'t.ex. 2·9':'t.ex. 2·2·9') + '">';
+          + '" inputmode="text" autocomplete="off" placeholder="' + (rad.antal===2?'två faktorer':'tre faktorer') + '">';   // platshållare: ledning, ej exempel (facit-läcka borttagen)
         html += '</div>';
         return;
       }
@@ -728,13 +728,13 @@ var PLUGG_FAKTORISERA = {
   titel:'',
   intro:'',
   grupper:[
-    {rubrik:'Faktorisera talet i två faktorer (t.ex. 2·9)', rader:[
+    {rubrik:'Faktorisera talet i två faktorer', rader:[
       {typ:'faktor', tal:18, antal:2},
       {typ:'faktor', tal:25, antal:2},
       {typ:'faktor', tal:27, antal:2},
       {typ:'faktor', tal:42, antal:2}
     ]},
-    {rubrik:'Faktorisera talet i tre faktorer (t.ex. 2·2·9)', rader:[
+    {rubrik:'Faktorisera talet i tre faktorer', rader:[
       {typ:'faktor', tal:36, antal:3},
       {typ:'faktor', tal:24, antal:3},
       {typ:'faktor', tal:12, antal:3},
@@ -800,8 +800,7 @@ var PLUGG_DOKUMENT = {
   },
   'overslag': {
     titel:'Överslagsräkning',
-    intro:'Skriv först ditt överslag (de avrundade talen) i mellanledet, och sedan svaret. '
-      + 'Exempel: 567 + 743 ≈ 600 + 700 = 1300.',
+    intro:'Skriv först ditt överslag (de avrundade talen) i mellanledet, och sedan svaret.',
     grupper:[
       {rubrik:'Beräkna med överslagsräkning', rader:[
         {typ:'mellan', vansterText:'567 + 743', tecken:'≈', mellan:'600+700', svar:1300},
@@ -864,7 +863,7 @@ var PLUGG_DOKUMENT = {
   },
   'brak': {
     titel:'Bråk och decimaltal',
-    intro:'Räkna ut talen. Skriv decimaltal med komma och bråk som t.ex. 3/10. Tryck sedan på Kontrollera.',
+    intro:'Räkna ut talen. Skriv decimaltal med komma och bråk med täljare och nämnare. Tryck sedan på Kontrollera.',
     grupper:[
       {rubrik:'Skriv talen i decimalform', rader:[
         {typ:'brakText', taljare:'1', namnare:'2', svar:'0,5', accept:['0,5','0.5']},
@@ -884,7 +883,7 @@ var PLUGG_DOKUMENT = {
         {typ:'brakText', heltal:'4', taljare:'4', namnare:'5', svar:'4,8', accept:['4,8','4.8']},
         {typ:'brakText', heltal:'2', taljare:'7', namnare:'100', svar:'2,07', accept:['2,07','2.07']}
       ]},
-      {rubrik:'Skriv talen i bråkform (skriv som t.ex. 3/10)', rader:[
+      {rubrik:'Skriv talen i bråkform', rader:[
         {typ:'text', fraga:'0,3', svar:'3/10', accept:['3/10']},
         {typ:'text', fraga:'0,13', svar:'13/100', accept:['13/100']},
         {typ:'text', fraga:'0,06', svar:'6/100', accept:['6/100','3/50']},
