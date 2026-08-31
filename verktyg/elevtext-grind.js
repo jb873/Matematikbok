@@ -26,16 +26,23 @@ const REGISTER = path.join(ROOT, 'js/data/elevtext-register.json');
 const FALT = ['prompt', 'rubrik', 'fraga', 'title', 'titel', 'q', 'vansterText', 'sub', 'intro', 'placeholder', 'hint', 'exempel', 'varning'];
 const FALT_RE = new RegExp('(?:^|[\\s,{(\\[])(' + FALT.join('|') + ')\\s*:', 'g');
 
-// Källor: öva-blad, drillar, ak9-variantmotorer, och ramarnas inbäddade generatorer.
+// Källor: öva-blad, drillmotorer (ovamer/potens/figur), metod-drillar, ak9-variantmotorer, ramarnas
+// inbäddade generatorer, och delkapitel-HTML:s inline drill-elevtext. Drill-elevtext (en rubrik eleven
+// läser många gånger) vägde tyngst i att bredda täckningen — se elevtext-svepet, "Väg 2".
 function kallor() {
   const list = [];
-  const dirs = ['js/motor/blad', 'js/motor/metod'];
+  const dirs = ['js/motor/blad', 'js/motor/metod', 'js/motor/ovamer', 'js/motor/potens', 'js/motor/figur'];
   for (const d of dirs) {
     const abs = path.join(ROOT, d);
     if (fs.existsSync(abs)) for (const f of fs.readdirSync(abs)) if (f.endsWith('.js')) list.push(d + '/' + f);
   }
   for (const f of fs.readdirSync(path.join(ROOT, 'js/motor'))) if (/^ak9.*\.js$/.test(f)) list.push('js/motor/' + f);
   for (const r of ['ak7-k1-ram.html', 'ak7-k2-ram.html', 'ak7-k3-ram.html', 'ak8-k1-ram.html']) list.push(r);
+  // Delkapitel-HTML (åk8/åk9): inline drill-elevtext (titel/sub i DRILLS-listorna) utanför bladen.
+  for (const d of ['ak8/k1', 'ak9/k1']) {
+    const abs = path.join(ROOT, d);
+    if (fs.existsSync(abs)) for (const f of fs.readdirSync(abs)) if (f.endsWith('.html')) list.push(d + '/' + f);
+  }
   list.push('js/data/k1-fardiga-test.js');   // FAS 3: elevtext-varningen vid flikbyte under prov
   list.push('js/data/ak8-fardiga-test.js');  // åk8: samma flikbyte-varning (certifiering)
   return list;
@@ -123,4 +130,10 @@ console.log('\n─────────────────────�
 if (added === 0 && removed === 0) { console.log('Elevtext-låset: allt matchar registret. 0 drift.'); process.exit(0); }
 console.log('Elevtext-låset: ' + added + ' ny(a) mall(ar) utan godkännande, ' + removed + ' borttagna.');
 console.log('En NY mall = elevtext som lagts till/ändrats. Granska den — är den din, kör --uppdatera för att godkänna.');
+// KÄND BEGRÄNSNING (Väg 1, medvetet lämnad): ren borttagning fäller INTE grinden — bara tillägg gör det.
+// Följd: en borttagen sträng ligger kvar i registret som fantom tills --uppdatera städar den (och en
+// IDENTISK sträng som återinförs dessförinnan flaggas ej). Ofarligt: en fantom släpper aldrig igenom NY
+// text. Att göra raderingar fällande skulle kräva omgodkännande vid varje städning → tjatig spärr → förbi-
+// kopplad spärr, vilket är sämre än blindfläcken. GRÖNT betyder därför: ingen ny elevtext har tillkommit
+// utan godkännande — INTE att registret är teckenidentiskt med källan.
 process.exit(added > 0 ? 1 : 0);   // borttag ensamt (ren radering) fäller inte grinden; tillägg gör det
