@@ -32,7 +32,7 @@ window.K1_TAXONOMI = {
       "roll": "karna",
       "formaga": null,
       "generator": null,
-      "begrepp": "Översätta mellan bråk, decimaltal och blandad form. T.ex. 3/4 = 0,75.",
+      "begrepp": "Översätta mellan bråk och decimaltal. T.ex. 3/4 = 0,75.",
       "grupp": "tal",
       "implemented": true
     },

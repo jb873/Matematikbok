@@ -69,7 +69,7 @@ window.K2_TAXONOMI = {
     {
       "id": "brak-byta", "namn": "Byta form", "parent": null, "niva": "omrade",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Bråk till decimaltal, blandad form till bråk och decimaltal.",
+      "begrepp": "Bråk till decimaltal och tillbaka, oäkta bråk till blandad form, decimaltal till blandad form.",
       "grupp": "brak", "implemented": true,
       "delatMed": {
         "kalla": "k1-taxonomi",
@@ -87,7 +87,13 @@ window.K2_TAXONOMI = {
       "id": "brak-blandad:rakna", "namn": "Oäkta bråk ↔ blandad form", "parent": "brak-blandad", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": "blandadEngine",
       "begrepp": "Skriv oäkta bråk i blandad form och blandad form som oäkta bråk.",
-      "visning": { "utbudslista": "k2d2", "grupp": "Byta form", "gruppordning": 0, "radordning": 3, "titel": "Blandad form", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d2", "grupp": "Byta form", "gruppordning": 0, "radordning": 3, "titel": "Oäkta bråk ↔ blandad form", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+    },
+    {
+      "id": "brak-blandad:dec-blandad", "namn": "Decimaltal till blandad form", "parent": "brak-blandad", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "repetition" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Skriv decimaltalet i blandad form (t.ex. 1,6 = 1 3/5). Enkelriktad — blandad → decimal byggs när innehållet finns.",
+      "visning": { "utbudslista": "k2d2", "grupp": "Byta form", "gruppordning": 0, "radordning": 3.5, "titel": "Decimaltal till blandad form", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-tid:rakna", "namn": "Tid i bråk- och decimalform", "parent": "brak-byta", "niva": "lovnod",
