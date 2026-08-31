@@ -8,8 +8,10 @@
    register.json). En mall som inte finns i registret är DRIFT: en ny eller ändrad formulering som
    ingen har godkänt. Grinden brister tills registret uppdateras — vilket är ett medvetet, granskat steg.
 
-   Kör:  node verktyg/elevtext-grind.js              (kontroll: exit 1 om någon mall saknas i registret)
-         node verktyg/elevtext-grind.js --uppdatera  (godkänn nuläget: skriv om registret)
+   Kör:  node verktyg/elevtext-grind.js                  (kontroll: exit 1 om någon mall saknas i registret)
+         node verktyg/elevtext-grind.js --uppdatera      (godkänn ALLT: skriv om hela registret)
+         node verktyg/elevtext-grind.js --uppdatera <x>  (godkänn bara filer/områden vars sökväg innehåller <x>
+                                                          — betar av rött i omgångar; övriga poster orörda)
 
    VAD SOM FÅNGAS: tillagd/ändrad fast text i ett elevtext-fält (t.ex. "(t.ex. 500+60+7)" i en rubrik,
      "(skriv med komma)" i en fråga). Talvärden och andra variabler ignoreras (de blir {} i mallen).
@@ -25,6 +27,18 @@ const REGISTER = path.join(ROOT, 'js/data/elevtext-register.json');
 // Elevtext-fält: värdet av dessa är text som eleven läser.
 const FALT = ['prompt', 'rubrik', 'fraga', 'title', 'titel', 'q', 'vansterText', 'sub', 'intro', 'placeholder', 'hint', 'exempel', 'varning'];
 const FALT_RE = new RegExp('(?:^|[\\s,{(\\[])(' + FALT.join('|') + ')\\s*:', 'g');
+
+// Elevsynliga HTML-ATTRIBUT (utanför fält:-syntaxen, som FALT_RE inte ser). placeholder= = rutans
+// ledtext eleven läser; den fångas nu i både fält- och attributform. title=/aria-label=/alt= kartlagda
+// men EJ inlagda: dominerade av nav/UI-krom (aria-label "Brödsmulor", title "Färdighetsdrill"), interna
+// flagg-noter (title "Precedenstvetydig…") och tomma/HTML-alt — inte pedagogisk elevtext (se rapport).
+const ATTR = ['placeholder'];
+const ATTR_RE = new RegExp('(?:^|[\\s"\'>;,({])(' + ATTR.join('|') + ')\\s*=\\s*("([^"]*)"|\'([^\']*)\')', 'g');
+function attrMall(raw) {
+  let v = String(raw).replace(/\$\{[^}]*\}/g, '{}');                         // template ${…} → {}
+  if (/['"]\s*\+|\+\s*['"]/.test(v)) v = v.replace(/['"]\s*\+[\s\S]*?\+\s*['"]/g, '{}');   // JS-konkat 'lit'+kod+'lit' → {}
+  return v.replace(/\s+/g, ' ').trim();
+}
 
 // Källor: öva-blad, drillmotorer (ovamer/potens/figur), metod-drillar, ak9-variantmotorer, ramarnas
 // inbäddade generatorer, och delkapitel-HTML:s inline drill-elevtext. Drill-elevtext (en rubrik eleven
@@ -90,6 +104,11 @@ function extrahera(rel) {
     const mall = extraheraMall(text, m.index + m[0].length);
     if (mall && /[a-zA-ZåäöÅÄÖ]/.test(mall)) set.add(falt + ' | ' + mall);   // kräver bokstäver (ej ren "{}")
   }
+  ATTR_RE.lastIndex = 0;
+  while ((m = ATTR_RE.exec(text))) {
+    const mall = attrMall(m[3] !== undefined ? m[3] : m[4]);
+    if (mall && /[a-zA-ZåäöÅÄÖ]/.test(mall) && !/</.test(mall)) set.add(m[1] + ' | ' + mall);   // ej ren "{}", ej HTML-markup
+  }
   return [...set].sort();
 }
 
@@ -101,12 +120,28 @@ function byggRegister() {
 
 // ── Kör ──
 const uppdatera = process.argv.includes('--uppdatera');
+const uppArg = uppdatera ? process.argv[process.argv.indexOf('--uppdatera') + 1] : null;   // valfritt fil-/områdesfilter
 const nu = byggRegister();
 
 if (uppdatera) {
+  // PARTIELLT godkännande (per fil eller område): `--uppdatera <delsträng-av-sökväg>` godkänner BARA de
+  // register-poster vars filväg innehåller delsträngen; övriga lämnas orörda. Så kan en röd grind betas
+  // av ett område i taget — den blir grönare för varje pass i stället för att ligga röd i veckor.
+  if (uppArg && !uppArg.startsWith('--')) {
+    const reg = fs.existsSync(REGISTER) ? JSON.parse(fs.readFileSync(REGISTER, 'utf8')) : {};
+    const matchade = [...new Set([...Object.keys(reg), ...Object.keys(nu)])].filter(f => f.includes(uppArg)).sort();
+    if (!matchade.length) { console.error('elevtext: inga käll-filer matchar "' + uppArg + '".'); process.exit(2); }
+    for (const f of matchade) { if (nu[f] && nu[f].length) reg[f] = nu[f]; else delete reg[f]; }
+    fs.writeFileSync(REGISTER, JSON.stringify(reg, null, 1) + '\n');
+    console.log('elevtext-register: godkände ' + matchade.length + ' fil(er) som matchar "' + uppArg + '":');
+    matchade.forEach(f => console.log('  ✓ ' + f));
+    console.log('Övriga poster orörda. Kör grinden igen för att se återstående rött.');
+    process.exit(0);
+  }
+  // FULLT godkännande: skriv om hela registret.
   fs.writeFileSync(REGISTER, JSON.stringify(nu, null, 1) + '\n');
   let tot = 0; for (const k in nu) tot += nu[k].length;
-  console.log('elevtext-register uppdaterat: ' + Object.keys(nu).length + ' filer, ' + tot + ' godkända mallar.');
+  console.log('elevtext-register uppdaterat (helt): ' + Object.keys(nu).length + ' filer, ' + tot + ' godkända mallar.');
   process.exit(0);
 }
 
