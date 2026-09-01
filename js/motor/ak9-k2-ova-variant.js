@@ -43,14 +43,14 @@
 
   // ── MALLAR — låst uppgiftsordning + grupper/rubriker. orig = Joachims exakta tal (dokument 1). ──
   //  Varje uppgift: { logg, prompt(t), mellan(t)|null, facit(t), orig }. Öva 1:s VÄXLINGS-grupper
-  //  (bråk→decimal, decimal→bråk) byggs OLOGGADE (logg:null) tills växlingsfamiljen landar (①).
+  //  (bråk→decimal, decimal→bråk) loggar nu bd-vaxla/bd-tillbrak i k1-storen (loggStore:'k1', FAS 3 — ① landat).
   var MALLAR = {
 
     ova1: { titel: 'Grunder i bråk', grupper: [
-      // G1 — bråk → decimalform. OLOGGAD (① routing kvar). Nämnare ∈{2,4,5} (avslutande decimal), täljare 1..5.
-      { rubrik: 'Byt form – skriv i decimalform', logg: null, uppgifter:
+      // G1 — bråk → decimalform → bd-vaxla:rakna (k1-store, FAS 3-route). Nämnare ∈{2,4,5} (avslutande decimal), täljare 1..5.
+      { rubrik: 'Byt form – skriv i decimalform', logg: 'bd-vaxla:rakna', loggStore: 'k1', uppgifter:
         [[2,5],[3,4],[3,2],[1,5],[5,4]].map(function(p){ return {
-          logg: null, orig: { t: p[0], n: p[1] },
+          logg: 'bd-vaxla:rakna', loggStore: 'k1', orig: { t: p[0], n: p[1] },
           sample: function(rng){ return { t: ri(rng, 1, 5), n: rp(rng, [2, 4, 5]) }; },
           villkor: function(x){ return [2, 4, 5].indexOf(x.n) >= 0 && x.t >= 1 && x.t <= 5 && x.t % x.n !== 0 && gcd(x.t, x.n) === 1; },
           prompt: function(x){ return BR(x.t, x.n) + ' ='; }, mellan: function(){ return null; },
@@ -85,11 +85,11 @@
           mellan: function(x){ var f = x.mål / x.n; return BR(x.t + ' · ' + f, x.n + ' · ' + f); },
           facit: function(x){ var f = x.mål / x.n; return { form: 'forlang', t: x.t * f, n: x.mål }; } }; }) },
 
-      // G5 — decimal → bråkform, enklaste form. OLOGGAD (① routing kvar). ≤3 decimaler, värde ≤2,5, ej heltal.
-      { rubrik: 'Byta form – skriv i bråkform, i enklaste form', logg: null, uppgifter:
+      // G5 — decimal → bråkform, enklaste form → bd-tillbrak:rakna (k1-store, FAS 3-route). ≤3 decimaler, värde ≤2,5, ej heltal.
+      { rubrik: 'Byta form – skriv i bråkform, i enklaste form', logg: 'bd-tillbrak:rakna', loggStore: 'k1', uppgifter:
         [0.8, 0.75, 2.5, 0.125, 1.2].map(function(d){
           var dec = ('' + d).split('.')[1] || ''; var pot = Math.pow(10, dec.length);
-          return { logg: null, orig: { d: d, t: Math.round(d * pot), n: pot },
+          return { logg: 'bd-tillbrak:rakna', loggStore: 'k1', orig: { d: d, t: Math.round(d * pot), n: pot },
             sample: function(rng){ var dp = ri(rng, 1, 3), po = Math.pow(10, dp), kk = ri(rng, 1, Math.floor(2.5 * po)); var dd = rund(kk / po); return { d: dd, t: Math.round(dd * po), n: po }; },
             villkor: function(x){ var s = ('' + x.d).split('.')[1] || ''; return s.length <= 3 && x.d > 0 && x.d <= 2.5 && x.t % x.n !== 0 && (x.n / gcd(x.t, x.n)) <= 10; },   // förkortad nämnare ≤10 ⇒ "snygga" tal (0,8=4/5, ej 0,62=31/50)
             prompt: function(x){ return k(x.d) + ' ='; }, mellan: function(){ return null; },
@@ -381,7 +381,7 @@
     }
   }
   var FACIT_FRI = { val: 1, tecken: 1 };   // former där facit får upprepas (bara talen behöver skilja)
-  function bygg(u, t, kastade){ return { prompt: u.prompt(t), mellan: u.mellan ? u.mellan(t) : null, facit: u.facit(t), logg: u.logg || null, tal: t, _kastade: kastade || 0 }; }
+  function bygg(u, t, kastade){ return { prompt: u.prompt(t), mellan: u.mellan ? u.mellan(t) : null, facit: u.facit(t), logg: u.logg || null, loggStore: u.loggStore || 'k2', tal: t, _kastade: kastade || 0 }; }
   //  undvik = tal-nycklar som (även) ska undvikas — grupp-syskon i SAMMA variant (ingen upprepning inom dok).
   function genUppgift(u, dokId, idx, variant, undvik){
     if(variant === 0 || u.fixed || !u.sample) return bygg(u, u.orig, 0);   // orig / algebraiskt fast tal (7x/2y)

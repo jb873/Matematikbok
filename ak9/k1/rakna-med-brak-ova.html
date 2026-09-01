@@ -92,7 +92,9 @@
 <script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/ak9-k2-ova-variant.js"></script>
 <script src="../../js/motor/ova-sekvens.js"></script>
-<!-- Öva-loggen: bråk-evidens → MasteryK2 (samma store som åttans blad + nians union-karta läser). GDPR: localStorage. -->
+<!-- Öva-loggen: k2-noder → MasteryK2; k1-lån (byta form, bd-vaxla/bd-tillbrak) → Mastery (k1-store) via loggStore:'k1'
+     — samma store-route som akr9-sidan + FAS 3. Båda stores läses av nians union-karta + självskattning. GDPR: localStorage. -->
+<script src="../../js/mastery.js"></script>
 <script src="../../js/mastery-k2.js"></script>
 <script>
 (function(){
@@ -408,7 +410,6 @@
   }
 
   function kontrollera(c){
-    var loggMast = window.MasteryK2 && window.MasteryK2.loggaForsok;
     var uppg = []; vy.doc.grupper.forEach(function(g){ g.uppgifter.forEach(function(u){ uppg.push(u); }); });
     c.querySelectorAll('.ak8-rad').forEach(function(rad, i){
       var u = uppg[i]; if(!u) return;
@@ -416,8 +417,8 @@
       var besvarad = radBesvarad(rad);
       var res = rattaRad(rad, u);
       if(besvarad && !res.ok){ var fEl = document.createElement('span'); fEl.className = 'ak8-fasit'; fEl.textContent = 'rätt: ' + res.facit; rad.appendChild(fEl); }
-      // EVIDENS: bara besvarade + loggade rader (växlings-grupperna har logg:null → loggas EJ), en gång/visning.
-      if(loggMast && !vy.loggat && u.logg && besvarad){ loggMast(u.logg, res.ok ? 'ratt' : 'fel'); }
+      // EVIDENS: bara besvarade + loggade rader, en gång/visning. STORE-ROUTE: k1-lån (bd-*) → Mastery, k2 → MasteryK2.
+      if(!vy.loggat && u.logg && besvarad){ var _mod = (u.loggStore === 'k1') ? window.Mastery : window.MasteryK2; if(_mod && _mod.loggaForsok) _mod.loggaForsok(u.logg, res.ok ? 'ratt' : 'fel'); }
     });
     vy.loggat = true;
   }

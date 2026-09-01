@@ -143,7 +143,7 @@
       L = lcm(A.n, B.n); var at = A.t * (L / A.n), bt = B.t * (L / B.n);
       return { t: (op === '+') ? at + bt : at - bt, n: L };
     }
-    return { logg: logg, loggStore: 'k1', orig: { dec: dec, brak: brak, hel: hel },
+    return { logg: logg, orig: { dec: dec, brak: brak, hel: hel },   // loggStore ur raden (add/sub = k2); ej k1 — dessa är BERÄKNINGAR, ej växling
       mellan: function(){ return null; },
       sample: function(rng){
         var d = rp(rng, DECS), b = sampProper(rng, 8, 12), h = ri(rng, 2, 9);
@@ -323,11 +323,13 @@
           addsubUppg('−', [6, 12], [5, 36], 'brak-sub:rakna'),
           addsubUppg('−', [3, 8], [5, 9], 'brak-sub:rakna') ] },
 
-      { rubrik: 'Beräkna genom att byta form – svara i enklaste form', logg: 'bd-tillbrak:rakna', loggStore: 'k1', uppgifter: [
-          decbrakUppg('dec+brak', ['0,2', 1, 5], [2, 3], 0, 'bd-tillbrak:rakna'),
-          decbrakUppg('brak+hel', null, [5, 6], 7, 'bd-tillbrak:rakna'),
-          decbrakUppg('brak-dec', ['0,6', 3, 5], [1, 9], 0, 'bd-tillbrak:rakna'),
-          decbrakUppg('dec-brak', ['0,7', 7, 10], [2, 3], 0, 'bd-tillbrak:rakna') ] },
+      // "Byta form"-BERÄKNING (addition/subtraktion som kräver ett växlingssteg) → add/sub-noderna, EJ bd-tillbrak.
+      // En beräkning ska inte gröna en ren växlingsnod (jfr 30·3 under stora tal, jmf-olika på förlänga-noden).
+      { rubrik: 'Beräkna genom att byta form – svara i enklaste form', logg: 'brak-add:rakna', uppgifter: [
+          decbrakUppg('dec+brak', ['0,2', 1, 5], [2, 3], 0, 'brak-add:rakna'),
+          decbrakUppg('brak+hel', null, [5, 6], 7, 'brak-add:rakna'),
+          decbrakUppg('brak-dec', ['0,6', 3, 5], [1, 9], 0, 'brak-sub:rakna'),
+          decbrakUppg('dec-brak', ['0,7', 7, 10], [2, 3], 0, 'brak-sub:rakna') ] },
 
       { rubrik: 'Beräkna – visa mellanled, svara i enklaste form', logg: 'brak-add:rakna', uppgifter: [
           blandKedjaUppg('+', { h: 5, t: 3, n: 7 }, { h: 8, t: 1, n: 3 }, 'brak-add:rakna', false),
