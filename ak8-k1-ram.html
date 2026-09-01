@@ -930,7 +930,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     return {key:'jmf'+a+'_'+b, prompt:'Vilket tecken gör påståendet sant?   '+M(a)+' ▢ '+M(b), options:['<','>','='], answer:ans, expl:M(a)+' '+ans+' '+M(b)+'.'};
   }) ] },
   // ── ÖVA-TÄCKNING · Räkna med bråk (dk4) + Add/sub bråk (dk5): decimal↔bråk-omvandling ──
-  // Decimal → bråk (enklaste form, brak-typ) → brak-blandad:rakna
+  // Decimal → bråk (enklaste form, brak-typ) → bd-tillbrak:rakna (k1-hemvist, k1-store — FAS 3 store-beslut)
   'brak-blandad:dec-brak': { snabb: [ function genDecBrak(seen){
     var bank=[[0.5,1,2],[0.25,1,4],[0.75,3,4],[0.2,1,5],[0.4,2,5],[0.6,3,5],[0.8,4,5],[0.125,1,8],[0.375,3,8],[0.1,1,10],[0.3,3,10],[0.7,7,10]];
     var subs=[],tries=0;
@@ -1067,7 +1067,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     // öva-täckning Negativa (dk3): lös ut okänt tal, dubbeltecken, jämför storlek
     'neg-losut-as':'neg-rakna:addsub', 'neg-losut-md':'neg-rakna:multdiv', 'neg-dubbel':'neg-rakna:addsub', 'neg-jmf':'neg-begrepp:begrepp',
     // öva-täckning bråk dk4/dk5: decimal↔bråk, min→decimaltimmar, bråk±decimal
-    'dec-brak':'brak-blandad:rakna', 'dec-blandad':'brak-blandad:dec-blandad', 'tid-dec':'brak-tid:rakna', 'add-dec-brak':'brak-add:rakna',
+    'dec-brak':'bd-tillbrak:rakna', 'dec-blandad':'brak-blandad:dec-blandad', 'tid-dec':'brak-tid:rakna', 'add-dec-brak':'brak-add:rakna',
     // öva-täckning potens dk8/dk10: decimalbas→värde, bråkbas→bråksvar, gp→vanligt tal, x-i-nämnaren
     'pot-eval-dec':'pot-begrepp:evaluera', 'pot-eval-brak':'pot-begrepp:evaluera', 'gp-avkoda':'gp-rakna:skriva', 'gp-losut-namn':'gp-rakna:losut',
     // öva-täckning prioritering: parentesⁿ (potenser), prioritering med negativa (multdiv), räkneordning med bråk

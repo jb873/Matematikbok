@@ -1439,8 +1439,14 @@ function renderTestResult(){
       else skippedCount++;
       // LOGGA per nod → mastery-matrisen (SAMMA hook som drillarna via GEN_NOD) → färgar kartan.
       // En gång per prov (t.logged), bara försökta uppgifter (skippade loggas ej). Elev-lokalt, inget nät.
-      if(!t.logged && result.status !== 'skipped' && GEN_NOD[q.generator] && resolveMastery() && resolveMastery().loggaForsok){
-        resolveMastery().loggaForsok(GEN_NOD[q.generator], result.status === 'correct' ? 'ratt' : 'fel');
+      // STORE-BESLUT (talform-familj FAS 3): bråk↔decimal-noderna (bd-*) är k1-hemvist — BÅDA ytorna läser
+      // dem ur k1-loggen (karta union-merge + självskattning evidensK1). Deras evidens loggas därför till
+      // k1-storen (window.Mastery), inte ram-storen. Samma loggStore:'k1'-princip som åk9 akr9-varianten.
+      // Övriga noder → resolveMastery() (ram-storen) som förr → byte-identiskt. Targeted per nod, ej delatMed-överhaul.
+      if(!t.logged && result.status !== 'skipped' && GEN_NOD[q.generator]){
+        var _nod = GEN_NOD[q.generator];
+        var _mast = (/^bd-/.test(_nod) && window.Mastery && window.Mastery.loggaForsok) ? window.Mastery : resolveMastery();
+        if(_mast && _mast.loggaForsok) _mast.loggaForsok(_nod, result.status === 'correct' ? 'ratt' : 'fel');
       }
       return {sub: s, result, key};
     });
