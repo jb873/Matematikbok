@@ -65,6 +65,22 @@ window.K2_TAXONOMI = {
       "visning": { "utbudslista": "k2d1", "grupp": "Andel och antal", "gruppordning": 0, "radordning": 4, "etikett": "resonera", "formagaKey": "resonera", "niva": null }
     },
 
+    /* ═══ FAS 4 — ANTECKNING till den som bygger PROCENTKAPITLET: procentformen hakar in HÄR ═══
+       Talform-växlingsfamiljen bor under brak-byta så procent UTÖKAR den — bygg INTE en parallell procent-struktur.
+       • Procent TILLFÖR: procent→bråk (50% = 1/2), procent→decimal (50% = 0,5), och de omvända OM de undervisas.
+         Redan TÄCKT: bråk↔decimal (bd-vaxla/tillbrak/hundra, k1-hemvist, delatMed), oäkta↔blandad + decimaltal→blandad
+         (k2). Lägg procent-riktningarna som fler LÖVNODER under brak-byta (mall: brak-blandad:dec-blandad) — en per UNDERVISAD riktning.
+       • REGELN gäller även här: en växling UTAN undervisat innehåll får INGEN nod (som blandad→decimal nedan; som
+         avrundningsnoderna som togs ur testet). Bygg bara procent-riktningar som har öva-innehåll.
+       • blandad → decimal: INNEHÅLLSÄRENDE — efterfrågad men ej undervisad (död radBlandadBada). Ingen nod förrän innehåll finns.
+       • STORE-REGELN: en delad nod loggas i EXAKT EN store — sin hemvist. Procentens EGNA noder är k2-hemvist och
+         loggas till k2 automatiskt (provbyggarens default resolveMastery). Återanvänds bråk↔decimal (bd-*) loggas de
+         i k1-storen: provbyggarens logg-hook (provbyggar-motor.js) routar k1-hemvist-noder → window.Mastery.
+         OBS (ärligt om nuläget): routingen känner igen k1-hemvist via bd-*-PREFIXET, inte en generell taxonomi-
+         uppslagning. Procent täcks ändå (egna noder→k2, bd-*-återbruk→k1). En GODTYCKLIG korskapitel-delad nod utan
+         bd-prefix (t.ex. algebrans inverterade tal som ska peka hit) kräver en generell hemvist-uppslagning + att
+         k2/k3-ramarna laddar K1_TAXONOMI (ak7-k2-ram gör det EJ i dag). Det är det kända delatMed/store-glappet — eget ärende. */
+
     /* ─────────────── Del 2 · Byta form (öppen) ─────────────── */
     {
       "id": "brak-byta", "namn": "Byta form", "parent": null, "niva": "omrade",
