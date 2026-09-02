@@ -886,9 +886,11 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   </div>
 </section>
 
-<!-- PANEL: FÖRDJUPNING (blad-filen renderar sheet-fordjupning) -->
+<!-- PANEL: FÖRDJUPNING — två blad vid sidan av varandra (blad-nav wireas i skalet nedan) -->
 <section class="tab-panel" data-panel="fordjupning">
-  <div class="ovn-wrap" id="sheet-fordjupning"></div>
+  <div class="blad-nav" id="fordj-nav" role="tablist" aria-label="Fördjupningsblad"></div>
+  <div id="fblad-allmant" class="blad-mount"><div class="ovn-wrap" id="sheet-fordjupning"></div></div>
+  <div id="fblad-multdiv" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-negmultdiv"></div></div>
 </section>
 
 <!-- PANEL: TEST (delens eget prov — blad-filen renderar sheet-test) -->
@@ -910,6 +912,8 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 <!-- TAXONOMI: delad nodstruktur (en källa, alla vyer) -->
 <script src="../../../js/data/k1-taxonomi.js"></script>
 <script src="../../../js/data/k1-fardiga-test.js"></script>
+<!-- MASTERY-store (k1): fördjupningsbladets grupp 1–3 loggar neg-rakna:multdiv -->
+<script src="../../../js/mastery.js"></script>
 
 <!-- SKAL: blad-nav (Öva) + Färdighetsträning ur taxonomin. Körs efter blad-filen
      (bladen redan auto-renderade in i sheet-*). Motorn/blad-filen orörd. -->
@@ -960,6 +964,25 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       navEl.appendChild(btn); knappar[i]=btn;
     });
     visa(0);
+  }
+
+  // ── FÖRDJUPNING: två blad vid sidan av varandra (befintligt + Joachims mult/div) ──
+  var FORDJ=[
+    {titel:'Teckenregler & prioritering', mount:'fblad-allmant'},
+    {titel:'Division som bråk · decimaltal', mount:'fblad-multdiv'}
+  ];
+  var fNavEl=document.getElementById('fordj-nav');
+  if(fNavEl){
+    var fMounts=[], fKnappar=[];
+    function fVisa(i){ FORDJ.forEach(function(b,j){ if(fMounts[j]) fMounts[j].hidden=(j!==i); if(fKnappar[j]){ var on=(j===i); fKnappar[j].classList.toggle('is-active',on); fKnappar[j].setAttribute('aria-selected',on?'true':'false'); } }); }
+    FORDJ.forEach(function(b,i){
+      fMounts[i]=document.getElementById(b.mount);
+      var btn=document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn'; btn.setAttribute('role','tab'); btn.title=b.titel;
+      btn.innerHTML='<span class="blad-nav-nr">'+(i+1)+'</span>'+b.titel;
+      btn.onclick=function(){ fVisa(i); };
+      fNavEl.appendChild(btn); fKnappar[i]=btn;
+    });
+    fVisa(0);
   }
 
   // ── FÄRDIGHETSTRÄNING ur taxonomin (utbudslista 'd3'), deep-link till metod-ramen (embed) ──

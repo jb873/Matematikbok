@@ -198,7 +198,9 @@ function bladHTML(blad){
 
   var radNummer = 0;
   blad.grupper.forEach(function(grupp, gi){
-    html += '<div class="ovn-grupp">';
+    // data-logg (valfritt) märker en grupp vars besvarade rutor ska matas till mastery.
+    // Utan data-logg loggas ingenting (opt-in) — de fyra äldre bladen rörs inte.
+    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     grupp.rader.forEach(function(rad){
       radNummer++;
@@ -485,6 +487,15 @@ function bygg_blad(rotEl, blad){
         ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
       }
       totalt++;
+      // FAS 2 · loggning: bara grupper med data-logg matar mastery. En besvarad (ej tom) ruta
+      // loggas som försök — FEL registreras som 'fel' (orange), rätt som 'ratt'. Grupp 4
+      // (decimaler) saknar data-logg → matar inte mastery. Tidsspärren i mastery.js kollapsar
+      // upprepade Kontrollera-klick i samma pass, så retention inte blåses upp.
+      var _grEl = inp.closest('.ovn-grupp');
+      var _loggNod = _grEl && _grEl.getAttribute('data-logg');
+      if(_loggNod && String(inp.value).trim() !== '' && window.Mastery && window.Mastery.loggaForsok){
+        window.Mastery.loggaForsok(_loggNod, ok ? 'ratt' : 'fel');
+      }
       // Bocken/krysset – stor, syns tydligt
       var mark = document.createElement('span');
       mark.className = 'ovn-mark ' + (ok ? 'ok' : 'fel');
@@ -731,6 +742,48 @@ var BLAD_FORDJUPNING = {
   ]
 };
 
+// --- 6 · FÖRDJUPNING II (Joachims blad: mult/div, stående bråk + decimaltal) ---
+// Ligger VID SIDAN AV blad 5 i Fördjupning-panelen (egen flik i fordj-nav).
+// Division skrivs som STÅENDE BRÅK (typ:'brak') – docx:ns m:f, aldrig platt '/'.
+// Talen är Joachims exakta uppgifter ur Negativa tal.docx (oförändrade).
+// Loggning: grupp 1–3 → neg-rakna:multdiv (åk7+åk8 mål). Grupp 4 (decimaler) → ingen
+//   logg (loggSkal nedan) – fördjupning inom fördjupningen, ska ej mata mastery.
+var BLAD_NEG_MULTDIV = {
+  titel:'Multiplikation och division – stående bråk och decimaltal',
+  intro:'Multiplikation och division med negativa tal. Division skrivs som stående bråk. Regeln: lika tecken ger plus, olika tecken ger minus. Skriv svaret med minustecken om det är negativt. Sista gruppen tar även med decimaltal – för dig som vill mer.',
+  grupper:[
+    {rubrik:'Multiplikation', logg:'neg-rakna:multdiv', rader:[
+      {typ:'enkel', vansterText:'5 · (−8) =',     svar:-40},
+      {typ:'enkel', vansterText:'4 · (−6) =',     svar:-24},
+      {typ:'enkel', vansterText:'(−9) · (−3) =', svar:27},
+      {typ:'enkel', vansterText:'(−2) · 12 =',    svar:-24},
+      {typ:'enkel', vansterText:'(−7) · (−11) =', svar:77}
+    ]},
+    {rubrik:'Division', logg:'neg-rakna:multdiv', rader:[
+      {typ:'brak', taljare:'36',        namnare:'−4', svar:-9},
+      {typ:'brak', taljare:'−18',  namnare:'3',       svar:-6},
+      {typ:'brak', taljare:'−24',  namnare:'−4', svar:6},
+      {typ:'brak', taljare:'48',        namnare:'−8', svar:-6},
+      {typ:'brak', taljare:'−81',  namnare:'−9', svar:9}
+    ]},
+    {rubrik:'Multiplikation och division blandat', logg:'neg-rakna:multdiv', rader:[
+      {typ:'enkel', vansterText:'6 · (−3) =',      svar:-18},
+      {typ:'brak', taljare:'72',        namnare:'−9',  svar:-8},
+      {typ:'enkel', vansterText:'(−11) · (−5) =', svar:55},
+      {typ:'brak', taljare:'−45',  namnare:'−5',  svar:9}
+    ]},
+    // Grupp 4: ingen logg (fördjupning inom fördjupningen).
+    {rubrik:'Med decimaltal', logg:null,
+      loggSkal:'Fördjupning inom fördjupningen – decimaler i multiplikation och division, för dem som vill mer. Ska inte mata mastery.',
+      rader:[
+      {typ:'enkel', vansterText:'(−0,2) · (−9) =', svar:1.8},
+      {typ:'brak', taljare:'7',         namnare:'−2',   svar:-3.5},
+      {typ:'enkel', vansterText:'0,3 · (−8) =',    svar:-2.4},
+      {typ:'brak', taljare:'−12',  namnare:'−0,5', svar:24}
+    ]}
+  ]
+};
+
 // ============================================================
 // Bygg upp bladen
 // ============================================================
@@ -739,4 +792,6 @@ bygg_blad(document.getElementById('sheet-rakna1'),      BLAD_RAKNA1);
 bygg_blad(document.getElementById('sheet-rakna2'),      BLAD_RAKNA2);
 bygg_blad(document.getElementById('sheet-test'),        BLAD_TEST);
 bygg_blad(document.getElementById('sheet-fordjupning'), BLAD_FORDJUPNING);
+var _nmd = document.getElementById('sheet-negmultdiv');
+if(_nmd) bygg_blad(_nmd, BLAD_NEG_MULTDIV);
 
