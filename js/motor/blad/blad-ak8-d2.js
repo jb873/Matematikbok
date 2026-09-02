@@ -8,12 +8,9 @@
    Bråk renderas som STÅENDE bråk (fracSpan) — även i facit. Tal vänsterställda.
    fracRuta (blad-karna.js) för ruta inne i bråk (C1:6). Rör inga motorer/mellanled.
 
-   NAMNGIVNA PLATSHÅLLARE (väntar på Joachim — se rapport):
-     • 6 figurer: tallinje Scala 1/8/11/22 + 2 termometrar
-     • B1:4 tredje raden facit (-2+0,7+0,3) — flaggad
-     • C2:1 första raden (frac(1888·8,-6)) — trolig felskrivning
-     • B2:6 precedenstvetydig — villkors-validering, villkor saknas
-     • B2:1 andra raden (-7-(12)) — parentes utan tecken, flaggad
+   FIGURER (byggda): tallinje Scala 1/8/11/22 via AVLAS/LINJE (SvgTallinje) +
+     termometer B1 −8,3 °C via SvgTermometer (grupp-egenskap `fig`, TERMO-helper).
+     BLAD_A-temperaturfrågorna (rad "Temperaturen är −5…") är textbaserade, ingen figur.
    Auto-rättat rakt av: (-200]→(-200) · 7.5→7,5 · -10.5→-10,5 · saknat = i C1:7.
    ============================================================ */
 (function(){
@@ -46,8 +43,9 @@
   // Teckenekvation: sätt in ett tecken (+ − × /) i varje ruta så att leden blir lika.
   // disp = 'A ___ B = C ___ D' (två rutor). Flera lösningar accepteras (validering).
   function E(disp, exempel){ return { typ:'ekv', disp:disp, exempel:exempel }; }
-  // Figur-platshållare (väntar på Joachim).
-  function FIG(namn){ return { typ:'figur', namn:namn }; }
+  // Termometer-figur (lodrät, visar ett värde). Config för window.SvgTermometer;
+  // sätts som grupp-egenskap `fig` → renderas EN gång ovanför gruppens rader.
+  function TERMO(varde, min, max, steg, etiketter){ return { varde:varde, min:min, max:max, steg:steg, etiketter:etiketter }; }
   // Avläsning: SVG-tallinje(r) + fält "namn = __" per punkt. Positioner = facit (självkonsistent).
   function LINJE(min, max, steg, etiketter, punkter){ return { min:min, max:max, steg:steg, etiketter:etiketter, punkter:punkter }; }
   function PT(v, namn){ return { v:v, namn:namn }; }
@@ -92,7 +90,8 @@
     { grupp:'Blad B1' },
     { rubrik:'Beräkna', rader:[ T('4 − 7 =', -3), T('−1 − 7 =', -8), T('−5 + 7 =', 2), T('−8 + 3 =', -5) ] },
     { rubrik:'Beräkna', rader:[ T('3 − 15 =', -12), T('−5 + 19 =', 14), T('35 − 100 =', -65), T('−230 + 500 =', 270) ] },
-    FIG('Termometer — Scala åk 8 uppgift 28'),
+    { rubrik:'Termometern visar −8,3 °C. Vad visar den om temperaturen', fig:TERMO(-8.3, -12, 2, 1, [-10, -5, 0]),
+      rader:[ T('minskar med 1,5 grader', -9.8), T('ökar med 1,5 grader', -6.8), T('ökar med 4 grader', -4.3) ] },
     { rubrik:'Beräkna', rader:[ T('−25 − 7 =', -32), T('0,6 − 1,8 =', -1.2), T('0,7 − 3 =', -2.3) ] },
     { rubrik:'Beräkna med mellanled', hint:'Samla de positiva talen först. Exempel: 6 − 12 + 8 = 14 − 12 = 2', rader:[
       M('3 − 15 + 17', 20, 15, 5),
@@ -256,9 +255,6 @@
         + (r.flagg ? '<span class="ak8-flagg" title="' + r.flagg + '">⚑</span>' : '') + '</div>';
     }
     if(r.typ === 'villkor'){
-      if(!r.test){ // platshållare (villkor saknas)
-        return '<div class="ak8-rad"><span class="ak8-q">' + r.krav + '</span><span class="ak8-vantar">väntar på villkor</span></div>';
-      }
       CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), svar = [], seen = {}, dist = true, alla = true; for(var i = 0; i < r.antal; i++){ var v = pNum(ins[i].value); svar.push(v); if(!isFinite(v) || !r.test(v)) alla = false; var k = Math.round(v * 1e6); if(seen[k]) dist = false; seen[k] = 1; } return { ok: alla && dist, facit: r.exempel }; });
       var boxar2 = []; for(var i = 0; i < r.antal; i++) boxar2.push(inTal());
       return '<div class="ak8-rad"><span class="ak8-q">' + r.krav + '</span><span class="ak8-svar" data-idx="' + idx + '">' + boxar2.join('<span class="ovn-text" style="margin:0 6px;">och</span>') + '</span></div>';
@@ -298,21 +294,19 @@
       CHECKS.push(function(el){ var mks = el.querySelectorAll('.tl-marker'); var ok = mks.length === mal.length; mks.forEach(function(mk){ if(Math.abs(+mk.dataset.v - +mk.dataset.target) > 1e-3) ok = false; }); return { ok: ok, facit: malTxt }; });
       return '<div class="ak8-rad ak8-rad-fig"><span class="ak8-svar" data-idx="' + idx + '"><div class="ak8-mark-chips">' + chips + '</div><div class="ak8-mark-wrap">' + svg + '</div></span></div>';
     }
-    if(r.typ === 'figur'){
-      return '<div class="ak8-figur">▨ Figur: <strong>' + r.namn + '</strong> — SVG byggs när Joachim specificerat den.</div>';
-    }
     return '';
   }
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
-    var grpN = 0;   // löpande gruppnummer (bara riktiga uppgiftsgrupper; figur/sektionshuvud hoppas över)
+    var grpN = 0;   // löpande gruppnummer (sektionshuvud {grupp} hoppas över)
     blad.uppg.forEach(function(u){
-      if(u.typ === 'figur'){ html += renderRad(u); return; }
       if(u.grupp){ html += '<h3 class="ak8-grupp">' + u.grupp + '</h3>'; return; }
       grpN++;
       CUR_NEG = gruppKanNeg(u);   // FAS3: teckenruta-styrning för brak-rader i denna grupp
-      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + grpN + '. ' + u.rubrik + (u.villkorNot ? ' <span class="ak8-flagg" title="Precedenstvetydig — villkors-validering, villkoret saknas">⚑</span>' : '') + '</div>';
+      html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + grpN + '. ' + u.rubrik + '</div>';
+      // Figur EN gång ovanför raderna (t.ex. termometer). Icke-interaktiv — eleven räknar, figuren visar utgångsläget.
+      if(u.fig) html += '<div class="ak8-termometer">' + (window.SvgTermometer ? window.SvgTermometer.termometer(u.fig) : '') + '</div>';
       if(u.hint) html += '<p class="ak8-hint">' + u.hint + '</p>';
       var bokN = 0;
       u.rader.forEach(function(r){
