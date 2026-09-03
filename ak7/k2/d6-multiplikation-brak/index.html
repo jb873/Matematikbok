@@ -1023,7 +1023,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     rader.forEach(function(n){ var v = n.visning; if(!grupper[v.grupp]) grupper[v.grupp] = { rubrik: v.grupp, ordning: v.gruppordning, rader: [] }; grupper[v.grupp].rader.push(n); });
     return Object.keys(grupper).map(function(k){ return grupper[k]; }).sort(function(a, b){ return a.ordning - b.ordning; })
       .map(function(gr){ gr.rader.sort(function(a, b){ return a.visning.radordning - b.visning.radordning; });
-        return { ko: gr.rubrik, drills: gr.rader.map(function(n){ var v = n.visning; return { titel: (v.titel || n.namn), formaga: v.etikett, ko: n.parent, formagaKey: v.formagaKey || undefined }; }) }; });
+        return { ko: gr.rubrik, drills: gr.rader.map(function(n){ var v = n.visning; return { titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0], formagaKey: v.formagaKey || undefined }; }) }; });
   }
   // Testlåset öppet (som k1): ta bort is-locked på testfliken efter att blad-filen låst den.
   var tb = document.querySelector('.tab-btn[data-tab="test"]'); if(tb) tb.classList.remove('is-locked');
