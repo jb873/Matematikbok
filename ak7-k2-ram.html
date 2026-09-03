@@ -639,7 +639,8 @@ function blandadEngine(){
     'brak-mult-rakna': function(){ multBrakEngine(); },      // Del 6: multiplikation med bråk (mellanled vid stora tal)
     'brak-div-bh':   function(){ divBrakHeltalEngine(); },   // Del 7: bråktal ÷ heltal (bara svaret)
     'brak-div-hb':   function(){ divHeltalBrakEngine(); },   // Del 7: heltal ÷ bråktal (bara svaret)
-    'brak-div-bb':   function(){ divBrakBrakEngine(); },     // Del 7: bråktal ÷ bråktal (visa metod)
+    'brak-div-bb':   function(){ divBrakBrakEngine(); },     // Del 7: bråktal ÷ bråktal (visa metod, via förlängning)
+    'brak-div-inv':  function(){ divBrakBrakEngine(); },     // invertera-metoden (Öva 6 G3): delar divBrakBrak-engine med brak-div-bb tills förlänga/invertera-splitten byggs. Bär evidens (ak9-öva) + ligger i tre test — alias, ej borttagning.
     'brak-lana':          function(){ lanaEngine(); },            // Låna i blandad form (lucka-drill)
     'brak-mult-forkorta': function(){ multForkortaEngine(); },    // Förkorta innan mult (lucka-drill)
     'brak-div-reciprok':  function(){ reciprokEngine(); },        // Skriva reciprok (lucka-drill)
