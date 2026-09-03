@@ -7,10 +7,16 @@
              taxonomin. Loggas evidens till ett id utan kartcell (som fantomen begrepp-as) faller
              bygget: eleven övar och evidensen försvinner. Samma sorts kontroll som elevtext-registret,
              riktad mot LOGGNINGEN i stället för mot orden — den hade fångat begrepp-as innan någon letat.
+   DEEPLINK — varje SURFAT färdighetskort (lövnod med visning) måste ha en drill-renderare för sitt
+             id-PREFIX i rätt ram: k1 → OVNING_RENDERS[prefix][formåga], k2 → K2_DRILL[prefix]. OCH
+             delkapitlens hub måste härleda ko ur id-prefixet, inte n.parent. Det var det som brast när
+             25 noder plattades ut i Familj 4: korten skickade parent (del-nyckel) som ingen renderare
+             har → tyst startsida. Den här kontrollen hade fångat alla 28 trasiga korten före ett klick.
 
-   Kör:  node verktyg/koppling-grind.js            (båda kraven; exit 1 om något brister)
+   Kör:  node verktyg/koppling-grind.js            (alla tre kraven; exit 1 om något brister)
          node verktyg/koppling-grind.js --bakat    (bara bakåt: mastery-nycklar → taxonomi)
          node verktyg/koppling-grind.js --framat   (bara framåt: generator → öva/drill)
+         node verktyg/koppling-grind.js --deeplink (bara deeplink: färdighetskort → drill-renderare)
 
    Noll nätväg. Ingen källfil ändras. */
 'use strict';
@@ -107,12 +113,77 @@ function framat(tax) {
   return { saknar: saknar.sort(), doda, antalGen: Object.keys(genNod).length, drillTackta: drill.size, bladKopplade: Object.keys(KOPP).length };
 }
 
+// ── DEEPLINK: färdighetskort (surfad lövnod) → drill-renderare ───────────────────────────────────
+// Balanserad brace-matchning (tål nästlade fn-kroppar), ä-säkra nycklar (rakneträning m.fl.).
+function blockBody(text, header) {
+  const i = text.search(header); if (i < 0) return null;
+  const open = text.indexOf('{', i); if (open < 0) return null;
+  let depth = 0;
+  for (let j = open; j < text.length; j++) { const c = text[j]; if (c === '{') depth++; else if (c === '}') { depth--; if (depth === 0) return text.slice(open + 1, j); } }
+  return null;
+}
+// k1-ramens OVNING_RENDERS: { prefix: { formåga: fn, … }, … } → { prefix: Set(formågor) }
+function k1Renderare(ram) {
+  const body = blockBody(ram, /const\s+OVNING_RENDERS\s*=/); const res = {}; if (!body) return res;
+  const re = /(?:^|\n)\s{2}(?:'([^']+)'|"([^"]+)"|([\wåäöÅÄÖ-]+))\s*:\s*\{/g; let m;
+  while ((m = re.exec(body))) {
+    const key = m[1] || m[2] || m[3], open = re.lastIndex - 1; let depth = 0, end = open;
+    for (let j = open; j < body.length; j++) { const c = body[j]; if (c === '{') depth++; else if (c === '}') { depth--; if (depth === 0) { end = j; break; } } }
+    const inner = body.slice(open + 1, end), fset = new Set();
+    for (const f of inner.matchAll(/(?:^|[\n,{])\s*(?:'([^']+)'|([\wåäöÅÄÖ-]+))\s*:/g)) fset.add(f[1] || f[2]);
+    res[key] = fset; re.lastIndex = end;
+  }
+  return res;
+}
+// k2-ramens K2_DRILL: { prefix: function(){…}, … } → Set(prefix). Grinden på ko enbart (formåga ignoreras där).
+function k2Renderare(ram) {
+  const body = blockBody(ram, /var\s+K2_DRILL\s*=/); const set = new Set(); if (!body) return set;
+  for (const m of body.matchAll(/(?:^|\n)\s*'([^']+)'\s*:\s*function/g)) set.add(m[1]);
+  return set;
+}
+// Surfade lövnoder (visning.utbudslista) ur taxonomin, med id-prefix + faktisk formåga (formagaKey||etikett).
+function surfade() {
+  const vm = require('vm'), out = [];
+  for (const [f, key, area] of [['js/data/k1-taxonomi.js', 'K1_TAXONOMI', 'k1'], ['js/data/k2-taxonomi.js', 'K2_TAXONOMI', 'k2'], ['js/data/k3-taxonomi.js', 'K3_TAXONOMI', 'k3']]) {
+    if (!exists(f)) continue;
+    const w = {}, ctx = { window: w }; vm.createContext(ctx); vm.runInContext(read(f), ctx);
+    for (const n of ((w[key] && w[key].noder) || [])) {
+      if (n.niva === 'lovnod' && n.visning && n.visning.utbudslista)
+        out.push({ id: n.id, prefix: String(n.id).split(':')[0], formaga: n.visning.formagaKey || n.visning.etikett, area, utbud: n.visning.utbudslista });
+    }
+  }
+  return out;
+}
+function deeplink() {
+  const k1r = k1Renderare(read('ak7-k1-ram.html')), k2r = k2Renderare(read('ak7-k2-ram.html'));
+  const noder = surfade(), brott = [];
+  for (const n of noder) {
+    if (n.area === 'k1') {
+      if (!k1r[n.prefix]) brott.push({ id: n.id, why: 'ingen OVNING_RENDERS[' + n.prefix + ']' });
+      else if (!k1r[n.prefix].has(n.formaga)) brott.push({ id: n.id, why: 'OVNING_RENDERS[' + n.prefix + '] saknar formågan «' + n.formaga + '»' });
+    } else if (n.area === 'k2') {
+      if (!k2r.has(n.prefix)) brott.push({ id: n.id, why: 'ingen K2_DRILL[' + n.prefix + ']' });
+    }
+    // k3: inga delkapitel-hubbar idag; läggs till när k3 får en drill-dispatch.
+  }
+  // LINT: delkapitlens hub måste härleda ko ur id-prefixet, inte n.parent (Familj 4-buggens signatur).
+  const lint = [];
+  for (const area of ['ak7/k1', 'ak7/k2']) {
+    const abs = path.join(ROOT, area); if (!fs.existsSync(abs)) continue;
+    for (const d of fs.readdirSync(abs)) { const p = area + '/' + d + '/index.html'; if (exists(p) && /ko:\s*n\.parent\b/.test(read(p))) lint.push(p); }
+  }
+  // ÖVERFLÖD (info): renderare utan surfad k1/k2-nod (kan vara ak8/ak9/provbyggar-only → ej fatal).
+  const surfPrefix = new Set(noder.map(n => n.prefix));
+  const overflow = [...Object.keys(k1r), ...k2r].filter(k => !surfPrefix.has(k)).sort();
+  return { brott, lint, overflow, antalKort: noder.length };
+}
+
 // ── Kör ─────────────────────────────────────────────────────────────────────────────────────────
 const tax = taxonomi();
-const bara = process.argv.find(a => a === '--bakat' || a === '--framat');
+const bara = process.argv.find(a => a === '--bakat' || a === '--framat' || a === '--deeplink');
 let fel = 0;
 
-if (bara !== '--framat') {
+if (!bara || bara === '--bakat') {
   const { brott, fantomKo } = bakat(tax);
   console.log('── BAKÅT: mastery-nycklar → taxonomi ──');
   if (!brott.length) console.log('  ✓ alla loggnycklar motsvarar noder i taxonomin.');
@@ -129,7 +200,7 @@ if (bara !== '--framat') {
   }
 }
 
-if (bara !== '--bakat') {
+if (!bara || bara === '--framat') {
   const r = framat(tax);
   console.log('\n── FRAMÅT: generator → öva/drill-koppling (åk7 k1) ──');
   if (r.saknasReg) { console.log('  ⓘ js/data/ova-koppling.js saknas ännu — framåt-kravet ej aktivt.'); }
@@ -139,6 +210,24 @@ if (bara !== '--bakat') {
     if (r.saknar.length) { console.log('  ✗ generatorer UTAN öva/drill-koppling (prövar något ingen övar):'); r.saknar.forEach(s => console.log('      ' + s)); fel += r.saknar.length; }
     r.doda.forEach(d => { console.log('  ✗ död koppling: ' + d.g + ' → ' + d.ref + ' (' + d.why + ')'); fel++; });
   }
+}
+
+if (!bara || bara === '--deeplink') {
+  const r = deeplink();
+  console.log('\n── DEEPLINK: färdighetskort → drill-renderare ──');
+  if (!r.brott.length && !r.lint.length)
+    console.log('  ✓ alla ' + r.antalKort + ' surfade kort har en drill-renderare för sitt id-prefix; alla hubbar härleder ko ur prefixet.');
+  if (r.brott.length) {
+    console.log('  ✗ surfade kort UTAN drill-renderare (öppnar startsida/översikt i st f drillen):');
+    r.brott.forEach(b => console.log('      ' + b.id + '  — ' + b.why));
+    fel += r.brott.length;
+  }
+  if (r.lint.length) {
+    console.log('  ✗ delkapitel-hub härleder ko ur n.parent (bryter för utplattade noder — använd n.id.split(\':\')[0]):');
+    r.lint.forEach(p => console.log('      ' + p));
+    fel += r.lint.length;
+  }
+  if (r.overflow.length) console.log('  ⓘ renderare utan surfad k1/k2-nod (ej fatal — kan vara ak8/ak9/provbyggar-only): ' + r.overflow.join(', '));
 }
 
 console.log('\n────────────────────────────────────────');
