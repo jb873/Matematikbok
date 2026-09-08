@@ -165,9 +165,13 @@
     opts = opts || {}; var ops = opts.ops || ['+', '−', '·', '/'];
     var digits = ['7','8','9','4','5','6','1','2','3'], html = '<div class="keypad"><div class="keypad-digits">';
     for(var i = 0; i < digits.length; i++) html += '<button type="button" class="kp-key" data-key="' + digits[i] + '">' + digits[i] + '</button>';
-    html += '<button type="button" class="kp-key span2" data-key="0">0</button>';
+    html += '<button type="button" class="kp-key span3" data-key="0">0</button></div>';
+    // Operatorer i TVÅ kolumner (kompaktare: ops blir ≤3 rader i st f en hög enkolumn). Radera (⌫)
+    // läggs SIST i ops-blocket → längst från siffrorna, som Joachims layout. Alltid ett ops-block
+    // (⌫ behöver ett hem även om ops är tomt).
+    html += '<div class="keypad-ops">';
+    for(var j = 0; j < ops.length; j++) html += '<button type="button" class="kp-key op" data-key="' + ops[j] + '">' + ops[j] + '</button>';
     html += '<button type="button" class="kp-key util" data-key="back">⌫</button></div>';
-    if(ops.length){ html += '<div class="keypad-ops">'; for(var j = 0; j < ops.length; j++) html += '<button type="button" class="kp-key op" data-key="' + ops[j] + '">' + ops[j] + '</button>'; html += '</div>'; }
     if(opts.builders){
       html += '<div class="keypad-ops"><button type="button" class="kp-key op kp-fracbtn" data-key="frac" title="Bygg stående bråk">' + FRAC_ICON + '</button><button type="button" class="kp-key op kp-potbtn" data-key="pot" title="Bygg potens: bas och exponent">' + POT_ICON + '</button>'
         // komplex:true (opt-in) → knappen för staplat komplex-bråk. Utelämnad = befintlig keypad byte-identisk.

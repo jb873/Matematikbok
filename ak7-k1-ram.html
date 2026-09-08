@@ -1859,15 +1859,15 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .tutor-send:disabled{background:var(--ink-faint);cursor:not-allowed}
 
 /* ==== DEL 3: SKÄRMTANGENTBORD ==== */
-.keypad{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:10px 12px;background:#faf8f4;border-top:1px solid #e7e1d6;box-shadow:0 -3px 14px rgba(15,30,46,.08)}
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:#faf8f4;border-top:1px solid #e7e1d6;box-shadow:0 -3px 14px rgba(15,30,46,.08)}
 .keypad-hidden{display:none !important}   /* döljs för ordsvars-rutor */
 #test-take-body{}     /* keypad-clearance.js reserverar body-padding mätt mot keypaden */
-.keypad-digits{display:grid;grid-template-columns:repeat(3,46px);gap:6px}
-.keypad-ops{display:grid;grid-template-columns:46px;gap:6px;align-content:start}
-.keypad-ops.wide2{grid-template-columns:repeat(2,46px)}
+.keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px}
+.keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start}   /* kompakt: 2 kolumner (⌫ sist) i st f en hög enkolumn */
+.keypad-ops.wide2{grid-template-columns:repeat(2,42px)}
 .kp-key{
-  height:44px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
-  background:var(--bg-card);font-family:var(--mono);font-size:19px;font-weight:600;
+  height:40px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--bg-card);font-family:var(--mono);font-size:18px;font-weight:600;
   color:var(--ink);cursor:pointer;transition:transform .08s,background .1s,border-color .1s;
   display:flex;align-items:center;justify-content:center;user-select:none;
 }
@@ -1876,6 +1876,7 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .kp-key.op{color:var(--c-metod);font-weight:700}
 .kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px}
 .kp-key.span2{grid-column:span 2}
+.kp-key.span3{grid-column:span 3}
 .kp-hint{text-align:center;font-size:12px;color:var(--ink-faint);margin-top:8px}
 /* Konfetti vid alla rätt i färdigt/provbyggar-test (rikTestUX) — provbyggar-motorns visaKonfetti */
 .pb-konfetti-lager{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
