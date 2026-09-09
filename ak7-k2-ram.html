@@ -149,6 +149,8 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 /* AK8_UI-keypad i färdigt/provbyggar-test (rikTestUX) — motorn renderar .keypad-digits/.keypad-ops/.kp-key */
 .keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px;}
 .keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}   /* kompakt: 2 kolumner (⌫ sist) i st f en hög enkolumn */
+.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start;}   /* smal byggar-kolumn: bråk över potens */
+.kp-inactive{opacity:.5;pointer-events:none;cursor:default;}   /* grå, syns men går ej att klicka (fast layout) */
 .kp-key{height:40px;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:var(--mono);font-size:18px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;transition:background .12s;}
 .kp-key:hover{background:var(--bg-soft);} .kp-key:active{transform:scale(.92);}
 .kp-key.op{color:var(--navy,#0f1e2e);font-weight:700;} .kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px;} .kp-key.span2{grid-column:span 2;} .kp-key.span3{grid-column:span 3;}

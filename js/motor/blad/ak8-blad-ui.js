@@ -161,23 +161,33 @@
   var POT_ICON = '<span class="kp-pot"><span class="kp-pot-b"></span><span class="kp-pot-e"></span></span>';
   // Staplat komplex-bråk: två små bråk-glyfer kring ett tjockt streck (delad byggsten).
   var KBRAK_ICON = '<span class="kp-kbrak"><span class="kp-kbrak-f"></span><span class="kp-kbrak-l"></span><span class="kp-kbrak-f"></span></span>';
+  // FAST LAYOUT (Joachim): keypaden ser ALLTID likadan ut, oavsett kapitel/uppgiftstyp. Knappar som
+  // inte gäller renderas grå + inaktiva (.kp-inactive → pointer-events:none). Tre block:
+  //   siffror (3 kol, ⌫ ensam bredvid 0 på 0-raden, avskild från tecknen) · operatorer (2 kol:
+  //   + − · / ( ) √ π) · byggare (1 smal kol: bråk över potens). Inget = (står i uppgiften).
+  // FAS 1: nya knapparna ( ) √ π är grå (ingen rättare accepterar dem ännu — parenteser bara i
+  //   evalArith-celler, √/π ingenstans). Bråk/potens grå tills builder-kontext. Operatorerna är
+  //   aktiva som förr; den kontext-styrda gråningen (ur rättar-typ + band) är FAS 2, ej inkopplad här.
   function keypadHTML(opts){
-    opts = opts || {}; var ops = opts.ops || ['+', '−', '·', '/'];
-    var digits = ['7','8','9','4','5','6','1','2','3'], html = '<div class="keypad"><div class="keypad-digits">';
-    for(var i = 0; i < digits.length; i++) html += '<button type="button" class="kp-key" data-key="' + digits[i] + '">' + digits[i] + '</button>';
-    html += '<button type="button" class="kp-key span3" data-key="0">0</button></div>';
-    // Operatorer i TVÅ kolumner (kompaktare: ops blir ≤3 rader i st f en hög enkolumn). Radera (⌫)
-    // läggs SIST i ops-blocket → längst från siffrorna, som Joachims layout. Alltid ett ops-block
-    // (⌫ behöver ett hem även om ops är tomt).
+    opts = opts || {};
+    function k(key, label, cls){ return '<button type="button" class="kp-key' + (cls ? ' ' + cls : '') + '" data-key="' + key + '"' + (cls && cls.indexOf('kp-inactive') > -1 ? ' aria-disabled="true" tabindex="-1"' : '') + '>' + label + '</button>'; }
+    var html = '<div class="keypad"><div class="keypad-digits">';
+    ['7','8','9','4','5','6','1','2','3'].forEach(function(d){ html += k(d, d); });
+    // 0-raden: komma · 0 · radera (⌫ ensam bredvid 0, avskild från operatorerna i nästa block)
+    html += k(',', ',') + k('0', '0') + k('back', '⌫', 'util') + '</div>';
+    // Operatorer (2 kol). Parenteser + √ + π är NYA → grå tills rättare/band aktiverar dem (FAS 2).
     html += '<div class="keypad-ops">';
-    for(var j = 0; j < ops.length; j++) html += '<button type="button" class="kp-key op" data-key="' + ops[j] + '">' + ops[j] + '</button>';
-    html += '<button type="button" class="kp-key util" data-key="back">⌫</button></div>';
-    if(opts.builders){
-      html += '<div class="keypad-ops"><button type="button" class="kp-key op kp-fracbtn" data-key="frac" title="Bygg stående bråk">' + FRAC_ICON + '</button><button type="button" class="kp-key op kp-potbtn" data-key="pot" title="Bygg potens: bas och exponent">' + POT_ICON + '</button>'
-        // komplex:true (opt-in) → knappen för staplat komplex-bråk. Utelämnad = befintlig keypad byte-identisk.
-        + (opts.komplex ? '<button type="button" class="kp-key op kp-kbrakbtn" data-key="kbrak" title="Bygg staplat komplex-bråk (bråk i täljare och nämnare)">' + KBRAK_ICON + '</button>' : '')
-        + '</div>';
-    }
+    ['+', '−', '·', '/'].forEach(function(o){ html += k(o, o, 'op'); });
+    html += k('(', '(', 'op kp-inactive') + k(')', ')', 'op kp-inactive');
+    html += k('√', '√', 'op kp-inactive') + k('π', 'π', 'op kp-inactive');
+    html += '</div>';
+    // Byggare (1 smal kol): bråk ÖVER potens. Grå tills builder-kontext (opts.builders).
+    var bi = opts.builders ? '' : ' kp-inactive';
+    html += '<div class="keypad-build">'
+      + '<button type="button" class="kp-key op kp-fracbtn' + bi + '" data-key="frac" title="Bygg stående bråk"' + (bi ? ' aria-disabled="true" tabindex="-1"' : '') + '>' + FRAC_ICON + '</button>'
+      + '<button type="button" class="kp-key op kp-potbtn' + bi + '" data-key="pot" title="Bygg potens: bas och exponent"' + (bi ? ' aria-disabled="true" tabindex="-1"' : '') + '>' + POT_ICON + '</button>'
+      + (opts.komplex ? '<button type="button" class="kp-key op kp-kbrakbtn" data-key="kbrak" title="Bygg staplat komplex-bråk (bråk i täljare och nämnare)">' + KBRAK_ICON + '</button>' : '')
+      + '</div>';
     return html + '</div>';
   }
   function printKnappHTML(){ return '<button type="button" class="ovn-skriv-ut" data-print>↗ Skriv ut bladet</button>'; }

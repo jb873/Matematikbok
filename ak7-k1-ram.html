@@ -1864,6 +1864,8 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 #test-take-body{}     /* keypad-clearance.js reserverar body-padding mätt mot keypaden */
 .keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px}
 .keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start}   /* kompakt: 2 kolumner (⌫ sist) i st f en hög enkolumn */
+.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start}   /* smal byggar-kolumn: bråk över potens */
+.kp-inactive{opacity:.5;pointer-events:none;cursor:default}   /* grå, syns men går ej att klicka (fast layout) */
 .keypad-ops.wide2{grid-template-columns:repeat(2,42px)}
 .kp-key{
   height:40px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
