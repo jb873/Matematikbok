@@ -542,34 +542,25 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   font-size:13px;color:var(--ink-soft);
 }
 .ovn-exempel strong{color:var(--ink);font-weight:600;}
-/* Skärmtangentbord – samma stil som öva-delen */
-.ovn-keypad{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
-.ovn-keypad-digits{display:grid;grid-template-columns:repeat(3,46px);gap:6px;}
-.ovn-keypad-ops{display:grid;grid-template-columns:46px;gap:6px;align-content:start;}
-.ovn-kp-key{
-  height:44px;border:1.5px solid var(--line);border-radius:6px;
-  background:var(--bg-card);font-family:var(--mono,'Source Serif 4');
-  font-size:19px;font-weight:600;
-  color:var(--ink);cursor:pointer;
-  transition:transform .08s,background .1s,border-color .1s;
-  display:flex;align-items:center;justify-content:center;user-select:none;
-}
-.ovn-kp-key:hover{background:var(--c-metod-bg, var(--bg-soft));border-color:var(--c-metod, var(--ink-faint));}
-.ovn-kp-key:active{transform:scale(.92);}
-.ovn-kp-key.op{color:var(--c-metod, var(--blue));font-weight:700;}
-.ovn-kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px;}
-.ovn-kp-key.span2{grid-column:span 2;}
-/* På smala skärmar: klistra knappsatsen nedtill så den alltid syns */
-@media(max-width:720px){
-  body{padding-bottom:230px;}
-  .ovn-keypad{
-    position:fixed;bottom:0;left:0;right:0;z-index:100;
-    margin:0;padding:10px 12px;
-    background:var(--bg-warm);
-    border-top:1px solid var(--line);
-    box-shadow:0 -4px 14px rgba(0,0,0,.08);
-  }
-}
+/* Delad keypad (AK8_UI-markup + kontext-gråning) — migrerad från egen .ovn-keypad. ALLTID fixed
+   nedtill (in-flow-på-desktop var drift); keypad-clearance.js sätter mätt body-padding (ej hårdkodad 230px). */
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:var(--bg-warm);border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(0,0,0,.08);}
+.keypad-hidden{display:none !important;}
+.keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px;}
+.keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
+.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start;}
+.kp-inactive{opacity:.5;pointer-events:none;cursor:default;}
+.kp-key{height:40px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg-card);font-family:var(--mono,'Source Serif 4');font-size:18px;font-weight:600;color:var(--ink);cursor:pointer;transition:transform .08s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;user-select:none;}
+.kp-key:hover{background:var(--c-metod-bg, var(--bg-soft));border-color:var(--c-metod, var(--ink-faint));}
+.kp-key:active{transform:scale(.92);}
+.kp-key.op{color:var(--c-metod, var(--blue));font-weight:700;}
+.kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px;}
+.kp-key.span2{grid-column:span 2;} .kp-key.span3{grid-column:span 3;}
+.kp-fracbtn, .kp-potbtn{color:var(--c-metod, var(--blue));}
+.kp-frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1px;}
+.kp-frac-t, .kp-frac-n{width:15px;height:9px;border:1.4px solid currentColor;border-radius:2px;} .kp-frac-l{width:19px;height:2px;background:currentColor;}
+.kp-pot{display:inline-flex;align-items:flex-start;}
+.kp-pot-b{width:14px;height:14px;border:1.6px solid currentColor;border-radius:2px;} .kp-pot-e{width:8px;height:8px;border:1.6px solid currentColor;border-radius:2px;margin-left:1px;margin-top:-4px;}
 .ovn-kontroll-rad{
   display:flex;justify-content:center;gap:12px;margin-top:22px;flex-wrap:wrap;
 }
@@ -907,6 +898,9 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   <span>Delkapitel 3</span>
 </footer>
 
+<!-- Delad keypad-motor (AK8_UI): keypadHTML + bindKeypad + kontext-gråning. Måste laddas FÖRE
+     blad-filen (den kör bygg_blad→keypadHTML vid load). CSS är inline ovan (d3:s palett). -->
+<script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../../js/motor/blad/blad-k1-d3.js"></script>
 
 <!-- TAXONOMI: delad nodstruktur (en källa, alla vyer) -->
