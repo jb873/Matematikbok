@@ -156,6 +156,41 @@
     }
   }
 
+  // ── FAS 2: KONTEXT-GRÅNING ──  Fast layout, men bara de tecken RÄTTAREN accepterar för den
+  // fokuserade rutan är aktiva; resten blir grå (.kp-inactive). Läget härleds ur rutans RÄTTAR-TYP
+  // via dess befintliga markör-klasser — INGEN separat tillåtenhetslista (samma källa som rättningen):
+  //   • plain pNum-ruta (default)        → siffror, komma, minus, radera
+  //   • uttrycks-cell (evalArith): .ak8-mel/.ak8-pexp/.ak8-gpe/.ak8-in-oms/.ak8-exprtxt,
+  //       [data-mellan]/[data-term], eller inuti .ak8-expr → även + · / ( )
+  //   • builder-cell (inuti .ak8-expr)   → även bråk/potens (frac/pot/kbrak)
+  //   • √ och π accepteras av ingen rättare ännu → ALLTID grå (plats reserverad).
+  //   • data-kp på rutan överstyr ('tal' | 'uttryck' | 'bygg' | 'fri'=allt aktivt).
+  var KP_BAS = ['0','1','2','3','4','5','6','7','8','9',',','−','back'];
+  function tillatnaTecken(inp){
+    var till = {}; for(var i = 0; i < KP_BAS.length; i++) till[KP_BAS[i]] = 1;
+    var m = inp && inp.dataset && inp.dataset.kp, uttryck, bygg;
+    // 'fri' = opt-out: alla normala tecken aktiva (√/π förblir grå — ingen rättare).
+    if(m){ uttryck = m === 'fri' || /uttryck|term/.test(m); bygg = m === 'fri' || /bygg/.test(m); }
+    else {
+      var expr = !!(inp && inp.closest && inp.closest('.ak8-expr'));
+      uttryck = expr || !!(inp && inp.matches && inp.matches('.ak8-mel,.ak8-pexp,.ak8-gpe,.ak8-in-oms,.ak8-exprtxt,[data-mellan],[data-term]'));
+      bygg = expr;
+    }
+    if(uttryck){ till['+'] = 1; till['·'] = 1; till['/'] = 1; till['('] = 1; till[')'] = 1; }
+    if(bygg){ till['frac'] = 1; till['pot'] = 1; till['kbrak'] = 1; }
+    return till;
+  }
+  function graderaKeypad(kp, inp){
+    if(!kp) return;
+    var till = tillatnaTecken(inp);
+    kp.querySelectorAll('.kp-key').forEach(function(b){
+      var inaktiv = !till[b.dataset.key];
+      b.classList.toggle('kp-inactive', inaktiv);
+      if(inaktiv){ b.setAttribute('aria-disabled', 'true'); b.setAttribute('tabindex', '-1'); }
+      else { b.removeAttribute('aria-disabled'); b.removeAttribute('tabindex'); }
+    });
+  }
+
   // ── KEYPAD ──  opts: { ops:[...], builders:bool }
   var FRAC_ICON = '<span class="kp-frac"><span class="kp-frac-t"></span><span class="kp-frac-l"></span><span class="kp-frac-n"></span></span>';
   var POT_ICON = '<span class="kp-pot"><span class="kp-pot-b"></span><span class="kp-pot-e"></span></span>';
@@ -225,12 +260,14 @@
       if(e.target.tagName !== 'INPUT') return;
       active = e.target;
       var dolj = arOrdruta(active, doljSel); if(kpEl) kpEl.classList.toggle('keypad-hidden', dolj);
+      if(kpEl && !dolj) graderaKeypad(kpEl, active);   // FAS 2: gråa knappar rättaren ej accepterar
       if(!dolj && active !== sisteFram) skrollaFram(kpEl, active);
       sisteFram = active;
     });
     // keypad
     mount.querySelectorAll('.kp-key').forEach(function(btn){
       btn.addEventListener('mousedown', function(e){
+        if(btn.classList.contains('kp-inactive')) return;   // FAS 2: grå knapp = inaktiv (utöver pointer-events)
         e.preventDefault();
         if(!active || active.disabled){ var first = mount.querySelector('input:not([disabled])'); if(first) active = first; else return; }
         var k = btn.dataset.key;
@@ -241,6 +278,7 @@
         active.focus();
       });
     });
+    if(kpEl && !arOrdruta(active, doljSel)) graderaKeypad(kpEl, active);   // FAS 2: initialt läge före första fokus
     // grow + clear-on-edit + auto-mellanslag
     mount.addEventListener('input', function(e){
       var t = e.target; if(!t.classList || !t.classList.contains('ak8-in')) return;
@@ -285,11 +323,13 @@
       if(e.target.tagName !== 'INPUT') return;
       active = e.target;
       var dolj = arOrdruta(active, doljSel); if(kp) kp.classList.toggle('keypad-hidden', dolj);
+      if(kp && !dolj) graderaKeypad(kp, active);   // FAS 2: gråa knappar rättaren ej accepterar
       if(!dolj && active !== sisteFram) skrollaFram(kp, active);
       sisteFram = active;
     });
     if(kp) kp.querySelectorAll('.kp-key').forEach(function(btn){
       btn.addEventListener('mousedown', function(e){
+        if(btn.classList.contains('kp-inactive')) return;   // FAS 2: grå knapp = inaktiv
         e.preventDefault();
         if(!active || active.disabled){ var f = mount.querySelector('input:not([disabled])'); if(f) active = f; else return; }
         var k = btn.dataset.key, ml = parseInt(active.getAttribute('maxlength') || '0', 10);
@@ -299,6 +339,7 @@
         active.focus({ preventScroll:true });
       });
     });
+    if(kp && !arOrdruta(active, doljSel)) graderaKeypad(kp, active);   // FAS 2: initialt läge
     mount.addEventListener('keydown', function(e){
       if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
       e.preventDefault();
