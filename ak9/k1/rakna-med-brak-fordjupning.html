@@ -88,6 +88,7 @@
 </main>
 <footer><div>Digitalt läromedel i matematik</div><span>Åk 9 + gymnasiet · Algebraiska bråk</span></footer>
 
+<script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/alg-brak.js"></script>
 <script src="../../js/data/gy-alg-brak.js"></script>
 <script>
@@ -108,9 +109,9 @@
     flush(); return out; }
 
   function ansCellHTML(){   // AK8_UI stående-bråk-cell (.ovn-brak.ak8-bc) med text-inputs för uttryck
-    return '<span class="ovn-brak ak8-bc"><span class="ovn-brak-taljare"><input class="ak8-in gy-t" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="täljare"></span>'
+    return '<span class="ovn-brak ak8-bc"><span class="ovn-brak-taljare"><input class="ak8-in gy-t" data-kp="fri" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="täljare"></span>'
       + '<span class="ovn-brak-strecket"></span>'
-      + '<span class="ovn-brak-namnare"><input class="ak8-in gy-n" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="1" aria-label="nämnare"></span></span>';
+      + '<span class="ovn-brak-namnare"><input class="ak8-in gy-n" data-kp="fri" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="1" aria-label="nämnare"></span></span>';
   }
   function facitHTML(t, n){ var nn = (n == null ? '' : ('' + n)).trim(); return (nn === '' || nn === '1') ? uttryckHTML(t) : fracWrap(uttryckHTML(t), uttryckHTML(nn)); }
 
@@ -134,8 +135,9 @@
       + '<span class="doc-eyebrow">Fördjupning</span><span class="doc-titel">' + esc(d.titel) + '</span>'
       + '<div class="doc-hjalp"><span>✎</span><div>Räkna på papper och skriv svaret i <strong>enklaste form</strong>. '
       + 'Täljare överst, nämnare under — lämna nämnaren tom om svaret är ett polynom (utan bråk). Variabler: x, y, a, b. Potens skrivs <code>x^2</code>.</div></div>'
-      + sheet + '</div>';
+      + sheet + (window.AK8_UI && AK8_UI.keypadHTML ? AK8_UI.keypadHTML() : '') + '</div>';
     docBody.innerHTML = head;
+    if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(docBody);   // FAS3: delad keypad (uttrycks-celler → data-kp=fri, operatorer aktiva)
     docBody.querySelector('[data-kontroll]').addEventListener('click', function(){ kontrollera(dokId); });
     docBody.querySelector('[data-tillbaka]').addEventListener('click', function(){ docEl.classList.add('hidden'); hubEl.classList.remove('hidden'); renderHub(); window.scrollTo(0, 0); });
   }
@@ -173,5 +175,6 @@
   renderHub();
 })();
 </script>
+<script src="../../js/motor/keypad-clearance.js"></script>
 </body>
 </html>

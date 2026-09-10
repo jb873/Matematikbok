@@ -312,22 +312,8 @@ function bladHTML(blad){
 
   // Knappsats – samma stil som öva-delen
   html += '<div class="ovn-wrap" style="padding-top:0;">';
-  html += '<div class="ovn-keypad" data-keypad>';
-  // Sifferblock 7-8-9 / 4-5-6 / 1-2-3 / 0(span2) backsteg
-  html += '<div class="ovn-keypad-digits">';
-  ['7','8','9','4','5','6','1','2','3'].forEach(function(d){
-    html += '<button type="button" class="ovn-kp-key" data-key="' + d + '">' + d + '</button>';
-  });
-  html += '<button type="button" class="ovn-kp-key span2" data-key="0">0</button>';
-  html += '<button type="button" class="ovn-kp-key util" data-key="back">\u232B</button>';
-  html += '</div>';
-  // Operator-kolumn: , / · =
-  html += '<div class="ovn-keypad-ops">';
-  [',','/','·','='].forEach(function(o){
-    html += '<button type="button" class="ovn-kp-key op" data-key="' + o + '">' + o + '</button>';
-  });
-  html += '</div>';
-  html += '</div>';
+  // DELAD AK8_UI-keypad (fast layout + kontext-gråning). Migrerad från egen .ovn-keypad.
+  html += AK8_UI.keypadHTML();
 
   html += '<div class="ovn-kontroll-rad">'
     + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
@@ -360,14 +346,6 @@ function bygg_blad(rotEl, blad){
   // Tab/Enter -> nästa input. Ångra rättning så fort man ändrar.
   inputs.forEach(function(inp, i){
     inp.addEventListener('focus', function(){ fokus = i; });
-    inp.addEventListener('keydown', function(e){
-      if(e.key === 'Enter' || e.key === 'Tab' && !e.shiftKey){
-        if(e.key === 'Enter'){
-          e.preventDefault();
-          if(i + 1 < inputs.length) inputs[i+1].focus();
-        }
-      }
-    });
     inp.addEventListener('input', function(){
       inp.classList.remove('correct','wrong');
       var f = inp.parentElement.querySelector('.ovn-fasit');
@@ -376,25 +354,8 @@ function bygg_blad(rotEl, blad){
   });
 
   // Knappsats
-  rotEl.querySelectorAll('.ovn-kp-key').forEach(function(btn){
-    btn.addEventListener('mousedown', function(e){
-      e.preventDefault();
-      var k = btn.dataset.key;
-      var aktiv = document.activeElement;
-      if(!aktiv || !aktiv.classList || !aktiv.classList.contains('ovn-in')){
-        if(inputs.length === 0) return;
-        aktiv = inputs[fokus] || inputs[0];
-        aktiv.focus();
-      }
-      if(k === 'back'){
-        aktiv.value = aktiv.value.slice(0, -1);
-      } else {
-        aktiv.value += k;
-      }
-      aktiv.dispatchEvent(new Event('input', {bubbles:true}));
-      aktiv.focus();
-    });
-  });
+  // Knappsats – delad AK8_UI-bindning (fokus-följning, kontext-gråning, ⌫, Enter→nästa ruta).
+  if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(rotEl);
 
   // Kontroll / Återställ / Skriv ut
   var forstaForsoket = true; // 0-1 fel på första försöket -> nytt blad

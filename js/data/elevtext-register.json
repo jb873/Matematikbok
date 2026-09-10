@@ -533,9 +533,9 @@
   "titel | Bråk ↔ decimal",
   "titel | Bråk ↔ decimal – nivå {}{} (nytt blad)",
   "titel | Bråkform och decimalform",
+  "titel | Test – nivå {}{} (nytt blad)",
   "titel | Tiondelar & hundradelar",
-  "titel | Tiondelar och hundradelar – nivå {}{} (nytt blad)",
-  "titel | Visa vad du kan – nivå {}{} (nytt blad)"
+  "titel | Tiondelar och hundradelar – nivå {}{} (nytt blad)"
  ],
  "js/motor/blad/blad-k2-d1.js": [
   "rubrik | Hur stor andel av Hannas kulor är blå?",
@@ -560,6 +560,10 @@
   "intro | {}Nu även åttondelar och tal större än 1. Skriv svaren i enklaste form / blandad form.{}Skriv bråken som decimaltal och decimaltalen som bråk.",
   "intro | {}Räkna med tal i olika former. Vissa svar blir negativa.{}Räkna med tal i olika former – gör om till samma form innan du räknar. Svara i decimalform.",
   "intro | {}Växla mellan oäkta bråk och blandad form. Sista delen: skriv blandade tal i enklaste form.{}Växla mellan oäkta bråk och blandad form.",
+  "placeholder | Skriv din uträkning här (rättas inte)",
+  "placeholder | enhet",
+  "placeholder | tal",
+  "placeholder | visa hur du räknar",
   "rubrik | Räkna och svara i decimalform",
   "rubrik | Skriv bråket som decimaltal",
   "rubrik | Skriv decimaltalet som bråk i enklaste form",
@@ -575,7 +579,7 @@
   "titel | Blandad form och bråkform – nivå {}{} (nytt blad)",
   "titel | Bråk ↔ decimal – nivå {}{} (nytt blad)",
   "titel | Räkna med former – nivå {}{} (nytt blad)",
-  "titel | Visa vad du kan – nivå {}{} (nytt blad)"
+  "titel | Test – nivå {}{} (nytt blad)"
  ],
  "js/motor/blad/blad-k2-d3.js": [
   "hint | Vilket tal måste du multiplicera nämnaren med för att få den nya nämnaren? Använd <strong>samma tal</strong> på täljaren.",
@@ -589,6 +593,10 @@
   "intro | {}Nu även åttondelar och tal större än 1. Skriv svaren i enklaste form / blandad form.{}Skriv bråken som decimaltal och decimaltalen som bråk.",
   "intro | {}Räkna med tal i olika former. Vissa svar blir negativa.{}Räkna med tal i olika former – gör om till samma form innan du räknar. Svara i decimalform.",
   "intro | {}Växla mellan oäkta bråk och blandad form. Sista delen: skriv blandade tal i enklaste form.{}Växla mellan oäkta bråk och blandad form.",
+  "placeholder | Skriv din uträkning här (rättas inte)",
+  "placeholder | enhet",
+  "placeholder | tal",
+  "placeholder | visa hur du räknar",
   "rubrik | Förkorta med 2",
   "rubrik | Förkorta med 5",
   "rubrik | Förkorta och skriv i blandad form",
@@ -626,7 +634,7 @@
   "titel | Med mellanled – nivå 1{}{} (nytt blad)",
   "titel | Med mellanled – nivå 2{}{} (nytt blad)",
   "titel | Räkna med former – nivå {}{} (nytt blad)",
-  "titel | Visa vad du kan – nivå {}{} (nytt blad)"
+  "titel | Test – nivå {}{} (nytt blad)"
  ],
  "js/motor/blad/blad-k2-d4.js": [
   "rubrik | Avgör om summan är större än eller mindre än 1",

@@ -1158,11 +1158,10 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       });
       h+='</div>';
     });
-    h+='<div class="ovn-wrap" style="padding-top:0;"><div class="ovn-keypad" data-keypad><div class="ovn-keypad-digits">';
-    ['7','8','9','4','5','6','1','2','3'].forEach(function(d){ h+='<button type="button" class="ovn-kp-key" data-key="'+d+'">'+d+'</button>'; });
-    h+='<button type="button" class="ovn-kp-key span2" data-key="0">0</button><button type="button" class="ovn-kp-key util" data-key="back">⌫</button></div><div class="ovn-keypad-ops">';
-    [',','+','-','='].forEach(function(o){ h+='<button type="button" class="ovn-kp-key op" data-key="'+o+'">'+o+'</button>'; });
-    h+='</div></div><div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'+(blad.genererare?'<button type="button" class="ovn-aterstall" data-action="nyttblad">↻ Nytt blad</button>':'')+'</div>';
+    h+='<div class="ovn-wrap" style="padding-top:0;">';
+    // DELAD AK8_UI-keypad (migrerad från inline .ovn-keypad).
+    h+=AK8_UI.keypadHTML();
+    h+='<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'+(blad.genererare?'<button type="button" class="ovn-aterstall" data-action="nyttblad">↻ Nytt blad</button>':'')+'</div>';
     h+='<div class="ovn-sammanf" data-sammanf style="display:none;"></div></div></div>';
     rotEl.innerHTML=h;
 
@@ -1185,21 +1184,14 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     var inputs=Array.from(rotEl.querySelectorAll('.ovn-in')); var fokus=0;
     inputs.forEach(function(inp,i){
       inp.addEventListener('focus',function(){fokus=i;});
-      inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault(); if(i+1<inputs.length) inputs[i+1].focus();} });
+      
       inp.addEventListener('input',function(){
         if(inp.classList.contains('ova-mellan-box')) inp.style.width=Math.max(60, inp.value.length*13+22)+'px';
         var row=inp.closest('.ovn-rad');
         if(row){ row.querySelectorAll('.ovn-mark,.ovn-fasit').forEach(function(x){x.remove();}); row.querySelectorAll('.ovn-in').forEach(function(x){x.classList.remove('correct','wrong');}); }
       });
     });
-    rotEl.querySelectorAll('.ovn-kp-key').forEach(function(btn){
-      btn.addEventListener('mousedown',function(e){ e.preventDefault();
-        var k=btn.dataset.key, aktiv=document.activeElement;
-        if(!aktiv||!aktiv.classList||!aktiv.classList.contains('ovn-in')){ if(!inputs.length)return; aktiv=inputs[fokus]||inputs[0]; aktiv.focus(); }
-        if(k==='back') aktiv.value=aktiv.value.slice(0,-1); else aktiv.value+=k;
-        aktiv.dispatchEvent(new Event('input',{bubbles:true})); aktiv.focus();
-      });
-    });
+    if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(rotEl);
     function markera(inp,ok,facit){
       var mark=document.createElement('span'); mark.className='ovn-mark '+(ok?'ok':'fel'); mark.textContent=ok?'✓':'✗';
       inp.classList.add(ok?'correct':'wrong'); inp.insertAdjacentElement('afterend',mark);

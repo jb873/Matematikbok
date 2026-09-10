@@ -316,7 +316,7 @@ var delStatus={}; // nyckel: nivåid_delindex → true
 function delKlar(n, di){ return !!delStatus[n.id+'_'+di]; }
 function autoStorlek(inp){ var len=(inp.value||inp.placeholder||'').length; inp.setAttribute('size',Math.max(1,len)); }
 function skapaTextSeg(ph){
-  var inp=document.createElement('input'); inp.type='text'; inp.className='seg-text'; inp.placeholder=ph||''; inp.setAttribute('inputmode','text'); autoStorlek(inp);
+  var inp=document.createElement('input'); inp.type='text'; inp.className='seg-text'; inp.placeholder=ph||''; inp.setAttribute('inputmode','text'); inp.setAttribute('data-kp','fri'); autoStorlek(inp);
   inp.addEventListener('focus',function(){ aktivtFalt=inp; });
   inp.addEventListener('input',function(){ autoStorlek(inp); });
   inp.addEventListener('keydown',function(e){ tangent(e,inp); });
@@ -324,9 +324,9 @@ function skapaTextSeg(ph){
 }
 function skapaBrakSeg(){
   var w=document.createElement('span'); w.className='seg-brak';
-  var t=document.createElement('input'); t.type='text'; t.className='brak-tal'; t.placeholder='täljare'; t.setAttribute('inputmode','text');
+  var t=document.createElement('input'); t.type='text'; t.className='brak-tal'; t.placeholder='täljare'; t.setAttribute('inputmode','text'); t.setAttribute('data-kp','fri');
   var s=document.createElement('span'); s.className='brak-streck';
-  var nn=document.createElement('input'); nn.type='text'; nn.className='brak-tal'; nn.placeholder='nämnare'; nn.setAttribute('inputmode','text');
+  var nn=document.createElement('input'); nn.type='text'; nn.className='brak-tal'; nn.placeholder='nämnare'; nn.setAttribute('inputmode','text'); nn.setAttribute('data-kp','fri');
   w.appendChild(t); w.appendChild(s); w.appendChild(nn);
   [t,nn].forEach(function(inp){ autoStorlek(inp);
     inp.addEventListener('focus',function(){ aktivtFalt=inp; });
@@ -457,3 +457,13 @@ function kontrolleraAlla(){
   }
 }
 renderFlikar(); visaFlik();
+
+// FAS3: delad AK8_UI-keypad (ekvationslösaren saknade inmatningsknappar → surfplatta kunde ej svara).
+// Keypaden läggs en gång på body (fixed) och bindKeypad följer fokus på de dynamiskt skapade .seg-text/
+// .brak-tal (event-delegerad focusin). Fälten är data-kp="fri" → operatorer aktiva för uttryck.
+(function(){
+  if(!(window.AK8_UI && AK8_UI.keypadHTML) || document.getElementById('ekv-keypad')) return;
+  var w=document.createElement('div'); w.innerHTML=AK8_UI.keypadHTML();
+  var kp=w.firstChild; if(!kp) return; kp.id='ekv-keypad'; document.body.appendChild(kp);
+  AK8_UI.bindKeypad(document.body);
+})();

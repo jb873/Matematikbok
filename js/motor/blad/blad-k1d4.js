@@ -154,7 +154,7 @@ function bladTest(niva, forsta){
     t3 = gSample(poolF, 3);
   }
   return {
-    titel: 'Visa vad du kan – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Test – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
     intro: 'Ett samlingstest för hela delkapitlet. Tre områden.',
     hint: niva === 2 ? TEST_HINT2 : TEST_HINT,
     keypadOps: [','],

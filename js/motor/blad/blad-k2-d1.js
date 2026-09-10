@@ -117,8 +117,11 @@
       if(u.innehall) html+=u.innehall;
       html+='</div>';
     });
+    // FAS3: delad AK8_UI-keypad (surfplatta kunde inte svara utan den). Fixed nedtill; keypad-clearance sköter marginalen.
+    if(window.AK8_UI && AK8_UI.keypadHTML) html+=AK8_UI.keypadHTML();
     html+='<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Återställ</button></div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
     mount.innerHTML=html;
+    if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(mount);
     mount.querySelectorAll('.d1-flerval .d1-chip, .d1-val .d1-chip').forEach(function(ch){ ch.onclick=function(){ if(ch.className.indexOf('ratt')>-1||ch.className.indexOf('fel')>-1||ch.className.indexOf('miss')>-1)return; if(ch.parentNode.classList.contains('d1-val')) ch.parentNode.querySelectorAll('.d1-chip').forEach(function(o){if(o!==ch)o.classList.remove('sel');}); ch.classList.toggle('sel'); }; });
     mount.querySelectorAll('.d1-rut').forEach(function(rt){ rt.onclick=function(){ if(rt.className.indexOf('ratt')>-1||rt.className.indexOf('fel')>-1)return; rt.classList.toggle('fylld'); }; });
     mount.querySelector('[data-action="kontroll"]').onclick=function(){ kontrollera(mount); };

@@ -134,7 +134,10 @@
       html += '</div>';
     });
     html += '</div>';
+    // FAS3: delad AK8_UI-keypad (surfplatta kunde inte svara utan den). Fixed nedtill; keypad-clearance sköter marginalen.
+    if(window.AK8_UI && AK8_UI.keypadHTML) html += AK8_UI.keypadHTML();
     mount.innerHTML = html;
+    if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(mount);
     // Facit-avslöjning
     mount.querySelectorAll('.d4-facit-btn').forEach(function(b){
       b.onclick = function(){ var f = document.getElementById('d4-facit-' + b.dataset.nr); if(f.hasAttribute('hidden')){ f.removeAttribute('hidden'); b.textContent = 'Dölj facit'; } else { f.setAttribute('hidden', ''); b.textContent = 'Visa facit'; } };

@@ -84,6 +84,27 @@ h1{font-family:var(--serif);font-weight:500;font-size:33px;margin:6px 0 2px;lett
 .del-sekt + .del-sekt{border-top:2px solid var(--paper-dk);padding-top:16px;margin-top:8px;}
 .del-last{opacity:.7;}
 .del-laskt{font-size:15px;color:var(--ink-faint);background:var(--paper-dk);border-radius:9px;padding:14px 16px;margin-top:6px;}
+
+/* FAS3: delad AK8_UI-keypad (ekvationslösaren saknade inmatningsknappar). Universell palett. */
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:var(--paper-lt);border-top:1px solid var(--paper-dk);box-shadow:0 -3px 14px rgba(15,30,46,.08);}
+.keypad-hidden{display:none !important;}
+.keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px;}
+.keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
+.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start;}
+.kp-inactive{opacity:.5;pointer-events:none;cursor:default;}
+.kp-key{height:40px;border:1.5px solid var(--paper-dk);border-radius:8px;background:#fff;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);cursor:pointer;transition:transform .08s,background .1s;display:flex;align-items:center;justify-content:center;user-select:none;}
+.kp-key:hover{background:var(--paper-dk);}
+.kp-key:active{transform:scale(.92);}
+.kp-key.op{color:var(--gold);font-weight:700;}
+.kp-key.util{background:var(--paper);color:var(--ink-faint);font-size:15px;}
+.kp-key.span2{grid-column:span 2;} .kp-key.span3{grid-column:span 3;}
+.kp-fracbtn, .kp-potbtn, .kp-kbrakbtn{color:var(--navy,#0f1e2e);}
+.kp-frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1px;}
+.kp-frac-t, .kp-frac-n{width:15px;height:9px;border:1.4px solid currentColor;border-radius:2px;} .kp-frac-l{width:19px;height:2px;background:currentColor;}
+.kp-pot{display:inline-flex;align-items:flex-start;}
+.kp-pot-b{width:14px;height:14px;border:1.6px solid currentColor;border-radius:2px;} .kp-pot-e{width:8px;height:8px;border:1.6px solid currentColor;border-radius:2px;margin-left:1px;margin-top:-4px;}
+.kp-kbrak{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1.5px;}
+.kp-kbrak-f{width:13px;height:7px;border:1.4px solid currentColor;border-radius:2px;} .kp-kbrak-l{width:18px;height:2.5px;background:currentColor;}
 </style>
 </head>
 <body>
@@ -98,6 +119,7 @@ h1{font-family:var(--serif);font-weight:500;font-size:33px;margin:6px 0 2px;lett
   <div class="global-hint" id="ghint"></div>
   <div class="actions" id="actions"></div>
 </div>
+<script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../../js/motor/ekvationer-balans/ekvationer-balans.js"></script>
 <!-- MasteryK3-loggning (elev-lokal) + deeplink-router. Observerar .uppg-klar; rör ej balansmetoden. -->
 <script src="../../../js/mastery-k3.js"></script>
