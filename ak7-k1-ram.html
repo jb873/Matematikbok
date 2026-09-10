@@ -4475,11 +4475,23 @@ const TEST_GENERATORS = {
       if(typ===2){ var x=rInt(-9,9), b2=rInt(1,9), r2=x+b2; return {key:'ab'+x+'_'+b2, prompt:'Vilket tal saknas?   ▢ + '+b2+' = '+M(r2), ans:x, expl:M(x)+' + '+b2+' = '+M(r2)+'.'}; }
       var x3=rInt(-9,9), b3=rInt(1,9), r3=x3-(-b3); return {key:'db'+x3+'_'+b3, prompt:'Vilket tal saknas?   ▢ − ('+M(-b3)+') = '+M(r3), ans:x3, expl:M(x3)+' − ('+M(-b3)+') = '+M(r3)+'.'};
     }),
-    // ÖVA-TÄCKNING d3: dubbeltecken a + (−b), a − (−b) — numeric
-    ProvbyggarMotor.gen.numeric('neg-dubbel','Räkna ut','neg-rakna', function(){
+    // ÖVA-TÄCKNING d3: dubbeltecken a + (−b), a − (−b). FAS2: SUBTRAKTION av negativt (a − (−b) = a + b)
+    // får en omskrivningscell (mellanled-num, led = omskrivningen värde-rättad); a + (−b) får ingen (som
+    // öva-bladet — ingen dubbelminus). Tvåvägs i EN generator via led:[…] resp. led:[]. Speglar ak8-ramens
+    // neg-rakna:addsub-dubbel verbatim (öppnad för åk7: samma krav som åttan i öva/drill/test).
+    ProvbyggarMotor.gen.mellanledNum('neg-dubbel','Räkna ut','neg-rakna', function(){
       var M=function(n){return(''+n).replace('-','−');};
-      var a=randPick([-9,-7,-5,-4,-3,4,5,6,8,10,12,15,17]), b=rInt(2,9), op=randPick(['−','+']), bb=-b, ans=op==='−'?a-bb:a+bb;
-      return {key:'du'+a+op+b, prompt:'Räkna ut:   '+M(a)+' '+op+' ('+M(bb)+')', ans:ans, expl:M(a)+' '+op+' ('+M(bb)+') = '+M(ans)+'.'};
+      var a=randPick([-9,-7,-5,-4,-3,4,5,6,8,10,12,15,17]), b=rInt(2,9), op=randPick(['−','+']), bb=-b;
+      var ans = op==='−' ? a-bb : a+bb;
+      var dubbelMinus = (op==='−');                       // − (−b) → omskrivning; + (−b) → ingen cell
+      var oms = M(a)+' + '+b;                              // a − (−b) = a + b
+      return {
+        key:'db'+a+op+b,
+        prompt: (dubbelMinus ? 'Skriv om utan dubbeltecken och räkna ut:   ' : 'Räkna ut:   ')+M(a)+' '+op+' ('+M(bb)+')',
+        led: dubbelMinus ? [{ fraga:'skriv om utan parentes', varde:ans, facit:oms }] : [],
+        slutVarde: ans, slutHint:'',
+        expl: dubbelMinus ? (M(a)+' − ('+M(bb)+') = '+oms+' = '+M(ans)+'.') : (M(a)+' '+op+' ('+M(bb)+') = '+M(ans)+'.')
+      };
     }),
     ProvbyggarMotor.gen.numeric('neg-multdiv','Multiplikation och division med negativa tal','neg-rakna', function(){
       const t=rInt(1,3); let s, ans;
@@ -8606,7 +8618,7 @@ function renderNegAddSub(body){
     title:'Addition och subtraktion', koId:'neg-rakna', forKey:'addsub', scoreKey:'addsub',
     sub:'Räkna ut uttrycket. Tänk på att minus framför en parentes byter tecken.',
     keypadOps:['−',','], OMG:6, gen:negAddSubGen,
-    omskrivning: /[?&]omskrivning=1/.test(location.search || '')   // åk8-gate (deeplink-flagga) → omskrivningscell vid dubbeltecken; åk7 utan → byte-identiskt
+    mellanled: true   // neg-rakna:addsub bär mellanled-kravet (a − (−b) = a + b); uttrycket avgör cellens närvaro. [f.d. åk8-deeplink-gate ?omskrivning=1 — nu öppen för åk7, samma krav som åttan]
   }, function(){ navTo('ko', {koId:'neg-rakna', delId: state.currentDel}); });
 }
 function renderNegMultDiv(body){
@@ -8654,10 +8666,10 @@ function negCalcEngine(body, cfg, backFn){
       return;
     }
     var task = omgang[idx];
-    // FAS2 (åk8-gatad): omskrivningscell vid dubbeltecken (a − (−b) = a + b). cfg.omskrivning sätts av
-    // åttans deeplink (?omskrivning=1); åk7 utan flaggan → enkel input = byte-identiskt.
-    // [PASS TVÅ: ersätt cfg.omskrivning med band.kravs.mellanled — inte ligga kvar bredvid.]
-    var oms = !!cfg.omskrivning && /[−–-]\s*\(\s*[−–-]/.test(task.q);
+    // FAS2: omskrivningscell vid dubbeltecken (a − (−b) = a + b). Kravet bärs av noden (band.kravs.mellanled),
+    // inte av årskurs — cfg.mellanled ersätter den gamla åk8-deeplink-flaggan (PASS TVÅ gjord). Öppen för åk7
+    // och åk8; UTTRYCKET avgör cellens närvaro (regexen), så 17 − (−8) får cell men 4 + (−11) inte.
+    var oms = !!cfg.mellanled && /[−–-]\s*\(\s*[−–-]/.test(task.q);
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(cfg.title, cfg.sub, level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)

@@ -132,6 +132,26 @@ function jamforMellan(a, b){
     .replace(',', '.');
   return s === bnorm;
 }
+// FAS2 (omskrivning till sjuan): en 'enkel'-uppgift som SUBTRAHERAR ett negativt tal (a − (−b) = a + b)
+// får en omskrivningscell före svaret. Kravet bärs av UTTRYCKET (samma regex som åttans blad-ak8-d2 +
+// drillen), tvåvägs: 8 − (−6) får cell, −12 + (−8) får ingen (inget dubbelminus).
+function harDubbelMinus(fraga){ return /[−–-]\s*\(\s*[−–-]/.test(String(fraga)); }
+// Värde-utvärderare (+ − · / parenteser, unärt minus, alla minus-varianter) — ingen eval. Omskrivningen
+// rättas på VÄRDE, så en giltig men annorlunda skriven form ('8 + 6', '14') godtas. Speglar blad-ak8-d2.
+function evalUttryck(str){
+  var s = String(str).replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/÷/g,'/').replace(/,/g,'.').replace(/\s+/g,'');
+  if(s === '' || !/^[-+*/().0-9]+$/.test(s)) return NaN;
+  var i = 0;
+  function expr(){ var v = term(); while(s[i]==='+'||s[i]==='-'){ var o=s[i++]; var t=term(); v = o==='+'?v+t:v-t; } return v; }
+  function term(){ var v = factor(); while(s[i]==='*'||s[i]==='/'){ var o=s[i++]; var f=factor(); v = o==='*'?v*f:v/f; } return v; }
+  function factor(){ if(s[i]==='+'){ i++; return factor(); } if(s[i]==='-'){ i++; return -factor(); }
+    if(s[i]==='('){ i++; var v=expr(); if(s[i]===')') i++; return v; }
+    var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]); }
+  var r = expr(); return i === s.length ? r : NaN;
+}
+// Kanonisk omskrivning för facit-visning: slår ihop yttre operator med inre tecken, tar bort parentesen.
+function skrivOm(f){ return String(f).replace(/([+−–-])\s*\(\s*([+−–-]?)\s*([0-9]+(?:[.,][0-9]+)?)\s*\)/g,
+  function(m, yttre, inre, tal){ var neg = (/[−–-]/.test(yttre)) !== (/[−–-]/.test(inre)); return (neg ? ' − ' : ' + ') + tal; }).replace(/\s*=\s*$/,'').replace(/\s{2,}/g,' ').trim(); }
 function jamforEnhet(a, b){
   // Enhet rättas flexibelt: utan mellanslag, gemener,
   // och med vanliga skrivvarianter (kr/sek osv. accepteras).
@@ -324,6 +344,13 @@ function bladHTML(blad){
       html += '<span class="ovn-label">' + bokstav + ')</span>';
       if(rad.typ === 'enkel'){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        // FAS2: subtraktion av negativt tal → omskrivningscell (värde-rättad) före svaret. Klassen
+        // ak8-in-oms ger uttrycks-läge på den delade keypaden (+ · ( ) aktiva); data-oms = rättvärdet.
+        if(harDubbelMinus(rad.vansterText)){
+          html += '<input class="ovn-in bred ak8-in-oms" data-oms="' + rad.svar
+            + '" inputmode="text" autocomplete="off" placeholder="skriv om">';
+          html += '<span class="ovn-text">=</span>';
+        }
         html += '<input class="ovn-in" data-svar="' + rad.svar
           + '" inputmode="decimal" autocomplete="off">';
       } else if(rad.typ === 'text'){
@@ -420,7 +447,11 @@ function bygg_blad(rotEl, blad){
       rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
       inp.classList.remove('correct','wrong','just-checked');
       var ok;
-      if(inp.dataset.mellan){
+      if(inp.dataset.oms !== undefined){
+        // FAS2: omskrivningscellen rättas på VÄRDE (giltig men annorlunda skriven form godtas)
+        var ov = evalUttryck(inp.value);
+        ok = !isNaN(ov) && Math.abs(ov - parseFloat(inp.dataset.oms)) < 1e-9;
+      } else if(inp.dataset.mellan){
         ok = jamforMellan(inp.value, inp.dataset.mellan);
       } else if(inp.dataset.enhet){
         ok = jamforEnhet(inp.value, inp.dataset.enhet);
@@ -451,7 +482,8 @@ function bygg_blad(rotEl, blad){
       // upprepade Kontrollera-klick i samma pass, så retention inte blåses upp.
       var _grEl = inp.closest('.ovn-grupp');
       var _loggNod = _grEl && _grEl.getAttribute('data-logg');
-      if(_loggNod && String(inp.value).trim() !== '' && window.Mastery && window.Mastery.loggaForsok){
+      // Omskrivningscellen (data-oms) loggas EJ separat — annars två evidens per uppgift; svarscellen bär loggen.
+      if(_loggNod && inp.dataset.oms === undefined && String(inp.value).trim() !== '' && window.Mastery && window.Mastery.loggaForsok){
         window.Mastery.loggaForsok(_loggNod, ok ? 'ratt' : 'fel');
       }
       // Bocken/krysset – stor, syns tydligt
@@ -465,7 +497,8 @@ function bygg_blad(rotEl, blad){
       } else {
         inp.classList.add('wrong','just-checked');
         var facit;
-        if(inp.dataset.mellan) facit = inp.dataset.mellan;
+        if(inp.dataset.oms !== undefined){ var _vt = rad.querySelector('.ovn-num'); facit = _vt ? skrivOm(_vt.textContent) : inp.dataset.oms.replace('.', ','); }
+        else if(inp.dataset.mellan) facit = inp.dataset.mellan;
         else if(inp.dataset.enhet) facit = inp.dataset.enhet;
         else if(inp.dataset.term !== undefined) facit = 'summan ska bli ' + inp.dataset.term.replace('.', ',');
         else if(inp.dataset.tvatal !== undefined) facit = inp.dataset.tvatal.split(',').join(' och ');
