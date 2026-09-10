@@ -63,7 +63,7 @@
             var rightBtn = document.querySelector('#fc-actions [data-val="' + svar + '"]');
             if(rightBtn) rightBtn.classList.add('correct');
           }
-          document.getElementById('fc-exp').textContent = svar + ' = 10^' + exp + '.';
+          document.getElementById('fc-exp').innerHTML = svar + ' = 10<sup>' + exp + '</sup>.';   // upphöjt, ej rått 10^exp
           btns.forEach(function(b){ b.disabled = true; });
           resultat.push(correct);
           var ts = getTutorScore('tio-rakna', 'prefix');

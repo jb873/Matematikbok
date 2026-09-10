@@ -261,7 +261,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       var res = op === '+' ? v1 + v2 : v1 - v2;
       return { key:'as'+b1+'_'+e1+op+b2+'_'+e2, prompt:'Räkna ut steg för steg:    '+b1+'^'+e1+' '+op+' '+b2+'^'+e2,
         led:[ { fraga:b1+'^'+e1, varde:v1, facit:String(v1) }, { fraga:b2+'^'+e2, varde:v2, facit:String(v2) } ],
-        slutVarde:res, slutHint:v1+' '+op+' '+v2, expl:b1+'^'+e1+' '+op+' '+b2+'^'+e2+' = '+v1+' '+op+' '+v2+' = '+res+'.' };
+        slutVarde:res, /* slutHint borttagen: v1 op v2 = de evaluerade potenserna = exakt led-cellernas svar → röjde mellanledet */ expl:b1+'^'+e1+' '+op+' '+b2+'^'+e2+' = '+v1+' '+op+' '+v2+' = '+res+'.' };
     }) ] },
     'pot-multdiv:losut': { snabb: [ G.numeric('gt-pot-losut', 'Lös ut basen eller exponenten', 'pot-multdiv:losut', function(){
       // Speglar genLosut (svar='varde'): x^e = V → basen, eller b^x = V → exponenten.

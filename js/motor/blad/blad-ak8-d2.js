@@ -360,8 +360,8 @@
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;   // flaggad rad utan facit — räknas ej
-      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
+      if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
       el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); });
       var old = el.parentNode.querySelector('.ak8-fasit'); if(old) old.remove();
       if(res.chip){ el.querySelectorAll('.ak8-chip').forEach(function(c){ c.style.pointerEvents = 'none'; if(c.classList.contains('sel')) c.classList.add(res.ok ? 'ratt' : 'fel'); }); }

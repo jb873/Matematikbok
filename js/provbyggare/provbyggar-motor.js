@@ -156,6 +156,18 @@ function brakUt(s){
       + '<span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + den + '</span></span>';
   });
 }
+// Potens-formatterare: bas^exp → bas<sup>exp</sup>. Provbyggaren saknade denna (bara brakUt fanns), så
+// varje test-sträng med literalt ^ renderades rått (6^2, 0,1^3, ·10^18). ^ förekommer här BARA som
+// exponent (inga regex/ankare når eleven), så en riktad ersättning är säker. Bas/exp = parentesgrupp,
+// tal (ev. decimalkomma), variabelbokstav eller ▢.
+function potUt(s){
+  s = '' + s;
+  if(s.indexOf('^') < 0) return s;
+  return s.replace(/(\([^()]*\)|\d+(?:,\d+)?|[A-Za-zÀ-ÿ]|▢)\s*\^\s*(\([^()]*\)|▢|[−–-]?\d+|[A-Za-zÀ-ÿ]+)/g,
+    function(m, bas, exp){ return bas + '<sup>' + exp + '</sup>'; });
+}
+// Matte-textformatterare: bråk OCH potens i ett svep. Används vid ALLA elevsynliga prompt/led/hint/facit.
+function mattextUt(s){ return potUt(brakUt(s)); }
 
   // ── Sub-typ-hanterare (config-oberoende: render/läs/återställ/gradera/facit) ──
 function renderSubInput(qNum, subIdx, s){
@@ -165,7 +177,7 @@ function renderSubInput(qNum, subIdx, s){
 
   if(s.type === 'binary'){
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt || s.q}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt || s.q)}</span></div>
       <div class="test-sub-binary-row" data-sub-id="${idBase}">
         ${s.options.map(opt => `
           <button class="test-sub-binary-btn" data-val="${opt}">${opt}</button>
@@ -216,13 +228,13 @@ function renderSubInput(qNum, subIdx, s){
       : /^\s*(Räkna ut|Beräkna|Skriv som vanligt tal)\b/.test(s.prompt || '');
     inputHtml = isCompute ? `
       <div class="test-sub-input-row">
-        <span class="num-inline">${s.prompt}</span>
+        <span class="num-inline">${mattextUt(s.prompt)}</span>
         <span class="test-sub-eq">=</span>
         <input type="text" class="test-sub-input" inputmode="decimal" style="width:120px;" data-sub-input="${idBase}-num">
         ${s.enhet ? `<span class="test-sub-eq">${s.enhet}</span>` : ''}
       </div>
     ` : `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
         <input type="text" class="test-sub-input" inputmode="decimal" style="width:120px;" data-sub-input="${idBase}-num">
@@ -231,7 +243,7 @@ function renderSubInput(qNum, subIdx, s){
     `;
   } else if(s.type === 'brak'){
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
         <span class="test-sub-brak">
@@ -246,7 +258,7 @@ function renderSubInput(qNum, subIdx, s){
     // Speglar drillens tresektions-rättning (mellanRatt/svarRatt) — drill-motorn orörd.
     const ledRows = (s.led || []).map((L, i) => `
       <div class="tsm-led">
-        <span class="tsm-fraga"><span class="num-inline">${L.fraga}</span></span>
+        <span class="tsm-fraga"><span class="num-inline">${mattextUt(L.fraga)}</span></span>
         <span class="test-sub-eq">=</span>
         <span class="test-sub-brak">
           <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="5" data-sub-input="${idBase}-L${i}-t" aria-label="mellanled täljare">
@@ -255,7 +267,7 @@ function renderSubInput(qNum, subIdx, s){
         </span>
       </div>`).join('');
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-mellan">
         ${ledRows}
         <div class="tsm-led tsm-slut">
@@ -276,19 +288,19 @@ function renderSubInput(qNum, subIdx, s){
     // för potenser/tiopotenser/prioritering/stora tal — bråk-mellanledet (täljare/nämnare) oförändrat.
     const ledRows = (s.led || []).map((L, i) => `
       <div class="tsm-led">
-        <span class="tsm-fraga"><span class="num-inline">${L.fraga}</span></span>
+        <span class="tsm-fraga"><span class="num-inline">${mattextUt(L.fraga)}</span></span>
         <span class="test-sub-eq">=</span>
         <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="10" data-sub-input="${idBase}-L${i}-num" aria-label="mellanled värde">
       </div>`).join('');
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${brakUt(s.prompt)}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-mellan">
         ${ledRows}
         <div class="tsm-led tsm-slut">
           <span class="tsm-fraga">Svar</span>
           <span class="test-sub-eq">=</span>
           <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="10" data-sub-input="${idBase}-snum" aria-label="slutsvar värde">
-          ${s.slutHint ? `<span class="tsm-hint">${s.slutHint}</span>` : ''}
+          ${s.slutHint ? `<span class="tsm-hint">${mattextUt(s.slutHint)}</span>` : ''}
         </div>
       </div>
     `;
@@ -297,12 +309,12 @@ function renderSubInput(qNum, subIdx, s){
     // Form-medveten rättning (koeff i [1,10) + rätt värde) speglar drillens gp-check. Bråk-mellanledet orört.
     const ledRows = (s.led || []).map((L, i) => `
       <div class="tsm-led">
-        <span class="tsm-fraga"><span class="num-inline">${L.fraga}</span></span>
+        <span class="tsm-fraga"><span class="num-inline">${mattextUt(L.fraga)}</span></span>
         <span class="test-sub-eq">=</span>
         <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="12" data-sub-input="${idBase}-L${i}-num" aria-label="mellanled värde">
       </div>`).join('');
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-mellan">
         ${ledRows}
         <div class="tsm-led tsm-slut">
@@ -310,8 +322,7 @@ function renderSubInput(qNum, subIdx, s){
           <span class="test-sub-eq">=</span>
           <span class="tsg-svar">
             <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="6" data-sub-input="${idBase}-gk" aria-label="koefficient" placeholder="a">
-            <span class="tsg-bas">· 10^</span>
-            <input type="text" class="test-sub-input tsn-cell" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-ge" aria-label="exponent" placeholder="n">
+            <span class="tsg-bas">· 10</span><sup class="tsg-exp"><input type="text" class="test-sub-input tsn-cell" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-ge" aria-label="exponent" placeholder="n" style="width:2.6em;"></sup>
           </span>
           <span class="tsm-hint">a·10ⁿ, 1 ≤ a &lt; 10</span>
         </div>
@@ -326,7 +337,7 @@ function renderSubInput(qNum, subIdx, s){
     `;
   } else if(s.type === 'blandad'){
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
         <input type="text" class="test-sub-input tsn-cell" inputmode="numeric" maxlength="3" style="width:44px;" data-sub-input="${idBase}-h" aria-label="heltal">
@@ -339,7 +350,7 @@ function renderSubInput(qNum, subIdx, s){
     `;
   } else if(s.type === 'intervall'){
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Ditt tal:</span>
         <input type="text" class="test-sub-input" inputmode="decimal" style="width:120px;" data-sub-input="${idBase}-iv">
@@ -348,7 +359,7 @@ function renderSubInput(qNum, subIdx, s){
   } else if(s.type === 'talfoljd'){
     // Fortsätt talföljden: eleven skriver de TVÅ nästkommande talen (två rutor).
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
         <input type="text" class="test-sub-input" inputmode="decimal" style="width:90px;" data-sub-input="${idBase}-0">
@@ -369,7 +380,7 @@ function renderSubInput(qNum, subIdx, s){
   } else if(s.type === 'markera'){
     // Markera FLERA tal som uppfyller villkoret (klicka-toggle). Speglar öva-bladets markera-flera.
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-markera-row" data-sub-id="${idBase}">
         ${s.options.map(opt => `<button class="test-sub-markera-btn" data-val="${opt}">${opt}</button>`).join('')}
       </div>
@@ -377,7 +388,7 @@ function renderSubInput(qNum, subIdx, s){
   } else if(s.type === 'ordsvar'){
     // Skriv svaret med ORD (t.ex. platsvärde: tiotal). Rättas mot ordet (tål plural/böjning).
     inputHtml = `
-      <div class="test-sub-q"><span class="num-inline">${s.prompt}</span></div>
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
         <input type="text" class="test-sub-input" data-nokeypad inputmode="text" style="width:170px;text-align:left;padding:0 10px;" placeholder="svar med ord" data-sub-input="${idBase}-ord">
@@ -873,11 +884,11 @@ function renderReviewSub(sr){
       <div class="test-review-sub-icon">${icon}</div>
       <div class="test-review-sub-body">
         ${sub.label ? `<div class="test-review-sub-label">${sub.label}</div>` : ''}
-        <div class="test-review-sub-q">${questionText}</div>
+        <div class="test-review-sub-q">${mattextUt(questionText)}</div>
         <div class="test-review-sub-ans">
-          ${result.status === 'wrong' ? `Ditt svar: <span class="your">${result.given || '(tomt)'}</span> · ` : ''}
+          ${result.status === 'wrong' ? `Ditt svar: <span class="your">${mattextUt(result.given || '(tomt)')}</span> · ` : ''}
           ${result.status === 'skipped' ? '<span style="font-style:italic">Överhoppad. </span>' : ''}
-          ${result.status !== 'correct' ? `Rätt svar: <span class="corr">${correctAnswerText}</span>` : `<span class="corr">${correctAnswerText.split('—')[0].trim() || 'Rätt!'}</span>`}
+          ${result.status !== 'correct' ? `Rätt svar: <span class="corr">${mattextUt(correctAnswerText)}</span>` : `<span class="corr">${mattextUt(correctAnswerText.split('—')[0].trim() || 'Rätt!')}</span>`}
         </div>
       </div>
     </div>

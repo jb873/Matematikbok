@@ -18,6 +18,9 @@
 
   // ── Potens-notation (upphöjt) + stående bråk ──
   function pot(b, e){ return '<span class="pot">' + b + '<sup>' + e + '</sup></span>'; }
+  // Facit-strängar innehåller exp-lag-steg med rått ^ (t.ex. 5^(2+7)) → formatera till upphöjt vid visning
+  // (facit sätts via innerHTML, ej textContent). bas/exp = parentesgrupp, tal, bokstav eller ▢.
+  function potFacit(s){ s = '' + s; if(s.indexOf('^') < 0) return s; return s.replace(/(\([^()]*\)|\d+(?:,\d+)?|[A-Za-zÀ-ÿ]|▢)\s*\^\s*(\([^()]*\)|▢|[−–-]?\d+|[A-Za-zÀ-ÿ]+)/g, function(m, b, e){ return b + '<sup>' + e + '</sup>'; }); }
   function fr(t, n){ return F.fracSpan(t, n); }
   // Potens med sammansatt bas (parentes/bråk): exponenten i SAMMA .pot-superscript som
   // heltals-/decimalbaser → konsekvent storlek/baslinje. Bråk-bas märks (.pot-frac) för
@@ -100,12 +103,12 @@
   // BLAD 2 — Potenser: multiplikation och division
   // ══════════════════════════════════════════════════════════════════════════════════════
   var MULTDIV = { nr:2, titel:'Potenser: multiplikation och division', nod:'pot-multdiv:rakna', uppg:[
-    G('Multiplikation, samma bas — behåll basen, addera exponenterna', [
+    G('Multiplikation, samma bas — behåll basen, addera exponenterna. Skriv exponenten oberäknad i mellanledet (t.ex. 4+5) och uträknad i svaret (9).', [
       KEXP(pot(3, 4) + ' · ' + pot(3, 5), 3, 9, '3⁴ · 3⁵ = 3^(4+5) = 3⁹'),
       KEXP(pot(2, 5) + ' · ' + pot(2, 6), 2, 11, '2⁵ · 2⁶ = 2^(5+6) = 2¹¹'),
       KEXP(pot(5, 2) + ' · ' + pot(5, 7), 5, 9, '5² · 5⁷ = 5^(2+7) = 5⁹')
     ]),
-    G('Division, samma bas — behåll basen, subtrahera exponenterna', [
+    G('Division, samma bas — behåll basen, subtrahera exponenterna. Skriv exponenten oberäknad i mellanledet (t.ex. 8−3) och uträknad i svaret (5).', [
       KEXP(fr(pot(6, 5), pot(6, 2)), 6, 3, '6⁵ / 6² = 6^(5−2) = 6³'),
       KEXP(fr(pot(3, 8), pot(3, 3)), 3, 5, '3⁸ / 3³ = 3^(8−3) = 3⁵'),
       KEXP(fr(pot(7, 12), pot(7, 4)), 7, 8, '7¹² / 7⁴ = 7^(12−4) = 7⁸')
@@ -292,16 +295,19 @@
           var mel = AK8_UI.cellRead(el, 'mel'), sv = AK8_UI.cellRead(el, 'sv').num;
           return { ok: mel.kind === 'pot' && likhetOk(mel.base, r.basval) && likhetOk(mel.exp, r.exp) && likhetOk(sv, r.svar), facit: r.facit };
         });
-        svarHtml = AK8_UI.ansCell('mel', 'bas^exp') + eq + AK8_UI.ansCell('sv', 'svar');
+        // FAS4: förrenderad tvåfälts-potens (bas + upphöjd exponent) i st f en avklippt "bas^exp"-ruta.
+        svarHtml = AK8_UI.potAnsCell('mel', 'bas', 'n') + eq + AK8_UI.ansCell('sv', 'svar');
       } else if(r.stil === 'exp'){
-        // Exp-lag: eleven bygger bas^exp i BÅDA leden (potens-knappen). Mellanledet = bas^(exp-uttryck),
-        // svaret = bas^(uträknad exponent). Basen skrivs av eleven, ingen förtryckt bas.
+        // Exp-lag: eleven skriver bas^exp i BÅDA leden. Mellanledet = bas^(exp-uttryck, t.ex. 4+5),
+        // svaret = bas^(uträknad exponent, t.ex. 9). Basen skrivs av eleven, ingen förtryckt bas.
         CHECKS.push(function(el){
           var mel = AK8_UI.cellRead(el, 'mel'), sv = AK8_UI.cellRead(el, 'sv');
           return { ok: mel.kind === 'pot' && likhetOk(mel.base, r.bas) && likhetOk(mel.exp, r.svarExp)
                     && sv.kind === 'pot' && likhetOk(sv.base, r.bas) && likhetOk(sv.exp, r.svarExp), facit: r.facit };
         });
-        svarHtml = AK8_UI.ansCell('mel', 'bas^exp') + eq + AK8_UI.ansCell('sv', 'bas^exp');
+        // FAS4: två fält per led. Mellanledets exp-fält bredare + platshållare "uttryck" (oberäknat, 4+5),
+        // svarets exp-fält smalt + "tal" (uträknat, 9). Grupp-rubriken förklarar skillnaden.
+        svarHtml = AK8_UI.potAnsCell('mel', 'bas', 'uttryck') + eq + AK8_UI.potAnsCell('sv', 'bas', 'tal');
       } else {   // 'ev'
         CHECKS.push(function(el){
           var mel = AK8_UI.cellRead(el, 'mel').num, sv = AK8_UI.cellRead(el, 'sv').num;
@@ -421,14 +427,14 @@
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;
-      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
+      if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
       if(res.korval){ var s = el.querySelector('.ak8-korval.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel'); }
       else { el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);   // ✓/✗-bock + puls (ingen låsning → retry)
       if(res.ok){ ratt++; }
       else if(!res.tabell && !el.querySelector('.ak8-fasit')){
-        var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = 'rätt: ' + res.facit; el.appendChild(f);
+        var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = 'rätt: ' + potFacit(res.facit); el.appendChild(f);
       }
     });
     var s = mount.querySelector('[data-sammanf]'); s.hidden = false;

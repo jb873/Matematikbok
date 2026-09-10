@@ -20,6 +20,9 @@
   // Motorn KAN detta; talurvalet avgör om det används (potenser/tiopotenser: nej; negativa-potenser: ja).
   function potSvarStr(bas, exp){ return exp >= 0 ? bas + '^' + exp : '1/' + bas + '^' + (-exp); }
   function potSvarHtml(bas, exp){ return exp >= 0 ? pot(bas, exp) : (typeof window.fracSpan === 'function' ? window.fracSpan(1, pot(bas, -exp)) : '1/' + pot(bas, -exp)); }
+  // answerStr bär rått ^ (b^e, ·10^n) och visas i feedbacken → formatera till upphöjt (feedbacken sätts via
+  // innerHTML). Riktad ersättning; ^ är alltid exponent här.
+  function supUt(s){ s = '' + s; if(s.indexOf('^') < 0) return s; return s.replace(/(\([^()]*\)|\d+(?:,\d+)?|[A-Za-zÀ-ÿ]|▢)\s*\^\s*(\([^()]*\)|▢|[−–-]?\d+|[A-Za-zÀ-ÿ]+)/g, function(m, b, e){ return b + '<sup>' + e + '</sup>'; }); }
 
   // ── Bas-strategier (parametern som gör dk 9/10 gratis) ──
   function basFri(){ return ri(2, 9); }         // dk 8: godtycklig bas
@@ -223,15 +226,15 @@
           // FORM-MEDVETEN: koeff i [1,10) OCH koeff·10^exp = målvärdet (15·10¹⁷ underkänns → 1,5·10¹⁸)
           var koeff = d3ParseNum(koeffEl.value), exp = stu;
           if(koeff === null || exp === null){ fb.classList.add('wrong'); fb.textContent = 'Fyll i koefficient och exponent.'; }
-          else if(koeff < 1 || koeff >= 10){ fb.classList.add('wrong'); fb.textContent = 'Koefficienten ska vara i grundpotensform (1–10). Svar: ' + task.answerStr + '.'; }
+          else if(koeff < 1 || koeff >= 10){ fb.classList.add('wrong'); fb.innerHTML = 'Koefficienten ska vara i grundpotensform (1–10). Svar: ' + supUt(task.answerStr) + '.'; }
           else if(Math.abs(koeff * Math.pow(10, exp) - task.answerNum) < 1e-3 * Math.max(1, Math.abs(task.answerNum))){
-            ok = true; input.classList.add('correct'); if(koeffEl) koeffEl.classList.add('correct'); fb.classList.add('correct'); fb.textContent = 'Rätt! Svar: ' + task.answerStr; ts.correct++;
-          } else { input.classList.add('wrong'); if(koeffEl) koeffEl.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = 'Inte rätt. Svar: ' + task.answerStr + '.'; }
+            ok = true; input.classList.add('correct'); if(koeffEl) koeffEl.classList.add('correct'); fb.classList.add('correct'); fb.innerHTML = 'Rätt! Svar: ' + supUt(task.answerStr); ts.correct++;
+          } else { input.classList.add('wrong'); if(koeffEl) koeffEl.classList.add('wrong'); fb.classList.add('wrong'); fb.innerHTML = 'Inte rätt. Svar: ' + supUt(task.answerStr) + '.'; }
         }
         else if(stu === null){ fb.classList.add('wrong'); fb.textContent = 'Skriv ett tal.'; }
         else if(Math.abs(stu - task.answerNum) < 1e-6 * Math.max(1, Math.abs(task.answerNum))){
-          ok = true; input.classList.add('correct'); fb.classList.add('correct'); fb.textContent = 'Rätt! Svar: ' + task.answerStr; ts.correct++;
-        } else { input.classList.add('wrong'); fb.classList.add('wrong'); fb.textContent = 'Inte rätt. Svar: ' + task.answerStr + '.'; }
+          ok = true; input.classList.add('correct'); fb.classList.add('correct'); fb.innerHTML = 'Rätt! Svar: ' + supUt(task.answerStr); ts.correct++;
+        } else { input.classList.add('wrong'); fb.classList.add('wrong'); fb.innerHTML = 'Inte rätt. Svar: ' + supUt(task.answerStr) + '.'; }
         results.push(ok);
         setTimeout(function(){ idx++; render(); }, ok ? 1700 : 2600);
       }

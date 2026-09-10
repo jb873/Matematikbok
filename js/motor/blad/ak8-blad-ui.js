@@ -66,7 +66,10 @@
       return;
     }
     var min = inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-in-sm') ? 34 : 74);
-    if(inp.value === '' && inp.placeholder && inp.classList.contains('ak8-exprtxt')) min = Math.max(min, inp.placeholder.length * 9);
+    if(inp.value === '' && inp.placeholder){
+      if(inp.classList.contains('ak8-exprtxt')) min = Math.max(min, inp.placeholder.length * 9);
+      else if(inp.classList.contains('ak8-in-sm')) min = Math.max(min, inp.placeholder.length * 7 + 8);   // FAS4: rymma platshållarord (uttryck/tal/bas) i det lilla upphöjda fältet — annars kapas de (samma sort som "bas^exp"-felet)
+    }
     inp.style.width = '1ch';
     inp.style.width = Math.max(min, Math.min(inp.scrollWidth + 6, 340)) + 'px';
   }
@@ -76,6 +79,18 @@
   function fracHTML(){ return '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn" inputmode="text" autocomplete="off"></span></span>'; }
   function potHTML(){ return '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" inputmode="text" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"></sup></span>'; }
   function ansCell(role, ph){ return '<span class="ak8-cell" data-r="' + role + '"><span class="ak8-expr">' + txtHTML(ph) + '</span></span>'; }
+  // FAS4: förrenderad TVÅFÄLTS-potenscell — bas-fält + upphöjt exponent-fält, var sitt platshållarord, så
+  // eleven ser direkt att det är två fält (bas resp. exponent) i stället för en avklippt "bas^exp"-ruta som
+  // krävde potens-knappen. cellRead läser den som kind:'pot' (en .ak8-pot, ingen ifylld exprtext). expWide =
+  // bredare exp-fält för mellanledets OBERÄKNADE uttryck (t.ex. 4+5); .ak8-pexp ger uttrycks-läge (+ aktiv).
+  function potAnsCell(role, basePh, expPh){
+    // Fältbredden styrs av grow() ur platshållar-längden (ak8-in-sm-grenen) → "uttryck" (mellanled) blir
+    // bredare än "tal"/"n" (svar) av sig självt; ingen inline-bredd behövs.
+    return '<span class="ak8-cell" data-r="' + role + '"><span class="ak8-expr">'
+      + '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" inputmode="text" autocomplete="off"' + (basePh ? ' placeholder="' + basePh + '"' : '') + '>'
+      + '<sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"' + (expPh ? ' placeholder="' + expPh + '"' : '') + '></sup></span>'
+      + '</span></span>';
+  }
   // ── STAPLAT KOMPLEX-BRÅK (DELAD byggsten) — ett bråk vars täljare OCH nämnare själva är
   //    uttrycks-celler (nästlade .ak8-expr). Låter förlänga-metoden VISA att nämnaren blir 1.
   //    Återanvänds i algebrans division av rationella uttryck + nian. Additivt: befintliga
@@ -123,7 +138,23 @@
     return slot.nextElementSibling.querySelector('input');   // kbrak → första nästlade rutan (topp-bråkets täljare)
   }
   function removeWidgetIfEmpty(active){
-    if(active.value !== '' || !/ak8-(frt|frn|pbase|pexp)/.test(active.className)) return null;
+    if(active.value !== '') return null;
+    // Komplex-bråk (kbrak): markören i en tom cell inuti ett .ovn-kbrak → ta bort HELA komplex-bråket
+    // om det är helt tomt (annars strandar scaffoldet — regexen nedan når bara det inre bråket). Är
+    // något ifyllt lämnas det (undvik dataförlust). Det yttre uttrycket är kbrakets närmaste .ak8-expr.
+    var kbrak = active.closest('.ovn-kbrak');
+    if(kbrak){
+      var allTom = Array.prototype.every.call(kbrak.querySelectorAll('.ak8-in'), function(i){ return i.value === ''; });
+      if(!allTom) return null;
+      var oExpr = kbrak.closest('.ak8-expr'); if(!oExpr) return null;
+      var kw = kbrak; while(kw.parentNode && kw.parentNode !== oExpr) kw = kw.parentNode;
+      if(kw.parentNode !== oExpr) return null;
+      var kprev = kw.previousElementSibling, knext = kw.nextElementSibling;
+      if(knext && knext.classList.contains('ak8-exprtxt')) knext.remove();
+      kw.remove();
+      return kprev ? (kprev.tagName === 'INPUT' ? kprev : kprev.querySelector('input')) : oExpr.querySelector('input');
+    }
+    if(!/ak8-(frt|frn|pbase|pexp)/.test(active.className)) return null;
     var expr = active.closest('.ak8-expr'); var w = active; while(w.parentNode !== expr) w = w.parentNode;
     var prev = w.previousElementSibling, next = w.nextElementSibling;
     if(next && next.classList.contains('ak8-exprtxt')) next.remove();
@@ -286,9 +317,16 @@
       grow(t);
       var rad = t.closest('.ak8-rad'); if(rad) rensaRad(rad);
     });
-    // enter → nästa ruta
+    // enter → nästa ruta; fysiskt Backspace i tom byggcell → ta bort strukturen (samma som keypadens ⌫,
+    // som förr var enda vägen ut → en felklickad bråk-/potenscell gick ej att ångra med tangentbordet).
     mount.addEventListener('keydown', function(e){
-      if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+      if(e.target.tagName !== 'INPUT') return;
+      if(e.key === 'Backspace' && e.target.value === ''){
+        var moved = removeWidgetIfEmpty(e.target);
+        if(moved){ e.preventDefault(); moved.focus(); }
+        return;   // ingen byggcell → låt webbläsaren hantera (rutan är ändå tom)
+      }
+      if(e.key !== 'Enter') return;
       e.preventDefault();
       var ins = Array.prototype.slice.call(mount.querySelectorAll('input:not([disabled])')), i = ins.indexOf(e.target);
       if(i > -1 && ins[i + 1]) ins[i + 1].focus();
@@ -355,7 +393,7 @@
   window.AK8_UI = {
     pNum: pNum, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, renderGrupp: renderGrupp,
-    grow: grow, ansCell: ansCell, cellRead: cellRead, exprSerialize: exprSerialize,
+    grow: grow, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,

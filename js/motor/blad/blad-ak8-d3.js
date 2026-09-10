@@ -302,8 +302,8 @@
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;
-      if(!AK8_UI.besvarad(el)) return;   // obesvarad ruta räknas ej
       tot++;
+      if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
       if(res.ordna){
         el.querySelector('.ak8-ordna').classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram');
       } else if(res.chip){
