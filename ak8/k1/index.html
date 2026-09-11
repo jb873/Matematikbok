@@ -66,8 +66,9 @@
   document.getElementById('hero-titel').textContent = bok.titel || 'Kapitel 1';
   var lista = document.getElementById('del-lista');
   var byggda = {}; (bok.delkapitel || []).forEach(function(d){ byggda[d.nr] = d; });
-  // Rendera 10 slottar; boken driver ordning/titel (single-source på nr).
-  for(var nr = 1; nr <= 10; nr++){
+  // Rendera minst 10 slottar, men aldrig färre än bokens högsta delkapitel-nr (single-source på nr).
+  var maxNr = (bok.delkapitel || []).reduce(function(m, d){ return Math.max(m, d.nr || 0); }, 10);
+  for(var nr = 1; nr <= maxNr; nr++){
     var d = byggda[nr];
     if(d && d.fil){
       // byggd/byggande sida → öppen länk
