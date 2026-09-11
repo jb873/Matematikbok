@@ -131,6 +131,14 @@ window.AK8_K1_BOK = {
       blad: [
         { nr: 1, titel: 'Grundpotenser', noder: ['gp-rakna:skriva', 'gp-rakna:multdiv', 'gp-rakna:addsub', 'gp-rakna:losut'] }
       ]
+    },
+    {
+      // Kvadratrötter (dk11) — nytt innehåll. Introduktion inför nian; nodfamiljen ärvs (samma nod, högre nivå).
+      // Dokument 1 = Joachims PDF, oförändrat. Blad-motor blad-ak8-kvrot.js, egen SVG-figur för uppgift 4.
+      nr: 11, id: 'kvadratrotter', titel: 'Kvadratrötter', fil: 'kvadratrotter.html', status: 'bygger',
+      blad: [
+        { nr: 1, titel: 'Kvadratrötter', noder: ['kvadrat-area:rakna', 'kvadrat-rakna:rakna', 'kvadrat-skala:rakna', 'rot-sida:rakna', 'rot-berakna:rakna', 'rot-uppskatta:rakna', 'rot-decimal:rakna', 'rot-narmevarde:rakna'] }
+      ]
     }
     // ⚠️ Delkapitel 4–7 (bråk ×4) väntar. Noderna är gemensamma med åk 7 (single-source).
   ]

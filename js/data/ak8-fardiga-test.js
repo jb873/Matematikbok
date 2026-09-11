@@ -28,7 +28,10 @@
     'neg-rakna:multdiv','primtal:begrepp','primtal:rakna','delbarhet:rakna','position:begrepp',
     'position:rakna','mult-rakna:sma','div-rakna:sma','mult-rakna:storasma','div-rakna:storasma',
     'brak-lana:rakna','brak-mult-forkorta:rakna','brak-div-reciprok:rakna',
-    'pot-begrepp:tabell'   // FAS1-breddning: potenstabell (numeric) blir quiz-bar; pot-begrepp:figur lämnas (visuell → självskattning)
+    'pot-begrepp:tabell',   // FAS1-breddning: potenstabell (numeric) blir quiz-bar; pot-begrepp:figur lämnas (visuell → självskattning)
+    // dk11 kvadratrötter (åk8-introduktion inför nian): alla 8 noder byggbara → ett samlingstest
+    'kvadrat-area:rakna','kvadrat-rakna:rakna','kvadrat-skala:rakna','rot-sida:rakna',
+    'rot-berakna:rakna','rot-uppskatta:rakna','rot-decimal:rakna','rot-narmevarde:rakna'
   ].forEach(function(n){ BYGGBARA[n] = 1; });
 
   // Antal test-TYPER (snabb-generatorer) per nod — speglar AK8_GEN_NOD i ak8-k1-ram.html (håll i synk

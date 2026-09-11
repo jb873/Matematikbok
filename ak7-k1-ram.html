@@ -5128,6 +5128,18 @@ DELAR_KO['grundpotenser'] = [
   }
 ];
 
+// Kvadratrötter (åk8, dk11, introduktion inför nian) — kvrot-drill.js. En färdighet per nod, alla 'rakna'.
+DELAR_KO['kvadratrotter'] = [
+  { id:'kvadrat-area',   nr:1, titel:'Area från sidan',          beskrivning:'Räkna ut arean av en kvadrat när sidan är känd.',       formagor:{ rakna:{desc:'Sidan i kvadrat ger arean.', implemented:true} } },
+  { id:'kvadrat-rakna',  nr:2, titel:'Kvadrera talet',           beskrivning:'Multiplicera ett tal med sig självt.',                  formagor:{ rakna:{desc:'Beräkna talet upphöjt till två.', implemented:true} } },
+  { id:'kvadrat-skala',  nr:3, titel:'Skala ett kvadrattal',     beskrivning:'Använd ett känt kvadrattal för att räkna ut ett skalat.', formagor:{ rakna:{desc:'Flytta decimaltecknet ur det kända kvadrattalet.', implemented:true} } },
+  { id:'rot-sida',       nr:4, titel:'Sidan från arean',         beskrivning:'Hitta sidan i en kvadrat när arean är känd.',           formagor:{ rakna:{desc:'Sidan är kvadratroten ur arean.', implemented:true} } },
+  { id:'rot-berakna',    nr:5, titel:'Beräkna kvadratroten',     beskrivning:'Kvadratroten ur perfekta kvadrattal.',                  formagor:{ rakna:{desc:'Vilket tal gånger sig självt ger radikanden?', implemented:true} } },
+  { id:'rot-uppskatta',  nr:6, titel:'Mellan vilka heltal',      beskrivning:'Uppskatta mellan vilka två heltal en kvadratrot ligger.', formagor:{ rakna:{desc:'Närmaste kvadrattal under och över.', implemented:true} } },
+  { id:'rot-decimal',    nr:7, titel:'Kvadratrot ur decimaltal', beskrivning:'Kvadratroten ur decimaltal som är perfekta kvadrater.',  formagor:{ rakna:{desc:'Tänk på antalet decimaler i svaret.', implemented:true} } },
+  { id:'rot-narmevarde', nr:8, titel:'Närmevärde med räknare',   beskrivning:'Kvadratrot som decimaltal, avrundat med räknare.',       formagor:{ rakna:{desc:'Avrunda till två decimaler.', implemented:true} } }
+];
+
 // ============================================================
 // ============================================================
 // ÖVNING: POSITIONSSYSTEMET (Del 1, kunskapsområde 2)
@@ -5406,7 +5418,16 @@ const OVNING_RENDERS = {
     multdiv:  (b)=> renderGpMultdiv(b),
     addsub:   (b)=> renderGpAddsub(b),
     losut:    (b)=> renderGpLosut(b)
-  }
+  },
+  // Kvadratrötter (åk8, dk11, introduktion inför nian) — kvrot-drill.js. En färdighet per nod, alla 'rakna'.
+  'kvadrat-area':{   rakna: (b)=> renderKvArea(b) },
+  'kvadrat-rakna':{  rakna: (b)=> renderKvKvadrera(b) },
+  'kvadrat-skala':{  rakna: (b)=> renderKvSkala(b) },
+  'rot-sida':{       rakna: (b)=> renderKvSida(b) },
+  'rot-berakna':{    rakna: (b)=> renderKvBerakna(b) },
+  'rot-uppskatta':{  rakna: (b)=> renderKvUppskatta(b) },
+  'rot-decimal':{    rakna: (b)=> renderKvDecimal(b) },
+  'rot-narmevarde':{ rakna: (b)=> renderKvNarmevarde(b) }
 };
 
 // ============================================================
@@ -9519,6 +9540,7 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-d1-tillagg.js"></script>
 <script src="js/motor/potens/potens-drill.js"></script>
 <script src="js/motor/potens/tio-prefix-drill.js"></script>
+<script src="js/motor/kvrot/kvrot-drill.js"></script>
 <!-- Taxonomin (bok-delkapitel via visning.utbudslista) — provbyggaren driver väljaren ur den, som kartan/delkapitel-sidorna. -->
 <script src="js/data/k1-taxonomi.js"></script>
 <script src="js/data/k1-fardiga-test.js"></script>
