@@ -34,23 +34,6 @@
   .kv-fig{ display:inline-block; margin:6px 0 2px 4px; }
   .kv-sidasvar{ display:block; margin-top:2px; }
   .kv-sidalabel{ margin-right:7px; color:var(--ink-soft); }
-  /* Föreläsning (genomgång, egna tal ur PDF:en) */
-  .fl-wrap{ max-width:820px; margin:0 auto; padding:22px 24px 44px; }
-  .fl-intro{ font-size:16px; line-height:1.7; color:var(--ink-soft); margin:0 0 24px; }
-  .fl-intro strong{ color:var(--ink); }
-  .fl-sektion{ background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:10px; padding:20px 26px; margin-bottom:16px; }
-  .fl-eyebrow{ font-family:var(--cinzel); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
-  .fl-sektion h3{ font-family:var(--serif); font-size:21px; font-weight:500; margin:3px 0 11px; }
-  .fl-sektion p{ font-size:15.5px; line-height:1.7; margin:0 0 12px; color:var(--ink-soft); }
-  .fl-sektion p:last-child{ margin-bottom:0; }
-  .fl-regel{ border-left:3px solid var(--gold-lt); background:rgba(154,114,40,.05); padding:11px 16px; border-radius:0 6px 6px 0; font-size:15px; color:var(--ink); margin:0 0 14px; }
-  .fl-exempel{ display:flex; flex-direction:column; gap:7px; margin:0 0 12px; }
-  .fl-rad{ font-size:17px; font-family:var(--serif); color:var(--ink); }
-  .fl-rad .fl-svar{ color:var(--gold); font-weight:600; }
-  .fl-fig{ display:flex; align-items:center; gap:16px; margin:4px 0 14px; }
-  .fl-fig svg{ display:block; flex-shrink:0; }
-  .fl-fig figcaption{ font-size:14px; color:var(--ink-faint); font-style:italic; margin:0; }
-  .fl-slut{ font-size:15px; color:var(--ink-soft); font-style:italic; margin-top:20px; text-align:center; }
   /* Färdighetsträning (samma mönster som övriga delkapitel) */
   .fard-layout{ max-width:920px; margin:0 auto; padding:18px 24px 44px; display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }
   .fard-lista{ display:flex; flex-direction:column; gap:6px; }
@@ -94,87 +77,7 @@
   <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
-<section class="tab-panel" data-panel="forelasning">
-  <div class="fl-wrap">
-    <p class="fl-intro">Att <strong>kvadrera</strong> och att dra <strong>kvadratroten</strong> är motsatta räknesätt — precis som plus och minus, eller gånger och delat. Den här genomgången bygger upp båda, från arean av en kvadrat till närmevärden med räknare. Talen är desamma som du sedan möter i Öva.</p>
-
-    <div class="fl-sektion">
-      <div class="fl-eyebrow">1 · Grunden</div>
-      <h3>Att kvadrera — och area</h3>
-      <p>Att kvadrera ett tal betyder att multiplicera det med sig självt. En kvadrat med sidan <em>s</em> har arean <em>s</em> · <em>s</em>, som vi skriver <em>s</em><sup>2</sup>. Därför hänger area och kvadrering ihop.</p>
-      <div class="fl-regel"><em>s</em><sup>2</sup> = <em>s</em> · <em>s</em>. Arean av en kvadrat är sidan i kvadrat.</div>
-      <div class="fl-exempel">
-        <div class="fl-rad">Sidan 3 dm ger arean 3 · 3 = <span class="fl-svar">9 dm²</span></div>
-        <div class="fl-rad">40<sup>2</sup> = 40 · 40 = <span class="fl-svar">1600</span></div>
-        <div class="fl-rad">0,5<sup>2</sup> = 0,5 · 0,5 = <span class="fl-svar">0,25</span></div>
-      </div>
-      <p>Tänk på enheten: en area mäts alltid i kvadratenheter (dm², cm², m²).</p>
-    </div>
-
-    <div class="fl-sektion">
-      <div class="fl-eyebrow">2 · Genväg</div>
-      <h3>Använd ett känt kvadrattal</h3>
-      <p>Kan du ett kvadrattal kan du räkna ut näraliggande tal utan att börja om. Vi vet att 13<sup>2</sup> = 169.</p>
-      <div class="fl-exempel">
-        <div class="fl-rad">1,3<sup>2</sup>: 1,3 är 13 delat med 10 → 169 delat med 100 = <span class="fl-svar">1,69</span></div>
-        <div class="fl-rad">130<sup>2</sup>: 130 är 13 · 10 → 169 · 100 = <span class="fl-svar">16 900</span></div>
-        <div class="fl-rad">0,13<sup>2</sup> = <span class="fl-svar">0,0169</span></div>
-      </div>
-      <div class="fl-regel">Flyttar du decimaltecknet ett steg i talet, flyttas det två steg i svaret — talet multipliceras ju in två gånger.</div>
-    </div>
-
-    <div class="fl-sektion">
-      <div class="fl-eyebrow">3 · Motsatsen</div>
-      <h3>Kvadratroten — från area till sida</h3>
-      <p>Kvadratroten <span class="kv-rot">√<span class="kv-rad"><em>a</em></span></span> frågar: vilket positivt tal gånger sig självt blir <em>a</em>? Det är motsatsen till att kvadrera.</p>
-      <div class="fl-fig">
-        <svg width="88" height="88" viewBox="0 0 88 88" aria-hidden="true"><rect x="9" y="9" width="70" height="70" fill="#d7ecd9" stroke="#2d6a4f" stroke-width="2"></rect><text x="44" y="50" text-anchor="middle" font-size="19" fill="#12110f" font-family="Georgia,serif">16</text></svg>
-        <figcaption>En kvadrat med arean 16 har sidan <span class="kv-rot">√<span class="kv-rad">16</span></span> = 4, eftersom 4 · 4 = 16.</figcaption>
-      </div>
-      <div class="fl-exempel">
-        <div class="fl-rad">En kvadrat med arean 9 cm² har sidan <span class="kv-rot">√<span class="kv-rad">9</span></span> = <span class="fl-svar">3 cm</span></div>
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">64</span></span> = <span class="fl-svar">8</span></div>
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">81</span></span> = <span class="fl-svar">9</span></div>
-      </div>
-      <p>Tal som 9, 16, 64 och 81 kallas <strong>perfekta kvadrater</strong> — deras rötter blir hela tal.</p>
-    </div>
-
-    <div class="fl-sektion">
-      <div class="fl-eyebrow">4 · Uppskatta</div>
-      <h3>Rötter som inte går jämnt ut</h3>
-      <p>De flesta tal är inte perfekta kvadrater. Då kan du klämma in roten mellan två heltal genom att hitta närmaste kvadrattal under och över.</p>
-      <div class="fl-exempel">
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">14</span></span>: 3<sup>2</sup> = 9 och 4<sup>2</sup> = 16. Eftersom 14 ligger mellan 9 och 16 ligger roten mellan <span class="fl-svar">3 och 4</span></div>
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">55</span></span> ligger mellan <span class="fl-svar">7 och 8</span> (49 &lt; 55 &lt; 64)</div>
-      </div>
-    </div>
-
-    <div class="fl-sektion">
-      <div class="fl-eyebrow">5 · Decimaltal</div>
-      <h3>Kvadratrot ur decimaltal</h3>
-      <p>Samma idé baklänges från kvadreringen. Fråga: vilket tal gånger sig självt ger decimaltalet?</p>
-      <div class="fl-exempel">
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">0,04</span></span> = <span class="fl-svar">0,2</span> eftersom 0,2 · 0,2 = 0,04</div>
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">0,64</span></span> = <span class="fl-svar">0,8</span></div>
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">1600</span></span> = <span class="fl-svar">40</span></div>
-      </div>
-    </div>
-
-    <div class="fl-sektion">
-      <div class="fl-eyebrow">6 · Räknare</div>
-      <h3>Närmevärde med räknare</h3>
-      <p>Tal som <span class="kv-rot">√<span class="kv-rad">2</span></span> har inget exakt decimalsvar — decimalerna tar aldrig slut och upprepar sig inte. Då använder vi räknare och avrundar, oftast till två decimaler.</p>
-      <div class="fl-exempel">
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">2</span></span> ≈ <span class="fl-svar">1,41</span></div>
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">5</span></span> ≈ <span class="fl-svar">2,24</span></div>
-        <div class="fl-rad"><span class="kv-rot">√<span class="kv-rad">33</span></span> ≈ <span class="fl-svar">5,74</span></div>
-      </div>
-      <div class="fl-regel">Räkna alltid ut en decimal mer än du behöver innan du avrundar: <span class="kv-rot">√<span class="kv-rad">2</span></span> = 1,4142… → 1,41.</div>
-    </div>
-
-    <p class="fl-slut">I Öva och Färdighetsträning tränar du varje steg själv — i Test visar du vad du kan.</p>
-  </div>
-</section>
+<section class="tab-panel" data-panel="forelasning"></section>
 
 <section class="tab-panel is-active" data-panel="ova">
   <div class="ovn-wrap" id="sheet-kvrot"></div>
@@ -196,6 +99,7 @@
 
 <script src="../../js/data/ak8-k1-bok.js"></script>
 <script src="../../js/data/ak8-fardiga-test.js"></script>
+<script src="../../js/data/forelasningar.js"></script>
 <script src="../../js/data/k1-taxonomi.js"></script>
 <script src="../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../js/motor/blad/blad-ak8-kvrot.js"></script>
@@ -211,6 +115,9 @@
     // TEST: färdigt samlingstest (auto-assemblerat ur delkapitlets byggbara noder) via delad AK8_FARDIGA.
     var tp = document.querySelector('.tab-panel[data-panel="test"]');
     if(tp && window.AK8_FARDIGA){ AK8_FARDIGA.renderTestFlik(tp, dk.nr, "../../ak8-k1-ram.html"); }
+    // FÖRELÄSNING: monteras ur registret (js/data/forelasningar.js). Sidan skriver ingen egen text.
+    var fp = document.querySelector('.tab-panel[data-panel="forelasning"]');
+    if(fp && window.AK8_FOREL){ AK8_FOREL.renderForelFlik(fp, dk.nr); }
   }
   // konfetti (delad definition med övriga delkapitel)
   window.visaAk8Konfetti = function(){ var g=document.querySelector('.konfetti-lager'); if(g) g.remove(); var l=document.createElement('div'); l.className='konfetti-lager'; document.body.appendChild(l); var f=['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899']; for(var i=0;i<70;i++){ var b=document.createElement('span'); b.className='konfetti'; b.style.left=(Math.random()*100)+'vw'; b.style.background=f[Math.floor(Math.random()*f.length)]; b.style.animationDuration=(2.5+Math.random()*2)+'s'; b.style.width=(6+Math.random()*8)+'px'; b.style.height=(10+Math.random()*8)+'px'; l.appendChild(b);} setTimeout(function(){ if(l) l.remove(); },5000); };
