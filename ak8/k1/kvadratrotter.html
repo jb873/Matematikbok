@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Matematik · Åk 8 · Kvadratrötter</title>
 <link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../js/motor/blad/ak8-blad-kanon.css">
 <style>
   :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
   *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
@@ -22,11 +23,11 @@
   .tab-btn{ font-family:var(--cinzel); font-size:12.5px; letter-spacing:.04em; color:var(--ink-faint); background:none; border:0; border-bottom:2px solid transparent; padding:10px 16px; cursor:pointer; }
   .tab-btn.is-active{ color:var(--navy); border-bottom-color:var(--navy); }
   .tab-panel{ display:none; } .tab-panel.is-active{ display:block; }
-  .ovn-wrap{ max-width:920px; margin:0 auto; padding:20px 24px 12px; }
   .platshall{ max-width:920px; margin:24px auto; padding:28px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--gold); border-radius:6px; text-align:center; color:var(--ink-soft); }
   .platshall h3{ font-family:var(--cinzel); font-size:20px; color:var(--ink); margin-bottom:8px; }
   .platshall p{ font-size:14px; line-height:1.6; max-width:480px; margin:0 auto; }
   /* Kvadratrötter-specifik notation + svarsceller (egen, delkapitel-lokal) */
+  .kv-pot{ white-space:nowrap; } .kv-pot sup{ font-size:0.72em; }   /* bas+exponent som ETT flex-item i .ak8-q (jfr .pot) */
   .kv-rot{ display:inline-flex; align-items:flex-start; white-space:nowrap; }
   .kv-rad{ border-top:2px solid currentColor; padding:1px 3px 0; margin-left:-1px; }
   .kv-enhet{ margin-left:8px; color:var(--ink-faint); font-size:15px; }

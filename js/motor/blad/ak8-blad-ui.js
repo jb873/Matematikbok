@@ -390,9 +390,36 @@
     if(kp) kp.classList.toggle('keypad-hidden', !!(_af && _af.tagName === 'INPUT' && arOrdruta(_af, doljSel)));
   }
 
+  // ── renderSheet — HELA bladets omslag som ETT kontrakt (FAS 2). ──
+  // Emitterar exakt den form varje åk8-blad har: .ovn-sheet + h2 + .ovn-grupp×N (renderGrupp: numrering
+  // N. + a/b/c) + kontrollrad (Kontrollera / Återställ / ev. extra knappar / Skriv ut) + .ovn-sammanf + keypad,
+  // och kör bindSheet. Ett blad som monteras här KAN inte utelämna omslaget eller rubriken — det var luckan i
+  // dk11 (html började med '' i st f '<div class="ovn-sheet"><h2>…'). Utseendet kommer ur ak8-blad-kanon.css.
+  //   grupper[i]: { rubrik, rader, logg? }   logg → data-logg på .ovn-grupp (mastery per grupp)
+  //   opts: { kontrollera(mount), reset(mount), resetLabel?, knappar?:[{attr,text,onclick(mount)}], keypad?:opts|false, print?:bool }
+  function renderSheet(mount, titel, grupper, renderRad, opts){
+    opts = opts || {};
+    var html = '<div class="ovn-sheet"><h2>' + titel + '</h2>';
+    grupper.forEach(function(g, gi){
+      html += '<div class="ovn-grupp"' + (g.logg ? ' data-logg="' + g.logg + '"' : '') + '>' + renderGrupp(g, gi + 1, renderRad) + '</div>';
+    });
+    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button>'
+      + '<button type="button" class="ovn-aterstall" data-reset>' + (opts.resetLabel || 'Återställ') + '</button>';
+    (opts.knappar || []).forEach(function(k){ html += '<button type="button" class="ovn-aterstall" ' + k.attr + '>' + k.text + '</button>'; });
+    if(opts.print !== false) html += printKnappHTML();
+    html += '</div><div class="ovn-sammanf" data-sammanf hidden></div></div>';
+    if(opts.keypad !== false) html += keypadHTML(opts.keypad || undefined);
+    mount.innerHTML = html;
+    var k1 = mount.querySelector('[data-kontroll]'); if(k1 && opts.kontrollera) k1.onclick = function(){ opts.kontrollera(mount); };
+    var k2 = mount.querySelector('[data-reset]');    if(k2 && opts.reset)       k2.onclick = function(){ opts.reset(mount); };
+    (opts.knappar || []).forEach(function(k){ var b = mount.querySelector('[' + k.attr + ']'); if(b && k.onclick) b.onclick = function(){ k.onclick(mount); }; });
+    bindSheet(mount);
+    return mount;
+  }
+
   window.AK8_UI = {
     pNum: pNum, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
-    gruppRubrik: gruppRubrik, injLabel: injLabel, renderGrupp: renderGrupp,
+    gruppRubrik: gruppRubrik, injLabel: injLabel, renderGrupp: renderGrupp, renderSheet: renderSheet,
     grow: grow, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,

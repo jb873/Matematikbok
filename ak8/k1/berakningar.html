@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Matematik · Åk 8 · Beräkningar</title>
 <link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../js/motor/blad/ak8-blad-kanon.css">
 <style>
+  /* Blad-regler nedan AVVIKER från ak8-blad-kanon.css (sidfamilj) — normalisering = eget beslut. */
   :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
   *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
   .topnav{ background:var(--navy); color:#fff; padding:13px 26px; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
@@ -27,36 +29,14 @@
   .blad-nav-btn.is-active{ background:var(--navy); border-color:var(--navy); color:#fff; }
   .blad-nav-nr{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--paper-dk); color:var(--ink-faint); font-size:11px; font-weight:600; }
   .blad-nav-btn.is-active .blad-nav-nr{ background:var(--gold-lt); color:var(--navy); }
-  .ovn-wrap{ max-width:920px; margin:0 auto; padding:16px 24px 40px; }
-  .ovn-sheet{ background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:26px 30px; }
   .ovn-sheet h2{ font-family:var(--serif); font-size:25px; font-weight:500; margin-bottom:6px; }
-  .ak8-intro{ font-size:13.5px; color:var(--ink-faint); font-style:italic; margin:0 0 12px; }
   .ovn-grupp{ margin-top:20px; } .ovn-grupp:first-of-type{ margin-top:10px; }
-  .ovn-grupp-rubrik{ font-size:18px; font-weight:600; margin-bottom:8px; }
   .ak8-rad{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:9px 0; border-bottom:1px dotted var(--paper-dk); }
-  .ak8-rad:last-child{ border-bottom:none; }
   .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; min-width:90px; }
   .ak8-svar{ display:inline-flex; align-items:center; gap:2px; flex-wrap:wrap; }
   .ak8-in{ width:96px; height:36px; text-align:center; font-family:var(--serif); font-size:18px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; font-feature-settings:'tnum'; }
-  .ak8-mel{ width:150px; text-align:left; padding:0 8px; }
-  .ak8-sv{ width:96px; }
-  .ak8-in.ak8-ok{ border-color:#2f7d4f; background:rgba(47,125,79,.08); color:#15803d; }
-  .ak8-in.ak8-fel{ border-color:#c0392b; background:rgba(192,57,43,.08); color:#b91c1c; }
   .ak8-fasit{ display:block; margin-top:4px; font-size:12.5px; color:#c0392b; width:100%; }
   /* stående bråk */
-  .ovn-brak{ display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; }
-  .ovn-brak-taljare,.ovn-brak-namnare{ padding:0 8px 2px; font-size:17px; font-feature-settings:'tnum'; white-space:nowrap; }
-  .ovn-brak-namnare{ padding:2px 8px 0; }
-  .ovn-brak-strecket{ height:2px; background:var(--ink); width:100%; min-width:40px; }
-  .ovn-text{ font-family:var(--serif); font-size:18px; } .ovn-num{ font-feature-settings:'tnum'; }
-  .ovn-kontroll-rad{ display:flex; gap:10px; margin-top:22px; }
-  .ovn-kontroll{ font-family:var(--cinzel); font-size:13px; letter-spacing:.05em; color:#fff; background:var(--gold); border:0; border-radius:8px; padding:11px 22px; cursor:pointer; }
-  .ovn-aterstall{ font-family:var(--cinzel); font-size:12px; color:var(--ink-faint); background:none; border:1px solid var(--paper-dk); border-radius:8px; padding:11px 18px; cursor:pointer; }
-  .ovn-sammanf{ margin-top:18px; padding:16px 20px; border-radius:8px; text-align:center; font-size:15px; background:#fff; border:1px solid var(--paper-dk); }
-  .ovn-sammanf.ok{ background:linear-gradient(135deg,#dcfce7,#bbf7d0); border:2px solid #16a34a; color:#14532d; }
-  .ovn-sammanf.ok .ovn-sammanf-icon{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:#16a34a; color:#fff; font-size:22px; margin-bottom:8px; }
-  .ovn-sammanf.ok .ovn-sammanf-titel{ display:block; font-family:var(--serif); font-size:21px; margin-bottom:4px; }
-  .ovn-sammanf.delvis{ background:rgba(154,114,40,.08); border-color:var(--gold); color:var(--gold); }
   .fard-layout{ max-width:920px; margin:0 auto; padding:18px 24px 44px; display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }
   .fard-lista{ display:flex; flex-direction:column; gap:6px; }
   .fard-ko{ font-family:var(--cinzel); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin:10px 0 2px; }

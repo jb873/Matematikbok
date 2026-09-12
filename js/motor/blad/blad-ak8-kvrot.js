@@ -15,7 +15,8 @@
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function inTal(){ return '<input class="ak8-in" inputmode="text" autocomplete="off">'; }
   // Notation (GRIND: inga råa ^ — allt formaterat)
-  function sup(bas, exp){ return bas + '<sup>' + exp + '</sup>'; }                                   // 40²
+  // Omslaget krävs: .ak8-q är inline-flex med gap → oomslaget bas+<sup> blir två flex-items ("40 2"). Samma skäl som potensernas .pot.
+  function sup(bas, exp){ return '<span class="kv-pot">' + bas + '<sup>' + exp + '</sup></span>'; }   // 40²
   function rot(radikand){ return '<span class="kv-rot">√<span class="kv-rad">' + radikand + '</span></span>'; }  // √64 med streck
 
   // ── FAS 2: skalenlig färgad kvadrat, area i svart inuti. Sidan ∝ √area (area 100 syns större än 16). ──
@@ -171,18 +172,14 @@
   function renderBlad(mount, data){
     CHECKS = [];
     var doc = data || DATA;   // utan argument = dokument 1 (Joachims, oförändrat); annars en variant
-    var html = '';
-    doc.forEach(function(g, gi){ html += '<div class="ovn-grupp" data-logg="' + g.logg + '">' + UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
-    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button>'
-      + '<button type="button" class="ovn-aterstall" data-reset>Rensa</button>'
-      + '<button type="button" class="ovn-aterstall" data-nytt>↻ Nytt blad med andra tal</button></div>';
-    html += '<div class="ovn-sammanf" data-sammanf hidden></div>';
-    html += UI.keypadHTML();
-    mount.innerHTML = html;
-    UI.bindSheet(mount);
-    mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
-    mount.querySelector('[data-reset]').onclick = function(){ renderBlad(mount, doc); };            // Rensa = samma tal
-    mount.querySelector('[data-nytt]').onclick = function(){ renderBlad(mount, genVariant()); };     // Nytt = variant (FAS 4)
+    // Hela omslaget (sheet + h2 + grupper + kontrollrad + sammanf + keypad + bindSheet) via kontraktet
+    // AK8_UI.renderSheet — bladet kan inte utelämna formen. Grupperna bär logg → data-logg per grupp.
+    UI.renderSheet(mount, 'Kvadratrötter', doc, renderRad, {
+      kontrollera: kontrollera,
+      reset: function(m){ renderBlad(m, doc); },                  // Rensa = samma tal
+      resetLabel: 'Rensa',
+      knappar: [{ attr: 'data-nytt', text: '↻ Nytt blad med andra tal', onclick: function(m){ renderBlad(m, genVariant()); } }]   // Nytt = variant (FAS 4)
+    });
   }
 
   function kontrollera(mount){
