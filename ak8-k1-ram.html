@@ -75,6 +75,8 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
 <script src="js/data/k2-taxonomi.js"></script>
 <script src="js/data/ak8-k1-bok.js"></script>
 <script src="js/data/ak8-fardiga-test.js"></script>
+<!-- dk11: testets talkälla = öva-bladets data (BLAD_AK8_KVROT.talBank), FAS 4b -->
+<script src="js/motor/blad/blad-ak8-kvrot.js"></script>
 <script src="js/mastery.js"></script>
 <script src="js/mastery-k2.js"></script>
 <script src="js/motor/blad/ak8-blad-ui.js"></script>
@@ -1038,38 +1040,36 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
   } ] },
 
   // ── dk11 · KVADRATRÖTTER (introduktion inför nian) ──
-  // Facit = elementär kvadrering/kvadratrot. Notation: bas^2 → sup via potUt; √ som unicode-radikal.
-  // Talurval speglar Joachims öva-dokument, aldrig svårare (takregeln). En numeric-generator per nod;
-  // uppskattnings-noden är flerval (mellan vilka heltal). genId → nod i AK8_GEN_NOD nedan.
+  // FAS 4b: talen hämtas ur BLAD_AK8_KVROT.talBank(nod) = dokument 1 (Joachims) + en variant inom öva-bandet.
+  // "Inga tal utan täckning i öva" är därmed sant PER KONSTRUKTION (samma datakälla), inte genom kontroll.
+  // Notation: bas^2 → sup via potUt; √ som unicode-radikal. uppskattnings-noden = flerval (mellan vilka heltal).
   'kvadrat-area:rakna': { snabb: [ G.numeric('kvrot-area','Area från sidan','kvadrat-area', function(){
-    var b=pick([[3,'dm'],[4,'dm'],[5,'dm'],[6,'dm'],[7,'dm'],[8,'dm'],[20,'cm'],[30,'cm'],[40,'cm'],[0.2,'m'],[0.3,'m'],[0.5,'m']]);
-    var s=b[0], u=b[1], ans=avr(s*s,4);
-    return {key:'ka'+s+u, prompt:'En kvadrat har sidan '+komma(s)+' '+u+'. Hur stor är arean? (svar i '+u+'²)',
-      ans:ans, expl:komma(s)+' · '+komma(s)+' = '+komma(ans)+' '+u+'².'};
+    var r=pick(BLAD_AK8_KVROT.talBank('kvadrat-area:rakna'));
+    return {key:'ka'+r.tal+r.tenhet, prompt:'En kvadrat har sidan '+komma(r.tal)+' '+r.tenhet+'. Hur stor är arean? (svar i '+r.tenhet+'²)',
+      ans:r.facit, expl:komma(r.tal)+' · '+komma(r.tal)+' = '+komma(r.facit)+' '+r.tenhet+'².'};
   }) ] },
   'kvadrat-rakna:rakna': { snabb: [ G.numeric('kvrot-kvadrera','Kvadrera talet','kvadrat-rakna', function(){
-    var n=pick([11,12,13,14,15,20,30,40,50,0.1,0.2,0.3,0.5,0.9]), ans=avr(n*n,2);
-    return {key:'kk'+n, prompt:'Beräkna:   '+komma(n)+'^2', ans:ans, expl:komma(n)+'^2 = '+komma(ans)+'.'};
+    var r=pick(BLAD_AK8_KVROT.talBank('kvadrat-rakna:rakna'));
+    return {key:'kk'+r.tal, prompt:'Beräkna:   '+komma(r.tal)+'^2', ans:r.facit, expl:komma(r.tal)+'^2 = '+komma(r.facit)+'.'};
   }) ] },
   'kvadrat-skala:rakna': { snabb: [ G.numeric('kvrot-skala','Skala ett kvadrattal','kvadrat-skala', function(){
-    var N=pick([11,12,13,14,15]), sq=N*N, v=pick([N/10, N*10, N/100]), ans=avr(v*v,6);
-    return {key:'ks'+N+'_'+v, prompt:'Du vet att '+N+'^2 = '+sq+'. Beräkna '+komma(v)+'^2',
-      ans:ans, expl:komma(v)+'^2 = '+komma(ans)+'.'};
+    var r=pick(BLAD_AK8_KVROT.talBank('kvadrat-skala:rakna'));
+    return {key:'ks'+r.kant+'_'+r.tal, prompt:'Du vet att '+r.kant+'^2 = '+(r.kant*r.kant)+'. Beräkna '+komma(r.tal)+'^2',
+      ans:r.facit, expl:komma(r.tal)+'^2 = '+komma(r.facit)+'.'};
   }) ] },
   'rot-sida:rakna': { snabb: [ G.numeric('kvrot-sida','Sidan från arean','rot-sida', function(){
-    var b=pick([[9,'cm'],[16,'cm'],[25,'cm'],[36,'cm'],[49,'cm'],[64,'cm'],[81,'cm'],[100,'cm'],[400,'cm'],[900,'dm'],[0.81,'m']]);
-    var a=b[0], u=b[1], ans=avr(Math.sqrt(a),2);
-    return {key:'rs'+a+u, prompt:'En kvadrat har arean '+komma(a)+' '+u+'². Hur lång är sidan? (svar i '+u+')',
-      ans:ans, expl:'√'+komma(a)+' = '+komma(ans)+' '+u+'.'};
+    var r=pick(BLAD_AK8_KVROT.talBank('rot-sida:rakna'));   // grupp 4 (figur, utan enhet) + grupp 5 (med enhet)
+    var e=r.tenhet||'';
+    return {key:'rs'+r.tal+e, prompt:'En kvadrat har arean '+komma(r.tal)+(e?' '+e+'²':'')+'. Hur lång är sidan?'+(e?' (svar i '+e+')':''),
+      ans:r.facit, expl:'√'+komma(r.tal)+' = '+komma(r.facit)+(e?' '+e:'')+'.'};
   }) ] },
   'rot-berakna:rakna': { snabb: [ G.numeric('kvrot-berakna','Beräkna kvadratroten','rot-berakna', function(){
-    var n=pick([4,9,16,25,36,49,64,81,100,121,144,169,196,225,400,900]), ans=Math.sqrt(n);
-    return {key:'rb'+n, prompt:'Beräkna:   √'+n, ans:ans, expl:'√'+n+' = '+ans+'.'};
+    var r=pick(BLAD_AK8_KVROT.talBank('rot-berakna:rakna'));
+    return {key:'rb'+r.tal, prompt:'Beräkna:   √'+r.tal, ans:r.facit, expl:'√'+r.tal+' = '+r.facit+'.'};
   }) ] },
   'rot-uppskatta:rakna': { snabb: [ G.flerval('kvrot-uppskatta','Mellan vilka heltal','rot-uppskatta', function(){
-    var perf=function(x){ var r=Math.round(Math.sqrt(x)); return r*r===x; };
-    var n, t=0; do{ n=ri(2,99); t++; } while(perf(n) && t<60);
-    var lo=Math.floor(Math.sqrt(n)), hi=lo+1, ratt=lo+' och '+hi;
+    var r=pick(BLAD_AK8_KVROT.talBank('rot-uppskatta:rakna'));
+    var n=r.tal, lo=r.lo, hi=r.hi, ratt=lo+' och '+hi;
     var opts=[ratt];
     if(lo-1>=1) opts.push((lo-1)+' och '+lo);
     opts.push(hi+' och '+(hi+1));
@@ -1080,14 +1080,12 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       expl:lo+'^2 = '+(lo*lo)+' och '+hi+'^2 = '+(hi*hi)+', så √'+n+' ligger mellan '+lo+' och '+hi+'.'};
   }) ] },
   'rot-decimal:rakna': { snabb: [ G.numeric('kvrot-decimal','Kvadratrot ur decimaltal','rot-decimal', function(){
-    var b=pick([[0.04,0.2],[0.09,0.3],[0.16,0.4],[0.25,0.5],[0.36,0.6],[0.49,0.7],[0.64,0.8],[0.81,0.9],[1.44,1.2],[1600,40],[0.01,0.1]]);
-    return {key:'rd'+b[0], prompt:'Beräkna:   √'+komma(b[0]), ans:b[1], expl:'√'+komma(b[0])+' = '+komma(b[1])+'.'};
+    var r=pick(BLAD_AK8_KVROT.talBank('rot-decimal:rakna'));
+    return {key:'rd'+r.tal, prompt:'Beräkna:   √'+komma(r.tal), ans:r.facit, expl:'√'+komma(r.tal)+' = '+komma(r.facit)+'.'};
   }) ] },
   'rot-narmevarde:rakna': { snabb: [ G.numeric('kvrot-narmevarde','Närmevärde med räknare','rot-narmevarde', function(){
-    var perf=function(x){ var r=Math.round(Math.sqrt(x)); return r*r===x; };
-    var n, t=0; do{ n=pick([2,3,5,6,7,8,10,11,12,13,15,17,18,20,30,33,40,50,60,71,83,90]); t++; } while(perf(n) && t<60);
-    var ans=avr(Math.sqrt(n),2);
-    return {key:'rn'+n, prompt:'Använd räknare. Avrunda till två decimaler:   √'+n+' ≈', ans:ans, expl:'√'+n+' ≈ '+komma(ans)+'.'};
+    var r=pick(BLAD_AK8_KVROT.talBank('rot-narmevarde:rakna'));
+    return {key:'rn'+r.tal, prompt:'Använd räknare. Avrunda till två decimaler:   √'+r.tal+' ≈', ans:r.facit, expl:'√'+r.tal+' ≈ '+komma(r.facit)+'.'};
   }) ] }
   };
   var AK8_GEN_NOD = {

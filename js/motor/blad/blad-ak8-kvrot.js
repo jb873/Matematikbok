@@ -34,57 +34,57 @@
   // ── DATA — 9 grupper. logg = noden gruppen matar. typ styr svarscellen. ──
   var DATA = [
     { rubrik:'Hur stor area har en kvadrat med sidan', logg:'kvadrat-area:rakna', rader:[
-      { typ:'enhet', fraga:'3 dm',   facit:9,      enhet:'dm²' },
-      { typ:'enhet', fraga:'30 dm',  facit:900,    enhet:'dm²' },
-      { typ:'enhet', fraga:'0,3 m',  facit:0.09,   enhet:'m²' },
-      { typ:'enhet', fraga:'400 cm', facit:160000, enhet:'cm²' }
+      { typ:'enhet', fraga:'3 dm',   facit:9,      enhet:'dm²', tal:3,   tenhet:'dm' },
+      { typ:'enhet', fraga:'30 dm',  facit:900,    enhet:'dm²', tal:30,  tenhet:'dm' },
+      { typ:'enhet', fraga:'0,3 m',  facit:0.09,   enhet:'m²',  tal:0.3, tenhet:'m' },
+      { typ:'enhet', fraga:'400 cm', facit:160000, enhet:'cm²', tal:400, tenhet:'cm' }
     ]},
     { rubrik:'Beräkna', logg:'kvadrat-rakna:rakna', rader:[
-      { typ:'tal', fraga:sup('40', '2') + ' =',  facit:1600 },
-      { typ:'tal', fraga:sup('0,5', '2') + ' =', facit:0.25 },
-      { typ:'tal', fraga:sup('400', '2') + ' =', facit:160000 },
-      { typ:'tal', fraga:sup('0,1', '2') + ' =', facit:0.01 }
+      { typ:'tal', fraga:sup('40', '2') + ' =',  facit:1600,   tal:40 },
+      { typ:'tal', fraga:sup('0,5', '2') + ' =', facit:0.25,   tal:0.5 },
+      { typ:'tal', fraga:sup('400', '2') + ' =', facit:160000, tal:400 },
+      { typ:'tal', fraga:sup('0,1', '2') + ' =', facit:0.01,   tal:0.1 }
     ]},
     { rubrik:'Du vet att ' + sup('13', '2') + ' är 169. Vad är då…', logg:'kvadrat-skala:rakna', rader:[
-      { typ:'tal', fraga:sup('1,3', '2') + ' =',  facit:1.69 },
-      { typ:'tal', fraga:sup('130', '2') + ' =',  facit:16900 },
-      { typ:'tal', fraga:sup('0,13', '2') + ' =', facit:0.0169 }
+      { typ:'tal', fraga:sup('1,3', '2') + ' =',  facit:1.69,   tal:1.3,  kant:13 },
+      { typ:'tal', fraga:sup('130', '2') + ' =',  facit:16900,  tal:130,  kant:13 },
+      { typ:'tal', fraga:sup('0,13', '2') + ' =', facit:0.0169, tal:0.13, kant:13 }
     ]},
     { rubrik:'Hur lång är sidan i kvadraten', logg:'rot-sida:rakna', rader:[
-      { typ:'figur', area:16,  farg:'gron',   facit:4 },
-      { typ:'figur', area:49,  farg:'rod',    facit:7 },
-      { typ:'figur', area:36,  farg:'bla',    facit:6 },
-      { typ:'figur', area:100, farg:'orange', facit:10 }
+      { typ:'figur', area:16,  farg:'gron',   facit:4,  tal:16 },
+      { typ:'figur', area:49,  farg:'rod',    facit:7,  tal:49 },
+      { typ:'figur', area:36,  farg:'bla',    facit:6,  tal:36 },
+      { typ:'figur', area:100, farg:'orange', facit:10, tal:100 }
     ]},
     { rubrik:'Hur lång är sidan i en kvadrat med arean', logg:'rot-sida:rakna', rader:[
-      { typ:'enhet', fraga:'9 cm²',    facit:3,   enhet:'cm' },
-      { typ:'enhet', fraga:'900 cm²',  facit:30,  enhet:'cm' },
-      { typ:'enhet', fraga:'2500 cm²', facit:50,  enhet:'cm' },
-      { typ:'enhet', fraga:'0,81 cm²', facit:0.9, enhet:'cm' }
+      { typ:'enhet', fraga:'9 cm²',    facit:3,   enhet:'cm', tal:9,    tenhet:'cm' },
+      { typ:'enhet', fraga:'900 cm²',  facit:30,  enhet:'cm', tal:900,  tenhet:'cm' },
+      { typ:'enhet', fraga:'2500 cm²', facit:50,  enhet:'cm', tal:2500, tenhet:'cm' },
+      { typ:'enhet', fraga:'0,81 cm²', facit:0.9, enhet:'cm', tal:0.81, tenhet:'cm' }
     ]},
     { rubrik:'Beräkna', logg:'rot-berakna:rakna', rader:[
-      { typ:'tal', fraga:rot('64') + ' =',  facit:8 },
-      { typ:'tal', fraga:rot('81') + ' =',  facit:9 },
-      { typ:'tal', fraga:rot('36') + ' =',  facit:6 },
-      { typ:'tal', fraga:rot('400') + ' =', facit:20 }
+      { typ:'tal', fraga:rot('64') + ' =',  facit:8,  tal:64 },
+      { typ:'tal', fraga:rot('81') + ' =',  facit:9,  tal:81 },
+      { typ:'tal', fraga:rot('36') + ' =',  facit:6,  tal:36 },
+      { typ:'tal', fraga:rot('400') + ' =', facit:20, tal:400 }
     ]},
     { rubrik:'Mellan vilka heltal ligger svaret på dessa kvadratrötter', logg:'rot-uppskatta:rakna', rader:[
-      { typ:'tvaruta', fraga:rot('14'), lo:3, hi:4 },
-      { typ:'tvaruta', fraga:rot('55'), lo:7, hi:8 },
-      { typ:'tvaruta', fraga:rot('91'), lo:9, hi:10 },
-      { typ:'tvaruta', fraga:rot('44'), lo:6, hi:7 }
+      { typ:'tvaruta', fraga:rot('14'), lo:3, hi:4,  tal:14 },
+      { typ:'tvaruta', fraga:rot('55'), lo:7, hi:8,  tal:55 },
+      { typ:'tvaruta', fraga:rot('91'), lo:9, hi:10, tal:91 },
+      { typ:'tvaruta', fraga:rot('44'), lo:6, hi:7,  tal:44 }
     ]},
     { rubrik:'Beräkna', logg:'rot-decimal:rakna', rader:[
-      { typ:'tal', fraga:rot('0,04') + ' =', facit:0.2 },
-      { typ:'tal', fraga:rot('0,64') + ' =', facit:0.8 },
-      { typ:'tal', fraga:rot('1600') + ' =', facit:40 },
-      { typ:'tal', fraga:rot('0,16') + ' =', facit:0.4 }
+      { typ:'tal', fraga:rot('0,04') + ' =', facit:0.2, tal:0.04 },
+      { typ:'tal', fraga:rot('0,64') + ' =', facit:0.8, tal:0.64 },
+      { typ:'tal', fraga:rot('1600') + ' =', facit:40,  tal:1600 },
+      { typ:'tal', fraga:rot('0,16') + ' =', facit:0.4, tal:0.16 }
     ]},
     { rubrik:'Använd miniräknare och avrunda till två decimaler', logg:'rot-narmevarde:rakna', rader:[
-      { typ:'tal', fraga:rot('2') + ' ≈',  facit:1.41 },
-      { typ:'tal', fraga:rot('5') + ' ≈',  facit:2.24 },
-      { typ:'tal', fraga:rot('33') + ' ≈', facit:5.74 },
-      { typ:'tal', fraga:rot('71') + ' ≈', facit:8.43 }
+      { typ:'tal', fraga:rot('2') + ' ≈',  facit:1.41, tal:2 },
+      { typ:'tal', fraga:rot('5') + ' ≈',  facit:2.24, tal:5 },
+      { typ:'tal', fraga:rot('33') + ' ≈', facit:5.74, tal:33 },
+      { typ:'tal', fraga:rot('71') + ' ≈', facit:8.43, tal:71 }
     ]}
   ];
 
@@ -106,42 +106,42 @@
     var s1 = [ri(2, 9), ri(2, 9) * 10, ri(2, 9) / 10, pick([200, 300, 500])];
     var enh1 = ['dm²', 'dm²', 'm²', 'cm²'], sidenh1 = ['dm', 'dm', 'm', 'cm'];
     var G1 = { rubrik:'Hur stor area har en kvadrat med sidan', logg:'kvadrat-area:rakna',
-      rader: s1.map(function(s, i){ return { typ:'enhet', fraga:komma(s) + ' ' + sidenh1[i], facit:q2(s * s), enhet:enh1[i] }; }) };
+      rader: s1.map(function(s, i){ return { typ:'enhet', fraga:komma(s) + ' ' + sidenh1[i], facit:q2(s * s), enhet:enh1[i], tal:s, tenhet:sidenh1[i] }; }) };
     // 2 — kvadrera (2-siffrigt ×10, decimal, 3-siffrigt ×100, decimal)
     var b2 = [ri(2, 9) * 10, ri(2, 9) / 10, ri(2, 9) * 100, ri(1, 9) / 10];
     var G2 = { rubrik:'Beräkna', logg:'kvadrat-rakna:rakna',
-      rader: b2.map(function(b){ return { typ:'tal', fraga:sup(komma(b), '2') + ' =', facit:q2(b * b) }; }) };
+      rader: b2.map(function(b){ return { typ:'tal', fraga:sup(komma(b), '2') + ' =', facit:q2(b * b), tal:b }; }) };
     // 3 — skala ur ett ANNAT känt kvadrattal (≠13²)
     var N = pick([11, 12, 14, 15]);
     var G3 = { rubrik:'Du vet att ' + sup(N, '2') + ' är ' + (N * N) + '. Vad är då…', logg:'kvadrat-skala:rakna', rader:[
-      { typ:'tal', fraga:sup(komma(N / 10), '2') + ' =', facit:q2((N / 10) * (N / 10)) },
-      { typ:'tal', fraga:sup(N * 10, '2') + ' =', facit:q2((N * 10) * (N * 10)) },
-      { typ:'tal', fraga:sup(komma(N / 100), '2') + ' =', facit:q2((N / 100) * (N / 100)) }
+      { typ:'tal', fraga:sup(komma(N / 10), '2') + ' =', facit:q2((N / 10) * (N / 10)), tal:N / 10, kant:N },
+      { typ:'tal', fraga:sup(N * 10, '2') + ' =', facit:q2((N * 10) * (N * 10)), tal:N * 10, kant:N },
+      { typ:'tal', fraga:sup(komma(N / 100), '2') + ' =', facit:q2((N / 100) * (N / 100)), tal:N / 100, kant:N }
     ]};
     // 4 — sida ur perfekt kvadrat, MED figur (fyra olika sidor 2–10)
     var k4 = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 4);
     var G4 = { rubrik:'Hur lång är sidan i kvadraten', logg:'rot-sida:rakna',
-      rader: k4.map(function(k, i){ return { typ:'figur', area:k * k, farg:farg[i], facit:k }; }) };
+      rader: k4.map(function(k, i){ return { typ:'figur', area:k * k, farg:farg[i], facit:k, tal:k * k }; }) };
     // 5 — sida ur perfekt kvadrat, UTAN figur (litet, ×10, större ×10, decimal)
     var s5 = [ri(2, 7), ri(2, 4) * 10, ri(5, 8) * 10, ri(2, 9) / 10];
     var G5 = { rubrik:'Hur lång är sidan i en kvadrat med arean', logg:'rot-sida:rakna',
-      rader: s5.map(function(s){ return { typ:'enhet', fraga:komma(q2(s * s)) + ' cm²', facit:s, enhet:'cm' }; }) };
+      rader: s5.map(function(s){ return { typ:'enhet', fraga:komma(q2(s * s)) + ' cm²', facit:s, enhet:'cm', tal:q2(s * s), tenhet:'cm' }; }) };
     // 6 — beräkna √ ur jämnt kvadrattal (fyra olika)
     var k6 = shuffle([5, 6, 7, 8, 9, 10, 12, 15, 20]).slice(0, 4);
     var G6 = { rubrik:'Beräkna', logg:'rot-berakna:rakna',
-      rader: k6.map(function(k){ return { typ:'tal', fraga:rot(k * k) + ' =', facit:k }; }) };
+      rader: k6.map(function(k){ return { typ:'tal', fraga:rot(k * k) + ' =', facit:k, tal:k * k }; }) };
     // 7 — mellan vilka heltal (ICKE-perfekta kvadrater)
     var n7 = distinktEjPerfekt(4, 5, 99);
     var G7 = { rubrik:'Mellan vilka heltal ligger svaret på dessa kvadratrötter', logg:'rot-uppskatta:rakna',
-      rader: n7.map(function(n){ var lo = Math.floor(Math.sqrt(n)); return { typ:'tvaruta', fraga:rot(n), lo:lo, hi:lo + 1 }; }) };
+      rader: n7.map(function(n){ var lo = Math.floor(Math.sqrt(n)); return { typ:'tvaruta', fraga:rot(n), lo:lo, hi:lo + 1, tal:n }; }) };
     // 8 — √ ur decimaltal (tre decimaler + ett stort, alla perfekta)
     var s8 = [ri(1, 9) / 10, ri(1, 9) / 10, ri(3, 7) * 10, ri(1, 9) / 10];
     var G8 = { rubrik:'Beräkna', logg:'rot-decimal:rakna',
-      rader: s8.map(function(s){ return { typ:'tal', fraga:rot(komma(q2(s * s))) + ' =', facit:s }; }) };
+      rader: s8.map(function(s){ return { typ:'tal', fraga:rot(komma(q2(s * s))) + ' =', facit:s, tal:q2(s * s) }; }) };
     // 9 — närmevärde med räknare, två decimaler (ICKE-perfekta)
     var n9 = distinktEjPerfekt(4, 2, 99);
     var G9 = { rubrik:'Använd miniräknare och avrunda till två decimaler', logg:'rot-narmevarde:rakna',
-      rader: n9.map(function(n){ return { typ:'tal', fraga:rot(n) + ' ≈', facit:Math.round(Math.sqrt(n) * 100) / 100 }; }) };
+      rader: n9.map(function(n){ return { typ:'tal', fraga:rot(n) + ' ≈', facit:Math.round(Math.sqrt(n) * 100) / 100, tal:n }; }) };
     return [G1, G2, G3, G4, G5, G6, G7, G8, G9];
   }
 
@@ -209,5 +209,12 @@
     }
   }
 
-  window.BLAD_AK8_KVROT = { renderBlad: renderBlad, genVariant: genVariant };
+  // talBank(nod) — TESTETS talkälla (FAS 4b): raderna ur dokument 1 + en färsk variant för noden. Testet får
+  // därmed bara tal som har täckning i Öva (Joachims tal + variantbandet) — sant per konstruktion, inte kontroll.
+  function talBank(nod){
+    var ut = [];
+    DATA.concat(genVariant()).forEach(function(g){ if(g.logg === nod) g.rader.forEach(function(r){ ut.push(r); }); });
+    return ut;
+  }
+  window.BLAD_AK8_KVROT = { renderBlad: renderBlad, genVariant: genVariant, talBank: talBank, DATA: DATA };
 })();
