@@ -176,7 +176,8 @@
   // ══════════════════════════════════════════════════════════════════════════════════════
   function renderPotDrill(body, cfg){
     var level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
-    function genOmgang(){ var o = []; for(var i = 0; i < 8; i++) o.push(cfg.gen(level, cfg.basFn)); return o; }
+    // FAS 3: ingen uppgift upprepas inom omgången — distinktOmgang (ramens kontrakt), nyckel = display.
+    function genOmgang(){ return distinktOmgang(function(){ return cfg.gen(level, cfg.basFn); }, 8, function(t){ return t.display; }); }
     function backFn(){ if(typeof navTo === 'function') navTo('kapitel'); }
     omgang = genOmgang();
 

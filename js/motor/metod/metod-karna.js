@@ -25,6 +25,29 @@ function sortAsc(a){return [...a].sort((x,y)=>x-y)}
 function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
+// distinktOmgang — N DISTINKTA uppgifter ur en generator (FAS 3, kontrakt för drillarnas omgångsbygge).
+// Mönstret från metod-mult (Set + försökstak PER OMGÅNG) med avrundningens OVILLKORLIGA fyllnad:
+// omgången är alltid full — hellre en dublett i nödfall än en kort omgång. Distinktheten är "best effort".
+//   gen()      → en uppgift (anropas utan argument; bind level etc. i en closure)
+//   n          → antal uppgifter i omgången
+//   keyFn(t)   → nyckel som avgör "samma uppgift" (t.ex. t.display); utelämnas → JSON.stringify(t)
+//   maxTries   → försökstak per omgång (default 300)
+// Ingen drill ska rulla egen for(i<8) o.push(gen()) — det var defekten som potens-drill bar vidare till kvrot.
+function distinktOmgang(gen, n, keyFn, maxTries){
+  keyFn = keyFn || function(t){ return JSON.stringify(t); };
+  maxTries = maxTries || 300;
+  const ut = [], seen = new Set(); let tries = 0;
+  while(ut.length < n && tries < maxTries){
+    tries++;
+    const t = gen(); if(t == null) continue;
+    const k = keyFn(t);
+    if(seen.has(k)) continue;
+    seen.add(k); ut.push(t);
+  }
+  while(ut.length < n){ const t = gen(); if(t != null) ut.push(t); else break; }   // ovillkorlig fyllnad
+  return ut;
+}
+
 const PRIMES_50 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
 const PRIMES_100 = [...PRIMES_50,53,59,61,67,71,73,79,83,89,97];
 function compositesUpTo(max){
