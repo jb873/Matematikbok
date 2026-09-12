@@ -117,9 +117,11 @@
   }
 
   // Skriv som potens — svar = exponenten (basen given i multiplikationen).
-  function genSkriva(level, basFn){
-    basFn = basFn || basFri;
-    var b = basFn(), e = ri(2, 6);
+  // opts.expMax: bas 10 har bara EN bas → exponentspannet är hela poolen; 2–6 ger 5 distinkta, för lite för en
+  // omgång på 8 (distinktOmgang faller då tillbaka på dubbletter). Tio-wrappern sätter 9 → 8 distinkta.
+  function genSkriva(level, basFn, opts){
+    basFn = basFn || basFri; opts = opts || {};
+    var b = basFn(), e = ri(2, opts.expMax || 6);
     var mult = []; for(var i = 0; i < e; i++) mult.push(b);
     return { display: mult.join(' · '), bas: b, answerNum: e, answerStr: b + '^' + e };
   }
@@ -253,7 +255,7 @@
   window.renderPotPrio     = function(b){ renderPotDrill(b, { ko:'prio-potenser', formaga:'rakna',  header:'Prioritering med potenser', sub:'Tänk på prioriteringsreglerna. Svaret kan bli negativt.', svar:'varde', gen:genPrio }); };
 
   // ── TIOPOTENSER (dk 9): SAMMA motor, bara basFn:basTio (parametrisering, ingen kopierad motor). ──
-  window.renderTioSkriva   = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'skriva',   header:'Skriv som tiopotens', sub:'Vilken exponent? Basen är 10.', svar:'exp',   gen:genSkriva,   basFn:basTio }); };
+  window.renderTioSkriva   = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'skriva',   header:'Skriv som tiopotens', sub:'Vilken exponent? Basen är 10.', svar:'exp',   gen:function(l, bf){ return genSkriva(l, bf, { expMax:9 }); },   basFn:basTio }); };
   window.renderTioEvaluera = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'evaluera', header:'Skriv som vanligt tal', sub:'Räkna ut värdet.', svar:'varde', gen:function(l, bf){ return genEvaluera(l, bf, { expMin:0, expMax:8, valMax:1e8 }); }, basFn:basTio }); };
   window.renderTioMultdiv  = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'rakna',    header:'Multiplikation och division', sub:'Behåll basen 10, operera på exponenterna.', svar:'exp', gen:genMultdiv, basFn:basTio }); };
   window.renderTioAddsub   = function(b){ renderPotDrill(b, { ko:'tio-rakna', formaga:'addsub',   header:'Addition och subtraktion', sub:'Räkna ut varje tiopotens, operera sedan.', svar:'varde', gen:function(l, bf){ return genAddsub(l, bf, { expMax:6, valMax:1e6 }); }, basFn:basTio }); };

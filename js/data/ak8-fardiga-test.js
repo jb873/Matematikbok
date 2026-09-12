@@ -28,7 +28,8 @@
     'neg-rakna:multdiv','primtal:begrepp','primtal:rakna','delbarhet:rakna','position:begrepp',
     'position:rakna','mult-rakna:sma','div-rakna:sma','mult-rakna:storasma','div-rakna:storasma',
     'brak-lana:rakna','brak-mult-forkorta:rakna','brak-div-reciprok:rakna',
-    'pot-begrepp:tabell',   // FAS1-breddning: potenstabell (numeric) blir quiz-bar; pot-begrepp:figur lämnas (visuell → självskattning)
+    // pot-begrepp:tabell BORTTAGEN här (delkapitel-grinden fann driften): generatorn togs bort vid certifiering FAS 2
+    // (ak8-k1-ram.html ~rad 812) men noden låg kvar som byggbar → dk8-testet lovade täckning som inte fanns.
     // dk11 kvadratrötter (åk8-introduktion inför nian): alla 8 noder byggbara → ett samlingstest
     'kvadrat-area:rakna','kvadrat-rakna:rakna','kvadrat-skala:rakna','rot-sida:rakna',
     'rot-berakna:rakna','rot-uppskatta:rakna','rot-decimal:rakna','rot-narmevarde:rakna'

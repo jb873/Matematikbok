@@ -34,7 +34,7 @@ const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--allow-file-a
   '--remote-debugging-port=' + PORT, '--user-data-dir=' + prof, 'about:blank'], { stdio: 'ignore' });
 
 function getJson(p, method){ return new Promise((res, rej) => { const rq = http.request({ host: '127.0.0.1', port: PORT, path: p, method: method || 'GET' }, r => { let s = ''; r.on('data', d => s += d); r.on('end', () => { try { res(JSON.parse(s)); } catch(e){ rej(e); } }); }); rq.on('error', rej); rq.end(); }); }
-async function waitPort(){ for(let i = 0; i < 100; i++){ try { return await getJson('/json/version'); } catch(e){ await new Promise(r => setTimeout(r, 100)); } } throw new Error('Chrome svarade inte på CDP-porten'); }
+async function waitPort(){ for(let i = 0; i < 200; i++){ try { return await getJson('/json/version'); } catch(e){ await new Promise(r => setTimeout(r, 100)); } } throw new Error('Chrome svarade inte på CDP-porten'); }
 
 (async () => {
   let code = 0;
