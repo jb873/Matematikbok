@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="../../fonts/fonts.css">
 <link rel="stylesheet" href="../../js/motor/blad/ak8-blad-kanon.css">
 <style>
-  /* Blad-regler nedan AVVIKER från ak8-blad-kanon.css (sidfamilj) — normalisering = eget beslut. */
   :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
   *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
   .topnav{ background:var(--navy); color:#fff; padding:13px 26px; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
@@ -29,14 +28,7 @@
   .blad-nav-btn.is-active{ background:var(--navy); border-color:var(--navy); color:#fff; }
   .blad-nav-nr{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--paper-dk); color:var(--ink-faint); font-size:11px; font-weight:600; }
   .blad-nav-btn.is-active .blad-nav-nr{ background:var(--gold-lt); color:var(--navy); }
-  .ovn-sheet h2{ font-family:var(--serif); font-size:25px; font-weight:500; margin-bottom:6px; }
-  .ovn-grupp{ margin-top:20px; } .ovn-grupp:first-of-type{ margin-top:10px; }
-  .ak8-rad{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:9px 0; border-bottom:1px dotted var(--paper-dk); }
-  .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; min-width:90px; }
-  .ak8-in{ width:96px; height:36px; text-align:center; font-family:var(--serif); font-size:18px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; font-feature-settings:'tnum'; }
-  .ak8-fasit{ display:block; margin-top:4px; font-size:12.5px; color:#c0392b; width:100%; }
   /* stående bråk */
-  .ovn-kontroll-rad{ display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; align-items:center; }
   .fard-layout{ max-width:920px; margin:0 auto; padding:18px 24px 44px; display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }
   .fard-lista{ display:flex; flex-direction:column; gap:6px; }
   .fard-ko{ font-family:var(--cinzel); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin:10px 0 2px; }

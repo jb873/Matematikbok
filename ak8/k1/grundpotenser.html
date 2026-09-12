@@ -7,8 +7,6 @@
 <link rel="stylesheet" href="../../fonts/fonts.css">
 <link rel="stylesheet" href="../../js/motor/blad/ak8-blad-kanon.css">
 <style>
-  /* Blad-regler nedan AVVIKER från ak8-blad-kanon.css (sidfamilj) — normalisering = eget beslut. */
-  .ak8-in-sm{ width:74px; height:36px; font-size:18px; }   /* pinnar utseendet före kanon-flytten: .ak8-in-sm var ostylad här (kanon: 60/32/16) — normalisera = eget beslut */
   :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
   *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
   .topnav{ background:var(--navy); color:#fff; padding:13px 26px; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
@@ -31,7 +29,6 @@
   .blad-nav-btn.is-active{ background:var(--navy); border-color:var(--navy); color:#fff; }
   .blad-nav-nr{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--paper-dk); color:var(--ink-faint); font-size:11px; font-weight:600; }
   .blad-nav-btn.is-active .blad-nav-nr{ background:var(--gold-lt); color:var(--navy); }
-  .ak8-svar{ display:inline-flex; align-items:center; gap:2px; flex-wrap:wrap; }
   /* potenser + grundpotens-cell */
   .pot{ font-family:var(--serif); white-space:nowrap; }
   .pot sup{ font-size:0.72em; }
@@ -39,11 +36,8 @@
   .pot > .ak8-in-sm{ width:42px; }
   .pot sup .ak8-gpe{ width:40px; }   /* exponentruta i grundpotens-cellen (tar uttryck 5+6) */
      /* koefficient-ruta (1,5 / 4,07) */
-  .ak8-fasit{ display:block; margin-top:4px; font-size:12.5px; color:#c0392b; width:100%; }
   /* stående bråk */
-  .ovn-brak-taljare,.ovn-brak-namnare{ padding:0 8px 2px; font-size:17px; white-space:nowrap; }
   /* kontroll + sammanfattning */
-  .ovn-kontroll-rad{ display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
   /* Färdighetsträning */
   .fard-layout{ max-width:920px; margin:0 auto; padding:18px 24px 44px; display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }
   .fard-lista{ display:flex; flex-direction:column; gap:6px; }
