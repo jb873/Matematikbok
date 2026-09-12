@@ -1,10 +1,17 @@
 /* ============================================================
-   FAMILJ B · METOD-KÄRNA (delade beroenden)
-   Utbrutet BYTE-IDENTISKT ur ak7-k1-ram.html, UTOM renderSummaryCard
-   som parametriserats på currentKO (enda globala kopplingen; sanktionerat).
-   OBS: navTo refererar övriga vy-renderare som bor kvar i ram-B tills
-   familj B modulariseras vidare — anropas ej av faktorträdsmotorn.
-   Laddas som klassiskt <script> FÖRE metod-faktortrad.js.
+   FAMILJ B · METOD-KÄRNA (delade beroenden för drill-ramen + metod-modulerna)
+   ─────────────────────────────────────────────────────────────
+   EN KÄLLA (PASS 3, 2026-09-12): ak7-k1-ram.html laddar den här filen som <script src>
+   omedelbart FÖRE sitt stora inline-skript, och bär INGA egna kopior av funktionerna nedan.
+   Historik: filen bröts ut 2026-07-12 ("ram-B omkopplad") men kopplades aldrig in i
+   ak7-k1-ram.html — ramen behöll originalen, och adjustLevel/exerciseHeader/renderSummaryCard
+   utvecklades vidare i ramen medan kärnfilen stod stilla (kärnans renderSummaryCard läste
+   opts.currentKO som ingen drill skickar → "Tillbaka" hade gått till ko 'undefined').
+   Nu är kärnan = ramens kod, byte-troget, och ramen tömd på dubbletterna.
+
+   Fria variabler (definieras i ramen, används vid ANROP, inte vid laddning): state, repRegister,
+   RAM_MAXNIVA, renderKapitel/renderDel/renderKo/renderOvning m.fl. (via navTo), ovaKonfetti.
+   Kräver <body> (body-click-lyssnaren) → laddas i body, inte i head.
    ============================================================ */
 
 // -- math helpers --
@@ -24,7 +31,6 @@ function primeFactorize(n){
 function sortAsc(a){return [...a].sort((x,y)=>x-y)}
 function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-
 // distinktOmgang — N DISTINKTA uppgifter ur en generator (FAS 3, kontrakt för drillarnas omgångsbygge).
 // Mönstret från metod-mult (Set + försökstak PER OMGÅNG) med avrundningens OVILLKORLIGA fyllnad:
 // omgången är alltid full — hellre en dublett i nödfall än en kort omgång. Distinktheten är "best effort".
@@ -47,29 +53,13 @@ function distinktOmgang(gen, n, keyFn, maxTries){
   while(ut.length < n){ const t = gen(); if(t != null) ut.push(t); else break; }   // ovillkorlig fyllnad
   return ut;
 }
-
-const PRIMES_50 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
-const PRIMES_100 = [...PRIMES_50,53,59,61,67,71,73,79,83,89,97];
 function compositesUpTo(max){
   const out=[];
   for(let i=4;i<=max;i++) if(!isPrime(i)) out.push(i);
   return out;
 }
-const COMPOSITES_50 = compositesUpTo(50);
-const COMPOSITES_100 = compositesUpTo(100);
 
-// -- state --
-const state = {
-  currentDel: null,
-  currentKO: null,
-  currentFormaga: null,
-  // Tutor's "verdict" per (ko, formaga)
-  tutorScores: {}, // {ko: {formaga: {correct: n, total: m}}}
-  // Self-assessment storage
-  skattningar: {} // {ko: {key: 'kan'|'osaker'|'kanej', ...}}
-};
-
-// -- getTutorScore (repRegister valfri; saknas => returnerar raw) --
+// -- tutor score (repetitions-bokföring via proxy) --
 function getTutorScore(koId, formagaKey){
   if(!state.tutorScores[koId])state.tutorScores[koId]={};
   if(!state.tutorScores[koId][formagaKey])state.tutorScores[koId][formagaKey]={correct:0,total:0,score:0};
@@ -104,7 +94,7 @@ function getTutorScore(koId, formagaKey){
   return p;
 }
 
-// -- getSummaryCopy --
+// -- sammanfattning --
 function getSummaryCopy(right, total){
   if(right === total){
     const msgs = [
@@ -127,11 +117,11 @@ function getSummaryCopy(right, total){
   }
   return {emoji:'🌱', title:'Bra att du försöker!', message:'Här finns lite att jobba på. Titta på förklaringarna och försök igen – det här kommer!', celebration:false};
 }
-
-// -- renderSummaryCard (PARAMETRISERAD: currentKO in) --
 function renderSummaryCard(opts){
-  const {right, total, level, levelChange, nextLabel='Ny omgång', currentKO} = opts;
+  const {right, total, level, levelChange, nextLabel='Ny omgång'} = opts;
   const summary = getSummaryCopy(right, total);
+  // Alla rätt → konfettiregn (fyras när sammanfattningen målats).
+  if(total > 0 && right === total && typeof ovaKonfetti === 'function') setTimeout(ovaKonfetti, 150);
   let levelMsg = '';
   if(levelChange === 'up') levelMsg = `↑ Nivå upp till ${level} – nu blir det svårare!`;
   else if(levelChange === 'down') levelMsg = `↓ Nivå ner till ${level} – vi tar det lite lugnare.`;
@@ -144,37 +134,40 @@ function renderSummaryCard(opts){
       ${levelMsg ? `<div class="summary-level-change ${levelChange==='down'?'down':''}">${levelMsg}</div>` : ''}
       <div class="summary-actions">
         <button class="btn primary" id="summary-next-btn">${nextLabel}</button>
-        <button class="btn" onclick="navTo('ko',{koId:'${currentKO}'})">Tillbaka</button>
+        <button class="btn" onclick="navTo('ko',{koId:'${state.currentKO}'})">Tillbaka</button>
       </div>
     </div>
   `;
 }
 
-// -- adjustLevel --
+// -- nivå-modell (klättrar, sjunker aldrig; tak = RAM_MAXNIVA) --
+function ramMaxNiva(){ return (typeof RAM_MAXNIVA === 'number' && RAM_MAXNIVA >= 1) ? RAM_MAXNIVA : 3; }
 function adjustLevel(level, right, total){
-  if(right >= total - 1 && level < 3) return {level: level+1, change: 'up'};
-  if(right <= Math.floor(total/3) && level > 1) return {level: level-1, change: 'down'};
+  // Nivå-modell: klättrar men sjunker ALDRIG. Svårigheten går upp när eleven
+  // bemästrar; på en miss faller den inte tillbaka – man får fler uppgifter på
+  // samma nivå tills det sitter. Nuvarande nivå = golv (högsta uppnådda).
+  // Taket är färdighetens verkliga nivå-antal (RAM_MAXNIVA, satt av ?maxniva=N;
+  // default 3). En enkel-nivå-färdighet (max 1) klättrar aldrig.
+  if(right >= total - 1 && level < ramMaxNiva()) return {level: level+1, change: 'up'};
   return {level, change: null};
 }
 
-// -- router: showView / navTo / global nav-klick --
+// -- vy-navigering --
 function showView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('is-active'));
   document.querySelector(`[data-view="${name}"]`).classList.add('is-active');
   window.scrollTo(0,0);
 }
-
 function navTo(view, opts={}){
   if(view==='kapitel') renderKapitel();
   else if(view==='del') renderDel(opts.delId);
   else if(view==='ko') renderKO(opts.koId, opts.delId);
   else if(view==='ovning') renderOvning(opts.koId, opts.formaga);
   else if(view==='skattning') renderSkattning();
-  else if(view==='test-config') renderTestConfig();
-  else if(view==='test-take') renderTestTake();
-  else if(view==='test-result') renderTestResult();
+  else if(view==='test-config') PB.render.config();
+  else if(view==='test-take') PB.render.take();
+  else if(view==='test-result') PB.render.result();
 }
-
 document.body.addEventListener('click', e=>{
   const navTarget = e.target.closest('[data-nav]');
   if(navTarget){
@@ -183,17 +176,25 @@ document.body.addEventListener('click', e=>{
   }
 });
 
-// -- exerciseHeader --
+// -- övningshuvud (nivå-stege) --
 function exerciseHeader(title, sub, level){
-  const levelLabel = level ? `Nivå ${level}` : '';
-  const dots = level ? Array.from({length:3}).map((_,i)=>`<i class="${i<level?'filled':''}"></i>`).join('') : '';
+  const MAXNIVA = ramMaxNiva();
+  // Klättrande stege visas bara för flernivå-färdigheter (max ≥ 2). En enkel-nivå-
+  // färdighet (max 1) visar ingen segment-stege – bara drillen.
+  const visaStege = level && MAXNIVA >= 2;
+  const niva = Math.min(level || 1, MAXNIVA);
+  // NIVÅBRYGGA (B3): exponera aktuell drill-nivå så mastery-hooken kan logga den. Additivt.
+  if(typeof window !== 'undefined') window.__aktuellNiva = visaStege ? niva : null;
+  const levelLabel = visaStege ? `Nivå ${niva} av ${MAXNIVA}` : '';
+  const dots = visaStege ? Array.from({length:MAXNIVA}).map((_,i)=>`<i class="${i<niva?'filled':''}${i===niva-1?' aktuell':''}"></i>`).join('') : '';
   return `
     <div class="exercise-header">
       <div>
         <h2 class="exercise-title">${title}</h2>
         <p class="exercise-sub">${sub}</p>
       </div>
-      ${level?`<div class="difficulty-badge">${levelLabel} <span class="dots">${dots}</span></div>`:''}
+      ${visaStege?`<div class="difficulty-badge">${levelLabel} <span class="dots stege">${dots}</span></div>`:''}
     </div>
   `;
 }
+

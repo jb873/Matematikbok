@@ -305,8 +305,6 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
   .hist-cta-grid{grid-template-columns:1fr}
 }
 
-
-
 /* ==== BREADCRUMB ==== */
 .breadcrumb{
   display:flex;align-items:center;gap:6px;
@@ -2285,7 +2283,6 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .prio-rad-expr{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink);}
 .prio-rad-eq{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink-faint);}
 
-
 /* ==== DEL 8: NEGATIVA TAL ==== */
 .neg-fraga{text-align:left;margin:22px 0 6px;font-size:18px;color:var(--ink);line-height:1.5;}
 .neg-expr{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--ink);}
@@ -2343,7 +2340,6 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
   background:var(--ink);color:#fff;font-family:var(--sans);font-size:11px;font-weight:700;
   display:flex;align-items:center;justify-content:center;
 }
-
 
 /* ==== DEL 9: AVRUNDNING OCH ÖVERSLAGSRÄKNING ==== */
 .avr-fraga{text-align:left;margin:22px 0 6px;font-size:18px;color:var(--ink);line-height:1.6;}
@@ -2574,6 +2570,8 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 
 <script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/provbyggare/provbyggar-motor.js"></script>
+<!-- Metod-kärnan (delade drill-hjälpare) — EN källa; ramen bär inga egna kopior (PASS 3). Före inline-skriptet, i body. -->
+<script src="js/motor/metod/metod-karna.js"></script>
 <script>
 // ============================================================
 // DATA: kunskapsområden + förmågor per område
@@ -2850,46 +2848,6 @@ function aiFetch(url, opts){
   return fetch(url, opts);
 }
 
-function isPrime(n){
-  if(n<2)return false;
-  if(n===2)return true;
-  if(n%2===0)return false;
-  for(let i=3;i*i<=n;i+=2)if(n%i===0)return false;
-  return true;
-}
-function primeFactorize(n){
-  const f=[];let x=n;
-  for(let p=2;p*p<=x;p++){while(x%p===0){f.push(p);x/=p}}
-  if(x>1)f.push(x);
-  return f;
-}
-function sortAsc(a){return [...a].sort((x,y)=>x-y)}
-function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
-function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-// (spegel av js/motor/metod/metod-karna.js — kärnfilen är ännu inte inkopplad, ramen kör inline-originalen; Fall B.)
-// distinktOmgang — N DISTINKTA uppgifter ur en generator (FAS 3, kontrakt för drillarnas omgångsbygge).
-// Mönstret från metod-mult (Set + försökstak PER OMGÅNG) med avrundningens OVILLKORLIGA fyllnad:
-// omgången är alltid full — hellre en dublett i nödfall än en kort omgång. Distinktheten är "best effort".
-//   gen()      → en uppgift (anropas utan argument; bind level etc. i en closure)
-//   n          → antal uppgifter i omgången
-//   keyFn(t)   → nyckel som avgör "samma uppgift" (t.ex. t.display); utelämnas → JSON.stringify(t)
-//   maxTries   → försökstak per omgång (default 300)
-// Ingen drill ska rulla egen for(i<8) o.push(gen()) — det var defekten som potens-drill bar vidare till kvrot.
-function distinktOmgang(gen, n, keyFn, maxTries){
-  keyFn = keyFn || function(t){ return JSON.stringify(t); };
-  maxTries = maxTries || 300;
-  const ut = [], seen = new Set(); let tries = 0;
-  while(ut.length < n && tries < maxTries){
-    tries++;
-    const t = gen(); if(t == null) continue;
-    const k = keyFn(t);
-    if(seen.has(k)) continue;
-    seen.add(k); ut.push(t);
-  }
-  while(ut.length < n){ const t = gen(); if(t != null) ut.push(t); else break; }   // ovillkorlig fyllnad
-  return ut;
-}
-
 function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}          // slumpheltal [a,b]
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;} // för enklaste form (gcd=1)
 function komma(x){return String(x).replace('.',',')}                    // 0.04 → "0,04" (svensk decimal)
@@ -2897,11 +2855,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
 
 const PRIMES_50 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
 const PRIMES_100 = [...PRIMES_50,53,59,61,67,71,73,79,83,89,97];
-function compositesUpTo(max){
-  const out=[];
-  for(let i=4;i<=max;i++) if(!isPrime(i)) out.push(i);
-  return out;
-}
+
 const COMPOSITES_50 = compositesUpTo(50);
 const COMPOSITES_100 = compositesUpTo(100);
 
@@ -2926,40 +2880,6 @@ const state = {
   skattningar: {} // {ko: {key: 'kan'|'osaker'|'kanej', ...}}
 };
 
-function getTutorScore(koId, formagaKey){
-  if(!state.tutorScores[koId])state.tutorScores[koId]={};
-  if(!state.tutorScores[koId][formagaKey])state.tutorScores[koId][formagaKey]={correct:0,total:0,score:0};
-  var raw = state.tutorScores[koId][formagaKey];
-  // Returnera en proxy som även för in repetitions-bokföring.
-  // Befintliga övningar gör t.ex. "ts.total++; if(ok) ts.correct++;" – båda
-  // sker i samma "turn". Vi skjuter upp registreringen till nästa mikrotask
-  // så att vi hunnit se eventuell correct-ökning innan vi avgör rätt/fel.
-  if(typeof repRegister !== 'function') return raw;
-  if(raw.__proxied) return raw.__proxy;
-  var lastTotal = raw.total, lastCorrect = raw.correct, pending = false;
-  function flush(){
-    pending = false;
-    if(raw.total > lastTotal){
-      var blevRatt = raw.correct > lastCorrect;
-      lastTotal = raw.total; lastCorrect = raw.correct;
-      try{ repRegister(koId, formagaKey, blevRatt); } catch(e){}
-    }
-  }
-  var p = new Proxy(raw, {
-    set: function(obj, prop, val){
-      obj[prop] = val;
-      if((prop === 'total' || prop === 'correct') && !pending){
-        pending = true;
-        Promise.resolve().then(flush);
-      }
-      return true;
-    }
-  });
-  raw.__proxied = true;
-  raw.__proxy = p;
-  return p;
-}
-
 const VERDICT_TEXT = {kan:'Kan', osaker:'Osäker', kanej:'Kan ej'};
 
 function tutorVerdictFor(koId, formagaKey){
@@ -2980,99 +2900,21 @@ function tutorVerdictFor(koId, formagaKey){
 // ============================================================
 // SUMMARY HELPER - används av alla övningar
 // ============================================================
-function getSummaryCopy(right, total){
-  if(right === total){
-    const msgs = [
-      'Helt galet bra – alla rätt! Du har full koll på det här.',
-      'Imponerande! Inte ett enda fel.',
-      'Fullt hus! Du behärskar verkligen det här.',
-      'Felfritt! Du har stenkoll.',
-      'Wow, alla rätt! Snyggt jobbat.'
-    ];
-    return {emoji:'🌟', title:'Alla rätt!', message: randPick(msgs), celebration:true};
-  }
-  if(right >= total - 1){
-    return {emoji:'🎉', title:'Riktigt bra jobbat!', message:'Nästan alla rätt – bara ett misstag. Du är på god väg!', celebration:true};
-  }
-  if(right >= Math.ceil(total * 0.75)){
-    return {emoji:'👍', title:'Bra jobbat!', message:'De flesta rätt. Med lite mer träning sitter det.', celebration:false};
-  }
-  if(right >= Math.ceil(total * 0.5)){
-    return {emoji:'💪', title:'Bra ansträngning!', message:'Du har koll på en del. Träna lite till så blir det säkrare.', celebration:false};
-  }
-  return {emoji:'🌱', title:'Bra att du försöker!', message:'Här finns lite att jobba på. Titta på förklaringarna och försök igen – det här kommer!', celebration:false};
-}
 
 /**
  * Returns HTML for a summary card. Caller wires up the button onclick.
  * level: 1, 2, 3 or null
  * levelChange: 'up' | 'down' | null
  */
-function renderSummaryCard(opts){
-  const {right, total, level, levelChange, nextLabel='Ny omgång'} = opts;
-  const summary = getSummaryCopy(right, total);
-  // Alla rätt → konfettiregn (fyras när sammanfattningen målats).
-  if(total > 0 && right === total && typeof ovaKonfetti === 'function') setTimeout(ovaKonfetti, 150);
-  let levelMsg = '';
-  if(levelChange === 'up') levelMsg = `↑ Nivå upp till ${level} – nu blir det svårare!`;
-  else if(levelChange === 'down') levelMsg = `↓ Nivå ner till ${level} – vi tar det lite lugnare.`;
-  return `
-    <div class="summary-card ${summary.celebration?'celebration':''}">
-      <div class="summary-emoji bounce">${summary.emoji}</div>
-      <h3 class="summary-title ${summary.celebration?'celebration':''}">${summary.title}</h3>
-      <div class="summary-score">${right} / ${total}</div>
-      <p class="summary-message">${summary.message}</p>
-      ${levelMsg ? `<div class="summary-level-change ${levelChange==='down'?'down':''}">${levelMsg}</div>` : ''}
-      <div class="summary-actions">
-        <button class="btn primary" id="summary-next-btn">${nextLabel}</button>
-        <button class="btn" onclick="navTo('ko',{koId:'${state.currentKO}'})">Tillbaka</button>
-      </div>
-    </div>
-  `;
-}
 
 /**
  * Adaptive level adjustment: ≥(total-1) right = level up, ≤floor(total/3) = level down
  * Returns new {level, change}
  */
-function ramMaxNiva(){ return (typeof RAM_MAXNIVA === 'number' && RAM_MAXNIVA >= 1) ? RAM_MAXNIVA : 3; }
-function adjustLevel(level, right, total){
-  // Nivå-modell: klättrar men sjunker ALDRIG. Svårigheten går upp när eleven
-  // bemästrar; på en miss faller den inte tillbaka – man får fler uppgifter på
-  // samma nivå tills det sitter. Nuvarande nivå = golv (högsta uppnådda).
-  // Taket är färdighetens verkliga nivå-antal (RAM_MAXNIVA, satt av ?maxniva=N;
-  // default 3). En enkel-nivå-färdighet (max 1) klättrar aldrig.
-  if(right >= total - 1 && level < ramMaxNiva()) return {level: level+1, change: 'up'};
-  return {level, change: null};
-}
 
 // ============================================================
 // ROUTER
 // ============================================================
-function showView(name){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('is-active'));
-  document.querySelector(`[data-view="${name}"]`).classList.add('is-active');
-  window.scrollTo(0,0);
-}
-
-function navTo(view, opts={}){
-  if(view==='kapitel') renderKapitel();
-  else if(view==='del') renderDel(opts.delId);
-  else if(view==='ko') renderKO(opts.koId, opts.delId);
-  else if(view==='ovning') renderOvning(opts.koId, opts.formaga);
-  else if(view==='skattning') renderSkattning();
-  else if(view==='test-config') PB.render.config();
-  else if(view==='test-take') PB.render.take();
-  else if(view==='test-result') PB.render.result();
-}
-
-document.body.addEventListener('click', e=>{
-  const navTarget = e.target.closest('[data-nav]');
-  if(navTarget){
-    e.preventDefault();
-    navTo(navTarget.dataset.nav);
-  }
-});
 
 // ============================================================
 // VIEW: KAPITEL HEM
@@ -3568,26 +3410,6 @@ där score är 0.0–1.0 baserat på hur väl svaret motsvarar rubricen.`;
 // ============================================================
 // EXERCISE HEADER HELPER
 // ============================================================
-function exerciseHeader(title, sub, level){
-  const MAXNIVA = ramMaxNiva();
-  // Klättrande stege visas bara för flernivå-färdigheter (max ≥ 2). En enkel-nivå-
-  // färdighet (max 1) visar ingen segment-stege – bara drillen.
-  const visaStege = level && MAXNIVA >= 2;
-  const niva = Math.min(level || 1, MAXNIVA);
-  // NIVÅBRYGGA (B3): exponera aktuell drill-nivå så mastery-hooken kan logga den. Additivt.
-  if(typeof window !== 'undefined') window.__aktuellNiva = visaStege ? niva : null;
-  const levelLabel = visaStege ? `Nivå ${niva} av ${MAXNIVA}` : '';
-  const dots = visaStege ? Array.from({length:MAXNIVA}).map((_,i)=>`<i class="${i<niva?'filled':''}${i===niva-1?' aktuell':''}"></i>`).join('') : '';
-  return `
-    <div class="exercise-header">
-      <div>
-        <h2 class="exercise-title">${title}</h2>
-        <p class="exercise-sub">${sub}</p>
-      </div>
-      ${visaStege?`<div class="difficulty-badge">${levelLabel} <span class="dots stege">${dots}</span></div>`:''}
-    </div>
-  `;
-}
 
 // ============================================================
 // VIEW: SJÄLVSKATTNING (hela kapitlet)
@@ -4724,7 +4546,6 @@ const PB = ProvbyggarMotor.montera({
     updateTutorContext: function(){ state.currentKO = null; state.currentFormaga = null; updateTutorContext(); }
   }
 });
-
 
 // ============================================================
 // AI TUTOR
@@ -8243,7 +8064,6 @@ function renderSubMatris(){
 
   render(); showView('skattning'); updateTutorContext();
 }
-
 
 // ============================================================
 // DEL 5 – DIVISION
