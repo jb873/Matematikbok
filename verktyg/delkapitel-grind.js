@@ -44,7 +44,7 @@ function cdp(url, js, extra){
   let r; for(let forsok = 0; forsok < 2; forsok++){   // ett omförsök vid CDP-portrace (Chrome hann inte upp)
     r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), url, tmp].concat(extra || []), { encoding: 'utf8', timeout: 320000 });
     if(r.status === 0) break;                                           // lyckat → klart
-    if(!(r.signal || /svarade inte på CDP-porten|hittar ingen sid-target/.test(r.stderr || ''))) break;   // riktigt fel i sidan → ingen retry
+    if(!(r.signal || /svarade inte på CDP-porten|hittar ingen sid-target|vakthund|CDP-steg tidsgränsat|WebSocket-anslutning/.test(r.stderr || ''))) break;   // riktigt fel i sidan → ingen retry; harness-hängning → ett omförsök
   }
   try { fs.unlinkSync(tmp); } catch(e){}
   if(r.status !== 0){ return { fel: (r.stderr || r.stdout || (r.signal ? 'timeout (' + r.signal + ')' : 'okänt fel')).trim().slice(0, 300) }; }
