@@ -5,7 +5,7 @@
 
    BAND PER SPÅR, inte bara per årskurs (order dk2 FAS 2): E-spåret, nians och gy-fördjupningens
    sex/två/åtta dokument har OLIKA golv och tak inom SAMMA nod och delkapitel. Denna fil bär bara
-   **E-bandet** (härlett ur E-spårets sex dokument, Öva 1–6). `spar.nian` / `spar.gy` fylls senare
+   **E-bandet** (härlett ur E-spårets sex dokument, Öva 1–6). `spar.nian` fylls senare (gymnasiespåret togs bort 2026-09-12 — inget `spar.gy`)
    ur respektive dokument — de får INTE härledas ur E, och E får inte tvingas upp av dem.
 
    TAKREGELN: uppgifterna får aldrig bli svårare än öva-dokumentet. Öva definierar golv OCH tak.

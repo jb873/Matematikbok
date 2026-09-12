@@ -21,15 +21,6 @@
   h1.hero-title em{ font-style:italic; color:var(--gold-lt); }
   .hero-back{ display:inline-block; margin-top:22px; font-family:var(--cinzel); font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--gold-lt); text-decoration:none; padding:7px 16px; border:1px solid rgba(255,255,255,.2); border-radius:4px; }
   .hero-back:hover{ background:rgba(255,255,255,.08); }
-  /* utbudslista: tre spår, grupperad platt lista (åk7-mönstret) */
-  .utbud{ max-width:900px; margin:0 auto; padding:30px 28px 56px; }
-  .utbud-grupp{ margin-top:30px; } .utbud-grupp:first-of-type{ margin-top:8px; }
-  .utbud-rubrik{ font-family:var(--cinzel); font-size:12px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-  .utbud-rubrik::after{ content:''; flex:1; height:1px; background:var(--paper-dk); }
-  .utbud-rubrik .spar-tag{ font-size:10px; letter-spacing:.08em; color:var(--gold); background:rgba(154,114,40,.1); border-radius:3px; padding:2px 8px; }
-  .val-rad{ display:flex; flex-wrap:wrap; gap:10px; }
-  .val-chip{ display:inline-flex; align-items:center; gap:8px; font-family:var(--serif); font-size:15px; color:var(--ink-soft); background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:11px 17px; opacity:.62; cursor:default; }
-  .val-chip .kommer{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); background:var(--paper-dk); border-radius:3px; padding:2px 7px; }
   /* Öppet val i eget spår (öva-varianterna finns) — full opacitet, klickbart. Ej en E-spårs-övergång. */
   .val-chip.val-oppen{ opacity:1; cursor:pointer; text-decoration:none; color:var(--ink); font-weight:600; transition:box-shadow .15s, border-color .15s; }
   .val-chip.val-oppen:hover{ border-color:var(--gold); box-shadow:0 2px 10px rgba(15,30,46,.08); }
@@ -72,7 +63,7 @@
 </footer>
 
 <script src="../../js/data/ak9-k1-bok.js"></script>
-<script src="../../js/data/ak8-k1-bok.js"></script>
+<script src="../../js/data/ak9-utbud.js"></script>
 <script>
 (function(){
   var me = location.pathname.split('/').pop();
@@ -84,56 +75,8 @@
   document.getElementById('footer-del').textContent = 'Årskurs 9 · Kapitel 1 · Delkapitel ' + dk.nr;
   document.title = 'Matematik · Åk 9 · ' + dk.titel;
 
-  // TRE SPÅR (Joachims E-spåret / Åk 9 / Åk 9 + gymnasiet). Grupperad platt utbudslista (åk7-mönstret):
-  // rubrik = spår (ej klickbar), rad = val (direktlänk när innehållet finns). Nu: skelett, allt "kommer".
-  // E-SPÅRET: tre LEVANDE övergångslänkar (materialet finns → kommer-regeln gäller inte här).
-  // Etiketterna hämtas single-source ur åttans bok (AK8_K1_BOK) för dk1/dk2; sjuans hela kapitel 1
-  // ur ak7.html:s kapitel-lista. Rendras som chips i val-rad → en fjärde rad (kartlänk) får plats
-  // BREDVID dem senare utan att ersätta dem. Årskurs-badge markerar att länken lämnar nian.
-  var bok8 = window.AK8_K1_BOK || { delkapitel: [] };
-  function dk8(nr){ var d = (bok8.delkapitel || []).filter(function(x){ return x.nr === nr; })[0];
-    return d ? { titel: d.titel, sub: (d.blad || []).map(function(b){ return b.titel; }).join(' · ') } : null; }
-  var g8 = dk8(1), b8 = dk8(2);
-  var ELANKAR = [
-    { ar:'Åk 8', titel:(g8 && g8.titel) || 'Grunder',     sub:(g8 && g8.sub) || '', href:'../../ak8/k1/grunder.html' },
-    { ar:'Åk 8', titel:(b8 && b8.titel) || 'Beräkningar', sub:(b8 && b8.sub) || '', href:'../../ak8/k1/berakningar.html' },
-    { ar:'Åk 7', titel:'Positionssystem och fyra räknesätt', sub:'Positionssystemet och de fyra räknesätten – addition, subtraktion, multiplikation och division.', href:'../../ak7-k1.html' }
-  ];
-
-  var SPAR = [
-    { rubrik: 'E-spåret', tag: 'grund', elankar: ELANKAR },
-    { rubrik: 'Åk 9-spåret', tag: 'mål', val: [{ label:'Föreläsning', href:'tal-och-berakna-forel.html' }, { label:'Öva', href:'tal-och-berakna-ova.html' }, { label:'Färdighetsträning', href:'tal-och-berakna-fard.html' }, { label:'Test', href:'tal-och-berakna-test.html' }] },
-    { rubrik: 'Åk 9 + gymnasiet', tag: 'fördjupning', val: ['Fördjupning', 'Färdighetsträning'] }
-  ];
-  var wrap = document.getElementById('utbud');
-  SPAR.forEach(function(s){
-    var g = document.createElement('div'); g.className = 'utbud-grupp';
-    var r = document.createElement('div'); r.className = 'utbud-rubrik';
-    r.innerHTML = s.rubrik + '<span class="spar-tag">' + s.tag + '</span>';
-    var rad = document.createElement('div'); rad.className = 'val-rad';
-    if(s.elankar){
-      s.elankar.forEach(function(L){
-        var a = document.createElement('a'); a.className = 'val-chip val-live'; a.href = L.href;
-        var ar = document.createElement('span'); ar.className = 'val-ar'; ar.textContent = L.ar;
-        var ti = document.createElement('span'); ti.className = 'val-titel'; ti.textContent = L.titel;
-        a.appendChild(ar); a.appendChild(ti);
-        if(L.sub){ var su = document.createElement('span'); su.className = 'val-sub'; su.textContent = L.sub; a.appendChild(su); }
-        rad.appendChild(a);
-      });
-    } else {
-      s.val.forEach(function(v){
-        if(v && v.href){                                   // öppet val (materialet finns) → levande länk, samma årskurs
-          var a = document.createElement('a'); a.className = 'val-chip val-oppen'; a.href = v.href; a.textContent = v.label;
-          rad.appendChild(a);
-        } else {
-          var c = document.createElement('span'); c.className = 'val-chip';
-          c.innerHTML = v + '<span class="kommer">kommer</span>';
-          rad.appendChild(c);
-        }
-      });
-    }
-    g.appendChild(r); g.appendChild(rad); wrap.appendChild(g);
-  });
+  // Utbudet (Årskurs 9 · Repetition) ritas av den delade monteraren ur bokens data — sidan bär inget eget.
+  AK9_UTBUD.render(document.getElementById('utbud'), dk);
 })();
 </script>
 <script src="../../js/elevfeedback.js" defer></script>

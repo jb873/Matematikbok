@@ -21,22 +21,6 @@
   h1.hero-title em{ font-style:italic; color:var(--gold-lt); }
   .hero-back{ display:inline-block; margin-top:22px; font-family:var(--cinzel); font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--gold-lt); text-decoration:none; padding:7px 16px; border:1px solid rgba(255,255,255,.2); border-radius:4px; }
   .hero-back:hover{ background:rgba(255,255,255,.08); }
-  /* ärlig byggplats-notis */
-  .bygg-note{ max-width:900px; margin:26px auto 0; padding:0 28px; }
-  .bygg-note-inner{ display:flex; gap:14px; align-items:flex-start; background:var(--paper-lt); border:1px solid var(--paper-dk); border-left:4px solid var(--gold); border-radius:8px; padding:16px 20px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
-  .bygg-note-inner .ikon{ font-size:20px; flex-shrink:0; }
-  /* utbudslista: tre spår, grupperad platt lista (åk7-mönstret) */
-  .utbud{ max-width:900px; margin:0 auto; padding:30px 28px 56px; }
-  .utbud-grupp{ margin-top:30px; } .utbud-grupp:first-of-type{ margin-top:8px; }
-  .utbud-rubrik{ font-family:var(--cinzel); font-size:12px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-  .utbud-rubrik::after{ content:''; flex:1; height:1px; background:var(--paper-dk); }
-  .utbud-rubrik .spar-tag{ font-size:10px; letter-spacing:.08em; color:var(--gold); background:rgba(154,114,40,.1); border-radius:3px; padding:2px 8px; }
-  .val-rad{ display:flex; flex-wrap:wrap; gap:10px; }
-  .val-chip{ display:inline-flex; align-items:center; gap:8px; font-family:var(--serif); font-size:15px; color:var(--ink-soft); background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:11px 17px; opacity:.62; cursor:default; }
-  .val-chip .kommer{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); background:var(--paper-dk); border-radius:3px; padding:2px 7px; }
-  a.val-chip{ opacity:1; cursor:pointer; color:var(--ink); border-left:3px solid var(--gold); text-decoration:none; transition:box-shadow .15s, border-color .15s; }
-  a.val-chip:hover{ box-shadow:0 2px 10px rgba(15,30,46,.09); border-color:var(--gold-lt); }
-  a.val-chip .oppna{ font-family:var(--cinzel); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
   footer{ border-top:1px solid var(--paper-dk); padding:26px 28px; display:flex; justify-content:space-between; align-items:center; max-width:900px; margin:0 auto; color:var(--ink-faint); font-size:12px; }
   footer span{ font-family:var(--cinzel); font-size:11px; letter-spacing:.1em; }
   @media(max-width:600px){ .topnav{ padding:0 16px; } .hero{ padding:36px 18px 32px; } }
@@ -62,16 +46,6 @@
   <a class="hero-back" href="index.html">← Alla delkapitel</a>
 </header>
 
-<div class="bygg-note">
-  <div class="bygg-note-inner">
-    <span class="ikon">🚧</span>
-    <div><strong>Det här delkapitlet byggs.</strong> <strong>E-spårets Öva</strong> (sex dokument med varianter) och
-    <strong>gymnasiefördjupningens algebraiska bråk</strong> (åtta dokument) är öppna. Resten av spåren och
-    val-raderna kopplas in när åk9-taxonomin taggas och bladen författas.
-    Du kan öva på samma färdigheter i <a href="../../ak8/index.html">årskurs 8</a>
-    och <a href="../../ak7.html">årskurs 7</a> under tiden.</div>
-  </div>
-</div>
 
 <main class="utbud" id="utbud"></main>
 
@@ -81,6 +55,7 @@
 </footer>
 
 <script src="../../js/data/ak9-k1-bok.js"></script>
+<script src="../../js/data/ak9-utbud.js"></script>
 <script>
 (function(){
   var me = location.pathname.split('/').pop();
@@ -92,32 +67,8 @@
   document.getElementById('footer-del').textContent = 'Årskurs 9 · Kapitel 1 · Delkapitel ' + dk.nr;
   document.title = 'Matematik · Åk 9 · ' + dk.titel;
 
-  // TRE SPÅR (Joachims E-spåret / Åk 9 / Åk 9 + gymnasiet). Grupperad platt utbudslista (åk7-mönstret):
-  // rubrik = spår (ej klickbar), rad = val (direktlänk när innehållet finns). Nu: skelett, allt "kommer".
-  var SPAR = [
-    { rubrik: 'E-spåret', tag: 'grund', val: [{ namn:'Öva', href:'rakna-med-brak-ova.html' }, 'Färdighetsträning', 'Test'] },
-    { rubrik: 'Åk 9-spåret', tag: 'mål', val: ['Föreläsning', { namn:'Öva', href:'rakna-med-brak-akr9-ova.html' }, { namn:'Färdighetsträning', href:'rakna-med-brak-fard.html' }, { namn:'Test', href:'rakna-med-brak-test.html' }] },
-    { rubrik: 'Åk 9 + gymnasiet', tag: 'fördjupning', val: [{ namn:'Fördjupning', href:'rakna-med-brak-fordjupning.html' }, 'Färdighetsträning'] }
-  ];
-  var wrap = document.getElementById('utbud');
-  SPAR.forEach(function(s){
-    var g = document.createElement('div'); g.className = 'utbud-grupp';
-    var r = document.createElement('div'); r.className = 'utbud-rubrik';
-    r.innerHTML = s.rubrik + '<span class="spar-tag">' + s.tag + '</span>';
-    var rad = document.createElement('div'); rad.className = 'val-rad';
-    s.val.forEach(function(v){
-      if(v && v.href){   // live-val (innehåll finns) → länk
-        var a = document.createElement('a'); a.className = 'val-chip'; a.href = v.href;
-        a.innerHTML = v.namn + '<span class="oppna">Öppna →</span>';
-        rad.appendChild(a);
-      } else {
-        var c = document.createElement('span'); c.className = 'val-chip';
-        c.innerHTML = v + '<span class="kommer">kommer</span>';
-        rad.appendChild(c);
-      }
-    });
-    g.appendChild(r); g.appendChild(rad); wrap.appendChild(g);
-  });
+  // Utbudet (Årskurs 9 · Repetition) ritas av den delade monteraren ur bokens data — sidan bär inget eget.
+  AK9_UTBUD.render(document.getElementById('utbud'), dk);
 })();
 </script>
 <script src="../../js/elevfeedback.js" defer></script>

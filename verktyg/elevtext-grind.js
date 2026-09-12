@@ -45,7 +45,7 @@ function attrMall(raw) {
 // läser många gånger) vägde tyngst i att bredda täckningen — se elevtext-svepet, "Väg 2".
 function kallor() {
   const list = [];
-  const dirs = ['js/motor/blad', 'js/motor/metod', 'js/motor/ovamer', 'js/motor/potens', 'js/motor/figur'];
+  const dirs = ['js/motor/blad', 'js/motor/metod', 'js/motor/ovamer', 'js/motor/potens', 'js/motor/figur', 'js/motor/kvrot'];   // kvrot: ny katalog 2026-09 (tredje gången en ny katalog hamnade utanför — se rapport om inverterad kallor())
   for (const d of dirs) {
     const abs = path.join(ROOT, d);
     if (fs.existsSync(abs)) for (const f of fs.readdirSync(abs)) if (f.endsWith('.js')) list.push(d + '/' + f);
@@ -59,6 +59,9 @@ function kallor() {
   }
   list.push('js/data/k1-fardiga-test.js');   // FAS 3: elevtext-varningen vid flikbyte under prov
   list.push('js/data/ak8-fardiga-test.js');  // åk8: samma flikbyte-varning (certifiering)
+  list.push('js/data/forelasningar.js');      // föreläsningsregistret: tom-text + notis (elevtext)
+  list.push('js/data/ak9-utbud.js');          // nians utbud: rubriker, repetitionstext, byggnotis (elevtext)
+  list.push('js/data/ak9-k1-bok.js');          // nians utbud-data: chip-titlar (titel:) per delkapitel
   return list;
 }
 
