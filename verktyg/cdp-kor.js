@@ -6,7 +6,7 @@
    någonsin i källträdet. Node ≥22 (inbyggd WebSocket), ingen npm.
 
    KÖR:
-     node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms]
+     node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms] [--pre fil.js]
        <js-fil> = en JS-text som EVALUERAS i sidan; får vara ett async-uttryck / IIFE som returnerar ett
                   Promise. Resultatet (JSON) skrivs på stdout.
      Exempel:
@@ -22,6 +22,9 @@ const url = args[0], jsFile = args[1];
 if(!url || !jsFile){ console.error('användning: node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms]'); process.exit(2); }
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? parseInt(args[i + 1], 10) : d; };
 const WAIT = opt('--wait', 1200), TIMEOUT = opt('--timeout', 60000);
+// --pre <js-fil>: körs i sidan FÖRE dess egna skript (Page.addScriptToEvaluateOnNewDocument) — t.ex. för att
+// fånga IIFE-lokala objekt genom att wrappa en global fabrik (window.__PB via ProvbyggarMotor.montera).
+const preI = args.indexOf('--pre'), PRE = preI >= 0 ? fs.readFileSync(path.resolve(args[preI + 1]), 'utf8') : null;
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const PORT = 9222 + Math.floor(Math.random() * 500);
 const expr = fs.readFileSync(path.resolve(jsFile), 'utf8');
@@ -47,6 +50,7 @@ async function waitPort(){ for(let i = 0; i < 100; i++){ try { return await getJ
     ws.onmessage = ev => { const m = JSON.parse(ev.data); if(m.id && pending[m.id]){ pending[m.id](m); delete pending[m.id]; } };
     const send = (method, params) => new Promise(res => { const i = ++id; pending[i] = res; ws.send(JSON.stringify({ id: i, method, params: params || {} })); });
     await send('Page.enable'); await send('Runtime.enable');
+    if(PRE) await send('Page.addScriptToEvaluateOnNewDocument', { source: PRE });
     await send('Page.navigate', { url });
     await new Promise(r => setTimeout(r, WAIT));
     const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true, timeout: TIMEOUT });
