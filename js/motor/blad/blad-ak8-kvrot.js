@@ -138,8 +138,11 @@
     var s8 = [ri(1, 9) / 10, ri(1, 9) / 10, ri(3, 7) * 10, ri(1, 9) / 10];
     var G8 = { rubrik:'Beräkna', logg:'rot-decimal:rakna',
       rader: s8.map(function(s){ return { typ:'tal', fraga:rot(komma(q2(s * s))) + ' =', facit:s, tal:q2(s * s) }; }) };
-    // 9 — närmevärde med räknare, två decimaler (ICKE-perfekta)
-    var n9 = distinktEjPerfekt(4, 2, 99);
+    // 9 — närmevärde med räknare, två decimaler (ICKE-perfekta). BAND PER PLATS, härlett ur Joachims 2/5/33/71
+    //    (PASS 2, godkänt 2026-09-12): a) √2 fast (den enda under 5) · b) 5–10 · c) 20–49 · d) 50–99. Golv 5 utom √2,
+    //    tak 99 — samma stegring som dokumentet. √3≈1,73 ("knappt större än ett") kan inte längre förekomma.
+    //    Slår igenom i TESTET också: talBank(rot-narmevarde) läser dessa rader (FAS 4b).
+    var n9 = [2, distinktEjPerfekt(1, 5, 10)[0], distinktEjPerfekt(1, 20, 49)[0], distinktEjPerfekt(1, 50, 99)[0]];
     var G9 = { rubrik:'Använd miniräknare och avrunda till två decimaler', logg:'rot-narmevarde:rakna',
       rader: n9.map(function(n){ return { typ:'tal', fraga:rot(n) + ' ≈', facit:Math.round(Math.sqrt(n) * 100) / 100, tal:n }; }) };
     return [G1, G2, G3, G4, G5, G6, G7, G8, G9];

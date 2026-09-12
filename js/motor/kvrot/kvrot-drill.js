@@ -89,8 +89,8 @@
   // 8) Närmevärde med räknare, 2 decimaler (icke-perfekt). answer = avr(√n, 2).
   function genNarmevarde(level){
     var bank = byLevel(level,
-      [2,3,5,6,7,8,10,11],
-      [12,13,14,15,17,18,19,20,21,22,23,24],
+      [2,5,6,7,8,10,11,12],   // PASS 2: samma golv som öva/test — inget under 5 utom √2 (8 distinkta för omgången)
+      [13,14,15,17,18,19,20,21,22,23,24],
       [26,27,28,29,30,33,35,37,40,41,42,43,44,45,46,47,48,50,51,52,53,55,60,71,83,90]);
     var n, t = 0;
     do { n = pick(bank); t++; } while(perfekt(n) && t < 60);
