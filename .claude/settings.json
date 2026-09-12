@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/jb/.claude/projects/c--Arkiv---webbbok-Matematik/memory\" && echo \"=== 1. VIDEO/FÖRELÄSNING ===\" && grep -ril \"video\\\\|youtube\\\\|genomgång\\\\|föreläsning\" . | head *)",
+      "Read(//c/Users/jb/.claude/projects/c--Arkiv---webbbok-Matematik/memory/**)"
+    ]
+  }
+}
