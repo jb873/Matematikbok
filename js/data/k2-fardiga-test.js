@@ -86,7 +86,7 @@
       var retur = returSuffix();   // FAS 4
       t.forEach(function(test, i){
         var url = ramPath + '?view=test-fardigt&del=' + del + '&test=' + (i + 1) + retur;
-        html += '<a href="' + url + '">' + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
+        html += '<a href="' + url + '">' + test.titel + ' <span style="opacity:.7;">· täcker ' + test.nodes.length + (test.nodes.length === 1 ? ' färdighet' : ' färdigheter') + '</span></a>';   // FAS 4a: se ak8-fardiga-test.js
       });
       html += '</div>';
     } else {

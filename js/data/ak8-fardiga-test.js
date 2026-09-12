@@ -142,7 +142,7 @@
         t.forEach(function(test, i){
           var deep = ramPath + '?view=test-fardigt&del=ak8d' + delNr + '&test=' + (i + 1) + '&embed=1' + retur;
           html += '<a href="#" class="test-lank" data-deep="' + encodeURIComponent(deep) + '" style="display:inline-block;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--gold,#9a7228);padding:12px 24px;border-radius:6px;text-decoration:none;">'
-            + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
+            + test.titel + ' <span style="opacity:.7;">· täcker ' + test.nodes.length + (test.nodes.length === 1 ? ' färdighet' : ' färdigheter') + '</span></a>';   // FAS 4a: antal delfrågor härleds vid generering (fulla a–d per typ), etiketten anger täckningen
         });
         html += '</div>';
       } else {

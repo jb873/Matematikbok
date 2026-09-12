@@ -86,7 +86,7 @@
     a.href = RAM + '?view=test-fardigt&del=' + DEL + '&test=' + (i + 1) + RETUR;
     a.innerHTML = '<span><span class="k-titel">' + (tester.length > 1 ? 'Test ' + (i + 1) : 'Test') + '</span>'
       + '<span class="k-sub">' + (tester.length > 1 ? 'Del ' + (i + 1) + ' av ' + tester.length + ' – tillsammans täcker de hela delkapitlet' : 'Hela delkapitlet') + '</span></span>'
-      + '<span class="k-antal">' + t.antal + ' uppgifter</span>';
+      + '<span class="k-antal">täcker ' + t.nodes.length + (t.nodes.length === 1 ? ' färdighet' : ' färdigheter') + '</span>';   // FAS 4a
     rad.appendChild(a);
   });
 })();

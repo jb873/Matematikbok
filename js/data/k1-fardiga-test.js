@@ -133,7 +133,7 @@
           + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
         t.forEach(function(test, i){
           var deep = ramPath + '?view=test-fardigt&del=' + del + '&test=' + (i + 1) + '&embed=1' + retur;
-          html += '<a href="#" class="test-lank" data-deep="' + encodeURIComponent(deep) + '">' + test.titel + ' <span style="opacity:.7;">· ' + test.antal + ' uppgifter</span></a>';
+          html += '<a href="#" class="test-lank" data-deep="' + encodeURIComponent(deep) + '">' + test.titel + ' <span style="opacity:.7;">· täcker ' + test.nodes.length + (test.nodes.length === 1 ? ' färdighet' : ' färdigheter') + '</span></a>';   // FAS 4a: se ak8-fardiga-test.js
         });
         html += '</div>';
       } else {

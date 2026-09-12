@@ -86,7 +86,7 @@
     var titel = document.createElement('span');
     titel.innerHTML = '<span class="k-titel"></span><span class="k-sub">Del ' + (i + 1) + ' av ' + tester.length + ' – tillsammans täcker de hela delkapitlet</span>';
     titel.querySelector('.k-titel').textContent = t.titel;   // textContent → ingen HTML-injektion
-    var antal = document.createElement('span'); antal.className = 'k-antal'; antal.textContent = t.antal + ' uppgifter';
+    var antal = document.createElement('span'); antal.className = 'k-antal'; antal.textContent = 'täcker ' + t.nodes.length + (t.nodes.length === 1 ? ' färdighet' : ' färdigheter');   // FAS 4a
     a.appendChild(titel); a.appendChild(antal);
     rad.appendChild(a);
   });

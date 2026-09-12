@@ -979,41 +979,21 @@ function generateTest(config){
   // antal = SVARBARA ITEMS (a–d-uppgifter), inte frågemallar. Räkna subs mot totalen och trunkera
   // sista frågan så att exakt `antal` items byggs ("6" → 6 saker att svara på).
   const snabbItems = () => questions.filter(q => q.kind === 'snabb').reduce((s,q) => s + q.subs.length, 0);
-  // COVERAGE-SEEDNING + BALANSERAD FYLL-UPP (färdigt test, config.coverage): seeda EN fråga per generator
-  // (ALLA valda typer med, ≤2 items) och toppa sedan upp till antal genom att ALLTID välja generatorn med
-  // FÄRRAST items (balans — FAS 3: föredra under-representerade i st.f. round-robin → jämn fördelning,
-  // fler uppgifter per nod). Tömda generatorer (unika slut, eller opt-out-variant → null) plockas bort.
+  // TÄCKNING (färdigt test, config.coverage) — FAS 4a: EN fråga per generator (= varje quiz-typ i de valda
+  // noderna) med generatorns FULLA delfrågor (a–d, som bladets grupp). Ingen trunkering till 2, ingen
+  // återbesöks-fyllnad, inget bortfall när `antal` nås — antal är HÄRLETT (summan), inte ett tak.
+  //   Rotorsaken bakom "testet samplar i st.f. täcker" (nian dk1 FAS 3-fyndet, dk11): seed-fasen kapade
+  //   varje fråga till 2 delfrågor och HOPPADE generatorer när antal var nått (→ noder saknades), och
+  //   fyll-upen återbesökte generatorer (→ dubbla typer, olika sammansättning per laddning).
+  //   Seedad före/efter: seed-fasens frågor är identiska (samma shuffle, samma gen-anrop i samma ordning);
+  //   skillnaden är bara sammansättningen — fulla delfrågor, alla generatorer, inga återbesök.
   // Skapa-eget (coverage=false) → OFÖRÄNDRAD round-robin nedan (byte-identiskt).
   if(config.coverage && snabbGens.length){
     const pool = snabbGens.map(function(sg){ return { gen: sg.gen, node: sg.node, items: 0, dead: false }; });
     shuffle(pool.slice()).forEach(function(p){
-      if(snabbItems() >= numSnabb) return;
       const q = p.gen(seen, variantFor(p.node));
-      if(q && q.subs && q.subs.length){
-        q.kind = 'snabb';
-        if(q.subs.length > 2) q.subs = q.subs.slice(0, 2);
-        const kvar0 = numSnabb - snabbItems();
-        if(q.subs.length > kvar0) q.subs = q.subs.slice(0, kvar0);
-        if(q.subs.length){ questions.push(q); p.items += q.subs.length; }
-      }
+      if(q && q.subs && q.subs.length){ q.kind = 'snabb'; questions.push(q); p.items += q.subs.length; }
     });
-    let safetyCounter = 0, prevSig = null, varietyTries = 0;
-    while(snabbItems() < numSnabb && safetyCounter < (config.rikUX ? 400 : 200)){
-      safetyCounter++;
-      const alive = pool.filter(function(x){ return !x.dead; });
-      if(!alive.length) break;
-      const minI = Math.min.apply(null, alive.map(function(x){ return x.items; }));
-      const cand = alive.filter(function(x){ return x.items === minI; });
-      const p = cand[Math.floor(Math.random() * cand.length)];
-      const q = p.gen(seen, variantFor(p.node));
-      if(!q || !q.subs || !q.subs.length){ p.dead = true; continue; }   // unika slut / opt-out → plocka bort
-      q.kind = 'snabb';
-      const sig = svarSignatur(q);
-      if(config.rikUX && sig !== null && sig === prevSig && varietyTries < 6){ varietyTries++; continue; }
-      const kvar = numSnabb - snabbItems();
-      if(q.subs.length > kvar) q.subs = q.subs.slice(0, kvar);   // trunkera sista frågan → exakt antalet
-      if(q.subs.length){ questions.push(q); p.items += q.subs.length; prevSig = sig; varietyTries = 0; }
-    }
   } else if(snabbGens.length){
     // Skapa-eget (coverage=false): OFÖRÄNDRAD round-robin → byte-identisk med tidigare.
     let gensShuffled = shuffle([...snabbGens]);
