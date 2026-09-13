@@ -23,6 +23,14 @@
     'kvadratrotter': []
   };
 
+  // ELEVTEXT som fält (intro/varning/titel) — elevtext-låset ser bara kända fältnamn, inte textContent-tilldelningar.
+  var TEXT = {
+    tom:   { intro: 'Ingen föreläsning ännu för det här delkapitlet. Öva och färdighetsträna så länge – filmen läggs in här när den är klar.' },
+    notis: { intro: 'Genomgångar till delkapitlets färdigheter. Filmerna laddas från YouTube först när du klickar på play – inget hämtas därifrån innan dess.' },
+    spela: { titel: 'Spela film' }, spelas: { titel: 'Spelas nu' }, tagg: { titel: 'Föreläsning' },
+    yt:    { titel: 'Filmen startar inte? Öppna den på YouTube ↗' }
+  };
+
   function delkapitelFor(delNr){
     var bok = window.AK8_K1_BOK || { delkapitel: [] };
     return (bok.delkapitel || []).filter(function(d){ return d.nr === delNr; })[0] || null;
@@ -69,29 +77,29 @@
 
     if(!filmer.length){
       var tom = document.createElement('div'); tom.className = 'forel-tom';
-      tom.textContent = 'Ingen föreläsning ännu för det här delkapitlet. Öva och färdighetsträna så länge – filmen läggs in här när den är klar.';
+      tom.textContent = TEXT.tom.intro;
       wrap.appendChild(tom);
       panelEl.innerHTML = ''; panelEl.appendChild(wrap);
       return;
     }
 
     var notis = document.createElement('div'); notis.className = 'forel-notis';
-    notis.innerHTML = '<span class="ikon">🎬</span><div>Genomgångar till delkapitlets färdigheter. Filmerna laddas från YouTube först när du klickar på play – inget hämtas därifrån innan dess.</div>';
+    notis.innerHTML = '<span class="ikon">🎬</span><div>' + TEXT.notis.intro + '</div>';
     wrap.appendChild(notis);
 
     // en delad spelare som flyttas under det klickade kortet (samma som nian)
     var aktivKort = null;
     var player = document.createElement('div'); player.className = 'lecture-player';
-    player.innerHTML = '<div class="lecture-frame"></div><a class="lecture-yt-link" target="_blank" rel="noopener">Filmen startar inte? Öppna den på YouTube ↗</a>';
+    player.innerHTML = '<div class="lecture-frame"></div><a class="lecture-yt-link" target="_blank" rel="noopener">' + TEXT.yt.titel + '</a>';
     function stang(){
-      if(aktivKort){ aktivKort.classList.remove('is-playing'); aktivKort.querySelector('.lecture-state').textContent = 'Spela film'; }
+      if(aktivKort){ aktivKort.classList.remove('is-playing'); aktivKort.querySelector('.lecture-state').textContent = TEXT.spela.titel; }
       player.classList.remove('is-open'); player.querySelector('.lecture-frame').innerHTML = '';
       aktivKort = null;
     }
     function spela(card, f){
       if(aktivKort === card){ stang(); return; }
       stang();
-      aktivKort = card; card.classList.add('is-playing'); card.querySelector('.lecture-state').textContent = 'Spelas nu';
+      aktivKort = card; card.classList.add('is-playing'); card.querySelector('.lecture-state').textContent = TEXT.spelas.titel;
       var origin = (location.origin && location.origin.indexOf('http') === 0) ? '&origin=' + encodeURIComponent(location.origin) : '';
       player.querySelector('.lecture-frame').innerHTML = '<iframe src="https://www.youtube.com/embed/' + f.id
         + '?rel=0&playsinline=1' + origin + '" title="' + f.titel
@@ -107,8 +115,8 @@
       var card = document.createElement('div'); card.className = 'lecture-card';
       // INGEN extern tumnagel — lokal play-platshållare. YouTube laddas först vid klick (spela).
       card.innerHTML = '<div class="lecture-thumb"><span class="lecture-play"><span>▶</span></span></div>'
-        + '<div class="lecture-meta"><div class="lecture-title">' + f.titel + '</div><div class="lecture-tag">Föreläsning</div></div>'
-        + '<div class="lecture-state">Spela film</div>';
+        + '<div class="lecture-meta"><div class="lecture-title">' + f.titel + '</div><div class="lecture-tag">' + TEXT.tagg.titel + '</div></div>'
+        + '<div class="lecture-state">' + TEXT.spela.titel + '</div>';
       card.addEventListener('click', function(){ spela(card, f); });
       lista.appendChild(card);
     });
