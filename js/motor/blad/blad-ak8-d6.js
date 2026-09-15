@@ -3,13 +3,18 @@
    (läst strukturellt ur document.xml/m:f; alla facit oberoende omräknade, 0 fel). Ärver åk7 k2.
    Återanvänder ak8-blad-ui.js (keypad + BRÅK-BYGGARE, expr-celler, numrering, markera) + blad-karna (fracSpan).
 
-   RÄTTNINGS-MODELL (per orderns beslut):
-   · Kanoniska rader (liknämnig/förläng/blandad utan lån/heltal/decimal/flerterms): FASTA mellanled-rutor,
-     varje rutas uttryck rättas mot det LÖPANDE VÄRDET (equality-kedja). Slutrutan dessutom mot enklaste form.
-   · LÅNA-rader (multi-path): FRI inmatning — likhetstecken-rättning inbyggd här (ingen separat motor):
-     varje led eleven skriver = radens värde, sista ledet = svaret i enklaste form. Godtar ALLA giltiga vägar.
-   FÖRLÄNGNINGS-KNAPP (ogrindad): visar/döljer de toggle-bara förlängnings-leden utan att röra svaren.
-   Mellanled/svar via bråk-byggaren → mixedEval tolkar blandade tal ("3 8/6 − 1 5/6"), bråk och decimaler. */
+   RÄTTNINGS-MODELL (Joachims beslut 2026-09-15 — "cellsystemet lagas, inte ersätts"):
+   · ALLA rader är en FRI KEDJA (AK8_UI.kedjaRadHTML): startläge ETT mellanled + svarsruta; "+ led"/"− led"
+     ger fler/färre led — antalet är elevens val, inte uppgiftens. Förr hade kanoniska rader fasta rutor
+     (mid 0/1/2 + toggle-dold förlängning) → subtraktionerna saknade synligt mellanled; det var ett fel.
+   · Rättas PÅ VÄRDE per led (Likhetsrattare.provaKedja): varje ifyllt led = radens värde, sista ledet =
+     svaret i rätt form (bråk/blandad/decimal, enklaste form). Godtar alla giltiga vägar (låna, oäkta …).
+   · FORMKRAVET (minimum = förlängningen med räknesättet kvar, 2/3 + 3/5 = 10/15 + 9/15 = 19/15) kommer
+     från UPPGIFTEN, inte rättaren: rubriken/ledtexten säger "visa mellanled", och rättaren kräver MINST ETT
+     ifyllt mellanled före svaret (antal ≥ 2). Vad som står i mellanledet rättas på värde — 10/15 + 9/15 och
+     19/15 har samma värde; det är uppgiften som ber om uttrycket med operatorn.
+   Mellanled/svar via bråk-byggaren → mixedEval tolkar blandade tal ("3 8/6 − 1 5/6"), bråk och decimaler.
+   R()/L()-fabrikerna behålls (data ur docx oförändrad); forlang/mid används inte längre av renderingen. */
 (function(){
   'use strict';
   var F = window, LR = window.Likhetsrattare;   // equality-rättaren (mixedEval/finalForm/finalCheck/provaKedja) bor i den delade modulen
@@ -48,7 +53,7 @@
       R(fr(3,4) + ' − ' + fr(1,6), [7,12], 'toggle', 0, BR(7,12)),
       R(fr(2,5) + ' + ' + fr(7,8), [51,40], 'toggle', 1, MI(1,11,40)),
       R(fr(3,5) + ' − ' + fr(1,4), [7,20], 'toggle', 0, BR(7,20))
-    ], 'Tryck på "Visa förlängning" om du vill skriva ut steget där du förlänger till gemensam nämnare.'),
+    ], 'Skriv förlängningen med räknesättet kvar i mellanledet, t.ex. 10/15 + 9/15, och svaret i rutan efter. Vill du räkna i fler steg: "+ led".'),
     G('Beräkna med blandad form – visa mellanled, svara i enklaste form', [
       R(mx(1,1,2) + ' + ' + mx(2,3,7), [55,14], 'toggle', 0, MI(3,13,14)),
       R(mx(2,3,4) + ' − ' + mx(1,5,8), [9,8], 'toggle', 0, MI(1,1,8)),
@@ -89,6 +94,7 @@
   ] };
 
   // ══════════════════════════ RENDER ══════════════════════════
+  var TEXT = { mellanled: { hint: '— visa ett mellanled före svaret' }, led: { hint: ' (varje led = uttrycket)' } };   // elevtext som fält
   var CHECKS = [];
   function exprOf(scope, role){ return scope.querySelector('.ak8-cell[data-r="' + role + '"] .ak8-expr'); }
 
@@ -96,48 +102,26 @@
 
   function renderRad(r){
     var idx = CHECKS.length;
-    if(r.lana){
-      CHECKS.push(function(el){
-        // FRI equality-kedja via DELADE helpern + rättaren: varje ifyllt led = radens värde, sista = svaret i enklaste form (path-fritt)
-        var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
-        return { ok: res.ok, facit: 'svar: ' + finText(r.fin) + (res.antal ? ' (varje led = uttrycket)' : '') };
-      });
-      return AK8_UI.kedjaRadHTML(idx, r.q);
-    }
-    // kanonisk kedja
-    var cells = [], roll = 0;
-    if(r.forlang) cells.push({ role: 'c' + (roll++), fk: r.forlang === 'toggle' ? 'ak8-forlang' : '' });
-    for(var i = 0; i < r.mid; i++) cells.push({ role: 'c' + (roll++), fk: '' });
-    cells.push({ role: 'fin', fk: '', fin: true });
     CHECKS.push(function(el){
-      var ok = true, sett = false;
-      cells.forEach(function(c){
-        var wrap = el.querySelector('.ak8-cell[data-r="' + c.role + '"]').closest('.ak8-ledwrap');
-        if(wrap && wrap.classList.contains('ak8-forlang') && !el.closest('.ovn-sheet').classList.contains('visa-forlang')) return; // dolt förläng-led hoppas över
-        var expr = exprOf(el, c.role);
-        if(c.fin){ if(!LR.finalCheck(LR.finalForm(expr), r.fin)) ok = false; }
-        else { if(!LR.likhet(LR.mixedEval(expr), r.v)) ok = false; }
-        sett = true;
-      });
-      return { ok: ok && sett, facit: 'svar: ' + finText(r.fin) };
+      // FRI kedja för ALLA rader: varje ifyllt led = radens värde, sista = svaret i rätt form (path-fritt).
+      // Minst ett mellanled före svaret (antal ≥ 2) — vägen ska visas (Joachims minimum).
+      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
+      var ok = res.ok && res.antal >= 2;
+      var facit = 'svar: ' + finText(r.fin) + (res.ok && res.antal < 2 ? ' ' + TEXT.mellanled.hint : (res.antal ? TEXT.led.hint : ''));
+      return { ok: ok, facit: facit };
     });
-    var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
-    cells.forEach(function(c){ html += AK8_UI.ledWrap(c.role, c.fk); });
-    return html + '</div>';
+    return AK8_UI.kedjaRadHTML(idx, r.q);
   }
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
     blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
-      + '<button type="button" class="ovn-forlang-knapp" data-forlang>Visa förlängning</button>'
       + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
     html += AK8_UI.keypadHTML({ builders: true, ops: ['+', '−', '·', '/', ','] });
     mount.innerHTML = html;
-    var sheet = mount.querySelector('.ovn-sheet');
-    // "+ led" (fri kedja) wiras i AK8_UI.bindSheet — ingen lokal wiring behövs.
-    mount.querySelector('[data-forlang]').onclick = function(){ sheet.classList.toggle('visa-forlang'); this.classList.toggle('is-on'); this.textContent = sheet.classList.contains('visa-forlang') ? 'Dölj förlängning' : 'Visa förlängning'; };
+    // "+ led"/"− led" (fri kedja) wiras i AK8_UI.bindSheet — ingen lokal wiring behövs.
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
     AK8_UI.bindSheet(mount);

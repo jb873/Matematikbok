@@ -95,7 +95,15 @@
   function finalCheck(ff, fin){
     if(fin.k === 'dec') return ff.kind === 'dec' && likhet(ff.num, fin.x);
     if(fin.k === 'br') return ff.kind === 'br' && likhet(ff.num, fin.t / fin.n) && ff.simplest;
-    if(fin.k === 'mi') return ff.kind === 'mi' && likhet(ff.num, fin.h + fin.t / fin.n) && ff.simplest;
+    if(fin.k === 'mi'){
+      var v = fin.h + fin.t / fin.n;
+      if(ff.kind === 'mi') return likhet(ff.num, v) && ff.simplest;
+      // Oäkta bråk i LÄGSTA TERMER godtas som svar när facit är blandad form (Joachim 2026-09-15:
+      // "2/3 + 3/5 = 10/15 + 9/15 = 19/15 godkänns"). "Enklaste form" = förkortat; blandad eller oäkta är
+      // båda giltiga skrivsätt. Enbart LÖSARE: inget rätt svar blir fel. Gäller d6/d7/d8 + nian (delad).
+      if(ff.kind === 'br') return likhet(ff.num, v) && isFinite(ff.t) && isFinite(ff.n) && gcd(ff.t, ff.n) === 1;
+      return false;
+    }
     return false;
   }
 

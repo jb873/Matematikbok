@@ -45,11 +45,39 @@
   //    kedjeCeller() ger led-cellernas expr i ordning (mata Likhetsrattare.provaKedja). "+ led"-knappen
   //    avslöjar nästa dolda extra-ruta (wiras i bindSheet). Ett enda "=" per del (inget efter uttrycket).
   function ledWrap(role, extra){ return '<span class="ak8-ledwrap' + (extra ? ' ' + extra : '') + '"><span class="ovn-text ak8-eq">=</span>' + ansCell(role) + '</span>'; }
+  // FRI KEDJA (Joachims modell, 2026-09-15): startläge = ETT mellanled + svarsruta (L0, L1 synliga) —
+  // minimikravet som påminner om att vägen ska visas. "+ led" avslöjar nästa dolda led (L2, L3) för den
+  // som räknar i flera steg; "− led" tar bort det senast tillagda igen (töms + göms). Antalet är
+  // elevens val, inte uppgiftens. Rättas på värde per led (provaKedja); formkravet ("förlängningen med
+  // räknesättet kvar") uttrycks i uppgiften + kravet på minst ett ifyllt mellanled, inte av rättaren.
+  var LED_TEXT = { mer: { titel: '+ led' }, mindre: { titel: '− led' } };   // elevtext som fält (låset ser titel:)
   function kedjaRadHTML(idx, qHTML){
     var celler = '';
     for(var k = 0; k < 4; k++) celler += ledWrap('L' + k, k >= 2 ? 'ak8-extra' : '');
     return '<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="' + idx + '"><span class="ak8-q">' + qHTML + '</span>' + celler
-      + '<button type="button" class="ak8-mer" data-mer>+ led</button></div>';
+      + '<button type="button" class="ak8-mer" data-mer>' + LED_TEXT.mer.titel + '</button><button type="button" class="ak8-mer ak8-mindre" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button></div>';
+  }
+  // Tillagt led: avslöja nästa dolda / göm+töm det senast avslöjade. Knapparna följer läget.
+  function ledAvsloja(rad){
+    var d = rad.querySelector('.ak8-extra'); if(!d) return null;
+    d.classList.remove('ak8-extra'); grow(d.querySelector('input')); ledKnappar(rad); return d;
+  }
+  function ledGom(rad, wrap){
+    var synliga = [].filter.call(rad.querySelectorAll('.ak8-ledwrap'), function(w){ return !w.classList.contains('ak8-extra'); });
+    var w = wrap || synliga[synliga.length - 1];
+    if(!w || synliga.length <= 2) return null;                       // minimum (mellanled + svar) rörs aldrig
+    w.querySelectorAll('.ak8-in').forEach(function(i){ i.value = ''; });
+    // töm även byggda widgets (bråk/potens) så ledet är rent nästa gång det avslöjas
+    var expr = w.querySelector('.ak8-expr'); if(expr) expr.innerHTML = txtHTML();
+    w.classList.add('ak8-extra'); ledKnappar(rad);
+    var kvar = [].filter.call(rad.querySelectorAll('.ak8-ledwrap'), function(x){ return !x.classList.contains('ak8-extra'); });
+    return kvar[kvar.length - 1];
+  }
+  function ledKnappar(rad){
+    var extra = rad.querySelectorAll('.ak8-extra').length, tot = rad.querySelectorAll('.ak8-ledwrap').length;
+    var mer = rad.querySelector('[data-mer]'), mindre = rad.querySelector('[data-mindre]');
+    if(mer) mer.hidden = extra === 0;
+    if(mindre) mindre.hidden = (tot - extra) <= 2;
   }
   function kedjaCeller(radEl){ return [].slice.call(radEl.querySelectorAll('.ak8-cell .ak8-expr')); }
 
@@ -135,6 +163,7 @@
     if(slot.parentNode !== expr) return null;
     var widget = kind === 'frac' ? fracHTML() : kind === 'pot' ? potHTML() : komplexBrakHTML();
     slot.insertAdjacentHTML('afterend', widget + txtHTML());
+    slot.nextElementSibling.setAttribute('data-byggd', '1');   // ELEVEN byggde den → får raderas bort (förrenderade widgets är cellens form och stannar)
     return slot.nextElementSibling.querySelector('input');   // kbrak → första nästlade rutan (topp-bråkets täljare)
   }
   function removeWidgetIfEmpty(active){
@@ -143,7 +172,7 @@
     // om det är helt tomt (annars strandar scaffoldet — regexen nedan når bara det inre bråket). Är
     // något ifyllt lämnas det (undvik dataförlust). Det yttre uttrycket är kbrakets närmaste .ak8-expr.
     var kbrak = active.closest('.ovn-kbrak');
-    if(kbrak){
+    if(kbrak && kbrak.hasAttribute('data-byggd')){
       var allTom = Array.prototype.every.call(kbrak.querySelectorAll('.ak8-in'), function(i){ return i.value === ''; });
       if(!allTom) return null;
       var oExpr = kbrak.closest('.ak8-expr'); if(!oExpr) return null;
@@ -155,11 +184,66 @@
       return kprev ? (kprev.tagName === 'INPUT' ? kprev : kprev.querySelector('input')) : oExpr.querySelector('input');
     }
     if(!/ak8-(frt|frn|pbase|pexp)/.test(active.className)) return null;
-    var expr = active.closest('.ak8-expr'); var w = active; while(w.parentNode !== expr) w = w.parentNode;
+    var expr = active.closest('.ak8-expr'); if(!expr) return null; var w = active; while(w.parentNode && w.parentNode !== expr) w = w.parentNode;
+    if(w.parentNode !== expr || !w.hasAttribute('data-byggd')) return null;   // förrenderad (potAnsCell, kanonisk bcell) → stannar
     var prev = w.previousElementSibling, next = w.nextElementSibling;
     if(next && next.classList.contains('ak8-exprtxt')) next.remove();
     w.remove();
     return prev ? (prev.tagName === 'INPUT' ? prev : prev.querySelector('input')) : expr.querySelector('input');
+  }
+
+  // ── RADERA = ÅNGRA DET SENASTE (2026-09-15, gäller alla celltyper: keypadens ⌫ och fysiskt Backspace) ──
+  // Regel: radera tar bort det senaste eleven gjorde, oavsett vad — en siffra, en bråkruta, en operator,
+  // ett helt tillagt mellanled. Förr togs en widget bara bort när markören stod i ett av DESS tomma fält;
+  // i den tomma texten EFTER bråket hände ingenting → eleven var fast (samma fel som i potenskapitlet).
+  //   1 fältet har tecken            → sista tecknet bort
+  //   2 tomt widget-fält, syskonfält ifyllt → hoppa till det (nästa radering äter dess tecken)
+  //   3 tom widget helt               → ta bort widgeten, markör i föregående ruta
+  //   4 tom text, widget före         → hoppa in i widgetens sista fält (steg 2–3 tar sedan bort den)
+  //   5 tom text, inget före, tillagt led → göm ledet igen, markör i föregående led
+  // Returnerar rutan som ska ha fokus (eller null om inget mer att ångra).
+  function widgetAv(inp){ var expr = inp.closest('.ak8-expr'); if(!expr) return null; var w = inp; while(w.parentNode && w.parentNode !== expr) w = w.parentNode; return w.parentNode === expr ? w : null; }
+  function sistaRuta(el){ var ins = el.querySelectorAll('.ak8-in'); return ins.length ? ins[ins.length - 1] : null; }
+  function radera(active){
+    if(active.value !== ''){ active.value = active.value.slice(0, -1); return active; }
+    // 2: tomt widget-fält med ifyllt syskon → dit
+    var wi = /ak8-(frt|frn|pbase|pexp)/.test(active.className) ? widgetAv(active) : null;
+    if(wi){
+      var syskon = [].filter.call(wi.querySelectorAll('.ak8-in'), function(i){ return i !== active && i.value !== ''; });
+      if(syskon.length) return syskon[syskon.length - 1];
+    }
+    // 3 (+ kbrak): helt tom widget bort
+    var moved = removeWidgetIfEmpty(active); if(moved) return moved;
+    // 3b: inne i ett KOMPLEX-bråk med innehåll kvar i den andra delen (täljare-/nämnar-uttrycket) → dit
+    //     (närmast föregående ifyllda ruta, annars sista ifyllda) — annars fastnade raderingen i en tömd del.
+    var kb = active.closest('.ovn-kbrak');
+    if(kb){
+      var alla = [].slice.call(kb.querySelectorAll('.ak8-in')), i = alla.indexOf(active), j;
+      for(j = i - 1; j >= 0; j--) if(alla[j].value !== '') return alla[j];
+      for(j = alla.length - 1; j > i; j--) if(alla[j].value !== '') return alla[j];
+    }
+    // 4: tom text med widget före → in i widgetens sista fält
+    if(active.classList.contains('ak8-exprtxt')){
+      var prev = active.previousElementSibling;
+      if(prev && !prev.classList.contains('ak8-exprtxt')){ var s = sistaRuta(prev); if(s) return s; }
+      // 5: första rutan i ett TILLAGT led som är tomt → göm ledet
+      var wrap = active.closest('.ak8-ledwrap'), rad = active.closest('.ak8-rad');
+      if(wrap && rad && !prev && !besvarad(wrap)){
+        var synliga = [].filter.call(rad.querySelectorAll('.ak8-ledwrap'), function(w){ return !w.classList.contains('ak8-extra'); });
+        if(synliga.length > 2 && synliga[synliga.length - 1] === wrap){ var till = ledGom(rad, wrap); return till ? sistaRuta(till) : null; }
+      }
+    }
+    return null;
+  }
+  // ── OPERATOR-HOPP (FAS 1): ett räknesätt skrivet med markören i ett bråk-/potensfält hör inte hemma DÄR
+  //    ("15+" i nämnaren) utan i texten EFTER widgeten — så uttrycket blir bråk · operator · bråk. ──
+  var OPER = { '+':1, '−':1, '-':1, '·':1, '*':1, '/':1, '(':1, ')':1 };
+  function operatorMal(active, key){
+    if(!OPER[key] || !/ak8-(frt|frn|pbase|pexp)/.test(active.className)) return active;
+    var w = widgetAv(active); if(!w) return active;
+    var next = w.nextElementSibling;
+    if(!next || !next.classList.contains('ak8-exprtxt')){ w.insertAdjacentHTML('afterend', txtHTML()); next = w.nextElementSibling; }
+    return next;
   }
 
   // ── AUTO-MELLANSLAG runt +/− i mellanled (markör bevaras) ──
@@ -285,9 +369,15 @@
   // ── BIND (efter mount.innerHTML): keypad + grow + fokus + enter + clear-on-edit + skriv-ut ──
   function bindSheet(mount, opts){
     opts = opts || {};
+    // Åter-bind (Återställ → renderBlad → bindSheet på SAMMA mount): ta bort förra bindningens mount-lyssnare
+    // först. Förr staplades de → efter tre återställningar avslöjade ett "+ led"-klick flera led, och
+    // focusin/keydown kördes flera gånger. Keypad-knapparna är nya element per render och binds om ändå.
+    if(mount.__ak8lyss){ mount.__ak8lyss.forEach(function(l){ mount.removeEventListener(l[0], l[1], l[2]); }); }
+    var lyss = mount.__ak8lyss = [];
+    function pa(typ, fn, capture){ mount.addEventListener(typ, fn, !!capture); lyss.push([typ, fn, !!capture]); }
     var active = mount.querySelector('input');
     var kpEl = mount.querySelector('.keypad'), sisteFram = null, doljSel = opts.hideFor || '[data-nokeypad]';
-    mount.addEventListener('focusin', function(e){
+    pa('focusin', function(e){
       if(e.target.tagName !== 'INPUT') return;
       active = e.target;
       var dolj = arOrdruta(active, doljSel); if(kpEl) kpEl.classList.toggle('keypad-hidden', dolj);
@@ -303,15 +393,23 @@
         if(!active || active.disabled){ var first = mount.querySelector('input:not([disabled])'); if(first) active = first; else return; }
         var k = btn.dataset.key;
         if(k === 'frac' || k === 'pot' || k === 'kbrak'){ var f = insertWidget(active, k); if(f){ active = f; f.focus(); var xp = f.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); } return; }
-        if(k === 'back'){ var moved = removeWidgetIfEmpty(active); if(moved){ active = moved; moved.focus(); return; } active.value = active.value.slice(0, -1); }
-        else { active.value += k; }
+        if(k === 'back'){
+          var rad0 = active.closest('.ak8-rad');
+          var till = radera(active);                          // ångra det senaste (tecken/widget/led) — alla celltyper
+          if(till){ active = till; till.focus(); till.dispatchEvent(new Event('input', { bubbles:true })); }
+          else if(rad0) rensaRad(rad0);
+          return;
+        }
+        var mal = operatorMal(active, k);                     // räknesätt i bråkfält → texten efter widgeten
+        if(mal !== active){ active = mal; grow(active); }
+        active.value += k;
         active.dispatchEvent(new Event('input', { bubbles:true }));
         active.focus();
       });
     });
     if(kpEl && !arOrdruta(active, doljSel)) graderaKeypad(kpEl, active);   // FAS 2: initialt läge före första fokus
     // grow + clear-on-edit + auto-mellanslag
-    mount.addEventListener('input', function(e){
+    pa('input', function(e){
       var t = e.target; if(!t.classList || !t.classList.contains('ak8-in')) return;
       if(t.classList.contains('ak8-mel')) autoSpace(t);
       grow(t);
@@ -319,12 +417,19 @@
     });
     // enter → nästa ruta; fysiskt Backspace i tom byggcell → ta bort strukturen (samma som keypadens ⌫,
     // som förr var enda vägen ut → en felklickad bråk-/potenscell gick ej att ångra med tangentbordet).
-    mount.addEventListener('keydown', function(e){
+    pa('keydown', function(e){
       if(e.target.tagName !== 'INPUT') return;
       if(e.key === 'Backspace' && e.target.value === ''){
-        var moved = removeWidgetIfEmpty(e.target);
-        if(moved){ e.preventDefault(); moved.focus(); }
-        return;   // ingen byggcell → låt webbläsaren hantera (rutan är ändå tom)
+        // tom ruta: samma regel som keypadens ⌫ — hoppa in i widgeten före, ta bort tom widget, göm tillagt led
+        var till = radera(e.target);
+        if(till){ e.preventDefault(); till.focus(); till.dispatchEvent(new Event('input', { bubbles:true })); }
+        return;
+      }
+      // räknesätt skrivet i ett bråk-/potensfält → hoppar till texten efter widgeten (FAS 1)
+      if(OPER[e.key] && /ak8-(frt|frn|pbase|pexp)/.test(e.target.className) && e.target.closest('.ak8-expr')){
+        var mal = operatorMal(e.target, e.key);
+        if(mal !== e.target){ e.preventDefault(); mal.value += (e.key === '-' ? '−' : e.key === '*' ? '·' : e.key); grow(mal); mal.focus(); mal.dispatchEvent(new Event('input', { bubbles:true })); }
+        return;
       }
       if(e.key !== 'Enter') return;
       e.preventDefault();
@@ -332,15 +437,18 @@
       if(i > -1 && ins[i + 1]) ins[i + 1].focus();
     });
     // clear-on-edit även för knapp-baserade svar (chips/ordna/valjflera) vid klick
-    mount.addEventListener('click', function(e){
+    pa('click', function(e){
       var b = e.target.closest && e.target.closest('.ak8-chip, .ak8-tal, .ak8-vf, .ak8-korval'); if(!b) return;
       var rad = b.closest('.ak8-rad'); if(rad) rensaRad(rad);
     }, true);
-    // "+ led" i fri equality-kedja: avslöja nästa dolda extra-ruta (delad för alla kedje-blad)
-    mount.addEventListener('click', function(e){
-      var b = e.target.closest && e.target.closest('[data-mer]'); if(!b) return;
-      var d = b.parentNode.querySelector('.ak8-extra'); if(d){ d.classList.remove('ak8-extra'); grow(d.querySelector('input')); }
+    // "+ led" / "− led" i fri kedja: avslöja nästa dolda led resp. göm det senast tillagda (delad för alla kedje-blad)
+    pa('click', function(e){
+      var b = e.target.closest && e.target.closest('[data-mer],[data-mindre]'); if(!b) return;
+      var rad = b.closest('.ak8-rad'); if(!rad) return;
+      if(b.hasAttribute('data-mer')){ var d = ledAvsloja(rad); if(d){ var i0 = d.querySelector('input'); if(i0){ i0.focus(); active = i0; } } }
+      else { var till = ledGom(rad); if(till){ var s = sistaRuta(till); if(s){ s.focus(); active = s; } } rensaRad(rad); }
     });
+    mount.querySelectorAll('.ak8-rad-kedja').forEach(ledKnappar);   // knapparnas startläge (− led gömd tills ett led lagts till)
     // initiala bredder + auto-fokus (utan att skrolla)
     mount.querySelectorAll('.ak8-in').forEach(grow);
     if(opts.focus !== false){ var f0 = mount.querySelector('.ak8-in:not([disabled])'); if(f0){ try { f0.focus({ preventScroll:true }); } catch(e){ f0.focus(); } } }
