@@ -10,9 +10,19 @@
                                  bråk, decimaler, + och −). NaN om ogiltig/tom.
      · finalForm(expr) → { kind:'mi'|'br'|'dec'|'expr'|'tom', num, t, n, simplest }
                                  klassificerar en SLUTruta; simplest = bråkdel reducerad (gcd=1) + proper (|t|<|n|).
-     · finalCheck(ff, fin) → bool   — jämför finalForm mot förväntad slutform
-                                 fin = {k:'mi',h,t,n} | {k:'br',t,n} | {k:'dec',x}. Kräver rätt kind + rätt värde + enklaste form.
-     · provaKedja(exprEls, varde, fin) → { ok, allaLika, slutOk, antal }
+     · finalStatus(ff, fin, krav) → { status:'ratt'|'form'|'fel', orsak }   — TRE LÄGEN (som alg-brak):
+                                 'fel' = fel värde · 'form' = RÄTT värde men fel form · 'ratt'. orsak (vid form):
+                                 'blandad' | 'brak' | 'brakform' | 'decimal' | 'forkorta' | 'klart' → BESKED[orsak].
+                                 fin = {k:'mi',h,t,n} | {k:'br',t,n} | {k:'dec',x}.
+                                 krav = SVARSFORMEN uppgiften ställer (bandet/gruppen, inte rubriktexten):
+                                   'enklaste' (default) — förkortat; blandad ELLER oäkta godtas (19/15-beslutet)
+                                   'blandad' — blandad form krävs (oäkta → 'form')
+                                   'brak'    — bråkform krävs (blandad → 'form')
+                                   'decimal' — decimalform krävs
+     · finalCheck(ff, fin, krav) → bool   — finalStatus(...).status === 'ratt'.
+     · ffAv(hel, t, n) → ff       — finalForm-objekt ur lösa fält (hel-ruta + stående bråk, t.ex. nians celler).
+     · besked(orsak) → sträng     — elevtexten för ett form-läge (BESKED-fälten; formuleringen är Joachims).
+     · provaKedja(exprEls, varde, fin, krav) → { ok, allaLika, slutOk, antal, status, orsak }
                                  FRI equality-kedja (path-fritt): minst ett ifyllt led, VARJE ifyllt led = varde,
                                  sista ifyllda ledet = fin. Godtar alla giltiga vägar (+ − · /, lån, oäkta osv.).
      · likhet(a,b) [1e-9], gcd(a,b), pNum(s), fylld(exprEl)   — hjälpare för återanvändning.
@@ -90,39 +100,73 @@
       if(harOperator(ft) || harOperator(fn)) return { kind: 'expr', num: val };   // (2·2)/(3·3) är ett led, inte ett SVAR i enklaste form
       var t = pNum(ft), n = pNum(fn);
       var proper = isFinite(t) && isFinite(n) && Math.abs(t) < Math.abs(n) && gcd(t, n) === 1;
-      if(/^-?\d+$/.test(wtxt)) return { kind: 'mi', num: val, t: t, n: n, simplest: proper && parseInt(wtxt, 10) !== 0 };
-      if(wtxt === '' || wtxt === '-') return { kind: 'br', num: val, t: t, n: n, simplest: proper };
+      if(/^-?\d+$/.test(wtxt)) return { kind: 'mi', num: val, hel: parseInt(wtxt, 10), t: t, n: n, simplest: proper && parseInt(wtxt, 10) !== 0 };
+      if(wtxt === '' || wtxt === '-') return { kind: 'br', num: val, hel: 0, t: t, n: n, simplest: proper };
       return { kind: 'expr', num: val };
     }
     if(fracs.length === 0 && /^-?\d*\.?\d+$/.test(wtxt)) return { kind: 'dec', num: val };
     return { kind: 'expr', num: val };
   }
 
-  function finalCheck(ff, fin){
-    if(fin.k === 'dec') return ff.kind === 'dec' && likhet(ff.num, fin.x);
-    if(fin.k === 'br') return ff.kind === 'br' && likhet(ff.num, fin.t / fin.n) && ff.simplest;
-    if(fin.k === 'mi'){
-      var v = fin.h + fin.t / fin.n;
-      if(ff.kind === 'mi') return likhet(ff.num, v) && ff.simplest;
-      // Oäkta bråk i LÄGSTA TERMER godtas som svar när facit är blandad form (Joachim 2026-09-15:
-      // "2/3 + 3/5 = 10/15 + 9/15 = 19/15 godkänns"). "Enklaste form" = förkortat; blandad eller oäkta är
-      // båda giltiga skrivsätt. Enbart LÖSARE: inget rätt svar blir fel. Gäller d6/d7/d8 + nian (delad).
-      if(ff.kind === 'br') return likhet(ff.num, v) && isFinite(ff.t) && isFinite(ff.n) && gcd(ff.t, ff.n) === 1;
-      return false;
-    }
-    return false;
+  // ff ur lösa fält (nians/d8:s celler: hel-ruta + täljare/nämnare). hel = null/0 → bråk, annars blandad.
+  function ffAv(hel, t, n){
+    var h = (hel == null || !isFinite(hel)) ? 0 : hel;
+    var proper = isFinite(t) && isFinite(n) && Math.abs(t) < Math.abs(n) && gcd(t, n) === 1;
+    var num = (isFinite(t) && isFinite(n) && n !== 0) ? h + t / n : NaN;
+    if(h !== 0) return { kind: 'mi', num: num, hel: h, t: t, n: n, simplest: proper };
+    return { kind: 'br', num: num, hel: 0, t: t, n: n, simplest: proper };
   }
+
+  // ELEVTEXT för form-lägena, som FÄLT (elevtext-låset). FÖRSLAG — formuleringen är Joachims (order 2026-09-15 FAS 3).
+  var BESKED = {
+    blandad:  { hint: 'Rätt räknat – skriv svaret i blandad form.' },
+    brak:     { hint: 'Rätt räknat – skriv svaret som ett bråk, utan heltal.' },
+    brakform: { hint: 'Rätt värde – skriv svaret i bråkform.' },
+    decimal:  { hint: 'Rätt värde – svara i decimalform.' },
+    forkorta: { hint: 'Rätt värde – förkorta svaret.' },
+    klart:    { hint: 'Rätt värde – räkna klart till ett svar.' }
+  };
+  function besked(orsak){ return (BESKED[orsak] || {}).hint || ''; }
+
+  // TRE LÄGEN. Värdet först: fel värde = 'fel'. Rätt värde → formen avgör: 'ratt' eller 'form' + orsak.
+  // krav = svarsformen uppgiften ställer. 'enklaste' (default): förkortat räcker — blandad OCH oäkta i
+  // lägsta termer godtas (Joachim 2026-09-15: "19/15 godkänns"). 'blandad'/'brak'/'decimal' = formen krävs
+  // (Joachim: "står det blandad form ska bråkform inte godkännas" — och spegelvänt).
+  function finalStatus(ff, fin, krav){
+    krav = krav || 'enklaste';
+    var v = fin.k === 'dec' ? fin.x : fin.k === 'mi' ? fin.h + fin.t / fin.n : fin.t / fin.n;
+    if(!ff || !likhet(ff.num, v)) return { status: 'fel' };
+    function form(o){ return { status: 'form', orsak: o }; }
+    var R = { status: 'ratt' };
+    if(fin.k === 'dec' || krav === 'decimal') return ff.kind === 'dec' ? R : form('decimal');
+    if(ff.kind === 'dec') return form('brakform');          // 0,5 där ett bråk väntas
+    if(ff.kind !== 'mi' && ff.kind !== 'br') return form('klart');   // uttryck/led, inte ett svar
+    var lagst = isFinite(ff.t) && isFinite(ff.n) && gcd(ff.t, ff.n) === 1;
+    var proper = lagst && Math.abs(ff.t) < Math.abs(ff.n);
+    if(ff.kind === 'mi' && ff.hel !== 0){                    // blandad form skriven
+      if(krav === 'brak') return form('brak');
+      if(!lagst) return form('forkorta');
+      if(!proper) return form('blandad');                    // 1 7/2 — bråkdelen ska vara äkta
+      return R;
+    }
+    // bråkform skriven (hel-rutan tom eller 0)
+    if(!lagst) return form('forkorta');
+    if(krav === 'blandad' && !proper) return form('blandad');   // 15/4 där blandad form krävs
+    return R;
+  }
+  function finalCheck(ff, fin, krav){ return finalStatus(ff, fin, krav).status === 'ratt'; }
 
   // Är cellen ifylld (någon input har värde)?
   function fylld(e){ return !!(e && [].slice.call(e.querySelectorAll('input')).some(function(i){ return i.value.trim() !== ''; })); }
 
   // FRI equality-kedja: minst ett ifyllt led; varje ifyllt led = varde; sista ifyllda = fin (enklaste form). Path-fritt.
-  function provaKedja(exprEls, varde, fin){
+  function provaKedja(exprEls, varde, fin, krav){
     var ifyllda = exprEls.filter(fylld);
-    if(!ifyllda.length) return { ok: false, allaLika: false, slutOk: false, antal: 0 };
+    if(!ifyllda.length) return { ok: false, allaLika: false, slutOk: false, antal: 0, status: 'fel' };
     var allaLika = ifyllda.every(function(e){ return likhet(mixedEval(e), varde); });
-    var slutOk = finalCheck(finalForm(ifyllda[ifyllda.length - 1]), fin);
-    return { ok: allaLika && slutOk, allaLika: allaLika, slutOk: slutOk, antal: ifyllda.length };
+    var fs = finalStatus(finalForm(ifyllda[ifyllda.length - 1]), fin, krav), slutOk = fs.status === 'ratt';
+    return { ok: allaLika && slutOk, allaLika: allaLika, slutOk: slutOk, antal: ifyllda.length,
+             status: allaLika ? fs.status : 'fel', orsak: allaLika ? fs.orsak : undefined };
   }
 
   // FRI uträkning i beräknings-rutor: varje ruta är en intern likhetskedja ("a = b = c") vars segment
@@ -142,7 +186,8 @@
   }
 
   window.Likhetsrattare = {
-    mixedEval: mixedEval, finalForm: finalForm, finalCheck: finalCheck, provaKedja: provaKedja,
+    mixedEval: mixedEval, finalForm: finalForm, finalCheck: finalCheck, finalStatus: finalStatus, ffAv: ffAv,
+    besked: besked, BESKED: BESKED, provaKedja: provaKedja,
     segvarden: segvarden, provaBerakning: provaBerakning,
     likhet: likhet, gcd: gcd, pNum: pNum, fylld: fylld
   };

@@ -364,7 +364,7 @@
           multKedjaUppg(['a', 'a', 'a'], [[3, 4], [11, 7], [21, 22]], 'brak-mult-forkorta:rakna'),
           multKedjaUppg(['b', 'b', 'b'], [{ h: 3, t: 3, n: 5 }, { h: 1, t: 1, n: 9 }, { h: 2, t: 1, n: 2 }], 'brak-mult-forkorta:rakna') ] },
 
-      { rubrik: 'Invertera talet', logg: 'brak-div-reciprok:rakna', uppgifter: [
+      { rubrik: 'Invertera talet', logg: 'brak-div-reciprok:rakna', svarform: 'brak', uppgifter: [
           reciprokUppg(3, 7, 'brak-div-reciprok:rakna'),
           reciprokUppg('5x', 'y', 'brak-div-reciprok:rakna', true, { t: 'y', n: '5x' }),      // y/5x (redan enklast)
           reciprokUppg('2x', 'xy^3', 'brak-div-reciprok:rakna', true, { t: 'y^3', n: '2' }) ] },   // xy^3/2x → y^3/2
@@ -441,7 +441,9 @@
     var idx = 0;
     return { dokId: dokId, variant: variant, titel: mall.titel, grupper: mall.grupper.map(function(g){
       var used = {};
-      return { rubrik: g.rubrik, logg: g.logg || null, uppgifter: g.uppgifter.map(function(u){
+      // svarform = SVARSFORMEN gruppen kräver (bandet per grupp): 'blandad' | 'brak' | 'decimal' | 'enklaste' (default = båda
+      // formerna godtas i lägsta termer, 19/15-beslutet). Rättaren läser detta, inte rubriktexten. Gäller alla varianter.
+      return { rubrik: g.rubrik, logg: g.logg || null, svarform: g.svarform || 'enklaste', uppgifter: g.uppgifter.map(function(u){
         var gu = genUppgift(u, dokId, idx++, variant, used); used[talKey(gu.tal)] = 1; return gu;
       }) };
     }) };

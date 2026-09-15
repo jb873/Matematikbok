@@ -28,7 +28,9 @@
   function MI(h, t, n){ return { k: 'mi', h: h, t: t, n: n }; }
   function BR(t, n){ return { k: 'br', t: t, n: n }; }
   function DE(x){ return { k: 'dec', x: x }; }
-  function G(rubrik, rader, hint){ return { rubrik: rubrik, rader: rader, hint: hint }; }
+  // opts.svarform = SVARSFORMEN gruppen kräver ('blandad'|'brak'|'decimal'); utelämnad = 'enklaste' (båda formerna).
+  // Kravet bor i DATAN (gruppen), inte i rubriktexten — rättaren läser inte rubriker. (Order 2026-09-15.)
+  function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Addition och subtraktion med bråk', uppg: [
@@ -105,10 +107,10 @@
     CHECKS.push(function(el){
       // FRI kedja för ALLA rader: varje ifyllt led = radens värde, sista = svaret i rätt form (path-fritt).
       // Minst ett mellanled före svaret (antal ≥ 2) — vägen ska visas (Joachims minimum).
-      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
+      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin, r.svarform);
       var ok = res.ok && res.antal >= 2;
       var facit = 'svar: ' + finText(r.fin) + (res.ok && res.antal < 2 ? ' ' + TEXT.mellanled.hint : (res.antal ? TEXT.led.hint : ''));
-      return { ok: ok, facit: facit };
+      return { ok: ok, facit: facit, besked: res.status === 'form' ? LR.besked(res.orsak) : '' };   // rätt värde, fel form → eget besked
     });
     return AK8_UI.kedjaRadHTML(idx, r.q);
   }
@@ -136,7 +138,7 @@
       el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       AK8_UI.markera(el, res.ok);
       if(res.ok){ ratt++; }
-      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = 'rätt ' + res.facit; el.appendChild(f); }
+      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = (res.besked ? res.besked + ' ' : '') + 'rätt ' + res.facit; el.appendChild(f); }
     });
     var s = mount.querySelector('[data-sammanf]'); s.hidden = false;
     if(ratt === tot && tot > 0){

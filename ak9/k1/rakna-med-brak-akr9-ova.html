@@ -137,15 +137,22 @@
     if(form === 'tal'){ var ft = rad.querySelector('.ak8-ft'); return !!ft && ft.value.trim() !== ''; }
     var fc = rad.querySelector('.ak8-bc[data-r="fin"]'); return !!fc && fc.querySelector('.ak8-bt').value.trim() !== '' && fc.querySelector('.ak8-bn').value.trim() !== '';
   }
-  function rattaSvar(rad, sf){   // canonical rättning av svarscellen (enklaste form) → { ok, facit }
-    if(sf.form === 'blandad'){
-      var mm = mread(rad, 'fin'), mal = sf.hel + sf.t / sf.n;
-      var ok = nara(mm.num, mal) && nara(mm.hel, sf.hel) && isFinite(mm.t) && isFinite(mm.n) && mm.t > 0 && mm.t < mm.n && gcd(Math.round(mm.t), Math.round(mm.n)) === 1;
-      markEl(mhEl(rad, 'fin'), ok); markBc(rad, 'fin', ok); return { ok:ok, facit: sf.hel + ' ' + sf.t + '/' + sf.n };
+  // canonical rättning av svarscellen — TRE LÄGEN via delad Likhetsrattare (order 2026-09-15 "Svarsformen ska hållas"):
+  // 'fel' = fel värde · 'form' = rätt värde, fel form (besked) · 'ratt'. krav = gruppens svarform (bandet), inte rubriken:
+  // 'enklaste' godtar blandad OCH oäkta i lägsta termer (19/15-beslutet); 'blandad'/'brak'/'decimal' kräver formen.
+  function rattaSvar(rad, sf, krav){
+    var fin = sf.form === 'tal' ? { k:'dec', x: sf.v } : sf.form === 'blandad' ? { k:'mi', h: sf.hel, t: sf.t, n: sf.n } : { k:'br', t: sf.t, n: sf.n };
+    var ff, mh = null;
+    if(sf.form === 'tal'){ var vv = pNum(rad.querySelector('.ak8-ft').value); ff = { kind: isFinite(vv) ? 'dec' : 'tom', num: vv }; }
+    else {
+      var box = rad.querySelector('.ak8-mc[data-mr="fin"]'); mh = box ? box.querySelector('.ak8-mh') : null;   // hel-rutan BARA om svarscellen har en
+      var hel = mh ? pNum(mh.value) : NaN, bb = bread(rad, 'fin');
+      ff = LR.ffAv(isFinite(hel) ? hel : null, bb.t, bb.n);
     }
-    if(sf.form === 'tal'){ var vv = pNum(rad.querySelector('.ak8-ft').value), ok2 = nara(vv, sf.v); markEl(rad.querySelector('.ak8-ft'), ok2); return { ok:ok2, facit: k(sf.v) }; }
-    var bb = bread(rad, 'fin'), ok3 = nara(bb.num, sf.t / sf.n) && isFinite(bb.t) && isFinite(bb.n) && gcd(Math.round(bb.t), Math.round(bb.n)) === 1;
-    markBc(rad, 'fin', ok3); return { ok:ok3, facit: sf.t + '/' + sf.n };
+    var st = LR.finalStatus(ff, fin, krav), ok = st.status === 'ratt';
+    if(sf.form === 'tal') markEl(rad.querySelector('.ak8-ft'), ok); else { if(mh) markEl(mh, ok); markBc(rad, 'fin', ok); }
+    var facit = sf.form === 'tal' ? k(sf.v) : sf.form === 'blandad' ? sf.hel + ' ' + sf.t + '/' + sf.n : sf.t + '/' + sf.n;
+    return { ok: ok, facit: facit, besked: st.status === 'form' ? LR.besked(st.orsak) : '' };
   }
 
   // BRAK(täljare)(nämnare) → stående bråk (REKURSIV: klarar komplex-bråk via balanserad parentes-scanning).
@@ -332,10 +339,10 @@
 
   // ── RÄTTA en rad ──
   function rattaRad(rad, u){
-    var typ = rad.dataset.typ, f = u.facit;
+    var typ = rad.dataset.typ, f = u.facit, krav = u.svarkrav || 'enklaste';
     if(typ === 'kedja'){
-      var res = LR.provaKedja(AK8_UI.kedjaCeller(rad), f.v, f.fin);
-      return { ok: res.ok, facit: finText(f.fin) };
+      var res = LR.provaKedja(AK8_UI.kedjaCeller(rad), f.v, f.fin, krav);
+      return { ok: res.ok, facit: finText(f.fin), besked: res.status === 'form' ? LR.besked(res.orsak) : '' };
     }
     if(typ === 'ordna'){
       var ideal = f.lista.map(function(p, i){ return { i:i, v:p[0] / p[1] }; }).sort(function(a, b){ return a.v - b.v; }).map(function(x){ return x.i; });
@@ -357,28 +364,28 @@
       var melOk = isFinite(m1.n) && isFinite(m2.n) && Math.round(m1.n) === Math.round(m2.n) && nara(m1.num, av) && nara(m2.num, bv)
         && (!f.mgn || (Math.round(m1.n) === L && Math.round(m2.n) === L));
       markBc(rad, 'mel1', melOk); markBc(rad, 'mel2', melOk);
-      var sv = rattaSvar(rad, f.svar);
+      var sv = rattaSvar(rad, f.svar, krav);
       var melText = f.m[0][0] + '/' + f.m[0][1] + ' ' + f.op + ' ' + f.m[1][0] + '/' + f.m[1][1];
-      return { ok: melOk && sv.ok, facit: melText + ' = ' + sv.facit };
+      return { ok: melOk && sv.ok, facit: melText + ' = ' + sv.facit, besked: melOk ? sv.besked : '' };
     }
-    if(typ === 'decbrak'){ var sv = rattaSvar(rad, f.svar); return { ok: sv.ok, facit: sv.facit }; }
+    if(typ === 'decbrak'){ return rattaSvar(rad, f.svar, krav); }
     if(typ === 'multheltal'){
       var mel = bread(rad, 'mel'), melOk = nara(mel.t, f.m.t) && nara(mel.n, f.m.n);
-      markBc(rad, 'mel', melOk); var sv = rattaSvar(rad, f.svar);
-      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
+      markBc(rad, 'mel', melOk); var sv = rattaSvar(rad, f.svar, krav);
+      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit, besked: melOk ? sv.besked : '' };
     }
     if(typ === 'multbrak'){
       var c = rad.querySelector('.ak8-bc[data-r="mel"]');
       var tRaw = c.querySelector('.ak8-bt').value.replace(/\s/g, ''), nRaw = c.querySelector('.ak8-bn').value.replace(/\s/g, '');
       var melOk = /^\d+$/.test(tRaw) && /^\d+$/.test(nRaw) && +tRaw === f.m.t && +nRaw === f.m.n;
-      markBc(rad, 'mel', melOk); var sv = rattaSvar(rad, f.svar);
-      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
+      markBc(rad, 'mel', melOk); var sv = rattaSvar(rad, f.svar, krav);
+      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit, besked: melOk ? sv.besked : '' };
     }
-    if(typ === 'komplexdiv'){ var sv = rattaSvar(rad, f.svar); return { ok: sv.ok, facit: sv.facit }; }
+    if(typ === 'komplexdiv'){ return rattaSvar(rad, f.svar, krav); }
     if(typ === 'divbrak'){
       var mel = bread(rad, 'mel'), melOk = nara(mel.num, f.m.t / f.m.n);
-      markBc(rad, 'mel', melOk); var sv = rattaSvar(rad, f.svar);
-      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit };
+      markBc(rad, 'mel', melOk); var sv = rattaSvar(rad, f.svar, krav);
+      return { ok: melOk && sv.ok, facit: f.m.t + '/' + f.m.n + ' = ' + sv.facit, besked: melOk ? sv.besked : '' };
     }
     if(typ === 'reciprok'){
       // AlgBrak: värde + enklaste form. 'form' = rätt värde men ej förenklat (t.ex. rå vändning xy³/2x).
@@ -393,13 +400,13 @@
   }
 
   function kontrollera(c){
-    var uppg = []; vy.doc.grupper.forEach(function(g){ g.uppgifter.forEach(function(u){ uppg.push(u); }); });
+    var uppg = []; vy.doc.grupper.forEach(function(g){ g.uppgifter.forEach(function(u){ u.svarkrav = g.svarform || 'enklaste'; uppg.push(u); }); });   // gruppens svarsform (bandet) följer uppgiften
     c.querySelectorAll('.ak8-rad').forEach(function(rad, i){
       var u = uppg[i]; if(!u) return;
       var gammal = rad.querySelector('.ak8-fasit'); if(gammal) gammal.remove();
       var besvarad = radBesvarad(rad);
       var res = rattaRad(rad, u);
-      if(besvarad && !res.ok){ var fEl = document.createElement('span'); fEl.className = 'ak8-fasit'; fEl.textContent = res.meddelande || ('rätt: ' + res.facit); rad.appendChild(fEl); }
+      if(besvarad && !res.ok){ var fEl = document.createElement('span'); fEl.className = 'ak8-fasit'; fEl.textContent = res.meddelande || ((res.besked ? res.besked + ' ' : '') + 'rätt: ' + res.facit); rad.appendChild(fEl); }
       // EVIDENS: bara besvarade + loggade rader, en gång/visning. STORE-ROUTING: k1-lån → Mastery, k2 → MasteryK2.
       if(!vy.loggat && u.logg && besvarad){
         var mod = (u.loggStore === 'k1') ? window.Mastery : window.MasteryK2;

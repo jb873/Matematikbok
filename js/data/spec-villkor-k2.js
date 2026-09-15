@@ -19,7 +19,13 @@
    Bråk-fält i tak/kravs:
      maxNamnare/maxTaljare · form ('proper'|'oakta'|'blandad'|'valfri') · maxHeltal (blandad-del)
      mellanled (false | 'forlang' | 'produktbrak' | 'komplexbrak' | 'kompensation')
-     svarform ('enklaste'|'blandad'|'decimal'|'brak'|'tecken'|'ordning')
+     svarform ('enklaste'|'blandad'|'decimal'|'brak'|'valfri' · celltyper: 'tecken'|'ordning'|'val'|'mgn')
+       BINDANDE sedan 2026-09-15 ("Svarsformen ska hållas, åt båda håll"): bandets svarform är nodens TAK,
+       variant-filens grupp bär KRAVET (g.svarform, rättaren läser det), facit-formen i alla varianter följer
+       kravet. verktyg/svarform-koll.js (i spec-fuzz-k2/-akr9) kontrollerar de tre leden mot varandra.
+         'enklaste' = förkortat; blandad ELLER oäkta godtas (19/15-beslutet) — INTE "blir blandad när >1"
+         'blandad'/'brak'/'decimal' = formen KRÄVS av uppgiften (rubriken "skriv i bråkform" osv.)
+         'valfri' = noden täcker flera riktningar; gruppen avgör (brak-blandad: G1 brak, G3 blandad)
      kravs: förkortbar(bool) · parvisOlika(n) · likhetsfall(bool) · terminerandeDecimal(bool)
      rattning ('canonical'|'equality')   // hela E-bandet = canonical (FAS 1)
 */
@@ -36,11 +42,11 @@
         kravs: { terminerandeDecimal: true },   // nämnare ∈ {2,4,5} → alltid avslutande decimal
         svarform: 'decimal', rattning: 'canonical' } }
     },
-    'bd-tillbrak:rakna': {        // Öva 1 G5 — decimal → bråkform, enklaste form.
+    'bd-tillbrak:rakna': {        // Öva 1 G5 — decimal → BRÅKFORM, enklaste form ("skriv i bråkform": 2,5 → 5/2, inte 2 ½).
       kalla: 'Öva 1 grupp 5 (0,8 · 0,75 · 2,5 · 0,125 · 1,2)',
       spar: { E: {
         tak: { maxDecimaler: 3, maxVarde: 2.5, mellanled: false },   // 0,125 = 3 dec; 2,5/1,2 = >1
-        kravs: {}, svarform: 'enklaste', rattning: 'canonical' },
+        kravs: {}, svarform: 'brak', rattning: 'canonical' },   // förr 'enklaste' + brakForm(värde) → blandad krävdes för 2,5 (spegelfelet, rättat 2026-09-15)
       nian: {   // nian Åk9-spåret Öva 1 G5 — decimal + bråk i samma uttryck (byta form för att räkna)
         kalla: 'nian Öva 1 grupp 5 (0,2+2/3, 5/6+7, 1/9−0,6, 0,7−2/3)',
         tak: { maxNamnare: 12, maxTaljare: 11, maxHeltal: 9, mellanled: false },
@@ -112,7 +118,7 @@
           kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
         { niva: 2, kalla: 'Öva 4 G1', beskrivning: 'Addition i blandad form',
           tak: { maxNamnare: 6, form: 'blandad', maxHeltal: 5, mellanled: 'forlang' },
-          kravs: { mellanled: true }, svarform: 'blandad', rattning: 'canonical' }
+          kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' }   // rubrik "svara i enklaste form": blandad ELLER oäkta (förr 'blandad' = beskrev bara att svaret blir >1)
       ] },
       nian: { nivaer: [   // nian Åk9-spåret: G4 (oliknämnig, MINSTA gem. nämnare-mellanled) → G6 (blandad, fri kedja)
         { niva: 1, kalla: 'nian Öva 1 G4', beskrivning: 'Oliknämnig addition, mellanled = MINSTA gem. nämnare (ej förlängning); negativt svar tillåtet',
@@ -120,7 +126,7 @@
           kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
         { niva: 2, kalla: 'nian Öva 1 G6', beskrivning: 'Blandade tal, addition — fri equality-kedja',
           tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'blandad', mellanled: 'kedja' },
-          kravs: {}, svarform: 'blandad', rattning: 'equality' }
+          kravs: {}, svarform: 'enklaste', rattning: 'equality' }   // rubrik "svara i enklaste form"
       ] } }
     },
     'brak-sub:rakna': {           // Öva 3 G3 + Öva 4 G3 — oliknämnig subtraktion (samma nivå).
@@ -138,7 +144,7 @@
           kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
         { niva: 2, kalla: 'nian Öva 1 G6', beskrivning: 'Blandade tal, subtraktion — fri equality-kedja',
           tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'blandad', mellanled: 'kedja' },
-          kravs: {}, svarform: 'blandad', rattning: 'equality' }
+          kravs: {}, svarform: 'enklaste', rattning: 'equality' }   // rubrik "svara i enklaste form"
       ] } }
     },
 
@@ -248,7 +254,7 @@
       kalla: 'nian Öva 1 grupp 6 d (5 5/9 − 2 11/12)',
       spar: { nian: {
         tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'blandad', mellanled: 'kedja' },
-        kravs: { lan: true }, svarform: 'blandad', rattning: 'equality' } }
+        kravs: { lan: true }, svarform: 'enklaste', rattning: 'equality' } }   // rubrik "svara i enklaste form"; lånet är metoden, inte svarsformen
     },
     'brak-mult-forkorta:rakna': {   // nian Öva 2 G4 — förkorta innan multiplikation (fri kedja).
       kalla: 'nian Öva 2 grupp 4 (5/27·9/15 … 3 3/5·1 1/9·2 1/2)',

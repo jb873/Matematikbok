@@ -9,6 +9,7 @@
   'use strict';
   var F = window;                          // fracSpan ur blad-karna.js
   var A = window.SvgAndel, TLj = window.SvgTallinje;
+  var LR = window.Likhetsrattare;   // delad tre-läges-rättare (finalStatus/ffAv/besked)
   function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // sanering: en-/em-dash, ej bara U+2212
   function ev(s){ return AK8_UI.evalArith(s); }
   function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
@@ -89,18 +90,24 @@
     var idx = CHECKS.length;
     if(r.typ === 'br'){
       CHECKS.push(function(el){
-        var b = bread(el, 'sv'), mal = r.t / r.n, ok = likhet(b.num, mal);
+        var b = bread(el, 'sv'), mal = r.t / r.n, ok = likhet(b.num, mal), besked = '';
         if(r.opts.exakt) ok = ok && likhet(b.t, r.t) && likhet(b.n, r.n);
-        if(r.opts.enklast) ok = ok && isFinite(b.t) && isFinite(b.n) && gcd(Math.round(b.t), Math.round(b.n)) === 1;
-        return { ok: ok, facit: r.t + '/' + r.n };
+        if(r.opts.enklast){
+          // Tre lägen (delad regel): rätt värde men oförkortat → 'form' med besked, inte bara ✗. Cellen har ingen hel-ruta,
+          // så blandad form kan inte skrivas här ("skriv i bråkform" hålls strukturellt).
+          var st = LR.finalStatus(LR.ffAv(null, b.t, b.n), { k: 'br', t: r.t, n: r.n }, 'brak');
+          ok = st.status === 'ratt'; if(st.status === 'form') besked = LR.besked(st.orsak);
+        }
+        return { ok: ok, facit: r.t + '/' + r.n, besked: besked };
       });
       return rad('<span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + bcellHTML('sv') + (r.opts.suffix ? '<span class="ovn-text">&nbsp;' + r.opts.suffix + '</span>' : '') + '</span>');
     }
     if(r.typ === 'mi'){
       CHECKS.push(function(el){
-        var m = mread(el.querySelector('.ak8-mc-wrap')), mal = r.hel + r.t / r.n;
-        var ok = likhet(m.num, mal) && likhet(m.hel, r.hel) && isFinite(m.t) && isFinite(m.n) && m.t < m.n && m.t > 0;
-        return { ok: ok, facit: r.hel + ' ' + r.t + '/' + r.n };
+        // "Skriv i blandad form" — kravet blandad (gruppen), tre lägen: 9/4 med tom hel-ruta = rätt värde, fel form.
+        var m = mread(el.querySelector('.ak8-mc-wrap'));
+        var st = LR.finalStatus(LR.ffAv(m.hel, m.t, m.n), { k: 'mi', h: r.hel, t: r.t, n: r.n }, 'blandad');
+        return { ok: st.status === 'ratt', facit: r.hel + ' ' + r.t + '/' + r.n, besked: st.status === 'form' ? LR.besked(st.orsak) : '' };
       });
       return rad('<span class="ak8-q">' + r.fraga + ' =</span><span class="ak8-svar" data-idx="' + idx + '"><span class="ak8-mc-wrap">' + mcellHTML() + '</span></span>');
     }
@@ -199,7 +206,7 @@
       else { el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);
       if(res.ok){ ratt++; }
-      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = 'rätt: ' + res.facit; (el.closest('.ak8-rad') || el).appendChild(f); }
+      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = (res.besked ? res.besked + ' ' : '') + 'rätt: ' + res.facit; (el.closest('.ak8-rad') || el).appendChild(f); }
     });
     var s = mount.querySelector('[data-sammanf]'); s.hidden = false;
     if(ratt === tot && tot > 0){

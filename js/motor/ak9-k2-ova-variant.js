@@ -40,6 +40,8 @@
     if(Math.abs(T) >= N){ var hel = Math.trunc(T / N), rest = Math.abs(T) - Math.abs(hel) * N; return { form: 'blandad', hel: hel, t: rest, n: N }; }  // oäkta → blandad
     return { form: 'brak', t: T, n: N };                                  // äkta → tvåfält
   }
+  // Reducerat bråk som BRÅKFORM oavsett värde (oäkta tillåtet) — för grupper vars krav är 'brak' (Öva 1 G5).
+  function oaktaForm(t, n){ var g = gcd(t, n); return { form: 'brak', t: t / g, n: n / g }; }
 
   // ── MALLAR — låst uppgiftsordning + grupper/rubriker. orig = Joachims exakta tal (dokument 1). ──
   //  Varje uppgift: { logg, prompt(t), mellan(t)|null, facit(t), orig }. Öva 1:s VÄXLINGS-grupper
@@ -48,7 +50,7 @@
 
     ova1: { titel: 'Grunder i bråk', grupper: [
       // G1 — bråk → decimalform → bd-vaxla:rakna (k1-store, FAS 3-route). Nämnare ∈{2,4,5} (avslutande decimal), täljare 1..5.
-      { rubrik: 'Byt form – skriv i decimalform', logg: 'bd-vaxla:rakna', loggStore: 'k1', uppgifter:
+      { rubrik: 'Byt form – skriv i decimalform', logg: 'bd-vaxla:rakna', loggStore: 'k1', svarform: 'decimal', uppgifter:
         [[2,5],[3,4],[3,2],[1,5],[5,4]].map(function(p){ return {
           logg: 'bd-vaxla:rakna', loggStore: 'k1', orig: { t: p[0], n: p[1] },
           sample: function(rng){ return { t: ri(rng, 1, 5), n: rp(rng, [2, 4, 5]) }; },
@@ -66,7 +68,7 @@
           facit: function(x){ return brakForm(x.t, x.n); } }; }) },   // alla äkta här → {form:'brak'}
 
       // G3 — förläng med 3, visa mellanled. logg brak-forlanga:rakna. Äkta, maxT 8, maxN 13. mellan = (t·3)/(n·3).
-      { rubrik: 'Förläng följande bråk med 3 – visa mellanled', logg: 'brak-forlanga:rakna', uppgifter:
+      { rubrik: 'Förläng följande bråk med 3 – visa mellanled', logg: 'brak-forlanga:rakna', svarform: 'brak', uppgifter:
         [[7,9],[3,5],[8,13]].map(function(p){ return {
           logg: 'brak-forlanga:rakna', orig: { t: p[0], n: p[1], f: 3 },
           sample: function(rng){ var f = sampProper(rng, 8, 13); return { t: f[0], n: f[1], f: 3 }; },
@@ -76,7 +78,7 @@
           facit: function(x){ return { form: 'forlang', t: x.t * x.f, n: x.n * x.f }; } }; }) },
 
       // G4 — förläng så att nämnaren blir 40, visa mellanled. Nämnare delar 40 & ≤13 ({2,4,5,8,10}), täljare<n, ≤8.
-      { rubrik: 'Förläng följande bråk så att nämnaren blir 40 – visa mellanled', logg: 'brak-forlanga:rakna', uppgifter:
+      { rubrik: 'Förläng följande bråk så att nämnaren blir 40 – visa mellanled', logg: 'brak-forlanga:rakna', svarform: 'brak', uppgifter:
         [[1,8],[2,5],[7,10]].map(function(p){ return {
           logg: 'brak-forlanga:rakna', orig: { t: p[0], n: p[1], mål: 40 },
           sample: function(rng){ var n = rp(rng, [2, 4, 5, 8, 10]); return { t: ri(rng, 1, Math.min(8, n - 1)), n: n, mål: 40 }; },
@@ -86,19 +88,19 @@
           facit: function(x){ var f = x.mål / x.n; return { form: 'forlang', t: x.t * f, n: x.mål }; } }; }) },
 
       // G5 — decimal → bråkform, enklaste form → bd-tillbrak:rakna (k1-store, FAS 3-route). ≤3 decimaler, värde ≤2,5, ej heltal.
-      { rubrik: 'Byta form – skriv i bråkform, i enklaste form', logg: 'bd-tillbrak:rakna', loggStore: 'k1', uppgifter:
+      { rubrik: 'Byta form – skriv i bråkform, i enklaste form', logg: 'bd-tillbrak:rakna', loggStore: 'k1', svarform: 'brak', uppgifter:
         [0.8, 0.75, 2.5, 0.125, 1.2].map(function(d){
           var dec = ('' + d).split('.')[1] || ''; var pot = Math.pow(10, dec.length);
           return { logg: 'bd-tillbrak:rakna', loggStore: 'k1', orig: { d: d, t: Math.round(d * pot), n: pot },
             sample: function(rng){ var dp = ri(rng, 1, 3), po = Math.pow(10, dp), kk = ri(rng, 1, Math.floor(2.5 * po)); var dd = rund(kk / po); return { d: dd, t: Math.round(dd * po), n: po }; },
             villkor: function(x){ var s = ('' + x.d).split('.')[1] || ''; return s.length <= 3 && x.d > 0 && x.d <= 2.5 && x.t % x.n !== 0 && (x.n / gcd(x.t, x.n)) <= 10; },   // förkortad nämnare ≤10 ⇒ "snygga" tal (0,8=4/5, ej 0,62=31/50)
             prompt: function(x){ return k(x.d) + ' ='; }, mellan: function(){ return null; },
-            facit: function(x){ return brakForm(x.t, x.n); } }; }) }   // 2,5→2 ½, 1,2→1 ⅕ blir {form:'blandad'}
+            facit: function(x){ return oaktaForm(x.t, x.n); } }; }) }   // "skriv i bråkform": 2,5 → 5/2, 1,2 → 6/5 (FORCERAT brak; förr blandad via brakForm — Joachim 2026-09-15)
     ] },
 
     ova2: { titel: 'Grunder i bråk – jämförelse och ordning', grupper: [
       // G1 — blandat tal → OÄKTA bråk (formen FORCAS 'brak'). logg brak-blandad. h 1..6, äkta t/n n≤9, oäkta-täljare ≤40.
-      { rubrik: 'Skriv i bråkform', logg: 'brak-blandad:rakna', uppgifter:
+      { rubrik: 'Skriv i bråkform', logg: 'brak-blandad:rakna', svarform: 'brak', uppgifter:
         [[6,3,5],[4,2,3],[1,5,7]].map(function(p){ return {
           logg: 'brak-blandad:rakna', orig: { h: p[0], t: p[1], n: p[2] },
           sample: function(rng){ var f = sampProper(rng, 8, 9); return { h: ri(rng, 1, 6), t: f[0], n: f[1] }; },
@@ -116,7 +118,7 @@
           facit: function(x){ return { form: 'val', a: x.a, b: x.b, ratt: (x.a[0] / x.a[1] >= x.b[0] / x.b[1]) ? 0 : 1 }; } }; }) },
 
       // G3 — oäkta bråk → BLANDAD form. Oäkta t/n (t>n), n≤9, t≤20, ej heltal (t%n≠0). logg brak-blandad.
-      { rubrik: 'Skriv i blandad form', logg: 'brak-blandad:rakna', uppgifter:
+      { rubrik: 'Skriv i blandad form', logg: 'brak-blandad:rakna', svarform: 'blandad', uppgifter:
         [[11,3],[9,5],[17,4],[20,9]].map(function(p){ return {
           logg: 'brak-blandad:rakna', orig: { t: p[0], n: p[1] },
           sample: function(rng){ var n = ri(rng, 2, 9); return { t: ri(rng, n + 1, 20), n: n }; },
@@ -222,7 +224,7 @@
         [[[2,7],[3,5]],[[3,4],[5,6]],[[2,3],[5,8]]].map(function(p){ return divBrakUppg(p[0], p[1], 'brak-div-bb:rakna'); }) },
 
       // G2 — skriv det inverterade talet (reciprok). Sträng-swap (även algebraiskt 7x/2y ⑥). logg brak-div-reciprok.
-      { rubrik: 'Vilket är det inverterade talet till…', logg: 'brak-div-reciprok:rakna', uppgifter:
+      { rubrik: 'Vilket är det inverterade talet till…', logg: 'brak-div-reciprok:rakna', svarform: 'brak', uppgifter:
         [[3,5],[2,9],['7x','2y']].map(function(p){ return reciprokUppg(p[0], p[1], 'brak-div-reciprok:rakna', typeof p[0] === 'string'); }) },
 
       // G3 — bråk ÷ bråk via INVERTERING. Samma cellstruktur som G1 (produkten (a·d)/(b·c) är lika oavsett
@@ -403,7 +405,9 @@
     var idx = 0;
     return { dokId: dokId, variant: variant, titel: mall.titel, grupper: mall.grupper.map(function(g){
       var used = {};   // grupp-lokala tal-nycklar (denna variant) ⇒ inga upprepade värden inom en grupp
-      return { rubrik: g.rubrik, logg: g.logg || null, uppgifter: g.uppgifter.map(function(u){
+      // svarform = SVARSFORMEN gruppen kräver (bandet per grupp): 'blandad' | 'brak' | 'decimal' | 'enklaste' (default = båda
+      // formerna godtas i lägsta termer, 19/15-beslutet). Rättaren läser detta, inte rubriktexten. Gäller alla varianter.
+      return { rubrik: g.rubrik, logg: g.logg || null, svarform: g.svarform || 'enklaste', uppgifter: g.uppgifter.map(function(u){
         var gu = genUppgift(u, dokId, idx++, variant, used); used[talKey(gu.tal)] = 1; return gu;
       }) };
     }) };

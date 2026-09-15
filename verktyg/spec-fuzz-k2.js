@@ -14,6 +14,7 @@ var ROOT = path.resolve(__dirname, '..');
 var API = require(path.join(ROOT, 'js/motor/ak9-k2-ova-variant.js'));
 var SPEC = require(path.join(ROOT, 'js/data/spec-villkor-k2.js'));
 var gcd = API._intern.gcd, lcm = API._intern.lcm;
+var SVF = require(path.join(__dirname, 'svarform-koll.js'));   // svarsformen bindande: band ⟷ grupp ⟷ facit
 
 var SAMPLES_PER_UPPG = 1000;   // × ~44 uppgifter ⇒ ≥ 30k sampel
 var DOKS = ['ova1', 'ova2', 'ova3', 'ova4', 'ova5', 'ova6'];
@@ -180,6 +181,11 @@ ml.rows.forEach(function(r){
 });
 console.log('  → mellanleds-avvikelser: ' + ml.fel.length);
 
+// ── Svarsform-bindning (band ⟷ gruppens krav ⟷ facit-form i alla varianter) ──
+var sv = SVF.svarformKoll(API, SPEC, DOKS, 'E');
+console.log(head('Svarsform (band ⟷ grupp ⟷ facit)'));
+SVF.skrivRapport(sv);
+
 console.log(head('Förkastningstal per uppgift'));
 Object.keys(forkast).forEach(function(k){ var f = forkast[k];
   if(f.fixed){ console.log('  ' + k.padEnd(10) + ' FAST (7x/2y, ingen variant)'); return; }
@@ -194,6 +200,7 @@ console.log('  facit-diff-fel (variant 0–3): ' + facitDiffFel.length); facitDi
 console.log('  distinkthets-larm          : ' + distinktLarm.length); distinktLarm.forEach(function(s){ console.log('    ⚠ ' + s); });
 
 console.log('  mellanleds-avvikelser      : ' + ml.fel.length);       ml.fel.forEach(function(s){ console.log('    ✗ ' + s); });
-var ok = !facitAvvik.length && !specAvvik.length && !facitDiffFel.length && !distinktLarm.length && !ml.fel.length && totSampel >= 30000;
-console.log('\n' + (ok ? '✓ GRIND GRÖN — facit-diff 0, spec-villkor 0, mellanled-konsistens OK, fuzz ≥30k' : '✗ GRIND RÖD — se avvikelser ovan'));
+console.log('  svarform-avvikelser        : ' + sv.fel.length);
+var ok = !facitAvvik.length && !specAvvik.length && !facitDiffFel.length && !distinktLarm.length && !ml.fel.length && !sv.fel.length && totSampel >= 30000;
+console.log('\n' + (ok ? '✓ GRIND GRÖN — facit-diff 0, spec-villkor 0, mellanled-konsistens OK, svarform bunden, fuzz ≥30k' : '✗ GRIND RÖD — se avvikelser ovan'));
 process.exit(ok ? 0 : 1);

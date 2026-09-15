@@ -15,7 +15,6 @@
   'use strict';
   var F = window, LR = window.Likhetsrattare;
   function evalA(s){ return AK8_UI.evalArith(s); }
-  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
   function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function fr(t, n){ return F.fracSpan(t, n); }
   function mx(h, t, n){ return h + '&nbsp;' + F.fracSpan(t, n); }
@@ -31,12 +30,6 @@
     return { hel: h, t: t, n: n, hasHel: hasHel, num: (isFinite(t) && isFinite(n) && n !== 0 && isFinite(h)) ? h + t / n : NaN };
   }
   function bstr(scope, role){ var c = scope.querySelector('.ak8-bc[data-r="' + role + '"]'); return { t: c.querySelector('.ak8-bt').value.replace(/\s/g, ''), n: c.querySelector('.ak8-bn').value.replace(/\s/g, '') }; }
-  function finOk(r, fin){
-    var proper = isFinite(r.t) && isFinite(r.n) && Math.abs(r.t) < Math.abs(r.n) && gcd(r.t, r.n) === 1;
-    if(fin.k === 'mi') return r.hasHel && proper;
-    if(fin.k === 'br') return !r.hasHel && proper;
-    return false;
-  }
 
   // ── slutform-fabriker (delade LR-formatet) ──
   function MI(h, t, n){ return { k: 'mi', h: h, t: t, n: n }; }
@@ -48,7 +41,9 @@
   function KAN(q, v, cells){ return { typ: 'kan', q: q, v: v[0] / v[1], cells: cells }; }  // cells: [{t:'b'|'m'|'i'|'kb', fin?}]  ('p' produktbråk-cell utgått → EQ)
   // fri kedja. min = minsta antal ifyllda led (2 = ett mellanled + svar); {fri:true} → 1 (får hoppa över).
   function EQ(q, v, fin, opts){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin, min: (opts && opts.fri) ? 1 : 2 }; }
-  function G(rubrik, rader, hint){ return { rubrik: rubrik, rader: rader, hint: hint }; }
+  // opts.svarform = SVARSFORMEN gruppen kräver ('blandad'|'brak'|'decimal'); utelämnad = 'enklaste' (båda formerna).
+  // Kravet bor i DATAN (gruppen), inte i rubriktexten — rättaren läser inte rubriker. (Order 2026-09-15.)
+  function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Division med bråk', uppg: [
@@ -121,13 +116,16 @@
     }
     if(r.typ === 'kan'){
       CHECKS.push(function(el){
-        var ok = true;
+        var ok = true, besked = '';
+        // Svarscellen rättas med den DELADE tre-läges-regeln (finalStatus + gruppens svarform) — förr en lokal
+        // finOk som krävde blandad där resten av bladet godtog båda (två rättare på samma blad; Joachim 2026-09-15).
+        function slut(ff, fin){ var st = LR.finalStatus(ff, fin, r.svarform); if(st.status !== 'ratt') ok = false; if(st.status === 'form') besked = LR.besked(st.orsak); }
         r.cells.forEach(function(c, i){
-          if(c.t === 'i'){ if(!LR.finalCheck(LR.finalForm(exprOf(el, 'k' + i)), c.fin)) ok = false; }
+          if(c.t === 'i'){ slut(LR.finalForm(exprOf(el, 'k' + i)), c.fin); }
           else if(c.t === 'kb'){ if(!likhet(LR.mixedEval(exprOf(el, 'k' + i)), r.v)) ok = false; }  // komplex-bråk = ett led, rättas på VÄRDE
-          else { var rd = bread(el, 'k' + i); if(!likhet(rd.num, r.v)) ok = false; if(c.fin && !finOk(rd, c.fin)) ok = false; }
+          else { var rd = bread(el, 'k' + i); if(c.fin) slut(LR.ffAv(rd.hasHel ? rd.hel : null, rd.t, rd.n), c.fin); else if(!likhet(rd.num, r.v)) ok = false; }
         });
-        return { ok: ok, facit: 'svar: ' + finText(r.cells[r.cells.length - 1].fin) };
+        return { ok: ok, facit: 'svar: ' + finText(r.cells[r.cells.length - 1].fin), besked: besked };
       });
       var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
       r.cells.forEach(function(c, i){ html += EQS + (c.t === 'i' ? AK8_UI.ansCell('k' + i) : c.t === 'kb' ? AK8_UI.komplexBrakCell('k' + i) : bcell('k' + i, c.t === 'm')); });
@@ -135,10 +133,10 @@
     }
     // equality — delad kedje-helper; minst r.min ifyllda led (mellanled + svar)
     CHECKS.push(function(el){
-      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
+      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin, r.svarform);
       var ok = res.ok && res.antal >= r.min;
       var facit = 'svar: ' + finText(r.fin) + (res.ok && res.antal < r.min ? ' ' + TEXT.mellanled.hint : (res.antal ? TEXT.led.hint : ''));
-      return { ok: ok, facit: facit };
+      return { ok: ok, facit: facit, besked: res.status === 'form' ? LR.besked(res.orsak) : '' };   // rätt värde, fel form → eget besked
     });
     return AK8_UI.kedjaRadHTML(idx, r.q);
   }
@@ -165,7 +163,7 @@
       el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       AK8_UI.markera(el, res.ok);
       if(res.ok){ ratt++; }
-      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = 'rätt ' + res.facit; el.appendChild(f); }
+      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = (res.besked ? res.besked + ' ' : '') + 'rätt ' + res.facit; el.appendChild(f); }
     });
     var s = mount.querySelector('[data-sammanf]'); s.hidden = false;
     if(ratt === tot && tot > 0){

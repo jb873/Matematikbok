@@ -15,6 +15,7 @@ var path = require('path');
 var ROOT = path.resolve(__dirname, '..');
 var API = require(path.join(ROOT, 'js/motor/ak9-k2-akr9-ova-variant.js'));
 var SPEC = require(path.join(ROOT, 'js/data/spec-villkor-k2.js'));
+var SVF = require(path.join(__dirname, 'svarform-koll.js'));   // svarsformen bindande: band ⟷ grupp ⟷ facit
 var gcd = API._intern.gcd, mkRng = API._intern.mkRng, seedOf = API._intern.seedOf, svarSig = API._intern.svarSig;
 var SAMPLES_PER_UPPG = 1000;   // × ~51 variabla uppgifter ⇒ ≥ 30k
 var DOKS = ['ova1', 'ova2'];
@@ -151,11 +152,16 @@ Object.keys(forkast).forEach(function(kk){ var f = forkast[kk];
   var pct = (100 * f.kast / (f.pass + f.kast)).toFixed(1);
   console.log('  ' + kk.padEnd(18) + ' pass ' + String(f.pass).padStart(4) + '  kast ' + String(f.kast).padStart(4) + '  (' + pct + '%)  distinkta ' + f.distinkta);
 });
+var sv = SVF.svarformKoll(API, SPEC, DOKS, 'nian');
+console.log(head('Svarsform (band ⟷ grupp ⟷ facit)'));
+SVF.skrivRapport(sv);
+
 console.log(head('RESULTAT'));
+console.log('  svarform-avvikelser        : ' + sv.fel.length);
 console.log('  facit-välformat-avvikelser : ' + facitAvvik.length); facitAvvik.slice(0, 20).forEach(function(s){ console.log('    ✗ ' + s); });
 console.log('  spec-villkor-avvikelser    : ' + specAvvik.length);  specAvvik.slice(0, 20).forEach(function(s){ console.log('    ✗ ' + s); });
 console.log('  facit-diff-fel (variant 0–3): ' + facitDiffFel.length); facitDiffFel.slice(0, 20).forEach(function(s){ console.log('    ✗ ' + s); });
 console.log('  distinkthets-larm          : ' + distinktLarm.length); distinktLarm.forEach(function(s){ console.log('    ⚠ ' + s); });
-var ok = !facitAvvik.length && !specAvvik.length && !facitDiffFel.length && !distinktLarm.length && totSampel >= 30000;
-console.log('\n' + (ok ? '✓ GRIND GRÖN — facit-diff 0, spec-villkor 0, fuzz ≥30k' : '✗ GRIND RÖD — se avvikelser'));
+var ok = !facitAvvik.length && !specAvvik.length && !facitDiffFel.length && !distinktLarm.length && !sv.fel.length && totSampel >= 30000;
+console.log('\n' + (ok ? '✓ GRIND GRÖN — facit-diff 0, spec-villkor 0, svarform bunden, fuzz ≥30k' : '✗ GRIND RÖD — se avvikelser'));
 process.exit(ok ? 0 : 1);

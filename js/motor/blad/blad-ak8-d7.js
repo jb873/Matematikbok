@@ -24,7 +24,9 @@
   function finText(fin){ return fin.k === 'dec' ? String(fin.x).replace('.', ',') : fin.k === 'br' ? fin.t + '/' + fin.n : fin.h + ' ' + fin.t + '/' + fin.n; }
   // rad-fabrik: fri kedja. min = minsta antal ifyllda led (2 = ett mellanled + svar); {fri:true} → 1 (får hoppa över).
   function EQ(q, v, fin, opts){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin, min: (opts && opts.fri) ? 1 : 2 }; }
-  function G(rubrik, rader, hint){ return { rubrik: rubrik, rader: rader, hint: hint }; }
+  // opts.svarform = SVARSFORMEN gruppen kräver ('blandad'|'brak'|'decimal'); utelämnad = 'enklaste' (båda formerna).
+  // Kravet bor i DATAN (gruppen), inte i rubriktexten — rättaren läser inte rubriker. (Order 2026-09-15.)
+  function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
   var FRI = { fri: true };
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
@@ -33,7 +35,7 @@
       EQ('5 · ' + fr(3,4), [15,4], MI(3,3,4)),
       EQ('3 · ' + fr(3,7), [9,7], MI(1,2,7)),
       EQ('7 · ' + fr(5,8), [35,8], MI(4,3,8))
-    ]),
+    ], null, { svarform: 'blandad' }),   // "svara i blandad form" — 15/4 ger 'form', inte rätt (Joachim 2026-09-15)
     G('Beräkna – visa mellanled och svara i enklaste form', [
       EQ(fr(2,3) + ' · ' + fr(2,3), [4,9], BR(4,9)),
       EQ(fr(3,7) + ' · ' + fr(2,5), [6,35], BR(6,35)),
@@ -92,10 +94,10 @@
     var idx = CHECKS.length;
     // FRI kedja (DELAD kedje-helper, samma som d6 + division): varje ifyllt led = radens värde, sista = svaret i rätt form.
     CHECKS.push(function(el){
-      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
+      var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin, r.svarform);
       var ok = res.ok && res.antal >= r.min;
       var facit = 'svar: ' + finText(r.fin) + (res.ok && res.antal < r.min ? ' ' + TEXT.mellanled.hint : (res.antal ? TEXT.led.hint : ''));
-      return { ok: ok, facit: facit };
+      return { ok: ok, facit: facit, besked: res.status === 'form' ? LR.besked(res.orsak) : '' };   // rätt värde, fel form → eget besked
     });
     return AK8_UI.kedjaRadHTML(idx, r.q);
   }
@@ -123,7 +125,7 @@
       el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       AK8_UI.markera(el, res.ok);
       if(res.ok){ ratt++; }
-      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = 'rätt ' + res.facit; el.appendChild(f); }
+      else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = (res.besked ? res.besked + ' ' : '') + 'rätt ' + res.facit; el.appendChild(f); }
     });
     var s = mount.querySelector('[data-sammanf]'); s.hidden = false;
     if(ratt === tot && tot > 0){
