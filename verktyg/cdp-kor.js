@@ -6,7 +6,7 @@
    någonsin i källträdet. Node ≥22 (inbyggd WebSocket), ingen npm.
 
    KÖR:
-     node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms] [--pre fil.js]
+     node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms] [--pre fil.js] [--screenshot ut.png] [--size WxH]
        <js-fil> = en JS-text som EVALUERAS i sidan; får vara ett async-uttryck / IIFE som returnerar ett
                   Promise. Resultatet (JSON) skrivs på stdout.
      Exempel:
@@ -25,6 +25,10 @@ const WAIT = opt('--wait', 1200), TIMEOUT = opt('--timeout', 60000);
 // --pre <js-fil>: körs i sidan FÖRE dess egna skript (Page.addScriptToEvaluateOnNewDocument) — t.ex. för att
 // fånga IIFE-lokala objekt genom att wrappa en global fabrik (window.__PB via ProvbyggarMotor.montera).
 const preI = args.indexOf('--pre'), PRE = preI >= 0 ? fs.readFileSync(path.resolve(args[preI + 1]), 'utf8') : null;
+// --screenshot <png>: skärmdump av RIKTIGA sidan EFTER att js-filen körts (synlighet i beviset — sett, inte bara DOM).
+// --size WxH: fönsterstorlek (default 900x1200).
+const shotI = args.indexOf('--screenshot'), SHOT = shotI >= 0 ? path.resolve(args[shotI + 1]) : null;
+const sizeI = args.indexOf('--size'), SIZE = sizeI >= 0 ? args[sizeI + 1].split('x').map(Number) : [900, 1200];
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const PORT = 9222 + Math.floor(Math.random() * 500);
 const expr = fs.readFileSync(path.resolve(jsFile), 'utf8');
@@ -38,7 +42,7 @@ const DEADLINE = WAIT + TIMEOUT + 15000;
 const vakthund = setTimeout(() => { console.error('cdp-kor: vakthund — deadline ' + DEADLINE + ' ms passerad, städar Chrome'); dodaChrome(); try { fs.rmSync(prof, { recursive: true, force: true }); } catch(e){} process.exit(1); }, DEADLINE);
 vakthund.unref && vakthund.unref();
 const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--allow-file-access-from-files', '--no-first-run',
-  '--remote-debugging-port=' + PORT, '--user-data-dir=' + prof, 'about:blank'], { stdio: 'ignore' });
+  '--remote-debugging-port=' + PORT, '--user-data-dir=' + prof, '--window-size=' + SIZE[0] + ',' + SIZE[1], '--hide-scrollbars', 'about:blank'], { stdio: 'ignore' });
 
 function getJson(p, method){ return new Promise((res, rej) => { const rq = http.request({ host: '127.0.0.1', port: PORT, path: p, method: method || 'GET' }, r => { let s = ''; r.on('data', d => s += d); r.on('end', () => { try { res(JSON.parse(s)); } catch(e){ rej(e); } }); }); rq.on('error', rej); rq.end(); }); }
 async function waitPort(){ for(let i = 0; i < 200; i++){ try { return await getJson('/json/version'); } catch(e){ await new Promise(r => setTimeout(r, 100)); } } throw new Error('Chrome svarade inte på CDP-porten'); }
@@ -67,6 +71,7 @@ async function waitPort(){ for(let i = 0; i < 200; i++){ try { return await getJ
     const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true, timeout: TIMEOUT });
     if(r.result && r.result.exceptionDetails){ console.error('FEL i sidan:', JSON.stringify(r.result.exceptionDetails.exception || r.result.exceptionDetails, null, 0).slice(0, 600)); code = 1; }
     else console.log(JSON.stringify(r.result && r.result.result ? r.result.result.value : null));
+    if(SHOT){ await send('Emulation.setDeviceMetricsOverride', { width: SIZE[0], height: SIZE[1], deviceScaleFactor: 1, mobile: false }); const sh = await send('Page.captureScreenshot', { format: 'png' }); if(sh.result && sh.result.data){ fs.writeFileSync(SHOT, Buffer.from(sh.result.data, 'base64')); console.error('skärmdump: ' + SHOT); } }
     ws.close();
   } catch(e){ console.error('cdp-kor:', e.message); code = 1; }
   finally { clearTimeout(vakthund); dodaChrome(); setTimeout(() => { try { fs.rmSync(prof, { recursive: true, force: true }); } catch(e){} process.exit(code); }, 300); }
