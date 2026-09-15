@@ -2,62 +2,43 @@
    Två Öva-blad, exakt-författade ur "Multiplikation med bråk.docx" (läst strukturellt ur
    document.xml/m:f; alla facit oberoende omräknade, 0 fel). Ärver åk7 k2.
 
-   Två rättnings-modeller (per order):
-   · CANONICAL (visa ett/mellanled, blandad/enklaste form): FASTA mellanled-rutor mot löpande värde.
-     Mellanledet är ett PRODUKTBRÅK ((2·2)/(3·3)) → motor-lokal cell där täljare/nämnare tolkas med
-     AK8_UI.evalArith. Slutrutan även mot enklaste form.
-   · EQUALITY (förkorta-innan, ta-bort-mellanled, förenkla-innan): FRI kedja via delade Likhetsrattare
-     (provaKedja) — path-fritt, korsförkorta i valfri ordning / kortare kedja. Modulen är OFÖRÄNDRAD.
+   EN rättnings-modell (Joachim 2026-09-15, samma som d6): ALLA rader är en FRI KEDJA via delade
+   AK8_UI.kedjaRadHTML + Likhetsrattare.provaKedja — path-fritt, korsförkorta i valfri ordning.
+   Startläge ett mellanled + svar, "+ led" ger fler. Minst ett ifyllt mellanled före svaret (antal ≥ 2),
+   utom där uppgiften uttryckligen säger att man får hoppa över det (G4, fri:true).
+   Förr hade G1/G2/G5 FASTA produktbråk-celler (en stående bråkcell per led): eleven kunde inte skriva
+   2 · 11/8 som första steg för 2 · 1 3/8, och G2 rad c hade tre celler mot syskonens två — det var fel.
    Bråk som stående bråk (bråk-byggaren). De 2 ordproblemen (Nils/får) byggs EJ här (problemlösning). */
 (function(){
   'use strict';
   var F = window, LR = window.Likhetsrattare;
-  function evalA(s){ return AK8_UI.evalArith(s); }
-  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
-  function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function fr(t, n){ return F.fracSpan(t, n); }
   function mx(h, t, n){ return h + '&nbsp;' + F.fracSpan(t, n); }
   // produktbråk-DISPLAY (täljare/nämnare kan vara uttryck som "11·5")
   function pf(num, den){ return '<span class="ovn-brak"><span class="ovn-brak-taljare ovn-num">' + num + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare ovn-num">' + den + '</span></span>'; }
-
-  // ── motor-lokal CANONICAL-cell: stående bråk (+ ev. hel) med UTTRYCK i täljare/nämnare (evalArith) ──
-  function fracInner(){ return '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-bt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-bn" inputmode="text" autocomplete="off"></span></span>'; }
-  function bcell(role, mixed){ return '<span class="ak8-bc' + (mixed ? ' ak8-mcx' : '') + '" data-r="' + role + '">' + (mixed ? '<input class="ak8-in ak8-mh" inputmode="text" autocomplete="off">' : '') + fracInner() + '</span>'; }
-  function bread(scope, role){
-    var c = scope.querySelector('.ak8-bc[data-r="' + role + '"]'); if(!c) return { num: NaN };
-    var t = evalA(c.querySelector('.ak8-bt').value), n = evalA(c.querySelector('.ak8-bn').value);
-    var mh = c.querySelector('.ak8-mh'), hasHel = !!(mh && mh.value.trim() !== ''), h = hasHel ? evalA(mh.value) : 0;
-    return { hel: h, t: t, n: n, hasHel: hasHel, num: (isFinite(t) && isFinite(n) && n !== 0 && isFinite(h)) ? h + t / n : NaN };
-  }
-  function finOk(r, fin){
-    var proper = isFinite(r.t) && isFinite(r.n) && Math.abs(r.t) < Math.abs(r.n) && gcd(r.t, r.n) === 1;
-    if(fin.k === 'mi') return r.hasHel && proper;
-    if(fin.k === 'br') return !r.hasHel && proper;
-    return false;
-  }
 
   // ── slutform-fabriker (delade LR-formatet) ──
   function MI(h, t, n){ return { k: 'mi', h: h, t: t, n: n }; }
   function BR(t, n){ return { k: 'br', t: t, n: n }; }
   function DE(x){ return { k: 'dec', x: x }; }
   function finText(fin){ return fin.k === 'dec' ? String(fin.x).replace('.', ',') : fin.k === 'br' ? fin.t + '/' + fin.n : fin.h + ' ' + fin.t + '/' + fin.n; }
-  // rad-fabriker
-  function KAN(q, v, cells){ return { typ: 'kan', q: q, v: v[0] / v[1], cells: cells }; }   // cells: [{m:bool}...]; sista = fin (fin-obj)
-  function EQ(q, v, fin){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin }; }
+  // rad-fabrik: fri kedja. min = minsta antal ifyllda led (2 = ett mellanled + svar); {fri:true} → 1 (får hoppa över).
+  function EQ(q, v, fin, opts){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin, min: (opts && opts.fri) ? 1 : 2 }; }
   function G(rubrik, rader, hint){ return { rubrik: rubrik, rader: rader, hint: hint }; }
+  var FRI = { fri: true };
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Multiplikation med bråk', uppg: [
     G('Beräkna – visa ett mellanled, svara i blandad form', [
-      KAN('5 · ' + fr(3,4), [15,4], [{}, { m:true, fin: MI(3,3,4) }]),
-      KAN('3 · ' + fr(3,7), [9,7], [{}, { m:true, fin: MI(1,2,7) }]),
-      KAN('7 · ' + fr(5,8), [35,8], [{}, { m:true, fin: MI(4,3,8) }])
+      EQ('5 · ' + fr(3,4), [15,4], MI(3,3,4)),
+      EQ('3 · ' + fr(3,7), [9,7], MI(1,2,7)),
+      EQ('7 · ' + fr(5,8), [35,8], MI(4,3,8))
     ]),
     G('Beräkna – visa mellanled och svara i enklaste form', [
-      KAN(fr(2,3) + ' · ' + fr(2,3), [4,9], [{}, { fin: BR(4,9) }]),
-      KAN(fr(3,7) + ' · ' + fr(2,5), [6,35], [{}, { fin: BR(6,35) }]),
-      KAN(fr(5,6) + ' · ' + fr(4,7), [10,21], [{}, {}, { fin: BR(10,21) }]),
-      KAN(fr(5,8) + ' · ' + fr(7,9), [35,72], [{}, { fin: BR(35,72) }])
+      EQ(fr(2,3) + ' · ' + fr(2,3), [4,9], BR(4,9)),
+      EQ(fr(3,7) + ' · ' + fr(2,5), [6,35], BR(6,35)),
+      EQ(fr(5,6) + ' · ' + fr(4,7), [10,21], BR(10,21)),
+      EQ(fr(5,8) + ' · ' + fr(7,9), [35,72], BR(35,72))
     ], 'Skriv mellanledet som (täljare·täljare)/(nämnare·nämnare) – du får skriva produkten i rutorna.'),
     G('Förkorta och beräkna', [
       EQ(pf('11·5','10'), [11,2], MI(5,1,2)),
@@ -66,15 +47,15 @@
       EQ(pf('5·12','18'), [10,3], MI(3,1,3))
     ], 'Fri väg: förkorta (korsförkorta) innan du multiplicerar, i valfri ordning. Varje led måste vara lika med uttrycket, sista ledet svaret i enklaste form.'),
     G('Beräkna – ta bort ett mellanled, räkna i huvudet, svara i enklaste form', [
-      EQ(fr(7,9) + ' · 6', [14,3], MI(4,2,3)),
-      EQ(fr(4,11) + ' · ' + fr(5,7), [20,77], BR(20,77)),
-      EQ('4 · ' + fr(12,7), [48,7], MI(6,6,7)),
-      EQ(fr(3,8) + ' · ' + fr(7,4), [21,32], BR(21,32))
+      EQ(fr(7,9) + ' · 6', [14,3], MI(4,2,3), FRI),
+      EQ(fr(4,11) + ' · ' + fr(5,7), [20,77], BR(20,77), FRI),
+      EQ('4 · ' + fr(12,7), [48,7], MI(6,6,7), FRI),
+      EQ(fr(3,8) + ' · ' + fr(7,4), [21,32], BR(21,32), FRI)
     ], 'Räkna i huvudet – du får hoppa över mellanled. Skriv så många (eller få) led du vill, sista i enklaste form.'),
     G('Beräkna – svara i enklaste form', [
-      KAN('2 · ' + mx(1,3,8), [11,4], [{ m:true }, { m:true, fin: MI(2,3,4) }]),
-      KAN('4 · ' + mx(2,4,5), [56,5], [{ m:true }, { m:true, fin: MI(11,1,5) }]),
-      KAN('5 · ' + mx(3,4,7), [125,7], [{ m:true }, { m:true, fin: MI(17,6,7) }])
+      EQ('2 · ' + mx(1,3,8), [11,4], MI(2,3,4)),
+      EQ('4 · ' + mx(2,4,5), [56,5], MI(11,1,5)),
+      EQ('5 · ' + mx(3,4,7), [125,7], MI(17,6,7))
     ]),
     G('Förkorta och beräkna', [
       EQ(fr(33,25) + ' · ' + fr(10,11), [6,5], MI(1,1,5)),
@@ -104,26 +85,17 @@
   ] };
 
   // ══════════════════════════ RENDER ══════════════════════════
+  var TEXT = { mellanled: { hint: '— visa ett mellanled före svaret' }, led: { hint: ' (varje led = uttrycket)' } };   // elevtext som fält (samma som d6)
   var CHECKS = [];
-  var EQS = '<span class="ovn-text ak8-eq">=</span>';   // canonical använder EQS + bcell direkt; equality-kedjan använder AK8_UI.kedjaRadHTML
-  function exprOf(scope, role){ return scope.querySelector('.ak8-cell[data-r="' + role + '"] .ak8-expr'); }
 
   function renderRad(r){
     var idx = CHECKS.length;
-    if(r.typ === 'kan'){
-      CHECKS.push(function(el){
-        var ok = true;
-        r.cells.forEach(function(c, i){ var rd = bread(el, 'k' + i); if(!likhet(rd.num, r.v)) ok = false; if(c.fin && !finOk(rd, c.fin)) ok = false; });
-        return { ok: ok, facit: 'svar: ' + finText(r.cells[r.cells.length - 1].fin) };
-      });
-      var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
-      r.cells.forEach(function(c, i){ html += EQS + bcell('k' + i, !!c.m); });
-      return html + '</div>';
-    }
-    // equality — DELAD kedje-helper (samma som d6 låna + division)
+    // FRI kedja (DELAD kedje-helper, samma som d6 + division): varje ifyllt led = radens värde, sista = svaret i rätt form.
     CHECKS.push(function(el){
       var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
-      return { ok: res.ok, facit: 'svar: ' + finText(r.fin) + ' (varje led = uttrycket)' };
+      var ok = res.ok && res.antal >= r.min;
+      var facit = 'svar: ' + finText(r.fin) + (res.ok && res.antal < r.min ? ' ' + TEXT.mellanled.hint : (res.antal ? TEXT.led.hint : ''));
+      return { ok: ok, facit: facit };
     });
     return AK8_UI.kedjaRadHTML(idx, r.q);
   }

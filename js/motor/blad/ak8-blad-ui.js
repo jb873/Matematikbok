@@ -236,8 +236,11 @@
     return null;
   }
   // ── OPERATOR-HOPP (FAS 1): ett räknesätt skrivet med markören i ett bråk-/potensfält hör inte hemma DÄR
-  //    ("15+" i nämnaren) utan i texten EFTER widgeten — så uttrycket blir bråk · operator · bråk. ──
-  var OPER = { '+':1, '−':1, '-':1, '·':1, '*':1, '/':1, '(':1, ')':1 };
+  //    ("15+" i nämnaren) utan i texten EFTER widgeten — så uttrycket blir bråk + bråk. ──
+  //    UNDANTAG · (mult/div-bladen, 2026-09-15): produkten HÖR hemma i täljare/nämnare — (5·4)/(6·7) är
+  //    multiplikationens mellanled och hinten ber om den. Hoppade · ut kunde formen inte skrivas alls.
+  //    Vill eleven ha · MELLAN två bråk (3/5 · 7/6) skriver hon det i texten efter bråket (Enter/tryck).
+  var OPER = { '+':1, '−':1, '-':1, '/':1, '(':1, ')':1 };
   function operatorMal(active, key){
     if(!OPER[key] || !/ak8-(frt|frn|pbase|pexp)/.test(active.className)) return active;
     var w = widgetAv(active); if(!w) return active;

@@ -5,9 +5,11 @@
    Rättnings-modeller:
    · INVERTERA (skriva reciprok): fast cell, byt plats på täljare/nämnare (även algebraiskt 2x/y→y/2x) — sträng-swap.
    · CANONICAL (fasta rutor): heltal÷stambråk (heltals-svar), stambråk÷heltal (bråk-svar), bråk÷heltal,
-     förlänga-/invertera-metoden (produktbråk-mellanled (a·d)/(b·c) via AK8_UI.evalArith, som mult).
-   · EQUALITY via delade AK8_UI.kedjaRadHTML + Likhetsrattare (path-fritt): två-varianter (godtar båda metoder),
-     förkorta-innan, blandad÷blandad, blandade räknesätt (mult/div/+/− blandat).
+     förlänga-metoden (komplex-bråk-cell som mellanled, medvetet fast).
+   · EQUALITY via delade AK8_UI.kedjaRadHTML + Likhetsrattare (path-fritt): invertera-metoden (blad 1 G5 —
+     förr fast produktbråk-cell som inte rymde 3/5 · 7/6, det steg hinten ber om; Joachim 2026-09-15),
+     två-varianter (godtar båda metoder), förkorta-innan, blandad÷blandad, blandade räknesätt.
+     Minst ett ifyllt mellanled före svaret (antal ≥ 2), som d6/d7.
    Div visas med ÷; bråk stående. De 7 problemen byggs i FAS 3-fliken (PROB_RUTA). */
 (function(){
   'use strict';
@@ -43,8 +45,9 @@
   function finText(fin){ return fin.k === 'dec' ? String(fin.x).replace('.', ',') : fin.k === 'br' ? fin.t + '/' + fin.n : fin.h + ' ' + fin.t + '/' + fin.n; }
   // rad-fabriker
   function INV(tj, nm){ return { typ: 'inv', tj: String(tj), nm: String(nm) }; }        // skriva reciprok (byt plats)
-  function KAN(q, v, cells){ return { typ: 'kan', q: q, v: v[0] / v[1], cells: cells }; }  // cells: [{t:'p'|'b'|'m'|'i', fin?}]
-  function EQ(q, v, fin){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin }; }
+  function KAN(q, v, cells){ return { typ: 'kan', q: q, v: v[0] / v[1], cells: cells }; }  // cells: [{t:'b'|'m'|'i'|'kb', fin?}]  ('p' produktbråk-cell utgått → EQ)
+  // fri kedja. min = minsta antal ifyllda led (2 = ett mellanled + svar); {fri:true} → 1 (får hoppa över).
+  function EQ(q, v, fin, opts){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin, min: (opts && opts.fri) ? 1 : 2 }; }
   function G(rubrik, rader, hint){ return { rubrik: rubrik, rader: rader, hint: hint }; }
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
@@ -68,9 +71,9 @@
       KAN(fr(3,5) + ' ÷ ' + fr(2,7), [21,10], [{ t:'kb' }, { t:'m', fin: MI(2,1,10) }])
     ], 'Skriv divisionen som ett staplat bråk och förläng täljare OCH nämnare med nämnarens invers, så nämnaren blir 1. Då står det som kvar är täljaren · inverterade nämnaren – det är därför invertera fungerar.'),
     G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', [
-      KAN(fr(3,5) + ' ÷ ' + fr(6,7), [7,10], [{ t:'p' }, { t:'b', fin: BR(7,10) }]),
-      KAN(fr(5,6) + ' ÷ ' + fr(3,8), [20,9], [{ t:'p' }, { t:'m', fin: MI(2,2,9) }]),
-      KAN(fr(7,3) + ' ÷ ' + fr(5,7), [49,15], [{ t:'p' }, { t:'m', fin: MI(3,4,15) }])
+      EQ(fr(3,5) + ' ÷ ' + fr(6,7), [7,10], BR(7,10)),
+      EQ(fr(5,6) + ' ÷ ' + fr(3,8), [20,9], MI(2,2,9)),
+      EQ(fr(7,3) + ' ÷ ' + fr(5,7), [49,15], MI(3,4,15))
     ], 'Invertera nämnaren och multiplicera: (täljare·täljare)/(nämnare·nämnare) i mellanledet.')
   ] };
 
@@ -102,6 +105,7 @@
   ] };
 
   // ══════════════════════════ RENDER ══════════════════════════
+  var TEXT = { mellanled: { hint: '— visa ett mellanled före svaret' }, led: { hint: ' (varje led = uttrycket)' } };   // elevtext som fält (samma som d6/d7)
   var CHECKS = [];
   var EQS = '<span class="ovn-text ak8-eq">=</span>';
   function exprOf(scope, role){ return scope.querySelector('.ak8-cell[data-r="' + role + '"] .ak8-expr'); }
@@ -129,10 +133,12 @@
       r.cells.forEach(function(c, i){ html += EQS + (c.t === 'i' ? AK8_UI.ansCell('k' + i) : c.t === 'kb' ? AK8_UI.komplexBrakCell('k' + i) : bcell('k' + i, c.t === 'm')); });
       return html + '</div>';
     }
-    // equality — delad kedje-helper
+    // equality — delad kedje-helper; minst r.min ifyllda led (mellanled + svar)
     CHECKS.push(function(el){
       var res = LR.provaKedja(AK8_UI.kedjaCeller(el), r.v, r.fin);
-      return { ok: res.ok, facit: 'svar: ' + finText(r.fin) + ' (varje led = uttrycket)' };
+      var ok = res.ok && res.antal >= r.min;
+      var facit = 'svar: ' + finText(r.fin) + (res.ok && res.antal < r.min ? ' ' + TEXT.mellanled.hint : (res.antal ? TEXT.led.hint : ''));
+      return { ok: ok, facit: facit };
     });
     return AK8_UI.kedjaRadHTML(idx, r.q);
   }

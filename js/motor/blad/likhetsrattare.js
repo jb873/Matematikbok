@@ -22,6 +22,10 @@
   function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
   function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
   function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
+  // Täljare/nämnare i ett stående bråk får vara ett UTTRYCK ("5·4") — multiplikationens mellanled är
+  // (5·4)/(6·7) (åk8 mult/div, 2026-09-15). AK8_UI.evalArith när den finns, annars rent tal (nian utan AK8_UI).
+  function talVarde(s){ return (window.AK8_UI && AK8_UI.evalArith) ? AK8_UI.evalArith(s) : pNum(s); }
+  function harOperator(s){ return /[+\-−–—·×*\/]/.test(String(s || '').replace(/^\s*[-−]/, '')); }   // ledande minus = tecken, inte operator
 
   // ── TOKENISERING: en expr-cell → tokenström (tal, stående bråk, operatorer + − · /, likhetstecken) ──
   function tokens(expr){
@@ -42,7 +46,7 @@
         var tv = top ? evalSeg(tokens(top)) : NaN, bv = bot ? evalSeg(tokens(bot)) : NaN;
         toks.push({ frac: (isFinite(tv) && isFinite(bv) && bv !== 0) ? tv / bv : NaN, t: tv, n: bv });
       } else if(ch.classList.contains('ovn-brak')){
-        var t = pNum(ch.querySelector('.ak8-frt').value), n = pNum(ch.querySelector('.ak8-frn').value);
+        var t = talVarde(ch.querySelector('.ak8-frt').value), n = talVarde(ch.querySelector('.ak8-frn').value);
         toks.push({ frac: (isFinite(t) && isFinite(n) && n !== 0) ? t / n : NaN, t: t, n: n });
       }
     });
@@ -82,7 +86,9 @@
     var wtxt = ''; Array.prototype.forEach.call(expr.querySelectorAll('.ak8-exprtxt'), function(t){ wtxt += t.value; });
     wtxt = wtxt.replace(/[\s ]/g, '').replace(/−/g, '-').replace(/,/g, '.');
     if(fracs.length === 1){
-      var t = pNum(fracs[0].querySelector('.ak8-frt').value), n = pNum(fracs[0].querySelector('.ak8-frn').value);
+      var ft = fracs[0].querySelector('.ak8-frt').value, fn = fracs[0].querySelector('.ak8-frn').value;
+      if(harOperator(ft) || harOperator(fn)) return { kind: 'expr', num: val };   // (2·2)/(3·3) är ett led, inte ett SVAR i enklaste form
+      var t = pNum(ft), n = pNum(fn);
       var proper = isFinite(t) && isFinite(n) && Math.abs(t) < Math.abs(n) && gcd(t, n) === 1;
       if(/^-?\d+$/.test(wtxt)) return { kind: 'mi', num: val, t: t, n: n, simplest: proper && parseInt(wtxt, 10) !== 0 };
       if(wtxt === '' || wtxt === '-') return { kind: 'br', num: val, t: t, n: n, simplest: proper };
