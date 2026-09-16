@@ -6,6 +6,8 @@
    via config i montera(). Globaler skuggas med samma namn → flyttad kod är oförändrad utom window.* → config.
    ── Elev-lokalt: läser/skriver bara via config.mastery (localStorage). Ingen nätväg i den här filen. ── */
 (function(){
+  // Slutsvarets form-hint i mellanled-subtypen, per svarform (elevtext som fält).
+  const FORMHINT = { enklaste: { hint: 'enklaste form' }, blandad: { hint: 'blandad form' }, brak: { hint: 'bråkform, enklaste form' } };
   // OBS: medvetet INTE 'use strict' — den flyttade koden kördes i ramens sloppy mode (t.ex.
   // generateTest:s safetyCounter läcker till global mellan snabb-/problem-looparna). Byte-identiskt.
 
@@ -100,7 +102,10 @@ function testMellanledGen(genId, titel, omrade, makeItem){
       const it = makeItem(opts);
       if(!it || seen.has(genId+'-'+it.key)) continue;
       seen.add(genId+'-'+it.key);
-      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'mellanled', prompt:it.prompt, led:it.led, slutTalj:it.slutTalj, slutNamn:it.slutNamn, explanation:it.expl||'' });
+      // svarform = KRAVET på slutsvaret, som DATA (order 2026-09-16): 'enklaste' (default — blandad ELLER oäkta i lägsta
+      // termer, samma regel som bladen) | 'blandad' | 'brak'. Sätts av generatorn (it.svarform) den dag ett test ska kräva
+      // en form; förr var kravet hårdkodat i rättaren (oäkta → blandad) med en hint som råkade beskriva det.
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'mellanled', prompt:it.prompt, led:it.led, slutTalj:it.slutTalj, slutNamn:it.slutNamn, svarform: it.svarform || 'enklaste', explanation:it.expl||'' });
     }
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
@@ -279,7 +284,7 @@ function renderSubInput(qNum, subIdx, s){
             <span class="tsb-streck"></span>
             <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-sn" aria-label="slutsvar nämnare">
           </span>
-          <span class="tsm-hint">enklaste form, blandad om oäkta</span>
+          <span class="tsm-hint">${(FORMHINT[s.svarform] || FORMHINT.enklaste).hint}</span>
         </div>
       </div>
     `;
@@ -657,25 +662,24 @@ function gradeSub(s, ans){
       if(isNaN(t) || isNaN(n) || n === 0) return false;
       return Math.abs(t / n - L.varde) < 1e-9;
     });
-    // SLUTSVAR: enklaste form OCH blandad form när facit är oäkta (täljare > nämnare) — speglar
-    // öva-bladens finOk (blad-ak8-d7): 'mi' = heltalsdel + äkta bråkdel för oäkta, 'br' = äkta bråk
-    // utan heltalsdel. Valfri heltals-ruta (shel) före bråket. Facit reducerat (gcd=1) av generatorn.
+    // SLUTSVAR: den DELADE tre-läges-regeln (Likhetsrattare.finalStatus) mot s.svarform — samma rättare som
+    // öva-bladen, kravet ur data. Valfri heltals-ruta (shel) före bråket. Facit reducerat (gcd=1) av generatorn.
     const st = parseInt(ans.slut && ans.slut[0]), sn = parseInt(ans.slut && ans.slut[1]);
     const shelStr = ans.slutHel, harHel = !(shelStr == null || String(shelStr).trim() === '');
     const shel = harHel ? parseInt(shelStr) : 0;
     const brakTom = !(ans.slut && (String(ans.slut[0]).trim() || String(ans.slut[1]).trim()));
-    let slutOk = false;
+    let slutOk = false, besked = '';
     if(s.slutNamn === 1){                                   // facit är ett heltal
       slutOk = harHel && !isNaN(shel) && shel === s.slutTalj && (brakTom || st === 0);
     } else if(!isNaN(st) && !isNaN(sn) && sn !== 0 && !isNaN(shel)){
-      const vardeOk = Math.abs((shel + st / sn) - s.slutTalj / s.slutNamn) < 1e-9;
-      const aktaDel = (st >= 0 && st < sn && gcd(st, sn) === 1);   // äkta + enklaste bråkdel
-      if(s.slutTalj > s.slutNamn){ slutOk = vardeOk && harHel && shel !== 0 && aktaDel; }   // oäkta → blandad krävs
-      else { slutOk = vardeOk && !harHel && aktaDel; }             // äkta → äkta bråk utan heltalsdel
+      const LR = window.Likhetsrattare;
+      const fin = (s.slutTalj > s.slutNamn) ? { k:'mi', h: Math.floor(s.slutTalj / s.slutNamn), t: s.slutTalj % s.slutNamn, n: s.slutNamn } : { k:'br', t: s.slutTalj, n: s.slutNamn };
+      const res = LR.finalStatus(LR.ffAv(harHel ? shel : null, st, sn), fin, s.svarform || 'enklaste');
+      slutOk = res.status === 'ratt'; if(res.status === 'form') besked = LR.besked(res.orsak);
     }
     const given = (s.led || []).map((L, i) => (ans.led[i] ? ans.led[i].join('/') : '?'))
       .concat([(harHel ? shel + ' ' : '') + (ans.slut ? ans.slut.join('/') : '?')]).join(' → ');
-    return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given};
+    return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given + (besked && ledOk ? ' — ' + besked : '')};
   }
   if(s.type === 'mellanled-num'){
     if(!ans || !ans.led) return {status:'skipped'};
@@ -843,8 +847,10 @@ function renderReviewSub(sr){
   } else if(sub.type === 'mellanled'){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit || (L.varde)).join(' → ');
+    const bl = Math.floor(sub.slutTalj / sub.slutNamn) + ' ' + (sub.slutTalj % sub.slutNamn) + '/' + sub.slutNamn;
     const slutText = (sub.slutNamn === 1) ? String(sub.slutTalj)
-      : (sub.slutTalj > sub.slutNamn) ? (Math.floor(sub.slutTalj / sub.slutNamn) + ' ' + (sub.slutTalj % sub.slutNamn) + '/' + sub.slutNamn + ' (blandad form)')
+      : (sub.slutTalj > sub.slutNamn)
+        ? (sub.svarform === 'blandad' ? bl + ' (blandad form)' : sub.svarform === 'brak' ? sub.slutTalj + '/' + sub.slutNamn + ' (bråkform)' : sub.slutTalj + '/' + sub.slutNamn + ' = ' + bl + ' (enklaste form)')
       : (sub.slutTalj + '/' + sub.slutNamn + ' (enklaste form)');
     correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + slutText + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'mellanled-num'){

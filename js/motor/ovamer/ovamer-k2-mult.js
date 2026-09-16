@@ -78,21 +78,23 @@
     function blandInput(){ return heltalBox('m-hel') + '<span style="margin:0 4px;"></span>' + fracBoxes('m-t', 'm-n'); }
     function blandFaktor(hel, t, n){ return intg(hel) + frac(t, n); }   // blandad faktor "1 ¾"
 
-    // Svarskontroll: ALLTID enklaste form; täljare > nämnare → blandad (heltalsruta + äkta bråkdel).
-    // Facit = ans (kanonisk, värde-härledd). Helt tal → tom bråkdel accepteras.
+    // Svarskontroll: kravet ur DATA (SVARFORM), rättning via den delade Likhetsrattare.finalStatus — samma regel
+    // som bladen och testet. 'enklaste' = blandad ELLER oäkta i lägsta termer (19/15-beslutet). Förr krävde drillen
+    // blandad och sa det i uppgiftstexten — texten var regeln (order 2026-09-16). Helt tal → tom bråkdel accepteras.
+    var SVARFORM = 'enklaste';
     function svarRatt(ans){
-      var hh = parseInt(valFor('m-hel'), 10); if(isNaN(hh)) hh = 0;
+      var hh = parseInt(valFor('m-hel'), 10), harHel = !isNaN(hh); if(!harHel) hh = 0;
       var tt = parseInt(valFor('m-t'), 10), nn = parseInt(valFor('m-n'), 10);
       if(isNaN(tt) && isNaN(nn)) return ans.t === 0 && hh === ans.hel;   // helt tal
       if(isNaN(tt) || isNaN(nn) || nn === 0) return false;
-      if(_gcd(tt, nn) !== 1 || tt >= nn) return false;                    // enklaste + äkta bråkdel
-      return hh === ans.hel && tt === ans.t && nn === ans.n;
+      var LR = window.Likhetsrattare, fin = ans.hel ? { k:'mi', h: ans.hel, t: ans.t, n: ans.n } : { k:'br', t: ans.t, n: ans.n };
+      return LR.finalStatus(LR.ffAv(harHel ? hh : null, tt, nn), fin, SVARFORM).status === 'ratt';
     }
 
     window.multBrakEngine = function(){
       window.korOvning({
         titel: 'Multiplikation med bråk',
-        sub: 'Multiplicera. Skriv svaret i enklaste form – är täljaren större än nämnaren, skriv blandad form.',
+        sub: 'Multiplicera. Skriv svaret i enklaste form.',
         back: window.renderOversikt,
         gen: function(level){
           var u = genMultBrak(level);

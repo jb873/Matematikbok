@@ -80,6 +80,7 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
 <script src="js/mastery.js"></script>
 <script src="js/mastery-k2.js"></script>
 <script src="js/motor/blad/ak8-blad-ui.js"></script>
+<script src="js/motor/blad/likhetsrattare.js"></script>
 <script src="js/provbyggare/provbyggar-motor.js"></script>
 <script>
 (function(){
@@ -1033,7 +1034,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       subs.push({label:String.fromCharCode(97+subs.length)+')', type:'mellanled',
         prompt:'Räkna ut (räkneordning, enklaste form):   '+f1[0]+'/'+f1[1]+' '+asOp+' '+f2[0]+'/'+f2[1]+' '+mdOp+' '+f3[0]+'/'+f3[1],
         led:[{fraga:'räkna '+f2[0]+'/'+f2[1]+' '+mdOp+' '+f3[0]+'/'+f3[1]+' först', varde: pt/pn, facit: pt+'/'+pn}],
-        slutTalj: st, slutNamn: sn,
+        slutTalj: st, slutNamn: sn, svarform: 'enklaste',   // kravet som data (rubriken säger enklaste form)
         explanation:'= '+f1[0]+'/'+f1[1]+' '+asOp+' '+pt+'/'+pn+' = '+st+'/'+sn+'.'});
     }
     return subs.length? {generator:'prio-brak', title:'Räkneordning med bråk', omrade:'brak-div', subs:subs} : null;

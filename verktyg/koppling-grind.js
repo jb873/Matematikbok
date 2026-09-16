@@ -172,6 +172,14 @@ function deeplink() {
     const abs = path.join(ROOT, area); if (!fs.existsSync(abs)) continue;
     for (const d of fs.readdirSync(abs)) { const p = area + '/' + d + '/index.html'; if (exists(p) && /ko:\s*n\.parent\b/.test(read(p))) lint.push(p); }
   }
+  // DATA-LINT: visning.formagaKey måste vara id:ts förmåge-suffix för alla lövnoder med tvådelat id — fältet är
+  // autogenererat och lästes förr bara av grinden; sju kvadratrot-noder bar id:ts ANDRA segment ('area', 'sida' …)
+  // utan att någon märkte det (2026-09-16). Undantag: noder vars suffix är en VARIANT, inte en förmåga (k2).
+  const FORMAGA_UNDANTAG = { 'brak-blandad:dec-blandad': 1, 'brak-sub:heltal': 1 };
+  for (const n of surfade()) {
+    const p = String(n.id).split(':'); if (p.length !== 2 || FORMAGA_UNDANTAG[n.id]) continue;
+    if (n.formaga && n.formaga !== p[1]) brott.push({ id: n.id, why: 'visning.formagaKey «' + n.formaga + '» ≠ id-suffix «' + p[1] + '» (autogenererat fält som ljuger)' });
+  }
   // ÖVERFLÖD (info): renderare utan surfad k1/k2-nod (kan vara ak8/ak9/provbyggar-only → ej fatal).
   const surfPrefix = new Set(noder.map(n => n.prefix));
   const overflow = [...Object.keys(k1r), ...k2r].filter(k => !surfPrefix.has(k)).sort();

@@ -58,14 +58,17 @@
     function blandInput(pre){ return heltalBox(pre + '-hel') + '<span style="margin:0 4px;"></span>' + fracBoxes(pre + '-t', pre + '-n'); }
     var LIKA = '<span style="margin:0 8px;font-size:22px;">=</span>';
     var GNG = '<span style="margin:0 7px;color:#7a6e65;">·</span>';
-    // Kanonisk blandad-rättning (ALLTID enklaste; helt tal → tom bråkdel). Speglar mult-drillens svarRatt.
+    // Svarskontroll: kravet ur DATA (SVARFORM), rättning via den delade Likhetsrattare.finalStatus — samma regel som
+    // bladen/testet/mult-drillen. 'enklaste' = blandad ELLER oäkta i lägsta termer. Förr krävde drillen blandad och
+    // sa det i uppgiftstexten (order 2026-09-16). Helt tal → tom bråkdel accepteras.
+    var SVARFORM = 'enklaste';
     function blandRatt(pre, ans){
-      var hh = parseInt(valFor(pre + '-hel'), 10); if(isNaN(hh)) hh = 0;
+      var hh = parseInt(valFor(pre + '-hel'), 10), harHel = !isNaN(hh); if(!harHel) hh = 0;
       var tt = parseInt(valFor(pre + '-t'), 10), nn = parseInt(valFor(pre + '-n'), 10);
       if(isNaN(tt) && isNaN(nn)) return ans.t === 0 && hh === ans.hel;
       if(isNaN(tt) || isNaN(nn) || nn === 0) return false;
-      if(_gcd(tt, nn) !== 1 || tt >= nn) return false;
-      return hh === ans.hel && tt === ans.t && nn === ans.n;
+      var LR = window.Likhetsrattare, fin = ans.hel ? { k:'mi', h: ans.hel, t: ans.t, n: ans.n } : { k:'br', t: ans.t, n: ans.n };
+      return LR.finalStatus(LR.ffAv(harHel ? hh : null, tt, nn), fin, SVARFORM).status === 'ratt';
     }
     // Bråk-rättning på VÄRDE + enklaste (accepterar oäkta). Speglar provbyggarens brak-subtyp.
     function fracRatt(pre, targetT, targetN){
@@ -78,7 +81,7 @@
     // ── Låna i blandad form (subtraktion; svar i blandad enklaste form) ──
     window.lanaEngine = function(){
       window.korOvning({
-        titel: 'Låna i blandad form', sub: 'Räkna ut differensen. Skriv svaret i blandad form, enklaste form. (Du får låna från heltalet eller räkna via oäkta bråk – valfri väg.)',
+        titel: 'Låna i blandad form', sub: 'Räkna ut differensen. Skriv svaret i enklaste form. (Du får låna från heltalet eller räkna via oäkta bråk – valfri väg.)',
         back: window.renderOversikt,
         gen: function(level){
           var u = genLana(level);
