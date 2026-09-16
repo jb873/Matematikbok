@@ -117,14 +117,17 @@
     return { kind: 'br', num: num, hel: 0, t: t, n: n, simplest: proper };
   }
 
-  // ELEVTEXT för form-lägena, som FÄLT (elevtext-låset). FÖRSLAG — formuleringen är Joachims (order 2026-09-15 FAS 3).
+  // ELEVTEXT för form-lägena, som FÄLT (elevtext-låset). Godkända av Joachim 2026-09-15 med två ändringar:
+  // ETT uttryck genomgående ("Rätt värde – …", samma som gy-fördjupningen), och klart-texten pekar på vad som saknas.
   var BESKED = {
-    blandad:  { hint: 'Rätt räknat – skriv svaret i blandad form.' },
-    brak:     { hint: 'Rätt räknat – skriv svaret som ett bråk, utan heltal.' },
+    blandad:  { hint: 'Rätt värde – skriv svaret i blandad form.' },
+    // 'brak' NÅS INTE i dag: där bråkform krävs ritas cellen utan hel-ruta, så eleven kan inte skriva blandad form.
+    // Texten finns för att regeln är komplett, inte som bevis på att fallet är täckt i någon vy.
+    brak:     { hint: 'Rätt värde – skriv svaret som ett bråk, utan heltal.' },
     brakform: { hint: 'Rätt värde – skriv svaret i bråkform.' },
     decimal:  { hint: 'Rätt värde – svara i decimalform.' },
     forkorta: { hint: 'Rätt värde – förkorta svaret.' },
-    klart:    { hint: 'Rätt värde – räkna klart till ett svar.' }
+    klart:    { hint: 'Rätt värde – räkna ut sista ledet.' }
   };
   function besked(orsak){ return (BESKED[orsak] || {}).hint || ''; }
 

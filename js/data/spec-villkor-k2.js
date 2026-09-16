@@ -126,7 +126,13 @@
           kravs: { mellanled: true }, svarform: 'enklaste', rattning: 'canonical' },
         { niva: 2, kalla: 'nian Öva 1 G6', beskrivning: 'Blandade tal, addition — fri equality-kedja',
           tak: { maxNamnare: 22, maxTaljare: 22, maxHeltal: 8, maxResultNamnare: 40, form: 'blandad', mellanled: 'kedja' },
-          kravs: {}, svarform: 'enklaste', rattning: 'equality' }   // rubrik "svara i enklaste form"
+          kravs: {}, svarform: 'enklaste', rattning: 'equality' },   // rubrik "svara i enklaste form"
+        // G5 "byta form" (0,2 + 2/3 · 5/6 + 7): decimal/HELTAL + äkta bråk, inget mellanled. Egen typ (form 'decbrak'),
+        // inte en nivå i stegen — låg utan band → 2868 falska larm (heltal > 0) i spec-fuzz-akr9 (rättat 2026-09-15).
+        // maxHeltal 7 = orig (5/6 + 7); generatorn samplar 2..7 (förr 2..9 — takregeln).
+        { niva: 3, kalla: 'nian Öva 1 G5 (byta form)', beskrivning: 'Decimal eller heltal + äkta bråk, svar i enklaste form',
+          tak: { maxNamnare: 12, maxTaljare: 9, maxHeltal: 7, maxResultNamnare: 45, form: 'proper', mellanled: false },   // 45 = orig (1/9 − 0,6 = −22/45)
+          kravs: {}, svarform: 'enklaste', rattning: 'canonical', _typ: 'decbrak' }
       ] } }
     },
     'brak-sub:rakna': {           // Öva 3 G3 + Öva 4 G3 — oliknämnig subtraktion (samma nivå).

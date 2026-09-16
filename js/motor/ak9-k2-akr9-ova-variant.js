@@ -146,14 +146,15 @@
     return { logg: logg, orig: { dec: dec, brak: brak, hel: hel },   // loggStore ur raden (add/sub = k2); ej k1 — dessa är BERÄKNINGAR, ej växling
       mellan: function(){ return null; },
       sample: function(rng){
-        var d = rp(rng, DECS), b = sampProper(rng, 8, 12), h = ri(rng, 2, 9);
+        var d = rp(rng, DECS), b = sampProper(rng, 8, 12), h = shape === 'brak+hel' ? ri(rng, 2, 7) : 0;   // hel ≤ 7 = orig (5/6 + 7), takregeln; bara formen med heltal bär ett
         return { dec: d, brak: b, hel: h };
       },
       villkor: function(x){
         var b = x.brak; if(!properOK(b) || b[1] > 12) return false;
         var c = combine(x); if(c.t === 0) return false;
+        if(c.n / gcd(c.t, c.n) > 45) return false;   // svarsnämnare ≤ 45 = orig (−22/45); 0,3 + 1/11 = 110-delar vore svårare (takregeln)
         if(shape === 'dec+brak' || shape === 'dec-brak' || shape === 'brak-dec'){ if(!x.dec || x.dec.length !== 3) return false; }
-        if(shape === 'brak+hel'){ if(!(x.hel >= 2 && x.hel <= 9)) return false; }
+        if(shape === 'brak+hel'){ if(!(x.hel >= 2 && x.hel <= 7)) return false; }
         // undvik att bråket och decimalen är lika (trivialt) i +/-:
         if(x.dec && Math.abs(b[0] / b[1] - x.dec[1] / x.dec[2]) < 1e-9) return false;
         return true;

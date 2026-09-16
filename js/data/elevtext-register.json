@@ -853,7 +853,14 @@
   "titel | Prioriteringsregeln"
  ],
  "js/motor/blad/blad-karna.js": [],
- "js/motor/blad/likhetsrattare.js": [],
+ "js/motor/blad/likhetsrattare.js": [
+  "hint | Rätt värde – förkorta svaret.",
+  "hint | Rätt värde – räkna ut sista ledet.",
+  "hint | Rätt värde – skriv svaret i blandad form.",
+  "hint | Rätt värde – skriv svaret i bråkform.",
+  "hint | Rätt värde – skriv svaret som ett bråk, utan heltal.",
+  "hint | Rätt värde – svara i decimalform."
+ ],
  "js/motor/blad/prob-ruta.js": [],
  "js/motor/metod/metod-addsub.js": [],
  "js/motor/metod/metod-avrundning.js": [

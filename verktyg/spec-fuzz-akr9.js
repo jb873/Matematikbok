@@ -24,6 +24,7 @@ var DOKS = ['ova1', 'ova2'];
 //   bandFor(logg, form) → tak {maxNamnare, maxTaljare, maxHeltal, maxMultiplikator, maxResultNamnare}.
 //   Noder som spänner två former (add/sub, mult-rakna, div-inv) har nivaer; niva väljs ur formen (som E:s bandFor).
 function nivaForForm(logg, form){
+  if(logg === 'brak-add:rakna' && form === 'decbrak') return 3;   // G5 "byta form" — egen typ med eget band (niva 3)
   if(logg === 'brak-add:rakna' || logg === 'brak-sub:rakna') return form === 'kedja' ? 2 : 1;
   if(logg === 'brak-mult-rakna:rakna') return form === 'multbrak' ? 2 : 1;
   if(logg === 'brak-div-inv:rakna') return form === 'kedja' ? 2 : 1;
