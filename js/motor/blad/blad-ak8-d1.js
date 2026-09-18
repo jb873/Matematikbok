@@ -16,12 +16,12 @@
   'use strict';
   var F = { fracSpan: window.fracSpan };
   function frac(t, n){ return F.fracSpan(t, n); }
-  var pNum = AK8_UI.pNum;   // DELAD parser (förr lokal kopia; en av fem varianter — order 2026-09-18 FAS 1)
+  function pNum(s){ return window.AK8_UI.pNum(s); }   // DELAD parser, lat uppslagning (kvrot laddas FÖRE ak8-blad-ui i ak8-k1-ram). Förr lokal kopia — order 2026-09-18 FAS 1
   function fmt(x){ var r = Math.round(x * 1e9) / 1e9, s = String(r).replace('.', ','); return s; }
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
 
   // Liten aritmetik-utvärderare för mellanledet (ingen eval): + − · / parenteser.
-  var evalArith = AK8_UI.evalArith;   // DELAD utvärderare (förr lokal; d2:s tog inte 'x' som gånger — order 2026-09-18 FAS 1)
+  function evalArith(s){ return window.AK8_UI.evalArith(s); }   // DELAD utvärderare, lat uppslagning (förr lokal; d2:s tog inte 'x' som gånger — order 2026-09-18 FAS 1)
 
   // ── Byggstenar ──
   // Tal-svar: ett textfält, facit = värde.

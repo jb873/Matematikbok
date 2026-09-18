@@ -19,7 +19,7 @@
   function frac(t, n){ return F.fracSpan(t, n); }
   // FAS1: normalisera ALLA minus-varianter (U+2212 matematiskt minus / U+2013 en-dash / U+2014 em-dash)
   // → U+002D innan parseFloat. Keypaden matar in U+2212; utan detta gav parseFloat('−2')=NaN → rätt svar rött.
-  var pNum = AK8_UI.pNum;   // DELAD parser (förr lokal kopia; en av fem varianter — order 2026-09-18 FAS 1)
+  function pNum(s){ return window.AK8_UI.pNum(s); }   // DELAD parser, lat uppslagning (kvrot laddas FÖRE ak8-blad-ui i ak8-k1-ram). Förr lokal kopia — order 2026-09-18 FAS 1
   function fmt(x){ return String(x).replace('.', ','); }
   function neg(html){ return '<span class="ovn-text">−</span>' + html; }   // minus framför stående bråk
 
@@ -176,7 +176,7 @@
   function unesc(s){ return String(s).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'); }
 
   // Liten aritmetik-utvärderare (+ − × / parenteser, unärt minus) — ingen eval.
-  var evalArith = AK8_UI.evalArith;   // DELAD utvärderare (förr lokal; d2:s tog inte 'x' som gånger — order 2026-09-18 FAS 1)
+  function evalArith(s){ return window.AK8_UI.evalArith(s); }   // DELAD utvärderare, lat uppslagning (förr lokal; d2:s tog inte 'x' som gånger — order 2026-09-18 FAS 1)
   // Teckenchips för ekvation: display + JS-operator.
   var EKV_OPS = [['+','+'], ['−','-'], ['×','*'], ['÷','/']];
   function ekvChips(){ return EKV_OPS.map(function(o){ return '<button type="button" class="ak8-chip" data-op="' + o[1] + '">' + o[0] + '</button>'; }).join(''); }

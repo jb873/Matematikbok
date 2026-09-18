@@ -10,7 +10,7 @@
   var F = window;                          // fracSpan ur blad-karna.js
   var A = window.SvgAndel, TLj = window.SvgTallinje;
   var LR = window.Likhetsrattare;   // delad tre-läges-rättare (finalStatus/ffAv/besked)
-  var pNum = AK8_UI.pNum;   // DELAD parser (förr lokal kopia; en av fem varianter — order 2026-09-18 FAS 1)
+  function pNum(s){ return window.AK8_UI.pNum(s); }   // DELAD parser, lat uppslagning (kvrot laddas FÖRE ak8-blad-ui i ak8-k1-ram). Förr lokal kopia — order 2026-09-18 FAS 1
   function ev(s){ return AK8_UI.evalArith(s); }
   function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
