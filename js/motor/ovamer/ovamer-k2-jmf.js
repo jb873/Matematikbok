@@ -204,11 +204,11 @@
       document.head.appendChild(s);
     }
     function scorebar(idx, results, OMG){ var d = ''; for(var i = 0; i < OMG; i++){ var c = i < idx ? (results[i] ? 'right' : 'wrong') : (i === idx ? 'current' : ''); d += '<div class="score-dot ' + c + '"></div>'; } return d; }
-    function klart(app, right, OMG, level, back, nyOmgang, render){
+    function klart(app, right, OMG, level, back, nyOmgang, render, adj){
       app.innerHTML = '<div class="view"><div class="exercise-card">'
         + '<div class="ex-header"><h2 class="ex-title">Klart!</h2><div class="ex-sub">Du klarade ' + right + ' av ' + OMG + '.</div></div>'
         + '<div class="summary"><div class="summary-big">' + right + '/' + OMG + '</div>'
-        + '<div class="summary-txt">' + (right >= OMG - 1 ? 'Starkt! Nästa omgång kan bli svårare.' : 'Fortsätt träna!') + '</div>'
+        + '<div class="summary-txt">' + (adj && adj.delta > 0 ? 'Starkt! Nästa omgång blir lite svårare.' : adj && adj.delta < 0 ? 'Nästa omgång blir lite lättare.' : 'Fortsätt träna!') + '</div>'
         + '<div class="summary-level">Nivå ' + level + '</div></div>'
         + '<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
         + '<button class="btn subtle" id="back">Till alla områden</button></div></div></div>';
@@ -225,7 +225,7 @@
       var level = 1, omgang = [], idx = 0, results = [], OMG = 6;
       function nyOmgang(){ omgang = []; for(var i = 0; i < OMG; i++) omgang.push(opts.gen(level)); idx = 0; results = []; }
       function render(){
-        if(idx >= omgang.length){ var right = results.filter(Boolean).length; if(right >= Math.ceil(OMG * 0.8) && level < 3) level++; klart(app, right, OMG, level, opts.back, nyOmgang, render); return; }
+        if(idx >= omgang.length){ var right = results.filter(Boolean).length; var adj = adjustLevel(level, right, OMG); level = adj.level; klart(app, right, OMG, level, opts.back, nyOmgang, render, adj); return; }   // DELAD nivåmodell (metod-karna) — förr egen klättra-logik utan adjustLevel
         var task = omgang[idx]; window.__aktuellNiva = level;   // nivåbrygga (FAS 2)
         var kortHtml = task.kort.map(function(k, ki){ return '<button class="jmf-kort' + (k.txt ? ' jmf-txtkort' : '') + '" data-i="' + ki + '">' + k.html + '</button>'; }).join('');
         app.innerHTML = '<div class="view"><div class="exercise-card">'
@@ -261,7 +261,7 @@
       var level = 1, omgang = [], idx = 0, results = [], OMG = 6;
       function nyOmgang(){ omgang = []; for(var i = 0; i < OMG; i++) omgang.push(opts.gen(level)); idx = 0; results = []; }
       function render(){
-        if(idx >= omgang.length){ var right = results.filter(Boolean).length; if(right >= Math.ceil(OMG * 0.8) && level < 3) level++; klart(app, right, OMG, level, opts.back, nyOmgang, render); return; }
+        if(idx >= omgang.length){ var right = results.filter(Boolean).length; var adj = adjustLevel(level, right, OMG); level = adj.level; klart(app, right, OMG, level, opts.back, nyOmgang, render, adj); return; }   // DELAD nivåmodell (metod-karna) — förr egen klättra-logik utan adjustLevel
         var task = omgang[idx], vald = []; window.__aktuellNiva = level;   // nivåbrygga (FAS 2)
         var kortHtml = task.kort.map(function(k, ki){ return '<button class="jmf-kort" data-i="' + ki + '">' + k.html + '</button>'; }).join('');
         app.innerHTML = '<div class="view"><div class="exercise-card">'

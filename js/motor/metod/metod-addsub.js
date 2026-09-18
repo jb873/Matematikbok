@@ -813,11 +813,8 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   function dgt(n,p){ return Math.floor(n/Math.pow(10,p))%10; }
   function hasP(n,p){ return Math.floor(n/Math.pow(10,p))>0||p===0; }
 
-  // Klättrar men sjunker aldrig (samma modell som övriga drillar).
-  function adjustLvl(lvl,right,total){
-    if(right>=total-1 && lvl<MAX_LVL) return {level:lvl+1,change:'up'};
-    return {level:lvl,change:null};
-  }
+  // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
+  // (Förr en lokal kopia av klättra-aldrig-sjunk; MAX_LVL = 3 = ramens tak.)
 
   function lvlName(l){
     return l===1 ? 'Två- och tresiffriga tal'
@@ -828,7 +825,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   function showSummary(){
     var right=omgangResults.filter(function(x){return x;}).length;
     var total=omgangResults.length;
-    var adj=adjustLvl(level,right,total);
+    var adj=adjustLevel(level,right,total);
     level=adj.level;
     body.innerHTML='<div class="exercise-card">'
       +exerciseHeader('Metod · uppställning (subtraktion)','Du klarade '+right+' av '+total+' uppgifter.',level)

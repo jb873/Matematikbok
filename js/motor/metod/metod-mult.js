@@ -792,11 +792,8 @@ function renderUppstallningMult(body, backFn, cfg){
     4:'tvåsiffrigt · tvåsiffrigt'
   };
 
-  function adjustUpp(lv, right, total){
-    if(right >= total-1 && lv < 3) return {level:lv+1, change:'up'};
-    if(right <= Math.floor(total/3) && lv > 1) return {level:lv-1, change:'down'};
-    return {level:lv, change:null};
-  }
+  // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
+  // Förr en lokal kopia som sjönk vid ≤ ⅓ rätt — en tredje modell ingen bestämt (order 2026-09-18).
 
   // Flersiffrig multiplikator (23–99, ental 3–9). Två delprodukter + summa.
   function genTaskFler(taskIdx){
@@ -1085,7 +1082,7 @@ function renderUppstallningMult(body, backFn, cfg){
   function showSummary(){
     const right = omgangResults.filter(function(x){ return x; }).length;
     const total = omgangResults.length;
-    const adj = adjustUpp(level, right, total);
+    const adj = adjustLevel(level, right, total);
     level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(TITEL, 'Du klarade ' + right + ' av ' + total + '.')

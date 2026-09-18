@@ -582,11 +582,8 @@ function renderDivMetoder(body){
 function renderDivKort(body, backFn){
   var level = 1, omgangResults = [], OMG = 5;
   var LEVELNAMN = {1:'tresiffrig täljare · nämnare 2–5', 2:'tresiffrig täljare · nämnare 3–9', 3:'fyrsiffrig täljare · nämnare 4–9'};
-  function adjustK(lv, right, total){
-    if(right >= total-1 && lv < 3) return {level:lv+1, change:'up'};
-    if(right <= Math.floor(total/3) && lv > 1) return {level:lv-1, change:'down'};
-    return {level:lv, change:null};
-  }
+  // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
+  // Förr en lokal kopia som sjönk vid ≤ ⅓ rätt — en tredje modell ingen bestämt (order 2026-09-18).
   function genTask(){
     var k = level === 3 ? 4 : 3;
     var nLo = level === 1 ? 2 : (level === 2 ? 3 : 4);
@@ -743,7 +740,7 @@ function renderDivKort(body, backFn){
   function showSummary(){
     var right = omgangResults.filter(function(x){ return x; }).length;
     var total = omgangResults.length;
-    var adj = adjustK(level, right, total);
+    var adj = adjustLevel(level, right, total);
     level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader('Metod · kort division', 'Du klarade ' + right + ' av ' + total + '.')
@@ -759,11 +756,8 @@ function renderDivKort(body, backFn){
 function renderDivLang(body, backFn){
   var level = 1, omgangResults = [], OMG = 4;
   var LEVELNAMN = {1:'tresiffrig täljare · nämnare 2–5', 2:'tresiffrig täljare · nämnare 3–9', 3:'tresiffrig täljare · nämnare 6–9'};
-  function adjustL(lv, right, total){
-    if(right >= total-1 && lv < 3) return {level:lv+1, change:'up'};
-    if(right <= Math.floor(total/3) && lv > 1) return {level:lv-1, change:'down'};
-    return {level:lv, change:null};
-  }
+  // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
+  // Förr en lokal kopia som sjönk vid ≤ ⅓ rätt — en tredje modell ingen bestämt (order 2026-09-18).
   function bygg(D, digs){
     var carry = 0, steps = [];
     for(var i=0; i<digs.length; i++){
@@ -941,7 +935,7 @@ function renderDivLang(body, backFn){
   function showSummary(){
     var right = omgangResults.filter(function(x){ return x; }).length;
     var total = omgangResults.length;
-    var adj = adjustL(level, right, total);
+    var adj = adjustLevel(level, right, total);
     level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader('Metod · lång division', 'Du klarade ' + right + ' av ' + total + '.')
