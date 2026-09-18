@@ -16,20 +16,12 @@
   'use strict';
   var F = { fracSpan: window.fracSpan };
   function frac(t, n){ return F.fracSpan(t, n); }
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // FAS1: minus-varianter → U+002D
+  var pNum = AK8_UI.pNum;   // DELAD parser (förr lokal kopia; en av fem varianter — order 2026-09-18 FAS 1)
   function fmt(x){ var r = Math.round(x * 1e9) / 1e9, s = String(r).replace('.', ','); return s; }
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
 
   // Liten aritmetik-utvärderare för mellanledet (ingen eval): + − · / parenteser.
-  function evalArith(s){
-    s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(/[·×x]/g, '*').replace(/÷/g, '/').replace(/,/g, '.');   // sanering: en-/em-dash (var ordagrann kopia av AK8_UI.evalArith)
-    if(!/^[-0-9.*/+()]*$/.test(s) || s === '') return NaN;
-    var i = 0;
-    function expr(){ var v = term(); while(s[i] === '+' || s[i] === '-'){ var o = s[i++], t = term(); v = o === '+' ? v + t : v - t; } return v; }
-    function term(){ var v = factor(); while(s[i] === '*' || s[i] === '/'){ var o = s[i++], f = factor(); v = o === '*' ? v * f : v / f; } return v; }
-    function factor(){ if(s[i] === '+'){ i++; return factor(); } if(s[i] === '-'){ i++; return -factor(); } if(s[i] === '('){ i++; var v = expr(); if(s[i] === ')') i++; return v; } var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]); }
-    var r = expr(); return i === s.length ? r : NaN;
-  }
+  var evalArith = AK8_UI.evalArith;   // DELAD utvärderare (förr lokal; d2:s tog inte 'x' som gånger — order 2026-09-18 FAS 1)
 
   // ── Byggstenar ──
   // Tal-svar: ett textfält, facit = värde.

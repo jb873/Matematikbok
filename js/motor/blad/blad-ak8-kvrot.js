@@ -11,7 +11,7 @@
 
   // ── hjälp ──
   function fmt(x){ return String(x).replace('.', ','); }
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/\s/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  var pNum = AK8_UI.pNum;   // DELAD parser (förr lokal kopia; en av fem varianter — order 2026-09-18 FAS 1)
   function likhetOk(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function inTal(){ return '<input class="ak8-in" inputmode="text" autocomplete="off">'; }
   // Notation (GRIND: inga råa ^ — allt formaterat)

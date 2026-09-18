@@ -19,7 +19,7 @@
   function frac(t, n){ return F.fracSpan(t, n); }
   // FAS1: normalisera ALLA minus-varianter (U+2212 matematiskt minus / U+2013 en-dash / U+2014 em-dash)
   // → U+002D innan parseFloat. Keypaden matar in U+2212; utan detta gav parseFloat('−2')=NaN → rätt svar rött.
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/\s/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  var pNum = AK8_UI.pNum;   // DELAD parser (förr lokal kopia; en av fem varianter — order 2026-09-18 FAS 1)
   function fmt(x){ return String(x).replace('.', ','); }
   function neg(html){ return '<span class="ovn-text">−</span>' + html; }   // minus framför stående bråk
 
@@ -176,20 +176,7 @@
   function unesc(s){ return String(s).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'); }
 
   // Liten aritmetik-utvärderare (+ − × / parenteser, unärt minus) — ingen eval.
-  function evalArith(s){
-    s = String(s).replace(/[−–—]/g, '-').replace(/[·×]/g, '*').replace(/÷/g, '/').replace(/,/g, '.').replace(/\s+/g, '');   // FAS1: alla minus-varianter
-    var i = 0;
-    function expr(){ var v = term(); while(s[i] === '+' || s[i] === '-'){ var op = s[i++]; var t = term(); v = op === '+' ? v + t : v - t; } return v; }
-    function term(){ var v = factor(); while(s[i] === '*' || s[i] === '/'){ var op = s[i++]; var f = factor(); v = op === '*' ? v * f : v / f; } return v; }
-    function factor(){
-      if(s[i] === '+'){ i++; return factor(); }
-      if(s[i] === '-'){ i++; return -factor(); }
-      if(s[i] === '('){ i++; var v = expr(); if(s[i] === ')') i++; return v; }
-      var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]);
-    }
-    var r = expr();
-    return i === s.length ? r : NaN;
-  }
+  var evalArith = AK8_UI.evalArith;   // DELAD utvärderare (förr lokal; d2:s tog inte 'x' som gånger — order 2026-09-18 FAS 1)
   // Teckenchips för ekvation: display + JS-operator.
   var EKV_OPS = [['+','+'], ['−','-'], ['×','*'], ['÷','/']];
   function ekvChips(){ return EKV_OPS.map(function(o){ return '<button type="button" class="ak8-chip" data-op="' + o[1] + '">' + o[0] + '</button>'; }).join(''); }

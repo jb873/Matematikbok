@@ -118,7 +118,7 @@
   var posFor = _seq.posFor, framflytta = _seq.framflytta;
 
   // ── Talformat + bråk-cell (bcellHTML/bread speglade byte-troget ur E-spårets öva-sida) ──
-  function pNum(s){ if(s == null) return NaN; s = ('' + s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  var pNum = UI.pNum;   // DELAD parser (alla minusvarianter; förr lokal kopia som bara tog U+2212 — order 2026-09-18 FAS 1)
   function nara(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function ev(s){ return UI.evalArith(s); }
   function bcellHTML(role){ return '<span class="ovn-brak ak8-bc" data-r="' + role + '"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-bt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-bn" inputmode="text" autocomplete="off"></span></span>'; }

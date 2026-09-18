@@ -102,9 +102,8 @@ function stopPlayer(){
 function jamforTal(a, b){
   // tillåt komma eller punkt, ignorera mellanslag
   if(a == null) return false;
-  var s = String(a).replace(/\s/g,'').replace(',', '.');
-  if(s === '') return false;
-  var n = parseFloat(s);
+  var n = AK8_UI.pNum(a);   // DELAD parser (ak8-blad-ui): mellanslag/NBSP, alla minusvarianter (U+2212, –, —), komma → punkt.
+                            // Förr lokal: 10 av 15 kopior tog inte keypadens '−' → negativt svar = NaN = fel (order 2026-09-18 FAS 1).
   if(isNaN(n)) return false;
   return Math.abs(n - b) < 1e-9;
 }

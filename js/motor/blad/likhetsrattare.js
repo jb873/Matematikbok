@@ -29,7 +29,7 @@
    Laddas som klassiskt <script> FÖRE blad-ak8-dN.js / rut-motorn. Inget nätverk. */
 (function(){
   'use strict';
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/−/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }
+  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // alla minusvarianter (U+2212, –, —) — förr bara U+2212 (order 2026-09-18 FAS 1)
   function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
   function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   // Täljare/nämnare i ett stående bråk får vara ett UTTRYCK ("5·4") — multiplikationens mellanled är
@@ -42,7 +42,7 @@
     var toks = [];
     Array.prototype.forEach.call(expr.children, function(ch){
       if(ch.classList.contains('ak8-exprtxt')){
-        var s = ch.value.replace(/[\s ]/g, '').replace(/−/g, '-').replace(/[·×]/g, '*').replace(/÷/g, '/').replace(/,/g, '.'), i = 0;
+        var s = ch.value.replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(/[·×]/g, '*').replace(/÷/g, '/').replace(/,/g, '.'), i = 0;
         while(i < s.length){
           var c = s[i];
           if(c === '+' || c === '-' || c === '*' || c === '/'){ toks.push({ op: c }); i++; }
@@ -94,7 +94,7 @@
     if(!expr) return { kind: 'tom', num: NaN };
     var fracs = expr.querySelectorAll('.ovn-brak'), val = mixedEval(expr);
     var wtxt = ''; Array.prototype.forEach.call(expr.querySelectorAll('.ak8-exprtxt'), function(t){ wtxt += t.value; });
-    wtxt = wtxt.replace(/[\s ]/g, '').replace(/−/g, '-').replace(/,/g, '.');
+    wtxt = wtxt.replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(/,/g, '.');
     if(fracs.length === 1){
       var ft = fracs[0].querySelector('.ak8-frt').value, fn = fracs[0].querySelector('.ak8-frn').value;
       if(harOperator(ft) || harOperator(fn)) return { kind: 'expr', num: val };   // (2·2)/(3·3) är ett led, inte ett SVAR i enklaste form
