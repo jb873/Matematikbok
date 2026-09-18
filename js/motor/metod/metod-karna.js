@@ -140,16 +140,42 @@ function renderSummaryCard(opts){
   `;
 }
 
-// -- nivå-modell (klättrar, sjunker aldrig; tak = RAM_MAXNIVA) --
+// -- nivå-modell: TVÅ lägen, styrda av DATA (taxonominodens nivamodell) --
+//   'befast'  befäst grundkunskap från mellanstadiet: klättrar men sjunker ALDRIG. Nuvarande nivå = golv;
+//             på en miss får man fler uppgifter på samma nivå tills det sitter.
+//   'nytt'    nytt stoff: klättrar vid ≥ 80 % rätt, sjunker vid < 40 % (k2/k3-ramarnas gamla modell).
+//   Modellen är en pedagogisk bedömning per FÄRDIGHET (Joachim 2026-09-18), inte per ram: förr fick allt i
+//   ak7-k1-ram "faller aldrig" — även kvadratrötter och potenser, som är nytt stoff i åttan. Nod utan fält
+//   → ramens default (RAM_NIVAMODELL; k1-ramen 'befast', k2/k3-ramarna 'nytt') = exakt det gamla beteendet.
+//   Taket = färdighetens nivå-antal (RAM_MAXNIVA, ?maxniva=N; default 3).
 function ramMaxNiva(){ return (typeof RAM_MAXNIVA === 'number' && RAM_MAXNIVA >= 1) ? RAM_MAXNIVA : 3; }
-function adjustLevel(level, right, total){
-  // Nivå-modell: klättrar men sjunker ALDRIG. Svårigheten går upp när eleven
-  // bemästrar; på en miss faller den inte tillbaka – man får fler uppgifter på
-  // samma nivå tills det sitter. Nuvarande nivå = golv (högsta uppnådda).
-  // Taket är färdighetens verkliga nivå-antal (RAM_MAXNIVA, satt av ?maxniva=N;
-  // default 3). En enkel-nivå-färdighet (max 1) klättrar aldrig.
-  if(right >= total - 1 && level < ramMaxNiva()) return {level: level+1, change: 'up'};
-  return {level, change: null};
+function nivamodellFor(nodId){
+  if(!nodId) return null;
+  var taxar = [window.K1_TAXONOMI, window.K2_TAXONOMI, window.K3_TAXONOMI];
+  for(var i = 0; i < taxar.length; i++){
+    var noder = taxar[i] && taxar[i].noder; if(!noder) continue;
+    for(var j = 0; j < noder.length; j++){ if(noder[j].id === nodId) return noder[j].nivamodell || null; }
+  }
+  return null;
+}
+function aktuellNivamodell(){
+  var nod = null;
+  try { var q = new URLSearchParams(location.search), ko = q.get('ko'), f = q.get('formaga'); nod = (ko && f) ? ko + ':' + f : null; } catch(e){}
+  return nivamodellFor(nod) || (typeof RAM_NIVAMODELL === 'string' ? RAM_NIVAMODELL : 'befast');
+}
+// adjustLevel(level, right, total[, modell]) → { level, change:'up'|'down'|null, delta:1|-1|0 }
+function adjustLevel(level, right, total, modell){
+  modell = modell || aktuellNivamodell();
+  if(modell === 'nytt'){
+    if(total > 0){
+      var kvot = right / total;
+      if(kvot >= 0.8 && level < ramMaxNiva()) return {level: level+1, change: 'up', delta: 1};
+      if(kvot < 0.4 && level > 1) return {level: level-1, change: 'down', delta: -1};
+    }
+    return {level, change: null, delta: 0};
+  }
+  if(right >= total - 1 && level < ramMaxNiva()) return {level: level+1, change: 'up', delta: 1};
+  return {level, change: null, delta: 0};
 }
 
 // -- vy-navigering --

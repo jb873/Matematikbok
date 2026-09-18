@@ -82,7 +82,7 @@ function tolkaEngine(kategori){
         +'<div class="ex-header"><h2 class="ex-title">Klart!</h2>'
         +'<div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
         +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
-        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-txt">'+(adj.delta>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.delta<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
         +'<div class="summary-level">Nivå '+level+'</div></div>'
         +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
         +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
@@ -268,7 +268,7 @@ function beraknaEngine(){
         +'<div class="ex-header"><h2 class="ex-title">Klart!</h2>'
         +'<div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
         +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
-        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-txt">'+(adj.delta>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.delta<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
         +'<div class="summary-level">Nivå '+level+'</div></div>'
         +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
         +'<button class="btn subtle" id="back">Till alla områden</button></div></div></div>';
@@ -475,7 +475,7 @@ function forenklaEngine(kategori){
       app.innerHTML='<div class="view"><div class="exercise-card">'
         +'<div class="ex-header"><h2 class="ex-title">Klart!</h2><div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
         +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
-        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-txt">'+(adj.delta>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.delta<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
         +'<div class="summary-level">Nivå '+level+'</div></div>'
         +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
         +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
@@ -749,7 +749,7 @@ function skrivaEngine(kategori){
       app.innerHTML='<div class="view"><div class="exercise-card">'
         +'<div class="ex-header"><h2 class="ex-title">Klart!</h2><div class="ex-sub">Du klarade '+right+' av '+omgang.length+'.</div></div>'
         +'<div class="summary"><div class="summary-big">'+right+'/'+omgang.length+'</div>'
-        +'<div class="summary-txt">'+(adj.change>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.change<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
+        +'<div class="summary-txt">'+(adj.delta>0?'Bra jobbat – nästa omgång blir lite svårare.':adj.delta<0?'Nästa omgång blir lite lättare.':'Fortsätt träna!')+'</div>'
         +'<div class="summary-level">Nivå '+level+'</div></div>'
         +'<div class="ex-actions"><button class="btn primary" id="next">Ny omgång</button>'
         +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';

@@ -12,6 +12,7 @@
 <script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/motor/blad/likhetsrattare.js"></script>
 <script src="js/data/k3-taxonomi.js"></script>
+<script src="js/motor/metod/metod-karna.js"></script>
 <script src="js/mastery-karna.js"></script>
 <script src="js/mastery-k3.js"></script>
 <style>
@@ -268,7 +269,7 @@ var app = document.getElementById('app');
 // HJÄLPFUNKTIONER
 // ============================================================
 function d3RandInt(lo, hi){ return lo + Math.floor(Math.random() * (hi - lo + 1)); }
-function randPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+// randPick: delad (js/motor/metod/metod-karna.js) — order 2026-09-18 FAS 4
 
 // Jämför tal (komma/punkt, minustecken, mellanslag)
 function jamforTal(a, b){
@@ -371,15 +372,8 @@ function jamforForm(a, godkanda){
   return godkanda.some(function(g){return norm(g)===na;});
 }
 // Adaptiv nivåjustering
-function adjustLevel(level, right, total){
-  var change=0;
-  if(total>0){
-    var kvot=right/total;
-    if(kvot>=0.8 && level<3){ level++; change=1; }
-    else if(kvot<0.4 && level>1){ level--; change=-1; }
-  }
-  return {level:level, change:change};
-}
+// Adaptiv nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält; ramens default 'nytt'.
+window.RAM_NIVAMODELL = 'nytt';
 // Konfetti
 function konfetti(){
   var gammal=document.querySelector('.konfetti-lager'); if(gammal) gammal.remove();

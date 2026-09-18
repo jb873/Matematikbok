@@ -3,6 +3,10 @@
    formaga + generator är förifyllda ur koden. arskursRelevans + roll har defaults att tagga
    (roll: karna | breddning | fordjupning). Manuella tags bor i OVERRIDES/EXTRA_NODER i generatorn.
    visning bär presentationsdatan; visning.utbudslista anger vilken delkapitel-lista raden hör till.
+   nivamodell (per lövnod, HANDSATT 2026-09-18 — generatorn känner inte fältet, tag för hand vid regenerering):
+     'befast' = befäst grundkunskap från mellanstadiet → drillnivån klättrar men sjunker aldrig
+     'nytt'   = nytt stoff → nivån kan sjunka (<40 % rätt). Saknas → ramens default (k1-ram 'befast', k2/k3 'nytt').
+     Joachims lista: dk1 6 befästa (siffror, position:begrepp/rakna, utvecklad) · 13 nytt · kvadratrötter + potenser nytt.
    REGENERERA när ramens DELAR/DELAR_KO/OVNING_RENDERS ändras. Motorer/Arkiv orörda. */
 window.K1_TAXONOMI = {
   "noder": [
@@ -223,7 +227,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderSiffrorBegrepp",
       "begrepp": "Vad en siffra och ett tal är, udda/jämnt och att bygga tal av siffror.",
@@ -245,7 +249,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderTalnamn",
       "begrepp": null,
@@ -281,7 +285,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderPositionBegrepp",
       "begrepp": "Platsvärde, och skriva tal från ental, tiondelar, hundradelar …",
@@ -303,7 +307,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPositionRakna",
       "begrepp": "Tallinjen, storleksordna, talföljder och att öka/minska med en tiondel.",
@@ -325,7 +329,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RESONERA",
       "generator": "renderPositionResonera",
       "begrepp": "Jämför tal som 9,1 och 9,09, och hitta tal som ligger mellan.",
@@ -347,7 +351,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderEnhetsbyten",
       "begrepp": null,
@@ -383,7 +387,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "METOD",
       "generator": "renderUtveckladMetod",
       "begrepp": "Skriv talet i utvecklad form steg för steg.",
@@ -405,7 +409,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderUtveckladRakna",
       "begrepp": "Vilket tal står på utvecklad form?",
@@ -441,7 +445,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderPrimtalBegrepp",
       "begrepp": "Är talet ett primtal eller sammansatt? Snabba flashcards.",
@@ -463,7 +467,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPrimtalRakna",
       "begrepp": "Dela upp tal i termer eller faktorer. Två, tre eller fyra stycken.",
@@ -485,7 +489,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "METOD",
       "generator": "renderPrimtalMetod",
       "begrepp": "Bygg faktorträd – välj själv hur du delar upp.",
@@ -507,7 +511,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "KOMMUNIKATION",
       "generator": "renderPrimtalKomm",
       "begrepp": "Skriv hela primtalsfaktoriseringen.",
@@ -529,7 +533,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RESONERA",
       "generator": "renderPrimtalResonera",
       "begrepp": "Förklara varför ett tal är primtal eller inte.",
@@ -551,7 +555,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "PROBLEM",
       "generator": "renderPrimtalProblem",
       "begrepp": "Gåtor: vilket tal är jag?",
@@ -573,7 +577,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderFaktoriseringBaklanges",
       "begrepp": null,
@@ -609,7 +613,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderDelbarhetBegrepp",
       "begrepp": "Vad betyder delbarhet? Vad är en siffersumma?",
@@ -631,7 +635,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderDelbarhetRakna",
       "begrepp": "Avgör snabbt om ett tal är delbart.",
@@ -653,7 +657,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderKonstrueraDelbar",
       "begrepp": null,
@@ -689,7 +693,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderRaknetraningRakna",
       "begrepp": "Öka och minska med en tiondel, hundradel eller tusendel.",
@@ -2199,7 +2203,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderPotSkriva",
       "begrepp": "Skriv som potens ↔ multiplikation.",
@@ -2213,7 +2217,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPotEvaluera",
       "begrepp": "Beräkna potensens värde.",
@@ -2241,7 +2245,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPotAddsub",
       "begrepp": "Evaluera-sedan-operera.",
@@ -2269,7 +2273,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPotMultdiv",
       "begrepp": "Behåll basen, operera på exponenterna.",
@@ -2283,7 +2287,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderPotLosut",
       "begrepp": "Hitta okänd bas eller exponent.",
@@ -2297,7 +2301,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RESONERA",
       "generator": "renderPotResonera",
       "begrepp": "Antal faktorer, hur mycket större.",
@@ -2325,7 +2329,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderTioSkriva",
       "begrepp": "Skriv tal som tiopotens.",
@@ -2339,7 +2343,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderTioEvaluera",
       "begrepp": "Beräkna tiopotensens värde.",
@@ -2353,7 +2357,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderTioMultdiv",
       "begrepp": "Multiplikation och division – behåll basen, operera på exponenterna.",
@@ -2367,7 +2371,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderTioAddsub",
       "begrepp": "Addition och subtraktion – räkna ut varje tiopotens, operera sedan.",
@@ -2381,7 +2385,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderTioLosut",
       "begrepp": "Vad ska stå istället för x?",
@@ -2409,7 +2413,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderGpSkriva",
       "begrepp": "Skriv vanligt tal ↔ grundpotensform.",
@@ -2423,7 +2427,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderGpMultdiv",
       "begrepp": "Multiplikation och division – koeff ×/÷, exponent +/−, normalisera.",
@@ -2437,7 +2441,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderGpAddsub",
       "begrepp": "Addition och subtraktion – räkna ut varje tal, operera sedan.",
@@ -2451,7 +2455,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": "renderGpLosut",
       "begrepp": "Vilket tal ska x vara?",
@@ -2521,7 +2525,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "RAKNA",
       "generator": null,
       "begrepp": "Fyll värde eller matcha potens (Öva-blad).",
@@ -2535,7 +2539,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": null,
       "begrepp": "Kvadratens area som potens (Öva-blad).",
@@ -2549,7 +2553,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak8": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "nytt", "roll": "karna",
       "formaga": "BEGREPP",
       "generator": "renderTioPrefix",
       "begrepp": "Matcha tiopotens mot SI-prefix: kilo 10³, mega 10⁶, giga 10⁹, tera 10¹² (Öva-blad).",
@@ -2563,38 +2567,38 @@ window.K1_TAXONOMI = {
       "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Beräkna kvadraten av ett tal eller en sida.", "visning": null },
     { "id": "kvadrat-area:rakna", "namn": "Area från sida", "parent": "kvadrering", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Räkna ut arean av en kvadrat ur sidan (sida² = area), med enheter.",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadrering", "gruppordning": 0, "radordning": 1, "etikett": "räkna", "formagaKey": "rakna", "niva": null } },
     { "id": "kvadrat-rakna:rakna", "namn": "Kvadrera tal", "parent": "kvadrering", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Kvadrera stora tal och decimaltal (40², 0,5²).",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadrering", "gruppordning": 0, "radordning": 2, "etikett": "räkna", "formagaKey": "rakna", "niva": null } },
     { "id": "kvadrat-skala:rakna", "namn": "Skala ett kvadrattal", "parent": "kvadrering", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Använd ett känt kvadrattal för att skala (13²=169 → 1,3², 130², 0,13²).",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadrering", "gruppordning": 0, "radordning": 3, "etikett": "räkna", "formagaKey": "rakna", "niva": null } },
     { "id": "kvadratrot", "namn": "Kvadratrot", "parent": "kvadratrotter", "niva": "deldoman",
       "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Hitta sidan ur arean och beräkna kvadratrötter.", "visning": null },
     { "id": "rot-sida:rakna", "namn": "Sida från area", "parent": "kvadratrot", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Hitta sidan ur arean (√area), med och utan bildstöd – kopplar kvadratroten till kvadraten.",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadratrot", "gruppordning": 1, "radordning": 1, "etikett": "räkna", "formagaKey": "rakna", "niva": null } },
     { "id": "rot-berakna:rakna", "namn": "Beräkna kvadratrot", "parent": "kvadratrot", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Beräkna roten ur ett jämnt kvadrattal (√64, √81, √400).",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadratrot", "gruppordning": 1, "radordning": 2, "etikett": "räkna", "formagaKey": "rakna", "niva": null } },
     { "id": "rot-uppskatta:rakna", "namn": "Uppskatta kvadratrot", "parent": "kvadratrot", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Avgör mellan vilka heltal en kvadratrot ligger (√14 ligger mellan 3 och 4).",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadratrot", "gruppordning": 1, "radordning": 3, "etikett": "uppskatta", "formagaKey": "rakna", "niva": null } },
     { "id": "rot-decimal:rakna", "namn": "Kvadratrot ur decimaltal", "parent": "kvadratrot", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Beräkna roten ur decimaltal (√0,04, √1600).",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadratrot", "gruppordning": 1, "radordning": 4, "etikett": "räkna", "formagaKey": "rakna", "niva": null } },
     { "id": "rot-narmevarde:rakna", "namn": "Närmevärde med räknare", "parent": "kvadratrot", "niva": "lovnod",
-      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Använd miniräknare och avrunda kvadratroten till två decimaler (√2 ≈ 1,41).",
       "visning": { "utbudslista": "kvrot", "grupp": "Kvadratrot", "gruppordning": 1, "radordning": 5, "etikett": "närmevärde", "formagaKey": "rakna", "niva": null } }
   ]
