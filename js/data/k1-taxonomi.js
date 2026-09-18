@@ -7,6 +7,7 @@
      'befast' = befäst grundkunskap från mellanstadiet → drillnivån klättrar men sjunker aldrig
      'nytt'   = nytt stoff → nivån kan sjunka (<40 % rätt). Saknas → ramens default (k1-ram 'befast', k2/k3 'nytt').
      Joachims lista: dk1 6 befästa (siffror, position:begrepp/rakna, utvecklad) · 13 nytt · kvadratrötter + potenser nytt.
+     2026-09-19: uppställning i räknesätten (div kort/lång, mult uppställning/-stora, sub uppställning) 'befast' — uttryckligt, inte ramens default.
    REGENERERA när ramens DELAR/DELAR_KO/OVNING_RENDERS ändras. Motorer/Arkiv orörda. */
 window.K1_TAXONOMI = {
   "noder": [
@@ -987,7 +988,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "METOD",
       "generator": "renderUppstallningSubEnkel",
       "begrepp": null,
@@ -1204,7 +1205,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "METOD",
       "generator": "renderUppstallningMult",
       "begrepp": null,
@@ -1224,7 +1225,7 @@ window.K1_TAXONOMI = {
       "parent": "mult-metoder",
       "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "METOD",
       "generator": "renderUppstallningMult",
       "begrepp": "Uppställning när båda faktorerna är större än 10.",
@@ -1548,7 +1549,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "karna",
+      "nivamodell": "befast", "roll": "karna",
       "formaga": "METOD",
       "generator": "renderDivKort",
       "begrepp": null,
@@ -1570,7 +1571,7 @@ window.K1_TAXONOMI = {
       "arskursRelevans": {
         "ak7": "mal"
       },
-      "roll": "breddning",
+      "nivamodell": "befast", "roll": "breddning",
       "formaga": "METOD",
       "generator": "renderDivLang",
       "begrepp": null,
