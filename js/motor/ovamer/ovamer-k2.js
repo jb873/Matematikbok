@@ -130,6 +130,7 @@ function raknaEngine(op){
   var KRAV=4, MAXNIVA=3;
   var titel = aro?'Addition med bråk':'Subtraktion med bråk';
   var sub = aro?'Addera bråken. Skriv svaret i enklaste form.':'Subtrahera bråken. Skriv svaret i enklaste form.';
+  var SVARFORM = 'enklaste';   // kravet på slutsvaret som DATA ('enklaste' | 'blandad' | 'brak'); rubriken säger enklaste form
   var tecken = aro?'+':'\u2212';
 
   function nyUppgift(){
@@ -231,15 +232,11 @@ function raknaEngine(op){
       // rätta slutsvaret (avgör streaken)
       var svT=parseInt(valSel('.sv-t'),10), svN=parseInt(valSel('.sv-n'),10);
       var svHel=valSel('.sv-hel'); svHel = svHel===''?0:parseInt(svHel,10);
-      var slutOk;
-      if(u.hel>0){
-        // blandad form: hel + rest/svarN, eller oäkta bråk som motsvarar samma värde
-        var heltalOk = (svHel===u.hel) && (svN===u.svarN) && (svT===u.restT) && gcd(svT||1,svN||1)===1;
-        var oaktaOk = !isNaN(svT)&&!isNaN(svN)&&svN!==0 && Math.abs(svT/svN-u.svarT/u.svarN)<1e-9 && gcd(svT,svN)===1 && (svHel===0||isNaN(svHel));
-        slutOk = heltalOk || oaktaOk;
-      } else {
-        slutOk = !isNaN(svT)&&!isNaN(svN)&&svN!==0 && Math.abs(svT/svN-u.svarT/u.svarN)<1e-9 && gcd(svT,svN)===1;
-      }
+      // Svarsformen ur DATA (SVARFORM) + den DELADE tre-läges-rättaren — samma regel som bladen, testet och
+      // mult-/låna-drillen. 'enklaste' = blandad ELLER oäkta i lägsta termer. Förr en egen kopia av regeln
+      // (samma utfall, men kravet stod i kod) — sista formregel-kopian (order 2026-09-18 FAS 3).
+      var LR = window.Likhetsrattare, fin = u.hel > 0 ? { k:'mi', h:u.hel, t:u.restT, n:u.svarN } : { k:'br', t:u.svarT, n:u.svarN };
+      var slutOk = !isNaN(svT) && !isNaN(svN) && svN !== 0 && LR.finalStatus(LR.ffAv(svHel || null, svT, svN), fin, SVARFORM).status === 'ratt';
 
       // färglägg mellanled (vägledning, påverkar ej streaken)
       faltFarg('.st-t', u.olika?[u.nt1,u.nt2]:null);
