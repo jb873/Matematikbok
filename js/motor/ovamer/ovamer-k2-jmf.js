@@ -226,7 +226,7 @@
       function nyOmgang(){ omgang = []; for(var i = 0; i < OMG; i++) omgang.push(opts.gen(level)); idx = 0; results = []; }
       function render(){
         if(idx >= omgang.length){ var right = results.filter(Boolean).length; if(right >= Math.ceil(OMG * 0.8) && level < 3) level++; klart(app, right, OMG, level, opts.back, nyOmgang, render); return; }
-        var task = omgang[idx];
+        var task = omgang[idx]; window.__aktuellNiva = level;   // nivåbrygga (FAS 2)
         var kortHtml = task.kort.map(function(k, ki){ return '<button class="jmf-kort' + (k.txt ? ' jmf-txtkort' : '') + '" data-i="' + ki + '">' + k.html + '</button>'; }).join('');
         app.innerHTML = '<div class="view"><div class="exercise-card">'
           + '<div class="ex-header"><h2 class="ex-title">' + opts.titel + '</h2><div class="ex-sub">' + opts.sub + '</div><span class="ex-level">Nivå ' + level + '</span></div>'
@@ -262,7 +262,7 @@
       function nyOmgang(){ omgang = []; for(var i = 0; i < OMG; i++) omgang.push(opts.gen(level)); idx = 0; results = []; }
       function render(){
         if(idx >= omgang.length){ var right = results.filter(Boolean).length; if(right >= Math.ceil(OMG * 0.8) && level < 3) level++; klart(app, right, OMG, level, opts.back, nyOmgang, render); return; }
-        var task = omgang[idx], vald = [];
+        var task = omgang[idx], vald = []; window.__aktuellNiva = level;   // nivåbrygga (FAS 2)
         var kortHtml = task.kort.map(function(k, ki){ return '<button class="jmf-kort" data-i="' + ki + '">' + k.html + '</button>'; }).join('');
         app.innerHTML = '<div class="view"><div class="exercise-card">'
           + '<div class="ex-header"><h2 class="ex-title">' + opts.titel + '</h2><div class="ex-sub">' + opts.sub + '</div><span class="ex-level">Nivå ' + level + '</span></div>'

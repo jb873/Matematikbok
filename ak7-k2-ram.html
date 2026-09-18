@@ -516,6 +516,7 @@ function korOvning(opts){
       return;
     }
     var task=omgang[idx], dots='';
+    window.__aktuellNiva = level;   // NIVÅBRYGGA (som metod-karnas exerciseHeader): k2-evidens bär nivå → kan nå grönt i åttans karta (minNiva 3). Order 2026-09-18 FAS 2.
     for(var i=0;i<omgang.length;i++){ var cls=i<idx?(results[i]?'right':'wrong'):(i===idx?'current':''); dots+='<div class="score-dot '+cls+'"></div>'; }
     app.innerHTML='<div class="view"><div class="exercise-card">'
       +'<div class="ex-header"><h2 class="ex-title">'+opts.titel+'</h2><div class="ex-sub">'+opts.sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'
@@ -572,6 +573,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 // ============================================================
 </script>
 <script src="js/motor/metod/metod-brak-decimal.js"></script>
+<script src="js/mastery-karna.js"></script>
 <script src="js/mastery-k2.js"></script>
 <script src="js/data/k2-taxonomi.js"></script>
 <script src="js/data/spec-villkor-k2.js"></script>
