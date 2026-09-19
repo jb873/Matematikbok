@@ -653,7 +653,23 @@ function bygg_blad(rotEl, blad){
   // kontext-gråning, ⌫. Mönstret ur d1/d2 (a320f04), sedan 2026-09-19 kärnans för alla blad.
   if(window.AK8_UI && !document.getElementById('ovn-keypad-shared')){
     var _kw = document.createElement('div'); _kw.innerHTML = AK8_UI.keypadHTML();
-    var _kp = _kw.firstChild; if(_kp){ _kp.id = 'ovn-keypad-shared'; document.body.appendChild(_kp); AK8_UI.bindKeypad(document.body); }
+    var _kp = _kw.firstChild; if(_kp){
+      _kp.id = 'ovn-keypad-shared'; document.body.appendChild(_kp); AK8_UI.bindKeypad(document.body);
+      // Synlig bara när ett blad syns. Förr låg keypaden inne i bladet och försvann med Öva-panelen; i body
+      // måste den själv dölja sig på Föreläsning/Färdighetsträning/Test (egna ytor, egna keypads). Flikbyte =
+      // klass-/hidden-ändring på paneler/mounts → MutationObserver. När ett blad syns lämnas beslutet till
+      // bindKeypads ordsvars-regel (data-nokeypad) så de två inte drar åt olika håll.
+      var _syn = function(){
+        var bladSyns = Array.prototype.some.call(document.querySelectorAll('.ovn-sheet'), function(el){ return el.getClientRects().length > 0; });
+        var a = document.activeElement;
+        var dolj = !bladSyns || !!(a && a.tagName === 'INPUT' && a.matches('[data-nokeypad]'));
+        // Skriv bara vid FAKTISK ändring: classList.add/remove sätter attributet även när inget ändras →
+        // observern skulle trigga sig själv i all oändlighet.
+        if(_kp.classList.contains('keypad-hidden') !== dolj) _kp.classList.toggle('keypad-hidden', dolj);
+      };
+      new MutationObserver(_syn).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'hidden', 'style'] });
+      _syn();
+    }
   }
 
   // Valruta-knappar: enkel- eller flerval
