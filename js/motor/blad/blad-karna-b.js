@@ -67,6 +67,135 @@ function jamforMellan(a, b){
   }
   return norm(a) === norm(b);
 }
+// (hjälpare ur k1-d1, flyttade till kärnan 2026-09-19)
+function jamforUttryck(a, godkanda){
+  if(a == null) return false;
+  function normTerm(t){
+    var neg = false;
+    if(t[0] === '+'){ t = t.slice(1); }
+    else if(t[0] === '-'){ neg = true; t = t.slice(1); }
+    var ch = t.split('').sort().join('');
+    return (neg ? '-' : '') + ch;
+  }
+  function norm(x){
+    var s = String(x).toLowerCase()
+      .replace(/[·×*]/g, '')
+      .replace(/\s/g, '')
+      .replace(/\u2212/g, '-')
+      .replace(/,/g, '.');
+    var termer = s.replace(/-/g, '+-').split('+').filter(function(t){ return t !== ''; });
+    return termer.map(normTerm).sort().join('+');
+  }
+  var na = norm(a);
+  return godkanda.some(function(g){ return norm(g) === na; });
+}
+// Jämför fritext mot en lista godkända svar (gemener, utan mellanslag).
+function jamforText(a, godkanda){
+  if(a == null) return false;
+  function norm(x){
+    return String(x).toLowerCase().replace(/\s/g,'').replace(/[.,!?]/g,'');
+  }
+  var na = norm(a);
+  if(na === '') return false;
+  return godkanda.some(function(g){ return norm(g) === na; });
+}
+// Symbolisk förenkling av linjärt uttryck med EN variabel → kanonisk form.
+function forenklaKanon(uttryck){
+  if(uttryck == null) return null;
+  var s = String(uttryck).toLowerCase()
+    .replace(/\u2212/g, '-').replace(/[×]/g, '*').replace(/·/g, '*')
+    .replace(/\s/g, '').replace(/,/g, '.');
+  if(s === '') return null;
+  var vm = s.match(/[a-z]/);
+  var v = vm ? vm[0] : null;
+  if(v && new RegExp('[a-z]').test(s.replace(new RegExp(v,'g'),''))) return null;
+  s = s.replace(/(\d|\))(\()/g, '$1*$2')
+       .replace(/(\))(\d|[a-z]|\()/g, '$1*$2')
+       .replace(/(\d)([a-z])/g, '$1*$2')
+       .replace(/([a-z])(\d)/g, '$1*$2');
+  function evalAt(xval){
+    var e = v ? s.replace(new RegExp(v,'g'), '('+xval+')') : s;
+    if(!/^[-+*/().\d]+$/.test(e)) return null;
+    try{ var r = Function('"use strict";return ('+e+')')(); return (typeof r==='number'&&isFinite(r))?r:null; }
+    catch(err){ return null; }
+  }
+  if(!v){ var c0 = evalAt(0); return c0===null?null:'C'+(Math.round(c0*1e6)/1e6); }
+  var f0 = evalAt(0), f1 = evalAt(1);
+  if(f0===null||f1===null) return null;
+  return (Math.round((f1-f0)*1e6)/1e6) + v + '+' + (Math.round(f0*1e6)/1e6);
+}
+function jamforForenkla(a, facit){
+  var na = forenklaKanon(a);
+  if(na === null) return false;
+  return na === forenklaKanon(facit);
+}
+// Symbolisk förenkling med FLERA variabler (x,y,a,b). Expanderar parenteser,
+// multiplikation och division, samlar koefficienter per variabel + konstant.
+// Returnerar kanonisk sträng, eller null om uttrycket inte kan tolkas.
+function forenklaFler(uttryck){
+  if(uttryck == null) return null;
+  var s = String(uttryck).toLowerCase()
+    .replace(/\u2212/g,'-').replace(/[×]/g,'*').replace(/·/g,'*')
+    .replace(/\s/g,'').replace(/,/g,'.');
+  if(s === '') return null;
+  // vilka variabler förekommer?
+  var vars = [];
+  (s.match(/[a-z]/g)||[]).forEach(function(c){ if(vars.indexOf(c)<0) vars.push(c); });
+  // implicit multiplikation
+  s = s.replace(/(\d|\))(\()/g,'$1*$2')
+       .replace(/(\))(\d|[a-z]|\()/g,'$1*$2')
+       .replace(/(\d)([a-z])/g,'$1*$2')
+       .replace(/([a-z])(\d)/g,'$1*$2')
+       .replace(/([a-z])([a-z])/g,'$1*$2');
+  function evalAt(vals){
+    var e = s;
+    for(var k in vals){ e = e.replace(new RegExp(k,'g'), '('+vals[k]+')'); }
+    if(!/^[-+*/().\d]+$/.test(e)) return null;
+    try{ var r = Function('"use strict";return ('+e+')')(); return (typeof r==='number'&&isFinite(r))?r:null; }
+    catch(err){ return null; }
+  }
+  // konstant = värde då alla variabler = 0
+  var noll = {}; vars.forEach(function(v){ noll[v]=0; });
+  var c = evalAt(noll);
+  if(c === null) return null;
+  // koefficient för varje variabel: värde då just den = 1 (övriga 0), minus konstant
+  var koef = {};
+  for(var i=0;i<vars.length;i++){
+    var vv = {}; vars.forEach(function(v){ vv[v]=0; }); vv[vars[i]] = 1;
+    var f1 = evalAt(vv);
+    if(f1 === null) return null;
+    koef[vars[i]] = Math.round((f1 - c)*1e6)/1e6;
+  }
+  // kanonisk: variabler i bokstavsordning + konstant
+  var delar = vars.slice().sort().map(function(v){ return koef[v]+v; });
+  delar.push('C'+(Math.round(c*1e6)/1e6));
+  return delar.join('|');
+}
+function jamforFler(a, facit){
+  var na = forenklaFler(a);
+  if(na === null) return false;
+  return na === forenklaFler(facit);
+}
+// Jämför ett led på FORM (rätt tal och tecken; godtar mellanslag, ·/x/*,
+// omkastad faktorordning 3·5=5·3 och omkastad termordning 15+2=2+15).
+function jamforForm(a, godkanda){
+  if(a == null) return false;
+  function normTerm(t){
+    var neg=false;
+    if(t[0]==='+'){t=t.slice(1);} else if(t[0]==='-'){neg=true;t=t.slice(1);}
+    var faktorer=t.split('·').filter(function(f){return f!=='';}).sort();
+    return (neg?'-':'') + faktorer.join('·');
+  }
+  function norm(x){
+    var s=String(x).toLowerCase().replace(/[×*x]/g,'·').replace(/\s/g,'').replace(/\u2212/g,'-').replace(/,/g,'.');
+    if(s==='') return '';
+    var termer=s.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';});
+    return termer.map(normTerm).sort().join('+');
+  }
+  var na=norm(a);
+  if(na==='') return false;
+  return godkanda.some(function(g){return norm(g)===na;});
+}
 // (hjälpare ur k1-d3, flyttade till kärnan 2026-09-19)
 // Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
 function visaTal(t){
@@ -160,6 +289,14 @@ function bladHTML(blad){
 
   if(blad.exempel){
     html += '<div class="ovn-exempel">' + blad.exempel + '</div>';
+  }
+
+  if(blad.stegvis){
+    html += '<div class="steg-nav" data-stegnav>'
+      + '<button type="button" class="steg-btn" data-steg="prev" disabled>← Föregående</button>'
+      + '<span class="steg-info" data-steg-info>Avsnitt 1 av ' + blad.grupper.length + '</span>'
+      + '<button type="button" class="steg-btn" data-steg="next">Nästa avsnitt →</button>'
+      + '</div>';
   }
 
   var radNummer = 0;
@@ -290,6 +427,42 @@ function bladHTML(blad){
         html += '</div>';
         return;
       }
+      // (ur k1-d1, flyttat till kärnan 2026-09-19)
+      // Tallinje: SVG med pilar A/B/C, eleven skriver vad varje pil pekar på
+      if(rad.typ === 'tallinje'){
+        html += '<div class="ovn-rad ovn-tallinje-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:flex-start;gap:10px;">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        // bygg SVG
+        var W=620, H=70, x0=30, x1=590, mn=rad.min, mx=rad.max;
+        function px(v){ return x0 + (v-mn)/(mx-mn)*(x1-x0); }
+        var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">';
+        s+='<line x1="'+x0+'" y1="48" x2="'+x1+'" y2="48" stroke="#333" stroke-width="2"/>';
+        s+='<polygon points="'+x1+',48 '+(x1-9)+',44 '+(x1-9)+',52" fill="#333"/>';
+        // delstreck
+        rad.streck.forEach(function(t){
+          var x=px(t.v);
+          s+='<line x1="'+x+'" y1="'+(t.lang?40:44)+'" x2="'+x+'" y2="'+(t.lang?56:52)+'" stroke="#333" stroke-width="'+(t.lang?2:1)+'"/>';
+          if(t.etikett!==undefined) s+='<text x="'+x+'" y="68" text-anchor="middle" font-size="12" fill="#555">'+visaTal(t.etikett)+'</text>';
+        });
+        // pilar
+        rad.pilar.forEach(function(p){
+          var x=px(p.v);
+          s+='<line x1="'+x+'" y1="14" x2="'+x+'" y2="40" stroke="#c0392b" stroke-width="2"/>';
+          s+='<polygon points="'+x+',44 '+(x-4)+',37 '+(x+4)+',37" fill="#c0392b"/>';
+          s+='<circle cx="'+x+'" cy="9" r="9" fill="#c0392b"/>';
+          s+='<text x="'+x+'" y="13" text-anchor="middle" font-size="11" fill="#fff" font-weight="bold">'+p.namn+'</text>';
+        });
+        s+='</svg>';
+        html += '<div class="alg-bild" style="width:100%;">' + s + '</div>';
+        // svarsrutor: en per pil
+        html += '<span class="ovn-tallinje-svar" style="display:flex;gap:14px;flex-wrap:wrap;">';
+        rad.pilar.forEach(function(p){
+          html += '<span style="display:inline-flex;align-items:center;gap:5px;"><span class="ovn-text ovn-num">'+p.namn+' =</span>'
+            + '<input class="ovn-in" data-svar="' + p.v + '" inputmode="decimal" autocomplete="off" style="width:80px;"></span>';
+        });
+        html += '</span></div>';
+        return;
+      }
       // räkna om bokstav per grupp
       html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
       html += '<span class="ovn-label">' + bokstav + ')</span>';
@@ -304,6 +477,79 @@ function bladHTML(blad){
         }
         html += '<input class="ovn-in" data-svar="' + rad.svar
           + '" inputmode="decimal" autocomplete="off">';
+      } else if(rad.typ === 'intervall'){
+        // Skriv tal strikt mellan min och max. Två rutor som standard, en ruta om enkelt:true.
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<input class="ovn-in ovn-intervall" data-min="' + rad.min + '" data-max="' + rad.max
+          + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off" placeholder="ett tal">';
+        if(!rad.enkelt){
+          html += '<input class="ovn-in ovn-intervall" data-min="' + rad.min + '" data-max="' + rad.max
+            + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off" placeholder="ett till">';
+        }
+      } else if(rad.typ === 'uttryck'){
+        // svaret är ett algebraiskt uttryck (rättas normaliserat)
+        if(rad.likhet){
+          html += '<span class="ovn-text ovn-num">' + rad.fraga + '</span>';
+          html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        } else {
+          html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        }
+        var acceptU = (rad.accept || [rad.svar]).join('|');
+        html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(acceptU)
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'uttryck') + '">';
+      } else if(rad.typ === 'ordtext'){
+        // fritext som tolkning (rättas mot lista av godkända formuleringar)
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        var acceptT = (rad.accept || [rad.svar]).join('|');
+        html += '<input class="ovn-in bred" data-nokeypad data-text="' + encodeURIComponent(acceptT)
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'svar med ord') + '">';
+      } else if(rad.typ === 'bild'){
+        // SVG-bild + uttrycks- eller numeriskt svar
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        html += '<div class="alg-bild">' + rad.svg + '</div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html += '<span class="ovn-text">' + (rad.fraga||'') + '</span>';
+        if(rad.svarTyp === 'uttryck'){
+          var accB = (rad.accept || [rad.svar]).join('|');
+          html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(accB)
+            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'uttryck') + '">';
+        } else if(rad.svarTyp === 'text'){
+          var accBt = (rad.accept || [rad.svar]).join('|');
+          html += '<input class="ovn-in bred" data-nokeypad data-text="' + encodeURIComponent(accBt)
+            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'svar med ord') + '">';
+        } else {
+          html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+        }
+        html += '</div></div>';
+      } else if(rad.typ === 'valruta'){
+        // Välj rätt uttryck bland alternativ (kan ha flera rätta). Valfri SVG ovanför.
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
+        html += '<span class="ovn-text" style="min-width:160px;">' + (rad.fraga||'') + '</span>';
+        var ratta = (rad.ratt || []).join('|');
+        var flera = rad.flera ? '1' : '';
+        html += '<div class="valruta-grid" data-ratt="' + encodeURIComponent(ratta) + '" data-flera="' + flera + '">';
+        rad.alt.forEach(function(a){
+          html += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + a + '</button>';
+        });
+        html += '</div></div>';
+      } else if(rad.typ === 'flerled'){
+        // Horisontell likhetskedja: uppgift = [insättning] = [förenkling] = [svar]
+        // led-objekt: {accept:[...], visa:'...'} ; sista ledet {svar:tal}
+        // Stöd för bråk i visat uttryck via rad.vansterHtml (annars rad.vansterText).
+        html += '<span class="ovn-text ovn-num">' + (rad.vansterHtml || rad.vansterText) + '</span>';
+        html += '<span class="ovn-text" style="margin:0 3px;">=</span>';
+        rad.led.forEach(function(led, li){
+          var arSvar = (li === rad.led.length - 1);
+          if(arSvar){
+            html += '<input class="ovn-in" data-svar="' + led.svar + '" inputmode="decimal" autocomplete="off" placeholder="svar" style="min-width:70px;">';
+          } else {
+            var acc = (led.accept || [led.visa]).join('|');
+            html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(acc)
+              + '" data-visa="' + led.visa + '" inputmode="text" autocomplete="off" placeholder="led" style="min-width:96px;">';
+            html += '<span class="ovn-text" style="margin:0 3px;">=</span>';
+          }
+        });
       } else if(rad.typ === 'text'){
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         html += '<input class="ovn-in bred" data-svar="' + rad.svar
@@ -383,6 +629,22 @@ function bygg_blad(rotEl, blad){
       inp.classList.remove('correct','wrong');
       var f = inp.parentElement.querySelector('.ovn-fasit');
       if(f) f.remove();
+      // Auto-mellanrum runt + och − i mellanled-fält (data-form)
+      if(inp.dataset.form !== undefined){
+        var pos = inp.selectionStart;
+        var fore = inp.value.slice(0, pos);
+        var ny = inp.value
+          .replace(/\s*([+\u2212-])\s*/g, ' $1 ')   // mellanrum runt + och −
+          .replace(/\s{2,}/g, ' ')                    // inga dubbla mellanrum
+          .replace(/^\s+/, '');                        // inget inledande mellanrum
+        if(ny !== inp.value){
+          // justera markörposition efter inskjutna mellanrum
+          var foreNy = fore.replace(/\s*([+\u2212-])\s*/g, ' $1 ').replace(/\s{2,}/g,' ').replace(/^\s+/,'');
+          inp.value = ny;
+          var nyPos = foreNy.length;
+          try{ inp.setSelectionRange(nyPos, nyPos); }catch(e){}
+        }
+      }
     });
   });
 
@@ -394,17 +656,45 @@ function bygg_blad(rotEl, blad){
     var _kp = _kw.firstChild; if(_kp){ _kp.id = 'ovn-keypad-shared'; document.body.appendChild(_kp); AK8_UI.bindKeypad(document.body); }
   }
 
+  // Valruta-knappar: enkel- eller flerval
+  rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
+    var flera = grid.dataset.flera === '1';
+    grid.querySelectorAll('.valruta-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(flera){
+          btn.classList.toggle('is-vald');
+        } else {
+          grid.querySelectorAll('.valruta-btn').forEach(function(b){ b.classList.remove('is-vald','correct','wrong'); });
+          btn.classList.add('is-vald');
+        }
+      });
+    });
+  });
+
   // Kontroll / Återställ / Skriv ut
   var forstaForsoket = true; // 0-1 fel på första försöket -> nytt blad
   rotEl.querySelector('[data-action="kontroll"]').addEventListener('click', function(){
     var ratt = 0, totalt = 0;
-    inputs.forEach(function(inp){
+    // Vid stegvis läge: rätta bara det synliga avsnittet
+    var aktivaInputs = blad.stegvis
+      ? inputs.filter(function(inp){ var g = inp.closest('.ovn-grupp'); return g && !g.classList.contains('steg-dold'); })
+      : inputs;
+    aktivaInputs.forEach(function(inp){
       var rad = inp.parentElement;
       // Ta bort eventuella tidigare fasit-spans och markeringar
       rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
       inp.classList.remove('correct','wrong','just-checked');
       var ok;
-      if(inp.dataset.oms !== undefined){
+      if(inp.dataset.uttryck !== undefined){
+        var godk = decodeURIComponent(inp.dataset.uttryck).split('|');
+        ok = jamforUttryck(inp.value, godk)
+          || godk.some(function(g){ return jamforForenkla(inp.value, g); })
+          || godk.some(function(g){ return jamforFler(inp.value, g); });
+      } else if(inp.dataset.form !== undefined){
+        ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
+      } else if(inp.dataset.text !== undefined){
+        ok = jamforText(inp.value, decodeURIComponent(inp.dataset.text).split('|'));
+      } else if(inp.dataset.oms !== undefined){
         // FAS2: omskrivningscellen rättas på VÄRDE (giltig men annorlunda skriven form godtas)
         var ov = evalUttryck(inp.value);
         ok = !isNaN(ov) && Math.abs(ov - parseFloat(inp.dataset.oms)) < 1e-9;
@@ -429,6 +719,20 @@ function bygg_blad(rotEl, blad){
         var malTal = inp.dataset.tvatal.split(',').map(function(x){ return parseFloat(x); });
         var v = parseFloat(String(inp.value).replace(',','.'));
         ok = !isNaN(v) && malTal.some(function(m){ return Math.abs(m-v)<1e-9; });
+      } else if(inp.dataset.min !== undefined){
+        // intervall: talet ska ligga strikt mellan min och max, och de två fälten i paret ska skilja sig
+        var lo = parseFloat(inp.dataset.min), hi = parseFloat(inp.dataset.max);
+        var vi = parseFloat(String(inp.value).replace(',','.'));
+        var inomIntervall = !isNaN(vi) && vi > lo && vi < hi;
+        // hitta parets andra fält
+        var par = rotEl.querySelectorAll('.ovn-intervall[data-par="' + inp.dataset.par + '"]');
+        var olika = true;
+        if(par.length === 2){
+          var v0 = parseFloat(String(par[0].value).replace(',','.'));
+          var v1 = parseFloat(String(par[1].value).replace(',','.'));
+          if(!isNaN(v0) && !isNaN(v1) && Math.abs(v0 - v1) < 1e-9) olika = false;
+        }
+        ok = inomIntervall && olika;
       } else {
         ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
       }
@@ -455,10 +759,14 @@ function bygg_blad(rotEl, blad){
         inp.classList.add('wrong','just-checked');
         var facit;
         if(inp.dataset.oms !== undefined){ var _vt = rad.querySelector('.ovn-num'); facit = _vt ? skrivOm(_vt.textContent) : inp.dataset.oms.replace('.', ','); }
+        else if(inp.dataset.uttryck !== undefined) facit = inp.dataset.visa;
+        else if(inp.dataset.form !== undefined) facit = inp.dataset.visa;
+        else if(inp.dataset.text !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.mellan) facit = inp.dataset.mellan;
         else if(inp.dataset.enhet) facit = inp.dataset.enhet;
         else if(inp.dataset.term !== undefined) facit = 'summan ska bli ' + inp.dataset.term.replace('.', ',');
         else if(inp.dataset.tvatal !== undefined) facit = inp.dataset.tvatal.split(',').join(' och ');
+        else if(inp.dataset.min !== undefined) facit = 'ett tal mellan ' + inp.dataset.min.replace('.', ',') + ' och ' + inp.dataset.max.replace('.', ',') + ' (två olika)';
         else facit = inp.dataset.svar.replace('.', ',');
         var f = document.createElement('span');
         f.className = 'ovn-fasit';
@@ -468,6 +776,30 @@ function bygg_blad(rotEl, blad){
       }
       // Ta bort blink-klassen efter animationen
       setTimeout(function(){ inp.classList.remove('just-checked'); }, 500);
+    });
+    // Rätta valruta-grids (välj rätt uttryck, ev. flera rätta)
+    rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
+      if(blad.stegvis){ var gg = grid.closest('.ovn-grupp'); if(gg && gg.classList.contains('steg-dold')) return; }
+      totalt++;
+      var ratta = decodeURIComponent(grid.dataset.ratt).split('|');
+      var flera = grid.dataset.flera === '1';
+      var valda = [];
+      grid.querySelectorAll('.valruta-btn').forEach(function(b){
+        b.classList.remove('correct','wrong');
+        var bv = decodeURIComponent(b.dataset.val);
+        var arRatt = ratta.some(function(r){ return jamforUttryck(bv,[r]) || jamforFler(bv,r); });
+        if(b.classList.contains('is-vald')){
+          valda.push(bv);
+          b.classList.add(arRatt ? 'correct' : 'wrong');
+        } else if(arRatt){
+          b.classList.add('correct'); // visa de rätta även om ej valda
+        }
+      });
+      // rätt om: valt minst ett, och alla valda är rätta, och (om ej flera) exakt ett valt
+      var allaValdaRatt = valda.length>0 && valda.every(function(v){ return ratta.some(function(r){ return jamforUttryck(v,[r])||jamforFler(v,r); }); });
+      var antalRatta = ratta.length;
+      var ok = allaValdaRatt && (flera ? valda.length===antalRatta : valda.length===1);
+      if(ok) ratt++;
     });
     var sam = rotEl.querySelector('[data-sammanf]');
     sam.style.display = 'block';
@@ -484,6 +816,9 @@ function bygg_blad(rotEl, blad){
       sam.textContent = 'Du fick ' + ratt + ' av ' + totalt + ' rätt. Titta på de rödmarkerade rutorna.';
     }
     sam.scrollIntoView({behavior:'smooth', block:'center'});
+
+    // Valfri callback (används bl.a. för att låsa upp Stencil B)
+    if(typeof blad.onResultat === 'function'){ blad.onResultat(ratt, totalt); }
 
     // Automatiskt nytt blad om eleven klarade 0-1 fel på FÖRSTA försöket
     // (slarvfel räcker inte för att låsa upp samma blad – men 2+ fel betyder
@@ -513,6 +848,7 @@ function bygg_blad(rotEl, blad){
       inp.value = '';
       inp.classList.remove('correct','wrong','just-checked');
     });
+    rotEl.querySelectorAll('.valruta-btn').forEach(function(b){ b.classList.remove('is-vald','correct','wrong'); });
     rotEl.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
     var sam = rotEl.querySelector('[data-sammanf]');
     sam.style.display = 'none';
@@ -531,6 +867,27 @@ function bygg_blad(rotEl, blad){
   rotEl.querySelector('[data-action="print"]').addEventListener('click', function(){
     window.print();
   });
+
+  // Steg-navigering: visa ett avsnitt (en grupp) i taget
+  if(blad.stegvis){
+    var grupper = Array.from(rotEl.querySelectorAll('.ovn-grupp'));
+    var stegInfo = rotEl.querySelector('[data-steg-info]');
+    var prevBtn = rotEl.querySelector('[data-steg="prev"]');
+    var nextBtn = rotEl.querySelector('[data-steg="next"]');
+    var aktuellt = 0;
+    function visaSteg(i){
+      aktuellt = Math.max(0, Math.min(grupper.length-1, i));
+      grupper.forEach(function(g, gi){ g.classList.toggle('steg-dold', gi !== aktuellt); });
+      stegInfo.textContent = 'Avsnitt ' + (aktuellt+1) + ' av ' + grupper.length;
+      prevBtn.disabled = (aktuellt === 0);
+      nextBtn.disabled = (aktuellt === grupper.length-1);
+      var nav = rotEl.querySelector('[data-stegnav]');
+      if(nav) nav.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+    prevBtn.addEventListener('click', function(){ visaSteg(aktuellt-1); });
+    nextBtn.addEventListener('click', function(){ visaSteg(aktuellt+1); });
+    visaSteg(0);
+  }
 
   if(inputs[0]) inputs[0].focus();
 }
