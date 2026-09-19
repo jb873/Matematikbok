@@ -497,6 +497,7 @@ function renderTalsorternaAdd(body, metod, backFn){
       termInputs.forEach(inp => inp.disabled = true);
       document.getElementById('ts-final-ans').disabled = true;
       const ts = getTutorScore('add-metoder','metod'); ts.total++;
+      const tsG = getTutorScore('add-metoder','talsorterna'); tsG.total++;   // nodens nyckel (add-metoder:talsorterna) — saknades: proxyn loggade aldrig noden (svep 2026-09-19)
       const termSum = termVals.reduce((x,y) => x+y, 0);
       const termsOK = termVals.length >= 2 && near(termSum, answer);   // måste dela upp, inte bara skriva svaret
       const finalOK = !isNaN(finalVal) && near(finalVal, answer);
@@ -506,7 +507,7 @@ function renderTalsorternaAdd(body, metod, backFn){
         document.getElementById('ts-final-ans').classList.add('correct');
         fb.classList.add('correct');
         fb.textContent = 'Rätt! ' + fmt(a) + ' + ' + fmt(b) + ' = ' + termVals.map(fmt).join(' + ') + ' = ' + fmt(answer) + ' ✓';
-        ts.correct++; nasta(true);
+        ts.correct++; tsG.correct++; nasta(true);
       } else if(termsOK){
         termInputs.forEach(i => i.classList.add('correct'));
         document.getElementById('ts-final-ans').classList.add('wrong');

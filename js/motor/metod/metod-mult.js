@@ -541,7 +541,9 @@ function renderMultMetoder(body, startMetod){
     if(id === 'uppstallning'){ renderUppstallningMult(body, back); return; }
     if(id === 'uppstallning-fler'){ renderUppstallningMult(body, back, {variant:'fler'}); return; }
     const cfg = ENRADS[id];
-    cfg.scoreKey = id;
+    // scoreKey = NODENS formagaKey (taxonomin): kompensation → mult-metoder:faktorer, dubbelparentes → mult-metoder:termer.
+    // Förr id rakt av → de två noderna fick aldrig evidens (svep 2026-09-19).
+    cfg.scoreKey = ({ kompensation:'faktorer', dubbelparentes:'termer' })[id] || id;
     renderEnradsMetod(body, cfg, back);
   }
 
@@ -1020,7 +1022,7 @@ function renderUppstallningMult(body, backFn, cfg){
       fb.className = 'rakna-uppdela-feedback show';
       document.getElementById('upp-check').disabled = true;
       const ts = getTutorScore('mult-metoder','metod');
-      const tsG = getTutorScore('mult-metoder','uppstallning');
+      const tsG = getTutorScore('mult-metoder', FLER ? 'uppstallning-stora' : 'uppstallning');   // nodens nyckel: flersiffriga drillen loggade 'uppstallning' → uppstallning-stora fick aldrig evidens (svep 2026-09-19)
       ts.total++; tsG.total++;
       omgangResults.push(correct);
       const dTxt = task.dDisplay || task.d;
