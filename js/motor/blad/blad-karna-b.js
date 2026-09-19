@@ -222,6 +222,42 @@ function evalUttryck(str){
 // Kanonisk omskrivning för facit-visning: slår ihop yttre operator med inre tecken, tar bort parentesen.
 function skrivOm(f){ return String(f).replace(/([+−–-])\s*\(\s*([+−–-]?)\s*([0-9]+(?:[.,][0-9]+)?)\s*\)/g,
   function(m, yttre, inre, tal){ var neg = (/[−–-]/.test(yttre)) !== (/[−–-]/.test(inre)); return (neg ? ' − ' : ' + ') + tal; }).replace(/\s*=\s*$/,'').replace(/\s{2,}/g,' ').trim(); }
+// (hjälpare ur k1-d10/k3-d7, flyttade till kärnan 2026-09-19)
+// Fritext ELLER uttryck/tal mot lista av godkända varianter: ·/x/* och komma/punkt normaliseras. Skild från
+// jamforText (d1: ordsvar — tar bort skiljetecken, rör inte x som är variabel). Två funktioner, två namn.
+function jamforFritext(a, godkanda){
+  if(a == null) return false;
+  function norm(x){
+    return String(x).toLowerCase()
+      .replace(/[x×*]/g, '·')
+      .replace(/\s/g, '')
+      .replace(/,/g, '.');
+  }
+  var na = norm(a);
+  if(na === '') return false;
+  for(var i = 0; i < godkanda.length; i++){
+    if(na === norm(godkanda[i])) return true;
+  }
+  return false;
+}
+// Utvärderar ett aritmetiskt uttryck (·/× → *, − → -, , → .) säkert.
+// Returnerar talet, eller null om uttrycket är ogiltigt/otillåtet.
+function prioEval(uttryck){
+  if(uttryck == null) return null;
+  var e = String(uttryck)
+    .replace(/[x×]/g, '*')
+    .replace(/\u00b7/g, '*')
+    .replace(/\u2212/g, '-')
+    .replace(/\s/g, '')
+    .replace(/,/g, '.');
+  if(e === '') return null;
+  if(!/^[-+*/().\d]+$/.test(e)) return null;
+  try{
+    var v = Function('"use strict";return (' + e + ')')();
+    if(typeof v !== 'number' || !isFinite(v)) return null;
+    return Math.round(v * 1e6) / 1e6;
+  }catch(err){ return null; }
+}
 function jamforEnhet(a, b){
   // Enhet rättas flexibelt: utan mellanslag, gemener,
   // och med vanliga skrivvarianter (kr/sek osv. accepteras).
@@ -308,6 +344,117 @@ function bladHTML(blad){
     grupp.rader.forEach(function(rad){
       radNummer++;
       var bokstav = String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
+      // (radtyper ur k1-d10/k3-d7 — plugg till prov — flyttade till kärnan 2026-09-19; kolliderande namn omdöpta)
+      if(rad.typ === 'faktor'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-text ovn-num">' + rad.tal + ' =</span>';
+        html += '<input class="ovn-in bred" data-faktor="' + rad.tal + '" data-antal="' + rad.antal
+          + '" inputmode="text" autocomplete="off" placeholder="' + (rad.antal===2?'två faktorer':'tre faktorer') + '">';   // platshållare: ledning, ej exempel (facit-läcka borttagen)
+        html += '</div>';
+        return;
+      }
+      // FORKLARA: fritextsvar, ingen rätt/fel – visar facit vid kontroll
+      if(rad.typ === 'forklara'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:stretch;gap:8px;">';
+        html += '<textarea class="prob-kladd" data-forklara="' + encodeURIComponent(rad.facit)
+          + '" rows="3" placeholder="Skriv din förklaring här..."></textarea>';
+        html += '</div>';
+        return;
+      }
+      // BRAKTEXT: visa bråk grafiskt (ev. med heltal framför), elev skriver decimalform
+      if(rad.typ === 'brakText'){
+        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        if(rad.heltal){
+          html += '<span class="ovn-text ovn-num" style="font-size:22px;margin-right:2px;">' + rad.heltal + '</span>';
+        }
+        html += '<span class="ovn-brak">';
+        html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
+        html += '<span class="ovn-brak-strecket"></span>';
+        html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
+        html += '</span>';
+        html += '<span class="ovn-text">=</span>';
+        var acc = (rad.accept || [rad.svar]).join('|');
+        html += '<input class="ovn-in" data-fritext="' + encodeURIComponent(acc)
+          + '" data-visa="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+        html += '</div>';
+        return;
+      }
+      // FLERVAL: välj flera tal ur en lista (t.ex. "vilka är delbara med 3")
+      if(rad.typ === 'flerval'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        var ratta = rad.ratt.map(function(x){ return String(x); }).join(',');
+        html += '<div class="ovn-flerval-grid" data-ratt="' + ratta + '">';
+        rad.tal.forEach(function(t){
+          html += '<button type="button" class="ovn-flerval-btn" data-tal="' + t + '">' + t + '</button>';
+        });
+        html += '</div></div>';
+        return;
+      }
+      // INTERVALL: öppet svar – vilket tal som helst inom intervallet godtas
+      if(rad.typ === 'intervallEn'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in bred" data-intmin="' + rad.min + '" data-intmax="' + rad.max
+          + '" data-exkl="' + (rad.exkl ? '1' : '0') + '" inputmode="decimal" autocomplete="off" placeholder="ditt tal">';
+        html += '</div>';
+        return;
+      }
+      // FÖLJD: talföljd – givna tal visas, eleven fyller i de tre nästa
+      if(rad.typ === 'foljd'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-text ovn-num" style="font-size:19px;">'
+          + rad.givna.join('   ') + '   …</span>';
+        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:6px;">';
+        rad.nasta.forEach(function(t){
+          html += '<input class="ovn-in" data-ordna="' + String(t).replace(/,/g,'.')
+            + '" inputmode="decimal" autocomplete="off" style="width:80px;">';
+        });
+        html += '</div></div>';
+        return;
+      }
+      // TEXT: en fråga, ett textsvar (ord eller uttryck)
+      if(rad.typ === 'fragaText'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        var accept = (rad.accept || [rad.svar]).join('|');
+        html += '<input class="ovn-in bred" data-fritext="' + encodeURIComponent(accept)
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="svar">';
+        html += '</div>';
+        return;
+      }
+      // ORDNA: tal som ska sorteras – eleven skriver i ordning i fält
+      if(rad.typ === 'ordningsfoljd'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-text" style="width:100%;font-size:16px;color:var(--ink-faint);">Talen: '
+          + rad.tal.join('  ·  ') + '</span>';
+        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;width:100%;margin-top:6px;">';
+        rad.ordning.forEach(function(t, i){
+          html += '<input class="ovn-in" data-ordna="' + rad.ordning[i].replace(/,/g,'.')
+            + '" inputmode="decimal" autocomplete="off" style="width:74px;"'
+            + ' placeholder="' + (i+1) + ':a">';
+        });
+        html += '</div></div>';
+        return;
+      }
+      // VAL: flervalsfråga – knappar, en är rätt
+      if(rad.typ === 'val'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<div class="ovn-val-grid" data-valsvar="' + rad.svar.replace(/,/g,'.') + '">';
+        rad.alternativ.forEach(function(alt){
+          html += '<button type="button" class="ovn-val-btn" data-val="' + alt.replace(/,/g,'.')
+            + '">' + alt + '</button>';
+        });
+        html += '</div></div>';
+        return;
+      }
       // (radtyp ur k1-d7/d8, flyttad till kärnan 2026-09-19)
       if(rad.typ === 'problemTid'){
         // Problem med tidssvar: timmar + minuter i två fält
@@ -572,6 +719,38 @@ function bladHTML(blad){
         html += '<input class="ovn-in lucka" data-svar="' + rad.svar
           + '" inputmode="decimal" autocomplete="off">';
         if(bitar[1] !== undefined) html += '<span class="ovn-text ovn-num">' + bitar[1] + '</span>';
+      } else if(rad.typ === 'overslag'){
+        // [Vänster] (≈ eller =) [mellanled-input] = [svar-input]
+        var mellanTecken = rad.tecken || '=';
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<span class="ovn-text" style="margin:0 2px;">' + mellanTecken + '</span>';
+        html += '<input class="ovn-in bred" data-mellan="' + rad.mellan
+          + '" inputmode="text" autocomplete="off" placeholder="överslag">';
+        html += '<span class="ovn-text">=</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off">';
+      } else if(rad.typ === 'prio'){
+        // Lodrät uppställning: uppgiftsrad överst, sedan steg-rad(er) med
+        // [vänsterled-ruta] = [svar-ruta]. Vänsterledet rättas på värde, svaret exakt.
+        html = html.replace('class="ovn-rad"', 'class="ovn-rad prio-rad"');
+        html += '<div class="prio-block">';
+        html += '<div class="prio-uppgift"><span class="ovn-num">' + rad.vansterText + '</span><span class="prio-eq">=</span></div>';
+        var steg = rad.steg || [];
+        steg.forEach(function(st, si){
+          var arSista = (si === steg.length - 1);
+          html += '<div class="prio-steg">';
+          html += '<input class="ovn-in prio-vl" data-vl="' + st.vlValue + '" inputmode="text" autocomplete="off" placeholder="förenkla">';
+          html += '<span class="prio-eq">=</span>';
+          if(arSista){
+            html += '<input class="ovn-in prio-svar" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off" placeholder="svar">';
+          } else {
+            html += '<span class="prio-tom"></span>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+        html += '</div>';
+        return;
       } else if(rad.typ === 'mellan'){
         // [Vänster]  = [mellanled-input]  = [svar-input]
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
@@ -672,6 +851,29 @@ function bygg_blad(rotEl, blad){
     }
   }
 
+  // Flervalsknappar – markera valt alternativ
+  rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
+    grid.querySelectorAll('.ovn-val-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
+          b.classList.remove('is-vald','correct','wrong');
+        });
+        btn.classList.add('is-vald');
+        grid.dataset.valt = btn.dataset.val;
+      });
+    });
+  });
+
+  // Multi-select-knappar – toggla av/på (välj flera)
+  rotEl.querySelectorAll('.ovn-flerval-grid').forEach(function(grid){
+    grid.querySelectorAll('.ovn-flerval-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        btn.classList.toggle('is-vald');
+        btn.classList.remove('correct','wrong','missad');
+      });
+    });
+  });
+
   // Valruta-knappar: enkel- eller flerval
   rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
     var flera = grid.dataset.flera === '1';
@@ -749,6 +951,37 @@ function bygg_blad(rotEl, blad){
           if(!isNaN(v0) && !isNaN(v1) && Math.abs(v0 - v1) < 1e-9) olika = false;
         }
         ok = inomIntervall && olika;
+      } else if(inp.dataset.fritext !== undefined){
+        // fritext/uttryck/decimaltal – jämför mot lista av godkända varianter (d10:s jamforText)
+        ok = jamforFritext(inp.value, decodeURIComponent(inp.dataset.fritext).split('|'));
+      } else if(inp.dataset.ordna !== undefined){
+        // sorteringsfält – jämför positionens tal
+        ok = jamforTal(inp.value, parseFloat(inp.dataset.ordna));
+      } else if(inp.dataset.intmin !== undefined){
+        // intervall (en ruta) – vilket tal som helst inom gränserna godtas; data-exkl=1 → strikt
+        var vI = parseFloat(String(inp.value).replace(',', '.'));
+        var mnI = parseFloat(inp.dataset.intmin), mxI = parseFloat(inp.dataset.intmax);
+        if(isNaN(vI)) ok = false;
+        else if(inp.dataset.exkl === '1') ok = vI > mnI && vI < mxI;
+        else ok = vI >= mnI && vI <= mxI;
+      } else if(inp.dataset.faktor !== undefined){
+        // faktorisering – godtar alla korrekta uppdelningar
+        var malTalF = parseInt(inp.dataset.faktor, 10);
+        var malAntalF = parseInt(inp.dataset.antal, 10);
+        var delar = String(inp.value).replace(/\u2212/g,'-')
+          .replace(/[x×*]/g,'·').replace(/\s/g,'').split('·');
+        var produkt = 1, giltigtF = true;
+        if(delar.length !== malAntalF) giltigtF = false;
+        delar.forEach(function(d){
+          var dv = parseInt(d, 10);
+          if(isNaN(dv) || dv < 2) giltigtF = false;
+          else produkt *= dv;
+        });
+        ok = giltigtF && produkt === malTalF;
+      } else if(inp.dataset.vl !== undefined){
+        // Prioritering, vänsterled: rättas på värde
+        var elevVarde = prioEval(inp.value);
+        ok = elevVarde !== null && Math.abs(elevVarde - parseFloat(inp.dataset.vl)) < 1e-6;
       } else {
         ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
       }
@@ -783,6 +1016,11 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.term !== undefined) facit = 'summan ska bli ' + inp.dataset.term.replace('.', ',');
         else if(inp.dataset.tvatal !== undefined) facit = inp.dataset.tvatal.split(',').join(' och ');
         else if(inp.dataset.min !== undefined) facit = 'ett tal mellan ' + inp.dataset.min.replace('.', ',') + ' och ' + inp.dataset.max.replace('.', ',') + ' (två olika)';
+        else if(inp.dataset.fritext !== undefined) facit = inp.dataset.visa;
+        else if(inp.dataset.ordna !== undefined) facit = inp.dataset.ordna.replace('.', ',');
+        else if(inp.dataset.intmin !== undefined) facit = 'ett tal mellan ' + String(parseFloat(inp.dataset.intmin)).replace('.', ',') + ' och ' + String(parseFloat(inp.dataset.intmax)).replace('.', ',');
+        else if(inp.dataset.faktor !== undefined) facit = 'produkt = ' + parseInt(inp.dataset.faktor, 10) + ', ' + parseInt(inp.dataset.antal, 10) + ' faktorer (minst 2 var)';
+        else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
         else facit = inp.dataset.svar.replace('.', ',');
         var f = document.createElement('span');
         f.className = 'ovn-fasit';
@@ -816,6 +1054,44 @@ function bygg_blad(rotEl, blad){
       var antalRatta = ratta.length;
       var ok = allaValdaRatt && (flera ? valda.length===antalRatta : valda.length===1);
       if(ok) ratt++;
+    });
+    // Rätta flervalsfrågor
+    rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
+      totalt++;
+      var ratt_svar = grid.dataset.valsvar;
+      var valt = grid.dataset.valt;
+      grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
+        b.classList.remove('correct','wrong');
+        if(b.dataset.val === ratt_svar) b.classList.add('correct');
+        else if(b.dataset.val === valt) b.classList.add('wrong');
+      });
+      if(valt === ratt_svar) ratt++;
+    });
+    // Rätta multi-select (delbarhet): alla rätta valda, inga felaktiga
+    rotEl.querySelectorAll('.ovn-flerval-grid').forEach(function(grid){
+      totalt++;
+      var rattaTal = grid.dataset.ratt.split(',');
+      var alltRatt = true;
+      grid.querySelectorAll('.ovn-flerval-btn').forEach(function(b){
+        b.classList.remove('correct','wrong','missad');
+        var arRatt = rattaTal.indexOf(b.dataset.tal) >= 0;
+        var arVald = b.classList.contains('is-vald');
+        if(arVald && arRatt){ b.classList.add('correct'); }
+        else if(arVald && !arRatt){ b.classList.add('wrong'); alltRatt = false; }
+        else if(!arVald && arRatt){ b.classList.add('missad'); alltRatt = false; }
+      });
+      if(alltRatt) ratt++;
+    });
+    // Förklaringsfrågor – visa exempelfacit (rättas inte)
+    rotEl.querySelectorAll('[data-forklara]').forEach(function(ta){
+      var gammalFacit = ta.parentElement.querySelector('.forklara-facit');
+      if(gammalFacit) gammalFacit.remove();
+      var facit = decodeURIComponent(ta.dataset.forklara);
+      var fd = document.createElement('div');
+      fd.className = 'forklara-facit';
+      fd.style.cssText = 'margin-top:8px;padding:10px 14px;background:var(--bg-warm);border-left:3px solid var(--gold);border-radius:6px;font-size:14px;color:var(--ink-soft);';
+      fd.innerHTML = '<strong>Exempel på svar:</strong> ' + facit;
+      ta.insertAdjacentElement('afterend', fd);
     });
     var sam = rotEl.querySelector('[data-sammanf]');
     sam.style.display = 'block';
@@ -866,6 +1142,18 @@ function bygg_blad(rotEl, blad){
     });
     rotEl.querySelectorAll('.valruta-btn').forEach(function(b){ b.classList.remove('is-vald','correct','wrong'); });
     rotEl.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
+    // Nollställ flervalsknappar – ta bort vald, rätt och fel
+    rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
+      grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
+        b.classList.remove('is-vald','correct','wrong');
+      });
+      delete grid.dataset.valt;
+    });
+    // Nollställ multi-select
+    rotEl.querySelectorAll('.ovn-flerval-btn').forEach(function(b){
+      b.classList.remove('is-vald','correct','wrong','missad');
+    });
+    rotEl.querySelectorAll('.forklara-facit').forEach(function(f){ f.remove(); });
     var sam = rotEl.querySelector('[data-sammanf]');
     sam.style.display = 'none';
     sam.textContent = '';

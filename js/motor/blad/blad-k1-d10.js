@@ -3,644 +3,10 @@
 // ---- PLUGG-MENY (byggs nedan) ----
 
 // ============================================================
-// ÖVNINGSMOTOR  – samma motor för alla fyra övningsblad
+// ÖVNINGSMOTOR – ligger i den delade kärnan blad-karna-b.js
+// (heltals-släkten; laddas FÖRE denna fil). Här finns bara bladets
+// egna generatorer och uppgiftsdata. Radtyper: se kärnan.
 // ============================================================
-//
-// Varje övning beskrivs som ett "blad" med en lista av "rader".
-// En rad är antingen:
-//   - {typ:'enkel',  vansterText:'10 · 5 =',  svar:50}
-//   - {typ:'lucka',  delar:['__ · 4,5 = 10'], luckPos:0, svar:???}
-//                    (text med en lucka markerad som '__')
-//   - {typ:'mellan', vansterText:'60 · 0,3 =', mellan:'6·3', svar:18}
-//                    (eleven skriver först mellanled, sedan svar)
-//
-// 'exempel' (valfritt) visas som förinifyllt exempel ovanför rad-listan.
-//
-// Rad-lista grupperas av {grupp:'Beräkna', rader:[...]}.
-
-function jamforTal(a, b){
-  // tillåt komma eller punkt, ignorera mellanslag, normalisera minustecken
-  if(a == null) return false;
-  var n = AK8_UI.pNum(a);   // DELAD parser (ak8-blad-ui): mellanslag/NBSP, alla minusvarianter (U+2212, –, —), komma → punkt.
-                            // Förr lokal: 10 av 15 kopior tog inte keypadens '−' → negativt svar = NaN = fel (order 2026-09-18 FAS 1).
-  if(isNaN(n)) return false;
-  return Math.abs(n - b) < 1e-9;
-}
-function jamforText(a, godkanda){
-  // Jämför fritext mot en lista godkända svar. Ignorerar mellanslag,
-  // gemener/versaler, och normaliserar ·/x/* samt komma/punkt.
-  if(a == null) return false;
-  function norm(x){
-    return String(x).toLowerCase()
-      .replace(/[x×*]/g, '·')
-      .replace(/\s/g, '')
-      .replace(/,/g, '.');
-  }
-  var na = norm(a);
-  if(na === '') return false;
-  for(var i = 0; i < godkanda.length; i++){
-    if(na === norm(godkanda[i])) return true;
-  }
-  return false;
-}
-// Utvärderar ett aritmetiskt uttryck (·/× → *, − → -, , → .) säkert.
-// Returnerar talet, eller null om uttrycket är ogiltigt/otillåtet.
-function prioEval(uttryck){
-  if(uttryck == null) return null;
-  var e = String(uttryck)
-    .replace(/[x×]/g, '*')
-    .replace(/\u00b7/g, '*')
-    .replace(/\u2212/g, '-')
-    .replace(/\s/g, '')
-    .replace(/,/g, '.');
-  if(e === '') return null;
-  if(!/^[-+*/().\d]+$/.test(e)) return null;
-  try{
-    var v = Function('"use strict";return (' + e + ')')();
-    if(typeof v !== 'number' || !isFinite(v)) return null;
-    return Math.round(v * 1e6) / 1e6;
-  }catch(err){ return null; }
-}
-function jamforMellan(a, b){
-  // mellanled får skrivas med eller utan likhetstecken, mellanslag, ·/x/*, − → -
-  if(a == null) return false;
-  function norm(x){
-    return String(x).toLowerCase()
-      .replace(/[x×*]/g, '·')
-      .replace(/\u2212/g, '-')
-      .replace(/[\s=]/g, '')
-      .replace(',', '.');
-  }
-  return norm(a) === norm(b);
-}
-function jamforEnhet(a, b){
-  // Enhet rättas flexibelt: utan mellanslag, gemener,
-  // och med vanliga skrivvarianter (kr/sek osv. accepteras).
-  if(a == null) return false;
-  var alias = {
-    'sek':'s', 'sekund':'s', 'sekunder':'s',
-    'kr':'kr', 'kronor':'kr', 'krona':'kr',
-    'meter':'m', 'metrar':'m',
-    'kilometer':'km',
-    'centimeter':'cm',
-    'mugg':'muggar', 'muggarna':'muggar',
-    'ask':'askar', 'askarna':'askar',
-    'liter':'l',
-    'mil':'mil'
-  };
-  function norm(x){
-    var t = String(x).toLowerCase().replace(/\./g,'').replace(/\s/g,'');
-    // ta bort eventuell punkt (m. -> m)
-    return t;
-  }
-  var na = norm(a), nb = norm(b);
-  if(na === nb) return true;
-  // alias åt båda håll
-  if(alias[na] === nb) return true;
-  if(alias[nb] === na) return true;
-  return false;
-}
-
-// ============================================================
-// KONFETTI – när eleven får alla rätt
-// ============================================================
-function visaKonfetti(){
-  // Plocka bort eventuell gammal konfetti
-  var gammal = document.querySelector('.konfetti-lager');
-  if(gammal) gammal.remove();
-  var lager = document.createElement('div');
-  lager.className = 'konfetti-lager';
-  document.body.appendChild(lager);
-  var färger = ['#16a34a','#dc2626','#f59e0b','#3b82f6','#a855f7','#ec4899','#06b6d4'];
-  var antal = 80;
-  for(var i = 0; i < antal; i++){
-    var b = document.createElement('span');
-    b.className = 'konfetti';
-    b.style.left = (Math.random() * 100) + 'vw';
-    b.style.background = färger[Math.floor(Math.random() * färger.length)];
-    var duration = 2.5 + Math.random() * 2; // 2,5–4,5 sek
-    var delay = Math.random() * 0.8;        // upp till 0,8 sek försening
-    b.style.animationDuration = duration + 's';
-    b.style.animationDelay = delay + 's';
-    b.style.width = (6 + Math.random() * 8) + 'px';
-    b.style.height = (10 + Math.random() * 8) + 'px';
-    lager.appendChild(b);
-  }
-  // Städa upp efter att allt fallit klart
-  setTimeout(function(){ if(lager.parentNode) lager.remove(); }, 6000);
-}
-
-function bladHTML(blad){
-  var html = '<div class="ovn-sheet">'
-    + '<h2>' + blad.titel + '</h2>'
-    + (blad.intro ? '<p class="ovn-intro">' + blad.intro + '</p>' : '');
-
-  if(blad.exempel){
-    html += '<div class="ovn-exempel">' + blad.exempel + '</div>';
-  }
-
-  var radNummer = 0;
-  blad.grupper.forEach(function(grupp, gi){
-    html += '<div class="ovn-grupp">';
-    html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
-    grupp.rader.forEach(function(rad){
-      radNummer++;
-      var bokstav = String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
-      // FAKTOR: faktorisera ett tal – godtar alla korrekta faktoriseringar
-      if(rad.typ === 'faktor'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span class="ovn-text ovn-num">' + rad.tal + ' =</span>';
-        html += '<input class="ovn-in bred" data-faktor="' + rad.tal + '" data-antal="' + rad.antal
-          + '" inputmode="text" autocomplete="off" placeholder="' + (rad.antal===2?'två faktorer':'tre faktorer') + '">';   // platshållare: ledning, ej exempel (facit-läcka borttagen)
-        html += '</div>';
-        return;
-      }
-      // FORKLARA: fritextsvar, ingen rätt/fel – visar facit vid kontroll
-      if(rad.typ === 'forklara'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:stretch;gap:8px;">';
-        html += '<textarea class="prob-kladd" data-forklara="' + encodeURIComponent(rad.facit)
-          + '" rows="3" placeholder="Skriv din förklaring här..."></textarea>';
-        html += '</div>';
-        return;
-      }
-      // BRAKTEXT: visa bråk grafiskt (ev. med heltal framför), elev skriver decimalform
-      if(rad.typ === 'brakText'){
-        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        if(rad.heltal){
-          html += '<span class="ovn-text ovn-num" style="font-size:22px;margin-right:2px;">' + rad.heltal + '</span>';
-        }
-        html += '<span class="ovn-brak">';
-        html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
-        html += '<span class="ovn-brak-strecket"></span>';
-        html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
-        html += '</span>';
-        html += '<span class="ovn-text">=</span>';
-        var acc = (rad.accept || [rad.svar]).join('|');
-        html += '<input class="ovn-in" data-text="' + encodeURIComponent(acc)
-          + '" data-visa="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
-        html += '</div>';
-        return;
-      }
-      // FLERVAL: välj flera tal ur en lista (t.ex. "vilka är delbara med 3")
-      if(rad.typ === 'flerval'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        var ratta = rad.ratt.map(function(x){ return String(x); }).join(',');
-        html += '<div class="ovn-flerval-grid" data-ratt="' + ratta + '">';
-        rad.tal.forEach(function(t){
-          html += '<button type="button" class="ovn-flerval-btn" data-tal="' + t + '">' + t + '</button>';
-        });
-        html += '</div></div>';
-        return;
-      }
-      // INTERVALL: öppet svar – vilket tal som helst inom intervallet godtas
-      if(rad.typ === 'intervall'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
-        html += '<input class="ovn-in bred" data-min="' + rad.min + '" data-max="' + rad.max
-          + '" data-exkl="' + (rad.exkl ? '1' : '0') + '" inputmode="decimal" autocomplete="off" placeholder="ditt tal">';
-        html += '</div>';
-        return;
-      }
-      // FÖLJD: talföljd – givna tal visas, eleven fyller i de tre nästa
-      if(rad.typ === 'foljd'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span class="ovn-text ovn-num" style="font-size:19px;">'
-          + rad.givna.join('   ') + '   …</span>';
-        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:6px;">';
-        rad.nasta.forEach(function(t){
-          html += '<input class="ovn-in" data-ordna="' + String(t).replace(/,/g,'.')
-            + '" inputmode="decimal" autocomplete="off" style="width:80px;">';
-        });
-        html += '</div></div>';
-        return;
-      }
-      // TEXT: en fråga, ett textsvar (ord eller uttryck)
-      if(rad.typ === 'text'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
-        var accept = (rad.accept || [rad.svar]).join('|');
-        html += '<input class="ovn-in bred" data-text="' + encodeURIComponent(accept)
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="svar">';
-        html += '</div>';
-        return;
-      }
-      // ORDNA: tal som ska sorteras – eleven skriver i ordning i fält
-      if(rad.typ === 'ordna'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span class="ovn-text" style="width:100%;font-size:16px;color:var(--ink-faint);">Talen: '
-          + rad.tal.join('  ·  ') + '</span>';
-        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;width:100%;margin-top:6px;">';
-        rad.ordning.forEach(function(t, i){
-          html += '<input class="ovn-in" data-ordna="' + rad.ordning[i].replace(/,/g,'.')
-            + '" inputmode="decimal" autocomplete="off" style="width:74px;"'
-            + ' placeholder="' + (i+1) + ':a">';
-        });
-        html += '</div></div>';
-        return;
-      }
-      // VAL: flervalsfråga – knappar, en är rätt
-      if(rad.typ === 'val'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<div class="ovn-val-grid" data-valsvar="' + rad.svar.replace(/,/g,'.') + '">';
-        rad.alternativ.forEach(function(alt){
-          html += '<button type="button" class="ovn-val-btn" data-val="' + alt.replace(/,/g,'.')
-            + '">' + alt + '</button>';
-        });
-        html += '</div></div>';
-        return;
-      }
-      if(rad.typ === 'problem'){
-        // Problem har egen layout: fråga + kladdruta + svar/enhet
-        html += '<div class="prob-rad" data-rad="' + radNummer + '">';
-        html += '<div class="prob-fraga">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span>' + rad.fraga + '</span>';
-        html += '</div>';
-        html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
-        html += '<textarea class="prob-kladd" rows="3" '
-          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
-        html += '<div class="prob-svar-rad">';
-        html += '<span class="prob-label">Svar:</span>';
-        html += '<input class="ovn-in" data-svar="' + rad.svar + '" '
-          + 'inputmode="decimal" autocomplete="off" placeholder="tal">';
-        html += '<input class="ovn-in enhet" data-enhet="' + rad.enhet + '" '
-          + 'inputmode="text" autocomplete="off" placeholder="enhet">';
-        html += '</div>';
-        html += '</div>';
-        return;
-      }
-      // Bråk-uppgifter: täljare/nämnare visas som riktigt bråk
-      if(rad.typ === 'brak' || rad.typ === 'brakLucka'){
-        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        // Bråk-blocket
-        html += '<span class="ovn-brak">';
-        if(rad.typ === 'brakLucka' && rad.luckaPos === 'taljare'){
-          // täljaren innehåller en lucka, t.ex. "706 · __"
-          var tBitar = rad.taljare.split('__');
-          html += '<span class="ovn-brak-taljare">' + tBitar[0]
-            + '<input class="ovn-in lucka" data-svar="' + rad.svar
-            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
-            + (tBitar[1] !== undefined ? tBitar[1] : '') + '</span>';
-          html += '<span class="ovn-brak-strecket"></span>';
-          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
-        } else if(rad.typ === 'brakLucka' && rad.luckaPos === 'namnare'){
-          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
-          html += '<span class="ovn-brak-strecket"></span>';
-          var nBitar = rad.namnare.split('__');
-          html += '<span class="ovn-brak-namnare">' + nBitar[0]
-            + '<input class="ovn-in lucka" data-svar="' + rad.svar
-            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
-            + (nBitar[1] !== undefined ? nBitar[1] : '') + '</span>';
-        } else {
-          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
-          html += '<span class="ovn-brak-strecket"></span>';
-          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
-        }
-        html += '</span>';
-        html += '<span class="ovn-text">=</span>';
-        if(rad.typ === 'brakLucka'){
-          // facit står efter likhetstecknet (eleven löser luckan i bråket)
-          html += '<span class="ovn-text ovn-num">' + rad.hoger + '</span>';
-        } else {
-          html += '<input class="ovn-in" data-svar="' + rad.svar
-            + '" inputmode="decimal" autocomplete="off">';
-        }
-        html += '</div>';
-        return;
-      }
-      // räkna om bokstav per grupp
-      html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-      html += '<span class="ovn-label">' + bokstav + ')</span>';
-      if(rad.typ === 'enkel'){
-        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
-        html += '<input class="ovn-in" data-svar="' + rad.svar
-          + '" inputmode="decimal" autocomplete="off">';
-      } else if(rad.typ === 'lucka'){
-        // text innehåller '__' där luckan ska sitta
-        var bitar = rad.text.split('__');
-        html += '<span class="ovn-text ovn-num">' + bitar[0] + '</span>';
-        html += '<input class="ovn-in lucka" data-svar="' + rad.svar
-          + '" inputmode="decimal" autocomplete="off">';
-        if(bitar[1] !== undefined) html += '<span class="ovn-text ovn-num">' + bitar[1] + '</span>';
-      } else if(rad.typ === 'mellan'){
-        // [Vänster] (≈ eller =) [mellanled-input] = [svar-input]
-        var mellanTecken = rad.tecken || '=';
-        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
-        html += '<span class="ovn-text" style="margin:0 2px;">' + mellanTecken + '</span>';
-        html += '<input class="ovn-in bred" data-mellan="' + rad.mellan
-          + '" inputmode="text" autocomplete="off" placeholder="överslag">';
-        html += '<span class="ovn-text">=</span>';
-        html += '<input class="ovn-in" data-svar="' + rad.svar
-          + '" inputmode="decimal" autocomplete="off">';
-      } else if(rad.typ === 'prio'){
-        // Lodrät uppställning: uppgiftsrad överst, sedan steg-rad(er) med
-        // [vänsterled-ruta] = [svar-ruta]. Vänsterledet rättas på värde, svaret exakt.
-        html = html.replace('class="ovn-rad"', 'class="ovn-rad prio-rad"');
-        html += '<div class="prio-block">';
-        html += '<div class="prio-uppgift"><span class="ovn-num">' + rad.vansterText + '</span><span class="prio-eq">=</span></div>';
-        var steg = rad.steg || [];
-        steg.forEach(function(st, si){
-          var arSista = (si === steg.length - 1);
-          html += '<div class="prio-steg">';
-          html += '<input class="ovn-in prio-vl" data-vl="' + st.vlValue + '" inputmode="text" autocomplete="off" placeholder="förenkla">';
-          html += '<span class="prio-eq">=</span>';
-          if(arSista){
-            html += '<input class="ovn-in prio-svar" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off" placeholder="svar">';
-          } else {
-            html += '<span class="prio-tom"></span>';
-          }
-          html += '</div>';
-        });
-        html += '</div>';
-        html += '</div>';
-        return;
-      }
-      html += '</div>';
-    });
-    radNummer = 0; // bokstäver räknas om per grupp
-  });
-
-  // räkna om labels per grupp
-  html += '</div>';
-
-  // Knappsats – samma stil som öva-delen
-  html += '<div class="ovn-wrap" style="padding-top:0;">';
-  // DELAD AK8_UI-keypad (fast layout + kontext-gråning). Migrerad från egen .ovn-keypad.
-  html += AK8_UI.keypadHTML();
-
-  html += '<div class="ovn-kontroll-rad">'
-    + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
-    + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'
-    + (blad.kanGenerera ? '<button type="button" class="ovn-aterstall" data-action="nytt-blad">↻ Nytt blad med andra tal</button>' : '')
-  + '</div>';
-
-  html += '<div class="ovn-sammanf" data-sammanf style="display:none;"></div>';
-
-  html += '<div class="ovn-skriv-ut"><button type="button" data-action="print">↗ Skriv ut bladet</button></div>';
-  html += '</div>';
-  return html;
-}
-
-function bygg_blad(rotEl, blad){
-  rotEl.innerHTML = bladHTML(blad);
-
-  // Räkna om radbokstäver så att varje grupp börjar om från 'a'
-  rotEl.querySelectorAll('.ovn-grupp').forEach(function(g){
-    var bok = 96;
-    g.querySelectorAll('.ovn-label').forEach(function(lbl){
-      bok++;
-      lbl.textContent = String.fromCharCode(bok) + ')';
-    });
-  });
-
-  var inputs = Array.from(rotEl.querySelectorAll('.ovn-in'));
-  var fokus = 0;
-
-  // Tab/Enter -> nästa input. Ångra rättning så fort man ändrar.
-  inputs.forEach(function(inp, i){
-    inp.addEventListener('focus', function(){ fokus = i; });
-    inp.addEventListener('input', function(){
-      inp.classList.remove('correct','wrong');
-      var f = inp.parentElement.querySelector('.ovn-fasit');
-      if(f) f.remove();
-    });
-  });
-
-  // Flervalsknappar – markera valt alternativ
-  rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
-    grid.querySelectorAll('.ovn-val-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
-          b.classList.remove('is-vald','correct','wrong');
-        });
-        btn.classList.add('is-vald');
-        grid.dataset.valt = btn.dataset.val;
-      });
-    });
-  });
-
-  // Multi-select-knappar – toggla av/på (välj flera)
-  rotEl.querySelectorAll('.ovn-flerval-grid').forEach(function(grid){
-    grid.querySelectorAll('.ovn-flerval-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        btn.classList.toggle('is-vald');
-        btn.classList.remove('correct','wrong','missad');
-      });
-    });
-  });
-
-  // Knappsats
-  // Knappsats – delad AK8_UI-bindning (fokus-följning, kontext-gråning, ⌫, Enter→nästa ruta).
-  if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(rotEl);
-
-  // Kontroll / Återställ / Skriv ut
-  var forstaForsoket = true; // 0-1 fel på första försöket -> nytt blad
-  rotEl.querySelector('[data-action="kontroll"]').addEventListener('click', function(){
-    var ratt = 0, totalt = 0;
-    inputs.forEach(function(inp){
-      var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
-      // Ta bort eventuella tidigare fasit-spans och markeringar
-      rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
-      inp.classList.remove('correct','wrong','just-checked');
-      var ok;
-      var facitText = null;
-      if(inp.dataset.mellan){
-        ok = jamforMellan(inp.value, inp.dataset.mellan);
-        facitText = inp.dataset.mellan;
-      } else if(inp.dataset.enhet){
-        ok = jamforEnhet(inp.value, inp.dataset.enhet);
-        facitText = inp.dataset.enhet;
-      } else if(inp.dataset.text !== undefined){
-        // textsvar – jämför mot lista av godkända varianter
-        var godkanda = decodeURIComponent(inp.dataset.text).split('|');
-        ok = jamforText(inp.value, godkanda);
-        facitText = inp.dataset.visa;
-      } else if(inp.dataset.ordna !== undefined){
-        // sorteringsfält – jämför positionens tal
-        ok = jamforTal(inp.value, parseFloat(inp.dataset.ordna));
-        facitText = inp.dataset.ordna.replace('.', ',');
-      } else if(inp.dataset.min !== undefined){
-        // intervall – vilket tal som helst inom gränserna godtas
-        var v = parseFloat(String(inp.value).replace(',', '.'));
-        var mn = parseFloat(inp.dataset.min), mx = parseFloat(inp.dataset.max);
-        if(isNaN(v)){
-          ok = false;
-        } else if(inp.dataset.exkl === '1'){
-          ok = v > mn && v < mx;
-        } else {
-          ok = v >= mn && v <= mx;
-        }
-        facitText = 'ett tal mellan ' + String(mn).replace('.', ',') + ' och ' + String(mx).replace('.', ',');
-      } else if(inp.dataset.faktor !== undefined){
-        // faktorisering – godtar alla korrekta uppdelningar
-        var malTal = parseInt(inp.dataset.faktor, 10);
-        var malAntal = parseInt(inp.dataset.antal, 10);
-        var delar = String(inp.value).replace(/\u2212/g,'-')
-          .replace(/[x×*]/g,'·').replace(/\s/g,'').split('·');
-        var produkt = 1, giltigt = true;
-        if(delar.length !== malAntal) giltigt = false;
-        delar.forEach(function(d){
-          var dv = parseInt(d, 10);
-          if(isNaN(dv) || dv < 2) giltigt = false;
-          else produkt *= dv;
-        });
-        ok = giltigt && produkt === malTal;
-        facitText = 'produkt = ' + malTal + ', ' + malAntal + ' faktorer (minst 2 var)';
-      } else if(inp.dataset.vl !== undefined){
-        // Prioritering, vänsterled: rättas på värde
-        var elevVarde = prioEval(inp.value);
-        var malVarde = parseFloat(inp.dataset.vl);
-        ok = elevVarde !== null && Math.abs(elevVarde - malVarde) < 1e-6;
-        facitText = 'ledet ska bli ' + String(malVarde).replace('.', ',');
-      } else {
-        ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
-        facitText = inp.dataset.svar ? inp.dataset.svar.replace('.', ',') : '';
-      }
-      totalt++;
-      // Bocken/krysset – stor, syns tydligt
-      var mark = document.createElement('span');
-      mark.className = 'ovn-mark ' + (ok ? 'ok' : 'fel');
-      mark.textContent = ok ? '✓' : '✗';
-      if(ok){
-        inp.classList.add('correct','just-checked');
-        ratt++;
-        inp.insertAdjacentElement('afterend', mark);
-      } else {
-        inp.classList.add('wrong','just-checked');
-        var f = document.createElement('span');
-        f.className = 'ovn-fasit';
-        f.textContent = 'rätt svar: ' + facitText;
-        inp.insertAdjacentElement('afterend', mark);
-        mark.insertAdjacentElement('afterend', f);
-      }
-      // Ta bort blink-klassen efter animationen
-      setTimeout(function(){ inp.classList.remove('just-checked'); }, 500);
-    });
-    // Rätta flervalsfrågor
-    rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
-      totalt++;
-      var ratt_svar = grid.dataset.valsvar;
-      var valt = grid.dataset.valt;
-      grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
-        b.classList.remove('correct','wrong');
-        if(b.dataset.val === ratt_svar) b.classList.add('correct');
-        else if(b.dataset.val === valt) b.classList.add('wrong');
-      });
-      if(valt === ratt_svar) ratt++;
-    });
-    // Rätta multi-select (delbarhet): alla rätta valda, inga felaktiga
-    rotEl.querySelectorAll('.ovn-flerval-grid').forEach(function(grid){
-      totalt++;
-      var rattaTal = grid.dataset.ratt.split(',');
-      var alltRatt = true;
-      grid.querySelectorAll('.ovn-flerval-btn').forEach(function(b){
-        b.classList.remove('correct','wrong','missad');
-        var arRatt = rattaTal.indexOf(b.dataset.tal) >= 0;
-        var arVald = b.classList.contains('is-vald');
-        if(arVald && arRatt){ b.classList.add('correct'); }
-        else if(arVald && !arRatt){ b.classList.add('wrong'); alltRatt = false; }
-        else if(!arVald && arRatt){ b.classList.add('missad'); alltRatt = false; }
-      });
-      if(alltRatt) ratt++;
-    });
-    // Förklaringsfrågor – visa exempelfacit (rättas inte)
-    rotEl.querySelectorAll('[data-forklara]').forEach(function(ta){
-      var gammalFacit = ta.parentElement.querySelector('.forklara-facit');
-      if(gammalFacit) gammalFacit.remove();
-      var facit = decodeURIComponent(ta.dataset.forklara);
-      var fd = document.createElement('div');
-      fd.className = 'forklara-facit';
-      fd.style.cssText = 'margin-top:8px;padding:10px 14px;background:var(--bg-warm);border-left:3px solid var(--gold);border-radius:6px;font-size:14px;color:var(--ink-soft);';
-      fd.innerHTML = '<strong>Exempel på svar:</strong> ' + facit;
-      ta.insertAdjacentElement('afterend', fd);
-    });
-    var sam = rotEl.querySelector('[data-sammanf]');
-    sam.style.display = 'block';
-    sam.classList.remove('ok','delvis');
-    if(ratt === totalt){
-      sam.classList.add('ok');
-      sam.innerHTML = '<div class="ovn-sammanf-icon">✓</div>'
-        + '<span class="ovn-sammanf-titel">Allt rätt!</span>'
-        + ratt + ' av ' + totalt + ' &mdash; jättebra jobbat!';
-      // Konfetti regnar
-      visaKonfetti();
-    } else {
-      sam.classList.add('delvis');
-      sam.textContent = 'Du fick ' + ratt + ' av ' + totalt + ' rätt. Titta på de rödmarkerade rutorna.';
-    }
-    sam.scrollIntoView({behavior:'smooth', block:'center'});
-
-    // Automatiskt nytt blad om eleven klarade 0-1 fel på FÖRSTA försöket
-    // (slarvfel räcker inte för att låsa upp samma blad – men 2+ fel betyder
-    //  att hen bör få rätta och försöka igen utan att bladet byts).
-    var fel = totalt - ratt;
-    if(forstaForsoket && fel <= 1 && blad.kanGenerera && blad.genId){
-      // Visa en mjuk meddelandetext och byt blad efter en kort paus
-      setTimeout(function(){
-        var sam2 = rotEl.querySelector('[data-sammanf]');
-        if(sam2){
-          var info = document.createElement('div');
-          info.style.cssText = 'margin-top:14px;font-size:14px;font-weight:normal;color:#15803d;';
-          info.textContent = 'Nytt blad med andra tal kommer …';
-          sam2.appendChild(info);
-        }
-      }, 1600);
-      setTimeout(function(){
-        // markera att vi börjat en ny "session" på bladet, så nytt blad genereras
-        byggSheet(rotEl.id.replace('sheet-',''), 'A', false);
-      }, 3200);
-    }
-    forstaForsoket = false;
-  });
-
-  rotEl.querySelector('[data-action="reset"]').addEventListener('click', function(){
-    inputs.forEach(function(inp){
-      inp.value = '';
-      inp.classList.remove('correct','wrong','just-checked');
-    });
-    rotEl.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
-    // Nollställ flervalsknappar – ta bort vald, rätt och fel
-    rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
-      grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
-        b.classList.remove('is-vald','correct','wrong');
-      });
-      delete grid.dataset.valt;
-    });
-    // Nollställ multi-select
-    rotEl.querySelectorAll('.ovn-flerval-btn').forEach(function(b){
-      b.classList.remove('is-vald','correct','wrong','missad');
-    });
-    rotEl.querySelectorAll('.forklara-facit').forEach(function(f){ f.remove(); });
-    var sam = rotEl.querySelector('[data-sammanf]');
-    sam.style.display = 'none';
-    sam.textContent = '';
-    forstaForsoket = true;
-    if(inputs[0]) inputs[0].focus();
-  });
-
-  var nyttBtn = rotEl.querySelector('[data-action="nytt-blad"]');
-  if(nyttBtn){
-    nyttBtn.addEventListener('click', function(){
-      byggSheet(rotEl.id.replace('sheet-',''), 'B', false);
-    });
-  }
-
-  rotEl.querySelector('[data-action="print"]').addEventListener('click', function(){
-    window.print();
-  });
-
-  if(inputs[0]) inputs[0].focus();
-}
-
 // ============================================================
 // UPPGIFTSDATA – stencilerna från Joachim
 // ============================================================
@@ -763,43 +129,43 @@ var PLUGG_DOKUMENT = {
     intro:'Skriv först ditt överslag (de avrundade talen) i mellanledet, och sedan svaret.',
     grupper:[
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'567 + 743', tecken:'≈', mellan:'600+700', svar:1300},
-        {typ:'mellan', vansterText:'139 + 279', tecken:'≈', mellan:'100+300', svar:400},
-        {typ:'mellan', vansterText:'289 + 415 + 307', tecken:'≈', mellan:'300+400+300', svar:1000}
+        {typ:'overslag', vansterText:'567 + 743', tecken:'≈', mellan:'600+700', svar:1300},
+        {typ:'overslag', vansterText:'139 + 279', tecken:'≈', mellan:'100+300', svar:400},
+        {typ:'overslag', vansterText:'289 + 415 + 307', tecken:'≈', mellan:'300+400+300', svar:1000}
       ]},
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'82,5 + 39,2 + 58,6', tecken:'≈', mellan:'80+40+60', svar:180},
-        {typ:'mellan', vansterText:'4,9 + 7,3 + 8,8 + 5,1', tecken:'≈', mellan:'5+7+9+5', svar:26}
+        {typ:'overslag', vansterText:'82,5 + 39,2 + 58,6', tecken:'≈', mellan:'80+40+60', svar:180},
+        {typ:'overslag', vansterText:'4,9 + 7,3 + 8,8 + 5,1', tecken:'≈', mellan:'5+7+9+5', svar:26}
       ]},
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'78 − 59', tecken:'≈', mellan:'80-60', svar:20},
-        {typ:'mellan', vansterText:'891 − 586', tecken:'≈', mellan:'900-600', svar:300},
-        {typ:'mellan', vansterText:'67,1 − 56,8', tecken:'≈', mellan:'70-60', svar:10}
+        {typ:'overslag', vansterText:'78 − 59', tecken:'≈', mellan:'80-60', svar:20},
+        {typ:'overslag', vansterText:'891 − 586', tecken:'≈', mellan:'900-600', svar:300},
+        {typ:'overslag', vansterText:'67,1 − 56,8', tecken:'≈', mellan:'70-60', svar:10}
       ]},
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'489,7 − 275,4', tecken:'≈', mellan:'490-280', svar:210},
-        {typ:'mellan', vansterText:'132,8 − 41,7', tecken:'≈', mellan:'130-40', svar:90},
-        {typ:'mellan', vansterText:'242 + 37 − 118', tecken:'≈', mellan:'240+40-120', svar:160}
+        {typ:'overslag', vansterText:'489,7 − 275,4', tecken:'≈', mellan:'490-280', svar:210},
+        {typ:'overslag', vansterText:'132,8 − 41,7', tecken:'≈', mellan:'130-40', svar:90},
+        {typ:'overslag', vansterText:'242 + 37 − 118', tecken:'≈', mellan:'240+40-120', svar:160}
       ]},
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'4,1 · 21', tecken:'≈', mellan:'4·20', svar:80},
-        {typ:'mellan', vansterText:'32 · 18', tecken:'≈', mellan:'30·20', svar:600},
-        {typ:'mellan', vansterText:'6,9 · 208', tecken:'≈', mellan:'7·200', svar:1400}
+        {typ:'overslag', vansterText:'4,1 · 21', tecken:'≈', mellan:'4·20', svar:80},
+        {typ:'overslag', vansterText:'32 · 18', tecken:'≈', mellan:'30·20', svar:600},
+        {typ:'overslag', vansterText:'6,9 · 208', tecken:'≈', mellan:'7·200', svar:1400}
       ]},
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'42 · 58', tecken:'≈', mellan:'40·60', svar:2400},
-        {typ:'mellan', vansterText:'690 · 32', tecken:'≈', mellan:'700·30', svar:21000},
-        {typ:'mellan', vansterText:'395 · 5,1', tecken:'≈', mellan:'400·5', svar:2000}
+        {typ:'overslag', vansterText:'42 · 58', tecken:'≈', mellan:'40·60', svar:2400},
+        {typ:'overslag', vansterText:'690 · 32', tecken:'≈', mellan:'700·30', svar:21000},
+        {typ:'overslag', vansterText:'395 · 5,1', tecken:'≈', mellan:'400·5', svar:2000}
       ]},
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'29 / 5', tecken:'≈', mellan:'30/5', svar:6},
-        {typ:'mellan', vansterText:'43 / 9', tecken:'≈', mellan:'45/9', svar:5},
-        {typ:'mellan', vansterText:'408 / 6', tecken:'≈', mellan:'420/6', svar:70}
+        {typ:'overslag', vansterText:'29 / 5', tecken:'≈', mellan:'30/5', svar:6},
+        {typ:'overslag', vansterText:'43 / 9', tecken:'≈', mellan:'45/9', svar:5},
+        {typ:'overslag', vansterText:'408 / 6', tecken:'≈', mellan:'420/6', svar:70}
       ]},
       {rubrik:'Beräkna med överslagsräkning', rader:[
-        {typ:'mellan', vansterText:'23,8 / 5,9', tecken:'≈', mellan:'24/6', svar:4},
-        {typ:'mellan', vansterText:'44,8 / 4,9', tecken:'≈', mellan:'45/5', svar:9},
-        {typ:'mellan', vansterText:'139 / 19', tecken:'≈', mellan:'140/20', svar:7}
+        {typ:'overslag', vansterText:'23,8 / 5,9', tecken:'≈', mellan:'24/6', svar:4},
+        {typ:'overslag', vansterText:'44,8 / 4,9', tecken:'≈', mellan:'45/5', svar:9},
+        {typ:'overslag', vansterText:'139 / 19', tecken:'≈', mellan:'140/20', svar:7}
       ]}
     ]
   },
@@ -844,16 +210,16 @@ var PLUGG_DOKUMENT = {
         {typ:'brakText', heltal:'2', taljare:'7', namnare:'100', svar:'2,07', accept:['2,07','2.07']}
       ]},
       {rubrik:'Skriv talen i bråkform', rader:[
-        {typ:'text', fraga:'0,3', svar:'3/10', accept:['3/10']},
-        {typ:'text', fraga:'0,13', svar:'13/100', accept:['13/100']},
-        {typ:'text', fraga:'0,06', svar:'6/100', accept:['6/100','3/50']},
-        {typ:'text', fraga:'1,3', svar:'13/10', accept:['13/10']}
+        {typ:'fragaText', fraga:'0,3', svar:'3/10', accept:['3/10']},
+        {typ:'fragaText', fraga:'0,13', svar:'13/100', accept:['13/100']},
+        {typ:'fragaText', fraga:'0,06', svar:'6/100', accept:['6/100','3/50']},
+        {typ:'fragaText', fraga:'1,3', svar:'13/10', accept:['13/10']}
       ]},
       {rubrik:'Beräkna – byt mellan bråk och decimalform', rader:[
-        {typ:'text', fraga:'4/10 + 0,24', svar:'0,64', accept:['0,64','0.64']},
-        {typ:'text', fraga:'0,5 − 1/4', svar:'0,25', accept:['0,25','0.25']},
-        {typ:'text', fraga:'3/4 + 1,3', svar:'2,05', accept:['2,05','2.05']},
-        {typ:'text', fraga:'1 2/5 − 0,7', svar:'0,7', accept:['0,7','0.7']}
+        {typ:'fragaText', fraga:'4/10 + 0,24', svar:'0,64', accept:['0,64','0.64']},
+        {typ:'fragaText', fraga:'0,5 − 1/4', svar:'0,25', accept:['0,25','0.25']},
+        {typ:'fragaText', fraga:'3/4 + 1,3', svar:'2,05', accept:['2,05','2.05']},
+        {typ:'fragaText', fraga:'1 2/5 − 0,7', svar:'0,7', accept:['0,7','0.7']}
       ]}
     ]
   },
@@ -888,14 +254,14 @@ var PLUGG_DOKUMENT = {
         {typ:'enkel', vansterText:'9,5 ≈', svar:10}
       ]},
       {rubrik:'Avrunda 68 325 till', rader:[
-        {typ:'text', fraga:'tiotusental', svar:'70000', accept:['70000','70 000']},
-        {typ:'text', fraga:'tusental', svar:'68000', accept:['68000','68 000']},
-        {typ:'text', fraga:'hundratal', svar:'68300', accept:['68300','68 300']}
+        {typ:'fragaText', fraga:'tiotusental', svar:'70000', accept:['70000','70 000']},
+        {typ:'fragaText', fraga:'tusental', svar:'68000', accept:['68000','68 000']},
+        {typ:'fragaText', fraga:'hundratal', svar:'68300', accept:['68300','68 300']}
       ]},
       {rubrik:'Avrunda 2 485 till', rader:[
-        {typ:'text', fraga:'tusental', svar:'2000', accept:['2000','2 000']},
-        {typ:'text', fraga:'hundratal', svar:'2500', accept:['2500','2 500']},
-        {typ:'text', fraga:'tiotal', svar:'2490', accept:['2490','2 490']}
+        {typ:'fragaText', fraga:'tusental', svar:'2000', accept:['2000','2 000']},
+        {typ:'fragaText', fraga:'hundratal', svar:'2500', accept:['2500','2 500']},
+        {typ:'fragaText', fraga:'tiotal', svar:'2490', accept:['2490','2 490']}
       ]},
       {rubrik:'Avrunda till två decimaler', rader:[
         {typ:'enkel', vansterText:'1,489 ≈', svar:1.49},
@@ -908,10 +274,10 @@ var PLUGG_DOKUMENT = {
         {typ:'enkel', vansterText:'126,746 ≈', svar:126.7}
       ]},
       {rubrik:'Avrunda 7 923,2896 till', rader:[
-        {typ:'text', fraga:'heltal', svar:'7923', accept:['7923','7 923']},
-        {typ:'text', fraga:'tiotal', svar:'7920', accept:['7920','7 920']},
-        {typ:'text', fraga:'tiondelar', svar:'7923,3', accept:['7923,3','7923.3','7 923,3']},
-        {typ:'text', fraga:'hundradelar', svar:'7923,29', accept:['7923,29','7923.29','7 923,29']}
+        {typ:'fragaText', fraga:'heltal', svar:'7923', accept:['7923','7 923']},
+        {typ:'fragaText', fraga:'tiotal', svar:'7920', accept:['7920','7 920']},
+        {typ:'fragaText', fraga:'tiondelar', svar:'7923,3', accept:['7923,3','7923.3','7 923,3']},
+        {typ:'fragaText', fraga:'hundradelar', svar:'7923,29', accept:['7923,29','7923.29','7 923,29']}
       ]}
     ]
   },
@@ -1053,10 +419,10 @@ var PLUGG_DOKUMENT = {
     intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
       {rubrik:'Vilket tal är', rader:[
-        {typ:'text', fraga:'4 tiotal större än 3 080', svar:'3120'},
-        {typ:'text', fraga:'5 tiotal mindre än 3 249', svar:'3199'},
-        {typ:'text', fraga:'7 hundratal mindre än 4 576', svar:'3876'},
-        {typ:'text', fraga:'4 hundratal större än 5 875', svar:'6275'}
+        {typ:'fragaText', fraga:'4 tiotal större än 3 080', svar:'3120'},
+        {typ:'fragaText', fraga:'5 tiotal mindre än 3 249', svar:'3199'},
+        {typ:'fragaText', fraga:'7 hundratal mindre än 4 576', svar:'3876'},
+        {typ:'fragaText', fraga:'4 hundratal större än 5 875', svar:'6275'}
       ]},
       {rubrik:'Vilka tre tal följer i talföljden?', rader:[
         {typ:'foljd', givna:['9,2','9,4','9,6'],        nasta:['9,8','10,0','10,2']},
@@ -1066,34 +432,34 @@ var PLUGG_DOKUMENT = {
         {typ:'foljd', givna:['2,488','2,491','2,494'],  nasta:['2,497','2,500','2,503']}
       ]},
       {rubrik:'Vilket tal är störst? Skriv det större talet', rader:[
-        {typ:'text', fraga:'9,1 eller 9,09', svar:'9,1', accept:['9,1','9.1']},
-        {typ:'text', fraga:'10,39 eller 10,4', svar:'10,4', accept:['10,4','10.4']}
+        {typ:'fragaText', fraga:'9,1 eller 9,09', svar:'9,1', accept:['9,1','9.1']},
+        {typ:'fragaText', fraga:'10,39 eller 10,4', svar:'10,4', accept:['10,4','10.4']}
       ]},
       {rubrik:'Skriv ett tal som är', rader:[
-        {typ:'intervall', fraga:'större än 9,9 men mindre än 10', min:9.9, max:10, exkl:true},
-        {typ:'intervall', fraga:'större än 10 men mindre än 10,01', min:10, max:10.01, exkl:true}
+        {typ:'intervallEn', fraga:'större än 9,9 men mindre än 10', min:9.9, max:10, exkl:true},
+        {typ:'intervallEn', fraga:'större än 10 men mindre än 10,01', min:10, max:10.01, exkl:true}
       ]},
       {rubrik:'Skriv talen med siffror', rader:[
-        {typ:'text', fraga:'3 ental, 5 hundradelar och 7 tusendelar', svar:'3,057', accept:['3,057','3.057']},
-        {typ:'text', fraga:'2 tiotal och 5 hundradelar', svar:'20,05', accept:['20,05','20.05']},
-        {typ:'text', fraga:'4 hundratal, 9 ental och 8 tusendelar', svar:'409,008', accept:['409,008','409.008']}
+        {typ:'fragaText', fraga:'3 ental, 5 hundradelar och 7 tusendelar', svar:'3,057', accept:['3,057','3.057']},
+        {typ:'fragaText', fraga:'2 tiotal och 5 hundradelar', svar:'20,05', accept:['20,05','20.05']},
+        {typ:'fragaText', fraga:'4 hundratal, 9 ental och 8 tusendelar', svar:'409,008', accept:['409,008','409.008']}
       ]},
       {rubrik:'Skriv talen med siffror', rader:[
-        {typ:'text', fraga:'12 hundradelar', svar:'0,12', accept:['0,12','0.12']},
-        {typ:'text', fraga:'17 tusendelar', svar:'0,017', accept:['0,017','0.017']},
-        {typ:'text', fraga:'19 tiondelar', svar:'1,9', accept:['1,9','1.9']}
+        {typ:'fragaText', fraga:'12 hundradelar', svar:'0,12', accept:['0,12','0.12']},
+        {typ:'fragaText', fraga:'17 tusendelar', svar:'0,017', accept:['0,017','0.017']},
+        {typ:'fragaText', fraga:'19 tiondelar', svar:'1,9', accept:['1,9','1.9']}
       ]},
       {rubrik:'Skriv talet som är en tiondel större än', rader:[
-        {typ:'text', fraga:'6', svar:'6,1', accept:['6,1','6.1']},
-        {typ:'text', fraga:'4,58', svar:'4,68', accept:['4,68','4.68']},
-        {typ:'text', fraga:'8,04', svar:'8,14', accept:['8,14','8.14']},
-        {typ:'text', fraga:'7,98', svar:'8,08', accept:['8,08','8.08']}
+        {typ:'fragaText', fraga:'6', svar:'6,1', accept:['6,1','6.1']},
+        {typ:'fragaText', fraga:'4,58', svar:'4,68', accept:['4,68','4.68']},
+        {typ:'fragaText', fraga:'8,04', svar:'8,14', accept:['8,14','8.14']},
+        {typ:'fragaText', fraga:'7,98', svar:'8,08', accept:['8,08','8.08']}
       ]},
       {rubrik:'Skriv talet som är en hundradel större än', rader:[
-        {typ:'text', fraga:'7,5', svar:'7,51', accept:['7,51','7.51']},
-        {typ:'text', fraga:'5,217', svar:'5,227', accept:['5,227','5.227']},
-        {typ:'text', fraga:'5,991', svar:'6,001', accept:['6,001','6.001']},
-        {typ:'text', fraga:'8,99', svar:'9,00', accept:['9,00','9.00','9','9,0','9.0']}
+        {typ:'fragaText', fraga:'7,5', svar:'7,51', accept:['7,51','7.51']},
+        {typ:'fragaText', fraga:'5,217', svar:'5,227', accept:['5,227','5.227']},
+        {typ:'fragaText', fraga:'5,991', svar:'6,001', accept:['6,001','6.001']},
+        {typ:'fragaText', fraga:'8,99', svar:'9,00', accept:['9,00','9.00','9','9,0','9.0']}
       ]},
       {rubrik:'Beräkna med huvudräkning – ingen uppställning', rader:[
         {typ:'enkel', vansterText:'0,8 + 0,03 =', svar:0.83},
@@ -1108,8 +474,8 @@ var PLUGG_DOKUMENT = {
         {typ:'enkel', vansterText:'7,56 − 1,6 =', svar:5.96}
       ]},
       {rubrik:'Skriv talet som är', rader:[
-        {typ:'text', fraga:'sex tiondelar mindre än 7,49', svar:'6,89', accept:['6,89','6.89']},
-        {typ:'text', fraga:'tolv tiondelar mindre än 7,16', svar:'5,96', accept:['5,96','5.96']}
+        {typ:'fragaText', fraga:'sex tiondelar mindre än 7,49', svar:'6,89', accept:['6,89','6.89']},
+        {typ:'fragaText', fraga:'tolv tiondelar mindre än 7,16', svar:'5,96', accept:['5,96','5.96']}
       ]}
     ]
   },
@@ -1118,17 +484,17 @@ var PLUGG_DOKUMENT = {
     intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
       {rubrik:'Vilket platsvärde har siffran 2 i talet?', rader:[
-        {typ:'text', fraga:'4 523', svar:'tiotal', accept:['tiotal','tiotalet']},
-        {typ:'text', fraga:'13 234', svar:'hundratal', accept:['hundratal','hundratalet']},
-        {typ:'text', fraga:'6,21', svar:'tiondel', accept:['tiondel','tiondelar','tiondelen']}
+        {typ:'fragaText', fraga:'4 523', svar:'tiotal', accept:['tiotal','tiotalet']},
+        {typ:'fragaText', fraga:'13 234', svar:'hundratal', accept:['hundratal','hundratalet']},
+        {typ:'fragaText', fraga:'6,21', svar:'tiondel', accept:['tiondel','tiondelar','tiondelen']}
       ]},
       {rubrik:'Ordna talen i storleksordning, börja med det minsta', rader:[
-        {typ:'ordna', tal:['0,1','2,5','0,5','3,0','0,4'], ordning:['0,1','0,4','0,5','2,5','3,0']}
+        {typ:'ordningsfoljd', tal:['0,1','2,5','0,5','3,0','0,4'], ordning:['0,1','0,4','0,5','2,5','3,0']}
       ]},
       {rubrik:'Skriv talen i utvecklad form', rader:[
-        {typ:'text', fraga:'176', svar:'1·100+7·10+6·1', accept:['1·100+7·10+6·1']},
-        {typ:'text', fraga:'34,6', svar:'3·10+4·1+6·0,1', accept:['3·10+4·1+6·0,1','3·10+4·1+6·0.1']},
-        {typ:'text', fraga:'8702', svar:'8·1000+7·100+2·1', accept:['8·1000+7·100+2·1']}
+        {typ:'fragaText', fraga:'176', svar:'1·100+7·10+6·1', accept:['1·100+7·10+6·1']},
+        {typ:'fragaText', fraga:'34,6', svar:'3·10+4·1+6·0,1', accept:['3·10+4·1+6·0,1','3·10+4·1+6·0.1']},
+        {typ:'fragaText', fraga:'8702', svar:'8·1000+7·100+2·1', accept:['8·1000+7·100+2·1']}
       ]},
       {rubrik:'Skriv talen på vanligt sätt', rader:[
         {typ:'enkel', vansterText:'5 · 10 =', svar:50},
@@ -1136,35 +502,35 @@ var PLUGG_DOKUMENT = {
         {typ:'enkel', vansterText:'2 · 100 + 4 · 10 + 6 · 1 =', svar:246}
       ]},
       {rubrik:'Ordna talen i storleksordning, börja med det minsta', rader:[
-        {typ:'ordna', tal:['0,18','0,1','0,2','1,7','0,15','2'], ordning:['0,1','0,15','0,18','0,2','1,7','2']}
+        {typ:'ordningsfoljd', tal:['0,18','0,1','0,2','1,7','0,15','2'], ordning:['0,1','0,15','0,18','0,2','1,7','2']}
       ]},
       {rubrik:'Vilket tal är närmast 2,8? Välj ett av talen', rader:[
         {typ:'val', alternativ:['2,9','0,3','2,69','0,25','2','3'], svar:'2,9'}
       ]},
       {rubrik:'Vilket platsvärde har siffran 2 i talet?', rader:[
-        {typ:'text', fraga:'10,02', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']},
-        {typ:'text', fraga:'293 834', svar:'hundratusental', accept:['hundratusental','hundratusentalet','hundra tusental']},
-        {typ:'text', fraga:'19,0921', svar:'tusendel', accept:['tusendel','tusendelar','tusendelen']}
+        {typ:'fragaText', fraga:'10,02', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']},
+        {typ:'fragaText', fraga:'293 834', svar:'hundratusental', accept:['hundratusental','hundratusentalet','hundra tusental']},
+        {typ:'fragaText', fraga:'19,0921', svar:'tusendel', accept:['tusendel','tusendelar','tusendelen']}
       ]},
       {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
-        {typ:'ordna', tal:['1,023','1,2','1,32','1,03'], ordning:['1,023','1,03','1,2','1,32']}
+        {typ:'ordningsfoljd', tal:['1,023','1,2','1,32','1,03'], ordning:['1,023','1,03','1,2','1,32']}
       ]},
       {rubrik:'Skriv i utvecklad form', rader:[
-        {typ:'text', fraga:'657', svar:'6·100+5·10+7·1', accept:['6·100+5·10+7·1']},
-        {typ:'text', fraga:'23,4', svar:'2·10+3·1+4·0,1', accept:['2·10+3·1+4·0,1','2·10+3·1+4·0.1']},
-        {typ:'text', fraga:'4,72', svar:'4·1+7·0,1+2·0,01', accept:['4·1+7·0,1+2·0,01','4·1+7·0.1+2·0.01']}
+        {typ:'fragaText', fraga:'657', svar:'6·100+5·10+7·1', accept:['6·100+5·10+7·1']},
+        {typ:'fragaText', fraga:'23,4', svar:'2·10+3·1+4·0,1', accept:['2·10+3·1+4·0,1','2·10+3·1+4·0.1']},
+        {typ:'fragaText', fraga:'4,72', svar:'4·1+7·0,1+2·0,01', accept:['4·1+7·0,1+2·0,01','4·1+7·0.1+2·0.01']}
       ]},
       {rubrik:'Använd siffrorna 7, 5, 8 och 4', rader:[
-        {typ:'text', fraga:'Skriv det största talet du kan', svar:'8754'},
-        {typ:'text', fraga:'Skriv det minsta talet du kan', svar:'4578'},
-        {typ:'text', fraga:'Skriv det största udda talet', svar:'8745'},
-        {typ:'text', fraga:'Skriv det minsta jämna talet', svar:'4578'}
+        {typ:'fragaText', fraga:'Skriv det största talet du kan', svar:'8754'},
+        {typ:'fragaText', fraga:'Skriv det minsta talet du kan', svar:'4578'},
+        {typ:'fragaText', fraga:'Skriv det största udda talet', svar:'8745'},
+        {typ:'fragaText', fraga:'Skriv det minsta jämna talet', svar:'4578'}
       ]},
       {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
-        {typ:'ordna', tal:['0,52','0,423','0,3','0,42'], ordning:['0,3','0,42','0,423','0,52']}
+        {typ:'ordningsfoljd', tal:['0,52','0,423','0,3','0,42'], ordning:['0,3','0,42','0,423','0,52']}
       ]},
       {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
-        {typ:'ordna', tal:['0,52','0,523','0,5','0,059'], ordning:['0,059','0,5','0,52','0,523']}
+        {typ:'ordningsfoljd', tal:['0,52','0,523','0,5','0,059'], ordning:['0,059','0,5','0,52','0,523']}
       ]}
     ]
   }
