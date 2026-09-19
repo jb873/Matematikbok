@@ -1,0 +1,187 @@
+/* ak7-k1blad-kanon.css — DELAD stil för sjuans TIO taluppfattnings- och algebrasidor (k1 d1–d3, d5–d8, d10; k3 d1, d7).
+   Regler som fanns med EXAKT samma deklaration i dessa sidor och i ingen annan. Länkas EFTER ak7-delkapitel-kanon.css, FÖRE sidans <style>.
+   Utbruten 2026-09-19; computed style mätt före och efter per sida — identiskt. Inga stjärna-snedstreck i kommentarer. */
+
+/* ── Negativa tal: storleksordna & talföljd ── */.ovn-ordna-rad,.ovn-foljd-rad{flex-wrap:wrap;gap:10px;}
+.ovn-ordna-prompt{font-family:'Source Serif 4',Georgia,serif;font-size:16px;color:var(--ink-soft);}
+.ovn-ordna-set{font-family:'Source Serif 4',Georgia,serif;font-size:19px;font-feature-settings:'tnum';
+  background:var(--paper-dk);border-radius:8px;padding:5px 14px;letter-spacing:.02em;}
+.ovn-ordna-svar{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.ovn-ordna-pil{font-size:18px;color:var(--ink-faint);}
+.ovn-foljd-led{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:20px;}
+.ovn-foljd-tal{font-size:20px;}
+.ovn-foljd-komma{color:var(--ink-faint);}
+.alg-bild{display:flex;justify-content:center;padding:10px;background:#fff;border:1px solid var(--line);border-radius:10px;}
+.alg-bild svg{max-width:100%;height:auto;}
+.brak{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;font-family:'Source Serif 4',Georgia,serif;}
+.brak .taljare{border-bottom:1.5px solid currentColor;padding:0 5px;line-height:1.25;}
+.brak .namnare{padding:0 5px;line-height:1.25;}
+.valruta-btn.is-vald{background:var(--gold-lt,#c49a40);border-color:var(--gold-lt,#c49a40);color:#fff;}
+.valruta-btn.correct{background:#16a34a;border-color:#16a34a;color:#fff;}
+.valruta-btn.wrong{background:#dc2626;border-color:#dc2626;color:#fff;}
+.emoji-bild{display:flex;gap:34px;flex-wrap:wrap;align-items:flex-start;justify-content:center;padding:18px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;width:100%;box-sizing:border-box;}
+.emoji-grupp{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:38px;line-height:1.1;text-align:center;}
+.emoji-text{font-size:13px;font-family:'Source Serif 4',Georgia,serif;font-style:italic;color:var(--ink-soft,#5d5347);}
+.blad-tom{max-width:920px;margin:24px auto;padding:44px 28px;text-align:center;color:var(--ink-faint,#7a6e65);background:var(--paper-lt,#faf7f1);border:1px dashed var(--paper-dk,#ede6d6);border-radius:10px;}
+.blad-tom h3{font-family:var(--serif,'Cormorant Garamond');font-size:22px;color:var(--ink,#12110f);margin-bottom:8px;font-weight:500;}
+/* ── PLUGG-MENY: grupper + dokumentlista ── */.plugg-grupprad{
+  max-width:920px;margin:0 auto;padding:24px 28px 0;
+}
+.plugg-grupprad-rubrik{
+  font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-weight:700;
+  color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.plugg-grupprad-rubrik::before{content:'📚';font-size:17px;}
+.plugg-grupprad-knappar{
+  display:flex;gap:10px;flex-wrap:wrap;
+}
+.plugg-gruppbtn{
+  font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-weight:600;
+  color:var(--ink);
+  background:linear-gradient(180deg, #fff 0%, #f4f0e8 100%);
+  border:1.5px solid #c9c2b3;border-radius:8px;cursor:pointer;
+  padding:11px 20px;white-space:nowrap;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.6),
+    0 2px 0 #c9c2b3,
+    0 3px 7px rgba(0,0,0,.08);
+  transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+.plugg-gruppbtn:hover{
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.6),
+    0 3px 0 #c9c2b3,
+    0 5px 12px rgba(0,0,0,.12);
+}
+.plugg-gruppbtn:active{transform:translateY(2px);box-shadow:inset 0 1px 3px rgba(0,0,0,.1);}
+.plugg-gruppbtn.is-active{
+  background:linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  color:#fff;border-color:#15803d;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 2px 0 #15803d,
+    0 4px 10px rgba(22,163,74,.3);
+}
+.plugg-doklista{
+  max-width:920px;margin:0 auto;padding:18px 28px 8px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.plugg-doklista-rubrik{
+  font-family:'Source Serif 4',Georgia,serif;font-size:14px;font-weight:700;
+  color:var(--ink-soft);margin-bottom:4px;
+}
+.plugg-dok{
+  display:flex;align-items:center;gap:14px;
+  background:var(--bg-card);border:1px solid var(--line);
+  border-left:4px solid var(--c-rakna);border-radius:8px;
+  padding:14px 18px;cursor:pointer;text-align:left;width:100%;
+  font-family:'Source Serif 4',Georgia,serif;
+  transition:box-shadow .15s, transform .15s;
+}
+.plugg-dok:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateX(3px);}
+.plugg-dok.is-active{border-left-color:var(--gold,#9a7228);background:var(--bg-warm);}
+.plugg-dok-nr{
+  font-family:var(--cinzel);font-size:12px;font-weight:600;
+  color:var(--ink-faint);min-width:26px;
+}
+.plugg-dok-namn{flex:1;font-size:17px;font-weight:500;color:var(--ink);}
+.plugg-dok-pil{color:var(--c-rakna);font-size:18px;}
+.plugg-aktivt{max-width:920px;margin:0 auto;padding:8px 0 0;}
+.ovn-val-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.ovn-val-btn{
+  min-width:54px;height:42px;padding:0 16px;
+  font-family:'Source Serif 4',Georgia,serif;font-size:18px;font-weight:600;
+  border:2px solid var(--c-metod,#1b4b8a);border-radius:6px;
+  background:#fff;color:var(--ink);cursor:pointer;transition:all .12s;
+}
+.ovn-val-btn:hover{background:var(--bg-soft);}
+.ovn-val-btn.is-vald{background:var(--c-metod,#1b4b8a);color:#fff;}
+.ovn-val-btn.correct{background:#dcfce7;border-color:#16a34a;color:#15803d;}
+.ovn-val-btn.wrong{background:#fee2e2;border-color:#dc2626;color:#b91c1c;}
+/* Multi-select (delbarhet) */.ovn-flerval-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.ovn-flerval-btn{
+  min-width:54px;height:44px;padding:0 16px;
+  font-family:'Source Serif 4',Georgia,serif;font-size:18px;font-weight:600;
+  border:2px solid var(--line);border-radius:6px;
+  background:#fff;color:var(--ink);cursor:pointer;transition:all .12s;
+}
+.ovn-flerval-btn:hover{border-color:var(--c-rakna);}
+.ovn-flerval-btn.is-vald{background:var(--c-rakna);color:#fff;border-color:var(--c-rakna);}
+.ovn-flerval-btn.correct{background:#dcfce7;border-color:#16a34a;color:#15803d;}
+.ovn-flerval-btn.wrong{background:#fee2e2;border-color:#dc2626;color:#b91c1c;}
+.ovn-flerval-btn.missad{background:#fef9c3;border-color:#ca8a04;color:#854d0e;}
+/* ============================================================
+   FAKTORTRÄD (dokument 9) – fristående interaktivt träd
+   ============================================================ */.ftrad-uppg{margin:20px 0;padding:18px;background:var(--bg-warm);border:1px solid var(--line);border-radius:8px;}
+.ftrad-uppg-rubrik{
+  font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;
+  color:var(--ink);margin-bottom:6px;
+}
+.ftrad-uppg-instr{font-size:13px;color:var(--ink-faint);margin-bottom:14px;}
+.ftrad-canvas{display:flex;justify-content:center;padding:10px 0;overflow-x:auto;}
+.tnode{display:flex;flex-direction:column;align-items:center;position:relative;}
+.tnode-label{
+  font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:18px;
+  width:52px;height:52px;border:2px solid var(--line);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg-card);color:var(--ink);flex-shrink:0;
+}
+.tnode-label.root{background:#dbeafe;border-color:var(--blue);color:var(--blue);}
+.tnode-label.prime{background:#dcfce7;border-color:#16a34a;color:#15803d;}
+.tnode-label.composite{background:var(--bg-card);border-color:var(--ink-soft);color:var(--ink);}
+.tnode-input-row{
+  display:inline-flex;gap:6px;align-items:center;margin-top:14px;padding:8px 10px;
+  background:var(--bg-card);border:1.5px dashed var(--gold);border-radius:6px;
+  font-family:'Source Serif 4',Georgia,serif;font-size:15px;
+}
+.tnode-input-row .tnode-target{font-weight:600;color:var(--gold);padding:0 4px;}
+.tnode-input-row .tnode-eq{color:var(--ink-soft);margin:0 2px;}
+.tnode-input{
+  font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;
+  width:46px;height:38px;border:2px solid var(--gold);border-radius:6px;
+  text-align:center;background:#fff;outline:none;color:var(--ink);padding:0;
+}
+.tnode-input.error{border-color:var(--error);background:var(--error-bg);}
+.tnode-mult{font-size:18px;color:var(--gold);font-weight:600;}
+.tnode-expand-btn{
+  font-size:13px;background:linear-gradient(180deg,#22c55e,#16a34a);color:#fff;border:1px solid #15803d;
+  padding:7px 14px;border-radius:6px;cursor:pointer;font-weight:600;margin-left:4px;
+  font-family:'Source Serif 4',Georgia,serif;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #15803d;
+}
+.tnode-expand-btn:active{transform:translateY(2px);box-shadow:none;}
+.tnode-children{display:flex;gap:28px;margin-top:14px;align-items:flex-start;justify-content:center;}
+.tnode-connector{height:14px;width:2px;background:var(--ink-faint);margin-top:6px;}
+.ftrad-klar{
+  margin-top:14px;padding:14px 18px;border-radius:8px;text-align:center;
+  background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:2px solid #16a34a;
+  color:#14532d;font-weight:600;display:none;
+}
+.ftrad-klar.show{display:block;}
+.ftrad-omstart{
+  display:block;margin:12px auto 0;background:none;border:1px solid var(--line);
+  color:var(--ink-soft);padding:8px 16px;border-radius:6px;cursor:pointer;
+  font-family:'Source Serif 4',Georgia,serif;font-size:13px;
+}
+/* Tallinje-uppgifter */.tl-uppg{margin:24px 0;padding:18px;background:var(--bg-warm);border:1px solid var(--line);border-radius:8px;}
+.tl-rubrik{font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;color:var(--ink);margin-bottom:12px;}
+.prio-rad{align-items:flex-start !important;}
+.prio-block{display:inline-flex;flex-direction:column;gap:9px;margin-top:2px;}
+.prio-uppgift,.prio-steg{display:grid;grid-template-columns:minmax(160px,auto) 30px minmax(120px,auto);align-items:center;gap:8px;}
+.prio-uppgift .ovn-num{font-size:19px;font-feature-settings:'tnum';text-align:right;white-space:nowrap;}
+.prio-eq{font-size:19px;text-align:center;color:var(--ink-soft);}
+.prio-vl,.prio-svar{height:38px;font-size:18px;text-align:center;font-feature-settings:'tnum';}
+.prio-vl{min-width:160px;}
+.prio-svar{min-width:120px;}
+.prio-tom{display:inline-block;}
+.tl-svarsrad{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+.tl-svar{display:inline-flex;align-items:center;gap:6px;}
+.tl-bok{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:17px;color:var(--blue);}
+.tl-ruta{
+  display:inline-block;margin:10px 0 4px;padding:10px 18px;
+  border:1.5px solid var(--gold);border-radius:8px;background:var(--bg-card);
+  font-family:'Source Serif 4',Georgia,serif;font-size:18px;font-weight:600;color:var(--ink);letter-spacing:.02em;
+}
+.tl-valrad{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:8px;flex-wrap:wrap;}
+.tl-valgrid .ovn-val-btn{min-width:62px;height:38px;font-size:16px;}
