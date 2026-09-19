@@ -73,34 +73,32 @@ function renderAddMetod(body){
 // --- METOD: UPPSTÄLLNING (addition) ---
 function renderUppstallningAdd(body, metod, backFn){
   let level = 1, omgangResults = [], currentTask = null;
-  const OMGANG = 5;
-  function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.add (Joachims band, order 2026-09-19).
+  // Generatorn (UppstBand) bygger hela omgången distinkt; nivå 3 blandar två storleksprofiler per omgång.
+  const BAND = UppstBand.band('add');
+  const MAXN = UppstBand.maxNiva('add');   // fyra nivåer (decimaltal = nivå 4)
+  const OMGANG = BAND.omgang || 5;
   function fmt(n){ return String(Math.round(n*100)/100).replace('.', ','); }
-  function lvlNamn(l){ return l===1 ? 'Tvåsiffriga tal' : l===2 ? 'Tresiffriga tal' : 'Decimaltal'; }
+  function lvlNamn(l){ return BAND.namn[l] || ('Nivå ' + l); }
 
-  // Kräver minst en övergång i lägsta kolumnen. Nivå 3 = decimaltal (aldrig avslutande 0).
+  // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Förr en lokal rnd()-generator med egna
+  // intervall och decimaltal på nivå 3 — nu bär bandet talområdet, drillen bara layouten (dec alltid 0).
+  let ko = [];
   function genUppstAdd(lvl){
-    const dec = lvl===3 ? (Math.random()<0.5?1:2) : 0, scale = Math.pow(10,dec);
-    for(let i=0; i<400; i++){
-      let a, b;
-      if(lvl===1){ a=rnd(13,98); b=rnd(13,98); }
-      else if(lvl===2){ a=rnd(115,989); b=rnd(115,989); }
-      else { a=(dec===1?rnd(15,999):rnd(115,9999))/scale; b=(dec===1?rnd(15,999):rnd(115,9999))/scale; }
-      const aI=Math.round(a*scale), bI=Math.round(b*scale);
-      if((aI%10)+(bI%10) < 10) continue;             // garanterad minnessiffra i lägsta kolumnen
-      return {a:a, b:b, answer:(aI+bI)/scale, dec:dec};
-    }
-    return dec===1 ? {a:7.4,b:5.7,answer:13.1,dec:1} : {a:74,b:57,answer:131,dec:0};
+    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('add', lvl, OMGANG);
+    const t = ko.shift();
+    const sc = Math.pow(10, t.dec || 0);
+    return {a:t.a / sc, b:t.b / sc, answer:t.answer / sc, dec:t.dec || 0};   // nivå 4: mantissor/10^dec
   }
 
   function showSummary(){
     const right = omgangResults.filter(x=>x).length, total = omgangResults.length;
-    const adj = adjustLevel(level, right, total); level = adj.level;
+    const adj = adjustLevel(level, right, total, null, MAXN); level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · uppställning', 'Du klarade '+right+' av '+total+'.', level)
+      + exerciseHeader('Metod · uppställning', 'Du klarade '+right+' av '+total+'.', level, MAXN)
       + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
       + '</div>';
-    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; currentTask=genUppstAdd(level); renderPractice(); };
+    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; renderPractice(); };   // renderPractice drar uppgiften (förr drogs den två gånger)
   }
 
   function renderExplain(){
@@ -226,7 +224,7 @@ function renderUppstallningAdd(body, metod, backFn){
 
     body.innerHTML = `
       <div class="exercise-card">
-        ${exerciseHeader('Metod · uppställning', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level)}
+        ${exerciseHeader('Metod · uppställning', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level, MAXN)}
         <div class="metod-explain-card">
           <p style="font-size:15px;margin:0 0 6px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">${fmt(a)} + ${fmt(b)}</strong>:</p>
 
@@ -350,7 +348,7 @@ function renderUppstallningAdd(body, metod, backFn){
         fb.classList.add('wrong');
         fb.textContent = `Inte rätt – ${fmt(a)} + ${fmt(b)} = ${fmt(answer)}. Kontrollera kolumn för kolumn.`;
       }
-      setTimeout(() => { if(omgangResults.length>=OMGANG) showSummary(); else { currentTask=genUppstAdd(level); renderPractice(); } }, correct?1800:2500);
+      setTimeout(() => { if(omgangResults.length>=OMGANG) showSummary(); else { renderPractice(); } }, correct?1800:2500);
     };
 
     document.getElementById('check-btn').onclick = check;
@@ -737,8 +735,10 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   var borrows = new Set();
   var omgangResults = [];
   var currentTask   = null;
-  var OMGANG  = 5;
-  var MAX_LVL = 3;           // 1 två/tresiffrigt · 2 hundratal/tusental · 3 decimaltal
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.sub (Joachims band, order 2026-09-19).
+  var BAND    = UppstBand.band('sub');
+  var OMGANG  = BAND.omgang || 5;
+  var MAX_LVL = UppstBand.maxNiva('sub');   // fyra nivåer i bandet (nivå 4 = decimaltal)
   var svarVal = {};          // pos -> ifyllt svar (bevaras när lån-knappen re-renderar)
   var sistFokusPos = null;   // senast fokuserade svarsruta (så markören inte hoppar till entalet)
 
@@ -760,39 +760,20 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     return s.length>=3 && s.slice(1,-1).indexOf('0')>=0;
   }
 
+  // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Förr lokala rnd()-intervall med decimaltal
+  // på nivå 3 — nu bär bandet talområdet, drillen bara layouten (dec alltid 0). Växlingskravet ligger i
+  // generatorn (struktur:vaxling) så metoden alltid behövs.
+  var ko = [];
   function genTask(lvl){
-    for(var i=0;i<600;i++){
-      var aInt,bInt,dec=0;
-      if(lvl===1){                          // heltal 2-3 siffror, 0-2 lån (blandat)
-        aInt=rnd(100,999);
-        bInt = Math.random()<0.5 ? rnd(23,99) : rnd(100,aInt-2);
-      } else if(lvl===2){                    // hundratal och tusental (3-4 siffror), fler lån, ibland nolla
-        if(Math.random()<0.35){              // garanterad nolla i mitten: X0YZ / XY0Z
-          var h=rnd(1,9), e=rnd(1,9);
-          aInt = h*1000 + (Math.random()<0.5?0:rnd(1,9))*100 + (Math.random()<0.5?0:rnd(1,9))*10 + e;
-        } else {
-          aInt = Math.random()<0.3 ? rnd(210,999) : rnd(1000,9999);
-        }
-        bInt = Math.random()<0.3 ? rnd(100,999) : rnd(1000,Math.max(1000,aInt-2));
-        if(bInt>=aInt) bInt = rnd(100, aInt-2);
-      } else {                               // decimaltal (1-2 decimaler)
-        dec = Math.random()<0.5 ? 1 : 2;
-        aInt = dec===1 ? (Math.random()<0.5 ? rnd(11,99) : rnd(101,999)) : rnd(101,999);
-        bInt = Math.random()<0.4 ? rnd(11,99) : rnd(100,aInt-2);
-      }
-
-      if(aInt<=bInt) continue;
-      var nb = countBorrows(aInt,bInt);
-      var ok = lvl===1 ? (nb<=2) : lvl===2 ? (nb>=2) : (nb>=1);
-      if(ok) return {aInt:aInt,bInt:bInt,ansInt:aInt-bInt,dec:dec};
-    }
-    return lvl===3 ? {aInt:834,bInt:276,ansInt:558,dec:1} : {aInt:1503,bInt:278,ansInt:1225,dec:0};
+    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('sub', lvl, OMGANG);
+    var t = ko.shift();
+    return {aInt:t.a, bInt:t.b, ansInt:t.answer, dec:t.dec || 0};   // nivå 4: mantissor + dec
   }
 
   function displayNum(n,dec){
     if(dec===0) return String(n);
     var s=String(n).padStart(dec+1,'0');
-    return s.slice(0,-dec)+'.'+s.slice(-dec);
+    return s.slice(0,-dec)+','+s.slice(-dec);   // decimalKOMMA (förr punkt — syntes i feedbacktexten)
   }
 
   // Bygger kolumn-struktur: [{type:'digit',pos:N}|{type:'decimal'}]
@@ -816,19 +797,15 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
   // (Förr en lokal kopia av klättra-aldrig-sjunk; MAX_LVL = 3 = ramens tak.)
 
-  function lvlName(l){
-    return l===1 ? 'Två- och tresiffriga tal'
-         : l===2 ? 'Hundratal och tusental'
-         : 'Decimaltal';
-  }
+  function lvlName(l){ return BAND.namn[l] || ('Nivå ' + l); }
 
   function showSummary(){
     var right=omgangResults.filter(function(x){return x;}).length;
     var total=omgangResults.length;
-    var adj=adjustLevel(level,right,total);
+    var adj=adjustLevel(level,right,total,null,MAX_LVL);
     level=adj.level;
     body.innerHTML='<div class="exercise-card">'
-      +exerciseHeader('Metod · uppställning (subtraktion)','Du klarade '+right+' av '+total+' uppgifter.',level)
+      +exerciseHeader('Metod · uppställning (subtraktion)','Du klarade '+right+' av '+total+' uppgifter.',level, MAX_LVL)
       +renderSummaryCard({right:right,total:total,level:level,levelChange:adj.change})
       +'</div>';
     document.getElementById('summary-next-btn').onclick=function(){
@@ -862,7 +839,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     var rowA='<div class="upp-i-op-cell"></div>';
     cols.forEach(function(col){
       if(col.type==='decimal'){
-        rowA+='<div class="upp-i-cell upp-dec-cell"><span class="upp-dec-pt">.</span></div>';
+        rowA+='<div class="upp-i-cell upp-dec-cell"><span class="upp-dec-pt">,</span></div>';
       } else {
         var pos=col.pos;
         var d=hasP(a,pos)?dgt(a,pos):null;
@@ -882,7 +859,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     var rowB='<div class="upp-i-op-cell sub-sign">−</div>';
     cols.forEach(function(col){
       if(col.type==='decimal'){
-        rowB+='<div class="upp-i-cell upp-dec-cell"><span class="upp-dec-pt">.</span></div>';
+        rowB+='<div class="upp-i-cell upp-dec-cell"><span class="upp-dec-pt">,</span></div>';
       } else {
         var pos=col.pos;
         var d=hasP(b,pos)?dgt(b,pos):null;
@@ -904,7 +881,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
     });
 
     body.innerHTML='<div class="exercise-card">'
-      +exerciseHeader('Metod · uppställning (subtraktion)',lvlName(level)+' · Uppgift '+(done+1)+' av '+OMGANG,level)
+      +exerciseHeader('Metod · uppställning (subtraktion)',lvlName(level)+' · Uppgift '+(done+1)+' av '+OMGANG,level, MAX_LVL)
       +'<div class="metod-explain-card">'
 
         +'<div class="upp-lan-row">'

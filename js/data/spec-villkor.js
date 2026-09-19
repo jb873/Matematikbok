@@ -122,7 +122,104 @@
 
   };
 
-  var API = { VILLKOR: VILLKOR,
+
+  // ═══════════════════════════════════════════════════════════════════════════════════════════
+  //  UPPSTÄLLNINGS-BANDET — talområden för Färdighetsträningens uppställningsdrillar
+  //  (add/sub/mult/div, ak7-k1-ram). Joachims talområden, order 2026-09-19. "15 + 15 var inte
+  //  högstadienivå." Generatorn (js/motor/metod/uppstallning-band.js) läser HÄR; ändra ett tal-
+  //  område utan att röra generatorn; verktyg/uppst-band-fuzz.js påstår att bandet hålls.
+  //
+  //  SCHEMA per räknesätt:
+  //    namn      : { 1:'…', 2:'…', 3:'…' }  — nivånamnet eleven ser (FALT: elevtext, J.B. sätter ordet)
+  //    nivaer    : { 1: VILLKOR, 2: VILLKOR, 3: VILLKOR }
+  //  VILLKOR:
+  //    arv       : nivå vars villkor gäller i botten (2 och 3 ärver 1: "övriga villkor gäller fortfarande")
+  //    <operand> : { min, max }  — tillåtet område per operand (term/faktorStor/faktorLiten/taljare/namnare)
+  //    minstEn   : { min, max }  — MINST EN av de storleksbärande operanderna ska ligga här (nivå 2)
+  //    resultat  : { summa|differens|kvot : { min } | 'heltal' } — villkor på resultatet
+  //    blandning : { perOmgang:'alla', profiler:[ VILLKOR-tillägg, … ] } — NIVÅ 3 ÄR EN FÖRDELNING,
+  //                inte ett intervall: varje uppgift dras ur EN profil; 'alla' = varje omgång ska
+  //                innehålla varje profil minst en gång (klättringen håller det tidigare färskt).
+  //    struktur  : drillens egna krav som gör metoden nödvändig (minnessiffra/växling) — dokumenterade
+  //                här så fuzzen kan skilja bandets förkastning från strukturens.
+  //
+  //  ANTAGANDEN (ej i ordern, satta som data så de kan justeras): nivå 1 = tvåsiffrigt (max 99);
+  //  nivå 2:s andra operand får vara upp till 999; nivå 3-profilerna 535–1234 och 1235–9999;
+  //  den lilla faktorn i mult är 3–9 (ensiffrig drill) resp. 12–99 (flersiffrig drill, ental ≥ 3);
+  //  nämnaren i div är 3–9 (kort och lång division delar band).
+  var UPPST_BAND = {
+    add: {
+      kalla: 'Joachim 2026-09-19: båda termerna > 34, summan > 100; nivå 2 en term > 334; nivå 3 blandat > 534 / > 1234',
+      namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal', 3:'Decimaltal', 4:'Tusental' },
+      omgang: 5,
+      nivaer: {
+        1: { term:{min:35,max:99}, resultat:{ summa:{min:101} }, struktur:'minnessiffra i entalen (drillens krav)' },
+        2: { arv:1, term:{min:35,max:999}, minstEn:{min:335,max:999} },
+        3: { arv:2, decimaler:{min:1,max:2} },   // DECIMALTAL som nivå 3 (J.B. 2026-09-19, alt. c): ny notation före större tal; minNiva:3 i åttan = klarade decimaler som förr. Mantissor ur nivå 2 (tresiffriga räcker)
+        4: { arv:1, term:{min:35,max:9999}, blandning:{ perOmgang:'alla', profiler:[ { minstEn:{min:535,max:1234} }, { minstEn:{min:1235,max:9999} } ] } }   // TUSENTAL som nivå 4: större tal av samma slag, två profiler   // FJÄRDE NIVÅN (J.B. 2026-09-19): nivå 3:s heltalsband skalat med 10^dec — bandet i heltal, uppgiften i decimaltal
+      }
+    },
+    sub: {
+      kalla: 'Joachim 2026-09-19: båda termerna > 34, differensen > 31; nivå 2 en term > 334; nivå 3 blandat > 534 / > 1234',
+      namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal', 3:'Decimaltal', 4:'Tusental' },
+      omgang: 5,
+      nivaer: {
+        1: { term:{min:35,max:199}, resultat:{ differens:{min:32} }, struktur:'minst en växling (drillens krav)' },   // max 199 (J.B. 2026-09-19): med 99 blev poolen ~500 par och synbart likformig
+        2: { arv:1, term:{min:35,max:999}, minstEn:{min:335,max:999} },
+        3: { arv:2, decimaler:{min:1,max:2} },   // DECIMALTAL som nivå 3 (J.B. 2026-09-19, alt. c): ny notation före större tal; minNiva:3 i åttan = klarade decimaler som förr. Mantissor ur nivå 2 (tresiffriga räcker)
+        4: { arv:1, term:{min:35,max:9999}, blandning:{ perOmgang:'alla', profiler:[ { minstEn:{min:535,max:1234} }, { minstEn:{min:1235,max:9999} } ] } }   // TUSENTAL som nivå 4: större tal av samma slag, två profiler   // fjärde nivån: decimaltal (skalat heltalsband)
+      }
+    },
+    mult: {   // ensiffrig multiplikator (mult-metoder:uppstallning)
+      kalla: 'Joachim 2026-09-19: ena faktorn > 34, den andra ≥ 3; nivå 2 en faktor > 334; nivå 3 blandat > 534 / > 1234',
+      namn: { 1:'Tvåsiffrigt tal · ensiffrigt', 2:'Tresiffrigt tal · ensiffrigt', 3:'Decimaltal · ensiffrigt', 4:'Tusental · ensiffrigt' },
+      omgang: 3,
+      nivaer: {
+        1: { faktorStor:{min:35,max:99}, faktorLiten:{min:3,max:9}, struktur:'stora faktorns ental ≥ 3 (drillens krav: flera delprodukter)' },
+        2: { arv:1, faktorStor:{min:335,max:999} },
+        3: { arv:2, decimaler:{min:1,max:2} },   // DECIMALTAL som nivå 3 (alt. c): stora faktorn skalad, tresiffrig mantissa
+        4: { arv:1, blandning:{ perOmgang:'alla', profiler:[ { faktorStor:{min:1235,max:4999} }, { faktorStor:{min:5000,max:9999} } ] } }   // TUSENTAL som nivå 4: tusental genomgående (>534-profilen gav nivå 2-tal när storleken bärs av EN faktor)
+      }
+    },
+    'mult-fler': {   // flersiffrig multiplikator (mult-metoder:uppstallning-stora) — samma band, liten faktor tvåsiffrig
+      kalla: 'som mult; den andra faktorn ≥ 3 uppfylls av tvåsiffrig multiplikator (ental ≥ 3 för två delprodukter)',
+      namn: { 1:'Tvåsiffrigt · tvåsiffrigt', 2:'Tresiffrigt · tvåsiffrigt', 3:'Decimaltal · tvåsiffrigt', 4:'Tusental · tvåsiffrigt' },
+      omgang: 5,
+      nivaer: {
+        1: { faktorStor:{min:35,max:99}, faktorLiten:{min:12,max:99}, struktur:'båda faktorernas ental ≥ 3 (drillens krav)' },
+        2: { arv:1, faktorStor:{min:335,max:999} },
+        3: { arv:2, decimaler:{min:1,max:1}, stegvis:{ litenDecimaler:1, fran:3 } },   // DECIMALTAL som nivå 3: stora faktorn EN decimal (som den gamla drillen — två + lilla faktorns en gav tre decimaler i svaret); lilla faktorn decimal först från tredje uppgiften (stegvis, som förr)
+        4: { arv:1, blandning:{ perOmgang:'alla', profiler:[ { faktorStor:{min:1235,max:4999} }, { faktorStor:{min:5000,max:9999} } ] } }   // TUSENTAL som nivå 4
+      }
+    },
+    div: {   // kort OCH lång division (div-metoder:kort / lang) delar band
+      kalla: 'Joachim 2026-09-19: täljaren > 54, nämnaren ≥ 3; nivå 2 täljare > 334; nivå 3 blandat > 534 / > 1234',
+      namn: { 1:'Täljare upp till 334', 2:'Tresiffrig täljare', 3:'Täljare i tusental' },
+      omgang: 5, omgangLang: 4,
+      nivaer: {
+        1: { taljare:{min:55,max:334}, namnare:{min:3,max:9}, resultat:{ kvot:'heltal' }, struktur:'ingen regel om första siffran (togs bort 2026-09-19: 312/4 med tvåsiffrig kvot är just det eleven ska förstå; layouten hoppar över första kvotcellen)' },
+        2: { arv:1, taljare:{min:335,max:999}, minnessiffra:true, struktur:'minst en minnessiffra/rest att bära vidare (drillens krav, ärvs av nivå 3)' },
+        3: { arv:2, blandning:{ perOmgang:'alla', profiler:[ { taljare:{min:1235,max:4999} }, { taljare:{min:5000,max:9999} } ] } }   // tusental genomgående (J.B. 2026-09-19): >534-profilen gav nivå 2-tal när storleken bärs av EN operand
+      }
+    }
+  };
+
+  // Löser upp arv + profil till ETT platt villkor: uppstBand('add', 3, 1) = nivå 3, profil 1.
+  function uppstBand(rakne, niva, profilIx){
+    var r = UPPST_BAND[rakne]; if(!r) return null;
+    var v = r.nivaer[niva]; if(!v) return null;
+    var ut = {}, bl = null;
+    function lagg(o){ if(o.blandning) bl = o.blandning; Object.keys(o).forEach(function(k){ if(k === 'arv' || k === 'blandning') return; ut[k] = o[k]; }); }   // blandningen ärvs (nivå 4 ärver nivå 3:s profiler)
+    (function arv(n, djup){ var x = r.nivaer[n]; if(!x || djup > 5) return; if(x.arv) arv(x.arv, djup + 1); lagg(x); })(niva, 0);   // arv följs rekursivt (3 → 2 → 1)
+    if(bl && profilIx != null && bl.profiler[profilIx]) lagg(bl.profiler[profilIx]);
+    ut.decimaler = ut.decimaler || null;   // nivå 4: {min,max} — heltalsbandet skalas med 10^dec
+    ut.profiler = bl ? bl.profiler.length : 1;
+    ut.perOmgang = bl ? bl.perOmgang : null;
+    ut.maxNiva = Object.keys(r.nivaer).length;
+    return ut;
+  }
+
+  var API = { VILLKOR: VILLKOR, UPPST_BAND: UPPST_BAND, uppstBand: uppstBand,
     // löser upp ak8:'ak7'-arv till konkret profil
     profil: function(nod, ars){
       var n = VILLKOR[nod]; if(!n) return null;

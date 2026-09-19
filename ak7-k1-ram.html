@@ -2573,6 +2573,8 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 <script src="js/provbyggare/provbyggar-motor.js"></script>
 <!-- Metod-kärnan (delade drill-hjälpare) — EN källa; ramen bär inga egna kopior (PASS 3). Före inline-skriptet, i body. -->
 <script src="js/motor/metod/metod-karna.js"></script>
+<script src="js/data/spec-villkor.js"></script>            <!-- uppställnings-bandet (UPPST_BAND) — talområden som data -->
+<script src="js/motor/metod/uppstallning-band.js"></script>  <!-- generatorn som läser bandet (add/sub/mult/div-drillarna) -->
 <script>
 // ============================================================
 // DATA: kunskapsområden + förmågor per område
@@ -6624,28 +6626,26 @@ function renderForlangDec(body){
 // Motor: uppställning i addition – siffra för siffra
 function renderAddUppstallning(body, backFn){
   let level = 1, omgang = [], idx = 0, results = [];
-
-  function genTask(lvl){
-    let a, b;
-    if(lvl === 1){ a = d3RandInt(14,89); b = d3RandInt(14,89); }
-    else if(lvl === 2){ a = d3RandInt(115,889); b = d3RandInt(15,89); }
-    else { a = d3RandInt(135,889); b = d3RandInt(135,889); }
-    return {a:a, b:b, answer:a + b};
-  }
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.add (Joachims band, order 2026-09-19). Förr
+  // d3RandInt(14,89) — "15 + 15 var inte högstadienivå". Omgången byggs distinkt ur bandet; nivå 3 blandar
+  // två storleksprofiler. (Samma band som metod-addsub:renderUppstallningAdd — den rika varianten.)
+  const BAND = UppstBand.band('add');
+  // Den här (enkla) layouten saknar decimalcell. Bandets nivå 3 är decimaltal (alt. c, 2026-09-19) → taket här är
+  // nivå 2. Nivå 3 (decimaltal) och 4 (tusental) finns i den rika uppställningen (metod-addsub:
+  // renderUppstallningAdd, via Metod-väljaren). Förslag: peka deeplinken dit och pensionera den här kopian.
+  const MAXN = 2;
   function genOmgang(){
-    const arr = [];
-    for(let i=0; i<6; i++) arr.push(genTask(level));
-    return arr;
+    return UppstBand.omgang('add', level, BAND.omgang || 5).map(function(t){ return {a:t.a, b:t.b, answer:t.answer}; });
   }
 
   function render(){
     if(idx >= omgang.length){
       const right = results.filter(function(x){ return x; }).length;
       const total = results.length;
-      const adj = adjustLevel(level, right, total);
+      const adj = adjustLevel(level, right, total, null, MAXN);
       level = adj.level;
       body.innerHTML = '<div class="exercise-card">'
-        + exerciseHeader('Metod · uppställning', 'Du klarade ' + right + ' av ' + total + '.', level)
+        + exerciseHeader('Metod · uppställning', 'Du klarade ' + right + ' av ' + total + '.', level, MAXN)
         + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
         + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="uppadd-back">Tillbaka till metoder</button></div>'
       + '</div>';
@@ -6675,7 +6675,7 @@ function renderAddUppstallning(body, backFn){
     }
 
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · uppställning', 'Addera siffra för siffra, från höger. Tänk på minnessiffrorna.', level)
+      + exerciseHeader('Metod · uppställning', 'Addera siffra för siffra, från höger. Tänk på minnessiffrorna.', level, MAXN)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="uppadd">'
         + digitRow(aStr, '')

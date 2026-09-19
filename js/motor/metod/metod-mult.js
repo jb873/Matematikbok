@@ -778,68 +778,30 @@ function renderUppstallningMult(body, backFn, cfg){
   let level = 1;
   let omgangResults = [];
   let uppgNr = 0;              // tipset under minnesrutorna visas bara de 2 första uppgifterna
-  const OMG = FLER ? 5 : 3;
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.mult / .'mult-fler' (Joachims band, order 2026-09-19).
+  const BAND = UppstBand.band(FLER ? 'mult-fler' : 'mult');
+  const MAXN = UppstBand.maxNiva(FLER ? 'mult-fler' : 'mult');   // fyra nivåer (decimaltal = nivå 4)
+  const OMG = BAND.omgang || (FLER ? 5 : 3);
   const TITEL = FLER ? 'Metod · uppställning · flersiffrig' : 'Metod · uppställning';
-
-  const LEVELNAMN = FLER ? {
-    1:'tvåsiffrigt · tvåsiffrigt',
-    2:'tresiffrigt · tvåsiffrigt',
-    3:'decimaltal · tvåsiffrigt'
-  } : {
-    1:'tvåsiffrigt tal · ensiffrigt',
-    2:'tresiffrigt tal · ensiffrigt',
-    3:'decimaltal · ensiffrigt',
-    4:'tvåsiffrigt · tvåsiffrigt'
-  };
+  const LEVELNAMN = BAND.namn;
 
   // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
   // Förr en lokal kopia som sjönk vid ≤ ⅓ rätt — en tredje modell ingen bestämt (order 2026-09-18).
 
-  // Flersiffrig multiplikator (23–99, ental 3–9). Två delprodukter + summa.
-  function genTaskFler(taskIdx){
-    const dU = d3RandInt(3,9), dT = d3RandInt(2,9), dScaled = dT*10 + dU;   // 23–99, ental 3–9
-    const ones = dScaled % 10, tens = Math.floor(dScaled/10);
-    function build(mScaled, mDec, dDec){
-      const p1 = mScaled * ones, p2 = mScaled * tens;
-      const prod = mScaled * dScaled, totalDec = mDec + dDec;
-      return {kind:'tva',
-        mDisplay: d3DecStr(mScaled, mDec), dDisplay: d3DecStr(dScaled, dDec),
-        d: dScaled, ones: ones, tens: tens, p1: p1, p2: p2,
-        answer: prod, answerDisplay: d3DecStr(prod, totalDec),
-        answerValue: prod / Math.pow(10, totalDec)};
-    }
-    if(level === 1) return build(d3RandInt(2,9)*10 + d3RandInt(3,9), 0, 0);                       // m 23–99
-    if(level === 2) return build(d3RandInt(1,9)*100 + d3RandInt(0,9)*10 + d3RandInt(3,9), 0, 0);  // m 123–999
-    // nivå 3: m alltid decimal (sista siffran 3–9); d decimal först fr.o.m. tredje uppgiften
-    return build(d3RandInt(10,99)*10 + d3RandInt(3,9), 1, taskIdx >= 2 ? 1 : 0);
-  }
-
+  // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Förr lokala d3RandInt-intervall med decimaltal
+  // på nivå 3 — nu bär bandet talområdet (heltal, tre nivåer, nivå 3 blandar två storleksprofiler); drillen
+  // bara layouten. Entals-kravet (≥ 3, flera delprodukter) ligger i generatorn som struktur.
+  let ko = [];
   function genTask(){
-    if(FLER) return genTaskFler(omgangResults.length);
-    if(level === 1){
-      // tiotal × ental: tvåsiffrigt tal slutar ej på 0/1/2, entalet 3–9
-      const units = d3RandInt(3,9), tens = d3RandInt(1,9);
-      const m = tens*10 + units;
-      const d = d3RandInt(3,9);
-      return {kind:'enkel', mDisplay:String(m), d:d, answer:m*d};
+    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang(FLER ? 'mult-fler' : 'mult', level, OMG);
+    const t = ko.shift(), dec = t.dec || 0, dDec = t.dDec || 0;
+    if(!FLER){
+      if(!dec) return {kind:'enkel', mDisplay:String(t.m), d:t.d, answer:t.answer};
+      return {kind:'decimal', mDisplay:d3DecStr(t.m, dec), dec:dec, d:t.d, answerIntStr:String(t.answer), answerValue:t.answer / Math.pow(10, dec)};   // nivå 4
     }
-    if(level === 2){
-      // hundratal × ental: tresiffrigt tal slutar ej på 0/1/2/3, entalet 4–9
-      const units = d3RandInt(4,9), tens = d3RandInt(0,9), huns = d3RandInt(1,9);
-      const m = huns*100 + tens*10 + units;
-      const d = d3RandInt(4,9);
-      return {kind:'enkel', mDisplay:String(m), d:d, answer:m*d};
-    }
-    // nivå 3: decimaltal × ental. Hela delen tiotal eller hundratal, 1 eller 2
-    // decimaler, sista decimalsiffran ej 0/1/2/3, entalet 4–9.
-    const dec = d3RandInt(1,2);
-    const whole = (Math.random() < 0.5) ? d3RandInt(10,99) : d3RandInt(100,999);
-    const fracLast = d3RandInt(4,9);
-    const fracStr = dec === 1 ? String(fracLast) : String(d3RandInt(0,9)) + String(fracLast);
-    const mScaled = whole * Math.pow(10, dec) + parseInt(fracStr, 10);
-    const d = d3RandInt(4,9);
-    return {kind:'decimal', mDisplay:String(whole)+','+fracStr, dec:dec,
-            d:d, answerIntStr:String(mScaled*d), answerValue:(mScaled/Math.pow(10,dec))*d};
+    const ones = t.d % 10, tens = Math.floor(t.d / 10), totalDec = dec + dDec;
+    return {kind:'tva', mDisplay:d3DecStr(t.m, dec), dDisplay:d3DecStr(t.d, dDec), d:t.d, ones:ones, tens:tens,
+            p1:t.m * ones, p2:t.m * tens, answer:t.answer, answerDisplay:d3DecStr(t.answer, totalDec), answerValue:t.answer / Math.pow(10, totalDec)};
   }
 
   // En cell: digit (fast), comma (fast), input (svar), eller empty
@@ -1013,7 +975,7 @@ function renderUppstallningMult(body, backFn, cfg){
     }
 
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(TITEL, LEVELNAMN[level] + '.', level)
+      + exerciseHeader(TITEL, LEVELNAMN[level] + '.', level, MAXN)
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.mDisplay + ' · ' + (task.dDisplay || task.d) + '</strong></p>'
         + '<p style="font-size:13px;margin:0 0 12px;color:var(--ink-soft);">' + infoHTML + '</p>'
@@ -1082,7 +1044,7 @@ function renderUppstallningMult(body, backFn, cfg){
   function showSummary(){
     const right = omgangResults.filter(function(x){ return x; }).length;
     const total = omgangResults.length;
-    const adj = adjustLevel(level, right, total);
+    const adj = adjustLevel(level, right, total, null, MAXN);
     level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader(TITEL, 'Du klarade ' + right + ' av ' + total + '.')

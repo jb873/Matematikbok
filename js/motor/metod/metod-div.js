@@ -580,36 +580,28 @@ function renderDivMetoder(body){
 }
 
 function renderDivKort(body, backFn){
-  var level = 1, omgangResults = [], OMG = 5;
-  var LEVELNAMN = {1:'tresiffrig täljare · nämnare 2–5', 2:'tresiffrig täljare · nämnare 3–9', 3:'fyrsiffrig täljare · nämnare 4–9'};
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.div (Joachims band, order 2026-09-19; kort och lång delar band).
+  var BAND = UppstBand.band('div');
+  var level = 1, omgangResults = [], OMG = BAND.omgang || 5;
+  var LEVELNAMN = BAND.namn;
   // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
   // Förr en lokal kopia som sjönk vid ≤ ⅓ rätt — en tredje modell ingen bestämt (order 2026-09-18).
+  // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Kvoten heltal, första siffran ≥ nämnaren och
+  // (nivå ≥ 2) minst en minnessiffra — allt i generatorn som struktur; drillen bygger bara kolumnerna.
+  var ko = [];
   function genTask(){
-    var k = level === 3 ? 4 : 3;
-    var nLo = level === 1 ? 2 : (level === 2 ? 3 : 4);
-    var nHi = level === 1 ? 5 : 9;
-    for(var tries=0; tries<800; tries++){
-      var n = d3RandInt(nLo, nHi);
-      var Q = d3RandInt(Math.pow(10, k-1), Math.pow(10, k) - 1);
-      var N = Q * n;
-      var ns = String(N);
-      if(ns.length !== k) continue;
-      var digs = ns.split('').map(Number);
-      if(digs[0] < n) continue;
-      var carry = 0, carryInto = [0], q = [];
-      for(var i=0; i<k; i++){
-        var val = carry * 10 + digs[i];
-        var qi = Math.floor(val / n);
-        carry = val - qi * n;
-        q.push(qi);
-        if(i < k-1) carryInto.push(carry);
-      }
-      if(carry !== 0) continue;
-      var hasCarry = carryInto.slice(1).some(function(c){ return c > 0; });
-      if(level > 1 && !hasCarry) continue;
-      return {n:n, digs:digs, carryInto:carryInto, q:q, N:N, k:k};
+    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('div', level, OMG);
+    var t = ko.shift();
+    var digs = String(t.N).split('').map(Number), k = digs.length;
+    var carry = 0, carryInto = [0], q = [];
+    for(var i=0; i<k; i++){
+      var val = carry * 10 + digs[i];
+      var qi = Math.floor(val / t.n);
+      carry = val - qi * t.n;
+      q.push(qi);
+      if(i < k-1) carryInto.push(carry);
     }
-    return {n:6, digs:[8,5,2], carryInto:[0,2,1], q:[1,4,2], N:852, k:3};
+    return {n:t.n, digs:digs, carryInto:carryInto, q:q, N:t.N, k:k};
   }
   function fixedCell(v){ return '<div class="cell">' + v + '</div>'; }
   function carrySlot(i, task, demo){
@@ -635,6 +627,9 @@ function renderDivKort(body, backFn){
     var namnRow = '<div class="mult-upp-row" style="justify-content:center;width:' + fracW + 'px;">' + fixedCell(task.n) + '</div>';
     var kvotRow = '<div class="mult-upp-row">';
     for(var m=0; m<k; m++){
+      // Första siffran mindre än nämnaren (312/4): kvoten börjar en kolumn in — första kvotcellen utgår,
+      // hela första siffran blir minnessiffra framför nästa (³1). Ingen inledande nolla att skriva.
+      if(m === 0 && k > 1 && task.q[0] === 0){ kvotRow += '<div class="cell"></div>'; continue; }
       kvotRow += demo
         ? fixedCell('<span style="color:var(--success);font-weight:700;">' + task.q[m] + '</span>')
         : '<div class="cell"><input type="text" class="mult-upp-ans div-kort-q" data-expect="' + task.q[m] + '" inputmode="numeric" maxlength="1" autocomplete="off"></div>';
@@ -725,11 +720,11 @@ function renderDivKort(body, backFn){
       omgangResults.push(correct);
       if(correct){
         fb.classList.add('correct');
-        fb.textContent = 'Rätt! ' + task.N + ' / ' + task.n + ' = ' + task.q.join('') + '  ✓';
+        fb.textContent = 'Rätt! ' + task.N + ' / ' + task.n + ' = ' + (task.N / task.n) + '  ✓';
         ts.correct++; tsG.correct++;
       } else {
         fb.classList.add('wrong');
-        fb.textContent = 'Inte rätt – ' + task.N + ' / ' + task.n + ' = ' + task.q.join('') + '. Kontrollera siffra för siffra.';
+        fb.textContent = 'Inte rätt – ' + task.N + ' / ' + task.n + ' = ' + (task.N / task.n) + '. Kontrollera siffra för siffra.';
       }
       if(omgangResults.length >= OMG) setTimeout(showSummary, correct ? 1800 : 2800);
       else setTimeout(renderPractice, correct ? 1800 : 2800);
@@ -754,37 +749,34 @@ function renderDivKort(body, backFn){
 }
 
 function renderDivLang(body, backFn){
-  var level = 1, omgangResults = [], OMG = 4;
-  var LEVELNAMN = {1:'tresiffrig täljare · nämnare 2–5', 2:'tresiffrig täljare · nämnare 3–9', 3:'tresiffrig täljare · nämnare 6–9'};
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.div (delat med kort division).
+  var BAND = UppstBand.band('div');
+  var level = 1, omgangResults = [], OMG = BAND.omgangLang || 4;
+  var LEVELNAMN = BAND.namn;
   // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
   // Förr en lokal kopia som sjönk vid ≤ ⅓ rätt — en tredje modell ingen bestämt (order 2026-09-18).
   function bygg(D, digs){
-    var carry = 0, steps = [];
-    for(var i=0; i<digs.length; i++){
+    // Första siffran mindre än nämnaren (312/4): första steget tar två siffror (31/4) och kvoten börjar
+    // en kolumn in. Varje steg bär sin kolumn (col) så layouten inte antar ett steg per siffra.
+    var carry = 0, steps = [], start = 0;
+    if(digs.length > 1 && digs[0] < D){ carry = digs[0]; start = 1; }
+    for(var i=start; i<digs.length; i++){
       var cur = carry * 10 + digs[i];
       var qi = Math.floor(cur / D), sub = qi * D, rem = cur - sub;
-      steps.push({cur:cur, qi:qi, sub:sub, rem:rem, broughtDigit:(i < digs.length-1 ? digs[i+1] : null)});
+      steps.push({col:i, cur:cur, qi:qi, sub:sub, rem:rem, broughtDigit:(i < digs.length-1 ? digs[i+1] : null)});
       carry = rem;
     }
     return {D:D, digs:digs, steps:steps, slutRest:carry, k:digs.length};
   }
+  // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Förr tresiffrig täljare hårdkodad; nu 2–4 siffror
+  // ur bandet (layouten är generisk i k).
+  var ko = [];
   function genTask(){
-    var nLo = level === 1 ? 2 : (level === 2 ? 3 : 6);
-    var nHi = level === 1 ? 5 : 9;
-    for(var tries=0; tries<800; tries++){
-      var D = d3RandInt(nLo, nHi);
-      var Q = d3RandInt(100, 999);
-      var N = Q * D;
-      var ns = String(N);
-      if(ns.length !== 3) continue;
-      var digs = ns.split('').map(Number);
-      if(digs[0] < D) continue;
-      var t = bygg(D, digs);
-      if(t.slutRest !== 0) continue;
-      t.N = N; t.Q = Q;
-      return t;
-    }
-    var fb = bygg(4, [7,8,4]); fb.N = 784; fb.Q = 196; return fb;
+    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('div', level, OMG);
+    var task = ko.shift();
+    var t = bygg(task.n, String(task.N).split('').map(Number));
+    t.N = task.N; t.Q = task.Q;
+    return t;
   }
   function fixedCell(v, cls){ return '<div class="cell ' + (cls||'') + '">' + v + '</div>'; }
   function emptyCell(){ return '<div class="cell"></div>'; }
@@ -800,10 +792,13 @@ function renderDivLang(body, backFn){
     var fracW = (k * 40 + (k - 1) * 2);
     var rows = '';
     var kvotCells = [];
+    var stegVid = {}; task.steps.forEach(function(st){ stegVid[st.col] = st; });
     for(var i=0; i<k; i++){
+      var sq = stegVid[i];
+      if(!sq){ kvotCells.push(emptyCell()); continue; }   // ingen kvotsiffra i den här kolumnen (första siffran < nämnaren)
       kvotCells.push(demo
-        ? fixedCell('<span style="color:var(--success);font-weight:700;">' + task.steps[i].qi + '</span>')
-        : inputCell(task.steps[i].qi, 'div-lang-q'));
+        ? fixedCell('<span style="color:var(--success);font-weight:700;">' + sq.qi + '</span>')
+        : inputCell(sq.qi, 'div-lang-q'));
     }
     // Efterföljande tomma cell = samma bredd som täljarradens vägg+nämnare-cell,
     // så alla rader högerjusteras lika och kolumnerna hamnar rakt under varandra.
@@ -818,8 +813,8 @@ function renderDivLang(body, backFn){
         + '<div class="dl-tal">' + taljCells.join('') + '</div>'
         + '<div class="dl-namn-box">' + task.D + '</div>'
       + '</div></div>';
-    for(var s=0; s<k; s++){
-      var st = task.steps[s];
+    for(var si=0; si<task.steps.length; si++){
+      var st = task.steps[si], s = st.col;
       var subStr = String(st.sub);
       var subLen = subStr.length;
       var subCells = [];
