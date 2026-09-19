@@ -143,6 +143,29 @@ function bladHTML(blad){
     grupp.rader.forEach(function(rad){
       radNummer++;
       var bokstav = String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
+      // (radtyp ur k1-d7/d8, flyttad till kärnan 2026-09-19)
+      if(rad.typ === 'problemTid'){
+        // Problem med tidssvar: timmar + minuter i två fält
+        html += '<div class="prob-rad" data-rad="' + radNummer + '">';
+        html += '<div class="prob-fraga">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span>' + rad.fraga + '</span>';
+        html += '</div>';
+        html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
+        html += '<textarea class="prob-kladd" rows="3" '
+          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
+        html += '<div class="prob-svar-rad">';
+        html += '<span class="prob-label">Svar:</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.timmar + '" '
+          + 'inputmode="numeric" autocomplete="off" style="width:70px;">';
+        html += '<span class="ovn-text" style="margin:0 2px;">h</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.minuter + '" '
+          + 'inputmode="numeric" autocomplete="off" style="width:70px;">';
+        html += '<span class="ovn-text" style="margin:0 2px;">min</span>';
+        html += '</div>';
+        html += '</div>';
+        return;
+      }
       if(rad.typ === 'problem'){
         // Problem har egen layout: fråga + kladdruta + svar/enhet
         html += '<div class="prob-rad" data-rad="' + radNummer + '">';
@@ -160,6 +183,47 @@ function bladHTML(blad){
         html += '<input class="ovn-in enhet" data-enhet="' + rad.enhet + '" '
           + 'inputmode="text" autocomplete="off" placeholder="enhet">';
         html += '</div>';
+        html += '</div>';
+        return;
+      }
+      // (radtyper ur k1-d7/d8, flyttade till kärnan 2026-09-19)
+      // Bråk-uppgifter: täljare/nämnare visas som riktigt bråk
+      if(rad.typ === 'brak' || rad.typ === 'brakLucka'){
+        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        // Bråk-blocket
+        html += '<span class="ovn-brak">';
+        if(rad.typ === 'brakLucka' && rad.luckaPos === 'taljare'){
+          // täljaren innehåller en lucka, t.ex. "706 · __"
+          var tBitar = rad.taljare.split('__');
+          html += '<span class="ovn-brak-taljare">' + tBitar[0]
+            + '<input class="ovn-in lucka" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
+            + (tBitar[1] !== undefined ? tBitar[1] : '') + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
+        } else if(rad.typ === 'brakLucka' && rad.luckaPos === 'namnare'){
+          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          var nBitar = rad.namnare.split('__');
+          html += '<span class="ovn-brak-namnare">' + nBitar[0]
+            + '<input class="ovn-in lucka" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off" style="width:64px;height:34px;font-size:17px;">'
+            + (nBitar[1] !== undefined ? nBitar[1] : '') + '</span>';
+        } else {
+          html += '<span class="ovn-brak-taljare">' + rad.taljare + '</span>';
+          html += '<span class="ovn-brak-strecket"></span>';
+          html += '<span class="ovn-brak-namnare">' + rad.namnare + '</span>';
+        }
+        html += '</span>';
+        html += '<span class="ovn-text">=</span>';
+        if(rad.typ === 'brakLucka'){
+          // facit står efter likhetstecknet (eleven löser luckan i bråket)
+          html += '<span class="ovn-text ovn-num">' + rad.hoger + '</span>';
+        } else {
+          html += '<input class="ovn-in" data-svar="' + rad.svar
+            + '" inputmode="decimal" autocomplete="off">';
+        }
         html += '</div>';
         return;
       }
