@@ -4438,6 +4438,9 @@ const TEST_GENERATORS = {
 // GEN_NOD: binder varje test-generator till sin TAXONOMI-nod (koId:formagaKey) — SAMMA nod som
 // Färdighetsträningens drill loggar till. Det är kopplingen som gör att ett prov färgar rätt cell
 // på kartan trots att generatorn är egen (Väg A). Ny generator → lägg till en rad här.
+// Uppställningens metod-objekt (beskrivning = elevtext i förklaringssteget, samma som Metod-väljarens kort)
+const ADD_UPPST_METOD = { id:'uppstallning', namn:'Uppställning', icon:'📐', kortBeskrivning:'Lägg talen under varandra, räkna ental, tiotal, hundratal.',
+  beskrivning:'Den klassiska metoden. Skriv talen under varandra och börja räkna från höger (entalen). Om summan är ≥ 10 skriver du ental och för över en minnessiffra till nästa position.' };   // ordagrant Metod-väljarens text (metod-addsub METODER)
 const GEN_NOD = {
   'primtal-binary': 'primtal:begrepp',
   'termer':         'primtal:rakna',
@@ -5140,7 +5143,10 @@ const OVNING_RENDERS = {
   // Addition - KO 3: Metoder (picker + uppställnings-deeplink; uppställning loggar egen nod)
   'add-metoder':{
     metod:        (b)=> renderAddMetod(b),     // rika versionen (metod-addsub): uppställning m. minnessiffror, talsorterna på rad, flytta över m. mellanled
-    uppstallning: (b)=> renderAddUppstallning(b, ()=> renderAddMetod(b)),
+    // Rika uppställningen (metod-addsub) — samma drill som Metod-väljaren når. Förr ramens enkla kopia
+    // renderAddUppstallning (ingen decimalcell → tak 2 mot bandets 4 → noden kunde aldrig nå minNiva 3 i
+    // åttans karta). Pensionerad 2026-09-19.
+    uppstallning: (b)=> renderUppstallningAdd(b, ADD_UPPST_METOD, ()=> renderAddMetod(b)),
     talsorterna:  (b)=> renderTalsorternaAdd(b, null, ()=> renderAddMetod(b))   // karta-nod add-metoder:talsorterna (öva-täckt, ingen drill)
   },
   // Addition - KO 4: Problemlösning
@@ -6624,125 +6630,7 @@ function renderForlangDec(body){
 }
 
 // Motor: uppställning i addition – siffra för siffra
-function renderAddUppstallning(body, backFn){
-  let level = 1, omgang = [], idx = 0, results = [];
-  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.add (Joachims band, order 2026-09-19). Förr
-  // d3RandInt(14,89) — "15 + 15 var inte högstadienivå". Omgången byggs distinkt ur bandet; nivå 3 blandar
-  // två storleksprofiler. (Samma band som metod-addsub:renderUppstallningAdd — den rika varianten.)
-  const BAND = UppstBand.band('add');
-  // Den här (enkla) layouten saknar decimalcell. Bandets nivå 3 är decimaltal (alt. c, 2026-09-19) → taket här är
-  // nivå 2. Nivå 3 (decimaltal) och 4 (tusental) finns i den rika uppställningen (metod-addsub:
-  // renderUppstallningAdd, via Metod-väljaren). Förslag: peka deeplinken dit och pensionera den här kopian.
-  const MAXN = 2;
-  function genOmgang(){
-    return UppstBand.omgang('add', level, BAND.omgang || 5).map(function(t){ return {a:t.a, b:t.b, answer:t.answer}; });
-  }
-
-  function render(){
-    if(idx >= omgang.length){
-      const right = results.filter(function(x){ return x; }).length;
-      const total = results.length;
-      const adj = adjustLevel(level, right, total, null, MAXN);
-      level = adj.level;
-      body.innerHTML = '<div class="exercise-card">'
-        + exerciseHeader('Metod · uppställning', 'Du klarade ' + right + ' av ' + total + '.', level, MAXN)
-        + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
-        + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="uppadd-back">Tillbaka till metoder</button></div>'
-      + '</div>';
-      document.getElementById('summary-next-btn').onclick = function(){
-        omgang = genOmgang(); idx = 0; results = []; render();
-      };
-      document.getElementById('uppadd-back').onclick = backFn;
-      return;
-    }
-    const t = omgang[idx];
-    const ansStr = String(t.answer);
-    const cols = ansStr.length;
-    const aStr = String(t.a), bStr = String(t.b);
-
-    function digitRow(str, op){
-      let cells = '';
-      for(let c=0; c<cols; c++){
-        const fromRight = cols - 1 - c;
-        const d = fromRight < str.length ? str[str.length - 1 - fromRight] : '';
-        cells += '<span class="uppadd-cell">' + d + '</span>';
-      }
-      return '<div class="uppadd-row"><span class="uppadd-op">' + (op || '') + '</span>' + cells + '</div>';
-    }
-    let ansCells = '';
-    for(let c=0; c<cols; c++){
-      ansCells += '<input type="text" class="uppadd-in" data-c="' + c + '" inputmode="numeric" maxlength="1" autocomplete="off">';
-    }
-
-    body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · uppställning', 'Addera siffra för siffra, från höger. Tänk på minnessiffrorna.', level, MAXN)
-      + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
-      + '<div class="uppadd">'
-        + digitRow(aStr, '')
-        + digitRow(bStr, '+')
-        + '<div class="uppadd-line"></div>'
-        + '<div class="uppadd-row"><span class="uppadd-op"></span>' + ansCells + '</div>'
-      + '</div>'
-      + '<div class="rakna-uppdela-feedback" id="uppadd-fb"></div>'
-      + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
-        + '<button class="btn primary" id="uppadd-check">Kontrollera</button>'
-        + '<button class="btn subtle" id="uppadd-back">Tillbaka till metoder</button>'
-      + '</div>'
-    + '</div>';
-
-    const inputs = Array.prototype.slice.call(body.querySelectorAll('.uppadd-in'));
-    inputs.forEach(function(inp, i){
-      inp.addEventListener('input', function(){
-        inp.value = inp.value.replace(/[^0-9]/g,'');
-        if(inp.value && i < inputs.length - 1) inputs[i+1].focus();
-      });
-      inp.addEventListener('keydown', function(e){
-        if(e.key === 'Backspace' && !inp.value && i > 0) inputs[i-1].focus();
-        if(e.key === 'Enter'){ e.preventDefault(); check(); }
-      });
-    });
-    setTimeout(function(){ if(inputs[0]) inputs[0].focus(); }, 50);
-    document.getElementById('uppadd-check').onclick = check;
-    document.getElementById('uppadd-back').onclick = backFn;
-
-    function check(){
-      const fb = document.getElementById('uppadd-fb');
-      fb.className = 'rakna-uppdela-feedback show';
-      let svar = '';
-      let tomma = false;
-      inputs.forEach(function(inp){
-        if(inp.value === '') tomma = true;
-        svar += inp.value;
-      });
-      if(tomma){
-        fb.classList.add('wrong');
-        fb.textContent = 'Fyll i alla rutor i svaret.';
-        return;
-      }
-      const num = parseInt(svar, 10);
-      const ok = num === t.answer;
-      const ts = getTutorScore('add-metoder','metod');
-      const tsG = getTutorScore('add-metoder','uppstallning');
-      ts.total++; tsG.total++;
-      inputs.forEach(function(inp){ inp.disabled = true; });
-      document.getElementById('uppadd-check').disabled = true;
-      if(ok){
-        inputs.forEach(function(inp){ inp.classList.add('correct'); });
-        fb.classList.add('correct');
-        fb.textContent = 'Rätt! ' + t.a + ' + ' + t.b + ' = ' + t.answer + '  ✓';
-        ts.correct++; tsG.correct++;
-      } else {
-        inputs.forEach(function(inp){ inp.classList.add('wrong'); });
-        fb.classList.add('wrong');
-        fb.textContent = 'Inte rätt. ' + t.a + ' + ' + t.b + ' = ' + t.answer + '. Kontrollera kolumn för kolumn.';
-      }
-      results.push(ok);
-      setTimeout(function(){ idx++; render(); }, ok ? 1800 : 2800);
-    }
-  }
-  omgang = genOmgang();
-  render();
-}
+// renderAddUppstallning (enkel uppställningskopia, 119 rader) pensionerad 2026-09-19 — se 'add-metoder'.uppstallning ovan.
 
 // ============================================================
 // ADDITION – KO 2: HUVUDRÄKNING
@@ -7007,7 +6895,7 @@ function renderAddMetoder(body){
     body.querySelectorAll('[data-metod]').forEach(function(btn){
       btn.onclick = function(){
         const m = btn.dataset.metod;
-        if(m === 'uppstallning') renderAddUppstallning(body, renderPicker);
+        if(m === 'uppstallning') renderUppstallningAdd(body, ADD_UPPST_METOD, renderPicker);
         else if(m === 'talsorterna') renderAddEnrad(body, TALSORTERNA, renderPicker);
         else if(m === 'flyttaover') renderAddEnrad(body, FLYTTAOVER, renderPicker);
         else renderAddSingle(body, NEGATIVA, renderPicker);

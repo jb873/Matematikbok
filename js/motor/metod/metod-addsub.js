@@ -338,12 +338,15 @@ function renderUppstallningAdd(body, metod, backFn){
       const fb = document.getElementById('fb'); fb.classList.add('show');
       document.getElementById('check-btn').disabled = true;
       const ts = getTutorScore('add-metoder','metod'); ts.total++;
+      // Nodens egen nyckel: mastery-proxyn loggar bara ko:formaga som matchar URL:en (add-metoder:uppstallning).
+      // Saknades här — bara den pensionerade ram-kopian loggade den (order 2026-09-19).
+      const tsG = getTutorScore('add-metoder','uppstallning'); tsG.total++;
       omgangResults.push(correct);
 
       if(correct){
         fb.classList.add('correct');
         fb.textContent = `Rätt! ${fmt(a)} + ${fmt(b)} = ${fmt(answer)} ✓`;
-        ts.correct++;
+        ts.correct++; tsG.correct++;
       } else {
         fb.classList.add('wrong');
         fb.textContent = `Inte rätt – ${fmt(a)} + ${fmt(b)} = ${fmt(answer)}. Kontrollera kolumn för kolumn.`;
