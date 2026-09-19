@@ -67,6 +67,32 @@ function jamforMellan(a, b){
   }
   return norm(a) === norm(b);
 }
+// (hjälpare ur k1-d3, flyttade till kärnan 2026-09-19)
+// Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
+function visaTal(t){
+  var s = String(t).replace('.', ',');
+  return s.replace(/^-/, '\u2212');
+}
+// FAS2 (omskrivning till sjuan): en 'enkel'-uppgift som SUBTRAHERAR ett negativt tal (a − (−b) = a + b)
+// får en omskrivningscell före svaret. Kravet bärs av UTTRYCKET (samma regex som åttans blad-ak8-d2 +
+// drillen), tvåvägs: 8 − (−6) får cell, −12 + (−8) får ingen (inget dubbelminus).
+function harDubbelMinus(fraga){ return /[−–-]\s*\(\s*[−–-]/.test(String(fraga)); }
+// Värde-utvärderare (+ − · / parenteser, unärt minus, alla minus-varianter) — ingen eval. Omskrivningen
+// rättas på VÄRDE, så en giltig men annorlunda skriven form ('8 + 6', '14') godtas. Speglar blad-ak8-d2.
+function evalUttryck(str){
+  var s = String(str).replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/÷/g,'/').replace(/,/g,'.').replace(/\s+/g,'');
+  if(s === '' || !/^[-+*/().0-9]+$/.test(s)) return NaN;
+  var i = 0;
+  function expr(){ var v = term(); while(s[i]==='+'||s[i]==='-'){ var o=s[i++]; var t=term(); v = o==='+'?v+t:v-t; } return v; }
+  function term(){ var v = factor(); while(s[i]==='*'||s[i]==='/'){ var o=s[i++]; var f=factor(); v = o==='*'?v*f:v/f; } return v; }
+  function factor(){ if(s[i]==='+'){ i++; return factor(); } if(s[i]==='-'){ i++; return -factor(); }
+    if(s[i]==='('){ i++; var v=expr(); if(s[i]===')') i++; return v; }
+    var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]); }
+  var r = expr(); return i === s.length ? r : NaN;
+}
+// Kanonisk omskrivning för facit-visning: slår ihop yttre operator med inre tecken, tar bort parentesen.
+function skrivOm(f){ return String(f).replace(/([+−–-])\s*\(\s*([+−–-]?)\s*([0-9]+(?:[.,][0-9]+)?)\s*\)/g,
+  function(m, yttre, inre, tal){ var neg = (/[−–-]/.test(yttre)) !== (/[−–-]/.test(inre)); return (neg ? ' − ' : ' + ') + tal; }).replace(/\s*=\s*$/,'').replace(/\s{2,}/g,' ').trim(); }
 function jamforEnhet(a, b){
   // Enhet rättas flexibelt: utan mellanslag, gemener,
   // och med vanliga skrivvarianter (kr/sek osv. accepteras).
@@ -138,7 +164,9 @@ function bladHTML(blad){
 
   var radNummer = 0;
   blad.grupper.forEach(function(grupp, gi){
-    html += '<div class="ovn-grupp">';
+    // data-logg (valfritt) märker en grupp vars besvarade rutor ska matas till mastery.
+    // Utan data-logg loggas ingenting (opt-in) — de fyra äldre bladen rörs inte.
+    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     grupp.rader.forEach(function(rad){
       radNummer++;
@@ -227,13 +255,70 @@ function bladHTML(blad){
         html += '</div>';
         return;
       }
+      // (radtyper ur k1-d3, flyttade till kärnan 2026-09-19)
+      // Storleksordna: visa talmängden, eleven skriver i ordning i rutor
+      if(rad.typ === 'ordna'){
+        var sorterat = rad.tal.slice().sort(function(a,b){ return rad.fallande ? b-a : a-b; });
+        html += '<div class="ovn-rad ovn-ordna-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-ordna-prompt">' + (rad.fraga || (rad.fallande ? 'Störst till minst:' : 'Minst till störst:')) + '</span>';
+        html += '<span class="ovn-ordna-set">{ ' + rad.tal.map(function(t){ return visaTal(t); }).join(', ') + ' }</span>';
+        html += '<span class="ovn-ordna-svar">';
+        sorterat.forEach(function(v, k){
+          if(k>0) html += '<span class="ovn-ordna-pil">' + (rad.fallande ? '>' : '<') + '</span>';
+          html += '<input class="ovn-in ovn-ordna-in" data-svar="' + v + '" inputmode="text" autocomplete="off">';
+        });
+        html += '</span>';
+        html += '</div>';
+        return;
+      }
+      // Talföljd: vissa termer givna, andra (null) är ifyllnadsrutor
+      if(rad.typ === 'talfoljd'){
+        html += '<div class="ovn-rad ovn-foljd-rad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<span class="ovn-foljd-led">';
+        rad.termer.forEach(function(t, k){
+          if(k>0) html += '<span class="ovn-foljd-komma">,</span>';
+          if(t === null){
+            html += '<input class="ovn-in ovn-foljd-in" data-svar="' + rad.facit[k] + '" inputmode="text" autocomplete="off">';
+          } else {
+            html += '<span class="ovn-text ovn-num ovn-foljd-tal">' + visaTal(t) + '</span>';
+          }
+        });
+        html += '<span class="ovn-foljd-komma">, …</span>';
+        html += '</span>';
+        html += '</div>';
+        return;
+      }
       // räkna om bokstav per grupp
       html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
       html += '<span class="ovn-label">' + bokstav + ')</span>';
       if(rad.typ === 'enkel'){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        // FAS2: subtraktion av negativt tal → omskrivningscell (värde-rättad) före svaret. Klassen
+        // ak8-in-oms ger uttrycks-läge på den delade keypaden (+ · ( ) aktiva); data-oms = rättvärdet.
+        if(harDubbelMinus(rad.vansterText)){
+          html += '<input class="ovn-in bred ak8-in-oms" data-oms="' + rad.svar
+            + '" inputmode="text" autocomplete="off" placeholder="skriv om">';
+          html += '<span class="ovn-text">=</span>';
+        }
         html += '<input class="ovn-in" data-svar="' + rad.svar
           + '" inputmode="decimal" autocomplete="off">';
+      } else if(rad.typ === 'text'){
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in bred" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off" placeholder="svar">';
+      } else if(rad.typ === 'term'){
+        // Dela upp ett tal i summa av termer – godtar alla korrekta uppdelningar
+        html += '<span class="ovn-text" style="min-width:140px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in bred" data-term="' + rad.summa + '" data-antal="' + (rad.antal||2)
+          + '" inputmode="text" autocomplete="off" placeholder="två termer">';   // platshållare: ledning, ej exempel (10+8=18 var facit-läcka)
+      } else if(rad.typ === 'tvatal'){
+        // Två tal i valfri ordning
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="0" inputmode="decimal" autocomplete="off" style="width:80px;">';
+        html += '<span class="ovn-text">och</span>';
+        html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="1" inputmode="decimal" autocomplete="off" style="width:80px;">';
       } else if(rad.typ === 'lucka'){
         // text innehåller '__' där luckan ska sitta
         var bitar = rad.text.split('__');
@@ -315,14 +400,45 @@ function bygg_blad(rotEl, blad){
       rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
       inp.classList.remove('correct','wrong','just-checked');
       var ok;
-      if(inp.dataset.mellan){
+      if(inp.dataset.oms !== undefined){
+        // FAS2: omskrivningscellen rättas på VÄRDE (giltig men annorlunda skriven form godtas)
+        var ov = evalUttryck(inp.value);
+        ok = !isNaN(ov) && Math.abs(ov - parseFloat(inp.dataset.oms)) < 1e-9;
+      } else if(inp.dataset.mellan){
         ok = jamforMellan(inp.value, inp.dataset.mellan);
       } else if(inp.dataset.enhet){
         ok = jamforEnhet(inp.value, inp.dataset.enhet);
+      } else if(inp.dataset.term !== undefined){
+        // dela upp i termer – godtar alla korrekta summor
+        var malSumma = parseFloat(inp.dataset.term);
+        var malAntal = parseInt(inp.dataset.antal, 10);
+        var termer = String(inp.value).replace(/\u2212/g,'-').replace(/\s/g,'').split('+');
+        var summa = 0, giltigt = true;
+        if(termer.length !== malAntal) giltigt = false;
+        termer.forEach(function(t){
+          var v = parseFloat(t.replace(',','.'));
+          if(isNaN(v)) giltigt = false; else summa += v;
+        });
+        ok = giltigt && Math.abs(summa - malSumma) < 1e-9;
+      } else if(inp.dataset.tvatal !== undefined){
+        // två tal i valfri ordning – båda fälten ska tillsammans matcha
+        var malTal = inp.dataset.tvatal.split(',').map(function(x){ return parseFloat(x); });
+        var v = parseFloat(String(inp.value).replace(',','.'));
+        ok = !isNaN(v) && malTal.some(function(m){ return Math.abs(m-v)<1e-9; });
       } else {
         ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
       }
       totalt++;
+      // FAS 2 · loggning: bara grupper med data-logg matar mastery. En besvarad (ej tom) ruta
+      // loggas som försök — FEL registreras som 'fel' (orange), rätt som 'ratt'. Grupp 4
+      // (decimaler) saknar data-logg → matar inte mastery. Tidsspärren i mastery.js kollapsar
+      // upprepade Kontrollera-klick i samma pass, så retention inte blåses upp.
+      var _grEl = inp.closest('.ovn-grupp');
+      var _loggNod = _grEl && _grEl.getAttribute('data-logg');
+      // Omskrivningscellen (data-oms) loggas EJ separat — annars två evidens per uppgift; svarscellen bär loggen.
+      if(_loggNod && inp.dataset.oms === undefined && String(inp.value).trim() !== '' && window.Mastery && window.Mastery.loggaForsok){
+        window.Mastery.loggaForsok(_loggNod, ok ? 'ratt' : 'fel');
+      }
       // Bocken/krysset – stor, syns tydligt
       var mark = document.createElement('span');
       mark.className = 'ovn-mark ' + (ok ? 'ok' : 'fel');
@@ -334,8 +450,11 @@ function bygg_blad(rotEl, blad){
       } else {
         inp.classList.add('wrong','just-checked');
         var facit;
-        if(inp.dataset.mellan) facit = inp.dataset.mellan;
+        if(inp.dataset.oms !== undefined){ var _vt = rad.querySelector('.ovn-num'); facit = _vt ? skrivOm(_vt.textContent) : inp.dataset.oms.replace('.', ','); }
+        else if(inp.dataset.mellan) facit = inp.dataset.mellan;
         else if(inp.dataset.enhet) facit = inp.dataset.enhet;
+        else if(inp.dataset.term !== undefined) facit = 'summan ska bli ' + inp.dataset.term.replace('.', ',');
+        else if(inp.dataset.tvatal !== undefined) facit = inp.dataset.tvatal.split(',').join(' och ');
         else facit = inp.dataset.svar.replace('.', ',');
         var f = document.createElement('span');
         f.className = 'ovn-fasit';
