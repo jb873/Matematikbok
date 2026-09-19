@@ -128,6 +128,20 @@ function raknaEngine(op){
   document.getElementById('hero').style.display='none';
   var level=1, streak=0;
   var KRAV=4, MAXNIVA=3;
+  // NEDGÅNG på glidande fönster (order 2026-09-19): streaken ("4 i rad") är drillens uppgångsregel och rörs inte.
+  // Nedgången följer nodens nivamodell (metod-karna): 'nytt' → nivå ner när < 40 % av de senaste FONSTER svaren
+  // är rätt (och nivå > 1), fönstret nollas; 'befast' → aldrig ner. Noderna brak-add/brak-sub saknar fält → k2-
+  // ramens default 'nytt'. Streak-gränssnittet oförändrat.
+  var FONSTER=6, fonster=[];
+  function nedgang(ok){
+    fonster.push(ok); if(fonster.length>FONSTER) fonster.shift();
+    if(fonster.length<FONSTER || level<=1) return false;
+    var modell = (typeof aktuellNivamodell==='function') ? aktuellNivamodell() : 'nytt';
+    if(modell!=='nytt') return false;
+    var ratt = fonster.filter(function(x){ return x; }).length;
+    if(ratt/FONSTER < 0.4){ level--; streak=0; fonster=[]; return true; }
+    return false;
+  }
   var titel = aro?'Addition med bråk':'Subtraktion med bråk';
   var sub = aro?'Addera bråken. Skriv svaret i enklaste form.':'Subtrahera bråken. Skriv svaret i enklaste form.';
   var SVARFORM = 'enklaste';   // kravet på slutsvaret som DATA ('enklaste' | 'blandad' | 'brak'); rubriken säger enklaste form
@@ -204,6 +218,7 @@ function raknaEngine(op){
           + '</div>';
     }
 
+    window.__aktuellNiva = level;   // NIVÅBRYGGA: raknaEngine har egen render (inte korOvning) → k2Logga bar ingen nivå här (order 2026-09-19)
     app.innerHTML='<div class="view"><div class="exercise-card">'
       +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2><div class="ex-sub">'+sub+'</div></div>'
       +'<div class="streak-rad"><span class="niva-pille">Nivå '+level+' av '+MAXNIVA+'</span>'
@@ -254,10 +269,12 @@ function raknaEngine(op){
       if(slutOk){
         fb.classList.add('correct'); fb.textContent='Rätt!';
         streak++;
-        if(streak>=KRAV && level<MAXNIVA){ level++; streak=0; fb.innerHTML='Rätt! Du går vidare till nivå '+level+'.'; }
+        if(streak>=KRAV && level<MAXNIVA){ level++; streak=0; fonster=[]; fb.innerHTML='Rätt! Du går vidare till nivå '+level+'.'; }
+        nedgang(true);
       } else {
         fb.classList.add('wrong'); fb.innerHTML='Rätt svar: '+facitText(u)+'. Streaken börjar om.';
         streak=0;
+        nedgang(false);   // tyst: nivåpillen visar den nya nivån vid nästa uppgift (ingen ny elevtext)
       }
       if(window.k2Logga) window.k2Logga(slutOk);   // additiv mastery-logg (rör ej beräkningen/mellanledet)
 
