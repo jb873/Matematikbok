@@ -5,6 +5,9 @@
    Schema per nod (identiskt med k1/k2):
      { id, namn, parent, niva, arskursRelevans, roll, formaga, generator, begrepp, visning }
    Områden har dessutom { grupp, implemented }. Lövnoder med generator har ett visning-objekt
+   nivamodell (per lövnod, HANDSATT 2026-09-19 — generatorn känner inte fältet, tag för hand): 'nytt' på ALLA lövnoder,
+     även osurfade. Joachim: allt inom bråk/algebra tränas på högstadiet → nivån kan sjunka (<40 % rätt). 'befast' finns bara
+     i k1 (add/sub-uppställning + positionssystem). Fältet läses av metod-karna.adjustLevel; ramens default slår aldrig till.
    (utbudslista); lövnoder utan generator har visning:null (synliga i kartan, ej i öva-väljaren).
 
    ── DEEPLINK-GATEN (viktigt): k3 har ÄNNU INGEN mastery-loggning eller ?ko=&formaga=-deeplink
@@ -55,7 +58,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-tolka:begrepp", "namn": "Tolka uttryck", "parent": "alg-tolka", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "BEGREPP", "generator": "tolkaEngine",
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "BEGREPP", "generator": "tolkaEngine",
       "begrepp": "Tolka vad ett uttryck står för och koppla uttryck till bild och situation.",
       "visning": { "utbudslista": "k3d1", "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 0, "titel": "Tolka uttryck", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
@@ -67,7 +70,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-skriva:kommunikation", "namn": "Skriva uttryck", "parent": "alg-skriva", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "KOMMUNIKATION", "generator": "skrivaEngine",
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "KOMMUNIKATION", "generator": "skrivaEngine",
       "begrepp": "Skriv ett uttryck som beskriver en text, figur eller sträcka med variabler.",
       "visning": { "utbudslista": "k3d1", "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 1, "titel": "Skriva uttryck", "etikett": "kommunikation", "formagaKey": "kommunikation", "niva": null }
     },
@@ -79,7 +82,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-berakna:rakna", "namn": "Beräkna med uttryck", "parent": "alg-berakna", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "beraknaEngine",
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": "beraknaEngine",
       "begrepp": "Sätt in variabelns värde och beräkna uttryckets värde (med mellanled).",
       "visning": { "utbudslista": "k3d1", "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 2, "titel": "Beräkna med uttryck", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
@@ -101,7 +104,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-talfoljd:resonera", "namn": "Fortsätta talföljd", "parent": "alg-talfoljd", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RESONERA", "generator": null,
       "begrepp": "Hitta mönstret och skriv de tre nästa talen i följden.",
       "visning": null
     },
@@ -113,7 +116,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-monster-uttryck:kommunikation", "namn": "Välja och skapa uttryck", "parent": "alg-monster-uttryck", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "KOMMUNIKATION", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "KOMMUNIKATION", "generator": null,
       "begrepp": "Beskriv ett mönster med ett uttryck – välj rätt eller skapa eget.",
       "visning": null
     },
@@ -125,7 +128,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-monster-rakna:rakna", "namn": "Räkna med uttryck ur mönster", "parent": "alg-monster-rakna", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Räkna ut en term längre fram med mönstrets uttryck.",
       "visning": null
     },
@@ -152,7 +155,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-samla:rakna", "namn": "Förenkla uttryck", "parent": "alg-samla", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": "forenklaEngine",
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": "forenklaEngine",
       "begrepp": "Samla lika termer och skriv uttrycket i enklaste form.",
       "visning": { "utbudslista": "k3d3", "grupp": "Förenkla uttryck", "gruppordning": 0, "radordning": 0, "titel": "Förenkla uttryck", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
@@ -164,7 +167,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-forenkla-parentes:resonera", "namn": "Förenkla med parentes", "parent": "alg-forenkla-parentes", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "fordjupning" }, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "RESONERA", "generator": null,
       "begrepp": "Lös upp parentes (tecken/siffra före) och förenkla. Fördjupning – ingen drill ännu.",
       "visning": null
     },
@@ -189,7 +192,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-ekv-ensidig:rakna", "namn": "Lösa ekvationer (balansmetoden)", "parent": "alg-ekv-ensidig", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Lös ekvationer med en obekant på ena sidan (även bråk-koefficient och decimaler) med balansmetoden.",
       "visning": null
     },
@@ -201,7 +204,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-ekv-badaled:rakna", "namn": "Variabel på båda sidor", "parent": "alg-ekv-badaled", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Lös ekvationer med variabel i båda leden genom att samla x på en sida.",
       "visning": null
     },
@@ -213,7 +216,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-ekv-parentes:resonera", "namn": "Parentes i ekvation", "parent": "alg-ekv-parentes", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": "RESONERA", "generator": null,
+      "arskursRelevans": { "ak7": "fordjupning" }, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "RESONERA", "generator": null,
       "begrepp": "Lös upp parentes och lös ekvationen. Fördjupning – parsern avvisar 3(x+2), ingen drill ännu.",
       "visning": null
     },
@@ -235,7 +238,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-prob-text:problem", "namn": "Skapa ekvation från text", "parent": "alg-prob-text", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
       "begrepp": "Ställ upp en ekvation ur en text (tal, olika saker, olika tal) och lös den.",
       "visning": null
     },
@@ -247,7 +250,7 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-prob-geometri:problem", "namn": "Problem med vinklar och geometri", "parent": "alg-prob-geometri", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
       "begrepp": "Ställ upp och lös ekvationer ur vinkel- och geometriproblem (omkrets, area).",
       "visning": null
     },
