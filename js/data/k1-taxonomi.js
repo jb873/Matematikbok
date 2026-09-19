@@ -843,7 +843,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderTalsorternaAdd",
       "begrepp": "Addera ental, tiotal och hundratal var för sig.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Addition", "gruppordning": 0, "radordning": 2.1, "etikett": "metod", "formagaKey": "talsorterna", "niva": null }
     },
     {
       "id": "add-problem",
@@ -1231,7 +1231,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderUppstallningMult",
       "begrepp": "Uppställning när båda faktorerna är större än 10.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.1, "etikett": "metod", "formagaKey": "uppstallning-stora", "niva": null }
     },
     {
       "id": "mult-metoder:talsorterna",
@@ -1243,7 +1243,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Multiplicera talsorterna var för sig.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.2, "etikett": "metod", "formagaKey": "talsorterna", "niva": null }
     },
     {
       "id": "mult-metoder:dubbla",
@@ -1255,7 +1255,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Dubbla den ena faktorn och halvera den andra.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.3, "etikett": "metod", "formagaKey": "dubbla", "niva": null }
     },
     {
       "id": "mult-metoder:faktorer",
@@ -1267,7 +1267,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Dela upp en faktor: 19·8 = 20·8 − 1·8.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.4, "etikett": "metod", "formagaKey": "faktorer", "niva": null }
     },
     {
       "id": "mult-metoder:termer",
@@ -1279,7 +1279,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1).",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.5, "etikett": "metod", "formagaKey": "termer", "niva": null }
     },
     {
       "id": "mult-rakna",
@@ -1817,7 +1817,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderPrioMetod",
       "begrepp": "Visa metoden steg för steg – räkna nedåt rad för rad.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Prioriteringsregeln", "gruppordning": 4, "radordning": 1.1, "etikett": "metod", "formagaKey": "metod", "niva": null }
     },
     {
       "id": "prio-lagar",
