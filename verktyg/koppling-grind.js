@@ -171,10 +171,8 @@ const OSYNLIG_UNDANTAG = {
   'add-metoder:metod': 'picker "Välj metod"', 'sub-metoder:metod': 'picker "Välj metod"', 'mult-metoder:metod': 'picker "Välj metod"', 'div-metoder:metod': 'picker "Välj metod"',
   'prio-lagar:rakna': 'picker "Räknelagar" (lagarna listas var för sig)',
   'mult-rakna:rakna': 'aggregat "Blandade beräkningar" (pow10/stora/sma listas var för sig)', 'div-rakna:rakna': 'aggregat "Blandade beräkningar"',
-  'mult-begrepp:metod': 'dubblett av primtal:metod (faktorträd, listad i d1)',
-  'add-begrepp:rakna': 'picker "Räkna · grunder" (tiokompisar m.fl. bakom) — BESKED: listas i hubben eller ej?',
-  'div-begrepp:rakna': 'picker "Delbarhet och talgåtor" — BESKED: listas i hubben eller ej?'
-};
+  'mult-begrepp:metod': 'dubblett av primtal:metod (faktorträd, listad i d1)'
+};   // add-begrepp:rakna + div-begrepp:rakna (pickers med drillar bakom) LISTAS sedan 2026-09-19 — Joachim: "ingen elev går via kartan"
 function osynliga() {
   const k1r = k1Renderare(read('ak7-k1-ram.html')), k2r = k2Renderare(read('ak7-k2-ram.html'));
   const brott = [], undantag = [];

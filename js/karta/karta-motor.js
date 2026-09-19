@@ -45,7 +45,9 @@
     // "Kommer"-tillstånd (obyggt område + allt under det): synligt, märkt, DÖTT — visuellt skilt från
     // scoping-grått. Räknas ALDRIG i rollup/completion (ett obyggt område är ingen svaghet hos eleven).
     function omradeAv(node){ var n = node; while(n && n.parent != null){ n = byId[n.parent]; } return n; }
-    function arKommer(node){ var o = (node && node.niva === 'omrade') ? node : omradeAv(node); return !!(o && !o.implemented && o.grupp !== 'avslutning'); }
+    // kommer = obyggt: hela området (implemented:false) ELLER en enskild lövnod med visning.kommer (plats utan innehåll —
+    // drillen är en stubb; hubben dämpar kortet, kartan länkar inte). Samma regel: en plats utan innehåll är inte klickbar.
+    function arKommer(node){ if(node && node.visning && node.visning.kommer) return true; var o = (node && node.niva === 'omrade') ? node : omradeAv(node); return !!(o && !o.implemented && o.grupp !== 'avslutning'); }
 
     // ── ELEV-LOKAL DATA · localStorage ENDAST. Lämnar ALDRIG enheten. ──
     function lasMatris(){
@@ -114,7 +116,10 @@
         if(!sc.inScope) return { gra:true, orsak:sc.orsak };
         return { state: MAST.masteryState(matris[node.id], pref.minNiva, BLEKNING, !!LARD[node.id]), stod: !!sc.stod };
       }
-      var scoped = barnAv(node.id).map(function(b){ return nodStatus(b, pref, matris); }).filter(function(c){ return !c.gra && !c.stod; });
+      var barnStatus = barnAv(node.id).map(function(b){ return nodStatus(b, pref, matris); });
+      // En kommer-lövnod (visning.kommer) räknas ALDRIG i rollup — som obyggda områden. Är ALLA barn kommer är grenen kommer.
+      if(barnStatus.length && barnStatus.every(function(c){ return c.kommer; })) return { kommer:true };
+      var scoped = barnStatus.filter(function(c){ return !c.gra && !c.stod && !c.kommer; });
       if(!scoped.length) return { gra:true, orsak:'framtid' };
       return { state: Math.min.apply(null, scoped.map(function(c){ return c.state; })) };
     }

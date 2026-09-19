@@ -760,7 +760,7 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderAddBegreppRakna",
       "begrepp": "Tiokompisar, hundrakompisar och att dela upp tal i termer.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Addition", "gruppordning": 0, "radordning": 0.1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "add-rakna:rakna",
@@ -1492,7 +1492,7 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderDivBegreppRakna",
       "begrepp": "Delbarhetsregler och talgåtor – tre kategorier.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Division", "gruppordning": 3, "radordning": 0.1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "div-tabell:rakna",
