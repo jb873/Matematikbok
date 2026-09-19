@@ -346,8 +346,7 @@ function bladHTML(blad){
 
   // Knappsats – samma stil som öva-delen
   html += '<div class="ovn-wrap" style="padding-top:0;">';
-  // DELAD AK8_UI-keypad (fast layout + kontext-gråning). Migrerad från egen .ovn-keypad.
-  html += AK8_UI.keypadHTML();
+  // Keypaden ligger INTE i bladet: en per sida monteras i body av bygg_blad (se där).
 
   html += '<div class="ovn-kontroll-rad">'
     + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
@@ -387,8 +386,13 @@ function bygg_blad(rotEl, blad){
     });
   });
 
-  // Knappsats – delad AK8_UI-bindning (fokus-följning, kontext-gråning, ⌫, Enter→nästa ruta).
-  if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(rotEl);
+  // Knappsats – EN delad AK8_UI-keypad per sida (inte en per blad): monteras i document.body (utanför
+  // blad-mounts/ev. transform) och binds mot hela sidan → följer fokus över alla blad, Enter→nästa ruta,
+  // kontext-gråning, ⌫. Mönstret ur d1/d2 (a320f04), sedan 2026-09-19 kärnans för alla blad.
+  if(window.AK8_UI && !document.getElementById('ovn-keypad-shared')){
+    var _kw = document.createElement('div'); _kw.innerHTML = AK8_UI.keypadHTML();
+    var _kp = _kw.firstChild; if(_kp){ _kp.id = 'ovn-keypad-shared'; document.body.appendChild(_kp); AK8_UI.bindKeypad(document.body); }
+  }
 
   // Kontroll / Återställ / Skriv ut
   var forstaForsoket = true; // 0-1 fel på första försöket -> nytt blad
