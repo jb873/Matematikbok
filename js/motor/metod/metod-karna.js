@@ -148,7 +148,12 @@ function renderSummaryCard(opts){
 //   ak7-k1-ram "faller aldrig" — även kvadratrötter och potenser, som är nytt stoff i åttan. Nod utan fält
 //   → ramens default (RAM_NIVAMODELL; k1-ramen 'befast', k2/k3-ramarna 'nytt') = exakt det gamla beteendet.
 //   Taket = färdighetens nivå-antal (RAM_MAXNIVA, ?maxniva=N; default 3).
-function ramMaxNiva(){ return (typeof RAM_MAXNIVA === 'number' && RAM_MAXNIVA >= 1) ? RAM_MAXNIVA : 3; }
+// Nivåtak: per drill när drillen säger det (bandets nivåantal, order 2026-09-19 — tre nivåer är inget naturligt
+// tak), annars ramens ?maxniva= (1–3), annars 3.
+function ramMaxNiva(maxNiva){
+  if(typeof maxNiva === 'number' && maxNiva >= 1) return maxNiva;
+  return (typeof RAM_MAXNIVA === 'number' && RAM_MAXNIVA >= 1) ? RAM_MAXNIVA : 3;
+}
 function nivamodellFor(nodId){
   if(!nodId) return null;
   var taxar = [window.K1_TAXONOMI, window.K2_TAXONOMI, window.K3_TAXONOMI];
@@ -164,17 +169,17 @@ function aktuellNivamodell(){
   return nivamodellFor(nod) || (typeof RAM_NIVAMODELL === 'string' ? RAM_NIVAMODELL : 'befast');
 }
 // adjustLevel(level, right, total[, modell]) → { level, change:'up'|'down'|null, delta:1|-1|0 }
-function adjustLevel(level, right, total, modell){
+function adjustLevel(level, right, total, modell, maxNiva){   // maxNiva: drillens eget tak (valfritt)
   modell = modell || aktuellNivamodell();
   if(modell === 'nytt'){
     if(total > 0){
       var kvot = right / total;
-      if(kvot >= 0.8 && level < ramMaxNiva()) return {level: level+1, change: 'up', delta: 1};
+      if(kvot >= 0.8 && level < ramMaxNiva(maxNiva)) return {level: level+1, change: 'up', delta: 1};
       if(kvot < 0.4 && level > 1) return {level: level-1, change: 'down', delta: -1};
     }
     return {level, change: null, delta: 0};
   }
-  if(right >= total - 1 && level < ramMaxNiva()) return {level: level+1, change: 'up', delta: 1};
+  if(right >= total - 1 && level < ramMaxNiva(maxNiva)) return {level: level+1, change: 'up', delta: 1};
   return {level, change: null, delta: 0};
 }
 
@@ -203,8 +208,8 @@ document.body.addEventListener('click', e=>{
 });
 
 // -- övningshuvud (nivå-stege) --
-function exerciseHeader(title, sub, level){
-  const MAXNIVA = ramMaxNiva();
+function exerciseHeader(title, sub, level, maxNiva){   // maxNiva: drillens eget tak (valfritt)
+  const MAXNIVA = ramMaxNiva(maxNiva);
   // Klättrande stege visas bara för flernivå-färdigheter (max ≥ 2). En enkel-nivå-
   // färdighet (max 1) visar ingen segment-stege – bara drillen.
   const visaStege = level && MAXNIVA >= 2;
