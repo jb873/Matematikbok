@@ -920,6 +920,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .fard-skill-titel{font-family:var(--serif,'Cormorant Garamond');font-size:15.5px;font-weight:500;color:var(--ink,#12110f);line-height:1.25;}
 .fard-skill-formaga{font-family:var(--cinzel,'Cinzel');font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint,#7a6e65);}
 .fard-skill.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);}
+.fard-skill.is-kommer{opacity:.45;cursor:default;pointer-events:none;}
 .fard-skill.is-active .fard-skill-titel{color:#fff;}
 .fard-skill.is-active .fard-skill-formaga{color:var(--gold-lt,#c49a40);}
 .fard-scen{position:sticky;top:14px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:12px;overflow:hidden;min-height:560px;}
@@ -1017,11 +1018,11 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
     delade.forEach(function(id){
       var n = k1noder.filter(function(x){ return x.id === id; })[0];
       if(!n || !n.visning) return; var v = n.visning;
-      rader.push({ titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0], formagaKey: v.formagaKey || 'rakna', ram: 'k1', ord: v.radordning });
+      rader.push({ titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0], formagaKey: v.formagaKey || 'rakna', ram: 'k1', ord: v.radordning, kommer: !!v.kommer });
     });
     // k2:s egna k2d2-lövnoder (Blandad form)
     k2noder.filter(function(n){ return n.niva === 'lovnod' && n.visning && n.visning.utbudslista === 'k2d2'; }).forEach(function(n){
-      var v = n.visning; rader.push({ titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0], formagaKey: v.formagaKey || 'rakna', ram: 'k2', ord: v.radordning });
+      var v = n.visning; rader.push({ titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0], formagaKey: v.formagaKey || 'rakna', ram: 'k2', ord: v.radordning, kommer: !!v.kommer });
     });
     rader.sort(function(a, b){ return a.ord - b.ord; });
     return rader.length ? [{ ko: 'Byta form', drills: rader }] : [];
@@ -1059,6 +1060,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       var rub = document.createElement('div'); rub.className = 'fard-ko'; rub.textContent = g.ko; gr.appendChild(rub);
       g.drills.forEach(function(p){
         var b = document.createElement('button'); b.type = 'button'; b.className = 'fard-skill'; b.setAttribute('role', 'tab');
+        if(p.kommer){ b.classList.add('is-kommer'); b.disabled = true; b.setAttribute('aria-disabled', 'true'); }   // visning.kommer: platsen syns, men leder inte in i tomrum
         b.innerHTML = '<span class="fard-skill-titel">' + p.titel + '</span><span class="fard-skill-formaga">' + p.formaga + '</span>';
         b.onclick = function(){ oppna(b, p); };
         gr.appendChild(b); alla.push(b);

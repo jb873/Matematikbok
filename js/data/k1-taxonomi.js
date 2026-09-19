@@ -10,6 +10,8 @@
      2026-09-19 (Joachims regel, hela k1): befäst = uppställning i ADDITION och SUBTRAKTION + positionssystemsnoderna. Allt annat nytt —
      mult/div-uppställning tränas på högstadiet, alternativa add/sub-metoder kräver taluppfattning, negativa tal/bråk/prio/avrundning nytt.
      ALLA lövnoder bär fältet (även osurfade) — ramens default används inte för någon k1-nod.
+   visning.kommer: true = plats utan innehåll (drillen är en stubb). Hubben visar kortet dämpat och oklickbart;
+     synlig-grind kräver att den INTE renderar. Ta bort flaggan när drillen finns. (avr-overslag:rakna, 2026-09-19.)
    REGENERERA när ramens DELAR/DELAR_KO/OVNING_RENDERS ändras. Motorer/Arkiv orörda. */
 window.K1_TAXONOMI = {
   "noder": [
@@ -929,7 +931,7 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderSubBegreppRakna",
       "begrepp": "Dela upp en differens i två eller tre termer.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Subtraktion", "gruppordning": 1, "radordning": 0.1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "sub-rakna:rakna",
@@ -1132,7 +1134,7 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderMultFaktorisera",
       "begrepp": "Faktorisera ett tal i två eller tre faktorer.",
-      "visning": null
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 0.1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "mult-begrepp:metod",
@@ -2175,7 +2177,7 @@ window.K1_TAXONOMI = {
       "generator": "renderAvrOverslag",
       "begrepp": "Överslagsberäkningar i addition, subtraktion, multiplikation och division.",
       "visning": {
-        "utbudslista": "d8",
+        "kommer": true, "utbudslista": "d8",
         "grupp": "Avrundning och överslag",
         "gruppordning": 0,
         "radordning": 1,

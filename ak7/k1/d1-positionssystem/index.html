@@ -884,6 +884,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .fard-skill-titel{font-family:var(--serif,'Cormorant Garamond');font-size:15.5px;font-weight:500;color:var(--ink,#12110f);line-height:1.25;letter-spacing:-.005em;}
 .fard-skill-formaga{font-family:var(--cinzel,'Cinzel');font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint,#7a6e65);}
 .fard-skill.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);}
+.fard-skill.is-kommer{opacity:.45;cursor:default;pointer-events:none;}
 .fard-skill.is-active .fard-skill-titel{color:#fff;}
 .fard-skill.is-active .fard-skill-formaga{color:var(--gold-lt,#c49a40);}
 .fard-scen{position:sticky;top:14px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:12px;overflow:hidden;min-height:560px;}
@@ -1033,7 +1034,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
         return { ko: gr.rubrik, drills: gr.rader.map(function(n){
           var v = n.visning;
           return { titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0],
-                   formagaKey: v.formagaKey || undefined, niva: v.niva || undefined };
+                   formagaKey: v.formagaKey || undefined, niva: v.niva || undefined, kommer: !!v.kommer };
         }) };
       });
   }
@@ -1088,6 +1089,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
       var rub=document.createElement('div'); rub.className='fard-ko'; rub.textContent=g.ko; gr.appendChild(rub);
       g.drills.forEach(function(p){
         var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.setAttribute('role','tab');
+        if(p.kommer){ b.classList.add('is-kommer'); b.disabled=true; b.setAttribute('aria-disabled','true'); }   // visning.kommer: platsen syns, men leder inte in i tomrum
         b.innerHTML='<span class="fard-skill-titel">'+p.titel+'</span>'
           +'<span class="fard-skill-formaga">'+p.formaga+'</span>';
         b.onclick=function(){ oppnaFardighet(b, p); };

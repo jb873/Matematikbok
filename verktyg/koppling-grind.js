@@ -154,6 +154,41 @@ function surfade() {
   }
   return out;
 }
+// ALLA lövnoder (även utan visning) — för OSYNLIG-benet.
+function allaLov() {
+  const vm = require('vm'), out = [];
+  for (const [f, key, area] of [['js/data/k1-taxonomi.js', 'K1_TAXONOMI', 'k1'], ['js/data/k2-taxonomi.js', 'K2_TAXONOMI', 'k2'], ['js/data/k3-taxonomi.js', 'K3_TAXONOMI', 'k3']]) {
+    if (!exists(f)) continue;
+    const w = {}, ctx = { window: w }; vm.createContext(ctx); vm.runInContext(read(f), ctx);
+    for (const n of ((w[key] && w[key].noder) || [])) if (n.niva === 'lovnod') out.push({ id: n.id, prefix: String(n.id).split(':')[0], suffix: String(n.id).split(':')[1], area, surfad: !!(n.visning && n.visning.utbudslista), ak7: !!(n.arskursRelevans && n.arskursRelevans.ak7) });
+  }
+  return out;
+}
+// OSYNLIG-benet: en lövnod som HAR en drill-renderare men visning:null syns aldrig i någon hub (hubbarna bygger
+// listan ur visning.utbudslista) — "byggt men inte nåbart". 2026-09-19 hade sju metod-noder legat så sedan de
+// skapades. Undantag = pickers/aggregat utan eget innehåll (nås från kartan; hubben listar metoderna direkt).
+const OSYNLIG_UNDANTAG = {
+  'add-metoder:metod': 'picker "Välj metod"', 'sub-metoder:metod': 'picker "Välj metod"', 'mult-metoder:metod': 'picker "Välj metod"', 'div-metoder:metod': 'picker "Välj metod"',
+  'prio-lagar:rakna': 'picker "Räknelagar" (lagarna listas var för sig)',
+  'mult-rakna:rakna': 'aggregat "Blandade beräkningar" (pow10/stora/sma listas var för sig)', 'div-rakna:rakna': 'aggregat "Blandade beräkningar"',
+  'mult-begrepp:metod': 'dubblett av primtal:metod (faktorträd, listad i d1)',
+  'add-begrepp:rakna': 'picker "Räkna · grunder" (tiokompisar m.fl. bakom) — BESKED: listas i hubben eller ej?',
+  'div-begrepp:rakna': 'picker "Delbarhet och talgåtor" — BESKED: listas i hubben eller ej?'
+};
+function osynliga() {
+  const k1r = k1Renderare(read('ak7-k1-ram.html')), k2r = k2Renderare(read('ak7-k2-ram.html'));
+  const brott = [], undantag = [];
+  for (const n of allaLov()) {
+    if (n.surfad) continue;
+    // Bara åk7-mål: åk8-only-noder (potenser, tiopotenser, grundpotenser) surfas via åk8-sidornas egna listor, ej visning.
+    if (n.area === 'k1' && !n.ak7) continue;
+    const harRend = n.area === 'k1' ? !!(k1r[n.prefix] && k1r[n.prefix].has(n.suffix)) : n.area === 'k2' ? k2r.has(n.prefix) : false;
+    if (!harRend) continue;
+    if (OSYNLIG_UNDANTAG[n.id]) { undantag.push(n.id + ' (' + OSYNLIG_UNDANTAG[n.id] + ')'); continue; }
+    brott.push(n.id);
+  }
+  return { brott, undantag };
+}
 function deeplink() {
   const k1r = k1Renderare(read('ak7-k1-ram.html')), k2r = k2Renderare(read('ak7-k2-ram.html'));
   const noder = surfade(), brott = [];
@@ -236,6 +271,12 @@ if (!bara || bara === '--deeplink') {
     fel += r.lint.length;
   }
   if (r.overflow.length) console.log('  ⓘ renderare utan surfad k1/k2-nod (ej fatal — kan vara ak8/ak9/provbyggar-only): ' + r.overflow.join(', '));
+  // OSYNLIG: byggd drill som ingen hub kan lista
+  const o = osynliga();
+  console.log('\n── OSYNLIG: lövnod med drill-renderare men visning:null (byggt men inte nåbart) ──');
+  if (!o.brott.length) console.log('  ✓ ingen byggd drill saknar visning (' + o.undantag.length + ' pickers/aggregat undantagna).');
+  else { console.log('  ✗ byggda drillar som ingen hub kan lista (sätt visning i taxonomin):'); o.brott.forEach(id => console.log('      ' + id)); fel += o.brott.length; }
+  o.undantag.forEach(u => console.log('  ⓘ undantag: ' + u));
 }
 
 console.log('\n────────────────────────────────────────');
