@@ -109,12 +109,21 @@
     var GRA = { bg:'#EAE6DA', br:'#D3CDBE', fg:'#8A857A' };
     // "Kommer" — sval, ljus ton + streckad ram (css) → tydligt skild från scoping-gråttets varma, fyllda beige.
     var KOMMER = { bg:'#EEEFF4', br:'#C4C2CF', fg:'#77737F' };
+    // Nivåkrav PER NOD (order 2026-09-19): minNiva gäller bara noder som har nivåer. visning.niva är nodens
+    // nivåantal (null = ramens 3; hubben skickar ?maxniva= när < 3). En-nivå-nod (1) → inget nivåkrav — dess
+    // drill loggar utan nivå, och att kräva tre nivåer av något som har en är omöjligt. Tvånivå-nod → kravet
+    // är toppen (2). Utan minNiva (åk7/åk9) → null som förr. masteryState rörs inte.
+    function kravNiva(node, minNiva){
+      if(minNiva == null) return null;
+      var nodMax = (node && node.visning && node.visning.niva != null) ? node.visning.niva : 3;
+      return nodMax === 1 ? null : Math.min(minNiva, nodMax);
+    }
     function nodStatus(node, pref, matris){
       if(arKommer(node)) return { kommer:true };   // obyggt → eget tillstånd, aldrig färg/gra/rollup
       if(node.niva === 'lovnod'){
         var sc = scopeAv(node, pref);
         if(!sc.inScope) return { gra:true, orsak:sc.orsak };
-        return { state: MAST.masteryState(matris[node.id], pref.minNiva, BLEKNING, !!LARD[node.id]), stod: !!sc.stod };
+        return { state: MAST.masteryState(matris[node.id], kravNiva(node, pref.minNiva), BLEKNING, !!LARD[node.id]), stod: !!sc.stod };
       }
       var barnStatus = barnAv(node.id).map(function(b){ return nodStatus(b, pref, matris); });
       // En kommer-lövnod (visning.kommer) räknas ALDRIG i rollup — som obyggda områden. Är ALLA barn kommer är grenen kommer.
@@ -228,7 +237,7 @@
     function renderMeter(){
       var lov = TAX.filter(function(n){ var sc = scopeAv(n, PREF); return n.niva === 'lovnod' && n.generator && !n.doljKarta && sc.inScope && !sc.stod; });
       var Y = lov.length;
-      var X = lov.filter(function(n){ return MAST.masteryState(MATRIS[n.id], PREF.minNiva, BLEKNING, !!LARD[n.id]) === 3; }).length;
+      var X = lov.filter(function(n){ return MAST.masteryState(MATRIS[n.id], kravNiva(n, PREF.minNiva), BLEKNING, !!LARD[n.id]) === 3; }).length;
       var pct = Y ? Math.round(X / Y * 100) : 0;
       var el = document.getElementById('meter'); if(!el) return;
       el.innerHTML =

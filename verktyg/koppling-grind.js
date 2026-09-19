@@ -288,12 +288,17 @@ if (!bara || bara === '--nivatak') {
   const sv = require(path.join(__dirname, 'nivatak-svep.js'));
   const takBrott = sv.rows.filter(r => /^UPPST_BAND/.test(r.bandKalla) && (r.tak == null || r.tak !== r.band));
   const nyckelBrott = sv.rows.filter(r => /^NEJ/.test(String(r.evidens)));
+  // visning.niva === 1 ⇔ drillen saknar klättring — åt BÅDA hållen (minNiva per nod, order 2026-09-19): nod deklarerad
+  // 3/null med en drill som loggar utan nivå = aldrig grön i åttan; nod deklarerad 1 med en drill som klättrar = felaktig data.
+  const nivaBrott = sv.rows.filter(r => r.flaggor.includes('ENNIVÅ') || r.flaggor.includes('NIVA1-MEN-KLÄTTRAR'));
   const oavgjorda = sv.rows.filter(r => r.flaggor.includes('?') || /via variabel/.test(String(r.evidens)));
   console.log('\n── NIVÅTAK: drillens tak = nodens band · nodens nyckel loggas ──');
   if (!takBrott.length) console.log('  ✓ alla ' + sv.rows.filter(r => /^UPPST_BAND/.test(r.bandKalla)).length + ' band-noder: drillens tak = bandets nivåantal.');
   else { takBrott.forEach(r => console.log('  ✗ ' + r.nod + ': drillens tak ' + (r.tak == null ? 'ej läsbart' : r.tak) + ' (' + r.takKalla + ') ≠ bandets ' + r.band + ' (' + r.bandKalla + ') — ' + r.fn)); fel += takBrott.length; }
   if (!nyckelBrott.length) console.log('  ✓ ingen drill loggar bara andra nycklar än nodens (' + sv.rows.filter(r => r.evidens === 'ja').length + ' bekräftade literalt).');
   else { nyckelBrott.forEach(r => console.log('  ✗ ' + r.nod + ': ' + r.evidens + ' — ' + r.fn)); fel += nyckelBrott.length; }
+  if (!nivaBrott.length) console.log('  ✓ visning.niva = 1 ⇔ drillen saknar klättring (' + sv.rows.filter(r => r.deklarerad === 1).length + ' en-nivå-noder deklarerade).');
+  else { nivaBrott.forEach(r => console.log('  ✗ ' + r.nod + ': ' + (r.flaggor.includes('ENNIVÅ') ? 'drillen loggar UTAN nivå (' + r.takKalla + ') men noden deklarerar ' + (r.deklarerad == null ? 'default 3' : r.deklarerad) + ' → aldrig grön i åttan; sätt visning.niva:1 eller ge drillen nivåer' : 'noden deklarerar niva 1 men drillen klättrar till ' + r.tak + ' (' + r.takKalla + ')') + ' — ' + r.fn)); fel += nivaBrott.length; }
   if (oavgjorda.length) console.log('  ⓘ statiskt oavgjorda (dispatch på argument / nyckel via variabel): ' + oavgjorda.length + ' — se node verktyg/nivatak-svep.js');
   if (sv.saknade.length) { console.log('  ✗ kort utan deeplink-post: ' + sv.saknade.join(', ')); fel += sv.saknade.length; }
 }

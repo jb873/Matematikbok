@@ -549,7 +549,7 @@ window.K1_TAXONOMI = {
         "radordning": 4,
         "etikett": "resonera",
         "formagaKey": null,
-        "niva": null
+        "niva": 1
       }
     },
     {
@@ -571,7 +571,7 @@ window.K1_TAXONOMI = {
         "radordning": 5,
         "etikett": "problemlösning",
         "formagaKey": "problem",
-        "niva": null
+        "niva": 1
       }
     },
     {
@@ -745,7 +745,7 @@ window.K1_TAXONOMI = {
         "radordning": 0,
         "etikett": "begrepp",
         "formagaKey": null,
-        "niva": 2
+        "niva": 1
       }
     },
     {
@@ -916,7 +916,7 @@ window.K1_TAXONOMI = {
         "radordning": 0,
         "etikett": "begrepp",
         "formagaKey": null,
-        "niva": 2
+        "niva": 1
       }
     },
     {
@@ -931,7 +931,7 @@ window.K1_TAXONOMI = {
       "formaga": "RAKNA",
       "generator": "renderSubBegreppRakna",
       "begrepp": "Dela upp en differens i två eller tre termer.",
-      "visning": { "utbudslista": "d2", "grupp": "Subtraktion", "gruppordning": 1, "radordning": 0.1, "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "d2", "grupp": "Subtraktion", "gruppordning": 1, "radordning": 0.1, "etikett": "räkna", "formagaKey": "rakna", "niva": 1 }
     },
     {
       "id": "sub-rakna:rakna",
@@ -1119,7 +1119,7 @@ window.K1_TAXONOMI = {
         "radordning": 0,
         "etikett": "begrepp",
         "formagaKey": null,
-        "niva": 2
+        "niva": 1
       }
     },
     {
@@ -1245,7 +1245,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Multiplicera talsorterna var för sig.",
-      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.2, "etikett": "metod", "formagaKey": "talsorterna", "niva": null }
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.2, "etikett": "metod", "formagaKey": "talsorterna", "niva": 1 }
     },
     {
       "id": "mult-metoder:dubbla",
@@ -1257,7 +1257,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Dubbla den ena faktorn och halvera den andra.",
-      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.3, "etikett": "metod", "formagaKey": "dubbla", "niva": null }
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.3, "etikett": "metod", "formagaKey": "dubbla", "niva": 1 }
     },
     {
       "id": "mult-metoder:faktorer",
@@ -1269,7 +1269,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Dela upp en faktor: 19·8 = 20·8 − 1·8.",
-      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.4, "etikett": "metod", "formagaKey": "faktorer", "niva": null }
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.4, "etikett": "metod", "formagaKey": "faktorer", "niva": 1 }
     },
     {
       "id": "mult-metoder:termer",
@@ -1281,7 +1281,7 @@ window.K1_TAXONOMI = {
       "formaga": "METOD",
       "generator": "renderMultMetoder",
       "begrepp": "Dela upp båda faktorerna i termer: 31·19 = (30+1)(20−1).",
-      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.5, "etikett": "metod", "formagaKey": "termer", "niva": null }
+      "visning": { "utbudslista": "d2", "grupp": "Multiplikation", "gruppordning": 2, "radordning": 2.5, "etikett": "metod", "formagaKey": "termer", "niva": 1 }
     },
     {
       "id": "mult-rakna",
@@ -1477,7 +1477,7 @@ window.K1_TAXONOMI = {
         "radordning": 0,
         "etikett": "begrepp",
         "formagaKey": null,
-        "niva": 2
+        "niva": 1
       }
     },
     {
@@ -2031,7 +2031,7 @@ window.K1_TAXONOMI = {
         "radordning": 0,
         "etikett": "räkna",
         "formagaKey": "rakna",
-        "niva": null
+        "niva": 1
       }
     },
     {
@@ -2067,7 +2067,7 @@ window.K1_TAXONOMI = {
         "radordning": 1,
         "etikett": "räkna",
         "formagaKey": "rakna",
-        "niva": null
+        "niva": 1
       }
     },
     {
@@ -2103,7 +2103,7 @@ window.K1_TAXONOMI = {
         "radordning": 2,
         "etikett": "räkna",
         "formagaKey": "rakna",
-        "niva": null
+        "niva": 1
       }
     },
     {
@@ -2139,7 +2139,7 @@ window.K1_TAXONOMI = {
         "radordning": 3,
         "etikett": "räkna",
         "formagaKey": "rakna",
-        "niva": null
+        "niva": 1
       }
     },
     {
@@ -2183,7 +2183,7 @@ window.K1_TAXONOMI = {
         "radordning": 1,
         "etikett": "räkna",
         "formagaKey": "rakna",
-        "niva": null
+        "niva": 1
       }
     },
     {

@@ -151,14 +151,21 @@ const rows = [], saknade = [];
           : (kap === 'k1' ? (vis.kommer ? 'kommer' : 'NEJ (ingen getTutorScore)') : 'k2/k3-hook');
       }
       const flaggor = [];
-      if (tak.tak === 1 && !bandR) flaggor.push('ENNIVÅ');   // ingen klättring: loggar niva null → når aldrig minNiva 3 (åttans karta)
-      else if (tak.tak != null && band != null && tak.tak < band) flaggor.push('TAK<BAND');
+      // visning.niva === 1 ⇔ drillen saknar klättring (order 2026-09-19: minNiva gäller bara noder med nivåer).
+      // Båda hållen: deklarerad 1 med en drill som klättrar = fel; deklarerad >1/null med en drill som loggar
+      // utan nivå = fel ("drill som glömmer nivån" ska förbli ett grindfel). Statiskt oavgjorda (dispatch) undantas.
+      const deklarerad = vis.niva != null ? vis.niva : null;
+      if (body && tak.tak != null) {
+        if (deklarerad === 1 && tak.tak > 1) flaggor.push('NIVA1-MEN-KLÄTTRAR');
+        if (deklarerad !== 1 && tak.tak === 1 && !bandR && !vis.kommer) flaggor.push('ENNIVÅ');   // loggar niva null men noden deklarerar nivåer → aldrig grön i åttan
+      }
+      if (deklarerad !== 1 && tak.tak != null && band != null && tak.tak > 1 && tak.tak < band) flaggor.push('TAK<BAND');
       if (tak.tak != null && band != null && tak.tak > band) flaggor.push('TAK>BAND');
       // nivåer-kolumnen är INFO, ingen flagga: `level===1 ? … : level===2 ? … : …` har tre grenar men bara literalerna 1 och 2
       if (evidens && /^NEJ/.test(evidens)) flaggor.push('EVIDENS?');
       if (ls.length > 1) flaggor.push('DUBBEL');
       if (!body) flaggor.push('?');
-      rows.push({ kap, nod: noder[nod].id, fn: l.fn + (l.args && l.args.length ? '(' + l.args.join(',') + ')' : '') + (via ? ' → ' + via : ''), tak: tak.tak, takKalla: tak.kalla, nivaer, band, bandKalla: bandR ? 'UPPST_BAND.' + bandR : (vis.niva != null ? 'visning.niva' : 'default'), evidens, flaggor });
+      rows.push({ kap, nod: noder[nod].id, deklarerad, fn: l.fn + (l.args && l.args.length ? '(' + l.args.join(',') + ')' : '') + (via ? ' → ' + via : ''), tak: tak.tak, takKalla: tak.kalla, nivaer, band, bandKalla: bandR ? 'UPPST_BAND.' + bandR : (vis.niva != null ? 'visning.niva' : 'default'), evidens, flaggor });
     });
   });
 });
@@ -169,5 +176,5 @@ console.log('NIVÅTAK-SVEP — ' + rows.length + ' deeplinkar (k1/k2/k3) · ' + 
 console.log('kap  nod                                 render                              tak  (källa)            nivåer  band (källa)         evidens         flaggor');
 (ALLA ? rows : fel).forEach(r => console.log(r.kap.padEnd(4) + ' ' + r.nod.padEnd(35) + ' ' + r.fn.slice(0, 35).padEnd(35) + ' ' + String(r.tak == null ? '?' : r.tak).padEnd(4) + ' ' + ('(' + r.takKalla + ')').padEnd(20) + ' ' + String(r.nivaer == null ? '?' : r.nivaer).padEnd(7) + ' ' + (r.band + ' (' + r.bandKalla + ')').padEnd(20) + ' ' + String(r.evidens).padEnd(15) + ' ' + r.flaggor.join(' ')));
 if (saknade.length) { console.log('\nKort utan deeplink-post i rammen (' + saknade.length + '):'); saknade.forEach(x => console.log('  ' + x)); }
-console.log('\nSumma: ' + rows.length + ' rader · flaggor: ' + ['TAK<BAND', 'TAK>BAND', 'NIVÅER<TAK', 'ENNIVÅ', 'EVIDENS?', 'DUBBEL', '?'].map(f => f + ' ' + rows.filter(r => r.flaggor.includes(f)).length).join(' · '));
+console.log('\nSumma: ' + rows.length + ' rader · flaggor: ' + ['TAK<BAND', 'TAK>BAND', 'ENNIVÅ', 'NIVA1-MEN-KLÄTTRAR', 'EVIDENS?', 'DUBBEL', '?'].map(f => f + ' ' + rows.filter(r => r.flaggor.includes(f)).length).join(' · '));
 }

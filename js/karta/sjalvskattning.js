@@ -167,8 +167,17 @@
       });
     }); }
 
+    // Nivåkrav PER NOD (order 2026-09-19): minNiva gäller bara noder som har nivåer. visning.niva är nodens
+    // nivåantal (null = ramens 3; hubben skickar ?maxniva= när < 3). En-nivå-nod (1) → inget nivåkrav — dess
+    // drill loggar utan nivå, och att kräva tre nivåer av något som har en är omöjligt. Tvånivå-nod → kravet
+    // är toppen (2). Utan minNiva (åk7/åk9) → null som förr. masteryState rörs inte.
+    function kravNiva(node, minNiva){
+      if(minNiva == null) return null;
+      var nodMax = (node && node.visning && node.visning.niva != null) ? node.visning.niva : 3;
+      return nodMax === 1 ? null : Math.min(minNiva, nodMax);
+    }
     // Evidens för en k2-lövnod (0–3) eller en k1-delatMed-nod (ur k1-loggen).
-    function evidensK2(id){ if(DEMO) return demoEv[id] != null ? demoEv[id] : 0; return MAST.masteryState((MAST.lasMatris() || {})[id], PREF.minNiva); }
+    function evidensK2(id){ if(DEMO) return demoEv[id] != null ? demoEv[id] : 0; return MAST.masteryState((MAST.lasMatris() || {})[id], kravNiva(byId[id], PREF.minNiva)); }
     function evidensK1(id){ if(DEMO) return 3; return K1 ? K1.masteryState((K1.lasMatris() || {})[id], null) : 0; }
 
     // Förmåge-dimensionen: belief-only-förmågor (modulen) + alla i-scope lövnoder som bär
