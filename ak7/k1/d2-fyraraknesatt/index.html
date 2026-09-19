@@ -22,6 +22,19 @@
   --cinzel:'Cinzel', 'Times New Roman', serif;
   --body:'Source Serif 4', Georgia, serif;
 }
+/* Variabler som motorns CSS refererar till (.ovn-in, .ovn-sammanf.delvis, .ovn-in.enhet.correct m.fl.) men som saknades
+   i den här sidfamiljen — bråksidorna fick dem 2025, k1-sidorna aldrig: .ovn-in hade INGEN kant här (border: none).
+   Samma block som i bråksidorna. Rättat 2026-09-20. */
+:root{
+  --c-rakna:#16a34a;
+  --success:#16a34a; --success-bg:#dcfce7;
+  --error:#dc2626;   --error-bg:#fee2e2;
+  --bg-warm:#f3ecdd;
+  --mono:'Source Serif 4',Georgia,serif;
+  --rod:#b23b2e; --rod-lt:#c0392b;
+  --las:#9a9388;
+}
+
 .placeholder-note{
   display:flex;gap:13px;align-items:flex-start;
   background:var(--paper-dk);border-radius:5px;padding:15px 17px;
