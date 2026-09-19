@@ -112,7 +112,9 @@ function renderPrimtalKomm(body){
     if(omgangResults.length >= OMGANG_SIZE){
       showOmgangSummary();
     } else {
-      if(level<3 && Math.random()<0.5) level++;
+      // Nivån flyttas BARA av adjustLevel vid summary-kortet. Förr höjdes den här slumpvis (50 %) efter varje
+      // uppgift, oavsett rätt/fel → slumpen läckte in i mastery-loggen via __aktuellNiva (ett rätt svar på ett
+      // slumpat nivå-3-tal loggades som nivå-3-evidens, som räknas mot grönt i åttans karta). Order 2026-09-19.
       start();
     }
   }
