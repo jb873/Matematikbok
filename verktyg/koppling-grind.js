@@ -221,7 +221,7 @@ function deeplink() {
 
 // ── Kör ─────────────────────────────────────────────────────────────────────────────────────────
 const tax = taxonomi();
-const bara = process.argv.find(a => a === '--bakat' || a === '--framat' || a === '--deeplink');
+const bara = process.argv.find(a => a === '--bakat' || a === '--framat' || a === '--deeplink' || a === '--nivatak');
 let fel = 0;
 
 if (!bara || bara === '--bakat') {
@@ -275,6 +275,27 @@ if (!bara || bara === '--deeplink') {
   if (!o.brott.length) console.log('  ✓ ingen byggd drill saknar visning (' + o.undantag.length + ' pickers/aggregat undantagna).');
   else { console.log('  ✗ byggda drillar som ingen hub kan lista (sätt visning i taxonomin):'); o.brott.forEach(id => console.log('      ' + id)); fel += o.brott.length; }
   o.undantag.forEach(u => console.log('  ⓘ undantag: ' + u));
+}
+
+if (!bara || bara === '--nivatak') {
+  // ── NIVÅTAK: drillens nivåtak = nodens band · drillen loggar nodens egen nyckel ──────────────────
+  // Ur verktyg/nivatak-svep.js (statisk läsning av deeplinkens render-funktion). Fäller på det som går
+  // att avgöra statiskt: (1) nod med band (UPPST_BAND) vars drill-tak ≠ bandets nivåantal — lägre tak =
+  // evidensen når aldrig bandets topp (add-metoder:uppstallning-fallet 2026-09-19), högre = loggar nivåer
+  // bandet inte känner; (2) drill vars getTutorScore-nycklar alla är literaler och ingen är nodens
+  // (evidensen når aldrig noden — talsorterna/uppstallning-stora-fallen). Dispatch-på-argument och
+  // variabel-nycklar rapporteras som ⓘ: de kräver dispatch-som-data för att bli grindbara.
+  const sv = require(path.join(__dirname, 'nivatak-svep.js'));
+  const takBrott = sv.rows.filter(r => /^UPPST_BAND/.test(r.bandKalla) && (r.tak == null || r.tak !== r.band));
+  const nyckelBrott = sv.rows.filter(r => /^NEJ/.test(String(r.evidens)));
+  const oavgjorda = sv.rows.filter(r => r.flaggor.includes('?') || /via variabel/.test(String(r.evidens)));
+  console.log('\n── NIVÅTAK: drillens tak = nodens band · nodens nyckel loggas ──');
+  if (!takBrott.length) console.log('  ✓ alla ' + sv.rows.filter(r => /^UPPST_BAND/.test(r.bandKalla)).length + ' band-noder: drillens tak = bandets nivåantal.');
+  else { takBrott.forEach(r => console.log('  ✗ ' + r.nod + ': drillens tak ' + (r.tak == null ? 'ej läsbart' : r.tak) + ' (' + r.takKalla + ') ≠ bandets ' + r.band + ' (' + r.bandKalla + ') — ' + r.fn)); fel += takBrott.length; }
+  if (!nyckelBrott.length) console.log('  ✓ ingen drill loggar bara andra nycklar än nodens (' + sv.rows.filter(r => r.evidens === 'ja').length + ' bekräftade literalt).');
+  else { nyckelBrott.forEach(r => console.log('  ✗ ' + r.nod + ': ' + r.evidens + ' — ' + r.fn)); fel += nyckelBrott.length; }
+  if (oavgjorda.length) console.log('  ⓘ statiskt oavgjorda (dispatch på argument / nyckel via variabel): ' + oavgjorda.length + ' — se node verktyg/nivatak-svep.js');
+  if (sv.saknade.length) { console.log('  ✗ kort utan deeplink-post: ' + sv.saknade.join(', ')); fel += sv.saknade.length; }
 }
 
 console.log('\n────────────────────────────────────────');
