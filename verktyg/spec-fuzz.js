@@ -19,7 +19,7 @@ const N = 60; // prov per generator/profil (täckningskrav behöver spann)
 const ramLines = fs.readFileSync(path.join(ROOT, 'ak7-k1-ram.html'), 'utf8').split(/\r?\n/);
 // Marker-baserad extraktion (tål radförskjutning när generatorer redigeras):
 const findIdx = (re, from) => { for (let i = from || 0; i < ramLines.length; i++) if (re.test(ramLines[i])) return i; return -1; };
-const hStart = findIdx(/^function isPrime\(n\)\{/);
+const hStart = findIdx(/^function rInt\(a,b\)\{/);   // isPrime m.fl. bor sedan d375c9f i metod-karna.js — helper-blocket i ramen börjar vid rInt
 const hEnd   = findIdx(/^function avr\(x,d\)\{/, hStart);            // sista hjälparen i blocket
 const tgStart = findIdx(/^const TEST_GENERATORS = \{/);
 const gnStart = findIdx(/^const GEN_NOD = \{/);
@@ -36,6 +36,7 @@ sandbox.window.document = documentStub;
 vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/provbyggare/provbyggar-motor.js'), 'utf8'), sandbox);
 sandbox.ProvbyggarMotor = sandbox.window.ProvbyggarMotor;
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/motor/metod/metod-karna.js'), 'utf8'), sandbox);   // isPrime/gcd/distinktOmgang — flyttade ur ramen (d375c9f)
 vm.runInContext(HELPERS + '\n' + TESTGEN + '\n' + GENNOD +
   '\nwindow.__TG = TEST_GENERATORS; window.__GN = GEN_NOD;', sandbox);
 const TG = sandbox.window.__TG, GN = sandbox.window.__GN;
