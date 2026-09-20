@@ -655,6 +655,7 @@ function renderFlyttaOver(body, metod, backFn){
       document.getElementById('fo-check').disabled=true;
 
       var ts = getTutorScore('add-metoder','metod'); ts.total++;
+      var tsG = getTutorScore('add-metoder','flytta-over'); tsG.total++;   // nodens nyckel (add-metoder:flytta-over) — mastery-proxyn loggar bara URL:ens ko:formaga
       var flyttStammer = flytt>0 && ((near(aVal,a+flytt) && near(bVal,b-flytt)) || (near(aVal,a-flytt) && near(bVal,b+flytt)));
       var mellanledOK  = !isNaN(aVal) && !isNaN(bVal) && near(aVal+bVal, answer);
       var sumOK        = !isNaN(sumVal) && near(sumVal, answer);
@@ -664,7 +665,7 @@ function renderFlyttaOver(body, metod, backFn){
         fb.classList.add('correct');
         fb.textContent = (flyttStammer ? 'Rätt! Du flyttade '+fmt(flytt)+'. ' : 'Rätt! ')
           + fmt(a)+' + '+fmt(b)+' = '+fmt(aVal)+' + '+fmt(bVal)+' = '+fmt(answer)+' ✓';
-        ts.correct++; nasta(true);
+        ts.correct++; tsG.correct++; nasta(true);
       } else if(mellanledOK && !sumOK){
         mlA.classList.add('correct'); mlB.classList.add('correct'); mlSum.classList.add('wrong');
         fb.classList.add('wrong');

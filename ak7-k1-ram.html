@@ -2610,6 +2610,7 @@ const FORMAGOR = {
   lang:         {label:'Lång division',       tagClass:'tag-metod', pillClass:'p-metod'},
   // Karta-noder → öva-blad (add-metoder:* / mult-metoder:*): deeplink ?formaga=<nyckel> in i rätt metod
   talsorterna:         {label:'Talsorterna var för sig',   tagClass:'tag-metod', pillClass:'p-metod'},
+  'flytta-over':       {label:'Flytta över',               tagClass:'tag-metod', pillClass:'p-metod'},   // nod add-metoder:flytta-over (2026-09-20)
   'uppstallning-stora':{label:'Uppställning · större tal',  tagClass:'tag-metod', pillClass:'p-metod'},
   dubbla:              {label:'Dubbla och halvera',         tagClass:'tag-metod', pillClass:'p-metod'},
   faktorer:            {label:'Dela upp i faktorer',        tagClass:'tag-metod', pillClass:'p-metod'},
@@ -4439,6 +4440,10 @@ const TEST_GENERATORS = {
 // Färdighetsträningens drill loggar till. Det är kopplingen som gör att ett prov färgar rätt cell
 // på kartan trots att generatorn är egen (Väg A). Ny generator → lägg till en rad här.
 // Uppställningens metod-objekt (beskrivning = elevtext i förklaringssteget, samma som Metod-väljarens kort)
+// Flytta över: metod-objektet ur Metod-väljaren (metod-addsub METODER) — beskrivningen är dess elevtext
+const ADD_FLYTTA_METOD = { id:'flytta-over', namn:'Flytta över', icon:'⚖️', kortBeskrivning:'Flytta ett värde från ena talet till det andra – summan ändras inte.',
+  beskrivning:'Flytta ett värde från det ena talet till det andra. Välj ett mellanled som gör uträkningen enklare. Exempel: 105 + 97 -> 102 + 100 = 202.' };
+function renderUppstFlyttaOver(b, back){ return renderFlyttaOver(b, ADD_FLYTTA_METOD, back); }
 const ADD_UPPST_METOD = { id:'uppstallning', namn:'Uppställning', icon:'📐', kortBeskrivning:'Lägg talen under varandra, räkna ental, tiotal, hundratal.',
   beskrivning:'Den klassiska metoden. Skriv talen under varandra och börja räkna från höger (entalen). Om summan är ≥ 10 skriver du ental och för över en minnessiffra till nästa position.' };   // ordagrant Metod-väljarens text (metod-addsub METODER)
 const GEN_NOD = {
@@ -5147,7 +5152,8 @@ const OVNING_RENDERS = {
     // renderAddUppstallning (ingen decimalcell → tak 2 mot bandets 4 → noden kunde aldrig nå minNiva 3 i
     // åttans karta). Pensionerad 2026-09-19.
     uppstallning: (b)=> renderUppstallningAdd(b, ADD_UPPST_METOD, ()=> renderAddMetod(b)),
-    talsorterna:  (b)=> renderTalsorternaAdd(b, null, ()=> renderAddMetod(b))   // karta-nod add-metoder:talsorterna (öva-täckt, ingen drill)
+    talsorterna:  (b)=> renderTalsorternaAdd(b, null, ()=> renderAddMetod(b)),   // karta-nod add-metoder:talsorterna (öva-täckt, ingen drill)
+    'flytta-over': (b)=> renderUppstFlyttaOver(b, ()=> renderAddMetod(b))          // FLYTTA ÖVER som kort (order 2026-09-20): rika drillen (metod-addsub), samma som Metod-väljaren
   },
   // Addition - KO 4: Problemlösning
   'add-problem':{
@@ -6831,22 +6837,8 @@ function renderAddMetoder(body){
       return {leftText: a + ' + ' + b + ' =', answerNum: a + b};
     }
   };
-  const FLYTTAOVER = {
-    header:'Metod · flytta över', formagaKey:'metod', koId:'add-metoder', scoreKey:'flyttaover',
-    sub:'Flytta över så att den ena termen blir ett jämnt tiotal.',
-    instr:'Skriv mellanledet och svaret, t.ex. 28 + 7 = 30 + 5 = 35.',
-    placeholder:'t.ex. 30 + 5 = 35', ops:['+','='], backLabel:'Tillbaka till metoder',
-    exempel:'<strong>Så funkar det:</strong> Fyll upp till närmaste tiotal och lägg sedan på resten.<br>'
-      + '<span class="ex-rad">28 + 7 = 30 + 5 = 35</span><br>'
-      + '<span class="ex-rad">56 + 8 = 60 + 4 = 64</span>',
-    gen:function(level){
-      let a, b;
-      if(level === 1){ a = nzTva(13,48); const ua = a%10; b = d3RandInt(Math.max(3,11-ua),9); }
-      else if(level === 2){ a = nzTva(43,88); const ua = a%10; b = d3RandInt(Math.max(3,11-ua),9); }
-      else { a = nzTva(115,488); const ua = a%10; b = d3RandInt(Math.max(4,11-ua),9); }
-      return {leftText: a + ' + ' + b + ' =', answerNum: a + b};
-    }
-  };
+  // FLYTTAOVER (enrads-kopia av flytta över, ensiffrig term: 28 + 7 = 30 + 5) pensionerad 2026-09-20 — kortet och
+  // Metod-väljaren går till den rika drillen renderFlyttaOver (metod-addsub), som är öva-bladets form (två termer, gap 1–3).
   const NEGATIVA = {
     header:'Metod · addition med negativa tal', formagaKey:'metod', koId:'add-metoder', scoreKey:'negativa',
     sub:'Lägg ihop tal som kan vara negativa. Tänk på tallinjen.',
@@ -6897,7 +6889,7 @@ function renderAddMetoder(body){
         const m = btn.dataset.metod;
         if(m === 'uppstallning') renderUppstallningAdd(body, ADD_UPPST_METOD, renderPicker);
         else if(m === 'talsorterna') renderAddEnrad(body, TALSORTERNA, renderPicker);
-        else if(m === 'flyttaover') renderAddEnrad(body, FLYTTAOVER, renderPicker);
+        else if(m === 'flyttaover') renderUppstFlyttaOver(body, renderPicker);   // enrads-kopian FLYTTAOVER pensionerad 2026-09-20 → rika drillen
         else renderAddSingle(body, NEGATIVA, renderPicker);
       };
     });

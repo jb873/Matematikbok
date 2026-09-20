@@ -848,6 +848,18 @@ window.K1_TAXONOMI = {
       "visning": { "utbudslista": "d2", "grupp": "Addition", "gruppordning": 0, "radordning": 2.1, "etikett": "metod", "formagaKey": "talsorterna", "niva": null }
     },
     {
+      "id": "add-metoder:flytta-over",
+      "namn": "Flytta över",
+      "parent": "add-metoder",
+      "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" },
+      "nivamodell": "nytt", "roll": "breddning",
+      "formaga": "METOD",
+      "generator": "renderFlyttaOver",
+      "begrepp": "Flytta ett värde från den ena termen till den andra så att en term blir ett jämnt tiotal – summan ändras inte.",
+      "visning": { "utbudslista": "d2", "grupp": "Addition", "gruppordning": 0, "radordning": 2.2, "etikett": "metod", "formagaKey": "flytta-over", "niva": null }
+    },
+    {
       "id": "add-problem",
       "namn": "Problemlösning",
       "parent": "addition",
