@@ -1031,24 +1031,17 @@ function renderUppstallningSubEnkel(body, metod, backFn){
 function renderOkaMinska(body, metod, backFn){
   let level = 1;
   let omgangResults = [];
-  const OMGANG = 6;
-
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND['oka-minska'] (Joachims band, order 2026-09-20): subtrahendens
+  // flyttsiffra ≥ 6, växling krävs, 16–19-profil, nivå 2 tresiffrigt + tusental, nivå 3 tiondelar + hundradelar. Förr lokala
+  // intervall utan villkor mellan entalen (48 − 38) och flytt åt båda hållen. Uppgiften är mantissor + dec: a/b/answer/flytt
+  // i heltal, dec skalar dem — rättningen räknar i mantissa så 0,3 + 0,3 aldrig blir ett flyttalsfel.
+  const BAND = UppstBand.band('oka-minska'), MAXN = UppstBand.maxNiva('oka-minska');
+  const OMGANG = BAND.omgang || 6;
+  const vakt = ExempelVakt.skapa('sub-metoder:okaminska', metod && metod.beskrivning);   // exempelvakten (inget räknat exempel i dag)
+  let ko = [];
   function newTask(){
-    const ranges = [
-      { aLo:30, aHi:99,  bLo:9,  bHi:49  },
-      { aLo:100,aHi:399, bLo:19, bHi:199 },
-      { aLo:200,aHi:999, bLo:49, bHi:499 }
-    ];
-    const r = ranges[Math.min(level-1, 2)];
-    for(let i=0; i<300; i++){
-      const a = r.aLo + Math.floor(Math.random()*(r.aHi-r.aLo+1));
-      const b = r.bLo + Math.floor(Math.random()*(Math.min(r.bHi,a-5)-r.bLo+1));
-      if(b >= a) continue;
-      const bMod = b % 10;
-      if(a - b < 8) continue;
-      if(bMod >= 7 || (bMod >= 1 && bMod <= 3)) return {a, b, answer: a-b};
-    }
-    return [{a:62,b:29,answer:33},{a:156,b:79,answer:77},{a:534,b:298,answer:236}][Math.min(level-1,2)];
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang('oka-minska', level, OMGANG, vakt); ko.lvl = level; }   // distinkt omgång ur bandet
+    return ko.shift();
   }
 
   let task = newTask();
@@ -1056,12 +1049,13 @@ function renderOkaMinska(body, metod, backFn){
 
   function render(){
     uppgNr++;
-    const {a, b, answer} = task;
-    const lvlSub = level===1 ? 'Tvåsiffriga tal' : level===2 ? 'Tresiffriga tal' : 'Blandade tal';
+    const {a, b, answer, dec, flytt} = task;
+    const sc = Math.pow(10, dec || 0), F = m => UppstBand.decStr(m, dec || 0);   // mantissa → elevformat (enhetligt antal decimaler)
+    const lvlSub = BAND.namn[level] || ('Nivå ' + level);
 
     body.innerHTML =
       '<div class="exercise-card">'
-      + exerciseHeader('Metod · öka och minska lika', lvlSub + ' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level)
+      + exerciseHeader('Metod · öka och minska lika', lvlSub + ' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level, MAXN)
       + '<div class="metod-explain-card">'
         + (uppgNr<=2 ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:20px;font-size:13px;line-height:1.6;">'
           + 'Skriv ett mellanled på raden. Visa <strong>vad du gör</strong> genom att skriva t.ex. <strong>+1</strong> eller <strong>−2</strong> i rutan ovanför det första uttrycket.'
@@ -1078,15 +1072,15 @@ function renderOkaMinska(body, metod, backFn){
             + '<div style="grid-column:4/10"></div>'
 
             // Rad 2: hela uttrycket
-            + '<span class="om-sub-num">' + a + '</span>'
+            + '<span class="om-sub-num">' + F(a) + '</span>'
             + '<span class="om-sub-op">−</span>'
-            + '<span class="om-sub-num">' + b + '</span>'
+            + '<span class="om-sub-num">' + F(b) + '</span>'
             + '<span class="om-sub-op om-sub-eq">=</span>'
-            + '<input type="text" class="om-sub-input" id="om-new-a" inputmode="numeric" maxlength="6" placeholder="___">'
+            + '<input type="text" class="om-sub-input" id="om-new-a" inputmode="decimal" maxlength="7" placeholder="___">'
             + '<span class="om-sub-op">−</span>'
-            + '<input type="text" class="om-sub-input" id="om-new-b" inputmode="numeric" maxlength="6" placeholder="___">'
+            + '<input type="text" class="om-sub-input" id="om-new-b" inputmode="decimal" maxlength="7" placeholder="___">'
             + '<span class="om-sub-op om-sub-eq">=</span>'
-            + '<input type="text" class="om-sub-input om-sub-ans" id="om-final" inputmode="numeric" maxlength="6" placeholder="?">'
+            + '<input type="text" class="om-sub-input om-sub-ans" id="om-final" inputmode="decimal" maxlength="7" placeholder="?">'
 
           + '</div>'
         + '</div>'
@@ -1121,10 +1115,12 @@ function renderOkaMinska(body, metod, backFn){
     document.getElementById('om-back').onclick  = backFn;
 
     function check(){
+      // Allt i MANTISSA: "0,3" → 3 på tiondelsnivå, "54" → 54 på heltalsnivå
+      const toM = v => { const t = String(v).trim().replace(',', '.'); if(t === '') return NaN; const x = parseFloat(t); return isNaN(x) ? NaN : Math.round(x * sc); };
       const raw    = annotInp.value.trim();
-      const aVal   = parseInt(newAInp.value);
-      const bVal   = parseInt(newBInp.value);
-      const finVal = parseInt(finalInp.value);
+      const aVal   = toM(newAInp.value);
+      const bVal   = toM(newBInp.value);
+      const finVal = toM(finalInp.value);
 
       const fb = document.getElementById('fb-om');
       fb.classList.remove('correct','wrong'); fb.classList.add('show');
@@ -1135,7 +1131,7 @@ function renderOkaMinska(body, metod, backFn){
       const tsGOM = getTutorScore('sub-metoder','okaminska'); tsGOM.total++;
 
       // Parsa annotering: "+1", "-2", "1" etc.
-      const delta    = parseInt(raw.replace('+',''));
+      const delta    = toM(raw.replace('+',''));
       const deltaOK  = !isNaN(delta) && delta !== 0 && aVal===a+delta && bVal===b+delta;
       const midledOK = !isNaN(aVal) && !isNaN(bVal) && (aVal - bVal === answer);
       const finalOK  = !isNaN(finVal) && finVal === answer;
@@ -1144,23 +1140,21 @@ function renderOkaMinska(body, metod, backFn){
         allInps.forEach(i => i.classList.add('correct'));
         fb.classList.add('correct');
         fb.textContent = (deltaOK?'Rätt! ':'Rätt svar! ')
-          + a + ' − ' + b + ' = ' + aVal + ' − ' + bVal + ' = ' + answer + ' ✓';
+          + F(a) + ' − ' + F(b) + ' = ' + F(aVal) + ' − ' + F(bVal) + ' = ' + F(answer) + ' ✓';
         ts.correct++; tsGOM.correct++;
         omgangResults.push(true);
       } else if(midledOK && !finalOK){
         newAInp.classList.add('correct'); newBInp.classList.add('correct');
         finalInp.classList.add('wrong');
         fb.classList.add('wrong');
-        fb.textContent = 'Mellanledet stämmer! Men ' + aVal + ' − ' + bVal + ' = ' + answer + ', inte ' + finVal + '.';
+        fb.textContent = 'Mellanledet stämmer! Men ' + F(aVal) + ' − ' + F(bVal) + ' = ' + F(answer) + ', inte ' + (isNaN(finVal) ? '(tomt)' : F(finVal)) + '.';
         omgangResults.push(false);
       } else {
         [newAInp,newBInp,finalInp].forEach(i => i.classList.add('wrong'));
-        const bMod = b % 10;
-        const hint = bMod >= 7
-          ? 'Lägg till '+(10-bMod)+' på båda: '+(a+(10-bMod))+' − '+(b+(10-bMod))
-          : 'Ta bort '+bMod+' från båda: '+(a-bMod)+' − '+(b-bMod);
+        // bandet gör alltid flytten UPPÅT till nästa runda tal (flytt = 10 − subtrahendens flyttsiffra)
+        const hint = 'Lägg till ' + F(flytt) + ' på båda: ' + F(a + flytt) + ' − ' + F(b + flytt);
         fb.classList.add('wrong');
-        fb.textContent = 'Mellanledet stämmer inte. Tips: ' + hint + ' = ' + answer + '.';
+        fb.textContent = 'Mellanledet stämmer inte. Tips: ' + hint + ' = ' + F(answer) + '.';
         omgangResults.push(false);
       }
 
@@ -1174,14 +1168,14 @@ function renderOkaMinska(body, metod, backFn){
   function showSummary(){
     const right = omgangResults.filter(x=>x).length;
     const total = omgangResults.length;
-    const adj   = adjustLevel(level, right, total);
+    const adj   = adjustLevel(level, right, total, null, MAXN);
     level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · öka och minska lika','Du klarade '+right+' av '+total+'.',level)
+      + exerciseHeader('Metod · öka och minska lika','Du klarade '+right+' av '+total+'.',level, MAXN)
       + renderSummaryCard({right, total, level, levelChange:adj.change})
       + '</div>';
     document.getElementById('summary-next-btn').onclick = () => {
-      omgangResults=[]; task=newTask(); render();
+      omgangResults=[]; ko=[]; task=newTask(); render();   // ny omgång = ny kö ur bandet
     };
   }
 
@@ -1190,42 +1184,33 @@ function renderOkaMinska(body, metod, backFn){
 
 // --- SUB METOD: ADDITION BAKIFRÅN ---
 function renderAdditionBakifran(body, metod, backFn){
-  let level = 1;                 // 1: tvåsiffrigt · 2: hundra/tusental · 3: decimaltal
-  let omgangResults = [];
-  let uppgNr = 0;                // totalt i sessionen – Idén-rutan visas bara de 2 första
-  const OMGANG = 5;
-  function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
-  function fmt(n){ return String(n).replace('.', ','); }
-  function lvlNamn(l){ return l===1 ? 'Tvåsiffriga tal' : l===2 ? 'Hundratal och tusental' : 'Decimaltal'; }
-
-  // b måste ha ett ental/tiondel att kliva från (b%10≠0) och det ska finnas rum för två steg.
+  let level = 1, omgangResults = [], uppgNr = 0;   // uppgNr: totalt i sessionen – Idén-rutan visas bara de 2 första
+  // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.bakifran (Joachims band, order 2026-09-20): växling krävs, första
+  // hoppet ≥ 3, minuenden slutar inte på 0, inget tak på resten (fri stegindelning), nivå 2 tresiffrigt + tusental, nivå 3
+  // tiondelar + hundradelar med differens ≥ 2 hela enheter. Förr lokala intervall utan villkor mellan entalen, bara tiondelar.
+  const BAND = UppstBand.band('bakifran'), MAXN = UppstBand.maxNiva('bakifran');
+  const OMGANG = BAND.omgang || 5;
+  const vakt = ExempelVakt.skapa('sub-metoder:bakifran', metod && metod.beskrivning);   // exempelvakten (inget räknat exempel i dag)
+  let ko = [], task = null;
+  // Elevformat med uppgiftens antal decimaler — enhetligt: 11,0 − 7,9, inte 11 − 7,9
+  function fmt(n){ const d = task ? task.dec : 0; return UppstBand.decStr(Math.round(n * Math.pow(10, d)), d); }
+  function lvlNamn(l){ return BAND.namn[l] || ('Nivå ' + l); }
   function newTask(lvl){
-    const dec = lvl===3 ? 1 : 0, scale = dec===1 ? 10 : 1;
-    for(let i=0;i<400;i++){
-      let aS, bS;
-      if(lvl===1){ aS = rnd(23,99);    bS = rnd(11, aS-6); }
-      else if(lvl===2){ aS = rnd(220,9989); bS = rnd(101, aS-31); }
-      else { aS = rnd(41,400); bS = rnd(13, aS-6); }        // i tiondelar → 4,1–40,0
-      if(bS % 10 === 0) continue;
-      const nextS = Math.ceil(bS/10)*10;
-      if(nextS >= aS) continue;
-      if(aS - bS < (lvl===2 ? 40 : 5)) continue;
-      return { a:aS/scale, b:bS/scale, answer:(aS-bS)/scale, dec:dec,
-               nextTio:nextS/scale, steg1:(nextS-bS)/scale, steg2:(aS-nextS)/scale };
-    }
-    return dec===1 ? { a:8.3,b:2.6,answer:5.7,dec:1,nextTio:3,steg1:0.4,steg2:5.3 }
-                   : { a:43,b:17,answer:26,dec:0,nextTio:20,steg1:3,steg2:23 };
+    if(!ko.length || ko.lvl !== lvl){ ko = UppstBand.omgang('bakifran', lvl, OMGANG, vakt); ko.lvl = lvl; }   // distinkt omgång ur bandet
+    const t = ko.shift(), sc = Math.pow(10, t.dec || 0);
+    return { a:t.a / sc, b:t.b / sc, answer:t.answer / sc, dec:t.dec || 0,
+             nextTio:t.nextTio / sc, steg1:t.flytt / sc, steg2:(t.a - t.nextTio) / sc };   // exempelvägen i tipset (eleven väljer sina egna hopp)
   }
-  let task = newTask(level);
+  task = newTask(level);
 
   function showSummary(){
     const right = omgangResults.filter(x=>x).length, total = omgangResults.length;
-    const adj = adjustLevel(level, right, total); level = adj.level;
+    const adj = adjustLevel(level, right, total, null, MAXN); level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader('Metod · addition bakifrån', 'Du klarade '+right+' av '+total+'.', level)
+      + exerciseHeader('Metod · addition bakifrån', 'Du klarade '+right+' av '+total+'.', level, MAXN)
       + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
       + '</div>';
-    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; task=newTask(level); render(); };
+    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; ko=[]; task=newTask(level); render(); };   // ny omgång = ny kö ur bandet
   }
 
   // FRI STEGINDELNING (order 2026-09-20): eleven väljer själv antalet hopp — minst två — och rättningen godtar VARJE
@@ -1245,7 +1230,7 @@ function renderAdditionBakifran(body, metod, backFn){
 
     body.innerHTML = `
       <div class="exercise-card">
-        ${exerciseHeader('Metod · addition bakifrån', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level)}
+        ${exerciseHeader('Metod · addition bakifrån', lvlNamn(level)+' · Uppgift '+(omgangResults.length+1)+' av '+OMGANG, level, MAXN)}
         <div class="metod-explain-card">
           ${visaIde ? `<div style="background:var(--bg-warm);padding:14px;border-radius:var(--radius);margin-bottom:16px;font-size:13px;">
             <strong>Idén:</strong> Istället för att subtrahera räknar vi hur mycket vi måste lägga till för att komma från <strong>${fmt(b)}</strong> till <strong>${fmt(a)}</strong>.

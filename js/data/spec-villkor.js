@@ -201,6 +201,40 @@
         2: { arv:1, taljare:{min:335,max:999}, minnessiffra:true, struktur:'minst en minnessiffra/rest att bära vidare (drillens krav, ärvs av nivå 3)' },
         3: { arv:2, blandning:{ perOmgang:'alla', profiler:[ { taljare:{min:1235,max:4999} }, { taljare:{min:5000,max:9999} } ] } }   // tusental genomgående (J.B. 2026-09-19): >534-profilen gav nivå 2-tal när storleken bärs av EN operand
       }
+    },
+    'oka-minska': {   // sub-metoder:okaminska — öka och minska lika: båda termerna flyttas lika mycket så att SUBTRAHENDEN blir ett runt tal
+      // FLYTTSIFFRA = siffran i den position som flyttas upp: entalet för heltal, tiondelen för tiondelar, hundradelen för hundradelar.
+      // Subtrahendens flyttsiffra ≥ min gör flytten liten (52 − 38 → 54 − 40; 52 − 31 lönar sig inte). vaxling:true är ett
+      // villkor MELLAN operanderna: minuendens flyttsiffra < subtrahendens — växling krävs (99 − 67 går rakt fram, 48 − 38 är
+      // redan klar). Hundradelar: flytten går till NÄSTA TIONDEL (15,02 → 15,10 är fullgott; 9,91 → 10 var ett exempel, inte regeln).
+      kalla: 'Joachim 2026-09-20: subtrahenden ≥ 16 med ental ≥ 6, växling krävs; profil 16–19 så de små syns; nivå 2 tresiffrigt och tusental (samma svårighet); nivå 3 tiondelar (siffra ≥ 6) och hundradelar (ingen gräns) blandade',
+      namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal och tusental', 3:'Decimaltal' },
+      omgang: 6,
+      nivaer: {
+        1: { subtrahend:{min:16,max:89}, minuend:{max:99}, flyttsiffra:{min:6}, vaxling:true, resultat:{ differens:{min:11} },
+             blandning:{ perOmgang:'alla', profiler:[ { subtrahend:{min:16,max:19} }, { subtrahend:{min:26,max:89} } ] } },   // 16–19 i varje omgång: flytten till 20 är kort och vinsten uppenbar (J.B.)
+        2: { arv:1, minuend:{max:9999}, blandning:{ perOmgang:'alla', profiler:[ { subtrahend:{min:116,max:989} }, { subtrahend:{min:1006,max:9989} } ] } },   // tresiffrigt OCH tusental i samma omgång
+        3: { arv:1, blandning:{ perOmgang:'alla', profiler:[   // decimaler = ny sorts svårighet → sist; mantissor i heltal, decimaler skalar (16–999 tiondelar = 1,6–99,9)
+              { decimaler:{min:1,max:1}, subtrahend:{min:16,max:989},   minuend:{max:999} },                          // tiondelar: flyttsiffra ≥ 6 ärvs (9,7 ja, 9,2 nej)
+              { decimaler:{min:2,max:2}, subtrahend:{min:116,max:9989}, minuend:{max:9999}, flyttsiffra:{min:1} } ] } }   // hundradelar: ingen gräns (flytten till nästa tiondel ≤ 0,09), bara inte 0
+      }
+    },
+    bakifran: {   // sub-metoder:bakifran — addition bakifrån: från subtrahenden i hopp uppåt till minuenden (fri stegindelning, order 2026-09-20)
+      // Samma flyttsiffra-begrepp som oka-minska. vaxling:true = minuendens flyttsiffra < subtrahendens (går subtraktionen rakt
+      // fram behövs ingen metod) — medför olika. forstaSteg.min = första hoppet (upp till nästa runda tal) minst så stort:
+      // 2490 − 449 med +1 är trivialt. Med fri stegindelning delar eleven själv upp resten; talen bär inget villkor på det
+      // (inget tak på resten, J.B.: styrs minuenden nära ett hundratal tränas inte de mellanliggande hoppen). Minuenden får inte
+      // sluta på 0 (75,0 − 30,4 ser ut som ett fel, 70 − 52 bär inte metoden) → minuend.flyttsiffra ≥ 1, som kräver subtrahendens ≥ 2.
+      kalla: 'Joachim 2026-09-20: växling krävs, första steget ≥ 3, minuenden slutar inte på 0, inget tak på resten; nivåer som oka-minska; nivå 3 tiondelar och hundradelar med differens ≥ 2 hela enheter',
+      namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal och tusental', 3:'Decimaltal' },
+      omgang: 5,
+      nivaer: {
+        1: { subtrahend:{min:16,max:89}, minuend:{max:99, flyttsiffra:{min:1}}, flyttsiffra:{min:2}, vaxling:true, forstaSteg:{min:3}, resultat:{ differens:{min:11} } },
+        2: { arv:1, minuend:{max:9999, flyttsiffra:{min:1}}, blandning:{ perOmgang:'alla', profiler:[ { subtrahend:{min:116,max:989} }, { subtrahend:{min:1006,max:9989} } ] } },
+        3: { arv:1, blandning:{ perOmgang:'alla', profiler:[
+              { decimaler:{min:1,max:1}, subtrahend:{min:16,max:979},   minuend:{max:999, flyttsiffra:{min:1}},  resultat:{ differens:{min:21} } },     // tiondelar: första hoppet ≥ 0,3, differens ≥ 2,1 (1,9 är knappt ett hopp, J.B.)
+              { decimaler:{min:2,max:2}, subtrahend:{min:116,max:9789}, minuend:{max:9999, flyttsiffra:{min:1}}, resultat:{ differens:{min:201} } } ] } }   // hundradelar: första hoppet ≥ 0,03 (nästa tiondel), differens ≥ 2,01 (samma regel)
+      }
     }
   };
 

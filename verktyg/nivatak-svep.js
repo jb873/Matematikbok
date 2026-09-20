@@ -54,7 +54,7 @@ function takI(body, vis) {
     return { tak: 1, kalla: 'ingen adjustLevel' };
   }
   const m = /adjustLevel\s*\([^;]*?,\s*null\s*,\s*([A-Za-z_]+)\s*\)/.exec(body);
-  if (m) { const v = m[1]; const b = new RegExp('(?:const|var|let)\\s+' + v + '\\s*=\\s*([^;\\n]+)').exec(body);
+  if (m) { const v = m[1]; const b = new RegExp('(?:const|var|let)\\s+(?:[^;\\n]*?,\\s*)?' + v + '\\s*=\\s*([^;,\\n]+)').exec(body);   // även `const BAND = …, MAXN = …`
     const def = b ? b[1].trim() : '?';
     const ub = /UppstBand\.maxNiva\(\s*(?:FLER\s*\?\s*)?'([\w-]+)'/.exec(def);
     if (ub) return { tak: bandMax(ub[1]), kalla: 'band ' + ub[1] + (def.includes('FLER') ? '|mult' : '') };
@@ -66,7 +66,7 @@ function takI(body, vis) {
 // ── band ──
 const SV = require(path.join(ROOT, 'js/data/spec-villkor.js'));
 function bandMax(r) { return SV.UPPST_BAND[r] ? Object.keys(SV.UPPST_BAND[r].nivaer).length : null; }
-const NOD_BAND = { 'add-metoder:uppstallning': 'add', 'sub-metoder:uppstallning': 'sub', 'mult-metoder:uppstallning': 'mult', 'mult-metoder:uppstallning-stora': 'mult-fler', 'div-metoder:kort': 'div', 'div-metoder:lang': 'div' };
+const NOD_BAND = { 'add-metoder:uppstallning': 'add', 'sub-metoder:uppstallning': 'sub', 'mult-metoder:uppstallning': 'mult', 'mult-metoder:uppstallning-stora': 'mult-fler', 'div-metoder:kort': 'div', 'div-metoder:lang': 'div', 'sub-metoder:okaminska': 'oka-minska', 'sub-metoder:bakifran': 'bakifran' };
 
 // ── deeplinkar per kapitel ──
 function k1Deeplinks() {

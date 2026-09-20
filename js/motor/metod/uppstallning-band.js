@@ -8,7 +8,8 @@
                                              en gång per omgång (perOmgang:'alla'), ordningen blandad
      UppstBand.kontrollera(rakne, niva, t) → [] om uppgiften håller bandet, annars lista av brott (fuzzen)
      UppstBand.stat                        → förkastningstal per räknesätt/nivå: {dragningar, godkanda, avslag:{…}}
-   Uppgift: add/sub {a,b,answer,display} · mult {m,d,answer,display} · div {N,n,Q,display}. `profil` = index i
+   Uppgift: add/sub {a,b,answer,display} · mult {m,d,answer,display} · div {N,n,Q,display} · oka-minska {a,b,answer,
+   dec,flytt,display} · bakifran samma + nextTio (a/b/answer/flytt = mantissor, dec skalar dem; display i decimalform). `profil` = index i
    blandningen (nivå 3), annars 0.
 
    Räknar bara HELTAL — bandet har inga decimaler (Joachims talområden). Drillarna renderar dec:0.
@@ -63,7 +64,28 @@
     if(v.minnessiffra && !harMinnessiffra(N, n)) return { skal:'struktur:minnessiffra' };            // nivå ≥ 2: minst en rest att bära vidare (kort division: minnessiffra; lång: rest ≠ 0 i något steg)
     return { task:{ N:N, n:n, Q:Q, answer:Q, display:N + ' / ' + n } };
   }
-  var DRAG = { add:dragAdd, sub:dragSub, mult:function(v){ return dragMult(v, false); }, 'mult-fler':function(v){ return dragMult(v, true); }, div:dragDiv };
+  // Flytt-metoderna (öka och minska lika · addition bakifrån): subtrahendens flyttsiffra KONSTRUERAS (inte förkastas) —
+  // sista siffran dras ur [flyttsiffra.min, 10 − forstaSteg.min]; minuenden dras ovanför b + differens.min. vaxling:true
+  // konstruerar minuendens flyttsiffra under subtrahendens (växling krävs), ur [minuend.flyttsiffra.min, b-siffran − 1]
+  // (bakifran: ≥ 1 så minuenden inte slutar på 0). Förkastas: flyttsiffrorna lika (olika) och minuend utan utrymme.
+  // flytt = första hoppet upp till nästa runda tal, nextTio = b + flytt (mantissor).
+  function dragFlytt(v){
+    var dec = v.decimaler ? rnd(v.decimaler) : 0;
+    var fmin = (v.flyttsiffra && v.flyttsiffra.min) || 0, fmax = v.forstaSteg ? 10 - v.forstaSteg.min : 9;
+    if(fmax < fmin) return { skal:'band:flyttsiffra' };
+    var b = rnd(v.subtrahend); b = b - (b % 10) + (fmin + Math.floor(Math.random() * (fmax - fmin + 1)));
+    if(b < v.subtrahend.min || b > v.subtrahend.max) return { skal:'band:subtrahend' };
+    var aLo = b + ((v.resultat && v.resultat.differens && v.resultat.differens.min) || 1), aHi = v.minuend.max;
+    if(aLo > aHi) return { skal:'band:minuend' };
+    var a = rnd({ min:aLo, max:aHi });
+    if(v.vaxling){ var mlo = (v.minuend.flyttsiffra && v.minuend.flyttsiffra.min) || 0; if(mlo > (b % 10) - 1) return { skal:'band:flyttsiffra' };
+      a = a - (a % 10) + mlo + Math.floor(Math.random() * ((b % 10) - mlo)); if(a < aLo) a += 10; if(a > aHi) return { skal:'band:minuend' }; }   // minuendens flyttsiffra < subtrahendens — konstruerat
+    if(v.olika === 'flyttsiffra' && a % 10 === b % 10) return { skal:'struktur:flyttsiffra-lika' };
+    var flytt = 10 - (b % 10);
+    return { task:{ a:a, b:b, answer:a - b, dec:dec, flytt:flytt, nextTio:b + flytt, egnaDecimaler:true,
+                    display:decStr(a, dec) + ' − ' + decStr(b, dec) } };
+  }
+  var DRAG = { add:dragAdd, sub:dragSub, mult:function(v){ return dragMult(v, false); }, 'mult-fler':function(v){ return dragMult(v, true); }, div:dragDiv, 'oka-minska':dragFlytt, bakifran:dragFlytt };
 
   // ── gen: dra tills bandet håller ─────────────────────────────────────────────────────────
   function gen(rakne, niva, profilIx, pos){
@@ -77,8 +99,8 @@
       var r = DRAG[rakne](v);
       if(r.skal){ avslag(s, r.skal); continue; }
       s.godkanda++;
-      r.task.profil = ix; r.task.niva = niva; r.task.dec = 0;
-      if(v.decimaler) skala(rakne, r.task, v, pos || 0);   // nivå 4: heltalsuppgiften blir decimaltal — mantissorna kvar (bandet, facit), display i decimalform
+      r.task.profil = ix; r.task.niva = niva; if(r.task.dec == null) r.task.dec = 0;
+      if(v.decimaler && !r.task.egnaDecimaler) skala(rakne, r.task, v, pos || 0);   // oka-minska bär sina decimaler själv (mantissor ur profilen)   // nivå 4: heltalsuppgiften blir decimaltal — mantissorna kvar (bandet, facit), display i decimalform
       return r.task;
     }
     return null;
@@ -143,6 +165,19 @@
       krav(t.answer === t.m * t.d, 'facit: ' + t.display);
       krav(t.m % 10 >= 3, 'stora faktorns ental < 3: ' + t.display);
       if(rakne === 'mult-fler') krav(t.d % 10 >= 3, 'lilla faktorns ental < 3: ' + t.display);
+    } else if(rakne === 'oka-minska' || rakne === 'bakifran'){
+      krav(inom(t.b, v.subtrahend), 'subtrahend utanför ' + JSON.stringify(v.subtrahend) + ': ' + t.display);
+      krav(t.a <= v.minuend.max, 'minuend > ' + v.minuend.max + ': ' + t.display);
+      krav(t.answer === t.a - t.b, 'facit: ' + t.display);
+      if(v.resultat && v.resultat.differens) krav(t.answer >= v.resultat.differens.min, 'differens < ' + v.resultat.differens.min + ': ' + t.display);
+      if(v.flyttsiffra) krav(t.b % 10 >= v.flyttsiffra.min, 'subtrahendens flyttsiffra < ' + v.flyttsiffra.min + ': ' + t.display);
+      krav(t.b % 10 !== 0, 'subtrahenden redan rund: ' + t.display);
+      if(v.olika === 'flyttsiffra') krav(t.a % 10 !== t.b % 10, 'flyttsiffrorna lika: ' + t.display);
+      krav(t.flytt === 10 - (t.b % 10) && (t.b + t.flytt) % 10 === 0, 'flytten gör inte subtrahenden rund: ' + t.display);
+      if(v.vaxling) krav(t.a % 10 < t.b % 10, 'ingen växling (minuendens flyttsiffra ≥ subtrahendens): ' + t.display);
+      if(v.minuend.flyttsiffra) krav(t.a % 10 >= v.minuend.flyttsiffra.min, 'minuendens flyttsiffra < ' + v.minuend.flyttsiffra.min + ': ' + t.display);
+      if(v.forstaSteg) krav(t.flytt >= v.forstaSteg.min, 'första steget < ' + v.forstaSteg.min + ': ' + t.display);
+      if(rakne === 'bakifran') krav(t.nextTio === t.b + t.flytt && t.nextTio < t.a, 'nästa runda tal ligger inte mellan termerna: ' + t.display);
     } else if(rakne === 'div'){
       krav(inom(t.N, v.taljare), 'täljare utanför ' + JSON.stringify(v.taljare) + ': ' + t.display);
       krav(inom(t.n, v.namnare), 'nämnare utanför ' + JSON.stringify(v.namnare) + ': ' + t.display);

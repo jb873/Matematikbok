@@ -42,7 +42,7 @@ RAKNE.forEach(rakne => {
       const keys = new Set(), profiler = new Set();
       omg.forEach(t => {
         uppg++;
-        const facit = rakne === 'add' ? t.a + t.b : rakne === 'sub' ? t.a - t.b : rakne === 'div' ? t.N / t.n : t.m * t.d;
+        const facit = rakne === 'add' ? t.a + t.b : (rakne === 'sub' || rakne === 'oka-minska' || rakne === 'bakifran') ? t.a - t.b : rakne === 'div' ? t.N / t.n : t.m * t.d;
         if (facit !== t.answer) facitFel++;
         const brott = UB.kontrollera(rakne, niva, t); if (brott.length) { bandFel++; if (bandFel <= 3) console.log('   ✗ ' + rakne + '/' + niva + ': ' + brott.join(' · ')); }
         if (keys.has(t.display)) dubbl++; keys.add(t.display); profiler.add(t.profil);
