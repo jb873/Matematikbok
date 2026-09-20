@@ -84,8 +84,11 @@ function renderUppstallningAdd(body, metod, backFn){
   // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Förr en lokal rnd()-generator med egna
   // intervall och decimaltal på nivå 3 — nu bär bandet talområdet, drillen bara layouten (dec alltid 0).
   let ko = [];
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const EXEMPEL_ADD = { a:374, b:286 };   // det fasta exempeltalet i renderExplain
+  const vakt = ExempelVakt.skapa('add-metoder:uppstallning', [EXEMPEL_ADD.a + ' + ' + EXEMPEL_ADD.b, metod && metod.beskrivning]);
   function genUppstAdd(lvl){
-    if(!ko.length || ko.lvl !== lvl){ ko = UppstBand.omgang('add', lvl, OMGANG); ko.lvl = lvl; }   // tom eller nivåbyte — inte varje anrop före första svaret
+    if(!ko.length || ko.lvl !== lvl){ ko = UppstBand.omgang('add', lvl, OMGANG, vakt); ko.lvl = lvl; }   // tom eller nivåbyte — inte varje anrop före första svaret
     const t = ko.shift();
     const sc = Math.pow(10, t.dec || 0);
     return {a:t.a / sc, b:t.b / sc, answer:t.answer / sc, dec:t.dec || 0};   // nivå 4: mantissor/10^dec
@@ -102,7 +105,7 @@ function renderUppstallningAdd(body, metod, backFn){
   }
 
   function renderExplain(){
-    const a = 374, b = 286; // fast exempeltal
+    const a = EXEMPEL_ADD.a, b = EXEMPEL_ADD.b; // fast exempeltal (vaktat i omgångsbygget)
     body.innerHTML = `
       <div class="exercise-card">
         ${exerciseHeader('Metod · uppställning', metod.beskrivning)}
@@ -555,7 +558,11 @@ function renderFlyttaOver(body, metod, backFn){
 
   // Ett tal ligger 1–3 (tiondelar) under nästa hela steg; det andra ger bort gapet.
   // Ex: 28 + 34 → flytta 2 → 30 + 32.  Nivå 3 i tiondelar: 4,8 + 3,5 → 5,0 + 3,3.
-  function newTask(lvl){
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const EXEMPEL_FO = '47 + 35 &rarr; flytta 3 &rarr; 50 + 32 = 82';
+  const vakt = ExempelVakt.skapa('add-metoder:flytta-over', [EXEMPEL_FO, metod && metod.beskrivning], { op:'+' });
+  const newTask = vakt.gen(dragTask);
+  function dragTask(lvl){
     const dec = lvl===3 ? 1 : 0, scale = dec===1 ? 10 : 1;
     for(let i=0; i<400; i++){
       let xI, yI;
@@ -597,7 +604,7 @@ function renderFlyttaOver(body, metod, backFn){
       + '<div class="metod-explain-card">'
         + (visaTips ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">'
           + '<strong>Idén:</strong> Flytta ett värde från ett tal till det andra – summan ändras inte.<br>'
-          + '<span style="color:var(--ink-soft);">Exempel: 47 + 35 &rarr; flytta 3 &rarr; 50 + 32 = 82</span>'
+          + '<span style="color:var(--ink-soft);">Exempel: ' + EXEMPEL_FO + '</span>'
         + '</div>' : '')
         + '<div class="om-flytt-rad" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;font-size:14px;color:var(--ink-soft);">'
           + '<span>Flytta</span>'
@@ -788,8 +795,10 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   // på nivå 3 — nu bär bandet talområdet, drillen bara layouten (dec alltid 0). Växlingskravet ligger i
   // generatorn (struktur:vaxling) så metoden alltid behövs.
   var ko = [];
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  var vakt = ExempelVakt.skapa('sub-metoder:uppstallning', metod && metod.beskrivning);   // metod är null via deeplinken
   function genTask(lvl){
-    if(!ko.length || ko.lvl !== lvl){ ko = UppstBand.omgang('sub', lvl, OMGANG); ko.lvl = lvl; }
+    if(!ko.length || ko.lvl !== lvl){ ko = UppstBand.omgang('sub', lvl, OMGANG, vakt); ko.lvl = lvl; }
     var t = ko.shift();
     return {aInt:t.a, bInt:t.b, ansInt:t.answer, dec:t.dec || 0};   // nivå 4: mantissor + dec
   }

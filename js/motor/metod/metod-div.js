@@ -589,8 +589,11 @@ function renderDivKort(body, backFn){
   // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Kvoten heltal, första siffran ≥ nämnaren och
   // (nivå ≥ 2) minst en minnessiffra — allt i generatorn som struktur; drillen bygger bara kolumnerna.
   var ko = [];
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  var EXEMPEL_KORT = '852 / 6';   // demoTask i renderExplain
+  var vakt = ExempelVakt.skapa('div-metoder:kort', EXEMPEL_KORT);
   function genTask(){
-    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang('div', level, OMG); ko.lvl = level; }
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang('div', level, OMG, vakt); ko.lvl = level; }
     var t = ko.shift();
     var digs = String(t.N).split('').map(Number), k = digs.length;
     var carry = 0, carryInto = [0], q = [];
@@ -647,7 +650,7 @@ function renderDivKort(body, backFn){
       + exerciseHeader('Metod · kort division', 'Dela siffra för siffra. Minnessiffran skrivs framför nästa siffra i täljaren.')
       + '<div class="metod-explain-card">'
         + '<h3 class="metod-step-title">Så här fungerar det</h3>'
-        + '<p class="metod-step-desc">Vi beräknar <strong>852 / 6</strong>.</p>'
+        + '<p class="metod-step-desc">Vi beräknar <strong>' + EXEMPEL_KORT + '</strong>.</p>'
         + '<div style="display:flex;justify-content:center;">' + buildBox(demoTask, true) + '</div>'
         + '<ol class="div-metod-steg">'
           + '<li><strong>8 / 6</strong> = 1, rest 2. Skriv <strong>1</strong> i kvoten och minnessiffran <strong>2</strong> framför nästa siffra.</li>'
@@ -771,8 +774,11 @@ function renderDivLang(body, backFn){
   // Ny omgång = ny kö ur bandet (vid omgångens första uppgift). Förr tresiffrig täljare hårdkodad; nu 2–4 siffror
   // ur bandet (layouten är generisk i k).
   var ko = [];
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  var EXEMPEL_LANG = '784 / 4';   // demoTask i renderExplain
+  var vakt = ExempelVakt.skapa('div-metoder:lang', EXEMPEL_LANG);
   function genTask(){
-    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang('div', level, OMG); ko.lvl = level; }
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang('div', level, OMG, vakt); ko.lvl = level; }
     var task = ko.shift();
     var t = bygg(task.n, String(task.N).split('').map(Number));
     t.N = task.N; t.Q = task.Q;
@@ -852,7 +858,7 @@ function renderDivLang(body, backFn){
       + exerciseHeader('Metod · lång division', 'Liggande stolen: dividera, multiplicera, subtrahera och flytta ner.')
       + '<div class="metod-explain-card">'
         + '<h3 class="metod-step-title">Så här fungerar det</h3>'
-        + '<p class="metod-step-desc">Vi beräknar <strong>784 / 4</strong>.</p>'
+        + '<p class="metod-step-desc">Vi beräknar <strong>' + EXEMPEL_LANG + '</strong>.</p>'
         + '<div style="display:flex;justify-content:center;">' + buildBox(demoTask, true) + '</div>'
         + '<ol class="div-metod-steg">'
           + '<li><strong>Dividera:</strong> 7 / 4 = 1. Skriv 1 i kvoten.</li>'
@@ -1135,9 +1141,11 @@ function renderDivRakna(body, startKat){
 // Beräkningar – små tal genom förlängning (två mellanled-rutor: förlängd täljare/nämnare + svar)
 function renderDivForlang(body, cfg, backFn){
   var level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  var vakt = ExempelVakt.forCfg(cfg), drag = vakt.gen(function(){ return cfg.gen(level); });
   function genOmgang(){
     var a = [];
-    for(var i=0; i<8; i++) a.push(cfg.gen(level));
+    for(var i=0; i<8; i++) a.push(drag());
     return a;
   }
   function render(){

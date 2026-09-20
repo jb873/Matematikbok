@@ -53,6 +53,76 @@ function distinktOmgang(gen, n, keyFn, maxTries){
   while(ut.length < n){ const t = gen(); if(t != null) ut.push(t); else break; }   // ovillkorlig fyllnad
   return ut;
 }
+// ── EXEMPELVAKTEN (order 2026-09-20) ────────────────────────────────────────────────────────────────
+// Det räknade exemplet i förklaringen får aldrig dyka upp som uppgift. Vakten sitter i OMGÅNGSBYGGET: en
+// dragen uppgift som är lika med ett exempel dras om. "Lika" = samma räknesätt och samma operander
+// (374 + 286 är 286 + 374 — kommutativt för + och ·, ordnat för − och /), inte samma sträng. Exemplen
+// läses ur cfg.exempel (ex-rad-spann eller löptext "a op b"), uppgiften ur display / leftText+rightText /
+// {a,b} {m,d} {N,n}. En uppgift med tom ruta (▢) identifieras av hela likheten ("6 · ▢ = 42").
+// Förkastningarna räknas per drill i ExempelVakt.stat[id] = {dragna, forkastade, slappta, okandForm}:
+// ett mätbart förkastningstal säger "byt exemplet", inte "vakta hårdare".
+var ExempelVakt = (function(){
+  var stat = {};
+  function txt(html){
+    return String(html == null ? '' : html)
+      .replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, ' ')
+      .replace(/&minus;|&#8722;|−|–/g, '-').replace(/&middot;|&times;|×|∙/g, '·').replace(/&nbsp;/g, ' ')
+      .replace(/&rarr;|->|→/g, '→').replace(/&#9633;|&#x25A1;|_{2,}/g, '▢');
+  }
+  // Identitet ur ett uttryck: "374 + 286 [= 660]" → "+|286,374" · "6 · ▢ = 42" → "·|6,▢|=42" · "42 / (−6)" → "/|42,-6"
+  function nyckel(uttryck){
+    var delar = txt(uttryck).replace(/[()]/g, ' ').split(/=|→/); var vl = delar[0];
+    if(!/[▢\d]/.test(vl)) return null;
+    vl = vl.replace(/(\d) (?=\d{3}(?!\d))/g, '$1')                    // tusentalsmellanrum: "40 000" → 40000
+           .replace(/(\d|▢)\s*-\s*(?=[\d▢])/g, '$1 - ');               // binärt minus mellan tal → operator, inte tecken
+    vl = vl.replace(/(\d)\s*:\s*(?=\d)/g, '$1 / ');                          // kolon är division bara mellan tal ("Exempel:" är prosa)
+    var tok = vl.match(/-?\d+(?:[.,]\d+)?|▢|[+\-·/]/g); if(!tok) return null;
+    var ops = [], opnd = [];
+    tok.forEach(function(t){ if(/^[+\-·/]$/.test(t)) ops.push(t); else opnd.push(t === '▢' ? '▢' : String(parseFloat(t.replace(',', '.')))); });
+    if(!ops.length || opnd.length < 2) return null;
+    var op = ops[0]; if(ops.some(function(o){ return o !== op; })) op = ops.join('');
+    if(op === '+' || op === '·') opnd = opnd.slice().sort();
+    var k = op + '|' + opnd.join(',');
+    if(opnd.indexOf('▢') >= 0 && delar.length > 1){ var sv = (delar[1].match(/-?\d+(?:[.,]\d+)?/) || [])[0]; if(sv != null) k += '|=' + String(parseFloat(sv.replace(',', '.'))); }
+    return k;
+  }
+  // Alla uttryck i en exempeltext → nycklar (varje ex-rad/mening/pil-led för sig)
+  function urExempel(html){
+    var ut = [];
+    txt(html).split(/\n|→|;|\.\s|\.$/).forEach(function(frag){ var k = nyckel(frag); if(k) ut.push(k); });
+    return ut;
+  }
+  function uttryckAv(t, op){
+    if(t == null) return null; if(typeof t === 'string') return t;
+    if(t.display != null) return String(t.display);
+    if(t.leftText != null || t.rightText != null) return (t.leftText || '') + ' ▢ ' + (t.rightText || '');
+    if(t.a != null && t.b != null) return t.a + ' ' + (op || '+') + ' ' + t.b;
+    if(t.m != null && t.d != null) return t.m + ' · ' + t.d;
+    if(t.N != null && t.n != null) return t.N + ' / ' + t.n;
+    return null;
+  }
+  // skapa(id, exempel, {op}) — exempel: sträng eller lista av strängar (html tillåtet); op = räknesätt för {a,b}-uppgifter
+  function skapa(id, exempel, opts){
+    opts = opts || {}; var nycklar = {};
+    [].concat(exempel || []).forEach(function(e){ urExempel(e).forEach(function(k){ nycklar[k] = true; }); });
+    var st = stat[id] = stat[id] || { dragna:0, forkastade:0, slappta:0, okandForm:0 };
+    st.exempel = Object.keys(nycklar);
+    function ar(t){ var u = uttryckAv(t, opts.op); if(u == null){ st.okandForm++; return false; } var k = nyckel(u); return k != null && nycklar[k] === true; }
+    return {
+      id:id, ar:ar, stat:st,
+      nyckelAv:function(t){ var u = uttryckAv(t, opts.op); return u == null ? null : nyckel(u); },
+      // generator-omslag: dras om (max 25 ggr) när dragningen är exemplet; sista dragningen släpps och räknas som slappt
+      gen:function(fn){ return function(){ var t; for(var i = 0; i < 25; i++){ t = fn.apply(this, arguments); st.dragna++; if(t == null || !ar(t)) return t; st.forkastade++; } st.slappta++; return t; }; },
+      // fast lista (buildOmgang): en plats som är exemplet byggs om — samma plats ur en ny lista (samma fördelning)
+      lista:function(bygg){ var l = bygg(); l.forEach(function(t, i){ st.dragna++; for(var k = 0; k < 25 && ar(l[i]); k++){ st.forkastade++; l[i] = bygg()[i]; st.dragna++; } if(ar(l[i])) st.slappta++; }); return l; }
+    };
+  }
+  // forCfg(cfg) — id ur cfg.koId:scoreKey (som getTutorScore), exempel ur cfg.exempel
+  function forCfg(cfg, opts){ return skapa((cfg.koId || '?') + ':' + (cfg.scoreKey || cfg.formagaKey || '?'), cfg.exempel, opts); }
+  function rapport(){ return Object.keys(stat).map(function(id){ var s = stat[id]; return id + '  dragna ' + s.dragna + ' · förkastade ' + s.forkastade + ' · släppta ' + s.slappta + ' · okänd form ' + s.okandForm + ' · exempel [' + s.exempel.join(' ; ') + ']'; }).join('\n'); }
+  return { skapa:skapa, forCfg:forCfg, nyckel:nyckel, urExempel:urExempel, uttryckAv:uttryckAv, stat:stat, rapport:rapport };
+})();
+if(typeof window !== 'undefined') window.ExempelVakt = ExempelVakt;
 function compositesUpTo(max){
   const out=[];
   for(let i=4;i<=max;i++) if(!isPrime(i)) out.push(i);

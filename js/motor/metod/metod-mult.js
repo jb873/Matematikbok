@@ -668,7 +668,9 @@ function renderMultMetoder(body, startMetod){
   function mkTask(a, b){ return {a:a, b:b, answer:a * b}; }
 
   function renderEnradsMetod(host, cfg, backFn){
-    let omgang = cfg.buildOmgang();
+    // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+    const vakt = ExempelVakt.skapa('mult-metoder:' + (cfg.scoreKey || cfg.id), cfg.exempel, { op:'·' });
+    let omgang = vakt.lista(cfg.buildOmgang);
     let idx = 0;
     let results = [];
     let uppgNr = 0;   // tips (Så funkar det + instruktion) bara på de två första uppgifterna
@@ -683,7 +685,7 @@ function renderMultMetoder(body, startMetod){
           + '<div style="margin-top:-8px;text-align:center;"><button class="btn subtle" id="metod-tillmetoder">Tillbaka till metoder</button></div>'
         + '</div>';
         document.getElementById('summary-next-btn').onclick = function(){
-          omgang = cfg.buildOmgang(); idx = 0; results = []; render();
+          omgang = vakt.lista(cfg.buildOmgang); idx = 0; results = []; render();
         };
         document.getElementById('metod-tillmetoder').onclick = backFn;
         return;
@@ -799,8 +801,11 @@ function renderUppstallningMult(body, backFn, cfg){
   // på nivå 3 — nu bär bandet talområdet (heltal, tre nivåer, nivå 3 blandar två storleksprofiler); drillen
   // bara layouten. Entals-kravet (≥ 3, flera delprodukter) ligger i generatorn som struktur.
   let ko = [];
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const EXEMPEL_MULT = '67 · 4';   // demons exempel i renderExplain
+  const vakt = ExempelVakt.skapa('mult-metoder:' + (FLER ? 'uppstallning-stora' : 'uppstallning'), EXEMPEL_MULT);
   function genTask(){
-    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang(FLER ? 'mult-fler' : 'mult', level, OMG); ko.lvl = level; }
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang(FLER ? 'mult-fler' : 'mult', level, OMG, vakt); ko.lvl = level; }
     const t = ko.shift(), dec = t.dec || 0, dDec = t.dDec || 0;
     if(!FLER){
       if(!dec) return {kind:'enkel', mDisplay:String(t.m), d:t.d, answer:t.answer};
@@ -865,7 +870,7 @@ function renderUppstallningMult(body, backFn, cfg){
       + exerciseHeader('Metod · uppställning', 'Multiplicera kolumn för kolumn. Minnessiffran skrivs till höger om talet och stryks när den använts.')
       + '<div class="metod-explain-card">'
         + '<h3 class="metod-step-title">Så här fungerar det</h3>'
-        + '<p class="metod-step-desc">Vi beräknar <strong>67 · 4</strong>. Klicka dig genom stegen.</p>'
+        + '<p class="metod-step-desc">Vi beräknar <strong>' + EXEMPEL_MULT + '</strong>. Klicka dig genom stegen.</p>'
         + '<div style="display:flex;justify-content:center;"><div class="mult-upp-box" id="demo-box"></div></div>'
         + '<div class="mult-demo-steg" id="demo-text"></div>'
         + '<div class="metod-demo-nav">'
@@ -1260,7 +1265,7 @@ function renderMultRakna(body, startKat){
   function openKat(katId){
     const cfg = CFG[katId];
     if(!cfg){ renderPicker(); return; }
-    cfg.scoreKey = katId;
+    cfg.scoreKey = katId; cfg.koId = 'mult-rakna';   // koId för alla kategorier (exempelvaktens id = koId:scoreKey, som getTutorScore)
     if(cfg.mode === 'enrad') renderRaknaEnrad(body, cfg, renderPicker);
     else if(cfg.mode === 'pow10') renderRaknaPow10(body, cfg, renderPicker);
     else if(cfg.mode === 'saknas'){ cfg.koId = 'mult-rakna'; cfg.formagaKey = 'rakna'; cfg.backLabel = 'Tillbaka till kategorier'; renderRaknaSaknas(body, cfg, renderPicker); }
@@ -1318,7 +1323,9 @@ function renderRaknaPow10(body, cfg, backFn){
     return {display:'10 · 6,07', facit:'60,7', answerNum:60.7};
   }
 
-  function genOmgang(){ const a=[]; for(let i=0;i<OMG;i++) a.push(genTask(level)); return a; }
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const vakt = ExempelVakt.forCfg(cfg), drag = vakt.gen(genTask);
+  function genOmgang(){ const a=[]; for(let i=0;i<OMG;i++) a.push(drag(level)); return a; }
 
   function renderSummary(){
     const right = results.filter(function(x){ return x; }).length;
@@ -1415,9 +1422,11 @@ function renderRaknaPow10(body, cfg, backFn){
 // --- Motor: ett svar per uppgift ---
 function renderRaknaSingle(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const vakt = ExempelVakt.forCfg(cfg), drag = vakt.gen(function(){ return cfg.gen(level); });
   function genOmgang(){
     const a = [];
-    for(let i=0; i<8; i++) a.push(cfg.gen(level));
+    for(let i=0; i<8; i++) a.push(drag());
     return a;
   }
   function render(){
@@ -1496,9 +1505,11 @@ function renderRaknaSingle(body, cfg, backFn){
 // --- Motor: enradsuppgift med mellanled ---
 function renderRaknaEnrad(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const vakt = ExempelVakt.forCfg(cfg), drag = vakt.gen(function(){ return cfg.gen(level); });
   function genOmgang(){
     const a = [];
-    for(let i=0; i<8; i++) a.push(cfg.gen(level));
+    for(let i=0; i<8; i++) a.push(drag());
     return a;
   }
   function render(){

@@ -4,7 +4,7 @@
 
    KONTRAKT
      UppstBand.gen(rakne, niva)            → EN uppgift inom bandet (null om 400 dragningar inte räckte)
-     UppstBand.omgang(rakne, niva, n)      → n DISTINKTA uppgifter; nivå 3 = fördelning: varje profil minst
+     UppstBand.omgang(rakne, niva, n, vakt) → n DISTINKTA uppgifter; nivå 3 = fördelning: varje profil minst
                                              en gång per omgång (perOmgang:'alla'), ordningen blandad
      UppstBand.kontrollera(rakne, niva, t) → [] om uppgiften håller bandet, annars lista av brott (fuzzen)
      UppstBand.stat                        → förkastningstal per räknesätt/nivå: {dragningar, godkanda, avslag:{…}}
@@ -98,15 +98,16 @@
   }
 
   // ── omgang: n distinkta; nivå 3 = varje profil minst en gång, blandad ordning ────────────
-  function omgang(rakne, niva, n){
+  function omgang(rakne, niva, n, vakt){
     var v = SV.uppstBand(rakne, niva), P = v.profiler;
+    var drag = vakt ? vakt.gen(gen) : gen;   // exempelvakten (metod-karna): en dragning lika med förklaringens exempel dras om
     var dist = (typeof distinktOmgang === 'function') ? distinktOmgang : lokalDistinkt;
     for(var forsok = 0; forsok < 20; forsok++){
       // profil per plats: de P första täcker alla profiler, resten slumpas; blandas sedan
       var plan = []; for(var i = 0; i < n; i++) plan.push(i < P ? i : Math.floor(Math.random() * P));
       for(var j = plan.length - 1; j > 0; j--){ var k = Math.floor(Math.random() * (j + 1)); var t = plan[j]; plan[j] = plan[k]; plan[k] = t; }
       var pos = 0;
-      var ut = dist(function(){ var ix = plan[Math.min(pos, plan.length - 1)]; var task = gen(rakne, niva, P > 1 ? ix : null, pos); if(task) pos++; return task; },
+      var ut = dist(function(){ var ix = plan[Math.min(pos, plan.length - 1)]; var task = drag(rakne, niva, P > 1 ? ix : null, pos); if(task) pos++; return task; },
                     n, function(task){ return task.display; });
       if(P > 1 && v.perOmgang === 'alla'){
         var sedda = {}; ut.forEach(function(task){ sedda[task.profil] = true; });

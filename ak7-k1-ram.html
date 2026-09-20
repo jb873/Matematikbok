@@ -6364,9 +6364,11 @@ function renderBrakMellanled(body, cfg, backFn){
 // Motor: ett svar per uppgift
 function renderAddSingle(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const vakt = ExempelVakt.forCfg(cfg), drag = vakt.gen(function(){ return cfg.gen(level); });
   function genOmgang(){
     const a = [];
-    for(let i=0; i<8; i++) a.push(cfg.gen(level));
+    for(let i=0; i<8; i++) a.push(drag());
     return a;
   }
   function render(){
@@ -6448,7 +6450,9 @@ function renderAddSingle(body, cfg, backFn){
 // renderas som  leftText [input] rightText  och luckans värde är answerNum.
 function renderRaknaSaknas(body, cfg, backFn){
   let level = 1, omgang = [], idx = 0, results = [], uppgNr = 0;
-  function genOmgang(){ const a = []; for(let i=0; i<8; i++) a.push(cfg.gen(level)); return a; }
+  // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
+  const vakt = ExempelVakt.forCfg(cfg), drag = vakt.gen(function(){ return cfg.gen(level); });
+  function genOmgang(){ const a = []; for(let i=0; i<8; i++) a.push(drag()); return a; }
   function render(){
     if(idx >= omgang.length){
       const right = results.filter(function(x){ return x; }).length;
