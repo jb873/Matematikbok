@@ -1228,12 +1228,20 @@ function renderAdditionBakifran(body, metod, backFn){
     document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; task=newTask(level); render(); };
   }
 
+  // FRI STEGINDELNING (order 2026-09-20): eleven väljer själv antalet hopp — minst två — och rättningen godtar VARJE
+  // uppdelning vars delar är positiva och summerar till differensen: 26 + 900 + 2017 är lika rätt som
+  // 26 + 900 + 2000 + 17 eller 926 + 2017. Förr: fasta fält (steg1 = nästa tiotal − b, steg2 = a − nästa tiotal),
+  // rättade fält för fält mot just den vägen. Generatorns nextTio/steg1/steg2 är nu bara tipsets exempelväg.
+  const MIN_STEG = 2, MAX_STEG = 6;
+  let steg = ['', ''];
+  const parse = v => { const t = String(v).trim().replace(',', '.'); return t === '' ? NaN : parseFloat(t); };
+  const nara = (x, y) => Math.abs(x - y) < 1e-9;
+
   function render(){
     uppgNr++;
+    steg = ['', ''];
     const {a, b, answer, nextTio, steg1, steg2} = task;
-    const useTwoSteps = steg2 > 0;
-    const visaIde = uppgNr <= 2;                                   // Idén-rutan bara på de 2 första
-    const posPct = Math.max(6, Math.min(94, (steg1/answer)*100));
+    const visaIde = uppgNr <= 2;
 
     body.innerHTML = `
       <div class="exercise-card">
@@ -1241,42 +1249,19 @@ function renderAdditionBakifran(body, metod, backFn){
         <div class="metod-explain-card">
           ${visaIde ? `<div style="background:var(--bg-warm);padding:14px;border-radius:var(--radius);margin-bottom:16px;font-size:13px;">
             <strong>Idén:</strong> Istället för att subtrahera räknar vi hur mycket vi måste lägga till för att komma från <strong>${fmt(b)}</strong> till <strong>${fmt(a)}</strong>.
-            Resultatet (differensen) är summan av stegen.
+            Differensen är summan av hoppen. Du väljer själv hur många hopp du tar — lägg till eller ta bort steg.
           </div>` : ''}
 
           <p style="font-size:15px;margin:0 0 18px;">Beräkna <strong style="font-family:var(--mono);font-size:18px;">${fmt(a)} − ${fmt(b)}</strong>.</p>
 
           <div class="abakifran-grid">
-            <div class="abakifran-tallinje">
-              <div class="ab-punkt" style="left:0%">
-                <div class="ab-label">${fmt(b)}</div>
-                <div class="ab-dot"></div>
-              </div>
-              <div class="ab-punkt" style="left:${posPct}%">
-                <div class="ab-label">${fmt(nextTio)}</div>
-                <div class="ab-dot"></div>
-              </div>
-              <div class="ab-punkt" style="left:100%">
-                <div class="ab-label">${fmt(a)}</div>
-                <div class="ab-dot"></div>
-              </div>
-              <div class="ab-linje"></div>
-            </div>
-
-            <div class="om-uttryck-rad" style="margin-top:8px;justify-content:center;">
-              <span class="om-u-num">${fmt(a)}</span>
-              <span class="om-u-op">−</span>
-              <span class="om-u-num">${fmt(b)}</span>
-              <span class="om-u-op">=</span>
-              <input type="text" class="om-u-input" id="ab-s1" inputmode="decimal" maxlength="6" data-ans="${steg1}" placeholder="___">
-              ${useTwoSteps ? `<span class="om-u-op">+</span>
-              <input type="text" class="om-u-input" id="ab-s2" inputmode="decimal" maxlength="6" data-ans="${steg2}" placeholder="___">` : ''}
-              <span class="om-u-op">=</span>
-              <input type="text" class="om-u-input om-u-input-sum" id="ab-sum" inputmode="decimal" maxlength="7" data-ans="${answer}" placeholder="?">
+            <div class="abakifran-tallinje" id="ab-tallinje"></div>
+            <div class="om-uttryck-rad" id="ab-kedja" style="margin-top:8px;justify-content:center;flex-wrap:wrap;row-gap:10px;"></div>
+            <div style="display:flex;gap:8px;justify-content:center;">
+              <button class="btn subtle" id="ab-plus" type="button">+ steg</button>
+              <button class="btn subtle" id="ab-minus" type="button">− steg</button>
             </div>
           </div>
-
-          ${visaIde ? `<p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:10px 0 0;">Mellanledet visar stegen: från ${fmt(b)} upp till ${fmt(nextTio)}${useTwoSteps?` och vidare till ${fmt(a)}`:''}.</p>` : ''}
 
           <div class="rakna-uppdela-feedback" id="fb-ab"></div>
           ${keypadHTML([])}
@@ -1289,50 +1274,90 @@ function renderAdditionBakifran(body, metod, backFn){
       </div>
     `;
 
-    const allInputs = [
-      document.getElementById('ab-s1'),
-      useTwoSteps ? document.getElementById('ab-s2') : null,
-      document.getElementById('ab-sum')
-    ].filter(Boolean);
+    const card = body.querySelector('.exercise-card');
+    let last = false;   // efter rättning: kedjan låst
 
-    const parse = v => parseFloat(String(v).replace(',','.'));
-    const check = ()=>{
-      let allRight = true;
-      allInputs.forEach(inp=>{
-        inp.disabled = true;
-        const correct = Math.abs(parse(inp.value) - parseFloat(inp.dataset.ans)) < 1e-9;
-        inp.classList.add(correct?'correct':'wrong');
-        if(!correct) allRight = false;
+    // Kedjan: a − b = [steg] + [steg] … = [svar]. Byggs om vid + steg / − steg med elevens värden bevarade.
+    function ritaKedja(fokusIx){
+      const k = document.getElementById('ab-kedja');
+      const sumEl = document.getElementById('ab-sum'); const sumVal = sumEl ? sumEl.value : '';
+      k.innerHTML = '<span class="om-u-num">' + fmt(a) + '</span><span class="om-u-op">−</span><span class="om-u-num">' + fmt(b) + '</span><span class="om-u-op">=</span>'
+        + steg.map((v, i) => (i ? '<span class="om-u-op">+</span>' : '') + '<input type="text" class="om-u-input ab-steg" data-ix="' + i + '" inputmode="decimal" maxlength="7" placeholder="___" value="' + v.replace(/"/g, '') + '">').join('')
+        + '<span class="om-u-op">=</span><input type="text" class="om-u-input om-u-input-sum" id="ab-sum" inputmode="decimal" maxlength="8" placeholder="?" value="' + sumVal.replace(/"/g, '') + '">';
+      const inputs = Array.from(k.querySelectorAll('input'));
+      inputs.forEach((inp, i) => {
+        inp.addEventListener('input', () => {
+          if(inp.classList.contains('ab-steg')){
+            const ix = parseInt(inp.dataset.ix);
+            // Backspace/⌫ i ett REDAN tomt sista steg tar bort steget (radera ångrar ett tillagt steg) — aldrig under minimum
+            if(inp.value === '' && inp.dataset.tom === '1' && ix === steg.length - 1 && steg.length > MIN_STEG){ steg.pop(); ritaKedja(steg.length - 1); return; }
+            inp.dataset.tom = inp.value === '' ? '1' : '0';
+            steg[ix] = inp.value;
+          }
+          ritaTallinje();
+        });
+        inp.addEventListener('keydown', e => {
+          if(e.key === 'Enter'){ e.preventDefault(); if(i < inputs.length - 1) inputs[i + 1].focus(); else check(); }
+          if(e.key === 'Backspace' && inp.value === '' && inp.classList.contains('ab-steg')){ const ix = parseInt(inp.dataset.ix); if(ix === steg.length - 1 && steg.length > MIN_STEG){ e.preventDefault(); steg.pop(); ritaKedja(steg.length - 1); } }   // tangentbordets Backspace i tomt sista steg (keypadens ⌫ går via input-händelsen)
+        });
+        if(inp.classList.contains('ab-steg')) inp.dataset.tom = inp.value === '' ? '1' : '0';
       });
+      document.getElementById('ab-plus').disabled = last || steg.length >= MAX_STEG;
+      document.getElementById('ab-minus').disabled = last || steg.length <= MIN_STEG;
+      if(fokusIx != null && inputs[fokusIx]) inputs[fokusIx].focus();
+      ritaTallinje();
+    }
+
+    // Tallinjen följer elevens hopp: b … (b + hopp₁) … (b + hopp₁ + hopp₂) … a
+    function ritaTallinje(){
+      const t = document.getElementById('ab-tallinje'); if(!t) return;
+      const pts = [{ pos:0, lbl:fmt(b) }];
+      let cum = 0;
+      for(const v of steg){ const x = parse(v); if(!(x > 0)) break; cum += x; if(cum >= answer - 1e-9) break; pts.push({ pos:(cum / answer) * 100, lbl:fmt(Math.round((b + cum) * 100) / 100) }); }
+      pts.push({ pos:100, lbl:fmt(a) });
+      t.innerHTML = pts.map(p => '<div class="ab-punkt" style="left:' + Math.max(0, Math.min(100, p.pos)) + '%"><div class="ab-label">' + p.lbl + '</div><div class="ab-dot"></div></div>').join('') + '<div class="ab-linje"></div>';
+    }
+
+    document.getElementById('ab-plus').onclick = () => { if(steg.length < MAX_STEG){ steg.push(''); ritaKedja(steg.length - 1); } };
+    document.getElementById('ab-minus').onclick = () => { if(steg.length > MIN_STEG){ steg.pop(); ritaKedja(steg.length - 1); } };
+
+    // Rättning: varje del > 0, delarna summerar till differensen (hoppen går uppåt från b ända till a), svaret = differensen.
+    function check(){
+      if(last) return; last = true;
+      const inputs = Array.from(card.querySelectorAll('#ab-kedja input'));
+      const delar = steg.map(parse), sumVal = parse(document.getElementById('ab-sum').value);
+      const delarOK = delar.every(x => x > 0) && nara(delar.reduce((p, q) => p + q, 0), answer);
+      const svarOK = nara(sumVal, answer);
+      inputs.forEach(inp => { inp.disabled = true; });
+      inputs.forEach(inp => inp.classList.add(inp.id === 'ab-sum' ? (svarOK ? 'correct' : 'wrong') : (delarOK ? 'correct' : 'wrong')));
+      document.getElementById('ab-plus').disabled = true; document.getElementById('ab-minus').disabled = true; document.getElementById('ab-check').disabled = true;
       const fb = document.getElementById('fb-ab'); fb.classList.add('show');
       const ts = getTutorScore('sub-metoder','metod'); ts.total++;
       const tsGB = getTutorScore('sub-metoder','bakifran'); tsGB.total++;
+      const allRight = delarOK && svarOK;
       omgangResults.push(allRight);
       if(allRight){
         fb.classList.add('correct');
-        fb.textContent = `Rätt! ${fmt(b)} + ${fmt(steg1)}${useTwoSteps?' + '+fmt(steg2):''} = ${fmt(a)}, alltså ${fmt(a)} − ${fmt(b)} = ${fmt(answer)}`;
+        fb.textContent = 'Rätt! ' + fmt(b) + ' + ' + delar.map(fmt).join(' + ') + ' = ' + fmt(a) + ', alltså ' + fmt(a) + ' − ' + fmt(b) + ' = ' + fmt(answer);
         ts.correct++; tsGB.correct++;
       } else {
         fb.classList.add('wrong');
-        fb.textContent = `${fmt(b)} + ${fmt(steg1)} = ${fmt(nextTio)}${useTwoSteps?', ' + fmt(nextTio) + ' + ' + fmt(steg2) + ' = ' + fmt(a) : ''}. Differensen är ${fmt(answer)}.`;
+        const varfor = !delar.every(x => x > 0) ? 'Varje hopp ska vara ett tal större än 0. '
+          : !delarOK ? 'Hoppen ' + delar.map(fmt).join(' + ') + ' = ' + fmt(Math.round(delar.reduce((p, q) => p + q, 0) * 100) / 100) + ' når inte fram till ' + fmt(a) + ' från ' + fmt(b) + '. '
+          : 'Hoppen stämmer, men svaret är summan av dem. ';
+        fb.textContent = varfor + 'En väg: ' + fmt(b) + ' + ' + fmt(steg1) + ' = ' + fmt(nextTio) + (steg2 > 0 ? ', ' + fmt(nextTio) + ' + ' + fmt(steg2) + ' = ' + fmt(a) : '') + '. Differensen är ' + fmt(answer) + '.';
       }
       setTimeout(()=>{
         if(omgangResults.length >= OMGANG) showSummary();
         else { task=newTask(level); render(); }
-      }, allRight ? 2000 : 2800);
-    };
+      }, allRight ? 2000 : 3200);
+    }
     document.getElementById('ab-check').onclick = check;
     document.getElementById('ab-ny').onclick = ()=>{ task=newTask(level); render(); };
     document.getElementById('ab-back').onclick = backFn;
-    allInputs.forEach((inp,i)=>{
-      inp.addEventListener('keydown', e=>{
-        if(e.key==='Enter'){ e.preventDefault();
-          if(i<allInputs.length-1) allInputs[i+1].focus(); else check();
-        }
-      });
-    });
-    setTimeout(()=>allInputs[0].focus(), 50);
-    bindKeypad(body.querySelector('.exercise-card'));
+    ritaKedja();
+    setTimeout(()=>{ const first = card.querySelector('.ab-steg'); if(first) first.focus(); }, 50);   // stegordningen är given: första hoppet
+    bindKeypad(card);
   }
   render();
 }
