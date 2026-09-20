@@ -171,10 +171,12 @@ function renderMultFaktorisera(body){
           + inputs
         + '</div>'
         + '<div class="rakna-uppdela-feedback" id="rakna-fb"></div>'
+        + keypadHTML([])   // KEYPAD (svep 2026-09-20): numeriska fält utan keypad — en elev på surfplatta kunde inte fylla i.
         + '<div style="margin-top:16px;text-align:center;"><button class="btn primary" id="rakna-check">Kontrollera</button></div>'
       + '</div>'
     + '</div>';
 
+    bindKeypad(body.querySelector('.exercise-card'));
     const inputEls = document.querySelectorAll('.rakna-factor-input');
     inputEls.forEach(function(inp, i){
       inp.addEventListener('keydown', function(e){
@@ -253,7 +255,10 @@ function keypadHTML(ops){
 }
 
 function bindKeypad(cardEl){
-  let active = cardEl.querySelector('input');
+  // Ingen förvald ruta i rutnät (order 2026-09-20): med flera rutor skriver keypaden bara i den ruta eleven
+  // fokuserat. Ett kort med EN inmatning får den som mål direkt (ordningen är given där).
+  const enda = cardEl.querySelectorAll('input:not([disabled])').length === 1;
+  let active = enda ? cardEl.querySelector('input:not([disabled])') : null;
   cardEl.addEventListener('focusin', function(e){
     if(e.target.tagName === 'INPUT') active = e.target;
   });
@@ -261,8 +266,8 @@ function bindKeypad(cardEl){
     btn.addEventListener('mousedown', function(e){
       e.preventDefault();
       if(!active || active.disabled){
-        const first = cardEl.querySelector('input:not([disabled])');
-        if(first) active = first; else return;
+        const fria = cardEl.querySelectorAll('input:not([disabled])');
+        if(fria.length === 1) active = fria[0]; else return;   // flera rutor, ingen vald → knappen gör inget
       }
       const k = btn.dataset.key;
       if(k === 'back'){
@@ -795,7 +800,7 @@ function renderUppstallningMult(body, backFn, cfg){
   // bara layouten. Entals-kravet (≥ 3, flera delprodukter) ligger i generatorn som struktur.
   let ko = [];
   function genTask(){
-    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang(FLER ? 'mult-fler' : 'mult', level, OMG);
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang(FLER ? 'mult-fler' : 'mult', level, OMG); ko.lvl = level; }
     const t = ko.shift(), dec = t.dec || 0, dDec = t.dDec || 0;
     if(!FLER){
       if(!dec) return {kind:'enkel', mDisplay:String(t.m), d:t.d, answer:t.answer};
@@ -995,7 +1000,8 @@ function renderUppstallningMult(body, backFn, cfg){
     bindKeypad(card);
     bindMinne(card);
     const ansInputs = Array.from(card.querySelectorAll('.mult-upp-ans'));
-    setTimeout(function(){ if(ansInputs.length) ansInputs[ansInputs.length-1].focus(); }, 50);
+    // Ingen ruta förvald (order 2026-09-20): var eleven börjar — höger eller vänster — hör till förståelsen av metoden.
+    // (Förr: fokus på entalscellen efter 50 ms.)
     ansInputs.forEach(function(inp, i){
       inp.addEventListener('keydown', function(e){
         if(e.key === 'Enter'){

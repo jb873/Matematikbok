@@ -85,7 +85,7 @@ function renderUppstallningAdd(body, metod, backFn){
   // intervall och decimaltal på nivå 3 — nu bär bandet talområdet, drillen bara layouten (dec alltid 0).
   let ko = [];
   function genUppstAdd(lvl){
-    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('add', lvl, OMGANG);
+    if(!ko.length || ko.lvl !== lvl){ ko = UppstBand.omgang('add', lvl, OMGANG); ko.lvl = lvl; }   // tom eller nivåbyte — inte varje anrop före första svaret
     const t = ko.shift();
     const sc = Math.pow(10, t.dec || 0);
     return {a:t.a / sc, b:t.b / sc, answer:t.answer / sc, dec:t.dec || 0};   // nivå 4: mantissor/10^dec
@@ -98,7 +98,7 @@ function renderUppstallningAdd(body, metod, backFn){
       + exerciseHeader('Metod · uppställning', 'Du klarade '+right+' av '+total+'.', level, MAXN)
       + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
       + '</div>';
-    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; renderPractice(); };   // renderPractice drar uppgiften (förr drogs den två gånger)
+    document.getElementById('summary-next-btn').onclick = ()=>{ omgangResults=[]; ko=[]; renderPractice(); };   // ny omgång = ny kö; renderPractice drar uppgiften (förr drogs den två gånger)
   }
 
   function renderExplain(){
@@ -317,8 +317,8 @@ function renderUppstallningAdd(body, metod, backFn){
       if(width - 1 < 1) minneBtn.disabled = true;            // ryms ingen minnessiffra alls
     }
 
-    // Fokusera ental-svaret direkt + koppla sifferknappsats mot fokuserad ruta
-    setTimeout(() => ansInputs[0] && ansInputs[0].focus(), 50);
+    // Ingen ruta förvald (order 2026-09-20): var eleven börjar — höger eller vänster — hör till förståelsen av metoden.
+    // (Förr: fokus på entalet efter 50 ms.) Keypaden binds mot den ruta eleven själv väljer.
     bindKeypad(body.querySelector('.exercise-card'));
 
     const check = () => {
@@ -368,13 +368,32 @@ function renderTalsorternaAdd(body, metod, backFn){
   function rnd(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
   function fmt(n){ return String(Math.round(n*100)/100).replace('.', ','); }
   function lvlNamn(l){ return l===1 ? 'Tresiffriga tal' : l===2 ? 'Fyrsiffriga tal' : 'Decimaltal'; }
-  function newTask(lvl){
+  function gen(lvl){
     if(lvl===1){ const a=rnd(112,989), b=rnd(112,989); return {a:a,b:b,answer:a+b,dec:0}; }
     if(lvl===2){ const a=rnd(1123,9899), b=rnd(1123,9899); return {a:a,b:b,answer:a+b,dec:0}; }
     const dec = Math.random()<0.5 ? 1 : 2, scale = Math.pow(10,dec);
     const aI = dec===1 ? rnd(15,999) : rnd(115,9999);
     const bI = dec===1 ? rnd(15,999) : rnd(115,9999);
     return {a:aI/scale, b:bI/scale, answer:(aI+bI)/scale, dec:dec};
+  }
+  // Omgången byggs distinkt i förväg, och EXEMPLET är ett eget tal som inte förekommer i någon av de fem
+  // uppgifterna (order 2026-09-20: förr visades "Exempel: a + b = …" med uppgiftens egna tal — exemplet var facit).
+  const nyckel = t => t.a + '+' + t.b;
+  let ko = [], exempel = null;
+  function genExempel(lvl, omg){
+    const upptagna = new Set(omg.map(nyckel)), tal = new Set(omg.flatMap(t => [t.a, t.b]));
+    for(let i = 0; i < 200; i++){ const e = gen(lvl); if(!upptagna.has(nyckel(e)) && !tal.has(e.a) && !tal.has(e.b)) return e; }   // varken samma par eller samma term
+    return gen(lvl);
+  }
+  function newTask(lvl){
+    if(!ko.length || ko.lvl !== lvl){ ko = distinktOmgang(() => gen(lvl), OMGANG, nyckel); ko.lvl = lvl; exempel = genExempel(lvl, ko); }   // "Ny uppgift" byter inte omgång (och inte exempel)
+    return ko.shift();
+  }
+  // Mellanledet (talsorterna var för sig) för ett tal-par — används av exemplet och rättningen
+  function mellanledFor(t){
+    const sc = Math.pow(10, t.dec), aI = Math.round(t.a*sc), bI = Math.round(t.b*sc), maxLen = String(Math.max(aI,bI)).length, d = [];
+    for(let p=maxLen-1; p>=0; p--){ const sum = (Math.floor(aI/Math.pow(10,p))%10 + Math.floor(bI/Math.pow(10,p))%10) * Math.pow(10,p); if(sum>0) d.push(sum/sc); }
+    return d;
   }
   let task = newTask(level);
   let terms = [''];  // state lever utanför render()
@@ -386,7 +405,7 @@ function renderTalsorternaAdd(body, metod, backFn){
       + exerciseHeader('Metod · talsorterna var för sig', 'Du klarade '+right+' av '+total+'.', level)
       + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change})
       + '</div>';
-    document.getElementById('summary-next-btn').onclick = function(){ omgangResults=[]; task=newTask(level); terms=['']; render(); };
+    document.getElementById('summary-next-btn').onclick = function(){ omgangResults=[]; ko=[]; task=newTask(level); terms=['']; render(); };
   }
 
   function refreshInputs(){
@@ -445,7 +464,7 @@ function renderTalsorternaAdd(body, metod, backFn){
       '<div class="metod-explain-card">' +
       (visaTips ? '<div style="background:var(--bg-warm);padding:12px 14px;border-radius:var(--radius);margin-bottom:18px;font-size:13px;line-height:1.6;">' +
         '<strong>Idén:</strong> Dela upp talen i talsorter, addera varje talsort för sig och summera ihop.<br>' +
-        '<span style="color:var(--ink-soft);">Exempel: ' + fmt(a) + ' + ' + fmt(b) + ' = ' + rattMellanled + ' = ' + fmt(answer) + '</span>' +
+        '<span style="color:var(--ink-soft);">Exempel: ' + fmt(exempel.a) + ' + ' + fmt(exempel.b) + ' = ' + mellanledFor(exempel).map(fmt).join(' + ') + ' = ' + fmt(exempel.answer) + '</span>' +
       '</div>' : '') +
       '<div class="ts-rad-container">' +
         '<div class="ts-rad-fast">' +
@@ -769,7 +788,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
   // generatorn (struktur:vaxling) så metoden alltid behövs.
   var ko = [];
   function genTask(lvl){
-    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('sub', lvl, OMGANG);
+    if(!ko.length || ko.lvl !== lvl){ ko = UppstBand.omgang('sub', lvl, OMGANG); ko.lvl = lvl; }
     var t = ko.shift();
     return {aInt:t.a, bInt:t.b, ansInt:t.answer, dec:t.dec || 0};   // nivå 4: mantissor + dec
   }
@@ -813,7 +832,7 @@ function renderUppstallningSubEnkel(body, metod, backFn){
       +renderSummaryCard({right:right,total:total,level:level,levelChange:adj.change})
       +'</div>';
     document.getElementById('summary-next-btn').onclick=function(){
-      omgangResults=[];borrows=new Set();laan=false;svarVal={};sistFokusPos=null;
+      omgangResults=[];ko=[];borrows=new Set();laan=false;svarVal={};sistFokusPos=null;
       currentTask=genTask(level);render();
     };
   }
@@ -952,9 +971,11 @@ function renderUppstallningSubEnkel(body, metod, backFn){
       });
     });
     // Behåll markören där eleven var (lån-knappen re-renderar) i stället för att hoppa till entalet
+    // Ingen ruta förvald (order 2026-09-20): var eleven börjar — höger eller vänster — hör till förståelsen av metoden.
+    // Bara ÅTERSTÄLLNING av den ruta eleven redan stod i (lån-knappen ritar om bladet) — aldrig ett förval.
     setTimeout(function(){
       var mal = sistFokusPos!=null && ansInputs.filter(function(x){return parseInt(x.dataset.pos)===sistFokusPos;})[0];
-      (mal || ansInputs[0]) && (mal || ansInputs[0]).focus();
+      if(mal) mal.focus();
     },50);
     bindKeypad(body.querySelector('.exercise-card'));
     document.getElementById('check-btn').onclick=check;

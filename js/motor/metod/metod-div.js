@@ -590,7 +590,7 @@ function renderDivKort(body, backFn){
   // (nivå ≥ 2) minst en minnessiffra — allt i generatorn som struktur; drillen bygger bara kolumnerna.
   var ko = [];
   function genTask(){
-    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('div', level, OMG);
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang('div', level, OMG); ko.lvl = level; }
     var t = ko.shift();
     var digs = String(t.N).split('').map(Number), k = digs.length;
     var carry = 0, carryInto = [0], q = [];
@@ -694,7 +694,7 @@ function renderDivKort(body, backFn){
         slot.replaceWith(inp); inp.focus();
       });
     });
-    setTimeout(function(){ if(qs.length) qs[0].focus(); }, 50);
+    // Ingen ruta förvald (order 2026-09-20): var eleven börjar — höger eller vänster — hör till förståelsen av metoden.
     qs.forEach(function(inp, i){
       inp.addEventListener('keydown', function(e){
         if(e.key === 'Enter'){ e.preventDefault(); if(i < qs.length - 1) qs[i+1].focus(); else check(); }
@@ -772,7 +772,7 @@ function renderDivLang(body, backFn){
   // ur bandet (layouten är generisk i k).
   var ko = [];
   function genTask(){
-    if(omgangResults.length === 0 || !ko.length) ko = UppstBand.omgang('div', level, OMG);
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang('div', level, OMG); ko.lvl = level; }
     var task = ko.shift();
     var t = bygg(task.n, String(task.N).split('').map(Number));
     t.N = task.N; t.Q = task.Q;
@@ -889,7 +889,7 @@ function renderDivLang(body, backFn){
     var card = body.querySelector('.exercise-card');
     bindKeypad(card);
     var allInputs = Array.from(card.querySelectorAll('.div-lang-q, .div-lang-sub, .div-lang-brought, .div-lang-rem'));
-    setTimeout(function(){ if(allInputs.length) allInputs[0].focus(); }, 50);
+    // Ingen ruta förvald (order 2026-09-20): var eleven börjar — höger eller vänster — hör till förståelsen av metoden.
     allInputs.forEach(function(inp, i){
       inp.addEventListener('keydown', function(e){
         if(e.key === 'Enter'){
