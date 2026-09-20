@@ -212,11 +212,11 @@
       omgang: 6,
       nivaer: {
         1: { subtrahend:{min:16,max:89}, minuend:{max:99}, flyttsiffra:{min:6}, vaxling:true, resultat:{ differens:{min:11} },
-             blandning:{ perOmgang:'alla', profiler:[ { subtrahend:{min:16,max:19} }, { subtrahend:{min:26,max:89} } ] } },   // 16–19 i varje omgång: flytten till 20 är kort och vinsten uppenbar (J.B.)
+             blandning:{ perOmgang:'alla', vikter:[1,9], profiler:[ { subtrahend:{min:16,max:19} }, { subtrahend:{min:26,max:89} } ] } },   // 16–19 MINST EN per omgång (perOmgang), inte hälften: vikter styr resten av platserna (1:9 ≈ 0,4 extra)
         2: { arv:1, minuend:{max:9999}, blandning:{ perOmgang:'alla', profiler:[ { subtrahend:{min:116,max:989} }, { subtrahend:{min:1006,max:9989} } ] } },   // tresiffrigt OCH tusental i samma omgång
         3: { arv:1, blandning:{ perOmgang:'alla', profiler:[   // decimaler = ny sorts svårighet → sist; mantissor i heltal, decimaler skalar (16–999 tiondelar = 1,6–99,9)
-              { decimaler:{min:1,max:1}, subtrahend:{min:16,max:989},   minuend:{max:999} },                          // tiondelar: flyttsiffra ≥ 6 ärvs (9,7 ja, 9,2 nej)
-              { decimaler:{min:2,max:2}, subtrahend:{min:116,max:9989}, minuend:{max:9999}, flyttsiffra:{min:1} } ] } }   // hundradelar: ingen gräns (flytten till nästa tiondel ≤ 0,09), bara inte 0
+              { decimaler:{min:1,max:1}, subtrahend:{min:16,max:979},   minuend:{max:999},  resultat:{ differens:{min:21} } },                       // tiondelar: flyttsiffra ≥ 6 ärvs (9,7 ja, 9,2 nej); differens ≥ 2,1 (elva gällde heltal, J.B.)
+              { decimaler:{min:2,max:2}, subtrahend:{min:116,max:9789}, minuend:{max:9999}, flyttsiffra:{min:1}, resultat:{ differens:{min:201} } } ] } }   // hundradelar: ingen gräns (flytten till nästa tiondel ≤ 0,09), bara inte 0; differens ≥ 2,01
       }
     },
     bakifran: {   // sub-metoder:bakifran — addition bakifrån: från subtrahenden i hopp uppåt till minuenden (fri stegindelning, order 2026-09-20)
@@ -249,6 +249,7 @@
     ut.decimaler = ut.decimaler || null;   // nivå 4: {min,max} — heltalsbandet skalas med 10^dec
     ut.profiler = bl ? bl.profiler.length : 1;
     ut.perOmgang = bl ? bl.perOmgang : null;
+    ut.vikter = bl && bl.vikter ? bl.vikter : null;   // relativ vikt per profil för platserna efter täckningen (utelämnad = lika)
     ut.maxNiva = Object.keys(r.nivaer).length;
     return ut;
   }

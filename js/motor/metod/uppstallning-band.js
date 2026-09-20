@@ -5,6 +5,7 @@
    KONTRAKT
      UppstBand.gen(rakne, niva)            → EN uppgift inom bandet (null om 400 dragningar inte räckte)
      UppstBand.omgang(rakne, niva, n, vakt) → n DISTINKTA uppgifter; nivå 3 = fördelning: varje profil minst
+                                             en gång, resten efter blandning.vikter (2026-09-20; utelämnade = lika);
                                              en gång per omgång (perOmgang:'alla'), ordningen blandad
      UppstBand.kontrollera(rakne, niva, t) → [] om uppgiften håller bandet, annars lista av brott (fuzzen)
      UppstBand.stat                        → förkastningstal per räknesätt/nivå: {dragningar, godkanda, avslag:{…}}
@@ -126,7 +127,10 @@
     var dist = (typeof distinktOmgang === 'function') ? distinktOmgang : lokalDistinkt;
     for(var forsok = 0; forsok < 20; forsok++){
       // profil per plats: de P första täcker alla profiler, resten slumpas; blandas sedan
-      var plan = []; for(var i = 0; i < n; i++) plan.push(i < P ? i : Math.floor(Math.random() * P));
+      // profil per plats: de P första täcker alla profiler; resten dras efter vikterna (data: blandning.vikter, utelämnade = lika)
+      var vikt = v.vikter && v.vikter.length === P ? v.vikter : null, viktSum = vikt ? vikt.reduce(function(x, y){ return x + y; }, 0) : P;
+      function viktad(){ var r = Math.random() * viktSum; for(var q = 0; q < P; q++){ r -= vikt ? vikt[q] : 1; if(r < 0) return q; } return P - 1; }
+      var plan = []; for(var i = 0; i < n; i++) plan.push(i < P ? i : viktad());
       for(var j = plan.length - 1; j > 0; j--){ var k = Math.floor(Math.random() * (j + 1)); var t = plan[j]; plan[j] = plan[k]; plan[k] = t; }
       var pos = 0;
       var ut = dist(function(){ var ix = plan[Math.min(pos, plan.length - 1)]; var task = drag(rakne, niva, P > 1 ? ix : null, pos); if(task) pos++; return task; },
