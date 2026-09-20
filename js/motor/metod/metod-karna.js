@@ -199,13 +199,19 @@ function navTo(view, opts={}){
   else if(view==='test-take') PB.render.take();
   else if(view==='test-result') PB.render.result();
 }
-document.body.addEventListener('click', e=>{
+// Navigations-delegeringen (ramens [data-nav]) binds när body finns. k3-ramen laddar den här filen i <head>
+// → document.body var null → TypeError vid laddning på varje k3-drill (fångad av onerror-hooken 2026-09-20;
+// __jsfel hookas senare och missade den). Funktionerna ovan är hoisted, så drillarna gick ändå.
+(function bindNav(){
+  if(!document.body){ document.addEventListener('DOMContentLoaded', bindNav); return; }
+  document.body.addEventListener('click', e=>{
   const navTarget = e.target.closest('[data-nav]');
   if(navTarget){
     e.preventDefault();
     navTo(navTarget.dataset.nav);
   }
 });
+})();
 
 // -- övningshuvud (nivå-stege) --
 function exerciseHeader(title, sub, level, maxNiva){   // maxNiva: drillens eget tak (valfritt)
