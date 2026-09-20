@@ -152,9 +152,9 @@
   //                      lilla faktorn/nämnaren får upprepas men inte vara SAMMA i hela omgången (omgången byggs om)
   //   forstaSteg         per OMGÅNG (flytt-drillarna): första hoppet täcker minst `minst` av `klasser` lika breda klasser av
   //                      profilens FAKTISKA hoppintervall (oka-minska nivå 1: hopp 1–4 → klasserna {1,2} {3} {4}; bakifrån 3–8)
-  //   differens          per OMGÅNG: differenserna täcker minst `minst` av `klasser` kvantil-klasser ur bandets FÖRDELNING
+  //   resultat           per OMGÅNG: resultaten (summa/differens/produkt/kvot) täcker minst `minst` av `klasser` kvantil-klasser ur bandets FÖRDELNING
   //                      (samplad en gång per band/nivå — differenserna klumpar sig lågt, intervall-terciler gav 0,5–0,7 ombyggen)
-  var SPRIDNING = { operander:'olika', forstaSteg:{ klasser:3, minst:2 }, differens:{ klasser:3, minst:2 } };
+  var SPRIDNING = { operander:'olika', forstaSteg:{ klasser:3, minst:2 }, resultat:{ klasser:3, minst:2 } };
   var UPPST_BAND = {
     add: {
       kalla: 'Joachim 2026-09-19: båda termerna > 34, summan > 100; nivå 2 en term > 334; nivå 3 blandat > 534 / > 1234',

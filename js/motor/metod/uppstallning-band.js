@@ -8,7 +8,7 @@
                                              en gång, resten efter blandning.vikter (2026-09-20; utelämnade = lika);
                                              en gång per omgång (perOmgang:'alla'), ordningen blandad
      UppstBand.kontrollera(rakne, niva, t) → [] om uppgiften håller bandet, annars lista av brott (fuzzen)
-     UppstBand.kontrolleraOmgang(rakne, niva, omg) → [] om omgången håller spridningen (operander/förstaSteg/differens), annars brott
+     UppstBand.kontrolleraOmgang(rakne, niva, omg) → [] om omgången håller spridningen (operander/förstaSteg/resultat), annars brott
      UppstBand.stat                        → förkastningstal per räknesätt/nivå: {dragningar, godkanda, avslag:{…}}
    Uppgift: add/sub {a,b,answer,display} · mult {m,d,answer,display} · div {N,n,Q,display} · oka-minska {a,b,answer,
    dec,flytt,display} · bakifran samma + nextTio (a/b/answer/flytt = mantissor, dec skalar dem; display i decimalform). `profil` = index i
@@ -165,9 +165,9 @@
     return { lo: 10 - fmax, hi: 10 - fmin };
   }
   function klassAv(x, lo, hi, k){ if(hi <= lo) return 0; return Math.min(k - 1, Math.floor(k * (x - lo) / (hi - lo + 1))); }   // k lika breda klasser av [lo, hi] (heltal)
-  // differens-kvantiler ur bandets fördelning: samplas EN gång per band/nivå (600 fria dragningar, alla profiler), cachas
+  // resultat-kvantiler (summa/differens/produkt/kvot) ur bandets fördelning: samplas EN gång per band/nivå (600 fria dragningar, alla profiler), cachas
   var kvantCache = {};
-  function differensKvantiler(rakne, niva, k){
+  function resultatKvantiler(rakne, niva, k){
     var key = rakne + '|' + niva + '|' + k; if(kvantCache[key]) return kvantCache[key];
     var v = SV.uppstBand(rakne, niva), P = v.profiler, ds = [], s0 = st(rakne, niva), d0 = s0.dragningar, g0 = s0.godkanda;
     for(var i = 0; i < 600; i++){ var t = gen(rakne, niva, P > 1 ? i % P : null, i % 5); if(t) ds.push(t.answer); }
@@ -176,7 +176,7 @@
     var gr = []; for(var q = 1; q < k; q++) gr.push(ds[Math.floor(ds.length * q / k)]);       // k − 1 kvantilgränser
     return (kvantCache[key] = gr);
   }
-  function differensKlass(x, gr){ var c = 0; for(var i = 0; i < gr.length; i++) if(x >= gr[i]) c = i + 1; return c; }
+  function resultatKlass(x, gr){ var c = 0; for(var i = 0; i < gr.length; i++) if(x >= gr[i]) c = i + 1; return c; }
   // omgångens brott mot spridningen: null om den håller, annars skälet (används både av omgang() och kontrolleraOmgang)
   function spridningsBrott(rakne, niva, omg, sp){
     if(!omg.length) return null;
@@ -189,10 +189,10 @@
       var mojliga = Math.min(sp.forstaSteg.klasser, (function(){ var iv = hoppIntervall(rakne, niva, omg[0].profil); return iv ? iv.hi - iv.lo + 1 : 1; })());
       if(Object.keys(kl).length < Math.min(sp.forstaSteg.minst, mojliga, omg.length)) return 'spridning:forstaSteg';
     }
-    if(sp.differens){
-      var gr = differensKvantiler(rakne, niva, sp.differens.klasser), dk = {};
-      omg.forEach(function(t){ dk[differensKlass(t.answer, gr)] = true; });
-      if(Object.keys(dk).length < Math.min(sp.differens.minst, omg.length)) return 'spridning:differens';
+    if(sp.resultat){
+      var gr = resultatKvantiler(rakne, niva, sp.resultat.klasser), dk = {};
+      omg.forEach(function(t){ dk[resultatKlass(t.answer, gr)] = true; });
+      if(Object.keys(dk).length < Math.min(sp.resultat.minst, omg.length)) return 'spridning:resultat';
     }
     return null;
   }
