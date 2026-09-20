@@ -8,6 +8,7 @@
                                              en gång, resten efter blandning.vikter (2026-09-20; utelämnade = lika);
                                              en gång per omgång (perOmgang:'alla'), ordningen blandad
      UppstBand.kontrollera(rakne, niva, t) → [] om uppgiften håller bandet, annars lista av brott (fuzzen)
+     UppstBand.kontrolleraOmgang(rakne, niva, omg) → [] om omgången håller spridningen (operander/förstaSteg/differens), annars brott
      UppstBand.stat                        → förkastningstal per räknesätt/nivå: {dragningar, godkanda, avslag:{…}}
    Uppgift: add/sub {a,b,answer,display} · mult {m,d,answer,display} · div {N,n,Q,display} · oka-minska {a,b,answer,
    dec,flytt,display} · bakifran samma + nextTio (a/b/answer/flytt = mantissor, dec skalar dem; display i decimalform). `profil` = index i
@@ -25,7 +26,7 @@
   var stat = {};
   function st(rakne, niva){
     var r = stat[rakne] || (stat[rakne] = {});
-    return r[niva] || (r[niva] = { dragningar:0, godkanda:0, avslag:{} });
+    return r[niva] || (r[niva] = { dragningar:0, godkanda:0, avslag:{}, ombyggen:{} });   // ombyggen: hela omgången om (fördelning / spridning)
   }
   function avslag(s, skal){ s.avslag[skal] = (s.avslag[skal] || 0) + 1; }
 
@@ -125,6 +126,8 @@
     var v = SV.uppstBand(rakne, niva), P = v.profiler;
     var drag = vakt ? vakt.gen(gen) : gen;   // exempelvakten (metod-karna): en dragning lika med förklaringens exempel dras om
     var dist = (typeof distinktOmgang === 'function') ? distinktOmgang : lokalDistinkt;
+    var sp = v.spridning, s = st(rakne, niva);
+    function ombygg(skal){ s.ombyggen[skal] = (s.ombyggen[skal] || 0) + 1; }
     for(var forsok = 0; forsok < 20; forsok++){
       // profil per plats: de P första täcker alla profiler, resten slumpas; blandas sedan
       // profil per plats: de P första täcker alla profiler; resten dras efter vikterna (data: blandning.vikter, utelämnade = lika)
@@ -132,16 +135,71 @@
       function viktad(){ var r = Math.random() * viktSum; for(var q = 0; q < P; q++){ r -= vikt ? vikt[q] : 1; if(r < 0) return q; } return P - 1; }
       var plan = []; for(var i = 0; i < n; i++) plan.push(i < P ? i : viktad());
       for(var j = plan.length - 1; j > 0; j--){ var k = Math.floor(Math.random() * (j + 1)); var t = plan[j]; plan[j] = plan[k]; plan[k] = t; }
-      var pos = 0;
-      var ut = dist(function(){ var ix = plan[Math.min(pos, plan.length - 1)]; var task = drag(rakne, niva, P > 1 ? ix : null, pos); if(task) pos++; return task; },
-                    n, function(task){ return task.display; });
+      var pos = 0, seddaOp = {};
+      var ut = dist(function(){
+        var ix = plan[Math.min(pos, plan.length - 1)]; var task = drag(rakne, niva, P > 1 ? ix : null, pos); if(!task) return task;
+        // A' (spridning.operander:'olika'): ingen STOR operand upprepas — per uppgift, som distinkthet, dras om här
+        if(sp && sp.operander === 'olika'){ var so = storaOperander(task);   // även lika termer i SAMMA uppgift (47 + 47) är en upprepning
+          if(so.some(function(x){ return seddaOp[x]; }) || (so.length > 1 && so[0] === so[1])){ s.godkanda--; avslag(s, 'spridning:operand'); return null; } }
+        storaOperander(task).forEach(function(x){ seddaOp[x] = true; }); pos++; return task;
+      }, n, function(task){ return task.display; });
+      if(ut.length < n && forsok < 19){ ombygg('kort'); continue; }                        // A'-avslag i fyllnadsfasen kan ge kort omgång → gör om
       if(P > 1 && v.perOmgang === 'alla'){
         var sedda = {}; ut.forEach(function(task){ sedda[task.profil] = true; });
-        if(Object.keys(sedda).length < P) continue;                                         // distinkthets-ersättningar kan ha tappat en profil → gör om
+        if(Object.keys(sedda).length < P){ ombygg('fordelning'); continue; }                 // distinkthets-ersättningar kan ha tappat en profil → gör om
       }
+      // B / C / lilla-inte-samma: egenskaper hos MÄNGDEN — prövas när omgången finns, hela omgången byggs om
+      var brott = sp ? spridningsBrott(rakne, niva, ut, sp) : null;
+      if(brott){ ombygg(brott); continue; }
       return ut;
     }
     return ut;
+  }
+  // ── spridning: hjälpare ───────────────────────────────────────────────────────
+  function storaOperander(t){ return t.N != null ? [t.N] : t.m != null ? [t.m] : [t.a, t.b]; }   // täljare / stora faktorn / båda termerna
+  function litenOperand(t){ return t.N != null ? t.n : t.m != null ? t.d : null; }                 // nämnare / lilla faktorn
+  // hoppintervall ur profilens band (mantissa): flyttsiffra ∈ [min, 10 − forstaSteg.min] → hopp ∈ [10 − fmax, 10 − fmin]
+  function hoppIntervall(rakne, niva, profil){
+    var v = SV.uppstBand(rakne, niva, profil); if(!v || v.flyttsiffra == null && !v.forstaSteg) return null;
+    var fmin = (v.flyttsiffra && v.flyttsiffra.min) || 1, fmax = v.forstaSteg ? 10 - v.forstaSteg.min : 9;
+    return { lo: 10 - fmax, hi: 10 - fmin };
+  }
+  function klassAv(x, lo, hi, k){ if(hi <= lo) return 0; return Math.min(k - 1, Math.floor(k * (x - lo) / (hi - lo + 1))); }   // k lika breda klasser av [lo, hi] (heltal)
+  // differens-kvantiler ur bandets fördelning: samplas EN gång per band/nivå (600 fria dragningar, alla profiler), cachas
+  var kvantCache = {};
+  function differensKvantiler(rakne, niva, k){
+    var key = rakne + '|' + niva + '|' + k; if(kvantCache[key]) return kvantCache[key];
+    var v = SV.uppstBand(rakne, niva), P = v.profiler, ds = [], s0 = st(rakne, niva), d0 = s0.dragningar, g0 = s0.godkanda;
+    for(var i = 0; i < 600; i++){ var t = gen(rakne, niva, P > 1 ? i % P : null, i % 5); if(t) ds.push(t.answer); }
+    s0.dragningar = d0; s0.godkanda = g0;                                                        // samplingen ska inte synas i förkastningstalet
+    ds.sort(function(x, y){ return x - y; });
+    var gr = []; for(var q = 1; q < k; q++) gr.push(ds[Math.floor(ds.length * q / k)]);       // k − 1 kvantilgränser
+    return (kvantCache[key] = gr);
+  }
+  function differensKlass(x, gr){ var c = 0; for(var i = 0; i < gr.length; i++) if(x >= gr[i]) c = i + 1; return c; }
+  // omgångens brott mot spridningen: null om den håller, annars skälet (används både av omgang() och kontrolleraOmgang)
+  function spridningsBrott(rakne, niva, omg, sp){
+    if(!omg.length) return null;
+    if(sp.operander === 'olika'){
+      var sedda = {}; for(var i = 0; i < omg.length; i++){ var so = storaOperander(omg[i]); for(var j = 0; j < so.length; j++){ if(sedda[so[j]]) return 'spridning:operand'; sedda[so[j]] = true; } }
+      var l0 = litenOperand(omg[0]); if(l0 != null && omg.length > 1 && omg.every(function(t){ return litenOperand(t) === l0; })) return 'spridning:liten-samma';
+    }
+    if(sp.forstaSteg && omg[0].flytt != null){
+      var kl = {}; omg.forEach(function(t){ var iv = hoppIntervall(rakne, niva, t.profil); if(iv) kl[klassAv(t.flytt, iv.lo, iv.hi, sp.forstaSteg.klasser)] = true; });
+      var mojliga = Math.min(sp.forstaSteg.klasser, (function(){ var iv = hoppIntervall(rakne, niva, omg[0].profil); return iv ? iv.hi - iv.lo + 1 : 1; })());
+      if(Object.keys(kl).length < Math.min(sp.forstaSteg.minst, mojliga, omg.length)) return 'spridning:forstaSteg';
+    }
+    if(sp.differens){
+      var gr = differensKvantiler(rakne, niva, sp.differens.klasser), dk = {};
+      omg.forEach(function(t){ dk[differensKlass(t.answer, gr)] = true; });
+      if(Object.keys(dk).length < Math.min(sp.differens.minst, omg.length)) return 'spridning:differens';
+    }
+    return null;
+  }
+  function kontrolleraOmgang(rakne, niva, omg){
+    var v = SV.uppstBand(rakne, niva); if(!v || !v.spridning) return [];
+    var b = spridningsBrott(rakne, niva, omg, v.spridning);
+    return b ? [b + ': ' + omg.map(function(t){ return t.display; }).join(' · ')] : [];
   }
   function lokalDistinkt(g, n, keyFn){
     var ut = [], seen = {}, tries = 0;
@@ -191,7 +249,7 @@
     return fel;
   }
 
-  var API = { gen:gen, omgang:omgang, kontrollera:kontrollera, stat:stat, band:function(r){ return SV.UPPST_BAND[r]; },
+  var API = { gen:gen, omgang:omgang, kontrollera:kontrollera, kontrolleraOmgang:kontrolleraOmgang, stat:stat, band:function(r){ return SV.UPPST_BAND[r]; },
               maxNiva:function(r){ return Object.keys(SV.UPPST_BAND[r].nivaer).length; }, decStr:decStr };
   if(typeof module !== 'undefined' && module.exports) module.exports = API;
   if(typeof window !== 'undefined') window.UppstBand = API;

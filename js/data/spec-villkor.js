@@ -147,11 +147,20 @@
   //  nivå 2:s andra operand får vara upp till 999; nivå 3-profilerna 535–1234 och 1235–9999;
   //  den lilla faktorn i mult är 3–9 (ensiffrig drill) resp. 12–99 (flersiffrig drill, ental ≥ 3);
   //  nämnaren i div är 3–9 (kort och lång division delar band).
+  // SPRIDNING INOM OMGÅNGEN (order 2026-09-20) — samma regel för alla sju banden (åtta noder); prövas i UppstBand.omgang:
+  //   operander:'olika'  per UPPGIFT: ingen STOR operand (term, minuend/subtrahend, stora faktorn, täljaren) upprepas i omgången;
+  //                      lilla faktorn/nämnaren får upprepas men inte vara SAMMA i hela omgången (omgången byggs om)
+  //   forstaSteg         per OMGÅNG (flytt-drillarna): första hoppet täcker minst `minst` av `klasser` lika breda klasser av
+  //                      profilens FAKTISKA hoppintervall (oka-minska nivå 1: hopp 1–4 → klasserna {1,2} {3} {4}; bakifrån 3–8)
+  //   differens          per OMGÅNG: differenserna täcker minst `minst` av `klasser` kvantil-klasser ur bandets FÖRDELNING
+  //                      (samplad en gång per band/nivå — differenserna klumpar sig lågt, intervall-terciler gav 0,5–0,7 ombyggen)
+  var SPRIDNING = { operander:'olika', forstaSteg:{ klasser:3, minst:2 }, differens:{ klasser:3, minst:2 } };
   var UPPST_BAND = {
     add: {
       kalla: 'Joachim 2026-09-19: båda termerna > 34, summan > 100; nivå 2 en term > 334; nivå 3 blandat > 534 / > 1234',
       namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal', 3:'Decimaltal', 4:'Tusental' },
       omgang: 5,
+      spridning: SPRIDNING,
       nivaer: {
         1: { term:{min:35,max:99}, resultat:{ summa:{min:101} }, struktur:'minnessiffra i entalen (drillens krav)' },
         2: { arv:1, term:{min:35,max:999}, minstEn:{min:335,max:999} },
@@ -163,6 +172,7 @@
       kalla: 'Joachim 2026-09-19: båda termerna > 34, differensen > 31; nivå 2 en term > 334; nivå 3 blandat > 534 / > 1234',
       namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal', 3:'Decimaltal', 4:'Tusental' },
       omgang: 5,
+      spridning: SPRIDNING,
       nivaer: {
         1: { term:{min:35,max:199}, resultat:{ differens:{min:32} }, struktur:'minst en växling (drillens krav)' },   // max 199 (J.B. 2026-09-19): med 99 blev poolen ~500 par och synbart likformig
         2: { arv:1, term:{min:35,max:999}, minstEn:{min:335,max:999} },
@@ -174,6 +184,7 @@
       kalla: 'Joachim 2026-09-19: ena faktorn > 34, den andra ≥ 3; nivå 2 en faktor > 334; nivå 3 blandat > 534 / > 1234',
       namn: { 1:'Tvåsiffrigt tal · ensiffrigt', 2:'Tresiffrigt tal · ensiffrigt', 3:'Decimaltal · ensiffrigt', 4:'Tusental · ensiffrigt' },
       omgang: 3,
+      spridning: SPRIDNING,
       nivaer: {
         1: { faktorStor:{min:35,max:99}, faktorLiten:{min:3,max:9}, struktur:'stora faktorns ental ≥ 3 (drillens krav: flera delprodukter)' },
         2: { arv:1, faktorStor:{min:335,max:999} },
@@ -185,6 +196,7 @@
       kalla: 'som mult; den andra faktorn ≥ 3 uppfylls av tvåsiffrig multiplikator (ental ≥ 3 för två delprodukter)',
       namn: { 1:'Tvåsiffrigt · tvåsiffrigt', 2:'Tresiffrigt · tvåsiffrigt', 3:'Decimaltal · tvåsiffrigt', 4:'Tusental · tvåsiffrigt' },
       omgang: 5,
+      spridning: SPRIDNING,
       nivaer: {
         1: { faktorStor:{min:35,max:99}, faktorLiten:{min:12,max:99}, struktur:'båda faktorernas ental ≥ 3 (drillens krav)' },
         2: { arv:1, faktorStor:{min:335,max:999} },
@@ -196,6 +208,7 @@
       kalla: 'Joachim 2026-09-19: täljaren > 54, nämnaren ≥ 3; nivå 2 täljare > 334; nivå 3 blandat > 534 / > 1234',
       namn: { 1:'Täljare upp till 334', 2:'Tresiffrig täljare', 3:'Täljare i tusental' },
       omgang: 5, omgangLang: 4,
+      spridning: SPRIDNING,
       nivaer: {
         1: { taljare:{min:55,max:334}, namnare:{min:3,max:9}, resultat:{ kvot:'heltal' }, struktur:'ingen regel om första siffran (togs bort 2026-09-19: 312/4 med tvåsiffrig kvot är just det eleven ska förstå; layouten hoppar över första kvotcellen)' },
         2: { arv:1, taljare:{min:335,max:999}, minnessiffra:true, struktur:'minst en minnessiffra/rest att bära vidare (drillens krav, ärvs av nivå 3)' },
@@ -210,9 +223,10 @@
       kalla: 'Joachim 2026-09-20: subtrahenden ≥ 16 med ental ≥ 6, växling krävs; profil 16–19 så de små syns; nivå 2 tresiffrigt och tusental (samma svårighet); nivå 3 tiondelar (siffra ≥ 6) och hundradelar (ingen gräns) blandade',
       namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal och tusental', 3:'Decimaltal' },
       omgang: 6,
+      spridning: SPRIDNING,
       nivaer: {
         1: { subtrahend:{min:16,max:89}, minuend:{max:99}, flyttsiffra:{min:6}, vaxling:true, resultat:{ differens:{min:11} },
-             blandning:{ perOmgang:'alla', vikter:[1,9], profiler:[ { subtrahend:{min:16,max:19} }, { subtrahend:{min:26,max:89} } ] } },   // 16–19 MINST EN per omgång (perOmgang), inte hälften: vikter styr resten av platserna (1:9 ≈ 0,4 extra)
+             blandning:{ perOmgang:'alla', vikter:[0,1], profiler:[ { subtrahend:{min:16,max:19} }, { subtrahend:{min:26,max:89} } ] } },   // 16–19 EXAKT EN per omgång (perOmgang ger platsen, vikt 0 ger inga fler): den visar metoden, konkurrerar inte om platserna (J.B.)
         2: { arv:1, minuend:{max:9999}, blandning:{ perOmgang:'alla', profiler:[ { subtrahend:{min:116,max:989} }, { subtrahend:{min:1006,max:9989} } ] } },   // tresiffrigt OCH tusental i samma omgång
         3: { arv:1, blandning:{ perOmgang:'alla', profiler:[   // decimaler = ny sorts svårighet → sist; mantissor i heltal, decimaler skalar (16–999 tiondelar = 1,6–99,9)
               { decimaler:{min:1,max:1}, subtrahend:{min:16,max:979},   minuend:{max:999},  resultat:{ differens:{min:21} } },                       // tiondelar: flyttsiffra ≥ 6 ärvs (9,7 ja, 9,2 nej); differens ≥ 2,1 (elva gällde heltal, J.B.)
@@ -228,6 +242,7 @@
       kalla: 'Joachim 2026-09-20: växling krävs, första steget ≥ 3, minuenden slutar inte på 0, inget tak på resten; nivåer som oka-minska; nivå 3 tiondelar och hundradelar med differens ≥ 2 hela enheter',
       namn: { 1:'Tvåsiffriga tal', 2:'Tresiffriga tal och tusental', 3:'Decimaltal' },
       omgang: 5,
+      spridning: SPRIDNING,
       nivaer: {
         1: { subtrahend:{min:16,max:89}, minuend:{max:99, flyttsiffra:{min:1}}, flyttsiffra:{min:2}, vaxling:true, forstaSteg:{min:3}, resultat:{ differens:{min:11} } },
         2: { arv:1, minuend:{max:9999, flyttsiffra:{min:1}}, blandning:{ perOmgang:'alla', profiler:[ { subtrahend:{min:116,max:989} }, { subtrahend:{min:1006,max:9989} } ] } },
@@ -250,6 +265,7 @@
     ut.profiler = bl ? bl.profiler.length : 1;
     ut.perOmgang = bl ? bl.perOmgang : null;
     ut.vikter = bl && bl.vikter ? bl.vikter : null;   // relativ vikt per profil för platserna efter täckningen (utelämnad = lika)
+    ut.spridning = r.spridning || null;                 // omgångsvillkor (samma på alla nivåer)
     ut.maxNiva = Object.keys(r.nivaer).length;
     return ut;
   }
