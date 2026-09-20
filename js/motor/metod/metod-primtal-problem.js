@@ -37,9 +37,12 @@ function renderPrimtalProblem(body){
             <div class="prob-feedback" id="prob-fb-${i}"></div>
           </div>
         `).join('')}
+        ${keypadHTML([])}
         <div id="prob-summary-anchor"></div>
       </div>
     `;
+    // KEYPAD (svep 2026-09-20): numeriska fält utan keypad — en elev på surfplatta kunde inte fylla i.
+    bindKeypad(body.querySelector('.exercise-card'));
     document.querySelectorAll('[data-check]').forEach(b=>{
       b.addEventListener('click', ()=>{
         const i = parseInt(b.dataset.check);

@@ -145,6 +145,7 @@ function renderPrimtalRakna(body){
             ${inputs}
           </div>
           <div class="rakna-uppdela-feedback" id="rakna-fb"></div>
+          ${keypadHTML([])}
           <div style="margin-top:16px;text-align:center;">
             <button class="btn primary" id="rakna-check">Kontrollera</button>
           </div>
@@ -152,6 +153,8 @@ function renderPrimtalRakna(body){
       </div>
     `;
 
+    // KEYPAD (svep 2026-09-20): numeriska fält utan keypad — en elev på surfplatta kunde inte fylla i.
+    bindKeypad(body.querySelector('.exercise-card'));
     const inputEls = document.querySelectorAll('.rakna-factor-input');
     inputEls.forEach((inp,i)=>{
       inp.addEventListener('keydown', e=>{

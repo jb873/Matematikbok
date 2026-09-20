@@ -201,6 +201,7 @@ function renderPrimtalMetod(body, koId){
           <div class="tree-result ${complete?'show correct':''}">
             ${complete?`🎉 Klart! ${treeRoot.value} = ${primes.join(' · ')}`:''}
           </div>
+          ${keypadHTML([])}
           <div class="tree-actions">
             ${complete ? `<button class="btn primary" id="next-task">${omgangResults.length + 1 >= OMGANG_SIZE ? 'Se resultat' : 'Nästa träd'}</button>` : `<button class="btn subtle" id="restart-task">Börja om</button>`}
             <button class="btn subtle" onclick="navTo('ko',{koId:'${koId}'})">Tillbaka</button>
@@ -209,6 +210,8 @@ function renderPrimtalMetod(body, koId){
       </div>
     `;
 
+    // KEYPAD (svep 2026-09-20): numeriska fält utan keypad — en elev på surfplatta kunde inte fylla i.
+    bindKeypad(body.querySelector('.exercise-card'));
     document.querySelectorAll('.tnode-input').forEach(inp=>{
       inp.addEventListener('input', e=>{
         const realId = inp.dataset.pi.replace(/-(left|right)$/,'');

@@ -159,6 +159,7 @@ function renderPrimtalKomm(body){
 
           <div class="komm-feedback" id="komm-fb"></div>
           <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            ${keypadHTML([])}
             <button class="btn primary" id="komm-check">Kontrollera</button>
             <button class="btn" id="komm-next-btn" style="display:none;">${omgangResults.length + 1 >= OMGANG_SIZE ? 'Se resultat' : 'Nästa uppgift'}</button>
             <button class="btn subtle" onclick="navTo('ko',{koId:'primtal'})">Tillbaka</button>
@@ -167,6 +168,7 @@ function renderPrimtalKomm(body){
       </div>
     `;
 
+    bindKeypad(body.querySelector('.exercise-card'));   // KEYPAD (svep 2026-09-20)
     document.getElementById('komm-check').onclick = checkAnswer;
     document.getElementById('komm-add').onclick = addFactorBox;
     document.getElementById('komm-remove').onclick = removeFactorBox;
