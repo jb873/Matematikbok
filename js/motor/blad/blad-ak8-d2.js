@@ -93,7 +93,7 @@
     { rubrik:'Termometern visar −8,3 °C. Vad visar den om temperaturen', fig:TERMO(-8.3, -12, 2, 1, [-10, -5, 0]),
       rader:[ T('minskar med 1,5 grader', -9.8), T('ökar med 1,5 grader', -6.8), T('ökar med 4 grader', -4.3) ] },
     { rubrik:'Beräkna', rader:[ T('−25 − 7 =', -32), T('0,6 − 1,8 =', -1.2), T('0,7 − 3 =', -2.3) ] },
-    { rubrik:'Beräkna med mellanled', hint:'Samla de positiva talen först. Exempel: 6 − 12 + 8 = 14 − 12 = 2', rader:[
+    { rubrik:'Beräkna med mellanled', rader:[
       M('3 − 15 + 17', 20, 15, 5),
       M('18 − 35 − 65', 18, 100, -82),
       M('−2 + 0,7 + 0,3', 1, 2, -1),
@@ -128,7 +128,7 @@
     { rubrik:'Beräkna', rader:[ T('−0,2 · (−7) =', 1.4), T('(−0,8) · 0,3 =', -0.24), T('3 · (−0,04) =', -0.12) ] },
     { rubrik:'Beräkna', rader:[ T(frac(-1500,-5) + ' =', 300), T(frac('−0,24',3) + ' =', -0.08), T(frac('3,6','−2') + ' =', -1.8) ] },
     { rubrik:'Vad ska stå i den tomma rutan?', rader:[ T('(−5) · □ = 35', -7), T('□ · 7 = −28', -4), T('(−4) · □ = −36', 9), T('□ · 0,5 = −0,25', -0.5) ] },
-    { rubrik:'Vad ska stå i den tomma rutan?', hint:'Rutan ligger inne i bråket.', rader:[
+    { rubrik:'Vad ska stå i den tomma rutan?', rader:[
       R(-56, 'namnare', 8, -7), R(-9, 'taljare', 3, -27), R(-36, 'namnare', -9, 4), R(11, 'taljare', -4, -44) ] },
     { rubrik:'Beräkna', rader:[ T('13 + 2 · (−5) =', 3), T('8 + ' + frac(15,-3) + ' =', 3), T('(−3) · (−5) − 8 =', 7), T(frac(-18,-3) + ' + (−4) =', 2) ] },
     { grupp:'Blad C2' },
@@ -294,7 +294,7 @@
       html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + grpN + '. ' + u.rubrik + '</div>';
       // Figur EN gång ovanför raderna (t.ex. termometer). Icke-interaktiv — eleven räknar, figuren visar utgångsläget.
       if(u.fig) html += '<div class="ak8-termometer">' + (window.SvgTermometer ? window.SvgTermometer.termometer(u.fig) : '') + '</div>';
-      if(u.hint) html += '<p class="ak8-hint">' + u.hint + '</p>';
+      // hjälptexter under rubrikerna borttagna (order 2026-09-21); u.hint renderas inte längre
       var bokN = 0;
       u.rader.forEach(function(r){
         var h = renderRad(r);

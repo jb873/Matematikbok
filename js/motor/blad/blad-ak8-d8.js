@@ -43,13 +43,15 @@
   function EQ(q, v, fin, opts){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin, min: (opts && opts.fri) ? 1 : 2 }; }
   // opts.svarform = SVARSFORMEN gruppen kräver ('blandad'|'brak'|'decimal'); utelämnad = 'enklaste' (båda formerna).
   // Kravet bor i DATAN (gruppen), inte i rubriktexten — rättaren läser inte rubriker. (Order 2026-09-15.)
+  // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
+
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Division med bråk', uppg: [
     G('Invertera följande tal (skriv det inverterade talet)', [
       INV('4', '7'), INV('6', '13'), INV('2x', 'y')
-    ], 'Byt plats på täljare och nämnare. Algebraiskt: 2x/y blir y/2x.'),
+    ]),
     G('Beräkna', [
       KAN('4 ÷ ' + fr(1,3), [12,1], [{ t:'i', fin: DE(12) }]),
       KAN('7 ÷ ' + fr(1,5), [35,1], [{ t:'i', fin: DE(35) }]),
@@ -64,12 +66,12 @@
       KAN(fr(4,5) + ' ÷ ' + fr(2,3), [6,5], [{ t:'kb' }, { t:'m', fin: MI(1,1,5) }]),
       KAN(fr(3,4) + ' ÷ ' + fr(5,6), [9,10], [{ t:'kb' }, { t:'b', fin: BR(9,10) }]),
       KAN(fr(3,5) + ' ÷ ' + fr(2,7), [21,10], [{ t:'kb' }, { t:'m', fin: MI(2,1,10) }])
-    ], 'Skriv divisionen som ett staplat bråk och förläng täljare OCH nämnare med nämnarens invers, så nämnaren blir 1. Då står det som kvar är täljaren · inverterade nämnaren – det är därför invertera fungerar.'),
+    ]),
     G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', [
       EQ(fr(3,5) + ' ÷ ' + fr(6,7), [7,10], BR(7,10)),
       EQ(fr(5,6) + ' ÷ ' + fr(3,8), [20,9], MI(2,2,9)),
       EQ(fr(7,3) + ' ÷ ' + fr(5,7), [49,15], MI(3,4,15))
-    ], 'Invertera nämnaren och multiplicera: (täljare·täljare)/(nämnare·nämnare) i mellanledet.')
+    ])
   ] };
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
@@ -78,7 +80,7 @@
       EQ('4 ÷ ' + fr(2,3), [6,1], DE(6)),
       EQ('5 ÷ ' + fr(2,7), [35,2], MI(17,1,2)),
       EQ('6 ÷ ' + fr(3,8), [16,1], DE(16))
-    ], 'Två giltiga vägar: som facit, ELLER gör heltalet till bråk (4 = 4/1) och räkna som i femman. Båda godtas.'),
+    ]),
     G('Beräkna', [
       KAN(fr(3,4) + ' ÷ 2', [3,8], [{ t:'b', fin: BR(3,8) }]),
       KAN(fr(4,7) + ' ÷ 6', [2,21], [{ t:'b', fin: BR(2,21) }]),
@@ -87,16 +89,16 @@
     G('Beräkna – visa mellanled, förkorta innan beräkning', [
       EQ(fr(11,18) + ' ÷ ' + fr(44,27), [3,8], BR(3,8)),
       EQ(fr(7,13) + ' ÷ ' + fr(49,26), [2,7], BR(2,7))
-    ], 'Invertera, korsförkorta innan du multiplicerar (fri väg).'),
+    ]),
     G('Beräkna – visa mellanled, svara i enklaste form', [
       EQ(mx(1,5,9) + ' ÷ ' + mx(1,1,6), [4,3], MI(1,1,3)),
       EQ(mx(2,3,4) + ' ÷ ' + mx(4,5,7), [7,12], BR(7,12)),
       EQ(mx(4,1,5) + ' ÷ ' + mx(3,3,8), [56,45], MI(1,11,45))
-    ], 'Gör om till oäkta bråk, invertera och multiplicera (fri väg).'),
+    ]),
     G('Beräkna – blandade räknesätt', [
       EQ(mx(10,2,5) + ' · ' + mx(5,5,8) + ' − ' + fr(5,6) + ' ÷ ' + mx(1,2,3), [58,1], DE(58)),
       EQ(mx(4,3,5) + ' ÷ (' + mx(5,1,2) + ' + ' + mx(1,2,5) + ')', [2,3], BR(2,3))
-    ], 'Tänk på räkneordningen: multiplikation och division före addition och subtraktion. Fri väg.')
+    ])
   ] };
 
   // ══════════════════════════ RENDER ══════════════════════════

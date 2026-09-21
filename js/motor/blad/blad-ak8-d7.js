@@ -26,6 +26,8 @@
   function EQ(q, v, fin, opts){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin, min: (opts && opts.fri) ? 1 : 2 }; }
   // opts.svarform = SVARSFORMEN gruppen kräver ('blandad'|'brak'|'decimal'); utelämnad = 'enklaste' (båda formerna).
   // Kravet bor i DATAN (gruppen), inte i rubriktexten — rättaren läser inte rubriker. (Order 2026-09-15.)
+  // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
+
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
   var FRI = { fri: true };
 
@@ -41,19 +43,19 @@
       EQ(fr(3,7) + ' · ' + fr(2,5), [6,35], BR(6,35)),
       EQ(fr(5,6) + ' · ' + fr(4,7), [10,21], BR(10,21)),
       EQ(fr(5,8) + ' · ' + fr(7,9), [35,72], BR(35,72))
-    ], 'Skriv mellanledet som (täljare·täljare)/(nämnare·nämnare) – du får skriva produkten i rutorna.'),
+    ]),
     G('Förkorta och beräkna', [
       EQ(pf('11·5','10'), [11,2], MI(5,1,2)),
       EQ(pf('20','12·3'), [5,9], BR(5,9)),
       EQ(pf('20·7','15'), [28,3], MI(9,1,3)),
       EQ(pf('5·12','18'), [10,3], MI(3,1,3))
-    ], 'Fri väg: förkorta (korsförkorta) innan du multiplicerar, i valfri ordning. Varje led måste vara lika med uttrycket, sista ledet svaret i enklaste form.'),
+    ]),
     G('Beräkna – ta bort ett mellanled, räkna i huvudet, svara i enklaste form', [
       EQ(fr(7,9) + ' · 6', [14,3], MI(4,2,3), FRI),
       EQ(fr(4,11) + ' · ' + fr(5,7), [20,77], BR(20,77), FRI),
       EQ('4 · ' + fr(12,7), [48,7], MI(6,6,7), FRI),
       EQ(fr(3,8) + ' · ' + fr(7,4), [21,32], BR(21,32), FRI)
-    ], 'Räkna i huvudet – du får hoppa över mellanled. Skriv så många (eller få) led du vill, sista i enklaste form.'),
+    ]),
     G('Beräkna – svara i enklaste form', [
       EQ('2 · ' + mx(1,3,8), [11,4], MI(2,3,4)),
       EQ('4 · ' + mx(2,4,5), [56,5], MI(11,1,5)),
@@ -64,7 +66,7 @@
       EQ(fr(21,8) + ' · ' + fr(16,35), [6,5], MI(1,1,5)),
       EQ(fr(28,27) + ' · ' + fr(18,7), [8,3], MI(2,2,3)),
       EQ(fr(5,18) + ' · ' + fr(63,25), [7,10], BR(7,10))
-    ], 'Korsförkorta i valfri ordning innan du multiplicerar. Fri väg – varje led lika med uttrycket, svaret i enklaste form.')
+    ])
   ] };
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
@@ -73,17 +75,17 @@
       EQ(mx(1,1,8) + ' · ' + mx(1,7,9), [2,1], DE(2)),
       EQ(mx(2,1,4) + ' · ' + mx(1,1,3), [3,1], DE(3)),
       EQ(mx(3,1,2) + ' · ' + mx(4,2,7), [15,1], DE(15))
-    ], 'Gör om till oäkta bråk, förenkla (korsförkorta) innan du multiplicerar. Fri väg.'),
+    ]),
     G('Förkorta och beräkna', [
       EQ(fr(4,5) + ' · ' + fr(10,21) + ' · ' + fr(7,12), [2,9], BR(2,9)),
       EQ(fr(11,4) + ' · ' + fr(9,33) + ' · ' + fr(16,5), [12,5], MI(2,2,5)),
       EQ(fr(15,8) + ' · ' + fr(2,7) + ' · ' + fr(14,9), [5,6], BR(5,6))
-    ], 'Tre faktorer – korsförkorta över alla täljare och nämnare innan du multiplicerar.'),
+    ]),
     G('Beräkna – visa mellanled, förenkla innan beräkning, svara i enklaste form', [
       EQ(mx(5,2,5) + ' · ' + mx(6,2,3), [36,1], DE(36)),
       EQ(mx(1,3,7) + ' · ' + mx(4,1,5), [6,1], DE(6)),
       EQ(mx(3,2,3) + ' · ' + mx(7,1,8), [209,8], MI(26,1,8))
-    ], 'Gör om till oäkta bråk, förenkla innan du multiplicerar. Fri väg.')
+    ])
   ] };
 
   // ══════════════════════════ RENDER ══════════════════════════

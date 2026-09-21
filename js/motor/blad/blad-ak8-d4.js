@@ -48,6 +48,8 @@
   function GPS(fraga, k, e){ return { typ:'gps', fraga:fraga, k:k, e:e }; }   // skriv i grundpotensform
   // GP-kedja: vänster = [gp-cell] = … . leds = [{k,e} | {kind:'gpfrac',k,e,namn}]. Sista ledet kräver koeff∈[1,10).
   function KGP(vanster, leds, facit){ return { typ:'kgp', vanster:vanster, leds:leds, facit:facit }; }
+  // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
+
   function G(rubrik, rader, hint){ return { rubrik:rubrik, rader:rader, hint:hint }; }
 
   // ══════════════════════════════════════════════════════════════════════════════════════
@@ -145,7 +147,7 @@
   var PRIO = { nr:3, titel:'Prioriteringsregeln med potenser', nod:'prio-potenser', uppg:[
     G('Beräkna', [
       T(potP('4 · 2', 2) + ' =', 64), T('5 · ' + pot(2, 4) + ' =', 80), T('5 · 2 + ' + pot(3, 3) + ' =', 37), T('25 − ' + pot(6, 2) + ' =', -11)
-    ], 'Tänk på prioriteringsreglerna. Ett svar blir negativt.'),
+    ]),
     G('Beräkna', [
       T(potP('0,2 · 3', 2) + ' =', 0.36), T('3 · ' + potP('2 − 1,9', 2) + ' =', 0.03), BR('4 · ' + potP(fr(3, 4), 2) + ' =', 9, 4)
     ]),
@@ -222,7 +224,7 @@
       KGP(gp(3, 4) + ' · ' + gp(3, 9), [{ k:9, e:13 }, { k:9, e:13 }], '3·10⁴ · 3·10⁹ = 9·10^(4+9) = 9·10¹³'),
       KGP(gp(5, 6) + ' · ' + gp(3, 11), [{ k:15, e:17 }, { k:15, e:17 }, { k:1.5, e:18 }], '5·10⁶ · 3·10¹¹ = 15·10^(6+11) = 15·10¹⁷ = 1,5·10¹⁸'),
       KGP(gp(7, 8) + ' · ' + gp(5, 7), [{ k:35, e:15 }, { k:35, e:15 }, { k:3.5, e:16 }], '7·10⁸ · 5·10⁷ = 35·10^(8+7) = 35·10¹⁵ = 3,5·10¹⁶')
-    ], 'Normalisering: om koefficienten ≥ 10, flytta så att 1 ≤ koeff < 10.'),
+    ]),
     G('Skriv i grundpotensform', [
       GPS('350 000', 3.5, 5), GPS('407 000', 4.07, 5), GPS('30 500 000', 3.05, 7)
     ]),
@@ -257,7 +259,7 @@
       KGP(gp(3, 4) + ' · ' + gp(4.5, 5), [{ k:13.5, e:9 }, { k:13.5, e:9 }, { k:1.35, e:10 }], '3·10⁴ · 4,5·10⁵ = 13,5·10^(4+5) = 13,5·10⁹ = 1,35·10¹⁰'),
       KGP(fr(gp(9, 8), gp(1.5, 3)), [{ k:6, e:5 }, { k:6, e:5 }], '9·10⁸ / 1,5·10³ = 6·10^(8−3) = 6·10⁵'),
       KGP(fr(gp(1.4, 7), gp(2, 4)), [{ kind:'gpfrac', k:14, e:6, dk:2, de:4 }, { k:7, e:2 }, { k:7, e:2 }], '1,4·10⁷ / 2·10⁴ = 14·10⁶ / 2·10⁴ = 7·10^(6−4) = 7·10²')
-    ], 'Sista raden: skriv om 1,4·10⁷ som 14·10⁶ först, så blir divisionen jämn.')
+    ])
   ] };
 
 

@@ -35,6 +35,8 @@
   function TL(cfg, punkter){ return { typ:'tl', cfg:cfg, punkter:punkter }; }                            // tallinje A/B/C
   function AN(svg, t, n){ return { typ:'an', svg:svg, t:t, n:n }; }                                        // andel av figur
   function T(fraga, facit, suffix){ return { typ:'tal', fraga:fraga, facit:facit, suffix:suffix }; }       // värde/decimal
+  // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
+
   function G(rubrik, rader, hint){ return { rubrik:rubrik, rader:rader, hint:hint }; }
 
   // ══════════════════════════════════════════════════════════════════════════════════════
@@ -52,7 +54,7 @@
     ]),
     G('Skriv två likformiga bråk (samma värde, men förlängda)', [
       LK(1, 3), LK(4, 5), LK(2, 9)
-    ], 'Likformiga = samma värde. Förläng täljare och nämnare med samma tal. Två olika räknas rätt om båda är lika med bråket.'),
+    ]),
     G('Skriv som timmar i bråkform, enklaste form', [
       BR('45 min =', 3, 4, { enklast:true, suffix:'h' }), BR('20 min =', 1, 3, { enklast:true, suffix:'h' }), BR('24 min =', 2, 5, { enklast:true, suffix:'h' })
     ]),
@@ -61,7 +63,7 @@
     ]),
     G('Förläng — visa mellanled', [
       FL(4, 5, 3, 12, 15), FL(3, 8, 5, 15, 40), FL(5, 3, 9, 45, 27), FL(7, 9, 6, 42, 54)
-    ], 'Förläng med talet i parentesen: skriv (täljare·tal)/(nämnare·tal) i mellanledet, räkna ut svaret sist.'),
+    ]),
     G('Skriv som timmar i decimalform', [
       T('15 min =', 0.25, 'h'), T('3 h 12 min =', 3.2, 'h'), T('1 h 45 min =', 1.75, 'h'), T('4 h 6 min =', 4.1, 'h')
     ]),
@@ -78,7 +80,7 @@
     ]),
     G('Hur stor andel av figuren är färgad? (enklaste form)', [
       AN(A.olikVar([1, 3], [1]), 3, 4), AN(A.olikVar([1, 1, 2, 2], [2]), 1, 3), AN(A.olikVar([1, 2, 1, 1], [1]), 2, 5)
-    ], 'Delarna är olika stora — tänk på hur stor varje del är, räkna inte bara antalet delar.')
+    ])
   ] };
 
   // ══════════════════════════════════════════════════════════════════════════════════════

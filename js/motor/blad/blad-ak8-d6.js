@@ -30,6 +30,8 @@
   function DE(x){ return { k: 'dec', x: x }; }
   // opts.svarform = SVARSFORMEN gruppen kräver ('blandad'|'brak'|'decimal'); utelämnad = 'enklaste' (båda formerna).
   // Kravet bor i DATAN (gruppen), inte i rubriktexten — rättaren läser inte rubriker. (Order 2026-09-15.)
+  // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
+
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
@@ -55,7 +57,7 @@
       R(fr(3,4) + ' − ' + fr(1,6), [7,12], 'toggle', 0, BR(7,12)),
       R(fr(2,5) + ' + ' + fr(7,8), [51,40], 'toggle', 1, MI(1,11,40)),
       R(fr(3,5) + ' − ' + fr(1,4), [7,20], 'toggle', 0, BR(7,20))
-    ], 'Skriv förlängningen med räknesättet kvar i mellanledet, t.ex. 10/15 + 9/15, och svaret i rutan efter. Vill du räkna i fler steg: "+ led".'),
+    ]),
     G('Beräkna med blandad form – visa mellanled, svara i enklaste form', [
       R(mx(1,1,2) + ' + ' + mx(2,3,7), [55,14], 'toggle', 0, MI(3,13,14)),
       R(mx(2,3,4) + ' − ' + mx(1,5,8), [9,8], 'toggle', 0, MI(1,1,8)),
@@ -65,7 +67,7 @@
     G('Beräkna – låna i blandad form', [
       L(mx(4,1,3) + ' − ' + mx(1,5,6), [5,2], MI(2,1,2)),
       L(mx(3,3,4) + ' − ' + mx(2,6,7), [25,28], BR(25,28))
-    ], 'Fri väg: skriv dina egna mellanled. Varje led måste vara lika med uttrycket, och sista ledet svaret i enklaste form. Alla giltiga vägar godtas (låna från heltalet, eller räkna via oäkta bråk).')
+    ])
   ] };
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
@@ -74,7 +76,7 @@
       R(mx(2,4,5) + ' + ' + mx(3,1,4), [121,20], 'toggle', 1, MI(6,1,20)),
       L(mx(5,1,3) + ' − ' + mx(2,3,4), [31,12], MI(2,7,12)),
       R(mx(6,5,9) + ' + ' + mx(3,5,6), [187,18], 'toggle', 1, MI(10,7,18))
-    ], 'Andra raden kräver att du lånar från heltalet – fri väg, skriv dina egna mellanled.'),
+    ]),
     G('Beräkna – visa mellanled och svara i enklaste form', [
       R(fr(1,2) + ' + ' + fr(1,3) + ' + ' + fr(1,4), [13,12], 'toggle', 1, MI(1,1,12)),
       R(fr(2,5) + ' + ' + fr(3,4) + ' + ' + fr(9,10), [41,20], 'toggle', 1, MI(2,1,20)),
@@ -84,11 +86,11 @@
       R(mx(7,3,4) + ' + ' + mx(2,5,6) + ' + ' + mx(3,5,8), [341,24], 'toggle', 1, MI(14,5,24)),
       R(mx(4,1,5) + ' − ' + mx(6,2,3) + ' + ' + mx(3,1,2), [31,30], 'toggle', 0, MI(1,1,30)),
       R(mx(3,3,5) + ' − ' + mx(8,5,6) + ' + ' + mx(4,2,3), [-17,30], 'toggle', 1, BR(-17,30))
-    ], 'Sista raden ger ett negativt svar – bygg kedjan med minustecken.'),
+    ]),
     G('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
       L(mx(4,1,6) + ' − ' + mx(1,3,8), [67,24], MI(2,19,24)),
       L(mx(5,2,7) + ' − ' + mx(3,5,6), [61,42], MI(1,19,42))
-    ], 'Låna från heltalet – fri väg, skriv dina egna mellanled. Alla giltiga vägar godtas.'),
+    ]),
     G('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
       R(mx(6,3,4) + ' + ' + mx(1,7,15) + ' − ' + mx(4,2,3) + ' + ' + mx(3,5,6) + ' − ' + mx(2,11,12), [67,15], 'toggle', 1, MI(4,7,15)),
       R(mx(9,5,12) + ' − ' + mx(2,5,18) + ' + ' + mx(1,11,20) + ' − ' + mx(2,37,45), [88,15], 'toggle', 2, MI(5,13,15))

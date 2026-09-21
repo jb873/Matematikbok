@@ -163,9 +163,8 @@
     ]),
     G('Vilka tal är delbara med 3? Klicka på dem', [
       VALJ([87, 135, 973, 761, 4302], function(v){ return v % 3 === 0; })
-    ]),
-    G('Utvecklad form &amp; faktorträd', [],
-      'Öva "Skriv i utvecklad form" och "Bygg faktorträd" i fliken <em>Färdighetsträning</em> – de har egna interaktiva verktyg.')
+    ])
+    // (Tom hänvisningsgrupp 'Utvecklad form & faktorträd' borttagen 2026-09-21: bara rubrik + hjälptext, inga rader — verktygen finns i Färdighetsträning.)
   ] };
 
   // ── RENDER ──
