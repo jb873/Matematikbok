@@ -209,7 +209,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;}
 .svar-cell.correct{background:rgba(22,163,74,.1);}
 .svar-cell.wrong{border-color:#dc2626;background:rgba(220,38,38,.08);}
 /* ── INBÄDDAT LÄGE (?embed=1): dölj kromet, visa bara övningen (Färdighetsträning) ── */
-body.embed .topnav, body.embed .hero{ display:none !important; }
+body.embed .topnav, body.embed .hero, body.embed footer{ display:none !important; }   /* footer: "Kapitel 2 · Öva mer" läckte in i åttans Färdighetsträning (order 2026-09-21) */
 body.embed .wrap{ padding:12px 14px 24px; max-width:100%; }
 </style>
 </head>
@@ -575,6 +575,7 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/ovamer/ovamer-k2.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-div.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-mult.js"></script>
+<script src="js/motor/ovamer/ovamer-k2-mult-ak8.js"></script>   <!-- åttans multiplikationskort (?variant=), AK8_UI-ytan; åk7:s drill orörd -->
 <script src="js/motor/ovamer/ovamer-k2-jmf.js"></script>
 <script src="js/motor/figur/svg-andel.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-andel.js"></script>
@@ -635,13 +636,13 @@ function blandadEngine(){
     'brak-mgn':      function(){ mgnEngine(); },              // nian: minsta gemensamma nämnare (två celler, band-driven)
     'brak-add':      function(){ raknaEngine('addition'); },
     'brak-sub':      function(){ raknaEngine('subtraktion'); },
-    'brak-mult-rakna': function(){ multBrakEngine(); },      // Del 6: multiplikation med bråk (mellanled vid stora tal)
+    'brak-mult-rakna': function(){ var v = hs.match(/[?&]variant=([a-z]+)/i); if(v && window.multAk8Engine) multAk8Engine(v[1]); else multBrakEngine(); },      // Del 6: multiplikation med bråk; ?variant= → åttans kort (ovamer-k2-mult-ak8, ett per öva-grupp)
     'brak-div-bh':   function(){ divBrakHeltalEngine(); },   // Del 7: bråktal ÷ heltal (bara svaret)
     'brak-div-hb':   function(){ divHeltalBrakEngine(); },   // Del 7: heltal ÷ bråktal (bara svaret)
     'brak-div-bb':   function(){ divBrakBrakEngine(); },     // Del 7: bråktal ÷ bråktal (visa metod, via förlängning)
     'brak-div-inv':  function(){ divBrakBrakEngine(); },     // invertera-metoden (Öva 6 G3): delar divBrakBrak-engine med brak-div-bb tills förlänga/invertera-splitten byggs. Bär evidens (ak9-öva) + ligger i tre test — alias, ej borttagning.
     'brak-lana':          function(){ lanaEngine(); },            // Låna i blandad form (lucka-drill)
-    'brak-mult-forkorta': function(){ multForkortaEngine(); },    // Förkorta innan mult (lucka-drill)
+    'brak-mult-forkorta': function(){ var v = hs.match(/[?&]variant=([a-z]+)/i); if(v && window.multAk8Engine) multAk8Engine(v[1]); else multForkortaEngine(); },    // Förkorta innan mult (lucka-drill); ?variant= → åttans kort
     'brak-div-reciprok':  function(){ reciprokEngine(); },        // Skriva reciprok (lucka-drill)
     'brak-jmf-lika':     function(){ klickaStorstEngine(); },     // Del 4: klicka störst
     'brak-jmf-riktmark': function(){ markeraRiktmarkEngine(); },  // Del 4: markera alla mot ½ och 1
