@@ -41,7 +41,7 @@
   function finText(fin){ return fin.k === 'dec' ? String(fin.x).replace('.', ',') : fin.k === 'br' ? fin.t + '/' + fin.n : fin.h + ' ' + fin.t + '/' + fin.n; }
   // rad-fabriker
   function INV(tj, nm){ return { typ: 'inv', tj: String(tj), nm: String(nm) }; }        // skriva reciprok (byt plats)
-  function KAN(q, v, cells){ return { typ: 'kan', q: q, v: v[0] / v[1], cells: cells }; }  // cells: [{t:'b'|'m'|'i'|'kb', fin?}]  ('p' produktbråk-cell utgått → EQ)
+  function KAN(q, v, cells){ return { typ: 'kan', q: q, v: v[0] / v[1], cells: cells }; }  // cells: [{t:'b'|'m'|'i'|'e'|'kb', fin?}]  'e' = tom uttryckscell, värde-rättad (förlänga-metoden: eleven bygger komplexbråket själv med EN bråkknapp, order 2026-09-21; 'kb' = förrenderad fyrfälts-cell, kvar som form men oanvänd i d8)  ('p' produktbråk-cell utgått → EQ)
   // fri kedja. min = minsta antal ifyllda led (2 = ett mellanled + svar); {fri:true} → 1 (får hoppa över).
   function EQ(q, v, fin, opts){ return { typ: 'eq', q: q, v: v[0] / v[1], fin: fin, min: (opts && opts.fri) ? 1 : 2 }; }
   // opts.svarform = SVARSFORMEN gruppen kräver ('blandad'|'brak'|'decimal'); utelämnad = 'enklaste' (båda formerna).
@@ -66,9 +66,9 @@
       KAN(dv(fr(1,7), '8'), [1,56], [{ t:'b', fin: BR(1,56) }])
     ]),
     G('Beräkna med metoden förlänga – visa mellanledet som staplat bråk, svara i enklaste form', [
-      KAN(dv(fr(4,5), fr(2,3)), [6,5], [{ t:'kb' }, { t:'m', fin: MI(1,1,5) }]),
-      KAN(dv(fr(3,4), fr(5,6)), [9,10], [{ t:'kb' }, { t:'b', fin: BR(9,10) }]),
-      KAN(dv(fr(3,5), fr(2,7)), [21,10], [{ t:'kb' }, { t:'m', fin: MI(2,1,10) }])
+      KAN(dv(fr(4,5), fr(2,3)), [6,5], [{ t:'e' }, { t:'m', fin: MI(1,1,5) }]),
+      KAN(dv(fr(3,4), fr(5,6)), [9,10], [{ t:'e' }, { t:'b', fin: BR(9,10) }]),
+      KAN(dv(fr(3,5), fr(2,7)), [21,10], [{ t:'e' }, { t:'m', fin: MI(2,1,10) }])
     ]),
     G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', [
       EQ(dv(fr(3,5), fr(6,7)), [7,10], BR(7,10)),
@@ -127,13 +127,13 @@
         function slut(ff, fin){ var st = LR.finalStatus(ff, fin, r.svarform); if(st.status !== 'ratt') ok = false; if(st.status === 'form') besked = LR.besked(st.orsak); }
         r.cells.forEach(function(c, i){
           if(c.t === 'i'){ slut(LR.finalForm(exprOf(el, 'k' + i)), c.fin); }
-          else if(c.t === 'kb'){ if(!likhet(LR.mixedEval(exprOf(el, 'k' + i)), r.v)) ok = false; }  // komplex-bråk = ett led, rättas på VÄRDE
+          else if(c.t === 'kb' || c.t === 'e'){ if(!likhet(LR.mixedEval(exprOf(el, 'k' + i)), r.v)) ok = false; }  // komplex-bråk / fritt uttryck = ett led, rättas på VÄRDE
           else { var rd = bread(el, 'k' + i); if(c.fin) slut(LR.ffAv(rd.hasHel ? rd.hel : null, rd.t, rd.n), c.fin); else if(!likhet(rd.num, r.v)) ok = false; }
         });
         return { ok: ok, facit: 'svar: ' + finText(r.cells[r.cells.length - 1].fin), besked: besked };
       });
       var html = '<div class="ak8-rad ak8-rad-kedja" data-idx="' + idx + '"><span class="ak8-q">' + r.q + '</span>';
-      r.cells.forEach(function(c, i){ html += EQS + (c.t === 'i' ? AK8_UI.ansCell('k' + i) : c.t === 'kb' ? AK8_UI.komplexBrakCell('k' + i) : bcell('k' + i, c.t === 'm')); });
+      r.cells.forEach(function(c, i){ html += EQS + ((c.t === 'i' || c.t === 'e') ? AK8_UI.ansCell('k' + i) : c.t === 'kb' ? AK8_UI.komplexBrakCell('k' + i) : bcell('k' + i, c.t === 'm')); });
       return html + '</div>';
     }
     // equality — delad kedje-helper; minst r.min ifyllda led (mellanled + svar)
