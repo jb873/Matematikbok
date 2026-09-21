@@ -10,7 +10,7 @@
      förr fast produktbråk-cell som inte rymde 3/5 · 7/6, det steg hinten ber om; Joachim 2026-09-15),
      två-varianter (godtar båda metoder), förkorta-innan, blandad÷blandad, blandade räknesätt.
      Minst ett ifyllt mellanled före svaret (antal ≥ 2), som d6/d7.
-   Div visas med ÷; bråk stående. De 7 problemen byggs i FAS 3-fliken (PROB_RUTA). */
+   Div visas som STAPLAT bråk (dv), aldrig ÷ (order 2026-09-21); bråk stående. De 7 problemen byggs i FAS 3-fliken (PROB_RUTA). */
 (function(){
   'use strict';
   var F = window, LR = window.Likhetsrattare;
@@ -18,6 +18,9 @@
   function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
   function fr(t, n){ return F.fracSpan(t, n); }
   function mx(h, t, n){ return h + '&nbsp;' + F.fracSpan(t, n); }
+  // DIVISION SOM STAPLAT BRÅK (order 2026-09-21, Joachim: aldrig ÷ på ett enda ställe): täljaruttrycket över nämnaruttrycket,
+  // även 4 över 1/3. Samma markup som färdighetsträningens komplexbråk (.ovn-kbrak), visningsvariant utan rutor.
+  function dv(a, b){ return '<span class="ovn-kbrak ovn-kbrak-visa"><span class="ovn-kbrak-topp">' + a + '</span><span class="ovn-kbrak-streck"></span><span class="ovn-kbrak-botten">' + b + '</span></span>'; }
   function pfDisp(tj, nm){ return '<span class="ovn-brak"><span class="ovn-brak-taljare ovn-num">' + tj + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare ovn-num">' + nm + '</span></span>'; }
 
   // ── motor-lokala CANONICAL-celler (produktbråk via evalArith; blandad; INVERTERA-reciprok som strängar) ──
@@ -53,51 +56,51 @@
       INV('4', '7'), INV('6', '13'), INV('2x', 'y')
     ]),
     G('Beräkna', [
-      KAN('4 ÷ ' + fr(1,3), [12,1], [{ t:'i', fin: DE(12) }]),
-      KAN('7 ÷ ' + fr(1,5), [35,1], [{ t:'i', fin: DE(35) }]),
-      KAN('3 ÷ ' + fr(1,9), [27,1], [{ t:'i', fin: DE(27) }])
+      KAN(dv('4', fr(1,3)), [12,1], [{ t:'i', fin: DE(12) }]),
+      KAN(dv('7', fr(1,5)), [35,1], [{ t:'i', fin: DE(35) }]),
+      KAN(dv('3', fr(1,9)), [27,1], [{ t:'i', fin: DE(27) }])
     ]),
     G('Beräkna', [
-      KAN(fr(1,3) + ' ÷ 4', [1,12], [{ t:'b', fin: BR(1,12) }]),
-      KAN(fr(1,5) + ' ÷ 6', [1,30], [{ t:'b', fin: BR(1,30) }]),
-      KAN(fr(1,7) + ' ÷ 8', [1,56], [{ t:'b', fin: BR(1,56) }])
+      KAN(dv(fr(1,3), '4'), [1,12], [{ t:'b', fin: BR(1,12) }]),
+      KAN(dv(fr(1,5), '6'), [1,30], [{ t:'b', fin: BR(1,30) }]),
+      KAN(dv(fr(1,7), '8'), [1,56], [{ t:'b', fin: BR(1,56) }])
     ]),
     G('Beräkna med metoden förlänga – visa mellanledet som staplat bråk, svara i enklaste form', [
-      KAN(fr(4,5) + ' ÷ ' + fr(2,3), [6,5], [{ t:'kb' }, { t:'m', fin: MI(1,1,5) }]),
-      KAN(fr(3,4) + ' ÷ ' + fr(5,6), [9,10], [{ t:'kb' }, { t:'b', fin: BR(9,10) }]),
-      KAN(fr(3,5) + ' ÷ ' + fr(2,7), [21,10], [{ t:'kb' }, { t:'m', fin: MI(2,1,10) }])
+      KAN(dv(fr(4,5), fr(2,3)), [6,5], [{ t:'kb' }, { t:'m', fin: MI(1,1,5) }]),
+      KAN(dv(fr(3,4), fr(5,6)), [9,10], [{ t:'kb' }, { t:'b', fin: BR(9,10) }]),
+      KAN(dv(fr(3,5), fr(2,7)), [21,10], [{ t:'kb' }, { t:'m', fin: MI(2,1,10) }])
     ]),
     G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', [
-      EQ(fr(3,5) + ' ÷ ' + fr(6,7), [7,10], BR(7,10)),
-      EQ(fr(5,6) + ' ÷ ' + fr(3,8), [20,9], MI(2,2,9)),
-      EQ(fr(7,3) + ' ÷ ' + fr(5,7), [49,15], MI(3,4,15))
+      EQ(dv(fr(3,5), fr(6,7)), [7,10], BR(7,10)),
+      EQ(dv(fr(5,6), fr(3,8)), [20,9], MI(2,2,9)),
+      EQ(dv(fr(7,3), fr(5,7)), [49,15], MI(3,4,15))
     ])
   ] };
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
   var BLAD2 = { key: 'B2', titel: 'Division med bråk – blad 2', uppg: [
     G('Beräkna – visa mellanled (två varianter går bra)', [
-      EQ('4 ÷ ' + fr(2,3), [6,1], DE(6)),
-      EQ('5 ÷ ' + fr(2,7), [35,2], MI(17,1,2)),
-      EQ('6 ÷ ' + fr(3,8), [16,1], DE(16))
+      EQ(dv('4', fr(2,3)), [6,1], DE(6)),
+      EQ(dv('5', fr(2,7)), [35,2], MI(17,1,2)),
+      EQ(dv('6', fr(3,8)), [16,1], DE(16))
     ]),
     G('Beräkna', [
-      KAN(fr(3,4) + ' ÷ 2', [3,8], [{ t:'b', fin: BR(3,8) }]),
-      KAN(fr(4,7) + ' ÷ 6', [2,21], [{ t:'b', fin: BR(2,21) }]),
-      KAN(fr(3,8) + ' ÷ 4', [3,32], [{ t:'b', fin: BR(3,32) }])
+      KAN(dv(fr(3,4), '2'), [3,8], [{ t:'b', fin: BR(3,8) }]),
+      KAN(dv(fr(4,7), '6'), [2,21], [{ t:'b', fin: BR(2,21) }]),
+      KAN(dv(fr(3,8), '4'), [3,32], [{ t:'b', fin: BR(3,32) }])
     ]),
     G('Beräkna – visa mellanled, förkorta innan beräkning', [
-      EQ(fr(11,18) + ' ÷ ' + fr(44,27), [3,8], BR(3,8)),
-      EQ(fr(7,13) + ' ÷ ' + fr(49,26), [2,7], BR(2,7))
+      EQ(dv(fr(11,18), fr(44,27)), [3,8], BR(3,8)),
+      EQ(dv(fr(7,13), fr(49,26)), [2,7], BR(2,7))
     ]),
     G('Beräkna – visa mellanled, svara i enklaste form', [
-      EQ(mx(1,5,9) + ' ÷ ' + mx(1,1,6), [4,3], MI(1,1,3)),
-      EQ(mx(2,3,4) + ' ÷ ' + mx(4,5,7), [7,12], BR(7,12)),
-      EQ(mx(4,1,5) + ' ÷ ' + mx(3,3,8), [56,45], MI(1,11,45))
+      EQ(dv(mx(1,5,9), mx(1,1,6)), [4,3], MI(1,1,3)),
+      EQ(dv(mx(2,3,4), mx(4,5,7)), [7,12], BR(7,12)),
+      EQ(dv(mx(4,1,5), mx(3,3,8)), [56,45], MI(1,11,45))
     ]),
     G('Beräkna – blandade räknesätt', [
-      EQ(mx(10,2,5) + ' · ' + mx(5,5,8) + ' − ' + fr(5,6) + ' ÷ ' + mx(1,2,3), [58,1], DE(58)),
-      EQ(mx(4,3,5) + ' ÷ (' + mx(5,1,2) + ' + ' + mx(1,2,5) + ')', [2,3], BR(2,3))
+      EQ(mx(10,2,5) + ' · ' + mx(5,5,8) + ' − ' + dv(fr(5,6), mx(1,2,3)), [58,1], DE(58)),
+      EQ(dv(mx(4,3,5), mx(5,1,2) + ' + ' + mx(1,2,5)), [2,3], BR(2,3))
     ])
   ] };
 

@@ -145,3 +145,9 @@
   .ovn-mark{ display:none !important; }
   body{ background:#fff !important; }
 }
+/* Visningsvariant av komplexbråket (öva d8, order 2026-09-21): division skrivs som staplat bråk, aldrig ÷.
+   Samma struktur som den redigerbara .ovn-kbrak, men täljare/nämnare är fast innehåll (tal, stående bråk, uttryck). */
+.ovn-kbrak-visa{ margin:0 8px; gap:3px; }
+.ovn-kbrak-visa .ovn-kbrak-topp, .ovn-kbrak-visa .ovn-kbrak-botten{ padding:2px 10px; font-size:17px; font-feature-settings:'tnum'; gap:4px; }
+.ovn-kbrak-visa .ovn-kbrak-streck{ min-width:48px; }
+.ovn-kbrak-visa .ovn-brak{ margin:0 2px; }
