@@ -178,6 +178,10 @@ function potUt(s){
 }
 // Matte-textformatterare: bråk OCH potens i ett svep. Används vid ALLA elevsynliga prompt/led/hint/facit.
 function mattextUt(s){ return potUt(brakUt(s)); }
+// Facit-textens egna bråk (brak-svar, mellanledets slutsvar): staplade när ramen begär det (åttan, rikTestUX —
+// order 2026-09-21); åk7-ramarna får samma 't/n'-text som förr. Sätts i montera().
+var BRAK_FACIT = false;
+function fx(t, n){ return BRAK_FACIT ? 'BRAK(' + t + ')(' + n + ')' : t + '/' + n; }
 
   // ── Sub-typ-hanterare (config-oberoende: render/läs/återställ/gradera/facit) ──
 function renderSubInput(qNum, subIdx, s){
@@ -190,7 +194,7 @@ function renderSubInput(qNum, subIdx, s){
       <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt || s.q)}</span></div>
       <div class="test-sub-binary-row" data-sub-id="${idBase}">
         ${s.options.map(opt => `
-          <button class="test-sub-binary-btn" data-val="${opt}">${opt}</button>
+          <button class="test-sub-binary-btn" data-val="${opt}">${mattextUt(opt)}</button>
         `).join('')}
       </div>
     `;
@@ -654,10 +658,10 @@ function gradeSub(s, ans){
   if(s.type === 'brak'){
     if(!Array.isArray(ans)) return {status:'skipped'};
     const t = parseInt(ans[0]), n = parseInt(ans[1]);
-    if(isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: (ans[0]||'?')+'/'+(ans[1]||'?')};
+    if(isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: fx(ans[0]||'?', ans[1]||'?')};
     const vardeOk = (t * s.namn === n * s.talj);   // t/n === talj/namn (samma värde)
     const enklast = (gcd(t, n) === 1);             // enklaste form (gcd=1)
-    return {status: (vardeOk && enklast) ? 'correct' : 'wrong', given: t+'/'+n};
+    return {status: (vardeOk && enklast) ? 'correct' : 'wrong', given: fx(t, n)};
   }
   if(s.type === 'mellanled'){
     if(!ans || !ans.led) return {status:'skipped'};
@@ -682,8 +686,8 @@ function gradeSub(s, ans){
       const res = LR.finalStatus(LR.ffAv(harHel ? shel : null, st, sn), fin, s.svarform || 'enklaste');
       slutOk = res.status === 'ratt'; if(res.status === 'form') besked = LR.besked(res.orsak);
     }
-    const given = (s.led || []).map((L, i) => (ans.led[i] ? ans.led[i].join('/') : '?'))
-      .concat([(harHel ? shel + ' ' : '') + (ans.slut ? ans.slut.join('/') : '?')]).join(' → ');
+    const given = (s.led || []).map((L, i) => (ans.led[i] ? fx(ans.led[i][0], ans.led[i][1]) : '?'))
+      .concat([(harHel ? shel + ' ' : '') + (ans.slut ? fx(ans.slut[0], ans.slut[1]) : '?')]).join(' → ');
     return {status: (ledOk && slutOk) ? 'correct' : 'wrong', given: given + (besked && ledOk ? ' — ' + besked : '')};
   }
   if(s.type === 'mellanled-num'){
@@ -724,7 +728,7 @@ function gradeSub(s, ans){
     // Oäkta → blandad form, enklaste form. talj/namn = det oäkta bråket.
     if(!ans || typeof ans !== 'object') return {status:'skipped'};
     const h = parseInt(ans.hel), t = parseInt(ans.t), n = parseInt(ans.n);
-    const given = (isNaN(h)?'?':h) + ' ' + (isNaN(t)?'?':t) + '/' + (isNaN(n)?'?':n);
+    const given = (isNaN(h)?'?':h) + ' ' + fx(isNaN(t)?'?':t, isNaN(n)?'?':n);
     if(isNaN(h) || isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: given};
     const vardeOk = ((h * n + t) * s.namn === s.talj * n);   // h + t/n === talj/namn (samma värde)
     const proper = (t >= 0 && t < n);                        // äkta bråkdel
@@ -848,15 +852,15 @@ function renderReviewSub(sr){
     correctAnswerText = komma(sub.answer) + (sub.enhet ? ` ${sub.enhet}` : '') + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'brak'){
     questionText = sub.prompt;
-    correctAnswerText = sub.talj + '/' + sub.namn + ' (enklaste form)' + (sub.explanation ? ` — ${sub.explanation}` : '');
+    correctAnswerText = fx(sub.talj, sub.namn) + ' (enklaste form)' + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'mellanled'){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit || (L.varde)).join(' → ');
-    const bl = Math.floor(sub.slutTalj / sub.slutNamn) + ' ' + (sub.slutTalj % sub.slutNamn) + '/' + sub.slutNamn;
+    const bl = Math.floor(sub.slutTalj / sub.slutNamn) + ' ' + fx(sub.slutTalj % sub.slutNamn, sub.slutNamn);
     const slutText = (sub.slutNamn === 1) ? String(sub.slutTalj)
       : (sub.slutTalj > sub.slutNamn)
-        ? (sub.svarform === 'blandad' ? bl + ' (blandad form)' : sub.svarform === 'brak' ? sub.slutTalj + '/' + sub.slutNamn + ' (bråkform)' : sub.slutTalj + '/' + sub.slutNamn + ' = ' + bl + ' (enklaste form)')
-      : (sub.slutTalj + '/' + sub.slutNamn + ' (enklaste form)');
+        ? (sub.svarform === 'blandad' ? bl + ' (blandad form)' : sub.svarform === 'brak' ? fx(sub.slutTalj, sub.slutNamn) + ' (bråkform)' : fx(sub.slutTalj, sub.slutNamn) + ' = ' + bl + ' (enklaste form)')
+      : (fx(sub.slutTalj, sub.slutNamn) + ' (enklaste form)');
     correctAnswerText = (ledFacit ? ledFacit + ' → ' : '') + slutText + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'mellanled-num'){
     questionText = sub.prompt;
@@ -872,7 +876,7 @@ function renderReviewSub(sr){
   } else if(sub.type === 'blandad'){
     questionText = sub.prompt;
     const bh = Math.floor(sub.talj / sub.namn), br = sub.talj % sub.namn, bg = gcd(br, sub.namn) || 1;
-    correctAnswerText = bh + ' ' + (br / bg) + '/' + (sub.namn / bg) + (sub.explanation ? ` — ${sub.explanation}` : '');
+    correctAnswerText = bh + ' ' + fx(br / bg, sub.namn / bg) + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'intervall'){
     questionText = sub.prompt;
     correctAnswerText = 'ett tal ' + (sub.incLow ? '≥ ' : '> ') + komma(sub.min) + ' och ' + (sub.incHigh ? '≤ ' : '< ') + komma(sub.max) + (sub.exempel ? ' (t.ex. ' + sub.exempel + ')' : '');
@@ -941,6 +945,7 @@ function exempelFaktorer(target, antal){
   function montera(config){
     function resolveTax(){ var t=config.taxonomi; return (typeof t==='function')?t():t; }
     function resolveMastery(){ var m=config.mastery; return (typeof m==='function')?m():m; }
+    BRAK_FACIT = !!config.rikTestUX;                // åttan: staplade bråk även i facit-texten
     var TEST_GENERATORS = config.generators;        // content
     var GEN_NOD         = config.genNod;            // content
     var BOK_DELKAPITEL  = config.bokDelkapitel;     // bok-delkapitel-gruppering

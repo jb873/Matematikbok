@@ -177,39 +177,43 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
   function gcd2(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=b; b=a%b; a=t; } return a||1; }
   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv. primT(n) = täljare 1..n−1 relativt prim mot n; efter 40 försök tas 1 (alltid relativt prim). Förr `do{…}while(gcd≠1)` utan tak på sju ställen.
   function primT(n){ var t = rI(1, n-1); for(var k = 0; gcd2(t, n) !== 1 && k < 40; k++) t = rI(1, n-1); return gcd2(t, n) === 1 ? t : 1; }
+  // STÅENDE BRÅK I TESTET (order 2026-09-21): varje bråk i prompt/led/facit/expl skrivs BRAK(t)(n) → brakUt staplar det.
+  // Förr 't/n' som text i alla bråkgeneratorer (ramen saknade t.o.m. .ovn-brak-CSS). '/' är kvar bara där det är heltalsdivision.
+  function B(t, n){ return n === 1 ? String(t) : 'BRAK(' + t + ')(' + n + ')'; }   // nämnare 1 → heltalet ensamt (16, inte 16/1)
+  function MX(h, t, n){ return h + ' ' + B(t, n); }
   function multBB(){   // bråk · bråk
     var n1=rP([2,3,4,5]), n2=rP([2,3,4,5]), t1=rI(1,n1-1), t2=rI(1,n2-1);
     var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
-    return { key:'bb:'+t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' · '+t2+'/'+n2,
-      led:[ { fraga:t1+'·'+t2+' / '+n1+'·'+n2, varde: talj/namn, facit: talj+'/'+namn } ],
-      slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+    return { key:'bb:'+t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+B(t1,n1)+' · '+B(t2,n2),
+      led:[ { fraga:B(t1+'·'+t2, n1+'·'+n2), varde: talj/namn, facit: B(talj,namn) } ],
+      slutTalj:T, slutNamn:N, expl:B(t1,n1)+' · '+B(t2,n2)+' = '+B(talj,namn)+' = '+B(T,N)+'.' };
   }
   function multHB(){   // heltal · bråk
     var h=rI(2,6), n=rP([2,3,4,5,6]), t=rI(1,n-1);
     var talj=h*t, namn=n, g=gcd2(talj,namn), T=talj/g, N=namn/g;
-    return { key:'hb:'+h+'*'+t+'/'+n, prompt:'Räkna ut steg för steg:    '+h+' · '+t+'/'+n,
-      led:[ { fraga:h+'·'+t+' / '+n, varde: talj/namn, facit: talj+'/'+namn } ],
-      slutTalj:T, slutNamn:N, expl:h+' · '+t+'/'+n+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+    return { key:'hb:'+h+'*'+t+'/'+n, prompt:'Räkna ut steg för steg:    '+h+' · '+B(t,n),
+      led:[ { fraga:B(h+'·'+t, n), varde: talj/namn, facit: B(talj,namn) } ],
+      slutTalj:T, slutNamn:N, expl:h+' · '+B(t,n)+' = '+B(talj,namn)+' = '+B(T,N)+'.' };
   }
   function multBlandad(){   // blandad · bråk: omvandla blandad → oäkta (led 1), multiplicera (led 2), förkorta
     var hel=rI(1,3), n1=rP([2,3,4]), t1=rI(1,n1-1), n2=rP([2,3,4,5]), t2=rI(1,n2-1);
     var ot1=hel*n1+t1;
     var talj=ot1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
     return { key:'bl:'+hel+'_'+t1+'/'+n1+'*'+t2+'/'+n2,
-      prompt:'Räkna ut steg för steg:    '+hel+' '+t1+'/'+n1+' · '+t2+'/'+n2,
-      led:[ { fraga:'skriv '+hel+' '+t1+'/'+n1+' som oäkta bråk', varde: ot1/n1, facit: ot1+'/'+n1 },
-            { fraga:ot1+'·'+t2+' / '+n1+'·'+n2, varde: talj/namn, facit: talj+'/'+namn } ],
+      prompt:'Räkna ut steg för steg:    '+MX(hel,t1,n1)+' · '+B(t2,n2),
+      led:[ { fraga:'skriv '+MX(hel,t1,n1)+' som oäkta bråk', varde: ot1/n1, facit: B(ot1,n1) },
+            { fraga:B(ot1+'·'+t2, n1+'·'+n2), varde: talj/namn, facit: B(talj,namn) } ],
       slutTalj:T, slutNamn:N,
-      expl:hel+' '+t1+'/'+n1+' · '+t2+'/'+n2+' = '+ot1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+      expl:MX(hel,t1,n1)+' · '+B(t2,n2)+' = '+B(ot1,n1)+' · '+B(t2,n2)+' = '+B(talj,namn)+' = '+B(T,N)+'.' };
   }
   function multStora(){   // stora tal med korsförkortning
     var p1=rI(1,3), q1=rI(2,4), p2=rI(1,3), q2=rI(2,4), g1=rP([2,3,4]), g2=rP([2,3,4]);
     var t1=p1*g1, n1=q1*g2, t2=p2*g2, n2=q2*g1;
     var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
     return { key:'st:'+t1+'/'+n1+'*'+t2+'/'+n2,
-      prompt:'Räkna ut steg för steg (förkorta gärna först):    '+t1+'/'+n1+' · '+t2+'/'+n2,
-      led:[ { fraga:t1+'·'+t2+' / '+n1+'·'+n2, varde: talj/namn, facit: talj+'/'+namn } ],
-      slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.' };
+      prompt:'Räkna ut steg för steg (förkorta gärna först):    '+B(t1,n1)+' · '+B(t2,n2),
+      led:[ { fraga:B(t1+'·'+t2, n1+'·'+n2), varde: talj/namn, facit: B(talj,namn) } ],
+      slutTalj:T, slutNamn:N, expl:B(t1,n1)+' · '+B(t2,n2)+' = '+B(talj,namn)+' = '+B(T,N)+'.' };
   }
   function multVariant(opts){
     var v = (opts && opts.variant) || 'alla';
@@ -383,45 +387,45 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     // ── Del 4–7 · BRÅK-KÄRNA — mirror av k2:s bråk-generatorer (byte-troget; facit = k2:s) ──
     'brak-blandad': { snabb: [ G.brak('k2-blandad','Blandad form → oäkta bråk','brak-blandad', function(){
       var hel=rI(1,4), n=rP([2,3,4,5,6,7,8]), t=primT(n); var talj=hel*n+t;
-      return {key:hel+'-'+t+'-'+n, prompt:'Skriv '+hel+' '+t+'/'+n+' som oäkta bråk.', talj:talj, namn:n, expl:hel+' '+t+'/'+n+' = '+talj+'/'+n+'.'};
+      return {key:hel+'-'+t+'-'+n, prompt:'Skriv '+MX(hel,t,n)+' som oäkta bråk.', talj:talj, namn:n, expl:MX(hel,t,n)+' = '+B(talj,n)+'.'};
     }) ] },
     'brak-tid': { snabb: [ G.brak('k2-tid','Tid i bråkform','brak-tid', function(){
       var m=rP([15,30,45,20,40,10,50,12,24,36,48,6,54,5,25,35,55,18,42]); var g=gcd2(m,60), t=m/g, n=60/g;
-      return {key:'tid'+m, prompt:'Skriv '+m+' min som del av en timme (enklaste form).', talj:t, namn:n, expl:m+' min = '+m+'/60 h = '+t+'/'+n+' h.'};
+      return {key:'tid'+m, prompt:'Skriv '+m+' min som del av en timme (enklaste form).', talj:t, namn:n, expl:m+' min = '+B(m,60)+' h = '+B(t,n)+' h.'};
     }) ] },
     'brak-forlanga': { snabb: [ G.numeric('k2-forlanga','Förläng bråket','brak-forlanga', function(){
       var n=rP([2,3,4,5,6]), t=rI(1,n-1), f=rP([2,3,4,5]);
-      return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = ___/'+(n*f), ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
+      return {key:t+'/'+n+'x'+f, prompt:'Förläng '+B(t,n)+' till '+(n*f)+'-delar:    '+B(t,n)+' = '+B('___',n*f), ans:t*f, expl:B(t,n)+' = '+B(t*f,n*f)+'.'};
     }) ] },
     'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
       var N=rP([2,3,4,5,6]), T=primT(N); var f=rP([2,3,4]);
-      return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+(T*f)+'/'+(N*f)+' till enklaste form.', talj:T, namn:N, expl:(T*f)+'/'+(N*f)+' = '+T+'/'+N+'.'};
+      return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+B(T*f,N*f)+' till enklaste form.', talj:T, namn:N, expl:B(T*f,N*f)+' = '+B(T,N)+'.'};
     }) ] },
     'brak-likformig': { snabb: [ G.numeric('k2-likformig','Likformiga bråk','brak-likformig', function(){
       var n=rP([2,3,4,5,6]), t=primT(n); var k=rP([2,3,4,5]);
-      return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+t+'/'+n+':    '+t+'/'+n+' = ___/'+(n*k), ans:t*k, expl:t+'/'+n+' = '+(t*k)+'/'+(n*k)+' (förläng med '+k+').'};
+      return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+B(t,n)+':    '+B(t,n)+' = '+B('___',n*k), ans:t*k, expl:B(t,n)+' = '+B(t*k,n*k)+' (förläng med '+k+').'};
     }) ] },
     'brak-jmf-lika': { snabb: [ G.flerval('k2-jmf-lika','Jämför bråk (samma nämnare)','brak-jmf-lika', function(){
       var n=rP([4,5,6,7,8,9]), a=rI(1,n-1), b=rI(1,n-1); for(var k0 = 0; b===a && k0 < 40; k0++) b=rI(1,n-1); if(b===a) b = a===1 ? 2 : 1; var s=(a>b)?a:b;   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv.
-      return {key:a+'-'+b+'/'+n, prompt:'Vilket bråk är störst?', options:[a+'/'+n, b+'/'+n], answer:s+'/'+n, expl:'Samma nämnare → störst täljare: '+s+'/'+n+'.'};
+      return {key:a+'-'+b+'/'+n, prompt:'Vilket bråk är störst?', options:[B(a,n), B(b,n)], answer:B(s,n), expl:'Samma nämnare → störst täljare: '+B(s,n)+'.'};
     }) ] },
     'brak-add': { snabb: [ G.mellanled('k2-add','Addition med bråk','brak-add', function(){
       var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
       var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
       var komb=nt1+nt2, g=gcd2(komb,L), T=komb/g, N=L/g;
       if(T>=N) return null;
-      return { key:t1+'/'+n1+'+'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' + '+t2+'/'+n2,
-        led:[ { fraga:nt1+'+'+nt2+' / '+L, varde: komb/L, facit: komb+'/'+L } ],
-        slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' + '+t2+'/'+n2+' = '+nt1+'/'+L+' + '+nt2+'/'+L+' = '+komb+'/'+L+' = '+T+'/'+N+'.' };
+      return { key:t1+'/'+n1+'+'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+B(t1,n1)+' + '+B(t2,n2),
+        led:[ { fraga:B(nt1+'+'+nt2, L), varde: komb/L, facit: B(komb,L) } ],
+        slutTalj:T, slutNamn:N, expl:B(t1,n1)+' + '+B(t2,n2)+' = '+B(nt1,L)+' + '+B(nt2,L)+' = '+B(komb,L)+' = '+B(T,N)+'.' };
     }) ] },
     'brak-sub': { snabb: [ G.mellanled('k2-sub','Subtraktion med bråk','brak-sub', function(){
       var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
       var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
       var komb=nt1-nt2; if(komb<=0) return null;
       var g=gcd2(komb,L), T=komb/g, N=L/g;
-      return { key:t1+'/'+n1+'-'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+t1+'/'+n1+' − '+t2+'/'+n2,
-        led:[ { fraga:nt1+'−'+nt2+' / '+L, varde: komb/L, facit: komb+'/'+L } ],
-        slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' − '+t2+'/'+n2+' = '+nt1+'/'+L+' − '+nt2+'/'+L+' = '+komb+'/'+L+' = '+T+'/'+N+'.' };
+      return { key:t1+'/'+n1+'-'+t2+'/'+n2, prompt:'Räkna ut steg för steg:    '+B(t1,n1)+' − '+B(t2,n2),
+        led:[ { fraga:B(nt1+'−'+nt2, L), varde: komb/L, facit: B(komb,L) } ],
+        slutTalj:T, slutNamn:N, expl:B(t1,n1)+' − '+B(t2,n2)+' = '+B(nt1,L)+' − '+B(nt2,L)+' = '+B(komb,L)+' = '+B(T,N)+'.' };
     }) ] },
     'brak-mult-rakna': { snabb: [ G.mellanled('k2-mult','Multiplikation med bråk','brak-mult-rakna', multVariant) ] },
     // ── dk7 · DIVISION MED BRÅK — testets tal ur öva-bladets data (BLAD_AK8_D8.talBank, order 2026-09-21 FAS 5):
@@ -431,14 +435,14 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       var r=pick(BLAD_AK8_D8.talBank('brak-div-bh')), t=r.t, n=r.n, h=r.h;
       var pt=t, pn=n*h, g=gcd2(pt,pn), T=pt/g, N=pn/g, Q='BRAK(BRAK('+t+')('+n+'))('+h+')';
       return { key:t+'/'+n+'/'+h, prompt:'Räkna ut steg för steg:    '+Q,
-        led:[ { fraga:'inversen av '+h, varde: 1/h, facit:'1/'+h }, { fraga:'BRAK('+t+')('+n+'·'+h+')', varde: pt/pn, facit: pt+'/'+pn } ],
+        led:[ { fraga:'inversen av '+h, varde: 1/h, facit:B(1,h) }, { fraga:B(t, n+'·'+h), varde: pt/pn, facit: B(pt,pn) } ],
         slutTalj:T, slutNamn:N, expl:Q+' = BRAK('+t+')('+n+') · BRAK(1)('+h+') = BRAK('+pt+')('+pn+') = BRAK('+T+')('+N+').' };
     }) ] },
     'brak-div-hb': { snabb: [ G.mellanled('k2-div-hb','Heltal delat med bråk','brak-div-hb', function(){
       var r=pick(BLAD_AK8_D8.talBank('brak-div-hb')), h=r.h, t=r.t, n=r.n;
       var pt=h*n, pn=t, g=gcd2(pt,pn), T=pt/g, N=pn/g, Q='BRAK('+h+')(BRAK('+t+')('+n+'))';
       return { key:h+'-'+t+'/'+n, prompt:'Räkna ut steg för steg:    '+Q,
-        led:[ { fraga:'inversen av BRAK('+t+')('+n+')', varde: n/t, facit: n+'/'+t }, { fraga:'BRAK('+h+'·'+n+')('+t+')', varde: pt/pn, facit: pt+'/'+pn } ],
+        led:[ { fraga:'inversen av '+B(t,n), varde: n/t, facit: B(n,t) }, { fraga:B(h+'·'+n, t), varde: pt/pn, facit: B(pt,pn) } ],
         slutTalj:T, slutNamn:N, expl:Q+' = '+h+' · BRAK('+n+')('+t+') = BRAK('+pt+')('+pn+') = BRAK('+T+')('+N+').' };
     }) ] },
     'brak-div-bb': { snabb: [ G.mellanled('k2-div-bb','Bråk delat med bråk','brak-div-bb', function(){
@@ -448,8 +452,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       function mxT(m){ return m[0]+' BRAK('+m[1]+')('+m[2]+')'; }
       var Q = r.slag==='blandad' ? 'BRAK('+mxT(r.A)+')('+mxT(r.B)+')' : 'BRAK(BRAK('+t1+')('+n1+'))(BRAK('+t2+')('+n2+'))';
       var led = r.slag==='blandad'
-        ? [ { fraga:'i oäkta form: BRAK('+t1+')('+n1+') delat med BRAK('+t2+')('+n2+') — inversen av BRAK('+t2+')('+n2+')', varde: n2/t2, facit: n2+'/'+t2 }, { fraga:'BRAK('+t1+'·'+n2+')('+n1+'·'+t2+')', varde: pt/pn, facit: pt+'/'+pn } ]
-        : [ { fraga:'inversen av BRAK('+t2+')('+n2+')', varde: n2/t2, facit: n2+'/'+t2 }, { fraga:'BRAK('+t1+'·'+n2+')('+n1+'·'+t2+')', varde: pt/pn, facit: pt+'/'+pn } ];
+        ? [ { fraga:'i oäkta form: '+B(t1,n1)+' delat med '+B(t2,n2)+' — inversen av '+B(t2,n2), varde: n2/t2, facit: B(n2,t2) }, { fraga:B(t1+'·'+n2, n1+'·'+t2), varde: pt/pn, facit: B(pt,pn) } ]
+        : [ { fraga:'inversen av '+B(t2,n2), varde: n2/t2, facit: B(n2,t2) }, { fraga:B(t1+'·'+n2, n1+'·'+t2), varde: pt/pn, facit: B(pt,pn) } ];
       return { key:r.slag+t1+'/'+n1+'//'+t2+'/'+n2, prompt:'Räkna ut steg för steg'+(r.slag==='forkorta' ? ' (förkorta gärna innan)' : '')+':    '+Q,
         led:led, slutTalj:T, slutNamn:N, expl:Q+' = BRAK('+t1+')('+n1+') · BRAK('+n2+')('+t2+') = BRAK('+pt+')('+pn+') = BRAK('+T+')('+N+').' };
     }) ] },
@@ -789,13 +793,13 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     var v1=m1*d+h1, v2=m2*d+h2;
     var diff=v1-v2;
     var g=gcd2(diff,d), T=diff/g, N=d/g;
-    return {key:m1+'_'+h1+'-'+m2+'_'+h2+'/'+d, prompt:'Räkna ut (enklaste form, oäkta bråk):    '+m1+' '+h1+'/'+d+' − '+m2+' '+h2+'/'+d, talj:T, namn:N, expl:m1+' '+h1+'/'+d+' − '+m2+' '+h2+'/'+d+' = '+diff+'/'+d+' = '+T+'/'+N+'.'};
+    return {key:m1+'_'+h1+'-'+m2+'_'+h2+'/'+d, prompt:'Räkna ut (enklaste form, oäkta bråk):    '+MX(m1,h1,d)+' − '+MX(m2,h2,d), talj:T, namn:N, expl:MX(m1,h1,d)+' − '+MX(m2,h2,d)+' = '+B(diff,d)+' = '+B(T,N)+'.'};
   }) ] },
   'ny-mforkorta': { snabb: [ G.brak('ny-mforkorta','Förkorta innan multiplikation','brak-mult-forkorta', function(){
     var t1=rI(1,5), n1=rI(t1+1,8), t2=rI(1,5), n2=rI(t2+1,8);
     var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
     if(g===1) return null;
-    return {key:t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Förkorta innan du multiplicerar (enklaste form):    '+t1+'/'+n1+' · '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.'};
+    return {key:t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Förkorta innan du multiplicerar (enklaste form):    '+B(t1,n1)+' · '+B(t2,n2), talj:T, namn:N, expl:B(t1,n1)+' · '+B(t2,n2)+' = '+B(talj,namn)+' = '+B(T,N)+'.'};
   }) ] },
   'ny-reciprok': { snabb: [ G.brak('ny-reciprok','Skriva reciprok','brak-div-reciprok', function(){
     var r=pick(BLAD_AK8_D8.talBank('brak-div-reciprok')), t=r.t, n=r.n;   // ur öva-bladets data (FAS 5)
@@ -841,7 +845,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       var n = ri(2,9), h = ri(1,4), r = primT(n);
       var talj = h*n + r, key = 'ob-'+talj+'/'+n;
       if(seen.has(key)) continue; seen.add(key);
-      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'blandad', prompt:'Skriv '+talj+'/'+n+' i blandad form (enklaste form):', talj:talj, namn:n, explanation:talj+'/'+n+' = '+h+' '+r+'/'+n+'.' });
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'blandad', prompt:'Skriv '+B(talj,n)+' i blandad form (enklaste form):', talj:talj, namn:n, explanation:B(talj,n)+' = '+MX(h,r,n)+'.' });
     }
     return subs.length ? { generator:'brak-oakta-blandad', title:'Skriv i blandad form', omrade:'brak-blandad:rakna', subs:subs } : null;
   } ] },
@@ -851,7 +855,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     if(n1===n2) return null;
     var v1=t1/n1, v2=t2/n2;
     if(Math.abs(v1-v2) < 1e-9) return null;
-    var a=t1+'/'+n1, b=t2+'/'+n2, stor = v1>v2 ? a : b;
+    var a=B(t1,n1), b=B(t2,n2), stor = v1>v2 ? a : b;
     return { key:a+'_'+b, prompt:'Vilket bråk är störst: '+a+' eller '+b+'?', options: shuffle([a,b]), answer: stor, expl:stor+' är störst.' };
   }) ] },
   // ── ÖVA-TÄCKNING · Grunder (position): typer som öva-bladet har men testet saknade ──
@@ -963,7 +967,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     var bank=[[0.5,1,2],[0.25,1,4],[0.75,3,4],[0.2,1,5],[0.4,2,5],[0.6,3,5],[0.8,4,5],[0.125,1,8],[0.375,3,8],[0.1,1,10],[0.3,3,10],[0.7,7,10]];
     var subs=[],tries=0;
     while(subs.length<4 && tries<60){ tries++; var b=pick(bank), key='db'+b[0]; if(seen.has(key)) continue; seen.add(key);
-      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:'Skriv '+komma(b[0])+' som bråk i enklaste form:', talj:b[1], namn:b[2], explanation:komma(b[0])+' = '+b[1]+'/'+b[2]+'.'}); }
+      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:'Skriv '+komma(b[0])+' som bråk i enklaste form:', talj:b[1], namn:b[2], explanation:komma(b[0])+' = '+B(b[1],b[2])+'.'}); }
     return subs.length? {generator:'dec-brak', title:'Skriv decimaltal som bråk', omrade:'brak-blandad', subs:subs} : null;
   } ] },
   // Decimal → blandad form (blandad-typ) → brak-blandad:dec-blandad (egen nod, FAS 3 — var uppsamlingshinken brak-blandad:rakna)
@@ -985,7 +989,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     var dec=pick([0.1,0.2,0.3,0.5]), op=pick(['+','−']);
     var ans = op==='+' ? avr(fr[2]+dec,2) : avr(fr[2]-dec,2);
     if(ans<0){ op='+'; ans=avr(fr[2]+dec,2); }
-    return {key:'adb'+fr[0]+'/'+fr[1]+op+dec, prompt:'Räkna ut (svar i decimalform):   '+fr[0]+'/'+fr[1]+' '+op+' '+komma(dec), ans:ans, expl:komma(fr[2])+' '+op+' '+komma(dec)+' = '+komma(ans)+'.'};
+    return {key:'adb'+fr[0]+'/'+fr[1]+op+dec, prompt:'Räkna ut (svar i decimalform):   '+B(fr[0],fr[1])+' '+op+' '+komma(dec), ans:ans, expl:komma(fr[2])+' '+op+' '+komma(dec)+' = '+komma(ans)+'.'};
   }) ] },
   // ── ÖVA-TÄCKNING · Potens-familjen (dk8, dk10) ──
   // Potens med decimalbas → värde (numeric) → pot-begrepp:evaluera
@@ -999,7 +1003,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     while(subs.length<3 && tries<50){ tries++;
       var fr=pick(bank), e=pick([2,3]), t=Math.pow(fr[0],e), n=Math.pow(fr[1],e), g=gcd2(t,n), T=t/g, N=n/g;
       var key='peb'+fr[0]+'/'+fr[1]+'^'+e; if(seen.has(key)) continue; seen.add(key);
-      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:'Beräkna (enklaste form):   ('+fr[0]+'/'+fr[1]+')^'+e, talj:T, namn:N, explanation:'('+fr[0]+'/'+fr[1]+')^'+e+' = '+T+'/'+N+'.'});
+      subs.push({label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:'Beräkna (enklaste form):   ('+B(fr[0],fr[1])+')^'+e, talj:T, namn:N, explanation:'('+B(fr[0],fr[1])+')^'+e+' = '+B(T,N)+'.'});
     }
     return subs.length? {generator:'pot-eval-brak', title:'Beräkna potens med bråkbas', omrade:'pot-begrepp', subs:subs} : null;
   } ] },
@@ -1049,8 +1053,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       var key='pb'+x.typ+x.A.join('')+x.B.join(''); if(seen.has(key)) return; seen.add(key);
       var Q = x.typ==='mult-sub' ? mxT(x.A)+' · '+mxT(x.B)+' − BRAK(BRAK('+x.C[0]+')('+x.C[1]+'))('+mxT(x.D)+')' : 'BRAK('+mxT(x.A)+')('+mxT(x.B)+' + '+mxT(x.C)+')';
       var led = x.typ==='mult-sub'
-        ? [ { fraga:'produkten '+mxT(x.A)+' · '+mxT(x.B), varde:(x.A[0]*x.A[2]+x.A[1])*(x.B[0]*x.B[2]+x.B[1])/(x.A[2]*x.B[2]), facit:((x.A[0]*x.A[2]+x.A[1])*(x.B[0]*x.B[2]+x.B[1]))+'/'+(x.A[2]*x.B[2]) } ]
-        : [ { fraga:'summan i nämnaren: '+mxT(x.B)+' + '+mxT(x.C), varde:(x.B[0]*x.B[2]+x.B[1])/x.B[2]+(x.C[0]*x.C[2]+x.C[1])/x.C[2], facit:((x.B[0]*x.B[2]+x.B[1])*x.C[2]+(x.C[0]*x.C[2]+x.C[1])*x.B[2])+'/'+(x.B[2]*x.C[2]) } ];
+        ? [ { fraga:'produkten '+mxT(x.A)+' · '+mxT(x.B), varde:(x.A[0]*x.A[2]+x.A[1])*(x.B[0]*x.B[2]+x.B[1])/(x.A[2]*x.B[2]), facit:B((x.A[0]*x.A[2]+x.A[1])*(x.B[0]*x.B[2]+x.B[1]), x.A[2]*x.B[2]) } ]
+        : [ { fraga:'summan i nämnaren: '+mxT(x.B)+' + '+mxT(x.C), varde:(x.B[0]*x.B[2]+x.B[1])/x.B[2]+(x.C[0]*x.C[2]+x.C[1])/x.C[2], facit:B((x.B[0]*x.B[2]+x.B[1])*x.C[2]+(x.C[0]*x.C[2]+x.C[1])*x.B[2], x.B[2]*x.C[2]) } ];
       subs.push({label:String.fromCharCode(97+subs.length)+')', type:'mellanled', prompt:'Räkna ut (räkneordning, enklaste form):   '+Q, led:led, slutTalj:x.T, slutNamn:x.N, svarform:'enklaste', explanation:'= BRAK('+x.T+')('+x.N+').'});
     });
     return subs.length? {generator:'prio-brak', title:'Räkneordning med bråk', omrade:'brak-div', subs:subs} : null;
