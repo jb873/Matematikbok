@@ -12,8 +12,10 @@
 (function(){
   'use strict';
   var F = window, LR = window.Likhetsrattare;
-  function fr(t, n){ return F.fracSpan(t, n); }
-  function mx(h, t, n){ return h + '&nbsp;' + F.fracSpan(t, n); }
+  // fracSpan ur blad-karna (öva-sidan); i testramen (laddar d7 för talBank) finns den inte → lokal fallback (som d8)
+  function fracSpanLokal(t, n){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + t + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + n + '</span></span>'; }
+  function fr(t, n){ return (F.fracSpan || fracSpanLokal)(t, n); }
+  function mx(h, t, n){ return h + '&nbsp;' + fr(t, n); }
   // produktbråk-DISPLAY (täljare/nämnare kan vara uttryck som "11·5")
   function pf(num, den){ return '<span class="ovn-brak"><span class="ovn-brak-taljare ovn-num">' + num + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare ovn-num">' + den + '</span></span>'; }
 
@@ -31,62 +33,69 @@
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
   var FRI = { fri: true };
 
+  // ══════════════════════════ DATA — EN KÄLLA FÖR ÖVA OCH TEST (order 2026-09-21, FAS 3) ══════════════════════════
+  // Talen som tupler; raderna nedan OCH testets banker (talBank(nod) → ak8-k1-ram) byggs ur dem — täckning per
+  // konstruktion (som division, d8). Facit räknas ur tuplerna, formen ur värdet (heltal → decimal, oäkta → blandad,
+  // äkta → bråk); grupp 1 kräver blandad form (svarform), övriga enklaste form.
+  var DATA = {
+    hb:      [[5, 3, 4], [3, 3, 7], [7, 5, 8]],                                              // B1 g1: h · t/n, svar i blandad form
+    bb:      [[[2, 3], [2, 3]], [[3, 7], [2, 5]], [[5, 6], [4, 7]], [[5, 8], [7, 9]]],        // B1 g2: bråk · bråk
+    produkt: [{ t: [11, 5], n: [10] }, { t: [20], n: [12, 3] }, { t: [20, 7], n: [15] }, { t: [5, 12], n: [18] }],   // B1 g3: förkorta produktbråk
+    huvud:   [{ k: 'bh', b: [7, 9], h: 6 }, { k: 'bb', a: [4, 11], b: [5, 7] }, { k: 'ho', h: 4, b: [12, 7] }, { k: 'bb', a: [3, 8], b: [7, 4] }],   // B1 g4: i huvudet (fri)
+    hm:      [[2, [1, 3, 8]], [4, [2, 4, 5]], [5, [3, 4, 7]]],                                // B1 g5: h · blandad
+    forkorta:[[[33, 25], [10, 11]], [[21, 8], [16, 35]], [[28, 27], [18, 7]], [[5, 18], [63, 25]]],   // B1 g6: förkorta och beräkna
+    mm:      [[[1, 1, 8], [1, 7, 9]], [[2, 1, 4], [1, 1, 3]], [[3, 1, 2], [4, 2, 7]]],        // B2 g1: blandad · blandad
+    tre:     [[[4, 5], [10, 21], [7, 12]], [[11, 4], [9, 33], [16, 5]], [[15, 8], [2, 7], [14, 9]]],   // B2 g2: tre faktorer
+    mm2:     [[[5, 2, 5], [6, 2, 3]], [[1, 3, 7], [4, 1, 5]], [[3, 2, 3], [7, 1, 8]]]         // B2 g3: blandad · blandad
+  };
+  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
+  function fin(T, N){ var g = gcd(T, N); T /= g; N /= g; return N === 1 ? DE(T) : T > N ? MI(Math.floor(T / N), T % N, N) : BR(T, N); }
+  function oakta(m){ return [m[0] * m[2] + m[1], m[2]]; }
+  function prod(arr){ return arr.reduce(function(p, x){ return p * x; }, 1); }
+  function radHB(x){ var T = x[0] * x[1], N = x[2]; return EQ(x[0] + ' · ' + fr(x[1], x[2]), [T, N], fin(T, N)); }
+  function radBB(p){ var T = p[0][0] * p[1][0], N = p[0][1] * p[1][1]; return EQ(fr(p[0][0], p[0][1]) + ' · ' + fr(p[1][0], p[1][1]), [T, N], fin(T, N)); }
+  function radProdukt(x){ var T = prod(x.t), N = prod(x.n); return EQ(pf(x.t.join('·'), x.n.join('·')), [T, N], fin(T, N)); }
+  function radHuvud(x){
+    if(x.k === 'bh') return EQ(fr(x.b[0], x.b[1]) + ' · ' + x.h, [x.b[0] * x.h, x.b[1]], fin(x.b[0] * x.h, x.b[1]), FRI);
+    if(x.k === 'ho') return EQ(x.h + ' · ' + fr(x.b[0], x.b[1]), [x.h * x.b[0], x.b[1]], fin(x.h * x.b[0], x.b[1]), FRI);
+    return EQ(fr(x.a[0], x.a[1]) + ' · ' + fr(x.b[0], x.b[1]), [x.a[0] * x.b[0], x.a[1] * x.b[1]], fin(x.a[0] * x.b[0], x.a[1] * x.b[1]), FRI);
+  }
+  function radHM(x){ var o = oakta(x[1]), T = x[0] * o[0], N = o[1]; return EQ(x[0] + ' · ' + mx(x[1][0], x[1][1], x[1][2]), [T, N], fin(T, N)); }
+  function radMM(p){ var a = oakta(p[0]), b = oakta(p[1]), T = a[0] * b[0], N = a[1] * b[1]; return EQ(mx(p[0][0], p[0][1], p[0][2]) + ' · ' + mx(p[1][0], p[1][1], p[1][2]), [T, N], fin(T, N)); }
+  function radTre(p){ var T = p[0][0] * p[1][0] * p[2][0], N = p[0][1] * p[1][1] * p[2][1]; return EQ(fr(p[0][0], p[0][1]) + ' · ' + fr(p[1][0], p[1][1]) + ' · ' + fr(p[2][0], p[2][1]), [T, N], fin(T, N)); }
+
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Multiplikation med bråk', uppg: [
-    G('Beräkna – visa ett mellanled, svara i blandad form', [
-      EQ('5 · ' + fr(3,4), [15,4], MI(3,3,4)),
-      EQ('3 · ' + fr(3,7), [9,7], MI(1,2,7)),
-      EQ('7 · ' + fr(5,8), [35,8], MI(4,3,8))
-    ], null, { svarform: 'blandad' }),   // "svara i blandad form" — 15/4 ger 'form', inte rätt (Joachim 2026-09-15)
-    G('Beräkna – visa mellanled och svara i enklaste form', [
-      EQ(fr(2,3) + ' · ' + fr(2,3), [4,9], BR(4,9)),
-      EQ(fr(3,7) + ' · ' + fr(2,5), [6,35], BR(6,35)),
-      EQ(fr(5,6) + ' · ' + fr(4,7), [10,21], BR(10,21)),
-      EQ(fr(5,8) + ' · ' + fr(7,9), [35,72], BR(35,72))
-    ]),
-    G('Förkorta och beräkna', [
-      EQ(pf('11·5','10'), [11,2], MI(5,1,2)),
-      EQ(pf('20','12·3'), [5,9], BR(5,9)),
-      EQ(pf('20·7','15'), [28,3], MI(9,1,3)),
-      EQ(pf('5·12','18'), [10,3], MI(3,1,3))
-    ]),
-    G('Beräkna – ta bort ett mellanled, räkna i huvudet, svara i enklaste form', [
-      EQ(fr(7,9) + ' · 6', [14,3], MI(4,2,3), FRI),
-      EQ(fr(4,11) + ' · ' + fr(5,7), [20,77], BR(20,77), FRI),
-      EQ('4 · ' + fr(12,7), [48,7], MI(6,6,7), FRI),
-      EQ(fr(3,8) + ' · ' + fr(7,4), [21,32], BR(21,32), FRI)
-    ]),
-    G('Beräkna – svara i enklaste form', [
-      EQ('2 · ' + mx(1,3,8), [11,4], MI(2,3,4)),
-      EQ('4 · ' + mx(2,4,5), [56,5], MI(11,1,5)),
-      EQ('5 · ' + mx(3,4,7), [125,7], MI(17,6,7))
-    ]),
-    G('Förkorta och beräkna', [
-      EQ(fr(33,25) + ' · ' + fr(10,11), [6,5], MI(1,1,5)),
-      EQ(fr(21,8) + ' · ' + fr(16,35), [6,5], MI(1,1,5)),
-      EQ(fr(28,27) + ' · ' + fr(18,7), [8,3], MI(2,2,3)),
-      EQ(fr(5,18) + ' · ' + fr(63,25), [7,10], BR(7,10))
-    ])
+    G('Beräkna – visa ett mellanled, svara i blandad form', DATA.hb.map(radHB), null, { svarform: 'blandad' }),   // "svara i blandad form" — 15/4 ger 'form', inte rätt (Joachim 2026-09-15)
+    G('Beräkna – visa mellanled och svara i enklaste form', DATA.bb.map(radBB)),
+    G('Förkorta och beräkna', DATA.produkt.map(radProdukt)),
+    G('Beräkna – ta bort ett mellanled, räkna i huvudet, svara i enklaste form', DATA.huvud.map(radHuvud)),
+    G('Beräkna – svara i enklaste form', DATA.hm.map(radHM)),
+    G('Förkorta och beräkna', DATA.forkorta.map(radBB))
   ] };
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
   var BLAD2 = { key: 'B2', titel: 'Multiplikation med bråk – blad 2', uppg: [
-    G('Beräkna – visa mellanled och förenkla innan beräkning, svara i enklaste form', [
-      EQ(mx(1,1,8) + ' · ' + mx(1,7,9), [2,1], DE(2)),
-      EQ(mx(2,1,4) + ' · ' + mx(1,1,3), [3,1], DE(3)),
-      EQ(mx(3,1,2) + ' · ' + mx(4,2,7), [15,1], DE(15))
-    ]),
-    G('Förkorta och beräkna', [
-      EQ(fr(4,5) + ' · ' + fr(10,21) + ' · ' + fr(7,12), [2,9], BR(2,9)),
-      EQ(fr(11,4) + ' · ' + fr(9,33) + ' · ' + fr(16,5), [12,5], MI(2,2,5)),
-      EQ(fr(15,8) + ' · ' + fr(2,7) + ' · ' + fr(14,9), [5,6], BR(5,6))
-    ]),
-    G('Beräkna – visa mellanled, förenkla innan beräkning, svara i enklaste form', [
-      EQ(mx(5,2,5) + ' · ' + mx(6,2,3), [36,1], DE(36)),
-      EQ(mx(1,3,7) + ' · ' + mx(4,1,5), [6,1], DE(6)),
-      EQ(mx(3,2,3) + ' · ' + mx(7,1,8), [209,8], MI(26,1,8))
-    ])
+    G('Beräkna – visa mellanled och förenkla innan beräkning, svara i enklaste form', DATA.mm.map(radMM)),
+    G('Förkorta och beräkna', DATA.tre.map(radTre)),
+    G('Beräkna – visa mellanled, förenkla innan beräkning, svara i enklaste form', DATA.mm2.map(radMM))
   ] };
+
+  // talBank(nod) — TESTETS talkälla: samma tupler som raderna ovan.
+  //   brak-mult-rakna:    {slag:'hb',h,t,n} · {slag:'bb',a,b} · {slag:'huvud',…} · {slag:'blandad',h,M} · {slag:'mm',A,B}
+  //   brak-mult-forkorta: {slag:'produkt',t:[…],n:[…]} · {slag:'forkorta',a,b} · {slag:'tre',f:[a,b,c]}
+  function talBank(nod){
+    var k = String(nod).replace(/:rakna$/, '');
+    if(k === 'brak-mult-rakna') return DATA.hb.map(function(x){ return { slag: 'hb', h: x[0], t: x[1], n: x[2] }; })
+      .concat(DATA.bb.map(function(p){ return { slag: 'bb', a: p[0], b: p[1] }; }))
+      .concat(DATA.huvud.map(function(x){ return x.k === 'bh' ? { slag: 'hb', h: x.h, t: x.b[0], n: x.b[1], ordning: 'bh' } : x.k === 'ho' ? { slag: 'hb', h: x.h, t: x.b[0], n: x.b[1] } : { slag: 'bb', a: x.a, b: x.b }; }))
+      .concat(DATA.hm.map(function(x){ return { slag: 'blandad', h: x[0], M: x[1] }; }))
+      .concat(DATA.mm.concat(DATA.mm2).map(function(p){ return { slag: 'mm', A: p[0], B: p[1] }; }));
+    if(k === 'brak-mult-forkorta') return DATA.produkt.map(function(x){ return { slag: 'produkt', t: x.t, n: x.n }; })
+      .concat(DATA.forkorta.map(function(p){ return { slag: 'forkorta', a: p[0], b: p[1] }; }))
+      .concat(DATA.tre.map(function(p){ return { slag: 'tre', f: p }; }));
+    return [];
+  }
 
   // ══════════════════════════ RENDER ══════════════════════════
   var TEXT = { mellanled: { hint: '— visa ett mellanled före svaret' }, led: { hint: ' (varje led = uttrycket)' } };   // elevtext som fält (samma som d6)
@@ -137,5 +146,5 @@
     } else { s.className = 'ovn-sammanf delvis'; s.textContent = ratt + ' av ' + tot + ' rätt. Se facit vid de röda och försök igen.'; }
   }
 
-  window.BLAD_AK8_D7 = { BLAD1: BLAD1, BLAD2: BLAD2, renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, key === 'B2' ? BLAD2 : BLAD1); } };
+  window.BLAD_AK8_D7 = { BLAD1: BLAD1, BLAD2: BLAD2, DATA: DATA, talBank: talBank, renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, key === 'B2' ? BLAD2 : BLAD1); } };
 })();

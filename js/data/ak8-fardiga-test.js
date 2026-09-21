@@ -156,7 +156,7 @@
       });
     }
     function oppnaTest(src){
-      var h = stickyHojd() + 40;
+      var h = stickyHojd() + 64;   // flikrad + "← Testlista"-knappen (36) + marginaler — iframens botten (keypaden) landar vid vyns botten
       panelEl.innerHTML = '<div style="max-width:920px;margin:16px auto 0;padding:0 24px;">'
         + '<button type="button" class="test-tillbaka" style="font-family:var(--cinzel);font-size:12px;letter-spacing:.06em;color:var(--gold);background:none;border:1px solid var(--paper-dk);border-radius:6px;padding:8px 16px;cursor:pointer;margin-bottom:12px;">← Testlista</button>'
         + '<iframe class="test-embed-frame" title="Test" src="' + src + '" style="width:100%;border:0;display:block;background:#fff;border-radius:8px;height:calc(100vh - ' + h + 'px);min-height:440px;"></iframe></div>';
@@ -164,6 +164,10 @@
         if(testHarIfyllt(panelEl) && !window.confirm(FAS3_TEXT.varning)) return;
         ritaLista();
       });
+      // KEYPADEN SYNS (order 2026-09-21 FAS 3): iframen är 100vh minus flikraden och börjar under hero-blocket → keypaden, fäst i
+      // iframens botten, låg under skärmkanten tills eleven själv scrollat. Scrolla så flikraden pinnas och iframen fyller vyn.
+      var fr = panelEl.querySelector('.test-tillbaka');
+      if(fr){ var y = fr.getBoundingClientRect().top + window.scrollY - stickyHojd() - 8; if(y > 0) try { window.scrollTo({ top: y, behavior: 'auto' }); } catch(e){ window.scrollTo(0, y); } }
     }
     ritaLista();
     initFlikrad();
