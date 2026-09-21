@@ -29,6 +29,9 @@ const preI = args.indexOf('--pre'), PRE = preI >= 0 ? fs.readFileSync(path.resol
 // --size WxH: fönsterstorlek (default 900x1200).
 const shotI = args.indexOf('--screenshot'), SHOT = shotI >= 0 ? path.resolve(args[shotI + 1]) : null;
 const sizeI = args.indexOf('--size'), SIZE = sizeI >= 0 ? args[sizeI + 1].split('x').map(Number) : [900, 1200];
+// --console: sidans console.log strömmas (Runtime.consoleAPICalled) till stderr som `console: …` — de sista raderna före
+// en tidsgräns pekar ut var sidan hängde (testgen-fuzz loggar generatorns namn före varje anrop).
+const KONSOL = args.includes('--console');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const PORT = 9222 + Math.floor(Math.random() * 500);
 const expr = fs.readFileSync(path.resolve(jsFile), 'utf8');
@@ -58,7 +61,8 @@ async function waitPort(){ for(let i = 0; i < 200; i++){ try { return await getJ
     const ws = new WebSocket(target.webSocketDebuggerUrl);
     await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; setTimeout(() => rej(new Error('WebSocket-anslutning tidsgränsad')), 30000); });
     let id = 0; const pending = {};
-    ws.onmessage = ev => { const m = JSON.parse(ev.data); if(m.id && pending[m.id]){ pending[m.id](m); delete pending[m.id]; } };
+    ws.onmessage = ev => { const m = JSON.parse(ev.data); if(m.id && pending[m.id]){ pending[m.id](m); delete pending[m.id]; }
+      else if(KONSOL && m.method === 'Runtime.consoleAPICalled'){ try { console.error('console: ' + (m.params.args || []).map(a => a.value !== undefined ? a.value : a.description).join(' ')); } catch(e){} } };
     // Varje CDP-steg har egen tidsgräns (30 s; Runtime.evaluate: TIMEOUT+5 s) → en hängd handskakning blir ett
     // namngivet fel i st f en tyst hängning (grinden kan då göra om körningen).
     const send = (method, params) => new Promise((res, rej) => { const i = ++id; const ms = method === 'Runtime.evaluate' ? TIMEOUT + 5000 : 30000;

@@ -164,6 +164,8 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
   function rI(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
   function rP(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
   function gcd2(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=b; b=a%b; a=t; } return a||1; }
+  // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv. primT(n) = täljare 1..n−1 relativt prim mot n; efter 40 försök tas 1 (alltid relativt prim). Förr `do{…}while(gcd≠1)` utan tak på sju ställen.
+  function primT(n){ var t = rI(1, n-1); for(var k = 0; gcd2(t, n) !== 1 && k < 40; k++) t = rI(1, n-1); return gcd2(t, n) === 1 ? t : 1; }
   function multBB(){   // bråk · bråk
     var n1=rP([2,3,4,5]), n2=rP([2,3,4,5]), t1=rI(1,n1-1), t2=rI(1,n2-1);
     var talj=t1*t2, namn=n1*n2, g=gcd2(talj,namn), T=talj/g, N=namn/g;
@@ -233,13 +235,13 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       return { key:'skriv'+b+'_'+e, prompt:'Skriv som en potens med basen '+b+' — vilken exponent?    '+mult.join(' · ')+' = '+b+'^▢', ans:e, expl:mult.join(' · ')+' = '+b+'^'+e+'.' };
     }) ] },
     'pot-begrepp:evaluera': { snabb: [ G.numeric('gt-pot-eval', 'Beräkna potensens värde', 'pot-begrepp:evaluera', function(){
-      var b, e, v; do { b = ri(2, 9); e = ri(2, 4); v = Math.pow(b, e); } while(v > 1000);
+      var b, e, v, k0 = 0; do { b = ri(2, 9); e = ri(2, 4); v = Math.pow(b, e); } while(v > 1000 && ++k0 < 60); if(v > 1000){ b = 2; e = 2; v = 4; }   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv.
       return { key:'eval'+b+'_'+e, prompt:'Beräkna:    '+b+'^'+e, ans:v, expl:b+'^'+e+' = '+v+'.' };
     }) ] },
     'pot-multdiv:rakna': { snabb: [ G.mellanledNum('gt-pot-multdiv', 'Exponent-lagen (mult och div)', 'pot-multdiv:rakna', function(){
       var b = ri(2, 6), typ = pick(['mult', 'div', 'blandat']);
       if(typ === 'mult'){
-        var m = ri(2, 7), n = ri(2, 7); while(m + n > 12){ m = ri(2, 7); n = ri(2, 7); } var res = m + n;
+        var m = ri(2, 7), n = ri(2, 7); for(var k0 = 0; m + n > 12 && k0 < 60; k0++){ m = ri(2, 7); n = ri(2, 7); } if(m + n > 12){ m = 2; n = 3; } var res = m + n;   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv.
         return { key:'m'+b+'_'+m+'_'+n, prompt:'Räkna ut med exponent-lagen:    '+b+'^'+m+' · '+b+'^'+n,
           led:[ { fraga:'lägg ihop exponenterna: '+m+' + '+n, varde:res, facit:String(res) } ],
           slutVarde:res, slutHint:'svarets exponent, '+b+'^▢', expl:b+'^'+m+' · '+b+'^'+n+' = '+b+'^('+m+'+'+n+') = '+b+'^'+res+'.' };
@@ -259,8 +261,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'pot-addsub:rakna': { snabb: [ G.mellanledNum('gt-pot-addsub', 'Addition och subtraktion med potenser', 'pot-addsub:rakna', function(){
       // EVALUERA-SEDAN-OPERERA (speglar genAddsub): led = de evaluerade potenserna, slut = resultatet.
       var b1 = ri(2, 6), e1 = ri(2, 3), b2 = ri(2, 6), e2 = ri(2, 3);
-      while(Math.pow(b1, e1) > 130) e1 = ri(2, 3);
-      while(Math.pow(b2, e2) > 130) e2 = ri(2, 3);
+      if(Math.pow(b1, e1) > 130) e1 = 2;   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv. (b ≤ 6 → b² ≤ 36)
+      if(Math.pow(b2, e2) > 130) e2 = 2;
       var v1 = Math.pow(b1, e1), v2 = Math.pow(b2, e2), op = pick(['+', '−']);
       var res = op === '+' ? v1 + v2 : v1 - v2;
       return { key:'as'+b1+'_'+e1+op+b2+'_'+e2, prompt:'Räkna ut steg för steg:    '+b1+'^'+e1+' '+op+' '+b2+'^'+e2,
@@ -270,24 +272,24 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     'pot-multdiv:losut': { snabb: [ G.numeric('gt-pot-losut', 'Lös ut basen eller exponenten', 'pot-multdiv:losut', function(){
       // Speglar genLosut (svar='varde'): x^e = V → basen, eller b^x = V → exponenten.
       if(Math.random() < 0.5){
-        var b = ri(2, 9), e = ri(2, 5); while(Math.pow(b, e) > 100000){ b = ri(2, 9); e = ri(2, 5); } var V = Math.pow(b, e);
+        var b = ri(2, 9), e = ri(2, 5); for(var k0 = 0; Math.pow(b, e) > 100000 && k0 < 60; k0++){ b = ri(2, 9); e = ri(2, 5); } var V = Math.pow(b, e);   // (kan inte slå till: 9⁵ = 59049)
         return { key:'lb'+b+'_'+e, prompt:'Vilket tal är x?    x^'+e+' = '+V, ans:b, expl:'x^'+e+' = '+V+' → x = '+b+' ('+b+'^'+e+' = '+V+').' };
       }
-      var bb = pick([2, 3, 4, 5, 10]), x = ri(2, 4); while(Math.pow(bb, x) > 1e6) x = ri(2, 4); var V2 = Math.pow(bb, x);
+      var bb = pick([2, 3, 4, 5, 10]), x = ri(2, 4); for(var k0 = 0; Math.pow(bb, x) > 1e6 && k0 < 60; k0++) x = ri(2, 4); var V2 = Math.pow(bb, x);   // (kan inte slå till: 10⁴)
       return { key:'le'+bb+'_'+x, prompt:'Vilket tal är x?    '+bb+'^x = '+V2, ans:x, expl:bb+'^x = '+V2+' → x = '+x+' ('+bb+'^'+x+' = '+V2+').' };
     }) ] },
     'prio-potenser': { snabb: [ G.mellanledNum('gt-prio-potenser', 'Prioritering med potenser', 'prio-potenser', function(){
       // VERKLIG LUCKA (ingen drill) — matte konsekvent med prio-reglerna: potens → gånger/delat → plus/minus.
       var t = pick([0, 1, 2]);
       if(t === 0){                                   // a + b · c^e
-        var a = ri(2, 9), b = ri(2, 5), c = ri(2, 4), e = ri(2, 3); while(Math.pow(c, e) > 50) e = ri(2, 3);
+        var a = ri(2, 9), b = ri(2, 5), c = ri(2, 4), e = ri(2, 3); if(Math.pow(c, e) > 50) e = 2;   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv. (c ≤ 4 → c² ≤ 16)
         var pe = Math.pow(c, e), m = b * pe, res = a + m;
         return { key:'p0_'+a+'_'+b+'_'+c+'_'+e, prompt:'Räkna ut steg för steg (potens först, sedan gånger, sedan plus/minus):    '+a+' + '+b+' · '+c+'^'+e,
           led:[ { fraga:c+'^'+e, varde:pe, facit:String(pe) }, { fraga:b+' · '+pe, varde:m, facit:String(m) } ],
           slutVarde:res, slutHint:a+' + '+m, expl:a+' + '+b+' · '+c+'^'+e+' = '+a+' + '+b+' · '+pe+' = '+a+' + '+m+' = '+res+'.' };
       }
       if(t === 1){                                   // a · b^e − c
-        var a1 = ri(2, 5), b1 = ri(2, 4), e1 = ri(2, 3), c1 = ri(2, 15); while(Math.pow(b1, e1) > 50) e1 = ri(2, 3);
+        var a1 = ri(2, 5), b1 = ri(2, 4), e1 = ri(2, 3), c1 = ri(2, 15); if(Math.pow(b1, e1) > 50) e1 = 2;   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv.
         var pe1 = Math.pow(b1, e1), m1 = a1 * pe1, res1 = m1 - c1;
         return { key:'p1_'+a1+'_'+b1+'_'+e1+'_'+c1, prompt:'Räkna ut steg för steg:    '+a1+' · '+b1+'^'+e1+' − '+c1,
           led:[ { fraga:b1+'^'+e1, varde:pe1, facit:String(pe1) }, { fraga:a1+' · '+pe1, varde:m1, facit:String(m1) } ],
@@ -310,7 +312,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     }) ] },
     'tio-rakna:rakna': { snabb: [ G.mellanledNum('gt-tio-multdiv', 'Exponent-lagen med tiopotenser', 'tio-rakna:rakna', function(){
       if(pick(['mult', 'div']) === 'mult'){
-        var m = ri(2, 7), n = ri(2, 7); while(m + n > 14){ m = ri(2, 7); n = ri(2, 7); } var res = m + n;
+        var m = ri(2, 7), n = ri(2, 7); for(var k0 = 0; m + n > 14 && k0 < 60; k0++){ m = ri(2, 7); n = ri(2, 7); } var res = m + n;   // (kan inte slå till: max 14)
         return { key:'tm'+m+'_'+n, prompt:'Räkna ut med exponent-lagen:    10^'+m+' · 10^'+n,
           led:[ { fraga:'lägg ihop exponenterna: '+m+' + '+n, varde:res, facit:String(res) } ],
           slutVarde:res, slutHint:'svarets exponent, 10^▢', expl:'10^'+m+' · 10^'+n+' = 10^'+res+'.' };
@@ -344,7 +346,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     }) ] },
     'gp-rakna:multdiv': { snabb: [ G.gp('gt-gp-multdiv', 'Multiplikation och division i grundpotensform', 'gp-rakna:multdiv', function(){
       if(pick(['mult', 'div']) === 'mult'){
-        var a = ri(1, 9), b = ri(1, 9), m = ri(2, 9), n = ri(2, 9); while(m + n > 18){ m = ri(2, 9); n = ri(2, 9); }
+        var a = ri(1, 9), b = ri(1, 9), m = ri(2, 9), n = ri(2, 9); for(var k0 = 0; m + n > 18 && k0 < 60; k0++){ m = ri(2, 9); n = ri(2, 9); }   // (kan inte slå till: max 18)
         var ck = a * b, ce = m + n, norm = normalisera(ck, ce);
         return { key:'gm'+a+'_'+m+'_'+b+'_'+n, prompt:'Räkna ut och skriv i grundpotensform:    '+dec(a)+'·10^'+m+' · '+dec(b)+'·10^'+n,
           led:[ { fraga:'koefficienterna: '+a+' · '+b, varde:ck, facit:dec(ck) }, { fraga:'exponenterna: '+m+' + '+n, varde:ce, facit:String(ce) } ],
@@ -369,7 +371,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
 
     // ── Del 4–7 · BRÅK-KÄRNA — mirror av k2:s bråk-generatorer (byte-troget; facit = k2:s) ──
     'brak-blandad': { snabb: [ G.brak('k2-blandad','Blandad form → oäkta bråk','brak-blandad', function(){
-      var hel=rI(1,4), n=rP([2,3,4,5,6,7,8]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var talj=hel*n+t;
+      var hel=rI(1,4), n=rP([2,3,4,5,6,7,8]), t=primT(n); var talj=hel*n+t;
       return {key:hel+'-'+t+'-'+n, prompt:'Skriv '+hel+' '+t+'/'+n+' som oäkta bråk.', talj:talj, namn:n, expl:hel+' '+t+'/'+n+' = '+talj+'/'+n+'.'};
     }) ] },
     'brak-tid': { snabb: [ G.brak('k2-tid','Tid i bråkform','brak-tid', function(){
@@ -381,15 +383,15 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = ___/'+(n*f), ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
     }) ] },
     'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
-      var N=rP([2,3,4,5,6]), T; do{ T=rI(1,N-1); }while(gcd2(T,N)!==1); var f=rP([2,3,4]);
+      var N=rP([2,3,4,5,6]), T=primT(N); var f=rP([2,3,4]);
       return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+(T*f)+'/'+(N*f)+' till enklaste form.', talj:T, namn:N, expl:(T*f)+'/'+(N*f)+' = '+T+'/'+N+'.'};
     }) ] },
     'brak-likformig': { snabb: [ G.numeric('k2-likformig','Likformiga bråk','brak-likformig', function(){
-      var n=rP([2,3,4,5,6]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var k=rP([2,3,4,5]);
+      var n=rP([2,3,4,5,6]), t=primT(n); var k=rP([2,3,4,5]);
       return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+t+'/'+n+':    '+t+'/'+n+' = ___/'+(n*k), ans:t*k, expl:t+'/'+n+' = '+(t*k)+'/'+(n*k)+' (förläng med '+k+').'};
     }) ] },
     'brak-jmf-lika': { snabb: [ G.flerval('k2-jmf-lika','Jämför bråk (samma nämnare)','brak-jmf-lika', function(){
-      var n=rP([4,5,6,7,8,9]), a=rI(1,n-1), b; do{ b=rI(1,n-1); }while(b===a); var s=(a>b)?a:b;
+      var n=rP([4,5,6,7,8,9]), a=rI(1,n-1), b=rI(1,n-1); for(var k0 = 0; b===a && k0 < 40; k0++) b=rI(1,n-1); if(b===a) b = a===1 ? 2 : 1; var s=(a>b)?a:b;   // // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv.
       return {key:a+'-'+b+'/'+n, prompt:'Vilket bråk är störst?', options:[a+'/'+n, b+'/'+n], answer:s+'/'+n, expl:'Samma nämnare → störst täljare: '+s+'/'+n+'.'};
     }) ] },
     'brak-add': { snabb: [ G.mellanled('k2-add','Addition med bråk','brak-add', function(){
@@ -419,7 +421,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
         slutTalj:T, slutNamn:N, expl:t+'/'+n+' ÷ '+h+' = '+t+'/'+n+' · 1/'+h+' = '+pt+'/'+pn+' = '+T+'/'+N+'.' };
     }) ] },
     'brak-div-hb': { snabb: [ G.mellanled('k2-div-hb','Heltal ÷ bråk','brak-div-hb', function(){
-      var n=rP([2,3,4,5]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var h=rI(1,4);
+      var n=rP([2,3,4,5]), t=primT(n); var h=rI(1,4);
       var pt=h*n, pn=t, g=gcd2(pt,pn), T=pt/g, N=pn/g;
       return { key:h+'-'+t+'/'+n, prompt:'Räkna ut steg för steg:    '+h+' ÷ '+t+'/'+n,
         led:[ { fraga:'inversen av '+t+'/'+n, varde: n/t, facit: n+'/'+t }, { fraga:h+'·'+n+' / '+t, varde: pt/pn, facit: pt+'/'+pn } ],
@@ -433,7 +435,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
         slutTalj:T, slutNamn:N, expl:t1+'/'+n1+' ÷ '+t2+'/'+n2+' = '+t1+'/'+n1+' · '+n2+'/'+t2+' = '+pt+'/'+pn+' = '+T+'/'+N+'.' };
     }) ] },
     'brak-div-inv': { snabb: [ G.brak('k2-div-inv','Invertera (omvända talet)','brak-div-inv', function(){
-      var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
+      var n=rP([2,3,4,5,6,7]), t=primT(n);
       return {key:'inv'+t+'/'+n, prompt:'Skriv det omvända talet (inversen) till '+t+'/'+n+':', talj:n, namn:t, expl:'Inversen av '+t+'/'+n+' är '+n+'/'+t+'.'};
     }) ] },
     // ── Del 5–7 · MULT/DIV med 10/100/1000 & stora tal — mirror av k1 (byte-troget) ──
@@ -777,7 +779,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
     return {key:t1+'/'+n1+'*'+t2+'/'+n2, prompt:'Förkorta innan du multiplicerar (enklaste form):    '+t1+'/'+n1+' · '+t2+'/'+n2, talj:T, namn:N, expl:t1+'/'+n1+' · '+t2+'/'+n2+' = '+talj+'/'+namn+' = '+T+'/'+N+'.'};
   }) ] },
   'ny-reciprok': { snabb: [ G.brak('ny-reciprok','Skriva reciprok','brak-div-reciprok', function(){
-    var n=rP([2,3,4,5,6,7]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1);
+    var n=rP([2,3,4,5,6,7]), t=primT(n);
     return {key:'rec'+t+'/'+n, prompt:'Skriv reciproken (omvända talet) till '+t+'/'+n+':', talj:n, namn:t, expl:'Reciproken av '+t+'/'+n+' är '+n+'/'+t+'.'};
   }) ] },
   // ── FAS1-BREDDNING · quiz-bara typer (nya generatorer). Rättning i provbyggar-motorns typ-grenar
@@ -817,7 +819,7 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
   'brak-blandad:oakta': { snabb: [ function genOaktaBlandad(seen){
     var subs = [], tries = 0;
     while(subs.length < 4 && tries < 80){ tries++;
-      var n = ri(2,9), h = ri(1,4), r; do { r = ri(1,n-1); } while(gcd2(r,n)!==1);
+      var n = ri(2,9), h = ri(1,4), r = primT(n);
       var talj = h*n + r, key = 'ob-'+talj+'/'+n;
       if(seen.has(key)) continue; seen.add(key);
       subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'blandad', prompt:'Skriv '+talj+'/'+n+' i blandad form (enklaste form):', talj:talj, namn:n, explanation:talj+'/'+n+' = '+h+' '+r+'/'+n+'.' });
@@ -1004,7 +1006,8 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
   // dk8: parentes upphöjt till potens (12−5)²=49 → prio-potenser
   'prio-potenser-paren': { snabb: [ G.mellanledNum('pot-paren','Parentes upphöjt till potens','prio-potenser', function(){
     var a=ri(3,15), b=ri(1,a-1), op=pick(['−','+']), inner=op==='−'?a-b:a+b, e=pick([2,3]), res=Math.pow(inner,e);
-    while(res>500){ e=2; res=inner*inner; }
+    if(res>500){ e=2; res=inner*inner; }
+    if(res>500) return null;   // TAK (order 2026-09-21): omdragning får aldrig bli evig — efter taket tas en reserv. inner ≥ 23 ger > 500 även i kvadrat — förr `while(res>500){ e=2; … }` = EVIG LOOP (frös sidan vid montering, seed-reproducerat 2026-09-21)
     return {key:'pp'+a+op+b+'^'+e, prompt:'Räkna ut:   ('+a+' '+op+' '+b+')^'+e,
       led:[{fraga:'räkna ut parentesen: '+a+' '+op+' '+b, varde:inner, facit:String(inner)}],
       slutVarde:res, slutHint:'parentesen upphöjt till '+e, expl:'('+a+' '+op+' '+b+')^'+e+' = '+inner+'^'+e+' = '+res+'.'};
