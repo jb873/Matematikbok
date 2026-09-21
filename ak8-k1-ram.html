@@ -47,7 +47,8 @@ body.embed .wrap{padding:12px 14px 24px;max-width:100%;}
 <style>
 /* Stående bråk i testet (BRAK(t)(n) via brakUt) + staplat komplexbråk (nästlat BRAK, division som bråk över bråk, 2026-09-21) */
 .ovn-brak{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 5px;line-height:1.15}
-.ovn-brak-taljare,.ovn-brak-namnare{padding:0 7px 1px;font-feature-settings:'tnum';white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
+.ovn-brak-taljare,.ovn-brak-namnare{padding:0 7px 1px;font-feature-settings:'tnum';white-space:nowrap;display:inline-block;line-height:1.25}
+.ovn-brak sup{font-size:.72em;vertical-align:super;line-height:0}   /* exponent inne i staplat bråk (exponentlagen) */
 .ovn-brak-namnare{padding:1px 7px 0}
 .ovn-brak-strecket{height:2px;background:currentColor;width:100%;min-width:22px;border-radius:1px}
 .ovn-brak .ovn-brak{margin:0 2px}
@@ -263,9 +264,9 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       }
       if(typ === 'div'){
         var mm = ri(5, 12), nn = ri(2, mm - 1); if(mm - nn > 9) nn = mm - ri(1, 9); var res2 = mm - nn;
-        return { key:'d'+b+'_'+mm+'_'+nn, prompt:'Räkna ut med exponent-lagen:    '+b+'^'+mm+' / '+b+'^'+nn,
+        return { key:'d'+b+'_'+mm+'_'+nn, prompt:'Räkna ut med exponent-lagen:    '+B(b+'^'+mm, b+'^'+nn),
           led:[ { fraga:'dra bort exponenterna: '+mm+' − '+nn, varde:res2, facit:String(res2) } ],
-          slutVarde:res2, slutHint:'svarets exponent, '+b+'^▢', expl:b+'^'+mm+' / '+b+'^'+nn+' = '+b+'^('+mm+'−'+nn+') = '+b+'^'+res2+'.' };
+          slutVarde:res2, slutHint:'svarets exponent, '+b+'^▢', expl:B(b+'^'+mm, b+'^'+nn)+' = '+b+'^('+mm+'−'+nn+') = '+b+'^'+res2+'.' };
       }
       var p = ri(2, 6), q = ri(2, 6), r = ri(2, Math.min(p + q - 1, 8)); var s1 = p + q, res3 = s1 - r;
       return { key:'bl'+b+'_'+p+'_'+q+'_'+r, prompt:'Räkna ut med exponent-lagen:    ('+b+'^'+p+' · '+b+'^'+q+') / '+b+'^'+r,
@@ -333,9 +334,9 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
           slutVarde:res, slutHint:'svarets exponent, 10^▢', expl:'10^'+m+' · 10^'+n+' = 10^'+res+'.' };
       }
       var mm = ri(5, 14), nn = ri(2, mm - 1); var res2 = mm - nn;
-      return { key:'td'+mm+'_'+nn, prompt:'Räkna ut med exponent-lagen:    10^'+mm+' / 10^'+nn,
+      return { key:'td'+mm+'_'+nn, prompt:'Räkna ut med exponent-lagen:    '+B('10^'+mm, '10^'+nn),
         led:[ { fraga:'dra bort exponenterna: '+mm+' − '+nn, varde:res2, facit:String(res2) } ],
-        slutVarde:res2, slutHint:'svarets exponent, 10^▢', expl:'10^'+mm+' / 10^'+nn+' = 10^'+res2+'.' };
+        slutVarde:res2, slutHint:'svarets exponent, 10^▢', expl:B('10^'+mm, '10^'+nn)+' = 10^'+res2+'.' };
     }) ] },
     'tio-rakna:addsub': { snabb: [ G.mellanledNum('gt-tio-addsub', 'Addition och subtraktion med tiopotenser', 'tio-rakna:addsub', function(){
       var e1 = ri(2, 6), e2 = ri(2, 6), op = pick(['+', '−']); var v1 = Math.pow(10, e1), v2 = Math.pow(10, e2);
@@ -369,9 +370,9 @@ function avr(x,d){const p=Math.pow(10,d==null?3:d);return Math.round(x*p)/p}// a
       }
       var rk = ri(1, 9), b2 = pick([2, 3, 5, 1.5, 2.5]), a2 = gpRound(rk * b2), m2 = ri(6, 13), n2 = ri(2, m2 - 2);
       var ce2 = m2 - n2, norm2 = normalisera(rk, ce2);
-      return { key:'gd'+a2+'_'+m2+'_'+b2+'_'+n2, prompt:'Räkna ut och skriv i grundpotensform:    '+dec(a2)+'·10^'+m2+' / '+dec(b2)+'·10^'+n2,
-        led:[ { fraga:'koefficienterna: '+dec(a2)+' / '+dec(b2), varde:rk, facit:String(rk) }, { fraga:'exponenterna: '+m2+' − '+n2, varde:ce2, facit:String(ce2) } ],
-        slutKoeff:norm2.koeff, slutExp:norm2.exp, expl:dec(a2)+'·10^'+m2+' / '+dec(b2)+'·10^'+n2+' = '+dec(rk)+'·10^'+ce2+'.' };
+      return { key:'gd'+a2+'_'+m2+'_'+b2+'_'+n2, prompt:'Räkna ut och skriv i grundpotensform:    '+B(dec(a2)+'·10^'+m2, dec(b2)+'·10^'+n2),
+        led:[ { fraga:'koefficienterna: '+B(dec(a2), dec(b2)), varde:rk, facit:String(rk) }, { fraga:'exponenterna: '+m2+' − '+n2, varde:ce2, facit:String(ce2) } ],
+        slutKoeff:norm2.koeff, slutExp:norm2.exp, expl:B(dec(a2)+'·10^'+m2, dec(b2)+'·10^'+n2)+' = '+dec(rk)+'·10^'+ce2+'.' };
     }) ] },
     'gp-rakna:addsub': { snabb: [ G.numeric('gt-gp-addsub', 'Addition och subtraktion i grundpotensform', 'gp-rakna:addsub', function(){
       var a = gpKoeff(), m = ri(3, 7), b = gpKoeff(), n = ri(2, m - 1), op = pick(['+', '−']);
