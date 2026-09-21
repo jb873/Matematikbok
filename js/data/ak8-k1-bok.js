@@ -90,7 +90,7 @@ window.AK8_K1_BOK = {
       nr: 7, id: 'div-brak', titel: 'Division', fil: 'div-brak.html', status: 'bygger',
       blad: [
         { nr: 1, titel: 'Division, blad 1', roll: 'mal', noder: ['brak-div-reciprok:rakna', 'brak-div-hb:rakna', 'brak-div-bh:rakna', 'brak-div-bb:rakna', 'brak-div-inv:rakna'] },
-        { nr: 2, titel: 'Division, blad 2', roll: 'mal', noder: ['brak-div-hb:rakna', 'brak-div-bh:rakna', 'brak-div-bb:rakna', 'brak-mult-forkorta:rakna'] }
+        { nr: 2, titel: 'Division, blad 2', roll: 'mal', noder: ['brak-div-hb:rakna', 'brak-div-bh:rakna', 'brak-div-bb:rakna'] }   // brak-mult-forkorta borttagen 2026-09-21: bladets förkorta-grupp är bråk delat med bråk (testet täcker öva)
       ]
     },
     {

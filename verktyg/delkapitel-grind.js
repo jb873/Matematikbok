@@ -13,7 +13,7 @@
      3 DRILLAR      varje drill i sidans Färdighetsträning körd en hel omgång (8) i riktiga ramen — ingen
                     uppgift upprepad. (Kända skuld-drillar rapporteras som SKULD, ej FEL, tills de migreras.)
      4 TEST         varje färdigt test för sidans delkapitel: EN fråga per generator (ingen dubblerad),
-                    alla noder täckta; för dk11 dessutom alla tal ∈ öva-bladets talmängd (talBank).
+                    alla noder täckta; för dk11 och dk7 dessutom alla tal ∈ öva-bladets talmängd (talBank).
 
    NEGATIVT VERIFIERAD (varje fel återinfört → grinden fäller): se commit-meddelandet för FAS 5.
    KÖR:  node verktyg/delkapitel-grind.js [--sida kvadratrotter] [--snabb]   (--snabb hoppar drill-körningen)
@@ -160,6 +160,20 @@ const t = cdp(fileUrl(path.join(ROOT, 'ak8-k1-ram.html')), `(function(){
           var p = String(s.prompt||'').replace(/\\^2/g,''); var m = p.match(/√\\s*([\\d,]+)/) || p.match(/sidan ([\\d,]+)/) || p.match(/arean ([\\d,]+)/) || p.match(/Beräkna ([\\d,]+)/) || p.match(/Beräkna:\\s*([\\d,]+)/);
           if(m && !band[n].has(String(parseFloat(m[1].replace(',','.'))))) utanfor.push(q.generator + ':' + m[1]); }); });
       }
+      // dk7 (division, 2026-09-21): varje delfrågas talföljd (siffrorna i prompten, i ordning) måste finnas i BLAD_AK8_D8.talBank
+      if(window.BLAD_AK8_D8 && tt.nodes.some(function(n){ return /^brak-div-/.test(n); })){
+        function seq(a){ return a.join(','); }
+        var till = {};
+        function add(n, arr){ (till[n] = till[n] || new Set()).add(seq(arr)); }
+        BLAD_AK8_D8.talBank('brak-div-hb').forEach(function(r){ add('brak-div-hb:rakna', [r.h, r.t, r.n]); });
+        BLAD_AK8_D8.talBank('brak-div-bh').forEach(function(r){ add('brak-div-bh:rakna', [r.t, r.n, r.h]); });
+        BLAD_AK8_D8.talBank('brak-div-bb').forEach(function(r){ add('brak-div-bb:rakna', r.slag === 'blandad' ? r.A.concat(r.B) : r.a.concat(r.b)); });
+        BLAD_AK8_D8.talBank('brak-div-bb:prio').forEach(function(x){ add('brak-div-bb:rakna', x.typ === 'mult-sub' ? [].concat(x.A, x.B, x.C, x.D) : [].concat(x.A, x.B, x.C)); });
+        BLAD_AK8_D8.talBank('brak-div-reciprok').forEach(function(r){ add('brak-div-reciprok:rakna', [r.t, r.n]); add('brak-div-inv:rakna', [r.t, r.n]); });
+        qs.forEach(function(q){ var n = __GENNOD[q.generator]; if(!till[n]) return; q.subs.forEach(function(s){
+          var nums = (String(s.prompt || '').match(/\\d+/g) || []).map(Number);   // prompt-prefixen ("Räkna ut steg för steg:", "… till") saknar siffror
+          if(!till[n].has(seq(nums))) utanfor.push(q.generator + ':' + nums.join('/')); }); });
+      }
       ut.push({ dk: dk.nr, titel: tt.titel, fragor: qs.length, delfragor: qs.reduce(function(s,q){ return s+q.subs.length; },0), saknade: saknade, dubbla: dubbla, utanfor: utanfor });
     });
   });
@@ -173,7 +187,7 @@ else t.forEach(function(x){
   if(x.saknade.length) fel('test ' + tag + ': noder EJ täckta: ' + x.saknade.join(' '));
   else if(x.dubbla.length) fel('test ' + tag + ': generator dubblerad: ' + [...new Set(x.dubbla)].join(' '));
   else if(x.utanfor.length) fel('test ' + tag + ': tal utanför öva-bandet: ' + x.utanfor.join(' '));
-  else ok('test ' + tag + ': alla noder, en fråga per generator' + (x.dk === 11 ? ', alla tal ∈ öva' : ''));
+  else ok('test ' + tag + ': alla noder, en fråga per generator' + ((x.dk === 11 || x.dk === 7) ? ', alla tal ∈ öva' : ''));
 });
 }
 try { fs.unlinkSync(pre); } catch(e){}

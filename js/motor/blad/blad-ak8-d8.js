@@ -16,8 +16,11 @@
   var F = window, LR = window.Likhetsrattare;
   function evalA(s){ return AK8_UI.evalArith(s); }
   function likhet(a, b){ return isFinite(a) && isFinite(b) && Math.abs(a - b) < 1e-9; }
-  function fr(t, n){ return F.fracSpan(t, n); }
-  function mx(h, t, n){ return h + '&nbsp;' + F.fracSpan(t, n); }
+  // fracSpan kommer ur blad-karna (öva-sidan). I testramen (ak8-k1-ram laddar d8 för talBank) finns den inte → samma
+  // fyrradiga markup lokalt, så modulen kan laddas där utan blad-karna (vars avr/visaKonfetti kolliderar med ramens).
+  function fracSpanLokal(t, n){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + t + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + n + '</span></span>'; }
+  function fr(t, n){ return (F.fracSpan || fracSpanLokal)(t, n); }
+  function mx(h, t, n){ return h + '&nbsp;' + fr(t, n); }
   // DIVISION SOM STAPLAT BRÅK (order 2026-09-21, Joachim: aldrig ÷ på ett enda ställe): täljaruttrycket över nämnaruttrycket,
   // även 4 över 1/3. Samma markup som färdighetsträningens komplexbråk (.ovn-kbrak), visningsvariant utan rutor.
   function dv(a, b){ return '<span class="ovn-kbrak ovn-kbrak-visa"><span class="ovn-kbrak-topp">' + a + '</span><span class="ovn-kbrak-streck"></span><span class="ovn-kbrak-botten">' + b + '</span></span>'; }
@@ -50,59 +53,75 @@
 
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
 
+  // ══════════════════════════ DATA — EN KÄLLA FÖR ÖVA OCH TEST (order 2026-09-21, FAS 5) ══════════════════════════
+  // Talen som tupler. Raderna nedan OCH testets banker (talBank(nod) → ak8-k1-ram) byggs ur samma tupler, så
+  // "inga tal i testet utan täckning i öva" är sant per konstruktion (som kvadratrötterna, FAS 4b). Facit räknas
+  // ur tuplerna (h·n/t, t/(n·h), a·d/(b·c) …) och formen ur värdet: heltal → decimal, oäkta → blandad, äkta → bråk.
+  var DATA = {
+    reciprok:  [[4, 7], [6, 13], ['2x', 'y']],                                   // B1 g1 (algebra-raden bara i öva)
+    hbStam:    [[4, 1, 3], [7, 1, 5], [3, 1, 9]],                                 // B1 g2: h över t/n (stambråk) → heltal
+    bhStam:    [[1, 3, 4], [1, 5, 6], [1, 7, 8]],                                 // B1 g3: t/n över h → stambråk
+    forlanga:  [[[4, 5], [2, 3]], [[3, 4], [5, 6]], [[3, 5], [2, 7]]],            // B1 g4: förlänga-metoden (komplexbråk byggt av eleven)
+    invertera: [[[3, 5], [6, 7]], [[5, 6], [3, 8]], [[7, 3], [5, 7]]],            // B1 g5: invertera-metoden (fri kedja)
+    hb:        [[4, 2, 3], [5, 2, 7], [6, 3, 8]],                                 // B2 g1: h över t/n (två varianter går bra)
+    bh:        [[3, 4, 2], [4, 7, 6], [3, 8, 4]],                                 // B2 g2: t/n över h
+    forkorta:  [[[11, 18], [44, 27]], [[7, 13], [49, 26]]],                       // B2 g3: förkorta innan beräkning
+    blandad:   [[[1, 5, 9], [1, 1, 6]], [[2, 3, 4], [4, 5, 7]], [[4, 1, 5], [3, 3, 8]]],   // B2 g4: blandad över blandad
+    prio:      [ { typ: 'mult-sub', A: [10, 2, 5], B: [5, 5, 8], C: [5, 6], D: [1, 2, 3] },   // B2 g5: A·B − C över D
+                 { typ: 'div-sum',  A: [4, 3, 5],  B: [5, 1, 2], C: [1, 2, 5] } ]             //        A över (B + C)
+  };
+  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
+  // slutform ur värdet t/n: förkortat; heltal → decimal, oäkta → blandad, äkta → bråk
+  function fin(t, n){ var g = gcd(t, n); t /= g; n /= g; return n === 1 ? DE(t) : t > n ? MI(Math.floor(t / n), t % n, n) : BR(t, n); }
+  function oakta(m){ return [m[0] * m[2] + m[1], m[2]]; }                      // [h,t,n] → [T,N]
+  // rader ur tuplerna
+  function radHB(x, typ){ var h = x[0], t = x[1], n = x[2], T = h * n, N = t, ff = fin(T, N);   // h ÷ t/n = h·n/t
+    return typ === 'kan' ? KAN(dv(String(h), fr(t, n)), [T, N], [{ t: 'i', fin: ff }]) : EQ(dv(String(h), fr(t, n)), [T, N], ff); }
+  function radBH(x){ var t = x[0], n = x[1], h = x[2]; return KAN(dv(fr(t, n), String(h)), [t, n * h], [{ t: 'b', fin: fin(t, n * h) }]); }   // t/n ÷ h = t/(n·h)
+  function radBB(p, typ){ var a = p[0], b = p[1], T = a[0] * b[1], N = a[1] * b[0], ff = fin(T, N);   // a/b ÷ c/d = a·d/(b·c)
+    return typ === 'forlanga' ? KAN(dv(fr(a[0], a[1]), fr(b[0], b[1])), [T, N], [{ t: 'e' }, { t: ff.k === 'mi' ? 'm' : 'b', fin: ff }]) : EQ(dv(fr(a[0], a[1]), fr(b[0], b[1])), [T, N], ff); }
+  function radBlandad(p){ var A = oakta(p[0]), Bq = oakta(p[1]), T = A[0] * Bq[1], N = A[1] * Bq[0]; return EQ(dv(mx(p[0][0], p[0][1], p[0][2]), mx(p[1][0], p[1][1], p[1][2])), [T, N], fin(T, N)); }
+  function prioVarde(x){   // exakt bråkräkning
+    if(x.typ === 'mult-sub'){ var A = oakta(x.A), Bq = oakta(x.B), D = oakta(x.D); var P = [A[0] * Bq[0], A[1] * Bq[1]], Q = [x.C[0] * D[1], x.C[1] * D[0]]; return [P[0] * Q[1] - Q[0] * P[1], P[1] * Q[1]]; }
+    var A2 = oakta(x.A), B2 = oakta(x.B), C2 = oakta(x.C); var S = [B2[0] * C2[1] + C2[0] * B2[1], B2[1] * C2[1]]; return [A2[0] * S[1], A2[1] * S[0]];
+  }
+  function radPrio(x){ var v = prioVarde(x), ff = fin(v[0], v[1]);
+    var q = x.typ === 'mult-sub' ? mx(x.A[0], x.A[1], x.A[2]) + ' · ' + mx(x.B[0], x.B[1], x.B[2]) + ' − ' + dv(fr(x.C[0], x.C[1]), mx(x.D[0], x.D[1], x.D[2]))
+                                 : dv(mx(x.A[0], x.A[1], x.A[2]), mx(x.B[0], x.B[1], x.B[2]) + ' + ' + mx(x.C[0], x.C[1], x.C[2]));
+    return EQ(q, v, ff); }
+
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Division med bråk', uppg: [
-    G('Invertera följande tal (skriv det inverterade talet)', [
-      INV('4', '7'), INV('6', '13'), INV('2x', 'y')
-    ]),
-    G('Beräkna', [
-      KAN(dv('4', fr(1,3)), [12,1], [{ t:'i', fin: DE(12) }]),
-      KAN(dv('7', fr(1,5)), [35,1], [{ t:'i', fin: DE(35) }]),
-      KAN(dv('3', fr(1,9)), [27,1], [{ t:'i', fin: DE(27) }])
-    ]),
-    G('Beräkna', [
-      KAN(dv(fr(1,3), '4'), [1,12], [{ t:'b', fin: BR(1,12) }]),
-      KAN(dv(fr(1,5), '6'), [1,30], [{ t:'b', fin: BR(1,30) }]),
-      KAN(dv(fr(1,7), '8'), [1,56], [{ t:'b', fin: BR(1,56) }])
-    ]),
-    G('Beräkna med metoden förlänga – visa mellanledet som staplat bråk, svara i enklaste form', [
-      KAN(dv(fr(4,5), fr(2,3)), [6,5], [{ t:'e' }, { t:'m', fin: MI(1,1,5) }]),
-      KAN(dv(fr(3,4), fr(5,6)), [9,10], [{ t:'e' }, { t:'b', fin: BR(9,10) }]),
-      KAN(dv(fr(3,5), fr(2,7)), [21,10], [{ t:'e' }, { t:'m', fin: MI(2,1,10) }])
-    ]),
-    G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', [
-      EQ(dv(fr(3,5), fr(6,7)), [7,10], BR(7,10)),
-      EQ(dv(fr(5,6), fr(3,8)), [20,9], MI(2,2,9)),
-      EQ(dv(fr(7,3), fr(5,7)), [49,15], MI(3,4,15))
-    ])
+    G('Invertera följande tal (skriv det inverterade talet)', DATA.reciprok.map(function(x){ return INV(x[0], x[1]); })),
+    G('Beräkna', DATA.hbStam.map(function(x){ return radHB(x, 'kan'); })),
+    G('Beräkna', DATA.bhStam.map(radBH)),
+    G('Beräkna med metoden förlänga – visa mellanledet som staplat bråk, svara i enklaste form', DATA.forlanga.map(function(p){ return radBB(p, 'forlanga'); })),
+    G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', DATA.invertera.map(function(p){ return radBB(p, 'eq'); }))
   ] };
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
   var BLAD2 = { key: 'B2', titel: 'Division med bråk – blad 2', uppg: [
-    G('Beräkna – visa mellanled (två varianter går bra)', [
-      EQ(dv('4', fr(2,3)), [6,1], DE(6)),
-      EQ(dv('5', fr(2,7)), [35,2], MI(17,1,2)),
-      EQ(dv('6', fr(3,8)), [16,1], DE(16))
-    ]),
-    G('Beräkna', [
-      KAN(dv(fr(3,4), '2'), [3,8], [{ t:'b', fin: BR(3,8) }]),
-      KAN(dv(fr(4,7), '6'), [2,21], [{ t:'b', fin: BR(2,21) }]),
-      KAN(dv(fr(3,8), '4'), [3,32], [{ t:'b', fin: BR(3,32) }])
-    ]),
-    G('Beräkna – visa mellanled, förkorta innan beräkning', [
-      EQ(dv(fr(11,18), fr(44,27)), [3,8], BR(3,8)),
-      EQ(dv(fr(7,13), fr(49,26)), [2,7], BR(2,7))
-    ]),
-    G('Beräkna – visa mellanled, svara i enklaste form', [
-      EQ(dv(mx(1,5,9), mx(1,1,6)), [4,3], MI(1,1,3)),
-      EQ(dv(mx(2,3,4), mx(4,5,7)), [7,12], BR(7,12)),
-      EQ(dv(mx(4,1,5), mx(3,3,8)), [56,45], MI(1,11,45))
-    ]),
-    G('Beräkna – blandade räknesätt', [
-      EQ(mx(10,2,5) + ' · ' + mx(5,5,8) + ' − ' + dv(fr(5,6), mx(1,2,3)), [58,1], DE(58)),
-      EQ(dv(mx(4,3,5), mx(5,1,2) + ' + ' + mx(1,2,5)), [2,3], BR(2,3))
-    ])
+    G('Beräkna – visa mellanled (två varianter går bra)', DATA.hb.map(function(x){ return radHB(x, 'eq'); })),
+    G('Beräkna', DATA.bh.map(radBH)),
+    G('Beräkna – visa mellanled, förkorta innan beräkning', DATA.forkorta.map(function(p){ return radBB(p, 'eq'); })),
+    G('Beräkna – visa mellanled, svara i enklaste form', DATA.blandad.map(radBlandad)),
+    G('Beräkna – blandade räknesätt', DATA.prio.map(radPrio))
   ] };
+
+  // talBank(nod) — TESTETS talkälla: samma tupler som raderna ovan (öva-täckning per konstruktion).
+  //   brak-div-hb: [h,t,n] · brak-div-bh: [t,n,h] · brak-div-bb: {a,b} (+ blandad {A,B}, forkorta {a,b}) ·
+  //   brak-div-reciprok / brak-div-inv: [t,n] (numeriska) · brak-div-bb:prio: prio-objekten med värde
+  function talBank(nod){
+    var k = String(nod).replace(/:rakna$/, '');
+    if(k === 'brak-div-hb') return DATA.hbStam.concat(DATA.hb).map(function(x){ return { h: x[0], t: x[1], n: x[2] }; });
+    if(k === 'brak-div-bh') return DATA.bhStam.concat(DATA.bh).map(function(x){ return { t: x[0], n: x[1], h: x[2] }; });
+    if(k === 'brak-div-bb') return DATA.forlanga.concat(DATA.invertera).map(function(p){ return { a: p[0], b: p[1], slag: 'bb' }; })
+      .concat(DATA.forkorta.map(function(p){ return { a: p[0], b: p[1], slag: 'forkorta' }; }))
+      .concat(DATA.blandad.map(function(p){ return { A: p[0], B: p[1], a: oakta(p[0]), b: oakta(p[1]), slag: 'blandad' }; }));
+    if(k === 'brak-div-reciprok' || k === 'brak-div-inv') return DATA.reciprok.filter(function(x){ return typeof x[0] === 'number'; }).map(function(x){ return { t: x[0], n: x[1] }; });
+    if(k === 'brak-div-bb:prio') return DATA.prio.map(function(x){ var v = prioVarde(x), g = gcd(v[0], v[1]); return { typ: x.typ, A: x.A, B: x.B, C: x.C, D: x.D, T: v[0] / g, N: v[1] / g }; });
+    return [];
+  }
 
   // ══════════════════════════ RENDER ══════════════════════════
   var TEXT = { mellanled: { hint: '— visa ett mellanled före svaret' }, led: { hint: ' (varje led = uttrycket)' } };   // elevtext som fält (samma som d6/d7)
@@ -178,5 +197,5 @@
     } else { s.className = 'ovn-sammanf delvis'; s.textContent = ratt + ' av ' + tot + ' rätt. Se facit vid de röda och försök igen.'; }
   }
 
-  window.BLAD_AK8_D8 = { BLAD1: BLAD1, BLAD2: BLAD2, renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, key === 'B2' ? BLAD2 : BLAD1); } };
+  window.BLAD_AK8_D8 = { BLAD1: BLAD1, BLAD2: BLAD2, DATA: DATA, talBank: talBank, renderBlad: function(mount, key){ CHECKS = []; renderBlad(mount, key === 'B2' ? BLAD2 : BLAD1); } };
 })();

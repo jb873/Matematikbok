@@ -156,10 +156,15 @@ const FORMAGA_NAMN = {begrepp:'Begrepp', rakna:'Räkna', metod:'Metod', kommunik
 function brakUt(s){
   s = '' + s;
   if(s.indexOf('BRAK(') < 0) return s;
-  return s.replace(/BRAK\(([^()]*)\)\(([^()]*)\)/g, function(m, num, den){
-    return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + num + '</span>'
-      + '<span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + den + '</span></span>';
-  });
+  // NÄSTLAT (order 2026-09-21, division som staplat bråk): BRAK(BRAK(3)(5))(BRAK(6)(7)) — innersta paret först (det saknar
+  // parenteser), sedan det yttre vars innehåll nu är markup utan parenteser. Utan nästling: ett varv, byte-identiskt.
+  for(var varv = 0; varv < 6 && s.indexOf('BRAK(') >= 0; varv++){
+    s = s.replace(/BRAK\(([^()]*)\)\(([^()]*)\)/g, function(m, num, den){
+      return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + num + '</span>'
+        + '<span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + den + '</span></span>';
+    });
+  }
+  return s;
 }
 // Potens-formatterare: bas^exp → bas<sup>exp</sup>. Provbyggaren saknade denna (bara brakUt fanns), så
 // varje test-sträng med literalt ^ renderades rått (6^2, 0,1^3, ·10^18). ^ förekommer här BARA som
