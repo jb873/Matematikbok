@@ -354,7 +354,7 @@ function bladHTML(blad){
         html += '<span class="ovn-label">' + bokstav + ')</span>';
         html += '<span class="ovn-text ovn-num">' + rad.tal + ' =</span>';
         html += '<input class="ovn-in bred" data-faktor="' + rad.tal + '" data-antal="' + rad.antal
-          + '" inputmode="text" autocomplete="off" placeholder="' + (rad.antal===2?'två faktorer':'tre faktorer') + '">';   // platshållare: ledning, ej exempel (facit-läcka borttagen)
+          + '" inputmode="text" autocomplete="off">';   // platshållare: ledning, ej exempel (facit-läcka borttagen)
         html += '</div>';
         return;
       }
@@ -362,7 +362,7 @@ function bladHTML(blad){
       if(rad.typ === 'forklara'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:stretch;gap:8px;">';
         html += '<textarea class="prob-kladd" data-forklara="' + encodeURIComponent(rad.facit)
-          + '" rows="3" placeholder="Skriv din förklaring här..."></textarea>';
+          + '" rows="3"></textarea>';
         html += '</div>';
         return;
       }
@@ -403,7 +403,7 @@ function bladHTML(blad){
         html += '<span class="ovn-label">' + bokstav + ')</span>';
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         html += '<input class="ovn-in bred" data-intmin="' + rad.min + '" data-intmax="' + rad.max
-          + '" data-exkl="' + (rad.exkl ? '1' : '0') + '" inputmode="decimal" autocomplete="off" placeholder="ditt tal">';
+          + '" data-exkl="' + (rad.exkl ? '1' : '0') + '" inputmode="decimal" autocomplete="off">';
         html += '</div>';
         return;
       }
@@ -428,7 +428,7 @@ function bladHTML(blad){
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         var accept = (rad.accept || [rad.svar]).join('|');
         html += '<input class="ovn-in bred" data-fritext="' + encodeURIComponent(accept)
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="svar">';
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
         html += '</div>';
         return;
       }
@@ -442,7 +442,7 @@ function bladHTML(blad){
         rad.ordning.forEach(function(t, i){
           html += '<input class="ovn-in" data-ordna="' + rad.ordning[i].replace(/,/g,'.')
             + '" inputmode="decimal" autocomplete="off" style="width:74px;"'
-            + ' placeholder="' + (i+1) + ':a">';
+            + '>';
         });
         html += '</div></div>';
         return;
@@ -469,7 +469,7 @@ function bladHTML(blad){
         html += '</div>';
         html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
         html += '<textarea class="prob-kladd" rows="3" '
-          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
+          + '></textarea>';
         html += '<div class="prob-svar-rad">';
         html += '<span class="prob-label">Svar:</span>';
         html += '<input class="ovn-in" data-svar="' + rad.timmar + '" '
@@ -491,13 +491,14 @@ function bladHTML(blad){
         html += '</div>';
         html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
         html += '<textarea class="prob-kladd" rows="3" '
-          + 'placeholder="Skriv din uträkning här (för din egen del — rättas inte)"></textarea>';
+          + '></textarea>';
         html += '<div class="prob-svar-rad">';
         html += '<span class="prob-label">Svar:</span>';
         html += '<input class="ovn-in" data-svar="' + rad.svar + '" '
-          + 'inputmode="decimal" autocomplete="off" placeholder="tal">';
+          + 'inputmode="decimal" autocomplete="off">';
+        html += '<span class="prob-label">Enhet:</span>';   // namnet står FRAMFÖR rutan, inte i den
         html += '<input class="ovn-in enhet" data-enhet="' + rad.enhet + '" '
-          + 'inputmode="text" autocomplete="off" placeholder="enhet">';
+          + 'inputmode="text" autocomplete="off">';
         html += '</div>';
         html += '</div>';
         return;
@@ -623,7 +624,7 @@ function bladHTML(blad){
         // ak8-in-oms ger uttrycks-läge på den delade keypaden (+ · ( ) aktiva); data-oms = rättvärdet.
         if(harDubbelMinus(rad.vansterText)){
           html += '<input class="ovn-in bred ak8-in-oms" data-oms="' + rad.svar
-            + '" inputmode="text" autocomplete="off" placeholder="skriv om">';
+            + '" inputmode="text" autocomplete="off">';
           html += '<span class="ovn-text">=</span>';
         }
         html += '<input class="ovn-in" data-svar="' + rad.svar
@@ -632,10 +633,10 @@ function bladHTML(blad){
         // Skriv tal strikt mellan min och max. Två rutor som standard, en ruta om enkelt:true.
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         html += '<input class="ovn-in ovn-intervall" data-min="' + rad.min + '" data-max="' + rad.max
-          + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off" placeholder="ett tal">';
+          + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off">';
         if(!rad.enkelt){
           html += '<input class="ovn-in ovn-intervall" data-min="' + rad.min + '" data-max="' + rad.max
-            + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off" placeholder="ett till">';
+            + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off">';
         }
       } else if(rad.typ === 'uttryck'){
         // svaret är ett algebraiskt uttryck (rättas normaliserat)
@@ -647,7 +648,7 @@ function bladHTML(blad){
         }
         var acceptU = (rad.accept || [rad.svar]).join('|');
         html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(acceptU)
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'uttryck') + '">';
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
       } else if(rad.typ === 'forenkla'){
         // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
         // Rättas av AlgBrak.gradePoly — värde + skriven form, två åtskilda besked. data-vars öppnar
@@ -716,7 +717,7 @@ function bladHTML(blad){
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         var acceptT = (rad.accept || [rad.svar]).join('|');
         html += '<input class="ovn-in bred" data-nokeypad data-text="' + encodeURIComponent(acceptT)
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'svar med ord') + '">';
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
       } else if(rad.typ === 'bild'){
         // SVG-bild + uttrycks- eller numeriskt svar
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
@@ -726,11 +727,11 @@ function bladHTML(blad){
         if(rad.svarTyp === 'uttryck'){
           var accB = (rad.accept || [rad.svar]).join('|');
           html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(accB)
-            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'uttryck') + '">';
+            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
         } else if(rad.svarTyp === 'text'){
           var accBt = (rad.accept || [rad.svar]).join('|');
           html += '<input class="ovn-in bred" data-nokeypad data-text="' + encodeURIComponent(accBt)
-            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'svar med ord') + '">';
+            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
         } else {
           html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
         }
@@ -756,23 +757,23 @@ function bladHTML(blad){
         rad.led.forEach(function(led, li){
           var arSvar = (li === rad.led.length - 1);
           if(arSvar){
-            html += '<input class="ovn-in" data-svar="' + led.svar + '" inputmode="decimal" autocomplete="off" placeholder="svar" style="min-width:70px;">';
+            html += '<input class="ovn-in" data-svar="' + led.svar + '" inputmode="decimal" autocomplete="off" style="min-width:70px;">';
           } else {
             var acc = (led.accept || [led.visa]).join('|');
             html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(acc)
-              + '" data-visa="' + led.visa + '" inputmode="text" autocomplete="off" placeholder="led" style="min-width:96px;">';
+              + '" data-visa="' + led.visa + '" inputmode="text" autocomplete="off" style="min-width:96px;">';
             html += '<span class="ovn-text" style="margin:0 3px;">=</span>';
           }
         });
       } else if(rad.typ === 'text'){
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         html += '<input class="ovn-in bred" data-svar="' + rad.svar
-          + '" inputmode="decimal" autocomplete="off" placeholder="svar">';
+          + '" inputmode="decimal" autocomplete="off">';
       } else if(rad.typ === 'term'){
         // Dela upp ett tal i summa av termer – godtar alla korrekta uppdelningar
         html += '<span class="ovn-text" style="min-width:140px;">' + rad.fraga + '</span>';
         html += '<input class="ovn-in bred" data-term="' + rad.summa + '" data-antal="' + (rad.antal||2)
-          + '" inputmode="text" autocomplete="off" placeholder="två termer">';   // platshållare: ledning, ej exempel (10+8=18 var facit-läcka)
+          + '" inputmode="text" autocomplete="off">';   // platshållare: ledning, ej exempel (10+8=18 var facit-läcka)
       } else if(rad.typ === 'tvatal'){
         // Två tal i valfri ordning
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
@@ -792,7 +793,7 @@ function bladHTML(blad){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         html += '<span class="ovn-text" style="margin:0 2px;">' + mellanTecken + '</span>';
         html += '<input class="ovn-in bred" data-mellan="' + rad.mellan
-          + '" inputmode="text" autocomplete="off" placeholder="överslag">';
+          + '" inputmode="text" autocomplete="off">';
         html += '<span class="ovn-text">=</span>';
         html += '<input class="ovn-in" data-svar="' + rad.svar
           + '" inputmode="decimal" autocomplete="off">';
@@ -806,10 +807,10 @@ function bladHTML(blad){
         steg.forEach(function(st, si){
           var arSista = (si === steg.length - 1);
           html += '<div class="prio-steg">';
-          html += '<input class="ovn-in prio-vl" data-vl="' + st.vlValue + '" inputmode="text" autocomplete="off" placeholder="förenkla">';
+          html += '<input class="ovn-in prio-vl" data-vl="' + st.vlValue + '" inputmode="text" autocomplete="off">';
           html += '<span class="prio-eq">=</span>';
           if(arSista){
-            html += '<input class="ovn-in prio-svar" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off" placeholder="svar">';
+            html += '<input class="ovn-in prio-svar" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
           } else {
             html += '<span class="prio-tom"></span>';
           }
@@ -822,7 +823,7 @@ function bladHTML(blad){
         // [Vänster]  = [mellanled-input]  = [svar-input]
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         html += '<input class="ovn-in bred" data-mellan="' + rad.mellan
-          + '" inputmode="text" autocomplete="off" placeholder="mellanled">';
+          + '" inputmode="text" autocomplete="off">';
         html += '<span class="ovn-text">=</span>';
         html += '<input class="ovn-in" data-svar="' + rad.svar
           + '" inputmode="decimal" autocomplete="off">';

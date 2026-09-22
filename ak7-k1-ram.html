@@ -5769,7 +5769,7 @@ function renderKompisar(body, backFn){
     body.innerHTML = '<div class="exercise-card">'
       + exerciseHeader('Tiokompisar och hundrakompisar', hint)
       + '<div class="rakna-tal">' + fragetext + '</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="kompis-input" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="?"></div>'
+      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="kompis-input" inputmode="numeric" maxlength="3" autocomplete="off"></div>'
       + '<div class="tabell-feedback" id="kompis-fb"></div>'
       + keypadHTML([])
       + '<div class="tabell-progress">Tal ' + (idx+1) + ' av ' + omgang.length + ' · ' + right + ' rätt'
@@ -5871,7 +5871,7 @@ function renderDelaUpp(body, backFn){
         + '<div class="mult-metod-instr">Dela upp talet <strong>' + t.mal + '</strong> i ' + ordAntal + ' termer.</div>'
         + '<div class="mult-rad-wrap">'
           + '<span class="mult-rad-fast">' + t.mal + ' =</span>'
-          + '<input type="text" class="mult-rad-input" id="delaupp-input" autocomplete="off" placeholder="t.ex. ' + (t.antal===2?'7 + 5':'5 + 9 + 11') + '">'
+          + '<input type="text" class="mult-rad-input" id="delaupp-input" autocomplete="off">'
         + '</div>'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="delaupp-fb"></div>'
@@ -5980,7 +5980,7 @@ function renderAddEnrad(body, cfg, backFn){
         + '<div class="mult-metod-instr">' + cfg.instr + '</div>'
         + '<div class="rakna-svar-rad">'
           + '<span class="rakna-svar-fast">' + task.leftText + '</span>'
-          + '<input type="text" class="rakna-svar-input" id="adde-input" autocomplete="off" placeholder="' + cfg.placeholder + '">'
+          + '<input type="text" class="rakna-svar-input" id="adde-input" autocomplete="off">'
         + '</div>'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="adde-fb"></div>'
@@ -6090,11 +6090,11 @@ function renderKompisTre(body, cfg, backFn){
         + '<div class="mult-metod-instr">Fyll upp till det jämna talet: skriv det jämna talet, resten och svaret.</div>'
         + '<div class="kompis-tre-rad">'
           + '<span class="rakna-svar-fast">' + task.leftText + '</span>'
-          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="ktre-r1" inputmode="text" maxlength="6" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="ktre-r1" inputmode="text" maxlength="6" autocomplete="off">'
           + '<span class="kompis-tre-op">+</span>'
-          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="ktre-r2" inputmode="text" maxlength="6" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="ktre-r2" inputmode="text" maxlength="6" autocomplete="off">'
           + '<span class="kompis-tre-op">=</span>'
-          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="ktre-r3" inputmode="text" maxlength="7" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="ktre-r3" inputmode="text" maxlength="7" autocomplete="off">'
         + '</div>'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="ktre-fb"></div>'
@@ -6207,7 +6207,7 @@ function renderKompisFraga(body, cfg, backFn){
       + ((cfg.exempel && level === 1 && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="rakna-tal">' + task.fraga + '</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="kf-input" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="?"></div>'
+      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="kf-input" inputmode="numeric" maxlength="5" autocomplete="off"></div>'
       + '<div class="rakna-uppdela-feedback" id="kf-fb"></div>'
       + keypadHTML(cfg.ops)
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
@@ -6290,11 +6290,11 @@ function renderBrakMellanled(body, cfg, backFn){
         + '<div class="mult-metod-instr">Skriv båda talen i decimalform i mellanledet och räkna ut svaret.</div>'
         + '<div class="kompis-tre-rad">'
           + '<span class="rakna-svar-fast">' + task.leftText + '</span>'
-          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-o1" inputmode="text" maxlength="7" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-o1" inputmode="text" maxlength="7" autocomplete="off">'
           + '<span class="kompis-tre-op">−</span>'
-          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-o2" inputmode="text" maxlength="7" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-o2" inputmode="text" maxlength="7" autocomplete="off">'
           + '<span class="kompis-tre-op">=</span>'
-          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-sv" inputmode="text" maxlength="7" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="rakna-svar-input kompis-tre-in" id="brm-sv" inputmode="text" maxlength="7" autocomplete="off">'
         + '</div>'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="brm-fb"></div>'
@@ -6398,7 +6398,7 @@ function renderAddSingle(body, cfg, backFn){
       + ((cfg.exempel && level === 1 && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + task.display + ' =</span>'
-        + '<input type="text" class="rakna-svar-input" id="adds-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?"></div>'
+        + '<input type="text" class="rakna-svar-input" id="adds-input" inputmode="text" maxlength="16" autocomplete="off"></div>'
       + '<div class="rakna-uppdela-feedback" id="adds-fb"></div>'
       + keypadHTML(cfg.ops)
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
@@ -6478,7 +6478,7 @@ function renderRaknaSaknas(body, cfg, backFn){
       + ((cfg.exempel && uppgNr <= 2) ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + task.leftText + '</span>'
-        + '<input type="text" class="rakna-svar-input" id="saknas-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?" style="flex:0 0 auto;width:88px;text-align:center;">'
+        + '<input type="text" class="rakna-svar-input" id="saknas-input" inputmode="text" maxlength="16" autocomplete="off" style="flex:0 0 auto;width:88px;text-align:center;">'
         + '<span class="rakna-svar-fast">' + task.rightText + '</span></div>'
       + '<div class="rakna-uppdela-feedback" id="saknas-fb"></div>'
       + keypadHTML(cfg.ops)
@@ -6539,9 +6539,9 @@ function bdFracHTML(t, n){
 function bdDec(x){ return String(x).replace('.', ','); }
 // Bråk med två inmatningsrutor (täljare/nämnare)
 function bdFracInHTML(){
-  return '<span class="bd-frac-in"><input class="bd-cellin" id="bd-t" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="?">'
+  return '<span class="bd-frac-in"><input class="bd-cellin" id="bd-t" inputmode="numeric" maxlength="4" autocomplete="off">'
     + '<span class="bd-strk"></span>'
-    + '<input class="bd-cellin" id="bd-n" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="?"></span>';
+    + '<input class="bd-cellin" id="bd-n" inputmode="numeric" maxlength="4" autocomplete="off"></span>';
 }
 function bdSummary(right, total){
   var allt = right === total;
@@ -6607,7 +6607,7 @@ function renderBrakDecimal(body){
   renderBdDrill(body, {
     title:'Bråk → decimal', sub:'Skriv bråket i decimalform. Använd komma för decimaltecken.', koId:'bd-vaxla', ops:[','],
     gen:function(){ return window.BrakDecimalGen.genFracDec(); },
-    fraga:function(t){ return bdFracHTML(t.t, t.n) + '<span class="bd-eq">=</span><input type="text" class="rakna-svar-input bd-svarin" id="bd-a" inputmode="decimal" maxlength="10" autocomplete="off" placeholder="?">'; },
+    fraga:function(t){ return bdFracHTML(t.t, t.n) + '<span class="bd-eq">=</span><input type="text" class="rakna-svar-input bd-svarin" id="bd-a" inputmode="decimal" maxlength="10" autocomplete="off">'; },
     check:function(t, card){ var v = d3ParseNum(card.querySelector('#bd-a').value); return { ok: v !== null && Math.abs(v - t.svar) < 1e-9, facit: t.t + '/' + t.n + ' = ' + t.svarStr }; }
   });
 }
@@ -6635,8 +6635,8 @@ function renderForlangDec(body){
     title:'Förläng till hundradelar', sub:'Förläng bråket till hundradelar och skriv decimaltalet.', koId:'bd-forlang', ops:[','],
     gen:function(){ return window.BrakDecimalGen.genForlang(); },
     fraga:function(t){ return bdFracHTML(t.t, t.n) + '<span class="bd-eq">=</span>'
-      + '<span class="bd-frac-in"><input class="bd-cellin" id="bd-h" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="?"><span class="bd-strk"></span><span class="bd-nmn" style="line-height:1.4;">100</span></span>'
-      + '<span class="bd-eq">=</span><input type="text" class="rakna-svar-input bd-svarin" id="bd-a" inputmode="decimal" maxlength="10" autocomplete="off" placeholder="?">'; },
+      + '<span class="bd-frac-in"><input class="bd-cellin" id="bd-h" inputmode="numeric" maxlength="4" autocomplete="off"><span class="bd-strk"></span><span class="bd-nmn" style="line-height:1.4;">100</span></span>'
+      + '<span class="bd-eq">=</span><input type="text" class="rakna-svar-input bd-svarin" id="bd-a" inputmode="decimal" maxlength="10" autocomplete="off">'; },
     check:function(t, card){ var h = parseInt(card.querySelector('#bd-h').value, 10), d = d3ParseNum(card.querySelector('#bd-a').value);
       return { ok: !isNaN(h) && h === t.hundra && d !== null && Math.abs(d - t.dec) < 1e-9, facit: t.t + '/' + t.n + ' = ' + t.hundra + '/100 = ' + bdDec(t.dec) }; }
   });
@@ -6658,8 +6658,7 @@ function renderAddHuvudrakning(body){
     header:'Huvudräkning · tiokompisar', formagaKey:'rakna', koId:'add-rakna', scoreKey:'tiokompis',
     antal:6,
     sub:'Räkna i huvudet genom att flytta över till ett jämnt tiotal.',
-    instr:'Skriv mellanledet och svaret, t.ex. 10 + 5 = 15.',
-    placeholder:'t.ex. 10 + 5 = 15', ops:['+','='], backLabel:'Tillbaka till kategorier',
+    instr:'Skriv mellanledet och svaret, t.ex. 10 + 5 = 15.', ops:['+','='], backLabel:'Tillbaka till kategorier',
     exempel:'<strong>Så funkar det:</strong> Fyll först upp till ett jämnt tiotal.<br>'
       + '<span class="ex-rad">8 + 7 = 10 + 5 = 15</span><br>'
       + '<span class="ex-rad">28 + 7 = 30 + 5 = 35</span>',
@@ -6687,8 +6686,7 @@ function renderAddHuvudrakning(body){
   const BRAK = {
     header:'Huvudräkning · bråk och blandad form', formagaKey:'rakna', koId:'add-rakna', scoreKey:'brak',
     sub:'Gör om bråket till decimalform och addera sedan.',
-    instr:'Skriv om i decimalform och räkna, t.ex. 0,25 + 0,5 = 0,75.',
-    placeholder:'t.ex. 0,25 + 0,5 = 0,75', ops:['+',',','='], backLabel:'Tillbaka till kategorier',
+    instr:'Skriv om i decimalform och räkna, t.ex. 0,25 + 0,5 = 0,75.', ops:['+',',','='], backLabel:'Tillbaka till kategorier',
     exempel:'<strong>Så funkar det:</strong> Skriv bråket som decimaltal, addera sedan.<br>'
       + '<span class="ex-rad">1/4 + 0,5 = 0,25 + 0,5 = 0,75</span><br>'
       + '<span class="ex-rad">3/5 + 0,7 = 0,6 + 0,7 = 1,3</span>',
@@ -6831,8 +6829,7 @@ function renderAddMetoder(body){
   const TALSORTERNA = {
     header:'Metod · talsorterna var för sig', formagaKey:'metod', koId:'add-metoder', scoreKey:'talsorterna',
     sub:'Addera tiotalen för sig och entalen för sig, lägg sedan ihop.',
-    instr:'Skriv mellanledet och svaret, t.ex. 70 + 13 = 83.',
-    placeholder:'t.ex. 70 + 13 = 83', ops:['+','='], backLabel:'Tillbaka till metoder',
+    instr:'Skriv mellanledet och svaret, t.ex. 70 + 13 = 83.', ops:['+','='], backLabel:'Tillbaka till metoder',
     exempel:'<strong>Så funkar det:</strong> 47 + 36 → tiotal 40 + 30 = 70, ental 7 + 6 = 13.<br>'
       + '<span class="ex-rad">47 + 36 = 70 + 13 = 83</span><br>'
       + '<span class="ex-rad">58 + 27 = 70 + 15 = 85</span>',
@@ -6958,12 +6955,12 @@ function renderAddProblem(body){
         + '<div style="font-size:15px;line-height:1.6;color:var(--ink);margin-bottom:12px;">' + p.text + '</div>'
         + '<div class="prob-svar-rad">'
           + '<span style="font-size:14px;color:var(--ink-soft);">Svar:</span>'
-          + '<input type="text" class="prob-input" inputmode="text" maxlength="12" data-input="' + i + '" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="prob-input" inputmode="text" maxlength="12" data-input="' + i + '" autocomplete="off">'
           + '<span class="prob-enhet">' + p.enhet + '</span>'
           + '<button class="btn primary" data-check="' + i + '">Kontrollera</button>'
         + '</div>'
         + '<div class="prob-notes"><div class="prob-notes-rubrik">Räkna här</div>'
-          + '<textarea class="prob-notes-area" rows="4" placeholder="Ställ upp och räkna här"></textarea></div>'
+          + '<textarea class="prob-notes-area" rows="4"></textarea></div>'
         + '<div class="prob-feedback" id="prob-fb-' + i + '"></div>'
       + '</div>';
     }
@@ -7351,7 +7348,7 @@ function renderSubBegreppRakna(body){
         + '<div class="mult-metod-instr">Skriv ' + t.mal + ' som en differens med ' + ordAntal + ' termer. (' + exHint + ')</div>'
         + '<div class="rakna-svar-rad">'
           + '<span class="rakna-svar-fast">' + t.mal + ' =</span>'
-          + '<input type="text" class="rakna-svar-input" id="sub-du-input" autocomplete="off" placeholder="' + (t.antal===2?'9 − 5':'30 − 10 − 13') + '">'
+          + '<input type="text" class="rakna-svar-input" id="sub-du-input" autocomplete="off">'
         + '</div>'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="sub-du-fb"></div>'
@@ -7566,7 +7563,7 @@ function renderSubEnrad(body, cfg, backFn){
       +renderScoreBarSimple(results.filter(function(x){return x;}).length,results.filter(function(x){return !x;}).length,omgang.length,idx)
       +'<div class="mult-metod-uppg"><div class="mult-metod-instr">'+cfg.instr+'</div>'
         +'<div class="rakna-svar-rad"><span class="rakna-svar-fast">'+task.leftText+'</span>'
-          +'<input type="text" class="rakna-svar-input" id="sube-input" autocomplete="off" placeholder="'+cfg.placeholder+'"></div></div>'
+          +'<input type="text" class="rakna-svar-input" id="sube-input" autocomplete="off"></div></div>'
       +'<div class="rakna-uppdela-feedback" id="sube-fb"></div>'
       +keypadHTML(cfg.ops)
       +'<div class="kp-hint">Skriv hela uträkningen på raden. Använd tangentbordet eller knapparna.</div>'
@@ -7616,8 +7613,7 @@ function renderSubMetoder(body){
   const NEGATIVA = {
     header:'Metod · subtraktion med negativa tal', formagaKey:'metod', koId:'sub-metoder', scoreKey:'negativa',
     sub:'Den andra termen är negativ. Skriv om och visa mellanledet.',
-    instr:'Skriv om och visa mellanledet, t.ex. (−9) − (−8) = (−9) + 8 = −1.',
-    placeholder:'t.ex. (−9) + 8 = −1', ops:['-','+','(',')',' '], backLabel:'Tillbaka till metoder',
+    instr:'Skriv om och visa mellanledet, t.ex. (−9) − (−8) = (−9) + 8 = −1.', ops:['-','+','(',')',' '], backLabel:'Tillbaka till metoder',
     exempel:'<strong>Så funkar det:</strong> Att subtrahera ett negativt tal = att addera dess positiva värde.<br>'
       + '<span class="ex-rad">6 − (−3) = 6 + 3 = 9</span><br>'
       + '<span class="ex-rad">(−7) − 6 = −13</span><br>'
@@ -7733,12 +7729,12 @@ function renderSubProblem(body){
         + '<div style="font-size:15px;line-height:1.6;color:var(--ink);margin-bottom:12px;">' + p.text + '</div>'
         + '<div class="prob-svar-rad">'
           + '<span style="font-size:14px;color:var(--ink-soft);">Svar:</span>'
-          + '<input type="text" class="prob-input" inputmode="text" maxlength="12" data-input="' + i + '" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="prob-input" inputmode="text" maxlength="12" data-input="' + i + '" autocomplete="off">'
           + '<span class="prob-enhet">' + p.enhet + '</span>'
           + '<button class="btn primary" data-check="' + i + '">Kontrollera</button>'
         + '</div>'
         + '<div class="prob-notes"><div class="prob-notes-rubrik">Räkna här</div>'
-          + '<textarea class="prob-notes-area" rows="4" placeholder="Ställ upp och räkna här"></textarea></div>'
+          + '<textarea class="prob-notes-area" rows="4"></textarea></div>'
         + '<div class="prob-feedback" id="prob-fb-' + i + '"></div>'
       + '</div>';
     }
@@ -8428,8 +8424,8 @@ function negCalcEngine(body, cfg, backFn){
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="neg-fraga">' + task.q + '</div>'
       + (oms
-          ? '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-oms" inputmode="text" maxlength="16" autocomplete="off" placeholder="skriv om" style="width:130px;"><span class="ovn-text" style="margin:0 8px;">=</span><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off" placeholder="?"></div>'
-          : '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off" placeholder="?"></div>')
+          ? '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-oms" inputmode="text" maxlength="16" autocomplete="off" style="width:130px;"><span class="ovn-text" style="margin:0 8px;">=</span><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off"></div>'
+          : '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="neg-input" inputmode="text" maxlength="9" autocomplete="off"></div>')
       + '<div class="rakna-uppdela-feedback" id="neg-fb"></div>'
       + keypadHTML(cfg.keypadOps || ['−'])
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'

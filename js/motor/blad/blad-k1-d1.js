@@ -276,16 +276,16 @@ var EGEN_A = {
       {typ:'valruta', flera:true, fraga:'… 5', alt:['27','72','70','63','45','98','100','125','3','568','73','490'], ratt:['70','45','100','125','490']}
     ]},
     {rubrik:'Faktorisera talet i två faktorer', rader:[
-      {typ:'uttryck', likhet:true, fraga:'15', svar:'3·5', accept:['3·5','5·3'], placeholder:'två faktorer'},
-      {typ:'uttryck', likhet:true, fraga:'27', svar:'3·9', accept:['3·9','9·3'], placeholder:'två faktorer'},
-      {typ:'uttryck', likhet:true, fraga:'36', svar:'6·6', accept:['6·6','4·9','9·4','3·12','12·3','2·18','18·2'], placeholder:'två faktorer'},
-      {typ:'uttryck', likhet:true, fraga:'12', svar:'3·4', accept:['3·4','4·3','2·6','6·2'], placeholder:'två faktorer'}
+      {typ:'uttryck', likhet:true, fraga:'15', svar:'3·5', accept:['3·5','5·3']},
+      {typ:'uttryck', likhet:true, fraga:'27', svar:'3·9', accept:['3·9','9·3']},
+      {typ:'uttryck', likhet:true, fraga:'36', svar:'6·6', accept:['6·6','4·9','9·4','3·12','12·3','2·18','18·2']},
+      {typ:'uttryck', likhet:true, fraga:'12', svar:'3·4', accept:['3·4','4·3','2·6','6·2']}
     ]},
     {rubrik:'Vilka primfaktorer saknas i faktoriseringen?', rader:[
-      {typ:'uttryck', fraga:'28 = 2 · 2 · ___', svar:'7', accept:['7'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'60 = 2 · 2 · ___ · 5', svar:'3', accept:['3'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'45 = ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
-      {typ:'uttryck', fraga:'90 = 2 · ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'}
+      {typ:'uttryck', fraga:'28 = 2 · 2 · ___', svar:'7', accept:['7']},
+      {typ:'uttryck', fraga:'60 = 2 · 2 · ___ · 5', svar:'3', accept:['3']},
+      {typ:'uttryck', fraga:'45 = ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3']},
+      {typ:'uttryck', fraga:'90 = 2 · ___ · ___ · 5  (skriv båda)', svar:'3·3', accept:['3·3']}
     ]},
     {rubrik:'Vilket tal har faktoriserats?', rader:[
       {typ:'enkel', vansterText:'2 · 2 · 2 · 2', svar:16},
@@ -302,14 +302,14 @@ var EGEN_A = {
       {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 3 och 5:', alt:['75','85','93','150','420','5','211'], ratt:['75','150','420']}
     ]},
     {rubrik:'Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
-      {typ:'uttryck', likhet:true, fraga:'18', svar:'2·3·3', accept:['2·3·3','3·2·3','3·3·2'], placeholder:'primfaktorer'},
-      {typ:'uttryck', likhet:true, fraga:'32', svar:'2·2·2·2·2', accept:['2·2·2·2·2'], placeholder:'primfaktorer'},
-      {typ:'uttryck', likhet:true, fraga:'56', svar:'2·2·2·7', accept:['2·2·2·7','7·2·2·2','2·7·2·2','2·2·7·2'], placeholder:'primfaktorer'}
+      {typ:'uttryck', likhet:true, fraga:'18', svar:'2·3·3', accept:['2·3·3','3·2·3','3·3·2']},
+      {typ:'uttryck', likhet:true, fraga:'32', svar:'2·2·2·2·2', accept:['2·2·2·2·2']},
+      {typ:'uttryck', likhet:true, fraga:'56', svar:'2·2·2·7', accept:['2·2·2·7','7·2·2·2','2·7·2·2','2·2·7·2']}
     ]},
     {rubrik:'Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
-      {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
-      {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
-      {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'}
+      {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600']},
+      {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600']},
+      {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600']}
     ]}
   ]
 };
@@ -329,16 +329,16 @@ var EGEN_B = {
       {typ:'valruta', flera:true, fraga:'… 5', alt:['33','84','55','91','60','77','200','135','7','432','89','310'], ratt:['55','60','200','135','310']}
     ]},
     {rubrik:'Faktorisera talet i två faktorer', rader:[
-      {typ:'uttryck', likhet:true, fraga:'21', svar:'3·7', accept:['3·7','7·3'], placeholder:'två faktorer'},
-      {typ:'uttryck', likhet:true, fraga:'32', svar:'4·8', accept:['4·8','8·4','2·16','16·2'], placeholder:'två faktorer'},
-      {typ:'uttryck', likhet:true, fraga:'24', svar:'4·6', accept:['4·6','6·4','3·8','8·3','2·12','12·2'], placeholder:'två faktorer'},
-      {typ:'uttryck', likhet:true, fraga:'18', svar:'2·9', accept:['2·9','9·2','3·6','6·3'], placeholder:'två faktorer'}
+      {typ:'uttryck', likhet:true, fraga:'21', svar:'3·7', accept:['3·7','7·3']},
+      {typ:'uttryck', likhet:true, fraga:'32', svar:'4·8', accept:['4·8','8·4','2·16','16·2']},
+      {typ:'uttryck', likhet:true, fraga:'24', svar:'4·6', accept:['4·6','6·4','3·8','8·3','2·12','12·2']},
+      {typ:'uttryck', likhet:true, fraga:'18', svar:'2·9', accept:['2·9','9·2','3·6','6·3']}
     ]},
     {rubrik:'Vilka primfaktorer saknas i faktoriseringen?', rader:[
-      {typ:'uttryck', fraga:'20 = 2 · 2 · ___', svar:'5', accept:['5'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'84 = 2 · 2 · ___ · 7', svar:'3', accept:['3'], placeholder:'tal'},
-      {typ:'uttryck', fraga:'63 = ___ · ___ · 7  (skriv båda)', svar:'3·3', accept:['3·3'], placeholder:'två tal'},
-      {typ:'uttryck', fraga:'150 = 2 · 3 · ___ · ___  (skriv båda)', svar:'5·5', accept:['5·5'], placeholder:'två tal'}
+      {typ:'uttryck', fraga:'20 = 2 · 2 · ___', svar:'5', accept:['5']},
+      {typ:'uttryck', fraga:'84 = 2 · 2 · ___ · 7', svar:'3', accept:['3']},
+      {typ:'uttryck', fraga:'63 = ___ · ___ · 7  (skriv båda)', svar:'3·3', accept:['3·3']},
+      {typ:'uttryck', fraga:'150 = 2 · 3 · ___ · ___  (skriv båda)', svar:'5·5', accept:['5·5']}
     ]},
     {rubrik:'Vilket tal har faktoriserats?', rader:[
       {typ:'enkel', vansterText:'2 · 2 · 2 · 3', svar:24},
@@ -355,14 +355,14 @@ var EGEN_B = {
       {typ:'valruta', flera:true, fraga:'Markera alla som är delbara med både 3 och 5:', alt:['60','95','81','180','330','5','127'], ratt:['60','180','330']}
     ]},
     {rubrik:'Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', rader:[
-      {typ:'uttryck', likhet:true, fraga:'24', svar:'2·2·2·3', accept:['2·2·2·3','3·2·2·2','2·3·2·2','2·2·3·2'], placeholder:'primfaktorer'},
-      {typ:'uttryck', likhet:true, fraga:'40', svar:'2·2·2·5', accept:['2·2·2·5','5·2·2·2','2·5·2·2','2·2·5·2'], placeholder:'primfaktorer'},
-      {typ:'uttryck', likhet:true, fraga:'60', svar:'2·2·3·5', accept:['2·2·3·5','2·2·5·3','3·2·2·5','5·2·2·3','2·3·2·5','2·5·2·3'], placeholder:'primfaktorer'}
+      {typ:'uttryck', likhet:true, fraga:'24', svar:'2·2·2·3', accept:['2·2·2·3','3·2·2·2','2·3·2·2','2·2·3·2']},
+      {typ:'uttryck', likhet:true, fraga:'40', svar:'2·2·2·5', accept:['2·2·2·5','5·2·2·2','2·5·2·2','2·2·5·2']},
+      {typ:'uttryck', likhet:true, fraga:'60', svar:'2·2·3·5', accept:['2·2·3·5','2·2·5·3','3·2·2·5','5·2·2·3','2·3·2·5','2·5·2·3']}
     ]},
     {rubrik:'Skriv tre tal som är delbara med 2, 3, 4 och 5', rader:[
-      {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
-      {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'},
-      {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600'], placeholder:'ett tal'}
+      {typ:'uttryck', fraga:'Tal 1 (delbart med 2, 3, 4 och 5):', svar:'60', accept:['60','120','180','240','300','360','420','480','540','600']},
+      {typ:'uttryck', fraga:'Tal 2:', svar:'120', accept:['60','120','180','240','300','360','420','480','540','600']},
+      {typ:'uttryck', fraga:'Tal 3:', svar:'180', accept:['60','120','180','240','300','360','420','480','540','600']}
     ]}
   ]
 };

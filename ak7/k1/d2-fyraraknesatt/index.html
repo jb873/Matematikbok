@@ -402,7 +402,7 @@
             var pu=parseUpp(rad.vansterText);
             h+='<div class="ovn-rad ova-upp-rad"><span class="ovn-label">'+L+'</span>'
               +'<span class="ovn-text ovn-num">'+rad.vansterText+'</span>'
-              +'<input class="ovn-in ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:100px;">'
+              +'<input class="ovn-in ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" style="width:100px;">'
               +(pu?'<button type="button" class="ova-upp-toggle" data-a="'+pu.a+'" data-b="'+pu.b+'" data-op="'+pu.op+'" data-dec="'+pu.dec+'">Räkna här ▾</button>':'')
               +'</div>'
               +(pu?'<div class="ova-upp-block" hidden></div>':'');
@@ -416,7 +416,7 @@
               +'<span class="ovn-text ovn-num">'+rad.vansterText+'</span>'
               +'<span class="ova-mellan-grupp" data-svar="'+rad.svar+'" data-antal="'+spec.antal+'" data-typ="'+spec.typ+'" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">'+boxar+'</span>'
               +'<span class="ovn-text">=</span>'
-              +'<input class="ovn-in ova-slutsvar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="width:84px;"></div>';
+              +'<input class="ovn-in ova-slutsvar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" style="width:84px;"></div>';
           }
         } else if(rad.typ==='lucka'){
           var bitar=String(rad.text).split('__');
@@ -427,7 +427,7 @@
         } else if(rad.typ==='text'){
           h+='<div class="ovn-rad"><span class="ovn-label">'+L+'</span>'
             +'<span class="ovn-text" style="flex:1;min-width:160px;">'+rad.fraga+'</span>'
-            +'<input class="ovn-in bred ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar"></div>';
+            +'<input class="ovn-in bred ova-svar" data-svar="'+rad.svar+'" inputmode="decimal" autocomplete="off"></div>';
         } else if(rad.typ==='term'){
           var tn=rad.antal||2, tboxar='';
           for(var ti=0;ti<tn;ti++){

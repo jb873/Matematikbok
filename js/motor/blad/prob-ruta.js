@@ -47,7 +47,7 @@
   // ── RENDER ──
   function boxHtml(n){ return '<div class="prob-box">' + AK8_UI.ansCell('b' + n) + '</div>'; }
   function enhetHtml(e){
-    if(e.typ === 'konkret') return '<input class="ak8-in prob-enhet" inputmode="text" autocomplete="off">';
+    if(e.typ === 'konkret') return '<span class="prob-label prob-enhet-fore">Enhet:</span><input class="ak8-in prob-enhet" inputmode="text" autocomplete="off">';
     if(e.typ === 'andel') return '<span class="prob-enhet-label">' + e.label + '</span>';
     return '';
   }
@@ -61,8 +61,7 @@
   function render(mount, config){
     var probs = (config && config.problem) || PROBLEM, nod = (config && config.nod) || 'formaga:likhetstecken';
     var html = '<div class="prob-wrap"><h2 class="prob-rubrik">Problemlösning</h2>'
-      + '<p class="prob-intro">Skriv hela uträkningen själv i beräknings-rutan – siffror, <b>+ − · /</b>, bråk-byggaren och likhetstecken <b>=</b>. '
-      + 'Behöver du flera steg: tryck <em>skapa ruta under</em>. Alla korrekta vägar godtas.</p>';
+      + '';   // ingen instruktion i öva (order 2026-09-22): rubriken och etiketterna Beräkning:/Svar: säger vad rutorna är
     probs.forEach(function(p, pi){
       html += '<div class="prob-kort" data-pi="' + pi + '">'
         + '<div class="prob-text"><span class="prob-nr">' + (pi + 1) + '.</span> ' + p.text + '</div>'
