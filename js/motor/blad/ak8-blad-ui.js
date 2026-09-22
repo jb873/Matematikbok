@@ -123,7 +123,7 @@
   }
 
   // ── UTTRYCKS-CELL (text + inbäddade bråk/potenser; byggs via keypadens byggar-knappar) ──
-  function txtHTML(ph){ return '<input class="ak8-in ak8-exprtxt" inputmode="text" autocomplete="off"' + (ph ? ' placeholder="' + ph + '"' : '') + '>'; }
+  function txtHTML(ph){ return '<input class="ak8-in ak8-exprtxt" inputmode="text" autocomplete="off"' + (ph ? '' : '') + '>'; }
   function fracHTML(){ return '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt" inputmode="text" autocomplete="off"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn" inputmode="text" autocomplete="off"></span></span>'; }
   function potHTML(){ return '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" inputmode="text" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"></sup></span>'; }
   function ansCell(role, ph){ return '<span class="ak8-cell" data-r="' + role + '"><span class="ak8-expr">' + txtHTML(ph) + '</span></span>'; }
@@ -135,8 +135,8 @@
     // Fältbredden styrs av grow() ur platshållar-längden (ak8-in-sm-grenen) → "uttryck" (mellanled) blir
     // bredare än "tal"/"n" (svar) av sig självt; ingen inline-bredd behövs.
     return '<span class="ak8-cell" data-r="' + role + '"><span class="ak8-expr">'
-      + '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" inputmode="text" autocomplete="off"' + (basePh ? ' placeholder="' + basePh + '"' : '') + '>'
-      + '<sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"' + (expPh ? ' placeholder="' + expPh + '"' : '') + '></sup></span>'
+      + '<span class="pot ak8-pot"><input class="ak8-in ak8-in-sm ak8-pbase" inputmode="text" autocomplete="off"' + (basePh ? '' : '') + '>'
+      + '<sup><input class="ak8-in ak8-in-sm ak8-pexp" inputmode="text" autocomplete="off"' + (expPh ? '' : '') + '></sup></span>'
       + '</span></span>';
   }
   // ── STAPLAT KOMPLEX-BRÅK (DELAD byggsten) — ett bråk vars täljare OCH nämnare själva är

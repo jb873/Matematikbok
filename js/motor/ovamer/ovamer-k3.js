@@ -101,9 +101,9 @@ function tolkaEngine(kategori){
     if(task.svarTyp==='tal'){
       svarFalt='<input class="ex-in" id="svar" inputmode="decimal" autocomplete="off"><span class="svar-fast">kr</span>';
     } else if(task.svarTyp==='uttryck'){
-      svarFalt='<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="uttryck">';
+      svarFalt='<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off">';
     } else {
-      svarFalt='<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="svar med ord" style="min-width:240px;">';
+      svarFalt='<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" style="min-width:240px;">';
     }
     app.innerHTML='<div class="view"><div class="exercise-card">'
       +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2>'
@@ -287,10 +287,10 @@ function beraknaEngine(){
     task.led.forEach(function(led, li){
       var arSvar=(li===task.led.length-1);
       if(arSvar){
-        ledHtml+='<input class="ex-in" data-svar="'+led.svar+'" inputmode="decimal" autocomplete="off" placeholder="svar" style="min-width:74px;">';
+        ledHtml+='<input class="ex-in" data-svar="'+led.svar+'" inputmode="decimal" autocomplete="off" style="min-width:74px;">';
       } else {
         ledHtml+='<input class="ex-in bred berakna-led" data-form="'+encodeURIComponent((led.accept||[led.visa]).join('|'))
-          +'" data-visa="'+led.visa+'" inputmode="text" autocomplete="off" placeholder="led" style="min-width:104px;">';
+          +'" data-visa="'+led.visa+'" inputmode="text" autocomplete="off" style="min-width:104px;">';
         ledHtml+='<span class="svar-fast" style="margin:0 2px;">=</span>';
       }
     });
@@ -437,7 +437,7 @@ var FORENKLA_FIGURER = [
 ];
 function genForenklaOmkrets(level){
   var f = (level===1? FORENKLA_FIGURER[Math.random()<0.5?0:1] : randPick(FORENKLA_FIGURER))();
-  return {svg:f.svg, uppstallning:f.uppstallning, svar:f.visa, accept:[f.facit], placeholder:f.uppstallning};
+  return {svg:f.svg, uppstallning:f.uppstallning, svar:f.visa, accept:[f.facit]};
 }
 
 // Generator: bråk-uttryck
@@ -493,14 +493,14 @@ function forenklaEngine(kategori){
     if(kategori==='omkrets'){
       kropp='<div class="emoji-bild" style="padding:14px;">'+task.svg+'</div>'
         +'<div class="svar-rad"><span class="svar-fast">Omkrets =</span>'
-        +'<input class="ex-in bred forenkla-led" id="mellan" data-form="'+encodeURIComponent(task.accept.join('|'))+'" inputmode="text" autocomplete="off" placeholder="uppställning" style="min-width:170px;">'
+        +'<input class="ex-in bred forenkla-led" id="mellan" data-form="'+encodeURIComponent(task.accept.join('|'))+'" inputmode="text" autocomplete="off" style="min-width:170px;">'
         +'<span class="svar-fast">=</span>'
-        +'<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="förenkla" style="min-width:120px;"></div>';
+        +'<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" style="min-width:120px;"></div>';
     } else {
       var fr = task.fragaHtml || task.fraga;
       kropp='<div class="ex-fraga ex-num" style="font-size:21px;">'+fr+'</div>'
         +'<div class="svar-rad"><span class="svar-fast">=</span>'
-        +'<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" placeholder="förenkla" style="min-width:150px;"></div>';
+        +'<input class="ex-in bred" id="svar" inputmode="text" autocomplete="off" style="min-width:150px;"></div>';
     }
     app.innerHTML='<div class="view"><div class="exercise-card">'
       +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2><div class="ex-sub">'+sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'
@@ -763,17 +763,17 @@ function skrivaEngine(kategori){
     var kropp;
     if(kategori==='text'){
       kropp='<div class="ex-fraga">'+task.fraga+'</div>'
-        +'<div class="svar-rad"><input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" placeholder="skriv ett uttryck" style="min-width:160px;"></div>';
+        +'<div class="svar-rad"><input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" style="min-width:160px;"></div>';
     } else if(kategori==='figur'){
       kropp='<div class="emoji-bild" style="padding:14px;">'+task.svg+'</div>'
         +'<div class="svar-rad"><span class="svar-fast">Omkrets =</span>'
-        +'<input class="ex-in bred skriva-led" id="mellan" inputmode="text" autocomplete="off" placeholder="skriv ett uttryck" style="min-width:150px;">'
+        +'<input class="ex-in bred skriva-led" id="mellan" inputmode="text" autocomplete="off" style="min-width:150px;">'
         +'<span class="svar-fast">=</span>'
-        +'<input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" placeholder="förenkla" style="min-width:120px;"></div>';
+        +'<input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" style="min-width:120px;"></div>';
     } else {
       kropp='<div class="emoji-bild" style="padding:14px;">'+task.svg+'</div>'
         +'<div class="svar-rad"><span class="svar-fast">Röda sträckan =</span>'
-        +'<input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" placeholder="skriv ett uttryck" style="min-width:140px;"></div>';
+        +'<input class="ex-in bred skriva-led" id="svar" inputmode="text" autocomplete="off" style="min-width:140px;"></div>';
     }
     app.innerHTML='<div class="view"><div class="exercise-card">'
       +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2><div class="ex-sub">'+sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'

@@ -303,7 +303,7 @@ function renderUppstallningAdd(body, metod, backFn){
       const pos = nastaMinne;
       const cell = body.querySelector('[data-carrycell="' + pos + '"]');
       if(!cell) return;
-      cell.innerHTML = '<input type="text" class="carr-input" data-pos="' + pos + '" inputmode="numeric" maxlength="1" placeholder="">';
+      cell.innerHTML = '<input type="text" class="carr-input" data-pos="' + pos + '" inputmode="numeric" maxlength="1">';
       const inp = cell.querySelector('.carr-input');
       inp.addEventListener('input', () => {
         inp.value = inp.value.replace(/[^0-9]/g,'');
@@ -416,7 +416,7 @@ function renderTalsorternaAdd(body, metod, backFn){
     if(!row) return;
     row.innerHTML = terms.map((val, i) =>
       (i > 0 ? '<span class="ts-op ts-plus-sep">+</span>' : '') +
-      '<input type="text" class="ts-term-input" data-idx="' + i + '" inputmode="decimal" maxlength="7" value="' + val + '" placeholder="___">'
+      '<input type="text" class="ts-term-input" data-idx="' + i + '" inputmode="decimal" maxlength="7" value="' + val + '">'
     ).join('');
 
     row.querySelectorAll('.ts-term-input').forEach((inp, i) => {
@@ -478,7 +478,7 @@ function renderTalsorternaAdd(body, metod, backFn){
         '</div>' +
         '<div class="ts-rad-inputs" id="ts-inputs-row"></div>' +
         '<span class="ts-op ts-eq-final">=</span>' +
-        '<input type="text" class="ts-ans-input" id="ts-final-ans" inputmode="decimal" maxlength="8" placeholder="?">' +
+        '<input type="text" class="ts-ans-input" id="ts-final-ans" inputmode="decimal" maxlength="8">' +
       '</div>' +
       '<div class="ts-snabbknappar">' +
         '<button class="ts-snabb-btn" id="ts-plus-btn">+ <span style="font-size:11px;opacity:.7">lägg till term</span></button>' +
@@ -608,7 +608,7 @@ function renderFlyttaOver(body, metod, backFn){
         + '</div>' : '')
         + '<div class="om-flytt-rad" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;font-size:14px;color:var(--ink-soft);">'
           + '<span>Flytta</span>'
-          + '<input type="text" class="om-u-input" id="om-flytt" inputmode="decimal" maxlength="4" placeholder="?" style="width:56px;">'
+          + '<input type="text" class="om-u-input" id="om-flytt" inputmode="decimal" maxlength="4" style="width:56px;">'
           + '<span>från det ena talet till det andra.</span>'
         + '</div>'
         + '<div class="om-uttryck-rad" style="justify-content:center;">'
@@ -616,11 +616,11 @@ function renderFlyttaOver(body, metod, backFn){
           + '<span class="om-u-op">+</span>'
           + '<span class="om-u-num">' + fmt(b) + '</span>'
           + '<span class="om-u-op">=</span>'
-          + '<input type="text" class="om-u-input" id="ml-a" inputmode="decimal" maxlength="6" placeholder="___">'
+          + '<input type="text" class="om-u-input" id="ml-a" inputmode="decimal" maxlength="6">'
           + '<span class="om-u-op">+</span>'
-          + '<input type="text" class="om-u-input" id="ml-b" inputmode="decimal" maxlength="6" placeholder="___">'
+          + '<input type="text" class="om-u-input" id="ml-b" inputmode="decimal" maxlength="6">'
           + '<span class="om-u-op">=</span>'
-          + '<input type="text" class="om-u-input om-u-input-sum" id="ml-sum" inputmode="decimal" maxlength="7" placeholder="?">'
+          + '<input type="text" class="om-u-input om-u-input-sum" id="ml-sum" inputmode="decimal" maxlength="7">'
         + '</div>'
         + '<div class="rakna-uppdela-feedback" id="fb-fo"></div>'
         + keypadHTML([])
@@ -1067,7 +1067,7 @@ function renderOkaMinska(body, metod, backFn){
 
             // Rad 1: annot ovanför a−b, sedan tomt
             + '<div class="om-sub-annot-cell">'
-              + '<input type="text" class="om-annot-input" id="om-annot" placeholder="+?" maxlength="4" autocomplete="off">'
+              + '<input type="text" class="om-annot-input" id="om-annot" maxlength="4" autocomplete="off">'
             + '</div>'
             + '<div style="grid-column:4/10"></div>'
 
@@ -1076,11 +1076,11 @@ function renderOkaMinska(body, metod, backFn){
             + '<span class="om-sub-op">−</span>'
             + '<span class="om-sub-num">' + F(b) + '</span>'
             + '<span class="om-sub-op om-sub-eq">=</span>'
-            + '<input type="text" class="om-sub-input" id="om-new-a" inputmode="decimal" maxlength="7" placeholder="___">'
+            + '<input type="text" class="om-sub-input" id="om-new-a" inputmode="decimal" maxlength="7">'
             + '<span class="om-sub-op">−</span>'
-            + '<input type="text" class="om-sub-input" id="om-new-b" inputmode="decimal" maxlength="7" placeholder="___">'
+            + '<input type="text" class="om-sub-input" id="om-new-b" inputmode="decimal" maxlength="7">'
             + '<span class="om-sub-op om-sub-eq">=</span>'
-            + '<input type="text" class="om-sub-input om-sub-ans" id="om-final" inputmode="decimal" maxlength="7" placeholder="?">'
+            + '<input type="text" class="om-sub-input om-sub-ans" id="om-final" inputmode="decimal" maxlength="7">'
 
           + '</div>'
         + '</div>'
@@ -1267,8 +1267,8 @@ function renderAdditionBakifran(body, metod, backFn){
       const k = document.getElementById('ab-kedja');
       const sumEl = document.getElementById('ab-sum'); const sumVal = sumEl ? sumEl.value : '';
       k.innerHTML = '<span class="om-u-num">' + fmt(a) + '</span><span class="om-u-op">−</span><span class="om-u-num">' + fmt(b) + '</span><span class="om-u-op">=</span>'
-        + steg.map((v, i) => (i ? '<span class="om-u-op">+</span>' : '') + '<input type="text" class="om-u-input ab-steg" data-ix="' + i + '" inputmode="decimal" maxlength="7" placeholder="___" value="' + v.replace(/"/g, '') + '">').join('')
-        + '<span class="om-u-op">=</span><input type="text" class="om-u-input om-u-input-sum" id="ab-sum" inputmode="decimal" maxlength="8" placeholder="?" value="' + sumVal.replace(/"/g, '') + '">';
+        + steg.map((v, i) => (i ? '<span class="om-u-op">+</span>' : '') + '<input type="text" class="om-u-input ab-steg" data-ix="' + i + '" inputmode="decimal" maxlength="7" value="' + v.replace(/"/g, '') + '">').join('')
+        + '<span class="om-u-op">=</span><input type="text" class="om-u-input om-u-input-sum" id="ab-sum" inputmode="decimal" maxlength="8" value="' + sumVal.replace(/"/g, '') + '">';
       const inputs = Array.from(k.querySelectorAll('input'));
       inputs.forEach((inp, i) => {
         inp.addEventListener('input', () => {

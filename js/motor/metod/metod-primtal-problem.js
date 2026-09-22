@@ -30,7 +30,7 @@ function renderPrimtalProblem(body){
               ${p.clues.map(c=>`<li>${c}</li>`).join('')}
             </ul>
             <div class="prob-input-row">
-              <input type="text" class="prob-input" inputmode="numeric" maxlength="4" data-input="${i}" placeholder="${p.isImpossible?'ev. inget?':'?'}">
+              <input type="text" class="prob-input" inputmode="numeric" maxlength="4" data-input="${i}">
               <button class="btn primary" data-check="${i}">Kontrollera</button>
               ${p.isImpossible?`<button class="btn" data-impossible="${i}">Det finns inget sånt tal</button>`:''}
             </div>

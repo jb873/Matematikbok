@@ -656,7 +656,7 @@ function bladHTML(blad){
         html += '<span class="ovn-text ovn-num">' + (rad.fragaHtml || rad.fraga) + '</span>';
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-vars="' + (rad.vars || 'xy')
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off"' + (rad.placeholder ? ' placeholder="' + rad.placeholder + '"' : '') + '>';   // ingen platshållartext (Joachim)
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off"' + (rad.placeholder ? '' : '') + '>';   // ingen platshållartext (Joachim)
       } else if(rad.typ === 'omkrets'){
         // OMKRETS UR FIGUR: figuren (SVG ur svg-algebrafigur.js) + ett förenklat uttryck som svar.
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';

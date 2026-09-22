@@ -43,7 +43,7 @@ function renderPlatsvarde(body, backFn){
   var forra = null;
   d1CustomEngine(body, {
     title:'Platsvärde', sub:'På vilken plats står den markerade siffran? Svara med platsens namn i ord (t.ex. hundratal).',
-    koId:'position', forKey:'begrepp', scoreKey:'platsvarde', OMG:6, keypad:false, inputmode:'text', placeholder:'t.ex. tiotal',
+    koId:'position', forKey:'begrepp', scoreKey:'platsvarde', OMG:6, keypad:false, inputmode:'text',
     gen:function(level){
       var t, guard = 0;
       do { t = d1GenPlatsvarde(level); guard++; } while(t.svar === forra && guard < 10);   // ingen direkt upprepning
@@ -222,7 +222,7 @@ function d1CustomEngine(body, cfg, backFn){
       + exerciseHeader(cfg.title, cfg.sub, level)
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="neg-fraga">' + task.q + '</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="d1c-input" inputmode="' + (cfg.inputmode || 'text') + '" autocomplete="off" placeholder="' + (cfg.placeholder || '?') + '"' + (cfg.maxlength ? ' maxlength="' + cfg.maxlength + '"' : '') + '></div>'
+      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="d1c-input" inputmode="' + (cfg.inputmode || 'text') + '" autocomplete="off"' + (cfg.maxlength ? ' maxlength="' + cfg.maxlength + '"' : '') + '></div>'
       + '<div class="rakna-uppdela-feedback" id="d1c-fb"></div>'
       + (cfg.keypad === false ? '' : keypadHTML(cfg.keypadOps || []))
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
@@ -280,7 +280,7 @@ function renderTalnamn(body){
       // tal → ord: svaret är text → fritext-jämförelse (normaliserad), ingen sifferknappsats
       d1CustomEngine(body, {
         title:'Skriv talet med ord', sub:'Skriv talet med bokstäver (mellanslag spelar ingen roll).',
-        koId:'siffror', forKey:'namn', scoreKey:'namn-ord', OMG:6, keypad:false, inputmode:'text', placeholder:'t.ex. fyrahundratjugofem',
+        koId:'siffror', forKey:'namn', scoreKey:'namn-ord', OMG:6, keypad:false, inputmode:'text',
         gen:function(level){ var n = d1GenTal(level); return { q:'Skriv talet <span class="neg-expr">' + n + '</span> med ord.', ord:d1TalTillOrd(n), tal:n }; },
         valid:function(raw, t){ return d1NormOrd(raw) === d1NormOrd(t.ord); },
         ratt:function(t){ return 'Rätt! ' + t.tal + ' = ' + t.ord + '.'; },
@@ -383,7 +383,7 @@ function d1GenKonstr(level){
 function renderKonstrueraDelbar(body){
   d1CustomEngine(body, {
     title:'Konstruera tal', sub:'Skriv ett tal som uppfyller villkoret. Det finns många rätta svar!',
-    koId:'delbarhet', forKey:'konstruera', scoreKey:'konstruera', OMG:6, keypadOps:[], inputmode:'numeric', placeholder:'ditt tal',
+    koId:'delbarhet', forKey:'konstruera', scoreKey:'konstruera', OMG:6, keypadOps:[], inputmode:'numeric',
     gen:function(level){ var t = d1GenKonstr(level);
       return { q:'Skriv ett tal som är <strong>delbart med ' + t.div.join(', ') + '</strong>.', div:t.div, lcm:t.lcm }; },
     valid:function(raw, t){ var n = d3ParseNum(raw);

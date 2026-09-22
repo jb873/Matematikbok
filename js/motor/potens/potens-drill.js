@@ -198,10 +198,10 @@
       }
       var task = omgang[idx]; uppgNr++;
       var svarHtml = cfg.svar === 'exp'
-        ? '<span class="rakna-svar-fast">' + task.display + ' = <span class="pot">' + task.bas + '<sup><input type="text" class="rakna-svar-input" id="pot-input" inputmode="numeric" maxlength="4" style="width:2.6em;text-align:center;" autocomplete="off" placeholder="?"></sup></span></span>'
+        ? '<span class="rakna-svar-fast">' + task.display + ' = <span class="pot">' + task.bas + '<sup><input type="text" class="rakna-svar-input" id="pot-input" inputmode="numeric" maxlength="4" style="width:2.6em;text-align:center;" autocomplete="off"></sup></span></span>'
         : cfg.svar === 'gp'
-        ? '<span class="rakna-svar-fast">' + task.display + ' = <input type="text" class="rakna-svar-input" id="pot-koeff" inputmode="text" maxlength="6" style="width:3.2em;text-align:center;" autocomplete="off" placeholder="koeff">·<span class="pot">10<sup><input type="text" class="rakna-svar-input" id="pot-input" inputmode="numeric" maxlength="3" style="width:2.4em;text-align:center;" autocomplete="off" placeholder="?"></sup></span></span>'
-        : '<span class="rakna-svar-fast">' + task.display + ' =</span><input type="text" class="rakna-svar-input" id="pot-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?">';
+        ? '<span class="rakna-svar-fast">' + task.display + ' = <input type="text" class="rakna-svar-input" id="pot-koeff" inputmode="text" maxlength="6" style="width:3.2em;text-align:center;" autocomplete="off">·<span class="pot">10<sup><input type="text" class="rakna-svar-input" id="pot-input" inputmode="numeric" maxlength="3" style="width:2.4em;text-align:center;" autocomplete="off"></sup></span></span>'
+        : '<span class="rakna-svar-fast">' + task.display + ' =</span><input type="text" class="rakna-svar-input" id="pot-input" inputmode="text" maxlength="16" autocomplete="off">';
       body.innerHTML = '<div class="exercise-card">'
         + exerciseHeader(cfg.header, cfg.sub, level)
         + renderScoreBarSimple(results.filter(function(x){ return x; }).length, results.filter(function(x){ return !x; }).length, omgang.length, idx)

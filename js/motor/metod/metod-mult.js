@@ -559,7 +559,6 @@ function renderMultMetoder(body, startMetod){
       header:'Metod · talsorterna var för sig',
       sub:'Dela upp talet i talsorter, multiplicera var för sig och addera ihop.',
       instr:'Skriv mellanledet och svaret på raden, åtskilda med =.',
-      placeholder:'t.ex. 180 + 42 = 222',
       ops:['+','='],
       exempel:'<strong>Så funkar det:</strong> Dela upp det större talet i talsorter och multiplicera varje del.<br>'
         + '<span class="ex-rad">37 · 6 = 180 + 42 = 222</span><br>'
@@ -578,7 +577,6 @@ function renderMultMetoder(body, startMetod){
       header:'Metod · dubbla och halvera',
       sub:'Dubbla ena talet och halvera det andra. Båda nya talen blir lättare – antingen blir ena 10, eller så blir båda ental.',
       instr:'Skriv mellanledet (dubblat och halverat) och svaret. T.ex. 7 · 10 = 70 eller 6 · 9 = 54.',
-      placeholder:'t.ex. 6 · 9 = 54',
       ops:['·','='],
       exempel:'<strong>Så funkar det:</strong> Båda talen blir lättare efter dubbla-och-halvera. Antingen blir ena 10 (när 5 dubblas), eller så blir båda ental.<br>'
         + '<span class="ex-rad">14 · 5 = 7 · 10 = 70</span><br>'
@@ -624,7 +622,6 @@ function renderMultMetoder(body, startMetod){
       header:'Metod · kompensationsmetoden',
       sub:'Räkna med ett runt tal och justera sedan för skillnaden.',
       instr:'Skriv hela uträkningen på raden, t.ex. 20 · 6 - 1 · 6 = 120 - 6 = 114.',
-      placeholder:'t.ex. 20 · 6 - 1 · 6 = 120 - 6 = 114',
       ops:['·','+','-','='],
       exempel:'<strong>Så funkar det:</strong> Ett tal nära ett tiotal byts mot det runda talet – sedan kompenserar du.<br>'
         + '<span class="ex-rad">19 · 6 = 20 · 6 − 1 · 6 = 120 − 6 = 114</span><br>'
@@ -646,7 +643,6 @@ function renderMultMetoder(body, startMetod){
       header:'Metod · dubbelparentes',
       sub:'Skriv båda talen som parenteser nära runda tal och multiplicera ut allt.',
       instr:'Skriv hela uträkningen på raden, t.ex. (20-1)(30-1) = 600-20-30+1 = 551.',
-      placeholder:'t.ex. (20-1)(30-1) = 600-20-30+1 = 551',
       ops:['(',')','·','+','-','='],
       exempel:'<strong>Så funkar det:</strong> Båda talen skrivs nära ett runt tal. Multiplicera ihop alla delar.<br>'
         + '<span class="ex-rad">19 · 29 = (20−1)(30−1) = 600−20−30+1 = 551</span><br>'
@@ -700,7 +696,7 @@ function renderMultMetoder(body, startMetod){
           + (uppgNr<=2 ? '<div class="mult-metod-instr">' + cfg.instr + '</div>' : '')
           + '<div class="mult-rad-wrap">'
             + '<span class="mult-rad-fast">' + task.a + ' · ' + task.b + ' =</span>'
-            + '<input type="text" class="mult-rad-input" id="metod-rad" autocomplete="off" placeholder="' + cfg.placeholder + '">'
+            + '<input type="text" class="mult-rad-input" id="metod-rad" autocomplete="off">'
           + '</div>'
         + '</div>'
         + '<div class="rakna-uppdela-feedback" id="metod-fb"></div>'
@@ -1164,7 +1160,6 @@ function renderMultRakna(body, startKat){
       header:'Beräkningar · stora och små tal',
       sub:'Flytta nollor mellan talen så uträkningen blir enkel – visa mellanledet.',
       instr:'Skriv ditt mellanled och svaret på raden, åtskilda med =.',
-      placeholder:'t.ex. 9·2=18',
       ops:['·','='],
       exempel:'<strong>Tänk så här:</strong> Flytta tiopotenser mellan talen så att det ena blir litet och det andra runt. Visa mellanledet.<br>'
         + '<span class="ex-rad">900 · 0,02 = 9 · 2 = 18</span><br>'
@@ -1354,7 +1349,7 @@ function renderRaknaPow10(body, cfg, backFn){
       + exerciseHeader(cfg.header, 'Nivå ' + level + ': ' + LVLNAMN[level] + '.', level)
       + (visaTips ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + t.display + ' =</span>'
-        + '<input type="text" class="rakna-svar-input" id="pow-input" inputmode="text" maxlength="14" autocomplete="off" placeholder="?"></div>'
+        + '<input type="text" class="rakna-svar-input" id="pow-input" inputmode="text" maxlength="14" autocomplete="off"></div>'
       + '<div class="tabell-feedback" id="pow-fb"></div>'
       + keypadHTML([','])
       + '<div class="tabell-progress">Tal ' + (idx+1) + ' av ' + omgang.length + ' · ' + right + ' rätt'
@@ -1453,7 +1448,7 @@ function renderRaknaSingle(body, cfg, backFn){
       + (uppgNr<=2 ? '<div class="rakna-kat-exempel">' + cfg.exempel + '</div>' : '')
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="rakna-svar-rad"><span class="rakna-svar-fast">' + task.display + ' =</span>'
-        + '<input type="text" class="rakna-svar-input" id="rakna-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?"></div>'
+        + '<input type="text" class="rakna-svar-input" id="rakna-input" inputmode="text" maxlength="16" autocomplete="off"></div>'
       + '<div class="rakna-uppdela-feedback" id="rakna-fb"></div>'
       + keypadHTML(cfg.ops)
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
@@ -1539,7 +1534,7 @@ function renderRaknaEnrad(body, cfg, backFn){
         + (uppgNr<=2 ? '<div class="mult-metod-instr">' + cfg.instr + '</div>' : '')
         + '<div class="rakna-svar-rad">'
           + '<span class="rakna-svar-fast">' + task.leftText + '</span>'
-          + '<input type="text" class="rakna-svar-input rakna-svar-bred" id="rakna-input" autocomplete="off" placeholder="' + cfg.placeholder + '">'
+          + '<input type="text" class="rakna-svar-input rakna-svar-bred" id="rakna-input" autocomplete="off">'
         + '</div>'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="rakna-fb"></div>'
@@ -1668,12 +1663,12 @@ function renderMultProblem(body){
         + '<div style="font-size:15px;line-height:1.6;color:var(--ink);margin-bottom:12px;">' + p.text + '</div>'
         + '<div class="prob-svar-rad">'
           + '<span style="font-size:14px;color:var(--ink-soft);">Svar:</span>'
-          + '<input type="text" class="prob-input" inputmode="text" maxlength="10" data-input="' + i + '" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="prob-input" inputmode="text" maxlength="10" data-input="' + i + '" autocomplete="off">'
           + '<span class="prob-enhet">' + p.enhet + '</span>'
           + '<button class="btn primary" data-check="' + i + '">Kontrollera</button>'
         + '</div>'
         + '<div class="prob-notes"><div class="prob-notes-rubrik">Räkna här</div>'
-          + '<textarea class="prob-notes-area" rows="4" placeholder="Ställ upp och räkna här"></textarea></div>'
+          + '<textarea class="prob-notes-area" rows="4"></textarea></div>'
         + '<div class="prob-feedback" id="prob-fb-' + i + '"></div>'
       + '</div>';
     }

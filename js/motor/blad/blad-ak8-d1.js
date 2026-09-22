@@ -86,7 +86,7 @@
 
   // ═══════════════ RENDER + SJÄLVRÄTTNING ═══════════════
   var CHECKS = [];
-  function inTal(ph){ return '<input class="ak8-in" inputmode="text" autocomplete="off"' + (ph ? ' placeholder="' + ph + '"' : '') + '>'; }
+  function inTal(ph){ return '<input class="ak8-in" inputmode="text" autocomplete="off"' + (ph ? '' : '') + '>'; }
 
   function renderRad(r){
     var idx = CHECKS.length;

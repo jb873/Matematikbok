@@ -111,7 +111,7 @@
   function ansCellHTML(){   // AK8_UI stående-bråk-cell (.ovn-brak.ak8-bc) med text-inputs för uttryck
     return '<span class="ovn-brak ak8-bc"><span class="ovn-brak-taljare"><input class="ak8-in gy-t" data-kp="fri" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="täljare"></span>'
       + '<span class="ovn-brak-strecket"></span>'
-      + '<span class="ovn-brak-namnare"><input class="ak8-in gy-n" data-kp="fri" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="1" aria-label="nämnare"></span></span>';
+      + '<span class="ovn-brak-namnare"><input class="ak8-in gy-n" data-kp="fri" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="nämnare"></span></span>';
   }
   function facitHTML(t, n){ var nn = (n == null ? '' : ('' + n)).trim(); return (nn === '' || nn === '1') ? uttryckHTML(t) : fracWrap(uttryckHTML(t), uttryckHTML(nn)); }
 

@@ -218,7 +218,7 @@ function renderSubInput(qNum, subIdx, s){
       <div class="test-sub-input-row">
         <span class="test-sub-target">${s.target}</span>
         <span class="test-sub-eq">=</span>
-        <input type="text" class="test-sub-input" style="width:200px;text-align:left;padding:0 10px;" placeholder="t.ex. 2 · 2 · 3" data-sub-input="${idBase}-str">
+        <input type="text" class="test-sub-input" style="width:200px;text-align:left;padding:0 10px;" data-sub-input="${idBase}-str">
       </div>
     `;
   } else if(s.type === 'gata'){
@@ -335,8 +335,8 @@ function renderSubInput(qNum, subIdx, s){
           <span class="tsm-fraga">Svar</span>
           <span class="test-sub-eq">=</span>
           <span class="tsg-svar">
-            <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="6" data-sub-input="${idBase}-gk" aria-label="koefficient" placeholder="a">
-            <span class="tsg-bas">· 10</span><sup class="tsg-exp"><input type="text" class="test-sub-input tsn-cell" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-ge" aria-label="exponent" placeholder="n" style="width:2.6em;"></sup>
+            <input type="text" class="test-sub-input tsn-cell" inputmode="decimal" maxlength="6" data-sub-input="${idBase}-gk" aria-label="koefficient">
+            <span class="tsg-bas">· 10</span><sup class="tsg-exp"><input type="text" class="test-sub-input tsn-cell" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-ge" aria-label="exponent" style="width:2.6em;"></sup>
           </span>
           <span class="tsm-hint">a·10ⁿ, 1 ≤ a &lt; 10</span>
         </div>
@@ -346,7 +346,7 @@ function renderSubInput(qNum, subIdx, s){
     inputHtml = `
       <div class="test-sub-q">Skriv <span class="num-inline">${s.bas}<sup>${s.exp}</sup></span> som en upprepad multiplikation:</div>
       <div class="test-sub-input-row">
-        <input type="text" class="test-sub-input" style="width:220px;text-align:left;padding:0 10px;" placeholder="t.ex. ${s.bas} · ${s.bas} · …" data-sub-input="${idBase}-pm">
+        <input type="text" class="test-sub-input" style="width:220px;text-align:left;padding:0 10px;" data-sub-input="${idBase}-pm">
       </div>
     `;
   } else if(s.type === 'blandad'){
@@ -388,7 +388,7 @@ function renderSubInput(qNum, subIdx, s){
       <div class="test-sub-input-row">
         <span class="test-sub-target">${s.tal}</span>
         <span class="test-sub-eq">=</span>
-        <input type="text" class="test-sub-input" style="width:230px;text-align:left;padding:0 10px;" placeholder="utvecklad form" data-sub-input="${idBase}-str">
+        <input type="text" class="test-sub-input" style="width:230px;text-align:left;padding:0 10px;" data-sub-input="${idBase}-str">
       </div>
     `;
   } else if(s.type === 'markera'){
@@ -405,7 +405,7 @@ function renderSubInput(qNum, subIdx, s){
       <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
-        <input type="text" class="test-sub-input" data-nokeypad inputmode="text" style="width:170px;text-align:left;padding:0 10px;" placeholder="svar med ord" data-sub-input="${idBase}-ord">
+        <input type="text" class="test-sub-input" data-nokeypad inputmode="text" style="width:170px;text-align:left;padding:0 10px;" data-sub-input="${idBase}-ord">
       </div>
     `;
   }

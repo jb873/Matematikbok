@@ -180,7 +180,7 @@ function avrRoundEngine(body, cfg, backFn){
       + renderScoreBarSimple(results.filter(function(x){return x;}).length, results.filter(function(x){return !x;}).length, omgang.length, idx)
       + '<div class="avr-fraga">Avrunda <span class="avr-expr">' + avrNum(task.n) + '</span>'
         + ' till närmaste <strong>' + task.posNamn + '</strong>.</div>'
-      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="avr-input" inputmode="text" maxlength="12" autocomplete="off" placeholder="?"></div>'
+      + '<div class="rakna-svar-rad"><input type="text" class="rakna-svar-input" id="avr-input" inputmode="text" maxlength="12" autocomplete="off"></div>'
       + '<div class="rakna-uppdela-feedback" id="avr-fb"></div>'
       + keypadHTML([','])
       + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'

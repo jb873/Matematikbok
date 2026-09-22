@@ -172,7 +172,7 @@ function bladHTML(blad){
 
       if(rad.typ === 'brakSvar'){
         var kladd = blad.mellanled
-          ? '<input class="ovn-in bred brak-kladd" inputmode="text" autocomplete="off" placeholder="visa hur du räknar">'
+          ? '<input class="ovn-in bred brak-kladd" inputmode="text" autocomplete="off">'
           : '';
         if(rad.fraga){
           html += '<div class="brak-fragerad" data-rad="' + radNummer + '">';
@@ -253,10 +253,10 @@ function bladHTML(blad){
         html += '<div class="prob-rad" data-rad="' + radNummer + '">';
         html += '<div class="prob-fraga"><span class="ovn-label">' + bokstav + ')</span><span>' + rad.fraga + '</span></div>';
         html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
-        html += '<textarea class="prob-kladd" rows="3" placeholder="Skriv din uträkning här (rättas inte)"></textarea>';
+        html += '<textarea class="prob-kladd" rows="3"></textarea>';
         html += '<div class="prob-svar-rad"><span class="prob-label">Svar:</span>';
-        html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off" placeholder="tal">';
-        if(rad.enhet) html += '<input class="ovn-in enhet" data-enhet="' + rad.enhet + '" inputmode="text" autocomplete="off" placeholder="enhet">';
+        html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+        if(rad.enhet) html += '<input class="ovn-in enhet" data-enhet="' + rad.enhet + '" inputmode="text" autocomplete="off">';
         html += '</div></div>';
         return;
       }

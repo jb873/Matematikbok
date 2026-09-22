@@ -3299,7 +3299,7 @@ function renderPrimtalResonera(body){
         ${exerciseHeader('Resonera · förklara med egna ord', `Fråga ${omgangResults.length + 1} av ${OMGANG_SIZE} · tutorn ger återkoppling.`)}
         <div class="res-task">
           <div class="res-question">${currentQ.q}</div>
-          <textarea class="res-textarea" id="res-input" placeholder="Skriv din förklaring..."></textarea>
+          <textarea class="res-textarea" id="res-input"></textarea>
           <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn primary" id="res-submit">Skicka till tutorn</button>
             <button class="btn" id="res-next" style="display:none;">${omgangResults.length + 1 >= OMGANG_SIZE ? 'Se resultat' : 'Nästa fråga'}</button>

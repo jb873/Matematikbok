@@ -441,7 +441,7 @@ function renderPosMellan(body, cfg, backFn){
       +'<div class="rakna-kat-exempel">'+cfg.exempel+'</div>'
       +renderScoreBarSimple(results.filter(function(x){return x;}).length,results.filter(function(x){return !x;}).length,omgang.length,idx)
       +'<div class="mult-metod-uppg"><div class="rakna-svar-rad"><span class="rakna-svar-fast">Ett tal mellan '+task.leftText+'</span>'
-        +'<input type="text" class="rakna-svar-input" id="posm-input" inputmode="decimal" autocomplete="off" placeholder="?"></div></div>'
+        +'<input type="text" class="rakna-svar-input" id="posm-input" inputmode="decimal" autocomplete="off"></div></div>'
       +'<div class="rakna-uppdela-feedback" id="posm-fb"></div>'
       +keypadHTML(cfg.ops)
       +'<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'

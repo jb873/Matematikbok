@@ -112,7 +112,7 @@
 .prob-label{ display:inline-block; font-family:var(--cinzel); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px; }
 .prob-boxar{ display:flex; flex-direction:column; gap:8px; }
 .prob-box .ak8-expr{ min-width:340px; min-height:42px; }
-.prob-mer{ margin-top:8px; font-family:var(--cinzel); font-size:12px; color:var(--gold); background:none; border:1px dashed var(--paper-dk); border-radius:8px; padding:7px 14px; cursor:pointer; }
+.prob-mer{ margin-top:8px; font-family:var(--cinzel); font-size:13px; color:var(--gold); background:var(--paper-lt,#faf7f1); border:1.5px solid var(--gold-lt,#c49a40); border-radius:8px; padding:0 16px; min-height:40px; display:inline-flex; align-items:center; cursor:pointer; }   /* knappen bär hela budskapet sedan instruktionstexten togs bort (order 2026-09-22): heldragen kant, 13 px, 40 px träffyta */
 .prob-mer:hover{ border-color:var(--gold); }
 .prob-svarrad{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px dotted var(--paper-dk); }
 .prob-svarrad .prob-label{ margin-bottom:0; }

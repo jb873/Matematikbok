@@ -288,7 +288,7 @@ function raknaEngine(op){
   // ---- hjälpare för boxar (definieras per render via slutna värden) ----
   function svarBox(){
     return '<span style="display:inline-flex;align-items:center;gap:4px;">'
-      + '<input class="svar-cell sv-hel" inputmode="numeric" placeholder="hel" style="width:42px;" title="heltal (om svaret är större än 1)">'
+      + '<input class="svar-cell sv-hel" inputmode="numeric" style="width:42px;" title="heltal (om svaret är större än 1)">'
       + '<span class="brak"><span class="taljare"><input class="svar-cell sv-t" inputmode="numeric"></span><span class="namnare"><input class="svar-cell sv-n" inputmode="numeric"></span></span></span>';
   }
   function stegBox(){ return '<span class="brak"><span class="taljare"><input class="brak-in steg-cell st-t" inputmode="numeric"></span><span class="namnare"><input class="brak-in steg-cell st-n" inputmode="numeric"></span></span>'; }

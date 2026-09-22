@@ -124,10 +124,10 @@
       var task = omgang[idx]; uppgNr++;
       var svarHtml = cfg.svar === 'tva'
         ? '<span class="rakna-svar-fast">' + task.display + ' </span>'
-          + '<input type="text" class="rakna-svar-input" id="kv-lo" inputmode="numeric" maxlength="4" style="width:3em;text-align:center;" autocomplete="off" placeholder="?">'
+          + '<input type="text" class="rakna-svar-input" id="kv-lo" inputmode="numeric" maxlength="4" style="width:3em;text-align:center;" autocomplete="off">'
           + '<span style="margin:0 8px;">och</span>'
-          + '<input type="text" class="rakna-svar-input" id="kv-hi" inputmode="numeric" maxlength="4" style="width:3em;text-align:center;" autocomplete="off" placeholder="?">'
-        : '<span class="rakna-svar-fast">' + task.display + ' </span><input type="text" class="rakna-svar-input" id="kv-input" inputmode="text" maxlength="16" autocomplete="off" placeholder="?">';
+          + '<input type="text" class="rakna-svar-input" id="kv-hi" inputmode="numeric" maxlength="4" style="width:3em;text-align:center;" autocomplete="off">'
+        : '<span class="rakna-svar-fast">' + task.display + ' </span><input type="text" class="rakna-svar-input" id="kv-input" inputmode="text" maxlength="16" autocomplete="off">';
       body.innerHTML = '<div class="exercise-card">'
         + exerciseHeader(cfg.header, cfg.sub, level)
         + renderScoreBarSimple(results.filter(function(x){ return x; }).length, results.filter(function(x){ return !x; }).length, omgang.length, idx)

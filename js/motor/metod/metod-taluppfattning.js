@@ -95,7 +95,7 @@ function renderUtveckladMetod(body){
       +'<span class="ex-rad">54,2 = 5·10 + 4·1 + 2·0,1</span></div>'
       +renderScoreBarSimple(results.filter(function(x){return x;}).length,results.filter(function(x){return !x;}).length,omgang.length,idx)
       +'<div class="mult-metod-uppg"><div class="rakna-svar-rad"><span class="rakna-svar-fast">'+task.talStr.replace('.',',')+' =</span>'
-        +'<input type="text" class="rakna-svar-input" id="utv-input" autocomplete="off" placeholder="t.ex. 1·100 + 7·10 + 6·1" style="min-width:240px;"></div></div>'
+        +'<input type="text" class="rakna-svar-input" id="utv-input" autocomplete="off" style="min-width:240px;"></div></div>'
       +'<div class="rakna-uppdela-feedback" id="utv-fb"></div>'
       +keypadHTML(['·','+',','])
       +'<div class="kp-hint">Skriv summan av platsvärdena. Använd · för gånger och + mellan termerna.</div>'

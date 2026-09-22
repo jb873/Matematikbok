@@ -260,9 +260,9 @@ function renderPrioBerakning(body){
       + '<div class="prio-ber-rad">'
         + '<span class="rakna-svar-fast">' + task.expr + '</span>'
         + '<span class="prio-ber-eq">=</span>'
-        + '<input type="text" class="rakna-svar-input prio-ber-in prio-ber-mellan" id="ber-mellan" inputmode="text" autocomplete="off" placeholder="mellanled">'
+        + '<input type="text" class="rakna-svar-input prio-ber-in prio-ber-mellan" id="ber-mellan" inputmode="text" autocomplete="off">'
         + '<span class="prio-ber-eq">=</span>'
-        + '<input type="text" class="rakna-svar-input prio-ber-in prio-ber-svar" id="ber-svar" inputmode="text" autocomplete="off" placeholder="svar">'
+        + '<input type="text" class="rakna-svar-input prio-ber-in prio-ber-svar" id="ber-svar" inputmode="text" autocomplete="off">'
       + '</div>'
       + '<div class="rakna-uppdela-feedback" id="ber-fb"></div>'
       + keypadHTML(['+','−','·','/'])
@@ -347,10 +347,10 @@ function prioTrappaHTML(task){
     var isLast = (s === task.steps.length - 1);
     var vlValue = radVarde(task.steps[s]);
     html += '<div class="prio-steg">'
-      + '<input type="text" class="prio-step-input prio-vl" data-vl="' + vlValue + '" inputmode="text" autocomplete="off" placeholder="förenkla">'
+      + '<input type="text" class="prio-step-input prio-vl" data-vl="' + vlValue + '" inputmode="text" autocomplete="off">'
       + '<span class="prio-eq">=</span>'
       + (isLast
-          ? '<input type="text" class="prio-step-input prio-svar prio-step-answer" data-answer="' + task.answer + '" inputmode="text" autocomplete="off" placeholder="svar">'
+          ? '<input type="text" class="prio-step-input prio-svar prio-step-answer" data-answer="' + task.answer + '" inputmode="text" autocomplete="off">'
           : '<span class="prio-tom"></span>')
     + '</div>';
   }
