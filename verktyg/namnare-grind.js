@@ -91,6 +91,12 @@ const PROBE8_FYLL = `(function(){
         var cell = syn[1].closest('.ak8-cell'), ft = cell && cell.querySelector('.ak8-frt'), fn = cell && cell.querySelector('.ak8-frn');
         if(!ft || !fn){ ej(); return; }
         ft.value = bm[3]; ev(ft, 'input'); fn.value = bm[4]; ev(fn, 'input'); fyllda.push(si); return; }
+      // Mellanleds-rader (d1: "= [mellanled] = [svar]", facit "8/0,1 = 8·10 / 0,1·10 = 80/1 = 80"):
+      // båda cellerna rättas mot samma värde → fyll dem med facitets SISTA tal.
+      if(s.querySelectorAll('.ak8-cell .ak8-exprtxt').length === 2 && ftxt.indexOf('=') > -1){
+        var svans = ftxt.split('=').pop().trim().replace(/\\s+/g, '');   // det som står efter SISTA = ("420 000" → "420000", "9/16" behålls)
+        if(/^[-\\u2212]?[0-9.,\\/]+$/.test(svans)){ ins.forEach(function(i){ i.value = svans; ev(i, 'input'); }); fyllda.push(si); return; }
+      }
       var t = tal(ftxt.replace(/^t\\.ex\\.\\s*/, ''));
       if(/^t\\.ex\\./.test(ftxt) && ins.length === 1 && t.length){ ins[0].value = t[0]; ev(ins[0], 'input'); fyllda.push(si); return; }
       if(t.length === ins.length && ftxt.indexOf('=') < 0){ ins.forEach(function(i, k){ i.value = t[k]; ev(i, 'input'); }); fyllda.push(si); return; }

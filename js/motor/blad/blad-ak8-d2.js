@@ -193,7 +193,7 @@
           return { ok: per[0] && per[1], per: per, facit: skrivOm(r.fraga) + ' ' + fmt(r.facit) };
         });
         return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">'
-          + '<input class="ak8-in ak8-in-oms" inputmode="text" autocomplete="off" placeholder="skriv om" style="width:96px;">'
+          + '<input class="ak8-in ak8-in-oms" inputmode="text" autocomplete="off" style="width:96px;">'
           + '<span class="ovn-text" style="margin:0 6px;">=</span>' + inTal() + '</span>'
           + (r.flagg ? '<span class="ak8-flagg" title="' + r.flagg + '">⚑</span>' : '') + '</div>';
       }

@@ -290,7 +290,7 @@
           var mel = AK8_UI.cellRead(el, 'mel').num, sv = AK8_UI.cellRead(el, 'sv').num, mal = r.ft / r.fn;
           var pc = { mel: likhetOk(mel, mal), sv: likhetOk(sv, mal) }; return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
         });
-        svarHtml = AK8_UI.ansCell('mel', 'mellanled') + eq + AK8_UI.ansCell('sv', 'svar');
+        svarHtml = AK8_UI.ansCell('mel') + eq + AK8_UI.ansCell('sv');
       } else if(r.stil === 'par'){
         // Parentes: mellanledet är en potens (eleven bygger bas^exp), svaret ett värde.
         CHECKS.push(function(el){
@@ -298,7 +298,7 @@
           var pc = { mel: mel.kind === 'pot' && likhetOk(mel.base, r.basval) && likhetOk(mel.exp, r.exp), sv: likhetOk(sv, r.svar) }; return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
         });
         // FAS4: förrenderad tvåfälts-potens (bas + upphöjd exponent) i st f en avklippt "bas^exp"-ruta.
-        svarHtml = AK8_UI.potAnsCell('mel', 'bas', 'n') + eq + AK8_UI.ansCell('sv', 'svar');
+        svarHtml = AK8_UI.potAnsCell('mel') + eq + AK8_UI.ansCell('sv');
       } else if(r.stil === 'exp'){
         // Exp-lag: eleven skriver bas^exp i BÅDA leden. Mellanledet = bas^(exp-uttryck, t.ex. 4+5),
         // svaret = bas^(uträknad exponent, t.ex. 9). Basen skrivs av eleven, ingen förtryckt bas.
@@ -309,13 +309,13 @@
         });
         // FAS4: två fält per led. Mellanledets exp-fält bredare + platshållare "uttryck" (oberäknat, 4+5),
         // svarets exp-fält smalt + "tal" (uträknat, 9). Grupp-rubriken förklarar skillnaden.
-        svarHtml = AK8_UI.potAnsCell('mel', 'bas', 'uttryck') + eq + AK8_UI.potAnsCell('sv', 'bas', 'tal');
+        svarHtml = AK8_UI.potAnsCell('mel') + eq + AK8_UI.potAnsCell('sv');
       } else {   // 'ev'
         CHECKS.push(function(el){
           var mel = AK8_UI.cellRead(el, 'mel').num, sv = AK8_UI.cellRead(el, 'sv').num;
           var pc = { mel: likhetOk(mel, r.svar), sv: likhetOk(sv, r.svar) }; return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
         });
-        svarHtml = AK8_UI.ansCell('mel', 'mellanled') + eq + AK8_UI.ansCell('sv', 'svar');
+        svarHtml = AK8_UI.ansCell('mel') + eq + AK8_UI.ansCell('sv');
       }
       return '<div class="ak8-rad ak8-rad-kedja"><span class="ak8-q">' + r.vanster + '</span><span class="ak8-svar" data-idx="' + idx + '">' + eq + svarHtml + '</span></div>';
     }

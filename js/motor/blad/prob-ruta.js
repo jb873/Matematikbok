@@ -45,9 +45,9 @@
   ];
 
   // ── RENDER ──
-  function boxHtml(n){ return '<div class="prob-box">' + AK8_UI.ansCell('b' + n, 'skriv uträkningen …') + '</div>'; }
+  function boxHtml(n){ return '<div class="prob-box">' + AK8_UI.ansCell('b' + n) + '</div>'; }
   function enhetHtml(e){
-    if(e.typ === 'konkret') return '<input class="ak8-in prob-enhet" inputmode="text" autocomplete="off" placeholder="enhet">';
+    if(e.typ === 'konkret') return '<input class="ak8-in prob-enhet" inputmode="text" autocomplete="off">';
     if(e.typ === 'andel') return '<span class="prob-enhet-label">' + e.label + '</span>';
     return '';
   }

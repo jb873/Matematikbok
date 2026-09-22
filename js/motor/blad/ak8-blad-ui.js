@@ -113,10 +113,10 @@
       inp.style.width = Math.max(18, Math.min(inp.scrollWidth + 2, 120)) + 'px';
       return;
     }
-    var min = inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-in-sm') ? 34 : 74);
-    if(inp.value === '' && inp.placeholder){
-      if(inp.classList.contains('ak8-exprtxt')) min = Math.max(min, inp.placeholder.length * 9);
-      else if(inp.classList.contains('ak8-in-sm')) min = Math.max(min, inp.placeholder.length * 7 + 8);   // FAS4: rymma platshållarord (uttryck/tal/bas) i det lilla upphöjda fältet — annars kapas de (samma sort som "bas^exp"-felet)
+    var min = inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-pexp') ? 26 : inp.classList.contains('ak8-in-sm') ? 34 : 74);
+    if(inp.value === '' && inp.classList.contains('ak8-exprtxt')){
+      var ex = inp.closest('.ak8-expr');   // tom OCH ensam i cellen (inget bråk/potens byggt) → full svarsbredd
+      if(ex && !ex.querySelector('.ovn-brak, .ak8-pot') && ex.querySelectorAll('.ak8-exprtxt').length === 1) min = 74;
     }
     inp.style.width = '1ch';
     inp.style.width = Math.max(min, Math.min(inp.scrollWidth + 6, 340)) + 'px';
@@ -317,11 +317,19 @@
     return next;
   }
 
-  // ── AUTO-MELLANSLAG runt +/− i mellanled (markör bevaras) ──
+  // ── AUTO-MELLANSLAG + RIKTIGA TECKEN i uttrycks-rutor (markören bevaras) ──
+  // Uppgiften står "15 − 2³" — då ska elevens rad se likadan ut, inte "15-8". Tre steg, i den här ordningen:
+  //   1) riktiga tecken: bindestreck/en-dash/em-dash → − (U+2212), * och × → ·
+  //   2) ETT mellanrum på var sida om ett räknetecken som står MELLAN två delar (inledande tecken står tätt: −5)
+  //   3) markören flyttas till samma plats i den nya texten (räknat i tecken som inte är mellanslag)
+  // Mellanrum som eleven skrivit själv INUTI ett tal (tusental: 4 800 000) lämnas i fred.
+  // Rättningen påverkas inte: pNum och evalArith saneras bort både mellanrum och teckenvarianter.
+  var UTTRYCKSRUTOR = '.ak8-mel,.ak8-exprtxt,.ak8-in-oms,.ak8-pexp,.ak8-gpe';
   function autoSpace(inp){
     var v = inp.value, pos = inp.selectionStart == null ? v.length : inp.selectionStart;
-    var raw = v.replace(/\s+/g, '');
-    var out = raw.replace(/([+−-])/g, function(op, _p, i){ return i === 0 ? op : ' ' + op + ' '; });
+    var out = v.replace(/[-\u2013\u2014]/g, '\u2212').replace(/[*\u00d7]/g, '\u00b7');
+    out = out.replace(/\s*([+\u2212\u00b7\/])\s*/g, function(m, op, i){ return i === 0 ? op : ' ' + op + ' '; });
+    if(!/[+\u2212\u00b7\/]\s*$/.test(out)) out = out.replace(/\s+$/, '');   // mellanrummet efter ett tecken står kvar tills nästa del skrivits
     if(out === v) return;
     var before = v.slice(0, pos).replace(/\s+/g, '').length, np = 0, seen = 0;
     while(np < out.length && seen < before){ if(out[np] !== ' ') seen++; np++; }
@@ -492,7 +500,7 @@
     // grow + clear-on-edit + auto-mellanslag
     pa('input', function(e){
       var t = e.target; if(!t.classList || !t.classList.contains('ak8-in')) return;
-      if(t.classList.contains('ak8-mel')) autoSpace(t);
+      if(t.matches && t.matches(UTTRYCKSRUTOR)) autoSpace(t);   // mellanrum + riktiga tecken i uttrycks-rutor
       grow(t);
       var rad = t.closest('.ak8-rad'); if(rad) rensaRad(rad);
     });

@@ -96,24 +96,22 @@
     }
     // kedja: vänster = [mellanled] = [svar]
     CHECKS.push(function(el){
-      var mel = evalArith(el.querySelector('.ak8-mel').value);
-      var sv = pNum(el.querySelector('.ak8-sv').value);
-      var per = [likhetOk(mel, r.svar), likhetOk(sv, r.svar)];   // per ruta: mellanled, svar
-      return { ok: per[0] && per[1], per: per, facit: r.facit };
+      var mel = AK8_UI.cellRead(el, 'mel').num, sv = AK8_UI.cellRead(el, 'sv').num;
+      var pc = { mel: likhetOk(mel, r.svar), sv: likhetOk(sv, r.svar) };   // per cell: mellanled, svar
+      return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
     });
+    var eq = '<span class="ovn-text" style="margin:0 6px;">=</span>';
     return '<div class="ak8-rad"><span class="ak8-q">' + r.vanster + '</span>'
       + '<span class="ak8-svar" data-idx="' + idx + '">'
-      + '<span class="ovn-text" style="margin:0 6px;">=</span><input class="ak8-in ak8-mel" inputmode="text" autocomplete="off" placeholder="mellanled">'
-      + '<span class="ovn-text" style="margin:0 6px;">=</span><input class="ak8-in ak8-sv" inputmode="text" autocomplete="off" placeholder="svar">'
+      + eq + AK8_UI.ansCell('mel') + eq + AK8_UI.ansCell('sv')
       + '</span></div>';
   }
 
   function renderBlad(mount, blad){
-    var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>'
-      + '<p class="ak8-intro">Tal vänsterställda. Visa mellanledet i den vänstra rutan (förlängning eller balansera decimalerna), och svaret i den högra.</p>';
+    var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
     blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
-    html += AK8_UI.keypadHTML({ ops:[',', '·', '/', '−'] });
+    html += AK8_UI.keypadHTML({ ops:[',', '·', '/', '−'], builders:true });
     mount.innerHTML = html;
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };
