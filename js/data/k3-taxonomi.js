@@ -160,6 +160,18 @@ window.K3_TAXONOMI = {
       "visning": { "utbudslista": "k3d3", "grupp": "Förenkla uttryck", "gruppordning": 0, "radordning": 0, "titel": "Förenkla uttryck", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
+      "id": "alg-samla-faktor", "namn": "Multiplicera och dela en term", "parent": "alg-forenkla", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Räkna ut tal · term och term / tal innan termerna samlas.",
+      "visning": null
+    },
+    {
+      "id": "alg-samla-faktor:rakna", "namn": "Multiplicera och dela en term", "parent": "alg-samla-faktor", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Multiplicera ett tal med en term (5 · 3x) och dela en term med ett tal (28x/2).",
+      "visning": null
+    },
+    {
       "id": "alg-forenkla-parentes", "namn": "Förenkla med parentes", "parent": "alg-forenkla", "niva": "deldoman",
       "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
       "begrepp": "Multiplicera in i parentes och förenkla (tecken och siffra före parentes). Fördjupning.",

@@ -19,6 +19,7 @@
   function brak(t, n){ return '<span class="brak"><span class="taljare">' + t + '</span><span class="namnare">' + n + '</span></span>'; }
   var NOD = 'alg-samla:rakna';        // Del 3:s enda lövnod i k3-taxonomin (generator forenklaEngine)
   var NOD_VARDE = 'alg-berakna:rakna';// "Beräkna värdet av uttrycket" hör till Del 1:s nod
+  var NOD_FAKTOR = 'alg-samla-faktor:rakna';   // tal · term och term / tal — egen färdighet (Joachim 2026-09-22)
   function G(rubrik, rader, logg){ return { rubrik: rubrik, rader: rader, logg: logg || NOD, loggStore: 'k3' }; }
   function f(fraga, svar, vars){ return { typ: 'forenkla', fraga: fraga, svar: svar, vars: vars || 'xy' }; }
   function fh(fragaHtml, svar, vars){ return { typ: 'forenkla', fraga: '', fragaHtml: fragaHtml, svar: svar, vars: vars || 'xy' }; }
@@ -29,7 +30,6 @@
   // ══════════════════════════════════════════════════════════════════════════════════════════
   var BLAD_A = {
     titel: 'Förenkla uttryck A',
-    intro: 'Samla lika termer och skriv uttrycket så enkelt som möjligt. Tryck på Kontrollera när du är klar.',
     grupper: [
       G('Förenkla uttryck', [
         f('4x + 3x', '7x'), f('7x + 2x', '9x'), f('3x + x + 2x', '6x'), f('y + y', '2y'), f('y + 5y + 7y', '13y')
@@ -39,11 +39,11 @@
       ]),
       G('Förenkla uttryck', [
         f('5 · 3x', '15x'), f('4y · 7', '28y'), f('1,3x · 10', '13x'), f('6 · 5y + 3y', '33y'), f('3x + 4 · 6x', '27x')
-      ]),
+      ], NOD_FAKTOR),
       G('Förenkla uttryck', [
         fh(brak('28x', '2'), '14x'), fh(brak('15y', '3'), '5y'),
         fh(brak('5x', '5') + ' + 7x', '8x'), fh('8y + ' + brak('6y', '2'), '11y')
-      ])
+      ], NOD_FAKTOR)
     ]
   };
 
@@ -52,7 +52,6 @@
   // ══════════════════════════════════════════════════════════════════════════════════════════
   var BLAD_B = {
     titel: 'Förenkla uttryck B',
-    intro: 'Nu finns flera variabler och tal i samma uttryck. Samla lika termer – och kom ihåg att tal bara kan läggas ihop med tal.',
     grupper: [
       G('Förenkla uttryck', [
         f('6x + 2y − 3x + 4y', '3x + 6y'), f('7x + 4y − 3x + 2y', '4x + 6y'),
@@ -88,7 +87,6 @@
   // ══════════════════════════════════════════════════════════════════════════════════════════
   var BLAD_C = {
     titel: 'Förenkla uttryck C',
-    intro: 'Här finns division, decimaltal och uppgifter där du skriver ett eget uttryck. Räkna ut divisionerna innan du samlar termerna.',
     grupper: [
       G('Förenkla uttrycket', [
         fh('5x + 5y − ' + brak('9x', '3') + ' − 2y', '2x + 3y'),
