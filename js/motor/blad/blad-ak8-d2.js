@@ -211,7 +211,7 @@
         var v = sign * (t / n);
         return { ok: isFinite(v) && isFinite(t) && isFinite(n) && n !== 0 && Math.abs(v - r.ft / r.fn) < 1e-9, facit: (r.ft < 0 ? '−' : '') + Math.abs(r.ft) + '/' + r.fn };
       });
-      var signBox = teckenruta ? '<input class="ak8-in ak8-sign" inputmode="text" autocomplete="off" maxlength="1" aria-label="tecken (skriv − eller lämna tomt)" style="width:26px;text-align:center;margin-right:4px;vertical-align:middle;">' : '';
+      var signBox = teckenruta ? '<input class="ak8-in ak8-sign" inputmode="text" autocomplete="off" maxlength="1" aria-label="tecken" style="width:26px;text-align:center;margin-right:4px;vertical-align:middle;">' : '';
       var box = '<span class="ovn-brak"><span class="ovn-brak-taljare"><input class="ak8-in ak8-bt" inputmode="text" style="width:48px;text-align:center;"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in ak8-bn" inputmode="text" style="width:48px;text-align:center;"></span></span>';
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + signBox + box + '</span></div>';
     }
