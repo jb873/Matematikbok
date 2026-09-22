@@ -28,16 +28,36 @@
   // ── NUMRERING ──
   function gruppRubrik(nr, rubrik, hint){ return '<div class="ovn-grupp-rubrik">' + nr + '. ' + rubrik + '</div>' + (hint ? '<div class="ak8-hint">' + hint + '</div>' : ''); }
   // Injicerar bokstavs-etikett (a,b,c…) först i en .ak8-rad; hoppar över icke-uppgiftsrader.
-  function injLabel(html, bokIndex){
-    return /^<div class="ak8-rad[^"]*">/.test(html)
-      ? html.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokIndex % 26)) + ')</span>')
-      : html;
+  // EN ETIKETTKÄLLA (order 2026-09-21): en rad som bär egna deluppgifts-etiketter (.ak8-linje-nr — flera tallinjer i
+  // samma rad, d2/d3) får INGEN radetikett; de inre etiketterna numreras i stället i gruppens löpande bokstavsföljd
+  // (a, b … c). Förr satte bladmotorn a) på raden OCH tallinjen a) på första linjen → "a) a)".
+  function injLabelN(html, bokIndex){
+    if(!/^<div class="ak8-rad[^"]*">/.test(html)) return { html: html, antal: 0 };
+    var n = 0, h = html.replace(/(class="ak8-linje-nr"[^>]*>)[a-z]\)/g, function(m, p){ return p + String.fromCharCode(97 + ((bokIndex + n++) % 26)) + ')'; });
+    if(n) return { html: h, antal: n };
+    return { html: html.replace(/^(<div class="ak8-rad[^"]*">)/, '$1<span class="ovn-label">' + String.fromCharCode(97 + (bokIndex % 26)) + ')</span>'), antal: 1 };
   }
+  function injLabel(html, bokIndex){ return injLabelN(html, bokIndex).html; }
   // Renderar en grupps rader med bokstavs-numrering (reset per grupp). renderRad: (rad)->html.
   function renderGrupp(grupp, nr, renderRad){
     var html = gruppRubrik(nr, grupp.rubrik, grupp.hint), bokN = 0;
-    grupp.rader.forEach(function(r){ var h = renderRad(r); if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = injLabel(h, bokN); bokN++; } html += h; });
+    grupp.rader.forEach(function(r){ var h = renderRad(r); var lb = injLabelN(h, bokN); html += lb.html; bokN += lb.antal; });
     return html;
+  }
+  // ── PER-RUTA-MARKERING (order 2026-09-21): i en rad med flera rutor visar VARJE ruta sin egen status
+  //    (res.per = [bool …] i rutornas ordning); raden är rätt (✓) bara om alla rutor är rätt (res.ok). Saknar
+  //    checken per (envärdes-rader, val-rader) markeras alla rutor med res.ok som förr. ──
+  //    res.perCell = { roll: bool } markerar per svarscell ([data-r]) när en cell rymmer flera rutor (uttrycks-/bråkceller).
+  function markeraRutor(el, res){
+    var ins = el.querySelectorAll('.ak8-in'), per = res && res.per, perCell = res && res.perCell;
+    var perOk = per && per.length === ins.length;
+    Array.prototype.forEach.call(ins, function(i, k){
+      if(i.closest('.ak8-extra')) return;
+      var ok = res.ok;
+      if(perOk) ok = per[k];
+      else if(perCell){ var c = i.closest('[data-r]'); if(c && c.dataset.r in perCell) ok = perCell[c.dataset.r]; }
+      i.classList.add(ok ? 'ak8-ok' : 'ak8-fel');
+    });
   }
 
   // ── FRI EQUALITY-KEDJA (DELAD): "uttryck = [led] = [led] … + led". Används av d6 (låna),
@@ -578,7 +598,7 @@
 
   window.AK8_UI = {
     pNum: pNum, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
-    gruppRubrik: gruppRubrik, injLabel: injLabel, renderGrupp: renderGrupp, renderSheet: renderSheet,
+    gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
     grow: grow, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,

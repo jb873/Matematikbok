@@ -9,6 +9,10 @@
 // ============================================================
 function gRand(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
 function gPick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+// EGNA MARKERINGAR (order 2026-09-21): i en rad med flera rutor rensar varje ruta bara de ✓/✗ + facit som står
+// direkt efter DEN rutan. Förr rensades hela radens/förälderns markeringar per ruta → bara sista rutans bock blev
+// kvar, och en rad med A, B fel och C rätt visade ✓ (grön rad med fel kvar).
+function egnaMarken(inp){ var nxt = inp.nextElementSibling; while(nxt && nxt.classList && (nxt.classList.contains('ovn-mark') || nxt.classList.contains('ovn-fasit'))){ var t = nxt; nxt = nxt.nextElementSibling; t.remove(); } }
 function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
 
 // Kanonisk (enklaste) blandad form av värdet t/n, n>0, t>=0.
@@ -357,8 +361,7 @@ function bygg_blad(rotEl, blad){
         if(rad) rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
         if(rad) rad.querySelectorAll('.brak-cell, .brak-bada-dec').forEach(function(c){ c.classList.remove('correct','wrong'); });
       } else {
-        var f = inp.parentElement.querySelector('.ovn-fasit');
-        if(f) f.remove();
+        egnaMarken(inp);   // rutans egen ✓/✗ + facit bort vid ändring (inte grannarnas)
       }
     });
   });
@@ -381,7 +384,7 @@ function bygg_blad(rotEl, blad){
     inputs.forEach(function(inp){
       if(inp.classList.contains('brak-cell') || inp.classList.contains('brak-kladd') || inp.classList.contains('brak-bada-dec') || inp.classList.contains('forlang-tal') || inp.classList.contains('forlang-dec')) return;
       var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
-      rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
+      egnaMarken(inp);   // rutans EGNA fasit + markering (inte radens — se egnaMarken)
       inp.classList.remove('correct','wrong','just-checked');
       var ok;
       if(inp.dataset.enhet) ok = (String(inp.value).toLowerCase().replace(/[\s.]/g,'') === String(inp.dataset.enhet).toLowerCase().replace(/[\s.]/g,''));

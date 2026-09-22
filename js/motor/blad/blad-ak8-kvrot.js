@@ -158,7 +158,7 @@
         + '<span class="ak8-svar kv-sidasvar" data-idx="' + idx + '"><span class="kv-sidalabel">sida =</span>' + inTal() + '</span></div>';
     }
     if(r.typ === 'tvaruta'){
-      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'); return { ok: likhetOk(pNum(ins[0].value), r.lo) && likhetOk(pNum(ins[1].value), r.hi), facit: r.lo + ' och ' + r.hi }; });
+      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'); var per = [likhetOk(pNum(ins[0].value), r.lo), likhetOk(pNum(ins[1].value), r.hi)]; return { ok: per[0] && per[1], per: per, facit: r.lo + ' och ' + r.hi }; });
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span>'
         + '<span class="ak8-svar" data-idx="' + idx + '">' + inTal() + '<span class="kv-och">och</span>' + inTal() + '</span></div>';
     }
@@ -193,7 +193,7 @@
       el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); });
       var f0 = el.querySelector('.ak8-fasit'); if(f0) f0.remove();
       if(!UI.besvarad(el)) return;                        // tom ruta: räknad men varken markerad, rättad eller loggad
-      el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
+      UI.markeraRutor(el, res);   // per ruta (res.per) — raden ✓ bara om alla rätt
       UI.markera(el.closest('.ak8-rad') || el, res.ok);
       // Loggning: en besvarad ruta = ett försök (rätt/fel). Tidsspärren i mastery.js kollapsar upprepade klick.
       var grEl = el.closest('.ovn-grupp'), loggNod = grEl && grEl.getAttribute('data-logg');

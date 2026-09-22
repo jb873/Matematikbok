@@ -177,9 +177,9 @@
     }
     if(r.typ === 'foljd'){
       CHECKS.push(function(el){
-        var ins = el.querySelectorAll('.ak8-in'), ok = true;
-        r.facit.forEach(function(f, i){ if(!likhetOk(pNum(ins[i].value), f)) ok = false; });
-        return { ok: ok, facit: r.facit.map(fmt).join('   ') };
+        var ins = el.querySelectorAll('.ak8-in'), ok = true, per = [];
+        r.facit.forEach(function(f, i){ var o = likhetOk(pNum(ins[i].value), f); per.push(o); if(!o) ok = false; });
+        return { ok: ok, per: per, facit: r.facit.map(fmt).join('   ') };   // per: varje ruta sin egen status
       });
       var boxar = r.facit.map(function(){ return inTal(true); }).join(' ');
       return '<div class="ak8-rad"><span class="ak8-q">' + r.pre + '</span><span class="ak8-svar" data-idx="' + idx + '">' + boxar + '</span></div>';
@@ -196,10 +196,10 @@
     }
     if(r.typ === 'villkor'){
       CHECKS.push(function(el){
-        var ins = el.querySelectorAll('.ak8-in'), varden = [], ok = true;
-        ins.forEach(function(inp){ var v = pNum(inp.value); if(!isFinite(v) || !r.test(v)) ok = false; varden.push(v); });
-        for(var a = 0; a < varden.length; a++) for(var b = a + 1; b < varden.length; b++) if(Math.abs(varden[a] - varden[b]) < 1e-6) ok = false;  // distinkta
-        return { ok: ok, facit: 't.ex. ' + r.exempel };
+        var ins = el.querySelectorAll('.ak8-in'), varden = [], ok = true, per = [];
+        ins.forEach(function(inp){ var v = pNum(inp.value); var o = isFinite(v) && r.test(v); per.push(o); if(!o) ok = false; varden.push(v); });
+        for(var a = 0; a < varden.length; a++) for(var b = a + 1; b < varden.length; b++) if(Math.abs(varden[a] - varden[b]) < 1e-6){ ok = false; per[a] = per[b] = false; }  // distinkta
+        return { ok: ok, per: per, facit: 't.ex. ' + r.exempel };
       });
       var rutor = []; for(var k = 0; k < r.antal; k++) rutor.push(inTal(true));
       return '<div class="ak8-rad"><span class="ak8-q">' + r.krav + '</span><span class="ak8-svar" data-idx="' + idx + '">' + rutor.join(' ') + '</span></div>';
@@ -214,9 +214,9 @@
         svg += rad + '</div>';
       });
       CHECKS.push(function(el){
-        var ins = el.querySelectorAll('.ak8-in'), ok = true;
-        varden.forEach(function(v, i){ if(!likhetOk(pNum(ins[i].value), v)) ok = false; });
-        return { ok: ok, facit: varden.map(fmt).join(', ') };
+        var ins = el.querySelectorAll('.ak8-in'), ok = true, per = [];
+        varden.forEach(function(v, i){ var o = likhetOk(pNum(ins[i].value), v); per.push(o); if(!o) ok = false; });
+        return { ok: ok, per: per, facit: varden.map(fmt).join(', ') };
       });
       return '<div class="ak8-rad ak8-rad-fig"><span class="ak8-svar" data-idx="' + idx + '">' + svg + '</span></div>';
     }
@@ -263,7 +263,7 @@
       var bokN = 0;
       g.rader.forEach(function(r){
         var h = renderRad(r);
-        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = AK8_UI.injLabel(h, bokN); bokN++; }
+        var lb = AK8_UI.injLabelN(h, bokN); h = lb.html; bokN += lb.antal;   // en etikettkälla (tallinjeraderna bär egna a)/b))
         html += h;
       });
       html += '</div>';
@@ -310,7 +310,7 @@
       } else if(res.valjflera){
         el.querySelectorAll('.ak8-vf').forEach(function(b){ var sel = b.classList.contains('sel'), rat = b.dataset.ratt === '1'; if(sel && rat) b.classList.add('ratt'); else if(sel !== rat) b.classList.add('fel'); });
       } else {
-        el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
+        AK8_UI.markeraRutor(el, res);   // per ruta (res.per) — raden ✓ bara om alla rätt
       }
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);
       if(res.ok){ ratt++; }

@@ -205,7 +205,7 @@
       if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
       if(res.korval){ var s = el.querySelector('.ak8-korval.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel'); }
       else if(res.ordna){ el.querySelector('.ak8-ordna').classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram'); }
-      else { el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
+      else { AK8_UI.markeraRutor(el, res); }   // per ruta när checken ger res.per
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);
       if(res.ok){ ratt++; }
       else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = (res.besked ? res.besked + ' ' : '') + 'rätt: ' + res.facit; (el.closest('.ak8-rad') || el).appendChild(f); }

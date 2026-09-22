@@ -98,8 +98,8 @@
     CHECKS.push(function(el){
       var mel = evalArith(el.querySelector('.ak8-mel').value);
       var sv = pNum(el.querySelector('.ak8-sv').value);
-      var ok = likhetOk(mel, r.svar) && likhetOk(sv, r.svar);
-      return { ok: ok, facit: r.facit };
+      var per = [likhetOk(mel, r.svar), likhetOk(sv, r.svar)];   // per ruta: mellanled, svar
+      return { ok: per[0] && per[1], per: per, facit: r.facit };
     });
     return '<div class="ak8-rad"><span class="ak8-q">' + r.vanster + '</span>'
       + '<span class="ak8-svar" data-idx="' + idx + '">'
@@ -126,7 +126,7 @@
       var res = CHECKS[+el.dataset.idx](el);
       tot++;
       if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
-      el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
+      el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.remove('ak8-ok', 'ak8-fel'); }); AK8_UI.markeraRutor(el, res);   // per ruta (res.per) — raden ✓ bara om alla rätt
       var rad = el.closest('.ak8-rad'); AK8_UI.markera(rad || el, res.ok);
       var old = rad && rad.querySelector('.ak8-fasit'); if(old) old.remove();
       if(res.ok) ratt++;

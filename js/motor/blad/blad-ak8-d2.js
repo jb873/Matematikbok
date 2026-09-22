@@ -189,8 +189,8 @@
         // på omskrivningen → godtar valfri giltig form), så metodsteget krävs men skrivsättet är fritt.
         CHECKS.push(function(el){
           var ins = el.querySelectorAll('.ak8-in');
-          var oms = evalArith(ins[0].value), sv = pNum(ins[1].value);
-          return { ok: likhetOk(oms, r.facit) && likhetOk(sv, r.facit), facit: skrivOm(r.fraga) + ' ' + fmt(r.facit) };
+          var oms = evalArith(ins[0].value), sv = pNum(ins[1].value), per = [likhetOk(oms, r.facit), likhetOk(sv, r.facit)];
+          return { ok: per[0] && per[1], per: per, facit: skrivOm(r.fraga) + ' ' + fmt(r.facit) };
         });
         return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">'
           + '<input class="ak8-in ak8-in-oms" inputmode="text" autocomplete="off" placeholder="skriv om" style="width:96px;">'
@@ -231,12 +231,12 @@
       return '<div class="ak8-rad"><span class="ak8-svar ak8-ordna" data-idx="' + idx + '">' + tal + '</span></div>';
     }
     if(r.typ === 'foljd'){
-      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true; r.facit.forEach(function(f, i){ if(!likhetOk(pNum(ins[i].value), f)) ok = false; }); return { ok: ok, facit: r.facit.map(fmt).join(', ') }; });
+      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, per = []; r.facit.forEach(function(f, i){ var o = likhetOk(pNum(ins[i].value), f); per.push(o); if(!o) ok = false; }); return { ok: ok, per: per, facit: r.facit.map(fmt).join(', ') }; });
       var boxar = r.facit.map(function(){ return inTal(); }).join('<span class="ovn-text" style="margin:0 4px;">,</span>');
       return '<div class="ak8-rad"><span class="ak8-q">' + r.pre + '</span><span class="ak8-svar" data-idx="' + idx + '">' + boxar + '</span></div>';
     }
     if(r.typ === 'mellan'){
-      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'); var ok = likhetOk(pNum(ins[0].value), r.posSum) && likhetOk(pNum(ins[1].value), r.negSum) && likhetOk(pNum(ins[2].value), r.svar); return { ok: ok, facit: fmt(r.posSum) + ' − ' + fmt(r.negSum) + ' = ' + fmt(r.svar) }; });
+      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'); var per = [likhetOk(pNum(ins[0].value), r.posSum), likhetOk(pNum(ins[1].value), r.negSum), likhetOk(pNum(ins[2].value), r.svar)], ok = per[0] && per[1] && per[2]; return { ok: ok, per: per, facit: fmt(r.posSum) + ' − ' + fmt(r.negSum) + ' = ' + fmt(r.svar) }; });
       var scaff = '<span class="ovn-text">= </span>' + inTal() + '<span class="ovn-text" style="margin:0 6px;">−</span>' + inTal() + '<span class="ovn-text" style="margin:0 6px;">= </span>' + inTal();
       return '<div class="ak8-rad"><span class="ak8-q">' + r.expr + '</span><span class="ak8-svar" data-idx="' + idx + '">' + scaff + '</span>'
         + (r.flagg ? '<span class="ak8-flagg" title="' + r.flagg + '">⚑</span>' : '') + '</div>';
@@ -265,11 +265,11 @@
         html += '<div class="ak8-tallinje">' + pre + (window.SvgTallinje ? window.SvgTallinje.linje(lin) : '') + '</div>';
         html += '<div class="ak8-avlas-rad">' + lin.punkter.map(function(p){ varden.push(p.v); return '<span class="ak8-avlas-in">' + p.namn + ' = <input class="ak8-in ak8-in-sm"></span>'; }).join('') + '</div>';
       });
-      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, fac = []; varden.forEach(function(v, i){ if(!likhetOk(pNum(ins[i].value), v)) ok = false; fac.push(fmt(v)); }); return { ok: ok, facit: fac.join(', ') }; });
+      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, fac = [], per = []; varden.forEach(function(v, i){ var o = likhetOk(pNum(ins[i].value), v); per.push(o); if(!o) ok = false; fac.push(fmt(v)); }); return { ok: ok, per: per, facit: fac.join(', ') }; });
       return '<div class="ak8-rad ak8-rad-fig"><span class="ak8-svar" data-idx="' + idx + '">' + html + '</span></div>';
     }
     if(r.typ === 'avstand'){
-      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, fac = []; r.par.forEach(function(pp, i){ var d = Math.round(Math.abs(pp[2] - pp[3]) * 1e6) / 1e6; if(!likhetOk(pNum(ins[i].value), d)) ok = false; fac.push(fmt(d)); }); return { ok: ok, facit: fac.join(', ') }; });
+      CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, fac = [], per = []; r.par.forEach(function(pp, i){ var d = Math.round(Math.abs(pp[2] - pp[3]) * 1e6) / 1e6; var o = likhetOk(pNum(ins[i].value), d); per.push(o); if(!o) ok = false; fac.push(fmt(d)); }); return { ok: ok, per: per, facit: fac.join(', ') }; });
       var h2 = r.par.map(function(pp){ return '<span class="ak8-avlas-in">' + pp[0] + ' och ' + pp[1] + ': <input class="ak8-in ak8-in-sm"></span>'; }).join('');
       return '<div class="ak8-rad"><span class="ak8-svar" data-idx="' + idx + '">' + h2 + '</span></div>';
     }
@@ -298,7 +298,7 @@
       var bokN = 0;
       u.rader.forEach(function(r){
         var h = renderRad(r);
-        if(/^<div class="ak8-rad[^"]*">/.test(h)){ h = AK8_UI.injLabel(h, bokN); bokN++; }
+        var lb = AK8_UI.injLabelN(h, bokN); h = lb.html; bokN += lb.antal;   // en etikettkälla (tallinjeraderna bär egna a)/b))
         html += h;
       });
       html += '</div>';
@@ -353,7 +353,7 @@
       var old = el.parentNode.querySelector('.ak8-fasit'); if(old) old.remove();
       if(res.chip){ el.querySelectorAll('.ak8-chip').forEach(function(c){ c.style.pointerEvents = 'none'; if(c.classList.contains('sel')) c.classList.add(res.ok ? 'ratt' : 'fel'); }); }
       else if(el.classList.contains('ak8-ordna')){ el.querySelectorAll('.ak8-tal').forEach(function(b){ b.style.pointerEvents = 'none'; }); el.classList.add(res.ok ? 'ak8-ok-ram' : 'ak8-fel-ram'); }
-      else { el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
+      else { AK8_UI.markeraRutor(el, res); }   // per ruta (res.per) — raden ✓ bara om alla rätt
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);
       if(res.ok) ratt++;
       else if(res.facit){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = 'rätt: ' + res.facit; (el.closest('.ak8-rad') || el).appendChild(f); }

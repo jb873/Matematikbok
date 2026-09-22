@@ -288,14 +288,14 @@
       if(r.stil === 'br'){
         CHECKS.push(function(el){
           var mel = AK8_UI.cellRead(el, 'mel').num, sv = AK8_UI.cellRead(el, 'sv').num, mal = r.ft / r.fn;
-          return { ok: likhetOk(mel, mal) && likhetOk(sv, mal), facit: r.facit };
+          var pc = { mel: likhetOk(mel, mal), sv: likhetOk(sv, mal) }; return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
         });
         svarHtml = AK8_UI.ansCell('mel', 'mellanled') + eq + AK8_UI.ansCell('sv', 'svar');
       } else if(r.stil === 'par'){
         // Parentes: mellanledet är en potens (eleven bygger bas^exp), svaret ett värde.
         CHECKS.push(function(el){
           var mel = AK8_UI.cellRead(el, 'mel'), sv = AK8_UI.cellRead(el, 'sv').num;
-          return { ok: mel.kind === 'pot' && likhetOk(mel.base, r.basval) && likhetOk(mel.exp, r.exp) && likhetOk(sv, r.svar), facit: r.facit };
+          var pc = { mel: mel.kind === 'pot' && likhetOk(mel.base, r.basval) && likhetOk(mel.exp, r.exp), sv: likhetOk(sv, r.svar) }; return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
         });
         // FAS4: förrenderad tvåfälts-potens (bas + upphöjd exponent) i st f en avklippt "bas^exp"-ruta.
         svarHtml = AK8_UI.potAnsCell('mel', 'bas', 'n') + eq + AK8_UI.ansCell('sv', 'svar');
@@ -304,8 +304,8 @@
         // svaret = bas^(uträknad exponent, t.ex. 9). Basen skrivs av eleven, ingen förtryckt bas.
         CHECKS.push(function(el){
           var mel = AK8_UI.cellRead(el, 'mel'), sv = AK8_UI.cellRead(el, 'sv');
-          return { ok: mel.kind === 'pot' && likhetOk(mel.base, r.bas) && likhetOk(mel.exp, r.svarExp)
-                    && sv.kind === 'pot' && likhetOk(sv.base, r.bas) && likhetOk(sv.exp, r.svarExp), facit: r.facit };
+          var pc = { mel: mel.kind === 'pot' && likhetOk(mel.base, r.bas) && likhetOk(mel.exp, r.svarExp), sv: sv.kind === 'pot' && likhetOk(sv.base, r.bas) && likhetOk(sv.exp, r.svarExp) };
+          return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
         });
         // FAS4: två fält per led. Mellanledets exp-fält bredare + platshållare "uttryck" (oberäknat, 4+5),
         // svarets exp-fält smalt + "tal" (uträknat, 9). Grupp-rubriken förklarar skillnaden.
@@ -313,7 +313,7 @@
       } else {   // 'ev'
         CHECKS.push(function(el){
           var mel = AK8_UI.cellRead(el, 'mel').num, sv = AK8_UI.cellRead(el, 'sv').num;
-          return { ok: likhetOk(mel, r.svar) && likhetOk(sv, r.svar), facit: r.facit };
+          var pc = { mel: likhetOk(mel, r.svar), sv: likhetOk(sv, r.svar) }; return { ok: pc.mel && pc.sv, perCell: pc, facit: r.facit };
         });
         svarHtml = AK8_UI.ansCell('mel', 'mellanled') + eq + AK8_UI.ansCell('sv', 'svar');
       }
@@ -351,7 +351,7 @@
       CHECKS.push(function(el){
         var ins = el.querySelectorAll('.ak8-in'), b = ins[0].value.trim().replace(',', '.'), e = pNum(ins[1].value);
         var bok = ('' + r.bas).replace(',', '.'), okB = isNaN(pFaktor(bok)) ? b.toLowerCase() === bok.toLowerCase() : likhetOk(pFaktor(b), pFaktor(bok));
-        return { ok: okB && likhetOk(e, r.exp), facit: r.bas + '^' + r.exp };
+        return { ok: okB && likhetOk(e, r.exp), per: [okB, likhetOk(e, r.exp)], facit: r.bas + '^' + r.exp };
       });
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + ' =</span><span class="ak8-svar" data-idx="' + idx + '"><span class="pot">' + inTal(true) + '<sup>' + inTal(true) + '</sup></span></span></div>';
     }
@@ -374,7 +374,7 @@
       CHECKS.push(function(el){
         var ins = el.querySelectorAll('.ak8-in'), b = ins[0].value.trim().replace(',', '.'), e = pNum(ins[1].value);
         var bok = ('' + r.bas).replace(',', '.'), okB = isNaN(pFaktor(bok)) ? b.toLowerCase() === bok.toLowerCase() : likhetOk(pFaktor(b), pFaktor(bok));
-        return { ok: okB && likhetOk(e, r.exp), facit: r.bas + '^' + r.exp };
+        return { ok: okB && likhetOk(e, r.exp), per: [okB, likhetOk(e, r.exp)], facit: r.bas + '^' + r.exp };
       });
       var svg = '<svg viewBox="0 0 120 120" width="96" height="96" class="ak8-kvadrat"><rect x="18" y="18" width="84" height="84" fill="none" stroke="#0f1e2e" stroke-width="2"/><text x="60" y="14" text-anchor="middle" font-size="13" fill="#3d3630">' + r.sida + '</text><text x="10" y="64" text-anchor="middle" font-size="13" fill="#3d3630">' + r.sida + '</text></svg>';
       return '<div class="ak8-rad ak8-rad-fig"><span class="ak8-svar" data-idx="' + idx + '">' + svg + '<span class="ak8-figsvar">Area = <span class="pot">' + inTal(true) + '<sup>' + inTal(true) + '</sup></span></span></span></div>';
@@ -432,7 +432,7 @@
       tot++;
       if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
       if(res.korval){ var s = el.querySelector('.ak8-korval.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel'); }
-      else { el.querySelectorAll('.ak8-in').forEach(function(i){ i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
+      else { AK8_UI.markeraRutor(el, res); }   // per ruta/cell (res.per / res.perCell) — raden ✓ bara om alla rätt
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);   // ✓/✗-bock + puls (ingen låsning → retry)
       if(res.ok){ ratt++; }
       else if(!res.tabell && !el.querySelector('.ak8-fasit')){

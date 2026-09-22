@@ -46,6 +46,10 @@
 //
 // Rad-lista grupperas av {grupp:'Beräkna', rader:[...]}.
 
+// EGNA MARKERINGAR (order 2026-09-21): i en rad med flera rutor rensar varje ruta bara de ✓/✗ + facit som står
+// direkt efter DEN rutan. Förr rensades hela radens/förälderns markeringar per ruta → bara sista rutans bock blev
+// kvar, och en rad med A, B fel och C rätt visade ✓ (grön rad med fel kvar).
+function egnaMarken(inp){ var nxt = inp.nextElementSibling; while(nxt && nxt.classList && (nxt.classList.contains('ovn-mark') || nxt.classList.contains('ovn-fasit'))){ var t = nxt; nxt = nxt.nextElementSibling; t.remove(); } }
 function jamforTal(a, b){
   // tillåt komma eller punkt, ignorera mellanslag
   if(a == null) return false;
@@ -806,8 +810,7 @@ function bygg_blad(rotEl, blad){
     inp.addEventListener('focus', function(){ fokus = i; });
     inp.addEventListener('input', function(){
       inp.classList.remove('correct','wrong');
-      var f = inp.parentElement.querySelector('.ovn-fasit');
-      if(f) f.remove();
+      egnaMarken(inp);   // rutans egen ✓/✗ + facit bort vid ändring (inte grannarnas)
       // Auto-mellanrum runt + och − i mellanled-fält (data-form)
       if(inp.dataset.form !== undefined){
         var pos = inp.selectionStart;
@@ -899,8 +902,8 @@ function bygg_blad(rotEl, blad){
       : inputs;
     aktivaInputs.forEach(function(inp){
       var rad = inp.parentElement;
-      // Ta bort eventuella tidigare fasit-spans och markeringar
-      rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
+      // Ta bort rutans EGNA tidigare fasit + markering (inte grannarnas — se egnaMarken)
+      egnaMarken(inp);
       inp.classList.remove('correct','wrong','just-checked');
       var ok;
       if(inp.dataset.uttryck !== undefined){
