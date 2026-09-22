@@ -159,6 +159,8 @@ const PROBE7 = `(function(){
   function visaSheet(sh){ if(synlig(sh)) return true; var tabs = Array.from(document.querySelectorAll('.tab-btn')), navs = Array.from(document.querySelectorAll('.blad-nav-btn'));
     for(var a = 0; a < tabs.length; a++){ tabs[a].click(); if(synlig(sh)) return true; for(var c = 0; c < navs.length; c++){ navs[c].click(); if(synlig(sh)) return true; } } return false; }
   Array.from(document.querySelectorAll('.ovn-sheet')).forEach(function(sh, i){ var h = sh.querySelector('h2'); var namn = (h ? h.textContent.trim() : 'blad ' + (i + 1)).slice(0, 28); if(!visaSheet(sh)){ ut.blad.push({ blad: namn, onabar: true }); return; } mat(namn, sh.parentElement); });
+  // Plugg till prov (k1/d10, k3/d7): dokumenten renderas först vid klick → öppna varje grupp + dokument och mät bladet som skapas
+  Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var sh = akt && akt.querySelector('.ovn-sheet'); var namn = ('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 28); if(!sh){ ut.blad.push({ blad: namn, ingenKnapp: true }); return; } mat(namn, sh.parentElement); }); });
   return ut;
 })()`;
 

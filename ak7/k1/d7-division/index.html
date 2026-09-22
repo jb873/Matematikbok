@@ -227,7 +227,7 @@
   var OVA=[
     {titel:'Stora tal', mount:'stora'},
     {titel:'Små tal', mount:'sma'},
-    {titel:'Med förlängning', mount:'smaforl'},
+    {titel:'Med förlängning', mount:'smaforl', kommer:true},   // GRUND_BLAD_SMAFORL har inga rader än (blad-k1-d7.js) → oklickbar tills innehåll finns
     {titel:'Lästal', mount:'lastal'}
   ];
   var navEl=document.getElementById('blad-nav');
@@ -238,6 +238,7 @@
       mounts[i]=document.getElementById('blad-'+b.mount);
       var btn=document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn'; btn.setAttribute('role','tab'); btn.title=b.titel;
       btn.innerHTML='<span class="blad-nav-nr">'+(i+1)+'</span>'+b.titel;
+      if(b.kommer){ btn.classList.add('is-kommer'); btn.disabled=true; btn.setAttribute('aria-disabled','true'); }   // tomt blad: platsen syns, men leder inte in i tomrum (samma regel som färdighetskortens visning.kommer)
       btn.onclick=function(){ visa(i); };
       navEl.appendChild(btn); knappar[i]=btn;
     });

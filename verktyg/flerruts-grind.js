@@ -65,6 +65,8 @@ const PROBE7 = `(function(){
     ut.blad.push(b);
   }
   Array.from(document.querySelectorAll('.ovn-sheet')).forEach(function(sh, i){ var h = sh.querySelector('h2'); mat((h ? h.textContent.trim() : 'blad ' + (i + 1)).slice(0, 30), sh); });
+  // Plugg till prov (k1/d10, k3/d7): dokumenten renderas vid klick → öppna varje grupp + dokument
+  Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var sh = akt && akt.querySelector('.ovn-sheet'); if(sh) mat(('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 30), sh); }); });
   return ut;
 })()`;
 const SIDOR8 = fs.readdirSync(path.join(ROOT, 'ak8/k1')).filter(f => /\.html$/.test(f) && f !== 'index.html').map(f => ['ak8/k1/' + f, PROBE8]);

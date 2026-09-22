@@ -671,6 +671,7 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .fard-skill-formaga{font-family:var(--cinzel,'Cinzel');font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint,#7a6e65);}
 .fard-skill.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);}
 .fard-skill.is-kommer{opacity:.45;cursor:default;pointer-events:none;}
+.blad-nav-btn.is-kommer, .tab-btn.is-kommer{opacity:.45;cursor:default;pointer-events:none;}   /* tomt blad/flik: syns, leder inte in i tomrum (order 2026-09-22) */
 .fard-skill.is-active .fard-skill-titel{color:#fff;}
 .fard-skill.is-active .fard-skill-formaga{color:var(--gold-lt,#c49a40);}
 .fard-scen{position:sticky;top:14px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-radius:12px;overflow:hidden;min-height:560px;}
