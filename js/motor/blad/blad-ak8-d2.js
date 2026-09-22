@@ -217,7 +217,7 @@
     }
     if(r.typ === 'fracruta'){
       CHECKS.push(function(el){ return { ok: likhetOk(pNum(el.querySelector('.fr-ruta').value), r.facit), facit: fmt(r.facit) }; });
-      return '<div class="ak8-rad"><span class="ak8-svar" data-idx="' + idx + '">' + F.fracRuta(r.fast, { ruta: r.ruta })
+      return '<div class="ak8-rad"><span class="ak8-svar" data-idx="' + idx + '">' + F.fracRuta(r.fast, { ruta: r.ruta, klass: 'ak8-in' })   // ak8-in: annars ser AK8_UI.besvarad/markeraRutor/keypaden inte rutan → raden räknas i nämnaren men rättas aldrig (order 2026-09-22)
         + '<span class="ovn-text" style="margin:0 8px;">= ' + fmt(r.rhs) + '</span></span></div>';
     }
     if(r.typ === 'tecken'){
