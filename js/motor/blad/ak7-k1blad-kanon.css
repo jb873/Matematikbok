@@ -185,3 +185,24 @@
 }
 .tl-valrad{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:8px;flex-wrap:wrap;}
 .tl-valgrid .ovn-val-btn{min-width:62px;height:38px;font-size:16px;}
+
+/* ── Algebra-figurer (svg-algebrafigur.js) + rutfigurer: additionspyramid och magisk kvadrat (k3 d3) ── */
+.alg-bild .af-svg, .af-svg{max-width:300px;width:100%;height:auto;display:block;}   /* .alg-bild svg{max-width:100%} är mer specifik än .af-svg ensam */
+.af-yta{fill:rgba(196,154,64,.16);}
+.af-kant{stroke:var(--navy,#0f1e2e);stroke-width:2;stroke-linejoin:round;}
+.af-matt{font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-style:italic;fill:var(--ink,#2b2620);}
+.af-enhet{font-style:normal;font-size:13px;fill:var(--ink-faint,#7a6e65);}
+.alg-pyramid{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;padding:8px 0;}
+.alg-pyr-rad{display:flex;gap:6px;justify-content:center;}
+.alg-magisk-wrap{display:flex;justify-content:center;width:100%;padding:8px 0;}
+.alg-magisk{display:grid;grid-template-columns:repeat(3,116px);gap:6px;}
+.alg-ruta{min-width:84px;height:42px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Source Serif 4',Georgia,serif;font-size:17px;text-align:center;
+  border:1.5px solid var(--navy,#0f1e2e);border-radius:6px;background:#fff;padding:0 6px;}
+.alg-ruta-fast{background:var(--paper-dk,#ede6d6);font-style:italic;}
+input.alg-ruta{width:100%;}
+.alg-magisk-wrap{flex-direction:column;align-items:center;gap:8px;}
+.alg-magisk-summa{font-family:'Source Serif 4',Georgia,serif;font-size:15px;color:var(--ink-soft,#3d3630);}
+.alg-magisk-summa em{font-style:italic;color:var(--ink,#2b2620);}
+.alg-sidor{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.alg-pyramid .alg-ruta{width:124px;min-width:124px;}   /* lika breda rutor → radernas antal ger pyramidformen */

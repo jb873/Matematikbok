@@ -343,7 +343,7 @@ function bladHTML(blad){
   blad.grupper.forEach(function(grupp, gi){
     // data-logg (valfritt) märker en grupp vars besvarade rutor ska matas till mastery.
     // Utan data-logg loggas ingenting (opt-in) — de fyra äldre bladen rörs inte.
-    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + '>';
+    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + (grupp.loggStore ? ' data-logg-store="' + grupp.loggStore + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     grupp.rader.forEach(function(rad){
       radNummer++;
@@ -648,6 +648,69 @@ function bladHTML(blad){
         var acceptU = (rad.accept || [rad.svar]).join('|');
         html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(acceptU)
           + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder||'uttryck') + '">';
+      } else if(rad.typ === 'forenkla'){
+        // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
+        // Rättas av AlgBrak.gradePoly — värde + skriven form, två åtskilda besked. data-vars öppnar
+        // variabelknapparna på keypaden för just den här rutan.
+        html += '<span class="ovn-text ovn-num">' + (rad.fragaHtml || rad.fraga) + '</span>';
+        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-vars="' + (rad.vars || 'xy')
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="' + (rad.placeholder || 'uttryck') + '">';
+      } else if(rad.typ === 'omkrets'){
+        // OMKRETS UR FIGUR: figuren (SVG ur svg-algebrafigur.js) + ett förenklat uttryck som svar.
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        html += '<div class="alg-bild">' + rad.svg + '</div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html += '<span class="ovn-text">' + (rad.fraga || 'Omkrets') + '</span>';
+        html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-vars="' + (rad.vars || 'xy')
+          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" placeholder="uttryck">';
+        html += '</div></div>';
+      } else if(rad.typ === 'oppet'){
+        // ÖPPET SVAR: eleven skriver ETT EGET uttryck med bestämt antal termer som förenklas till målet.
+        // Många svar är rätt — rättas mot (1) antal termer, (2) värdet. Formen granskas INTE (det ska
+        // vara oförenklat).
+        html += '<span class="ovn-text" style="min-width:150px;">' + (rad.fraga || '') + '</span>';
+        html += '<input class="ovn-in bred" data-oppet="' + encodeURIComponent(rad.mal) + '" data-termer="' + (rad.termer || 4)
+          + '" data-vars="' + (rad.vars || 'x') + '" data-visa="' + rad.mal + '" inputmode="text" autocomplete="off" placeholder="t.ex. 2x + 4x + 7 + 3">';
+      } else if(rad.typ === 'pyramid'){
+        // ADDITIONSPYRAMID: varje ruta = summan av de två under. Rutor med 'fast' är givna, övriga
+        // fylls i. EN RUTA = ETT SVAR (egen markering) — flerrutsrad enligt order 2026-09-21.
+        html += '<div class="alg-pyramid">';
+        rad.rader.forEach(function(r){
+          html += '<div class="alg-pyr-rad">';
+          r.forEach(function(c){
+            html += (c.fast !== undefined)
+              ? '<span class="alg-ruta alg-ruta-fast">' + c.fast + '</span>'
+              : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-vars="' + (rad.vars || 'xy')
+                + '" data-visa="' + c.svar + '" inputmode="text" autocomplete="off">';
+          });
+          html += '</div>';
+        });
+        html += '</div>';
+      } else if(rad.typ === 'magisk'){
+        // MAGISK KVADRAT: rad, kolumn och diagonal ger samma summa = 3 · mittrutan. Lösningen är
+        // entydig ur de givna rutorna (kontrollerat vid konstruktionen) → varje ruta rättas mot sitt
+        // eget värde och visar egen markering.
+        html += '<div class="alg-magisk-wrap">';
+        if(rad.summa) html += '<div class="alg-magisk-summa">Summan: <em>' + rad.summa + '</em></div>';
+        html += '<div class="alg-magisk">';
+        rad.rutor.forEach(function(c){
+          html += (c.fast !== undefined)
+            ? '<span class="alg-ruta alg-ruta-fast">' + c.fast + '</span>'
+            : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-vars="' + (rad.vars || 'xyp')
+              + '" data-visa="' + c.svar + '" inputmode="text" autocomplete="off">';
+        });
+        html += '</div></div>';
+      } else if(rad.typ === 'sidor'){
+        // ÖPPEN OMKRETS (C5): figuren + TVÅ sidor som tillsammans ska ge den angivna omkretsen.
+        // Paret är svaret → båda rutorna får samma markering, men var och en visar den själv.
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
+        html += '<div class="alg-sidor" data-halva="' + encodeURIComponent(rad.halva) + '" data-visa="' + rad.visa + '">';
+        html += '<input class="ovn-in bred" data-sida="1" data-vars="' + (rad.vars || 'x') + '" inputmode="text" autocomplete="off" placeholder="en sida">';
+        html += '<span class="ovn-text" style="margin:0 6px;">och</span>';
+        html += '<input class="ovn-in bred" data-sida="2" data-vars="' + (rad.vars || 'x') + '" inputmode="text" autocomplete="off" placeholder="andra sidan">';
+        html += '</div></div>';
       } else if(rad.typ === 'ordtext'){
         // fritext som tolkning (rättas mot lista av godkända formuleringar)
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
@@ -900,13 +963,28 @@ function bygg_blad(rotEl, blad){
     var aktivaInputs = blad.stegvis
       ? inputs.filter(function(inp){ var g = inp.closest('.ovn-grupp'); return g && !g.classList.contains('steg-dold'); })
       : inputs;
+    // Sid-paret (typ 'sidor') rättas som PAR i en egen loop nedan — hoppas över här, annars räknas
+    // rutorna en gång till i nämnaren och facit-kedjan saknar data-svar.
+    aktivaInputs = aktivaInputs.filter(function(inp){ return inp.dataset.sida === undefined; });
     aktivaInputs.forEach(function(inp){
       var rad = inp.parentElement;
       // Ta bort rutans EGNA tidigare fasit + markering (inte grannarnas — se egnaMarken)
       egnaMarken(inp);
       inp.classList.remove('correct','wrong','just-checked');
-      var ok;
-      if(inp.dataset.uttryck !== undefined){
+      var ok, _besked = null;
+      if(inp.dataset.forenkla !== undefined){
+        // FÖRENKLA: värde + skriven form (AlgBrak.gradePoly). 'form' = rätt värde men inte förenklat
+        // → räknas som fel, men beskedet talar om VAD som är kvar att göra (samma två lägen som bråken).
+        var _rf = window.AlgBrak ? window.AlgBrak.gradePoly(inp.value, decodeURIComponent(inp.dataset.forenkla)) : { status: 'fel' };
+        ok = _rf.status === 'ratt';
+        if(_rf.status === 'form') _besked = _rf.besked;
+        else if(_rf.parsefel) _besked = _rf.besked;
+      } else if(inp.dataset.oppet !== undefined){
+        // ÖPPET SVAR: eget uttryck med bestämt antal termer som förenklas till målet.
+        var _ro = window.AlgBrak ? window.AlgBrak.gradeOppet(inp.value, decodeURIComponent(inp.dataset.oppet), parseInt(inp.dataset.termer, 10)) : { status: 'fel' };
+        ok = _ro.status === 'ratt';
+        if(_ro.besked) _besked = _ro.besked;
+      } else if(inp.dataset.uttryck !== undefined){
         var godk = decodeURIComponent(inp.dataset.uttryck).split('|');
         ok = jamforUttryck(inp.value, godk)
           || godk.some(function(g){ return jamforForenkla(inp.value, g); })
@@ -995,9 +1073,12 @@ function bygg_blad(rotEl, blad){
       // upprepade Kontrollera-klick i samma pass, så retention inte blåses upp.
       var _grEl = inp.closest('.ovn-grupp');
       var _loggNod = _grEl && _grEl.getAttribute('data-logg');
+      // STORE-ROUTE: k1-taxonomin bor i window.Mastery, k3 (algebra) i window.MasteryK3. Utan route
+      // hamnade algebra-evidensen i k1-storen. data-logg-store sätts av bladets data (grupp.loggStore).
+      var _store = (_grEl && _grEl.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
       // Omskrivningscellen (data-oms) loggas EJ separat — annars två evidens per uppgift; svarscellen bär loggen.
-      if(_loggNod && inp.dataset.oms === undefined && String(inp.value).trim() !== '' && window.Mastery && window.Mastery.loggaForsok){
-        window.Mastery.loggaForsok(_loggNod, ok ? 'ratt' : 'fel');
+      if(_loggNod && inp.dataset.oms === undefined && String(inp.value).trim() !== '' && _store && _store.loggaForsok){
+        _store.loggaForsok(_loggNod, ok ? 'ratt' : 'fel');
       }
       // Bocken/krysset – stor, syns tydligt
       var mark = document.createElement('span');
@@ -1024,10 +1105,12 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.intmin !== undefined) facit = 'ett tal mellan ' + String(parseFloat(inp.dataset.intmin)).replace('.', ',') + ' och ' + String(parseFloat(inp.dataset.intmax)).replace('.', ',');
         else if(inp.dataset.faktor !== undefined) facit = 'produkt = ' + parseInt(inp.dataset.faktor, 10) + ', ' + parseInt(inp.dataset.antal, 10) + ' faktorer (minst 2 var)';
         else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
+        else if(inp.dataset.forenkla !== undefined) facit = inp.dataset.visa;
+        else if(inp.dataset.oppet !== undefined) facit = 'ett eget uttryck med ' + inp.dataset.termer + ' termer som förenklas till ' + inp.dataset.visa;
         else facit = inp.dataset.svar.replace('.', ',');
         var f = document.createElement('span');
         f.className = 'ovn-fasit';
-        f.textContent = 'rätt svar: ' + facit;
+        f.textContent = _besked ? _besked : ('rätt svar: ' + facit);   // 'form'-läget: beskedet i stället för facit (eleven har rätt värde)
         inp.insertAdjacentElement('afterend', mark);
         mark.insertAdjacentElement('afterend', f);
       }
@@ -1058,6 +1141,31 @@ function bygg_blad(rotEl, blad){
       var ok = allaValdaRatt && (flera ? valda.length===antalRatta : valda.length===1);
       if(ok) ratt++;
     });
+    // Rätta öppna sid-par (typ 'sidor'): a + b = halva omkretsen. Paret = ETT svar i nämnaren,
+    // men båda rutorna får sin egen markering (flerruts-regeln).
+    rotEl.querySelectorAll('.alg-sidor').forEach(function(box){
+      totalt++;
+      var a = box.querySelector('[data-sida="1"]'), b = box.querySelector('[data-sida="2"]');
+      [a, b].forEach(function(i){ i.classList.remove('correct', 'wrong', 'just-checked'); egnaMarken(i); });
+      if(!String(a.value).trim() && !String(b.value).trim()) return;   // obesvarad: räknad, men inte rättad
+      var res = window.AlgBrak ? window.AlgBrak.gradeSidor(a.value, b.value, decodeURIComponent(box.dataset.halva)) : { status: 'fel' };
+      var okS = res.status === 'ratt';
+      [a, b].forEach(function(i){
+        i.classList.add(okS ? 'correct' : 'wrong', 'just-checked');
+        var mk = document.createElement('span'); mk.className = 'ovn-mark ' + (okS ? 'ok' : 'fel'); mk.textContent = okS ? '✓' : '✗';
+        i.insertAdjacentElement('afterend', mk);
+      });
+      if(okS) ratt++;
+      else {
+        var fs2 = document.createElement('span'); fs2.className = 'ovn-fasit';
+        fs2.textContent = res.besked || ('sidorna ska tillsammans ge omkretsen ' + box.dataset.visa);
+        box.appendChild(fs2);
+      }
+      var _gr = box.closest('.ovn-grupp'), _nod = _gr && _gr.getAttribute('data-logg');
+      var _st = (_gr && _gr.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
+      if(_nod && _st && _st.loggaForsok) _st.loggaForsok(_nod, okS ? 'ratt' : 'fel');
+    });
+
     // Rätta flervalsfrågor
     rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
       totalt++;

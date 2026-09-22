@@ -79,6 +79,9 @@
 .keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px;}
 .keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
 .keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start;}
+.keypad-vars{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
+.kp-key.varkey{color:var(--navy,#0f1e2e);font-style:italic;}
+@media (max-width:430px){ /* keypad-smal: allt ryms på EN rad även på telefon */ .keypad{gap:4px;padding:8px 6px;} .keypad-vars{grid-template-columns:repeat(2,40px);} }
 .kp-inactive{opacity:.5;pointer-events:none;cursor:default;}
 .kp-key{height:40px;border:1.5px solid var(--paper-dk);border-radius:8px;background:#fff;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);cursor:pointer;transition:transform .08s,background .1s;display:flex;align-items:center;justify-content:center;user-select:none;}
 .kp-key:hover{background:var(--paper-dk);}

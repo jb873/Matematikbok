@@ -363,6 +363,8 @@
       bygg = expr;
     }
     if(uttryck){ till['+'] = 1; till['·'] = 1; till['/'] = 1; till['('] = 1; till[')'] = 1; }
+    var vars = inp && inp.dataset && inp.dataset.vars;   // data-vars="xy" → just de variablerna aktiva (algebra); saknas → alla grå
+    if(vars) ('' + vars).split('').forEach(function(v){ if(VARIABLER.indexOf(v) > -1) till[v] = 1; });
     if(bygg){ till['frac'] = 1; till['pot'] = 1; }   // EN bråkknapp (order 2026-09-21): komplexbråket byggs med samma knapp inne i täljare/nämnare
     return till;
   }
@@ -378,6 +380,7 @@
   }
 
   // ── KEYPAD ──  opts: { ops:[...], builders:bool }
+  var VARIABLER = ['x', 'y', 'a', 'b', 'p'];   // samma uppsättning som algebra-rättaren (alg-brak.js VARS)
   var FRAC_ICON = '<span class="kp-frac"><span class="kp-frac-t"></span><span class="kp-frac-l"></span><span class="kp-frac-n"></span></span>';
   var POT_ICON = '<span class="kp-pot"><span class="kp-pot-b"></span><span class="kp-pot-e"></span></span>';
   // Staplat komplex-bråk: två små bråk-glyfer kring ett tjockt streck (delad byggsten).
@@ -401,6 +404,13 @@
     ['+', '−', '·', '/'].forEach(function(o){ html += k(o, o, 'op'); });
     html += k('(', '(', 'op kp-inactive') + k(')', ')', 'op kp-inactive');
     html += k('√', '√', 'op kp-inactive') + k('π', 'π', 'op kp-inactive');
+    html += '</div>';
+    // Variabler (2 kol × 3 rader — lägre än sifferblocket → keypadens HÖJD oförändrad). Algebra kräver
+    // bokstäver; en elev på surfplatta kunde annars inte skriva ett algebraiskt svar alls. Grå tills rutan
+    // säger vilka som gäller (data-vars), samma princip som ( ) √ π.
+    var aktivaVars = ('' + (opts.vars || '')).split('');
+    html += '<div class="keypad-vars">';
+    VARIABLER.forEach(function(v){ html += k(v, v, 'varkey' + (aktivaVars.indexOf(v) > -1 ? '' : ' kp-inactive')); });
     html += '</div>';
     // Byggare (1 smal kol): bråk ÖVER potens. Grå tills builder-kontext (opts.builders).
     var bi = opts.builders ? '' : ' kp-inactive';

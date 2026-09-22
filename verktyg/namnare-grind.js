@@ -129,6 +129,16 @@ const PROBE7 = `(function(){
     else if(d.tvatal !== undefined){ var par = Array.from(inp.closest('.ovn-rad, .ovn-grupp').querySelectorAll('.ovn-in[data-tvatal]')); v = String(d.tvatal.split(',')[par.indexOf(inp) % 2] || d.tvatal.split(',')[0]).replace('.', ','); }
     else if(d.min !== undefined){ var lo = parseFloat(d.min), hi = parseFloat(d.max), p2 = Array.from(inp.closest('.ovn-grupp, .ovn-rad').querySelectorAll('.ovn-intervall[data-par="' + d.par + '"]')); v = String(lo + (hi - lo) * (p2.indexOf(inp) === 1 ? 0.6 : 0.4)).replace('.', ','); }
     else if(d.summa !== undefined){ var s = parseFloat(d.summa), grp = Array.from(inp.closest('.ovn-rad, .ovn-grupp').querySelectorAll('.ovn-in[data-summa]')); var k = grp.indexOf(inp), n = grp.length; v = String(k === n - 1 ? s - (n - 1) : 1); }
+    else if(d.forenkla !== undefined) v = d.visa;                                   // k3 d3: förenklat uttryck (facit i data-visa)
+    else if(d.oppet !== undefined){                                                 // eget uttryck med n termer som förenklas till målet
+      var mm = dec(d.oppet).replace(/\\u2212/g, '-').replace(/\\s+/g, '').match(/^(-?\\d*)([a-z])([+-]\\d+)$/);
+      if(mm){ var kk = mm[1] === '' ? 1 : (mm[1] === '-' ? -1 : parseInt(mm[1], 10)), kn = parseInt(mm[3], 10);
+        v = (kk - 1) + mm[2] + ' + ' + mm[2] + ' + ' + (kn - 1) + ' + 1'; }
+    }
+    else if(d.sida !== undefined){                                                  // öppet sid-par: a + b = halva omkretsen
+      var box = inp.closest('.alg-sidor'), halva = box ? dec(box.dataset.halva) : '';
+      v = d.sida === '1' ? '1' : (halva ? halva + ' - 1' : null);
+    }
     else if(d.oms !== undefined) v = String(d.oms).replace('.', ',');
     else if(d.text !== undefined) v = d.visa || dec(d.text).split('|')[0];
     else if(d.mellan !== undefined) v = d.mellan;
@@ -165,7 +175,7 @@ const PROBE7 = `(function(){
 })()`;
 
 const SIDOR8 = fs.readdirSync(path.join(ROOT, 'ak8/k1')).filter(f => /\.html$/.test(f) && f !== 'index.html').map(f => 'ak8/k1/' + f);
-const SIDOR7 = ['ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => p + '/index.html');
+const SIDOR7 = ['ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => p + '/index.html');
 const TMP = path.join(os.tmpdir(), 'namnare-' + process.pid);
 function kor(sida, probe, seed){
   const pf = TMP + '-probe.js', pre = TMP + '-pre.js'; fs.writeFileSync(pf, probe); fs.writeFileSync(pre, PRE(seed));

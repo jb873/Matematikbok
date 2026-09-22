@@ -1862,7 +1862,10 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 #test-take-body{}     /* keypad-clearance.js reserverar body-padding mätt mot keypaden */
 .keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px}
 .keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start}   /* kompakt: 2 kolumner (⌫ sist) i st f en hög enkolumn */
-.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start}   /* smal byggar-kolumn: bråk över potens */
+.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start}
+.keypad-vars{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
+.kp-key.varkey{color:var(--navy,#0f1e2e);font-style:italic;}
+@media (max-width:430px){ /* keypad-smal: allt ryms på EN rad även på telefon */ .keypad{gap:4px;padding:8px 6px;} .keypad-vars{grid-template-columns:repeat(2,40px);} }   /* smal byggar-kolumn: bråk över potens */
 .kp-inactive{opacity:.5;pointer-events:none;cursor:default}   /* grå, syns men går ej att klicka (fast layout) */
 .keypad-ops.wide2{grid-template-columns:repeat(2,42px)}
 .kp-key{
