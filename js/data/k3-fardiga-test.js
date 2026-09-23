@@ -15,11 +15,16 @@
   var TYP_PER_NOD = { 'alg-tolka:begrepp': 3, 'alg-skriva:kommunikation': 4, 'alg-berakna:rakna': 2 };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 
+  // utbudslista = sträng ELLER lista (samma nod i flera kapitel — sjuans nivå 1, åttans nivåkapitel).
+  function iUtbud(visning, del){
+    var u = visning && visning.utbudslista;
+    return Array.isArray(u) ? u.indexOf(del) >= 0 : u === del;
+  }
   function byggbaraNoder(del){
     var tax = window.K3_TAXONOMI; if(!tax || !tax.noder) return [];
     var ut = [];
     tax.noder.forEach(function(n){
-      if(n.visning && n.visning.utbudslista === del && BYGGBARA[n.id] && ut.indexOf(n.id) < 0) ut.push(n.id);
+      if(n.visning && iUtbud(n.visning, del) && BYGGBARA[n.id] && ut.indexOf(n.id) < 0) ut.push(n.id);
     });
     return ut;
   }

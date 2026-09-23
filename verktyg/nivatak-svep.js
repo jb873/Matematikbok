@@ -109,13 +109,19 @@ function taxNoder(kap) {
 }
 
 // ── analys ──
-const rows = [], saknade = [];
+const rows = [], saknade = [], kommerUtanDrill = [];
 [['k1', k1Deeplinks()], ['k2', k2Deeplinks()], ['k3', k3Deeplinks()]].forEach(([kap, links]) => {
   const noder = taxNoder(kap); const text = TEXT[kap];
   const perNod = {}; links.forEach(l => { const k = l.nod || l.ko; (perNod[k] = perNod[k] || []).push(l); });
   Object.keys(noder).forEach(nod => {
     const ls = perNod[nod] || perNod[nod.split(':')[0]]; const vis = noder[nod].vis;   // k2: ko-nyckel
-    if (!ls) { saknade.push(kap + ' ' + nod + ' (kort utan deeplink-post)'); return; }
+    if (!ls) {
+      // visning.kommer = platsen är deklarerad men innehållet är inte byggt (hubben visar kortet
+      // disabled). Det är inte ett kort som leder in i tomrum — räknas separat, inte som brott.
+      if (vis && vis.kommer) kommerUtanDrill.push(kap + ' ' + nod);
+      else saknade.push(kap + ' ' + nod + ' (kort utan deeplink-post)');
+      return;
+    }
     ls.forEach(l => {
       let body = l.fn.startsWith('balans:') ? null : fnBody(text, l.fn);
       let via = null;
@@ -169,12 +175,13 @@ const rows = [], saknade = [];
     });
   });
 });
-module.exports = { rows, saknade };
+module.exports = { rows, saknade, kommerUtanDrill };
 if (require.main === module) {
 const fel = rows.filter(r => r.flaggor.length);
 console.log('NIVÅTAK-SVEP — ' + rows.length + ' deeplinkar (k1/k2/k3) · ' + fel.length + ' med flaggor\n');
 console.log('kap  nod                                 render                              tak  (källa)            nivåer  band (källa)         evidens         flaggor');
 (ALLA ? rows : fel).forEach(r => console.log(r.kap.padEnd(4) + ' ' + r.nod.padEnd(35) + ' ' + r.fn.slice(0, 35).padEnd(35) + ' ' + String(r.tak == null ? '?' : r.tak).padEnd(4) + ' ' + ('(' + r.takKalla + ')').padEnd(20) + ' ' + String(r.nivaer == null ? '?' : r.nivaer).padEnd(7) + ' ' + (r.band + ' (' + r.bandKalla + ')').padEnd(20) + ' ' + String(r.evidens).padEnd(15) + ' ' + r.flaggor.join(' ')));
 if (saknade.length) { console.log('\nKort utan deeplink-post i rammen (' + saknade.length + '):'); saknade.forEach(x => console.log('  ' + x)); }
+if (kommerUtanDrill.length) { console.log('\nDeklarerade platser utan drill (visning.kommer, ' + kommerUtanDrill.length + '):'); kommerUtanDrill.forEach(x => console.log('  ' + x)); }
 console.log('\nSumma: ' + rows.length + ' rader · flaggor: ' + ['TAK<BAND', 'TAK>BAND', 'ENNIVÅ', 'NIVA1-MEN-KLÄTTRAR', 'EVIDENS?', 'DUBBEL', '?'].map(f => f + ' ' + rows.filter(r => r.flaggor.includes(f)).length).join(' · '));
 }

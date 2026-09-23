@@ -301,6 +301,7 @@ if (!bara || bara === '--nivatak') {
   else { nivaBrott.forEach(r => console.log('  ✗ ' + r.nod + ': ' + (r.flaggor.includes('ENNIVÅ') ? 'drillen loggar UTAN nivå (' + r.takKalla + ') men noden deklarerar ' + (r.deklarerad == null ? 'default 3' : r.deklarerad) + ' → aldrig grön i åttan; sätt visning.niva:1 eller ge drillen nivåer' : 'noden deklarerar niva 1 men drillen klättrar till ' + r.tak + ' (' + r.takKalla + ')') + ' — ' + r.fn)); fel += nivaBrott.length; }
   if (oavgjorda.length) console.log('  ⓘ statiskt oavgjorda (dispatch på argument / nyckel via variabel): ' + oavgjorda.length + ' — se node verktyg/nivatak-svep.js');
   if (sv.saknade.length) { console.log('  ✗ kort utan deeplink-post: ' + sv.saknade.join(', ')); fel += sv.saknade.length; }
+  if (sv.kommerUtanDrill && sv.kommerUtanDrill.length) console.log('  ⓘ deklarerade platser utan drill (visning.kommer): ' + sv.kommerUtanDrill.length + ' — ' + sv.kommerUtanDrill.join(', '));
 }
 
 console.log('\n────────────────────────────────────────');

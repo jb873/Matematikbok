@@ -236,35 +236,123 @@ window.K3_TAXONOMI = {
     /* ═══════════════ Del 5 · Problemlösning (kommer senare) ═══════════════
        Öva-mer-området 'problem' finns men alla 7 grupper implemented:false (ak7-k3-ram.html:236-247).
        Alla generator:null. Formåga: PROBLEM. */
+    /* ═══════════════ Del 5 · Problemlösning ═══════════════
+       NODFAMILJ (order 2026-09-23). Tio lövnoder, fyra nivåer i sikte — ritad som kvadratrötterna:
+       EN lövnod per färdighet, svårigheten inom noden bärs av band (nivå 1–2 i samma nod), och
+       samma nod ärvs uppåt i årskurs (arskursRelevans) i stället för att dubbleras.
+
+       REGELN: ett band ändrar talen, antalet delar eller notationen — en NY NOD ändrar metoden.
+         · nivå 2 lägger parentes till instruktion och figur, och en tredje del till "personer eller delar"
+           → band, samma noder.
+         · likheter (två uttryck satta lika, variabel i båda leden), area, procent, förhållande och
+           ekvationssystem är egna metoder → egna noder.
+       Omkrets och area är TVÅ noder: att arean är sidorna multiplicerade är en annan förkunskap än
+       att omkretsen är sidorna adderade — en elev kan klara den ena och inte den andra.
+
+       VAR DE SYNS (visning.utbudslista är en LISTA — samma nod listas i flera kapitel med olika band):
+         sjuan  k3d5 = Problemlösning (nivå 1) · k3d6 = Fördjupning (nivå 2)
+         åttan  prob1–prob4 = ett kapitel per nivå (nivå 1 ska finnas som egen plats att gå till)
+       visning.kommer = true tills bladet och drillen finns — platsen syns, men leder inte in i tomrum.
+       Nians fördjupning (tre variabler, pq-formeln) är nästa steg i trappan och ligger utanför listan. */
     {
       "id": "alg-problem", "namn": "Problemlösning", "parent": null, "niva": "omrade",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Skapa ekvation från text och lösa problem med tal, vinklar och geometri.",
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Översätta ett problem till uttryck och en ekvation, lösa den med balansmetoden och svara på frågan. Fyra nivåer: samma noder växer, nya metoder får egna noder.",
       "grupp": "algebra", "implemented": false
     },
+
+    /* ── Deldomän 1 · tal och delar ── */
     {
-      "id": "alg-prob-text", "namn": "Skapa ekvation från text", "parent": "alg-problem", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Översätta en problemtext till en ekvation och lösa den.",
+      "id": "alg-prob-text", "namn": "Problem med tal och delar", "parent": "alg-problem", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Namnge delarna, välj vilken som är x, skriv uttryck för de övriga och ställ upp ekvationen.",
       "visning": null
     },
     {
-      "id": "alg-prob-text:problem", "namn": "Skapa ekvation från text", "parent": "alg-prob-text", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
-      "begrepp": "Ställ upp en ekvation ur en text (tal, olika saker, olika tal) och lös den.",
+      "id": "alg-prob-instruktion:problem", "namn": "Följa en instruktion", "parent": "alg-prob-text", "niva": "lovnod",
+      "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Ta reda på det okända talet ur en instruktion i flera steg (nivå 2: med parentes, 2(x + 3) = 16).",
+      "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med tal och delar", "gruppordning": 0, "radordning": 1,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+    {
+      "id": "alg-prob-delar:problem", "namn": "Personer eller delar", "parent": "alg-prob-text", "niva": "lovnod",
+      "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Två eller flera delar som hör ihop: en är x, de andra uttrycks med x, och summan ger ekvationen (nivå 2: tre delar).",
+      "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med tal och delar", "gruppordning": 0, "radordning": 2,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+    {
+      "id": "alg-prob-foljd:problem", "namn": "Tal som följer på varandra", "parent": "alg-prob-text", "niva": "lovnod",
+      "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Tre eller fyra tal som följer på varandra (även jämna) med känd summa – skriv dem med x och lös.",
+      "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med tal och delar", "gruppordning": 0, "radordning": 3,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+    {
+      "id": "alg-prob-likhet:problem", "namn": "Två uttryck som är lika", "parent": "alg-prob-text", "niva": "lovnod",
+      "arskursRelevans": {"ak7":"fordjupning","ak8":"mal"}, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Ställ upp två uttryck som beskriver samma sak, sätt dem lika och lös ekvationen med variabel i båda leden.",
+      "visning": { "utbudslista": ["k3d6","prob2"], "grupp": "Problem med tal och delar", "gruppordning": 0, "radordning": 4,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+
+    /* ── Deldomän 2 · vinklar och figurer ── */
+    {
+      "id": "alg-prob-geometri", "namn": "Problem med vinklar och figurer", "parent": "alg-problem", "niva": "deldoman",
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Rita figuren, skriv sidorna eller vinklarna som uttryck och använd vinkelsumman, omkretsen eller arean som villkor.",
       "visning": null
     },
     {
-      "id": "alg-prob-geometri", "namn": "Problem med vinklar och geometri", "parent": "alg-problem", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
-      "begrepp": "Lösa problem med vinklar och geometriska figurer (omkrets, area) med hjälp av ekvationer.",
+      "id": "alg-prob-vinklar:problem", "namn": "Vinklar i en triangel", "parent": "alg-prob-geometri", "niva": "lovnod",
+      "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Vinklar som uttrycks med varandra, med vinkelsumman 180 grader som villkor.",
+      "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med vinklar och figurer", "gruppordning": 1, "radordning": 1,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+    {
+      "id": "alg-prob-omkrets:problem", "namn": "Geometriska figurer · omkrets", "parent": "alg-prob-geometri", "niva": "lovnod",
+      "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Sidor som uttrycks med varandra, med omkretsen som villkor – omkretsen är sidorna adderade.",
+      "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med vinklar och figurer", "gruppordning": 1, "radordning": 2,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+    {
+      "id": "alg-prob-area:problem", "namn": "Geometriska figurer · area", "parent": "alg-prob-geometri", "niva": "lovnod",
+      "arskursRelevans": {"ak7":"fordjupning","ak8":"mal"}, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Arean som villkor – arean är sidorna multiplicerade, vilket ger en faktor före parentes: 5(3a + 4) = 65.",
+      "visning": { "utbudslista": ["k3d6","prob2"], "grupp": "Problem med vinklar och figurer", "gruppordning": 1, "radordning": 3,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+
+    /* ── Deldomän 3 · samband mellan storheter (nivå 3–4, åttan och nian) ── */
+    {
+      "id": "alg-prob-samband", "namn": "Andel, förhållande och system", "parent": "alg-problem", "niva": "deldoman",
+      "arskursRelevans": { "ak8": "mal", "ak9": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Problem där sambandet mellan storheterna bär lösningen: procent, förhållande och två okända.",
       "visning": null
     },
     {
-      "id": "alg-prob-geometri:problem", "namn": "Problem med vinklar och geometri", "parent": "alg-prob-geometri", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
-      "begrepp": "Ställ upp och lös ekvationer ur vinkel- och geometriproblem (omkrets, area).",
-      "visning": null
+      "id": "alg-prob-procent:problem", "namn": "Ekvationer med procent", "parent": "alg-prob-samband", "niva": "lovnod",
+      "arskursRelevans": {"ak8":"mal","ak9":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "En känd del och en känd procentsats ger det hela: skriv procenten som faktor och lös ekvationen.",
+      "visning": { "utbudslista": ["prob3"], "grupp": "Andel, förhållande och system", "gruppordning": 2, "radordning": 1,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+    {
+      "id": "alg-prob-forhallande:problem", "namn": "Förhållande och fördelning", "parent": "alg-prob-samband", "niva": "lovnod",
+      "arskursRelevans": {"ak8":"mal","ak9":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Storheter som förhåller sig som 1:2:3 skrivs x, 2x, 3x – och en summa fördelas i samma förhållande.",
+      "visning": { "utbudslista": ["prob3"], "grupp": "Andel, förhållande och system", "gruppordning": 2, "radordning": 2,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+    },
+    {
+      "id": "alg-prob-system:problem", "namn": "Ekvationssystem", "parent": "alg-prob-samband", "niva": "lovnod",
+      "arskursRelevans": {"ak8":"fordjupning","ak9":"mal"}, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "PROBLEM", "generator": null,
+      "begrepp": "Två okända och två villkor – lös med additions- eller substitutionsmetoden. Balansmetoden räcker inte.",
+      "visning": { "utbudslista": ["prob4"], "grupp": "Andel, förhållande och system", "gruppordning": 2, "radordning": 3,
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
     },
 
     /* ═══════════════ Del 6 · Fördjupning (kommer senare) ═══════════════

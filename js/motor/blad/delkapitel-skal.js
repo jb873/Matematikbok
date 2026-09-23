@@ -67,11 +67,17 @@ function ova(lista){
 }
 
 // ── FÄRDIGHETSTRÄNING: grupper/rader ur taxonomin, drillen i iframen bredvid ──────────────────
-// Lövnoder med visning.utbudslista === utbudslistaId grupperas på visning.grupp. En källa, alla vyer.
+// Lövnoder vars visning pekar ut utbudslistan grupperas på visning.grupp. En källa, alla vyer.
+// utbudslista är en STRÄNG eller en LISTA: en nod kan höra hemma i flera kapitel (sjuans nivå 1 och
+// åttans nivåkapitel är samma färdighet med olika band).
+function iUtbud(visning, utbudslistaId){
+  var u = visning && visning.utbudslista;
+  return Array.isArray(u) ? u.indexOf(utbudslistaId) >= 0 : u === utbudslistaId;
+}
 function fardighetUrTaxonomi(tax, utbudslistaId){
   var noder = (tax && tax.noder) || [];
   var rader = noder.filter(function(n){
-    return n.niva === 'lovnod' && n.visning && n.visning.utbudslista === utbudslistaId;
+    return n.niva === 'lovnod' && n.visning && iUtbud(n.visning, utbudslistaId);
   });
   var grupper = {};
   rader.forEach(function(n){
@@ -135,5 +141,5 @@ function montera(cfg){
   forelasning(cfg.forel);
 }
 
-window.DelkapitelSkal = { montera: montera, fardighetUrTaxonomi: fardighetUrTaxonomi };
+window.DelkapitelSkal = { montera: montera, fardighetUrTaxonomi: fardighetUrTaxonomi, iUtbud: iUtbud };
 })();

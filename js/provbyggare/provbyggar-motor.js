@@ -1166,7 +1166,8 @@ function renderTestConfig(){
   const delkapitel = BOK_DELKAPITEL
     .filter(d => !delFilter || d.del === delFilter)
     .map(d => {
-      const dn = bokNoder.filter(n => n.visning.utbudslista === d.del);
+      // utbudslista kan vara en lista (samma nod i flera kapitel — k3:s problemlösning)
+      const dn = bokNoder.filter(n => Array.isArray(n.visning.utbudslista) ? n.visning.utbudslista.includes(d.del) : n.visning.utbudslista === d.del);
       const gnamn = [];
       dn.forEach(n => { const g = n.visning.grupp || 'Övrigt'; if(gnamn.indexOf(g) < 0) gnamn.push(g); });
       gnamn.sort((a, b) => minGruppOrd(dn, a) - minGruppOrd(dn, b));
