@@ -110,7 +110,7 @@
 
   function render(){
     var mount=document.getElementById('sheet-andel'); if(!mount) return; ensureCSS();
-    var html='<div class="ovn-sheet"><h2>Andel och antal</h2><p class="ovn-intro">Figurerna är ritade i bokens färger. Skriv ditt svar som bråk (eller klicka) och tryck <strong>Kontrollera</strong> när du är klar.</p>';
+    var html='<div class="ovn-sheet"><h2>Andel och antal</h2>';
     UPPG.forEach(function(u){
       if(u.typ==='rubrik'){ html+='<h3 style="font-family:var(--serif);font-size:21px;margin:26px 0 2px;color:var(--ink);">'+u.rubrik+'</h3>'; return; }
       html+='<div class="ovn-grupp"><div class="ovn-grupp-rubrik"><span class="ovn-label" style="min-width:24px;">'+u.nr+'.</span>'+u.rubrik+(u.flagg?'<span class="d1-flagg">'+u.flagg+'</span>':'')+'</div>';

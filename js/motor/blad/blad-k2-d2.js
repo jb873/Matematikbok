@@ -121,6 +121,21 @@ function jamforTal(a, b){
   return Math.abs(n - b) < 1e-9;
 }
 
+// MELLANLED = UTTRYCK (order 2026-09-23): rutor som bär ett mellanled rättas på VÄRDE med den delade
+// evalArith (samma som åttan) — "1·4", "8/2" och "4" är alla rätt. Övriga rutor rättas som förr.
+var MELLANLEDSRUTOR = 'mellan-fin,forlang-in,kedje-in,brak-steg-cell,stam-cell';
+function arMellanled(inp){
+  var kl = MELLANLEDSRUTOR.split(',');
+  for(var i = 0; i < kl.length; i++) if(inp.classList.contains(kl[i])) return true;
+  return false;
+}
+function jamforLed(inp, facit){
+  if(!arMellanled(inp)) return jamforTal(inp.value, facit);
+  var v = window.AK8_UI && AK8_UI.evalArith ? AK8_UI.evalArith(inp.value) : NaN;
+  return isFinite(v) && Math.abs(v - facit) < 1e-9;
+}
+
+
 // ============================================================
 //  RENDERING AV BLAD
 // ============================================================
@@ -146,7 +161,7 @@ function svarBrakHTML(svar){
 function bladHTML(blad){
   var html = '<div class="ovn-sheet">'
     + '<h2>' + blad.titel + '</h2>'
-    + (blad.intro ? '<p class="ovn-intro">' + blad.intro + '</p>' : '');
+    ;   // ingen intro-rad i öva (order 2026-09-23)
 
   if(blad.tvaNivaer){
     var l2 = !blad.niva2Upplast;
@@ -156,11 +171,7 @@ function bladHTML(blad){
       + '</div>';
   }
 
-  html += '<div class="brak-hint">' + (blad.hint
-    ? blad.hint
-    : ('<strong>Tänk på:</strong> svara alltid i <strong>enklaste form</strong>. '
-       + (blad.mellanled ? 'Visa hur du räknar i uträkningsrutan – t.ex. hur du förlänger – innan du skriver svaret. ' : '')
-       + 'Är svaret i blandad form (större än 1) finns en liten ruta till vänster för heltalet.')) + '</div>';
+  // .brak-hint borttagen (order 2026-09-23): inga hjälptexter i öva
 
   blad.grupper.forEach(function(grupp, gi){
     html += '<div class="ovn-grupp">';
@@ -355,7 +366,7 @@ function bygg_blad(rotEl, blad){
       else if(inp.dataset.rund){
         ok = inp.dataset.rund.split('|').some(function(v){ return jamforTal(inp.value, parseFloat(v.replace(',', '.'))); });
       }
-      else ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
+      else ok = jamforLed(inp, parseFloat(inp.dataset.svar));
       totalt++;
       var mk = marker(ok);
       if(ok){ inp.classList.add('correct','just-checked'); ratt++; inp.insertAdjacentElement('afterend', mk); }
@@ -532,7 +543,7 @@ function radBrakDec(t, n, val, note, rund){
 }
 // Bråk-rad: decimaltal visas, eleven skriver bråket i enklaste form (återanvänder brakSvar)
 function radDecBrak(t, n, dec){
-  return {typ:'brakSvar', vanster:'<span class="ovn-text ovn-num">' + dec + '</span>', svar:kanonisk(t, n)};
+  return {typ:'brakSvar', vanster:'<span class="ovn-text ovn-num">' + dec + '</span>', svar:kanonisk(t, n), opnd:{slag:'decBrak', t:t, n:n, dec:dec}};
 }
 
 // ── Talpooler per nivå ──
@@ -565,9 +576,7 @@ function gSample(arr, k){
   return kopia.slice(0, k);
 }
 
-var BTFORM_HINT = '<strong>Tänk på:</strong> skriv decimaltal med <strong>komma</strong> (t.ex. 0,75) '
   + 'och bråk i <strong>enklaste form</strong>. Tecknet ≈ betyder att svaret är avrundat.';
-var BTFORM_HINT2 = BTFORM_HINT + ' På den här nivån finns även åttondelar och tal större än 1 – skriv dem i blandad form (t.ex. 1 och 1/4).';
 
 // Bygg ett blad ur poolerna för given nivå
 function bladBTform(niva, forsta){
@@ -592,10 +601,6 @@ function bladBTform(niva, forsta){
   }
   return {
     titel: 'Bråk ↔ decimal – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: niva === 2
-      ? 'Nu även åttondelar och tal större än 1. Skriv svaren i enklaste form / blandad form.'
-      : 'Skriv bråken som decimaltal och decimaltalen som bråk.',
-    hint: niva === 2 ? BTFORM_HINT2 : BTFORM_HINT,
     keypadOps: [','],
     grupper: [
       {rubrik:'Skriv bråket som decimaltal', rader:
@@ -641,9 +646,7 @@ function radBlandadBada(t, n){
   return {typ:'brakTillBanda', taljare:t, namnare:n, decSvar: avr(t/n, 6), brakSvar: kanonisk(t, n)};
 }
 
-var BL_HINT = '<strong>Tänk på:</strong> blandad form skrivs som heltal + bråk (t.ex. 1 och 3/4), och bråket ska vara i <strong>enklaste form</strong>. '
   + 'I bråkform skriver du bara täljare och nämnare (t.ex. 7/4).';
-var BL_HINT2 = BL_HINT + ' På den här nivån finns även blandade tal vars bråkdel är ett oäkta bråk – skriv om dem i enklaste form.';
 
 // ── Nya radtyper för blandad form ↔ bråkform ──
 // Oäkta bråk → blandad form (visar t/n, svar = blandad form)
@@ -656,7 +659,7 @@ function oaktaEnklast(hel, t, n){
 }
 function radBlandadTillOakta(hel, t, n){
   var o = oaktaEnklast(hel, t, n);
-  return {typ:'brakSvar', vanster: mixedSpan({hel:hel, t:t, n:n}), likhet:true, svar:{hel:0, t:o.t, n:o.n}};
+  return {typ:'brakSvar', vanster: mixedSpan({hel:hel, t:t, n:n}), likhet:true, svar:{hel:0, t:o.t, n:o.n}, opnd:{slag:'blandadOakta', hel:hel, t:t, n:n}};
 }
 // Blandat tal med oäkta bråkdel → enklaste blandade form (visar "hel t/n", svar = kanonisk)
 function radEnklasteForm(hel, t, n){
@@ -695,10 +698,6 @@ function bladBlandad(niva, forsta){
   }
   return {
     titel: 'Blandad form och bråkform – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: niva === 2
-      ? 'Växla mellan oäkta bråk och blandad form. Sista delen: skriv blandade tal i enklaste form.'
-      : 'Växla mellan oäkta bråk och blandad form.',
-    hint: niva === 2 ? BL_HINT2 : BL_HINT,
     keypadOps: [],
     grupper: grupper
   };
@@ -883,9 +882,7 @@ var RK_G3_N2 = [
   [['mixed',1,1,8], '−', ['mixed',2,1,4]]
 ];
 
-var RAKNA_HINT  = '<strong>Tänk på:</strong> gör om alla tal till <strong>samma form</strong> innan du räknar. '
   + 'Skriv svaret som decimaltal med komma (t.ex. 0,75). Tecknet ≈ betyder att svaret är avrundat.';
-var RAKNA_HINT2 = RAKNA_HINT + ' På den här nivån kan svaret bli <strong>negativt</strong> – skriv då minustecken framför.';
 
 function bladRakna(niva, forsta){
   var p1 = niva === 2 ? RK_G1_N2 : RK_G1_N1;
@@ -909,10 +906,6 @@ function bladRakna(niva, forsta){
   }
   return {
     titel: 'Räkna med former – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: niva === 2
-      ? 'Räkna med tal i olika former. Vissa svar blir negativa.'
-      : 'Räkna med tal i olika former – gör om till samma form innan du räknar. Svara i decimalform.',
-    hint: niva === 2 ? RAKNA_HINT2 : RAKNA_HINT,
     keypadOps: niva === 2 ? [',', '-'] : [','],
     grupper: [
       {rubrik: niva === 2 ? 'Bråk och decimaltal med tredjedelar (≈ avrundat svar)'
@@ -945,10 +938,8 @@ function GEN_RAKNA_N2(){ return bladRakna(2, false); }
 var TEST_RAKNA_N1 = RK_G1_N1.concat(RK_G2_N1, RK_G3_N1);
 var TEST_RAKNA_N2 = RK_G1_N2.concat(RK_G2_N2, RK_G3_N2);
 
-var TEST_HINT  = '<strong>Testet:</strong> visa att du klarar alla områden. '
   + 'Skriv decimaltal med komma och bråk i <strong>enklaste form</strong>. '
   + 'Tecknet ≈ betyder att svaret är avrundat.';
-var TEST_HINT2 = TEST_HINT + ' På nivå 2 kan svaret i sista frågan bli <strong>negativt</strong>.';
 
 function bladTest(niva, forsta){
   var poolBD = niva === 2 ? TERM2 : TERM1;
@@ -980,8 +971,6 @@ function bladTest(niva, forsta){
   }
   return {
     titel: 'Test – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: 'Ett samlingstest från hela kapitlet. Fem områden, tre uppgifter per område.',
-    hint: niva === 2 ? TEST_HINT2 : TEST_HINT,
     keypadOps: niva === 2 ? [',', '-'] : [','],
     isTest: true,
     grupper: [
@@ -1077,7 +1066,8 @@ function byggSheet(sheetId, forstaBesoket, niva){
 
 // Flikväxling (låsta flikar reagerar inte)
 var tabRow = document.getElementById('tab-row');
-tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
+// Modulen laddas även i testramen (talbanken) där flikraden inte finns → vakt i stället för krasch.
+if(tabRow) tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
   btn.addEventListener('click', function(){
     if(btn.classList.contains('is-locked')) return;
     var id = btn.dataset.tab;
@@ -1103,3 +1093,24 @@ if(devLas()){
   document.body.appendChild(devBadge);
   console.info('🔧 DEV-läge aktiverat — alla lås är öppna (test-fliken och nivå 2 på alla flikar).');
 }
+
+// ══ TALBANK — testets tal ur ÖVA-bladets data (order 2026-09-23). Se blad-k2-d5.js. ════════════
+window.BLAD_K2_D2 = (function(){
+  var bank = {};
+  function lagg(nod, post){ (bank[nod] = bank[nod] || []).push(post); }
+  var byggare = [];
+  ['GRUND_BTFORM_N1','GRUND_BTFORM_N2','GRUND_BL_N1','GRUND_BL_N2','GRUND_RAKNA_N1','GRUND_RAKNA_N2'].forEach(function(namn){
+    if(typeof window[namn] === 'function') byggare.push(window[namn]);
+  });
+  byggare.forEach(function(bygg){
+    var b; try { b = bygg(); } catch(e){ return; }
+    (b.grupper || []).forEach(function(g){
+      (g.rader || []).forEach(function(r){
+        if(r.typ === 'brakTillDec') lagg('bd-vaxla:rakna', { slag:'brakDec', t:r.taljare, n:r.namnare, dec:r.svar });
+        else if(r.opnd && r.opnd.slag === 'decBrak') lagg('bd-tillbrak:rakna', r.opnd);
+        else if(r.opnd && r.opnd.slag === 'blandadOakta') lagg('brak-blandad:rakna', r.opnd);
+      });
+    });
+  });
+  return { talBank: function(nod){ return (bank[String(nod)] || []).slice(); } };
+})();

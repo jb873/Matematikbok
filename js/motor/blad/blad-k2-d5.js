@@ -46,7 +46,8 @@ function mixedText(o){
 function radBerakna(t1, n1, op, t2, n2){
   var v = frVarde(t1, n1, op, t2, n2);
   var rad = {typ:'brakSvar', vanster: fracSpan(t1,n1) + opSpan(op) + fracSpan(t2,n2),
-          likhet:true, svar: kanonisk(v.t, v.n), olikaNamn: (n1 !== n2)};
+          likhet:true, svar: kanonisk(v.t, v.n), olikaNamn: (n1 !== n2),
+          opnd: {slag:'brak', t1:t1, n1:n1, op:op, t2:t2, n2:n2}};   // testets talbank läser härifrån
   if(n1 !== n2){
     // Steg-data för femledad uppställning (förläng → samma nämnare → lägg ihop → svar)
     var L = n1 * n2 / gcd(n1, n2);   // minsta gemensamma nämnare
@@ -77,7 +78,8 @@ function radBland(h1, t1, n1, op, h2, t2, n2){
   var v = frVarde(T1, n1, op, T2, n2);
   return {typ:'brakSvar',
     vanster: blandSpan(h1,t1,n1) + opSpan(op) + blandSpan(h2,t2,n2),
-    likhet:true, svar: kanonisk(v.t, v.n), olikaNamn: (n1 !== n2)};
+    likhet:true, svar: kanonisk(v.t, v.n), olikaNamn: (n1 !== n2),
+    opnd: {slag:'blandad', h1:h1, t1:t1, n1:n1, op:op, h2:h2, t2:t2, n2:n2}};
 }
 // Blandad form via decimalform: visar talen, eleven svarar med ETT decimaltal.
 // termer: [{h,t,n}, {op,h,t,n}, ...]  dec = facit som decimaltal
@@ -172,6 +174,21 @@ function jamforTal(a, b){
   return Math.abs(n - b) < 1e-9;
 }
 
+// MELLANLED = UTTRYCK (order 2026-09-23): rutor som bär ett mellanled rättas på VÄRDE med den delade
+// evalArith (samma som åttan) — "1·4", "8/2" och "4" är alla rätt. Övriga rutor rättas som förr.
+var MELLANLEDSRUTOR = 'mellan-fin,forlang-in,kedje-in,brak-steg-cell,stam-cell';
+function arMellanled(inp){
+  var kl = MELLANLEDSRUTOR.split(',');
+  for(var i = 0; i < kl.length; i++) if(inp.classList.contains(kl[i])) return true;
+  return false;
+}
+function jamforLed(inp, facit){
+  if(!arMellanled(inp)) return jamforTal(inp.value, facit);
+  var v = window.AK8_UI && AK8_UI.evalArith ? AK8_UI.evalArith(inp.value) : NaN;
+  return isFinite(v) && Math.abs(v - facit) < 1e-9;
+}
+
+
 // ============================================================
 //  RENDERING AV BLAD
 // ============================================================
@@ -197,7 +214,7 @@ function svarBrakHTML(svar){
 function bladHTML(blad){
   var html = '<div class="ovn-sheet">'
     + '<h2>' + blad.titel + '</h2>'
-    + (blad.intro ? '<p class="ovn-intro">' + blad.intro + '</p>' : '');
+    ;   // ingen intro-rad i öva (order 2026-09-23)
 
   if(blad.tvaNivaer){
     var l2 = !blad.niva2Upplast;
@@ -207,9 +224,7 @@ function bladHTML(blad){
       + '</div>';
   }
 
-  html += '<div class="brak-hint"><strong>Tänk på:</strong> svara alltid i <strong>enklaste form</strong>. '
-    + (blad.mellanled ? 'Visa hur du räknar i uträkningsrutan – t.ex. hur du förlänger – innan du skriver svaret. ' : '')
-    + 'Är svaret i blandad form (större än 1) finns en liten ruta till vänster för heltalet.</div>';
+  // .brak-hint borttagen (order 2026-09-23): inga hjälptexter i öva
 
   blad.grupper.forEach(function(grupp, gi){
     html += '<div class="ovn-grupp">';
@@ -402,7 +417,7 @@ function bygg_blad(rotEl, blad){
       // Steg-celler (femledad uppställning): rätta och färglägg, men utan inline-markörer
       if(inp.classList.contains('brak-steg-cell')){
         inp.classList.remove('correct','wrong','just-checked');
-        var okS = jamforTal(inp.value, parseFloat(inp.dataset.svar));
+        var okS = jamforLed(inp, parseFloat(inp.dataset.svar));
         totalt++;
         if(okS){ ratt++; inp.classList.add('correct','just-checked'); }
         else { inp.classList.add('wrong','just-checked'); }
@@ -414,7 +429,7 @@ function bygg_blad(rotEl, blad){
       inp.classList.remove('correct','wrong','just-checked');
       var ok;
       if(inp.dataset.enhet) ok = (String(inp.value).toLowerCase().replace(/[\s.]/g,'') === String(inp.dataset.enhet).toLowerCase().replace(/[\s.]/g,''));
-      else ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
+      else ok = jamforLed(inp, parseFloat(inp.dataset.svar));
       totalt++;
       var mk = marker(ok);
       if(ok){ inp.classList.add('correct','just-checked'); ratt++; inp.insertAdjacentElement('afterend', mk); }
@@ -540,7 +555,6 @@ function fyllFacitData(rotEl, blad){
 function GRUND_FORLANG1(){
   return {
     titel: 'Addition och subtraktion med bråk – Stencil 1',
-    intro: 'Räkna ut talen och skriv svaret i enklaste form. Tryck på Kontrollera när du är klar.',
     tabId: 'forlang1',
     kanGenerera: true,
     mellanled: true,
@@ -661,7 +675,6 @@ function unika(genFn, antal, maxLika){
 function GEN_FORLANG1(){
   return {
     titel: 'Addition och subtraktion med bråk – nytt blad',
-    intro: 'Nya tal, samma metoder. Skriv svaren i enklaste form.',
     tabId: 'forlang1',
     kanGenerera: true,
     mellanled: true,
@@ -687,7 +700,6 @@ function T(op,t,n){ return {op:op, t:t, n:n}; }
 function GRUND_FORLANG2_N1(){
   return {
     titel: 'Förläng båda nämnarna – nivå 1',
-    intro: 'Förläng båda bråken till samma nämnare innan du räknar. Svara i enklaste form.',
     mellanled: true,
     grupper: [
       {rubrik:'Beräkna med bråk', rader:[
@@ -709,7 +721,6 @@ function GRUND_FORLANG2_N1(){
 function GRUND_FORLANG2_N2(){
   return {
     titel: 'Förläng båda nämnarna – nivå 2',
-    intro: 'Svårare nämnare och uppgifter med tre termer. Räkna ett steg i taget och svara i enklaste form.',
     mellanled: true,
     grupper: [
       {rubrik:'Beräkna med bråk', rader:[
@@ -760,7 +771,6 @@ function genTreTerm(){
 function GEN_FORLANG2_N1(){
   return {
     titel: 'Förläng båda nämnarna – nivå 1 (nytt blad)',
-    intro: 'Förläng båda bråken till samma nämnare. Svara i enklaste form.',
     mellanled: true,
     grupper: [
       {rubrik:'Beräkna med bråk', rader: unika(function(){ return genTvaTerm(PAR_FB); }, 4, 1)},
@@ -771,7 +781,6 @@ function GEN_FORLANG2_N1(){
 function GEN_FORLANG2_N2(){
   return {
     titel: 'Förläng båda nämnarna – nivå 2 (nytt blad)',
-    intro: 'Svårare nämnare och tre termer. Svara i enklaste form.',
     mellanled: true,
     grupper: [
       {rubrik:'Beräkna med bråk', rader: unika(function(){ return genTvaTerm(PAR_FB_S); }, 3, 1)},
@@ -786,7 +795,6 @@ function GEN_FORLANG2_N2(){
 function GRUND_BLANDAD_N1(){
   return {
     titel: 'Räkna med blandad form – blad 1',
-    intro: 'Räkna med tal i blandad form (heltal och bråk). Skriv svaret i enklaste blandad form. Är svaret större än 1 finns en ruta för heltalet.',
     tabId: 'blandad', mellanled: true, keypadOps: ['+','−','/','='],
     grupper: [
       {rubrik:'Räkna med blandad form', rader:[
@@ -806,7 +814,6 @@ function GRUND_BLANDAD_N1(){
 function GRUND_BLANDAD_N2(){
   return {
     titel: 'Räkna med blandad form – blad 2',
-    intro: 'Svårare uppgifter. Ibland behöver du växla (låna) från heltalet. Skriv svaret i enklaste form.',
     tabId: 'blandad', mellanled: true, keypadOps: ['+','−','/','='],
     grupper: [
       {rubrik:'Räkna med blandad form', rader:[
@@ -853,7 +860,6 @@ function gBlandDec(specs){
 function GEN_BLANDAD_N1(){
   return {
     titel: 'Räkna med blandad form – nytt blad',
-    intro: 'Nya tal, samma metod. Skriv svaret i enklaste blandad form.',
     tabId: 'blandad', mellanled: true, keypadOps: ['+','−','/','='],
     grupper: [
       {rubrik:'Räkna med blandad form (samma nämnare)', rader: unika(function(){ return gBland(5,[4,5,6,8],true); }, 4, 1)},
@@ -865,7 +871,6 @@ function GEN_BLANDAD_N1(){
 function GEN_BLANDAD_N2(){
   return {
     titel: 'Räkna med blandad form – nytt blad (svårare)',
-    intro: 'Svårare tal. Ibland behöver du växla från heltalet. Skriv svaret i enklaste form.',
     tabId: 'blandad', mellanled: true, keypadOps: ['+','−','/','='],
     grupper: [
       {rubrik:'Räkna med blandad form', rader: unika(function(){ return gBlandOlika(6); }, 4, 1)},
@@ -941,7 +946,8 @@ function byggSheet(sheetId, forstaBesoket, niva){
 
 // Flikväxling (låsta flikar reagerar inte)
 var tabRow = document.getElementById('tab-row');
-tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
+// Modulen laddas även i testramen (talbanken) där flikraden inte finns → vakt i stället för krasch.
+if(tabRow) tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
   btn.addEventListener('click', function(){
     if(btn.classList.contains('is-locked')) return;
     var id = btn.dataset.tab;
@@ -955,3 +961,22 @@ uppdateraLas();
 byggSheet('forlang1', true);
 byggSheet('forlang2', true);
 byggSheet('blandad', true);
+
+// ══ TALBANK — testets tal ur ÖVA-bladets data (order 2026-09-23) ══════════════════════════════
+// Byggs HÄR, vid laddning, till ren data: k2:s bladkopior delar globala funktionsnamn, så en sen
+// uppslagning skulle hämta fel moduls funktioner. Nyckel = nod-id i k2-taxonomin.
+window.BLAD_K2_D5 = (function(){
+  var bank = {};
+  function lagg(nod, post){ (bank[nod] = bank[nod] || []).push(post); }
+  [GRUND_FORLANG1, GRUND_FORLANG2_N1, GRUND_FORLANG2_N2, GRUND_BLANDAD_N1, GRUND_BLANDAD_N2].forEach(function(bygg){
+    var blad; try { blad = bygg(); } catch(e){ return; }
+    (blad.grupper || []).forEach(function(g){
+      (g.rader || []).forEach(function(r){
+        var o = r.opnd; if(!o) return;
+        if(o.slag === 'blandad') lagg('brak-lana:rakna', o);
+        else lagg(o.op === '-' ? 'brak-sub:rakna' : 'brak-add:rakna', o);
+      });
+    });
+  });
+  return { talBank: function(nod){ return (bank[String(nod)] || []).slice(); } };
+})();

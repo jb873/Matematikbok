@@ -575,6 +575,11 @@ function jamforHeltal(s,m){ var v=parseInt(String(s).replace(/\s/g,''),10); retu
 <script src="js/motor/metod/metod-karna.js"></script>
 <script src="js/data/spec-villkor-k2.js"></script>
 <script src="js/data/k2-fardiga-test.js"></script>
+<!-- ÖVA-bladens talbank: testets tal = övningens tal (order 2026-09-23). Modulerna renderar inget här. -->
+<script src="js/motor/blad/blad-k2-d2.js"></script>
+<script src="js/motor/blad/blad-k2-d3.js"></script>
+<script src="js/motor/blad/blad-k2-d5.js"></script>
+<script src="js/motor/blad/blad-k2-d6.js"></script>
 <script src="js/motor/ovamer/ovamer-k2.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-div.js"></script>
 <script src="js/motor/ovamer/ovamer-k2-mult.js"></script>
@@ -730,11 +735,47 @@ function blandadEngine(){
   }
   function multVariant(opts){
     var v = (opts && opts.variant) || 'alla';
+    if(v === 'alla' || v === 'hb' || v === 'bb'){   // ÖVA-bladets tal först
+      var bp = bankPost('BLAD_K2_D6', 'brak-mult-rakna:rakna') || bankPost('BLAD_K2_D6', 'brak-mult-forkorta:rakna');
+      if(bp && (v === 'alla' || bp.slag === v)){ var bf = multFraga(bp); if(bf) return bf; }
+    }
     if(v === 'alla') v = rP(['hb','bb','blandad','stora']);
     if(v === 'hb') return multHB();
     if(v === 'blandad') return multBlandad();
     if(v === 'stora') return multStora();
     return multBB();
+  }
+  // ── ÖVA-BLADENS TALBANK (order 2026-09-23) ──────────────────────────────────────────────────
+  // Testets tal ska vara övningens tal. Hjälparna nedan bygger frågan ur en bank-post; saknas banken
+  // (modulen ej laddad) eller passar posten inte frågeformen används den tidigare slumpen.
+  function bankPost(modul, nod){
+    var m = window[modul]; if(!m || !m.talBank) return null;
+    var b = m.talBank(nod); if(!b.length) return null;
+    return b[Math.floor(Math.random() * b.length)];
+  }
+  function addSubFraga(o){                      // {t1,n1,op,t2,n2} → mellanleds-fråga
+    var L = o.n1 * o.n2 / gcd2(o.n1, o.n2), nt1 = o.t1 * (L / o.n1), nt2 = o.t2 * (L / o.n2);
+    var komb = o.op === '-' ? nt1 - nt2 : nt1 + nt2;
+    if(komb <= 0) return null;
+    var g = gcd2(komb, L), T = komb / g, N = L / g;
+    if(T >= N) return null;                     // frågeformen saknar hel-del → lämna till slumpen
+    var tecken = o.op === '-' ? ' − ' : ' + ';
+    return { key: o.t1 + '/' + o.n1 + o.op + o.t2 + '/' + o.n2,
+      prompt: 'Räkna ut steg för steg:    ' + o.t1 + '/' + o.n1 + tecken + o.t2 + '/' + o.n2,
+      led: [ { fraga: nt1 + (o.op === '-' ? '−' : '+') + nt2 + ' / ' + L, varde: komb / L, facit: komb + '/' + L } ],
+      slutTalj: T, slutNamn: N,
+      expl: o.t1 + '/' + o.n1 + tecken + o.t2 + '/' + o.n2 + ' = ' + nt1 + '/' + L + tecken + nt2 + '/' + L + ' = ' + komb + '/' + L + ' = ' + T + '/' + N + '.' };
+  }
+  function multFraga(o){                        // {slag:'hb'|'bb'|'andel'|'mm', …} → mellanleds-fråga
+    if(o.slag === 'hb'){ var talj = o.h * o.t, namn = o.n, g = gcd2(talj, namn);
+      return { key: 'hb:' + o.h + '*' + o.t + '/' + o.n, prompt: 'Räkna ut steg för steg:    ' + o.h + ' · ' + o.t + '/' + o.n,
+        led: [ { fraga: o.h + '·' + o.t + ' / ' + o.n, varde: talj / namn, facit: talj + '/' + namn } ],
+        slutTalj: talj / g, slutNamn: namn / g, expl: o.h + ' · ' + o.t + '/' + o.n + ' = ' + talj + '/' + namn + ' = ' + (talj / g) + '/' + (namn / g) + '.' }; }
+    if(o.slag === 'bb'){ var t = o.t1 * o.t2, n = o.n1 * o.n2, g2 = gcd2(t, n);
+      return { key: 'bb:' + o.t1 + '/' + o.n1 + '*' + o.t2 + '/' + o.n2, prompt: 'Räkna ut steg för steg:    ' + o.t1 + '/' + o.n1 + ' · ' + o.t2 + '/' + o.n2,
+        led: [ { fraga: o.t1 + '·' + o.t2 + ' / ' + o.n1 + '·' + o.n2, varde: t / n, facit: t + '/' + n } ],
+        slutTalj: t / g2, slutNamn: n / g2, expl: o.t1 + '/' + o.n1 + ' · ' + o.t2 + '/' + o.n2 + ' = ' + t + '/' + n + ' = ' + (t / g2) + '/' + (n / g2) + '.' }; }
+    return null;                                // andel/blandad: egna frågeformer → slumpen
   }
   var K2_TEST_GENERATORS = {
     // d1 — Andel av ett antal (numeric). Visuella andel-figur/tallinje hoppas (kan ej genereras entydigt i testformatet).
@@ -744,6 +785,10 @@ function blandadEngine(){
     }) ] },
     // d2 — Blandad form → oäkta bråk (brak; fraktionsdelen coprim → oäkta redan enklaste)
     'brak-blandad': { snabb: [ G.brak('k2-blandad','Blandad form → oäkta bråk','brak-blandad', function(){
+      var bp = bankPost('BLAD_K2_D2', 'brak-blandad:rakna');   // ÖVA-bladets tal först
+      if(bp && bp.t < bp.n){ var T = bp.hel * bp.n + bp.t;
+        return { key: bp.hel + '-' + bp.t + '-' + bp.n, prompt: 'Skriv ' + bp.hel + ' ' + bp.t + '/' + bp.n + ' som oäkta bråk.', talj: T, namn: bp.n,
+          expl: bp.hel + ' ' + bp.t + '/' + bp.n + ' = ' + T + '/' + bp.n + '.' }; }
       var hel=rI(1,4), n=rP([2,3,4,5,6,7,8]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var talj=hel*n+t;
       return {key:hel+'-'+t+'-'+n, prompt:'Skriv '+hel+' '+t+'/'+n+' som oäkta bråk.', talj:talj, namn:n, expl:hel+' '+t+'/'+n+' = '+talj+'/'+n+'.'};
     }) ] },
@@ -753,10 +798,18 @@ function blandadEngine(){
     }) ] },
     // d3 — Förlänga (numeric: nämnaren given, täljaren efterfrågas — förläng ⇒ EJ enklaste, så numeric) + Förkorta (brak, enklaste)
     'brak-forlanga': { snabb: [ G.numeric('k2-forlanga','Förläng bråket','brak-forlanga', function(){
+      var bp = bankPost('BLAD_K2_D3', 'brak-forlanga:rakna');   // ÖVA-bladets tal först
+      if(bp && bp.malN % bp.n === 0){ var bf = bp.malN / bp.n;
+        return { key: bp.t + '/' + bp.n + 'x' + bf, prompt: 'Förläng ' + bp.t + '/' + bp.n + ' till ' + bp.malN + '-delar:    ' + bp.t + '/' + bp.n + ' = ___/' + bp.malN,
+          ans: bp.t * bf, expl: bp.t + '/' + bp.n + ' = ' + (bp.t * bf) + '/' + bp.malN + ' (förläng med ' + bf + ').' }; }
       var n=rP([2,3,4,5,6]), t=rI(1,n-1), f=rP([2,3,4,5]);
       return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = ___/'+(n*f), ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
     }) ] },
     'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
+      var bp = bankPost('BLAD_K2_D3', 'brak-forkorta:rakna');   // ÖVA-bladets tal först
+      if(bp){ var g0 = gcd2(bp.t, bp.n), T0 = bp.t / g0, N0 = bp.n / g0;
+        if(T0 < N0) return { key: 'fk' + bp.t + '/' + bp.n, prompt: 'Skriv ' + bp.t + '/' + bp.n + ' i enklaste form.', talj: T0, namn: N0,
+          expl: bp.t + '/' + bp.n + ' = ' + T0 + '/' + N0 + '.' }; }
       var N=rP([2,3,4,5,6]), T; do{ T=rI(1,N-1); }while(gcd2(T,N)!==1); var f=rP([2,3,4]);
       return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+(T*f)+'/'+(N*f)+' till enklaste form.', talj:T, namn:N, expl:(T*f)+'/'+(N*f)+' = '+T+'/'+N+'.'};
     }) ] },
@@ -792,6 +845,8 @@ function blandadEngine(){
     // d5 — Add/sub MED MELLANLED: summa/differens över gemensam nämnare (värde-rättat) → slutsvar enklaste.
     // Spegel av drillens femledade add/sub: gemensam nämnare visas i ledets fråga, eleven räknar summan, förkortar sist.
     'brak-add': { snabb: [ G.mellanled('k2-add','Addition med bråk','brak-add', function(){
+      var bp = bankPost('BLAD_K2_D5', 'brak-add:rakna');   // ÖVA-bladets tal först
+      if(bp && bp.slag === 'brak'){ var bf = addSubFraga(bp); if(bf) return bf; }
       var n1=rP([2,3,4,5,6]), n2=rP([2,3,4,5,6]), t1=rI(1,n1-1), t2=rI(1,n2-1);
       var L=n1*n2/gcd2(n1,n2), nt1=t1*(L/n1), nt2=t2*(L/n2);
       var komb=nt1+nt2, g=gcd2(komb,L), T=komb/g, N=L/g;
@@ -806,6 +861,7 @@ function blandadEngine(){
     }) ] },
     'brak-sub': { snabb: [ G.mellanled('k2-sub','Subtraktion med bråk','brak-sub', function(opts){
       var v = (opts && opts.variant) || 'proper';
+      if(v === 'proper'){ var bp = bankPost('BLAD_K2_D5', 'brak-sub:rakna'); if(bp && bp.slag === 'brak'){ var bf = addSubFraga(bp); if(bf) return bf; } }
       if(v === 'blandad'){
         // NIAN dk2 (källa: nian Öva 1 G6): blandad-tal-subtraktion som KRÄVER växling — täcker
         // brak-lana-konceptet UTAN egen generator (Joachims order). Heltalsdelar skiljer med 1 och

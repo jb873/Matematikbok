@@ -118,6 +118,21 @@ function jamforTal(a, b){
   return Math.abs(n - b) < 1e-9;
 }
 
+// MELLANLED = UTTRYCK (order 2026-09-23): rutor som bär ett mellanled rättas på VÄRDE med den delade
+// evalArith (samma som åttan) — "1·4", "8/2" och "4" är alla rätt. Övriga rutor rättas som förr.
+var MELLANLEDSRUTOR = 'mellan-fin,forlang-in,kedje-in,brak-steg-cell,stam-cell';
+function arMellanled(inp){
+  var kl = MELLANLEDSRUTOR.split(',');
+  for(var i = 0; i < kl.length; i++) if(inp.classList.contains(kl[i])) return true;
+  return false;
+}
+function jamforLed(inp, facit){
+  if(!arMellanled(inp)) return jamforTal(inp.value, facit);
+  var v = window.AK8_UI && AK8_UI.evalArith ? AK8_UI.evalArith(inp.value) : NaN;
+  return isFinite(v) && Math.abs(v - facit) < 1e-9;
+}
+
+
 // ============================================================
 //  RENDERING AV BLAD
 // ============================================================
@@ -143,7 +158,7 @@ function svarBrakHTML(svar){
 function bladHTML(blad){
   var html = '<div class="ovn-sheet">'
     + '<h2>' + blad.titel + '</h2>'
-    + (blad.intro ? '<p class="ovn-intro">' + blad.intro + '</p>' : '');
+    ;   // ingen intro-rad i öva (order 2026-09-23)
 
   if(blad.tvaNivaer){
     var l2 = !blad.niva2Upplast;
@@ -153,11 +168,7 @@ function bladHTML(blad){
       + '</div>';
   }
 
-  html += '<div class="brak-hint">' + (blad.hint
-    ? blad.hint
-    : ('<strong>Tänk på:</strong> svara alltid i <strong>enklaste form</strong>. '
-       + (blad.mellanled ? 'Visa hur du räknar i uträkningsrutan – t.ex. hur du förlänger – innan du skriver svaret. ' : '')
-       + 'Är svaret i blandad form (större än 1) finns en liten ruta till vänster för heltalet.')) + '</div>';
+  // .brak-hint borttagen (order 2026-09-23): inga hjälptexter i öva
 
   blad.grupper.forEach(function(grupp, gi){
     html += '<div class="ovn-grupp">';
@@ -522,7 +533,7 @@ function bygg_blad(rotEl, blad){
       else if(inp.dataset.rund){
         ok = inp.dataset.rund.split('|').some(function(v){ return jamforTal(inp.value, parseFloat(v.replace(',', '.'))); });
       }
-      else ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
+      else ok = jamforLed(inp, parseFloat(inp.dataset.svar));
       totalt++;
       var mk = marker(ok);
       if(ok){ inp.classList.add('correct','just-checked'); ratt++; inp.insertAdjacentElement('afterend', mk); }
@@ -797,9 +808,7 @@ function gSample(arr, k){
   return kopia.slice(0, k);
 }
 
-var BTFORM_HINT = '<strong>Tänk på:</strong> skriv decimaltal med <strong>komma</strong> (t.ex. 0,75) '
   + 'och bråk i <strong>enklaste form</strong>. Tecknet ≈ betyder att svaret är avrundat.';
-var BTFORM_HINT2 = BTFORM_HINT + ' På den här nivån finns även åttondelar och tal större än 1 – skriv dem i blandad form (t.ex. 1 och 1/4).';
 
 // Bygg ett blad ur poolerna för given nivå
 function bladBTform(niva, forsta){
@@ -824,10 +833,6 @@ function bladBTform(niva, forsta){
   }
   return {
     titel: 'Bråk ↔ decimal – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: niva === 2
-      ? 'Nu även åttondelar och tal större än 1. Skriv svaren i enklaste form / blandad form.'
-      : 'Skriv bråken som decimaltal och decimaltalen som bråk.',
-    hint: niva === 2 ? BTFORM_HINT2 : BTFORM_HINT,
     keypadOps: [','],
     grupper: [
       {rubrik:'Skriv bråket som decimaltal', rader:
@@ -873,9 +878,7 @@ function radBlandadBada(t, n){
   return {typ:'brakTillBanda', taljare:t, namnare:n, decSvar: avr(t/n, 6), brakSvar: kanonisk(t, n)};
 }
 
-var BL_HINT = '<strong>Tänk på:</strong> blandad form skrivs som heltal + bråk (t.ex. 1 och 3/4), och bråket ska vara i <strong>enklaste form</strong>. '
   + 'I bråkform skriver du bara täljare och nämnare (t.ex. 7/4).';
-var BL_HINT2 = BL_HINT + ' På den här nivån finns även blandade tal vars bråkdel är ett oäkta bråk – skriv om dem i enklaste form.';
 
 // ── Nya radtyper för blandad form ↔ bråkform ──
 // Oäkta bråk → blandad form (visar t/n, svar = blandad form)
@@ -927,10 +930,6 @@ function bladBlandad(niva, forsta){
   }
   return {
     titel: 'Blandad form och bråkform – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: niva === 2
-      ? 'Växla mellan oäkta bråk och blandad form. Sista delen: skriv blandade tal i enklaste form.'
-      : 'Växla mellan oäkta bråk och blandad form.',
-    hint: niva === 2 ? BL_HINT2 : BL_HINT,
     keypadOps: [],
     grupper: grupper
   };
@@ -1115,9 +1114,7 @@ var RK_G3_N2 = [
   [['mixed',1,1,8], '−', ['mixed',2,1,4]]
 ];
 
-var RAKNA_HINT  = '<strong>Tänk på:</strong> gör om alla tal till <strong>samma form</strong> innan du räknar. '
   + 'Skriv svaret som decimaltal med komma (t.ex. 0,75). Tecknet ≈ betyder att svaret är avrundat.';
-var RAKNA_HINT2 = RAKNA_HINT + ' På den här nivån kan svaret bli <strong>negativt</strong> – skriv då minustecken framför.';
 
 function bladRakna(niva, forsta){
   var p1 = niva === 2 ? RK_G1_N2 : RK_G1_N1;
@@ -1141,10 +1138,6 @@ function bladRakna(niva, forsta){
   }
   return {
     titel: 'Räkna med former – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: niva === 2
-      ? 'Räkna med tal i olika former. Vissa svar blir negativa.'
-      : 'Räkna med tal i olika former – gör om till samma form innan du räknar. Svara i decimalform.',
-    hint: niva === 2 ? RAKNA_HINT2 : RAKNA_HINT,
     keypadOps: niva === 2 ? [',', '-'] : [','],
     grupper: [
       {rubrik: niva === 2 ? 'Bråk och decimaltal med tredjedelar (≈ avrundat svar)'
@@ -1177,10 +1170,8 @@ function GEN_RAKNA_N2(){ return bladRakna(2, false); }
 var TEST_RAKNA_N1 = RK_G1_N1.concat(RK_G2_N1, RK_G3_N1);
 var TEST_RAKNA_N2 = RK_G1_N2.concat(RK_G2_N2, RK_G3_N2);
 
-var TEST_HINT  = '<strong>Testet:</strong> visa att du klarar alla områden. '
   + 'Skriv decimaltal med komma och bråk i <strong>enklaste form</strong>. '
   + 'Tecknet ≈ betyder att svaret är avrundat.';
-var TEST_HINT2 = TEST_HINT + ' På nivå 2 kan svaret i sista frågan bli <strong>negativt</strong>.';
 
 function bladTest(niva, forsta){
   var poolBD = niva === 2 ? TERM2 : TERM1;
@@ -1212,8 +1203,6 @@ function bladTest(niva, forsta){
   }
   return {
     titel: 'Test – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
-    intro: 'Ett samlingstest från hela kapitlet. Fem områden, tre uppgifter per område.',
-    hint: niva === 2 ? TEST_HINT2 : TEST_HINT,
     keypadOps: niva === 2 ? [',', '-'] : [','],
     isTest: true,
     grupper: [
@@ -1304,8 +1293,6 @@ var FORL_MC = [
 var FORL_TVA23 = [[16,40],[2,9],[5,17],[7,12]];  // förläng med 2 sedan med 3
 var FORL_TVA34 = [[6,15],[2,17],[23,29],[5,8]];  // förläng med 3 sedan med 4
 
-var FORL_HINT  = '<strong>Att förlänga</strong> = multiplicera täljare och nämnare med <strong>samma tal</strong>. Bråkets värde ändras inte.';
-var FORL_HINT2 = FORL_HINT + ' Här förlänger du i två steg – multiplicera med första talet och sedan med det andra.';
 
 function bladForlanga(niva, forsta){
   if(niva === 2){
@@ -1313,8 +1300,6 @@ function bladForlanga(niva, forsta){
     var a34 = forsta ? FORL_TVA34.slice(0,3) : gSample(FORL_TVA34, 3);
     return {
       titel: 'Förlänga i två steg – nivå 2' + (forsta ? '' : ' (nytt blad)'),
-      intro: 'Förläng bråken i två steg. Skriv slutbråket.',
-      hint: FORL_HINT2, keypadOps: [],
       grupper: [
         {rubrik:'Förläng med 2 och sedan med 3', rader: a23.map(function(p){ return radTvaSteg(p[0], p[1], 2, 3); })},
         {rubrik:'Förläng med 3 och sedan med 4', rader: a34.map(function(p){ return radTvaSteg(p[0], p[1], 3, 4); })}
@@ -1327,8 +1312,6 @@ function bladForlanga(niva, forsta){
   var mc     = forsta ? FORL_MC.slice(0,2)     : gSample(FORL_MC, 2);
   return {
     titel: 'Förlänga – nivå 1' + (forsta ? '' : ' (nytt blad)'),
-    intro: 'Förläng bråk och jämför bråk som har olika nämnare.',
-    hint: FORL_HINT, keypadOps: [],
     grupper: [
       {rubrik:'Skriv bråket med den nya nämnaren', rader: namn.map(function(p){ return radForlang(p[0], p[1], p[2]); })},
       {rubrik:'Vilket tecken ska stå mellan bråken? <, = eller >', rader: tecken.map(function(p){ return radTecken(p[0], p[1], p[2], p[3]); })},
@@ -1353,7 +1336,6 @@ var MELL_A   = [[1,2],[3,4],[2,5],[1,5]];   // förläng med 2
 var MELL_B   = [[2,3],[1,4],[3,5],[2,7]];   // förläng med 3
 var MELL_MAL = [[1,2,8],[3,4,8],[2,3,12],[1,3,12],[2,5,10],[5,6,12]];
 var MGN_PAIRS = [[1,3,1,4],[1,2,1,3],[2,3,1,4],[3,4,1,6],[1,2,2,5],[1,4,1,6]];
-var MELL_HINT = '<strong>Mellanledet</strong> visar uträkningen: du multiplicerar täljare och nämnare med samma tal. Räkna ut produkterna och skriv svaret.';
 
 function bladMellan(niva, forsta){
   if(niva === 2){
@@ -1361,8 +1343,6 @@ function bladMellan(niva, forsta){
     var mgn = forsta ? MGN_PAIRS.slice(0,2) : gSample(MGN_PAIRS, 2);
     return {
       titel: 'Med mellanled – nivå 2' + (forsta ? '' : ' (nytt blad)'),
-      intro: 'Förläng till en given nämnare, och förläng två bråk till samma nämnare (minsta gemensamma nämnare).',
-      hint: 'Vilket tal måste du multiplicera nämnaren med för att få den nya nämnaren? Använd <strong>samma tal</strong> på täljaren.',
       keypadOps: [],
       grupper: [
         {rubrik:'Förläng till nämnaren som står – fyll i faktorn och täljaren', rader: mal.map(function(p){ return radMellanMal(p[0], p[1], p[2]); })},
@@ -1374,8 +1354,6 @@ function bladMellan(niva, forsta){
   var b = forsta ? MELL_B.slice(0,3) : gSample(MELL_B, 3);
   return {
     titel: 'Med mellanled – nivå 1' + (forsta ? '' : ' (nytt blad)'),
-    intro: 'Förläng bråket och visa uträkningen i mellanledet. Fyll i faktorn (samma uppe och nere) och räkna ut svaret.',
-    hint: MELL_HINT, keypadOps: [],
     grupper: [
       {rubrik:'Förläng med 2 – fyll i mellanledet och svaret', rader: a.map(function(p){ return radMellanFyll(p[0], p[1], 2); })},
       {rubrik:'Förläng med 3 – fyll i mellanledet och svaret', rader: b.map(function(p){ return radMellanFyll(p[0], p[1], 3); })}
@@ -1390,8 +1368,8 @@ function GEN_MELLAN_N2(){ return bladMellan(2, false); }
 // ============================================================
 //  DELKAPITEL 3 · FÖRKORTA  (innehåll)
 // ============================================================
-function radForkorta(t, n, f){ return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar:{hel:0, t:t/f, n:n/f}}; }
-function radEnklaste(t, n){ var g = gcd(t, n); return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar:{hel:0, t:t/g, n:n/g}}; }
+function radForkorta(t, n, f){ return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar:{hel:0, t:t/f, n:n/f}, opnd:{slag:'forkorta', t:t, n:n, f:f}}; }
+function radEnklaste(t, n){ var g = gcd(t, n); return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar:{hel:0, t:t/g, n:n/g}, opnd:{slag:'enklaste', t:t, n:n}}; }
 function radBlandadForkort(t, n){ return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar: kanonisk(t, n)}; }
 function radStam(){ return {typ:'stambrak'}; }
 function radPara(par){ return {typ:'para', par: par}; }
@@ -1406,7 +1384,6 @@ var FORK_PARA  = [
   [[6,8],[10,15],[8,10],[3,12]],
   [[2,6],[6,8],[10,12],[4,5]]
 ];
-var FORK_HINT = '<strong>Att förkorta</strong> = dividera täljare och nämnare med <strong>samma tal</strong>. Bråkets värde ändras inte. Förkortar du så långt det går får du <strong>enklaste form</strong>.';
 
 function bladForkorta(niva, forsta){
   if(niva === 2){
@@ -1414,8 +1391,6 @@ function bladForkorta(niva, forsta){
     var bland = forsta ? FORK_BLAND.slice(0,4) : gSample(FORK_BLAND, 4);
     return {
       titel: 'Förkorta – nivå 2' + (forsta ? '' : ' (nytt blad)'),
-      intro: 'Förkorta så långt som möjligt, och skriv stora bråk i blandad form.',
-      hint: FORK_HINT, keypadOps: [],
       grupper: [
         {rubrik:'Förkorta så långt som möjligt (enklaste form)', rader: lang.map(function(p){ return radEnklaste(p[0], p[1]); })},
         {rubrik:'Förkorta och skriv i blandad form', rader: bland.map(function(p){ return radBlandadForkort(p[0], p[1]); })}
@@ -1428,8 +1403,6 @@ function bladForkorta(niva, forsta){
   var para = forsta ? FORK_PARA[0]         : gPick(FORK_PARA);
   return {
     titel: 'Förkorta – nivå 1' + (forsta ? '' : ' (nytt blad)'),
-    intro: 'Förkorta bråk, skriv i enklaste form och para ihop bråk med samma värde.',
-    hint: FORK_HINT, keypadOps: [],
     grupper: [
       {rubrik:'Förkorta med 2', rader: m2.map(function(p){ return radForkorta(p[0], p[1], 2); })},
       {rubrik:'Förkorta med 5', rader: m5.map(function(p){ return radForkorta(p[0], p[1], 5); })},
@@ -1491,7 +1464,8 @@ function byggSheet(sheetId, forstaBesoket, niva){
 
 // Flikväxling (låsta flikar reagerar inte)
 var tabRow = document.getElementById('tab-row');
-tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
+// Modulen laddas även i testramen (talbanken) där flikraden inte finns → vakt i stället för krasch.
+if(tabRow) tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
   btn.addEventListener('click', function(){
     if(btn.classList.contains('is-locked')) return;
     var id = btn.dataset.tab;
@@ -1516,3 +1490,26 @@ if(devLas()){
   document.body.appendChild(devBadge);
   console.info('🔧 DEV-läge aktiverat — alla lås är öppna (test-fliken och nivå 2 på alla flikar).');
 }
+
+// ══ TALBANK — testets tal ur ÖVA-bladets data (order 2026-09-23). Se blad-k2-d5.js. ════════════
+window.BLAD_K2_D3 = (function(){
+  var bank = {};
+  function lagg(nod, post){ (bank[nod] = bank[nod] || []).push(post); }
+  var blad = [];
+  [GRUND_FORLANGA_N1, GRUND_FORLANGA_N2, GRUND_MELLAN_N1, GRUND_MELLAN_N2, GRUND_FORKORTA_N1, GRUND_FORKORTA_N2].forEach(function(bygg){
+    if(typeof bygg !== 'function') return;
+    try { blad.push(bygg()); } catch(e){}
+  });
+  blad.forEach(function(b){
+    (b.grupper || []).forEach(function(g){
+      (g.rader || []).forEach(function(r){
+        if(r.typ === 'forlang') lagg('brak-forlanga:rakna', { slag:'forlang', t:r.t, n:r.n, malN:r.malN });
+        else if(r.typ === 'mellanMal') lagg('brak-forlanga:rakna', { slag:'forlang', t:r.t, n:r.n, malN:r.malN });
+        else if(r.typ === 'tecken') lagg('brak-jmf-lika:begrepp', { slag:'tecken', a:r.a, b:r.b, svar:r.svar });
+        else if(r.typ === 'mgn') lagg('brak-mgn:rakna', { slag:'mgn', t1:r.t1, n1:r.n1, t2:r.t2, n2:r.n2 });
+        else if(r.opnd) lagg('brak-forkorta:rakna', r.opnd);
+      });
+    });
+  });
+  return { talBank: function(nod){ return (bank[String(nod)] || []).slice(); } };
+})();

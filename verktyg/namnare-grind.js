@@ -162,6 +162,8 @@ const PROBE7 = `(function(){
     var RADSEL = '.brak-svar-rad, .brak-fragerad, .brak-forlang-rad, .val-rad, .stam-rad';
     var rader = Array.from(root.querySelectorAll(RADSEL)).filter(synlig);
     var selar = Array.from(root.querySelectorAll('.para-sel')).filter(synlig);
+    b.oppna = Array.from(root.querySelectorAll('[data-oppen]')).filter(synlig).length;   // öppen uppgift (villkor, inget facit i DOM) → enhet men ej fyllbar
+    b.ejTackta += b.oppna;
     b.valRader = Array.from(root.querySelectorAll('.val-rad')).filter(synlig).length;   // knapprad utan ruta
     b.paraSelar = selar.length;                                                          // <select> utan ruta
     b.radTyper = rader.length;
@@ -253,7 +255,7 @@ SIDOR7.forEach(sida => {
     // Enhet = en SYNLIG ifyllbar ruta, eller en svarsenhet UTAN ruta (knapprad, select, valgrid).
     // Rader som består av rutor räknas alltså via sina rutor — modulerna räknar olika (d5/d6 räknar varje
     // stegruta), och invarianten är att nämnaren aldrig får vara STÖRRE än det eleven kan fylla i.
-    var enheter = b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0);
+    var enheter = b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0) + (b.oppna || 0);
     if(b.namnare > enheter) brott.push('NÄMNAREN ' + b.namnare + ' > synliga svarsenheter ' + enheter + ' (rutor ' + b.synligIn + ' + grids ' + b.synligGrid + ' + knapprader ' + (b.valRader || 0) + ' + val ' + (b.paraSelar || 0) + ')');
     if(b.doldIn || b.doldGrid) brott.push('DOLDA i visat blad: rutor ' + b.doldIn + ', grids ' + b.doldGrid);
     if(!b.ejTackta && b.namnare > 0 && b.ratt !== b.namnare) brott.push('allt fyllt ur data men ' + b.ratt + ' av ' + b.namnare);

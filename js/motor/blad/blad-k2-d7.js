@@ -74,8 +74,7 @@
     var mount = document.getElementById('sheet-division');
     if(!mount) return;
     var html = '<div class="ovn-sheet"><h2>Division med bråk</h2>'
-      + '<p class="ovn-intro">Fördjupning i årskurs 7. Divisionen skrivs som ett stående (komplext) bråk. '
-      + 'I grupp 3 och 6 visas hela metoden: multiplicera täljare och nämnare med det inverterade bråket så att nämnaren blir 1.</p>';
+      ;   // ingen intro-rad i öva (order 2026-09-23)
     GRUPPER.forEach(function(g){
       html += '<div class="ovn-grupp"><div class="ovn-grupp-rubrik">' + g.rubrik + '</div>';
       if(g.metodNot) html += '<p class="dv-metod-not">Visa hela mellanledet på alla uppgifter.</p>';
