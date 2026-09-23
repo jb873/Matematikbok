@@ -24,7 +24,8 @@
     // SJUAN (order 2026-09-23): nycklar på formen 'ak7-kN-dM'. Tom lista = ärligt tom yta, ingen
     // prosa på sidan. k3/d1 bar en kvarglömd kopia som lovade filmer om NEGATIVA TAL — fel ämne.
     'ak7-k3-d1': [],
-    'ak7-k3-d3': []
+    'ak7-k3-d3': [],
+    'ak7-k3-d4': []
   };
 
   // ELEVTEXT som fält (intro/varning/titel) — elevtext-låset ser bara kända fältnamn, inte textContent-tilldelningar.

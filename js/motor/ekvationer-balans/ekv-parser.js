@@ -187,12 +187,20 @@ function operationer(vl, hl, opts){
   if(Math.abs(L.b) > EPS) n++;
   if(Math.abs(H.a) > EPS) n++;
   if(Math.abs(Math.abs(L.a - H.a) - 1) > EPS) n++;
-  if(/\(/.test(String(vl)) || /\(/.test(String(hl))) n++;
+  // Bara en parentes som ska LÖSAS UPP kostar ett steg: något multiplicerar parentesen,
+  // 2(x + 3) eller 5·(3a + 4). Parenteser som bara grupperar — bråkens (x)/(2) — gör det inte.
+  var multParentes = /[0-9a-zåäö)]\s*[·*]?\s*\(/i;
+  if(multParentes.test(String(vl)) || multParentes.test(String(hl))) n++;
   return n;
 }
+// Minsta antal rader i kedjan, INKLUSIVE ekvationen själv. Två lägen (order 2026-09-23):
+//   'kort'       (problemlösningen) EN rad per operation   → 1 + n
+//   'utskriven'  (ekvationskapitlet) operationen skrivs ut på båda sidor OCH utförs → 1 + 2n
+// 2x + 4 = 12 ger 3 rader i kort läge och 5 i utskrivet; 5x + 4 = 7x − 8 ger 4 respektive 7.
 function minstaAntalRader(vl, hl, opts){
   var n = operationer(vl, hl, opts);
-  return n == null ? null : 1 + n;
+  if(n == null) return null;
+  return 1 + ((opts && opts.lage === 'utskriven') ? 2 * n : n);
 }
 
 var API = { parseSida: parseSida, parseEkvation: parseEkvation, sammaLosning: sammaLosning,

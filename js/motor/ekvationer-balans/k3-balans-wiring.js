@@ -1,62 +1,49 @@
-/* k3-balans-wiring.js — DEEPLINK-ROUTER + OBSERVERANDE loggning för balansmetoden (Del4).
-   ── KRONJUVEL: ekvationer-balans.js ÄNDRAS INTE EN RAD. Den är ett bar-script vars funktioner
-      och variabler blir globaler (aktivFlik, FLIKAR, renderFlikar, visaFlik, uppgifter). Detta
-      omslag griper de globalerna utifrån — logiken, parsern och per-rad-rättningen är orörda. ──
-   Laddas SIST på d4-ekvationer-sidan (efter ekvationer-balans.js + mastery-k3.js). Två jobb:
+/* k3-balans-wiring.js — OBSERVERANDE loggning + deeplink för balansmetoden (k3/d4).
 
-   1. ROUTER: ?ko=&formaga= → rätt sektion. Noderna särskiljs av ?ko= (båda har formaga=rakna).
-      Sätter globalen aktivFlik + kallar visaFlik() — samma väg som fliken själv.
+   ADDITIV: ekvationer-balans.js loggar ingenting själv. Den sätter `.uppg-klar` → `.show` exakt när
+   en ekvation är löst (per EKVATION, inte per rad), och varje uppgiftsblock bär `data-nod`. Det här
+   omslaget observerar den signalen (MutationObserver) och loggar ett försök till MasteryK3 för
+   uppgiftens egen nod. Per-rad-signalen ignoreras — den skulle överräkna grovt.
 
-   2. LOGGNING: EN LÖST EKVATION = ETT EVENT. Balansmetoden sätter .uppg-klar → .show EXAKT när
-      en ekvation är löst (kontrolleraUppg, ekvationer-balans.js:429) — per EKVATION, inte per rad.
-      Vi observerar den signalen (MutationObserver på #card) och loggar 'ratt' en gång per löst
-      ekvation till MasteryK3. Per-rad-signalen (rad-ok) IGNORERAS — den skulle överräkna grovt
-      (samma fel som gjorde jamforTal obrukbar som observationsyta). Ingen motorrad ändras.
+   Efter omskrivningen (order 2026-09-23) finns inga flikindex att härleda noden ur: noden står på
+   uppgiften. Steg 1 och 2 loggar till alg-ekv-ensidig:rakna, steg 3 till alg-ekv-badaled:rakna.
 
-   Parentes-noden (alg-ekv-parentes) wiras ALDRIG här: parsern avvisar 3(x+2) rent och parenteser
-   är författade som fördjupning → den noden står som "kommer" (generator:null). GDPR: bara
-   MasteryK3 (localStorage), inget nät. Loggar bara i deeplink-läge för en wirad nod. */
+   DEEPLINK: ?ko=&formaga= öppnar rätt öva-blad (skalet äger bladnavigeringen; vi klickar knappen).
+   Parentes-noden wiras aldrig — parenteserna är författade som fördjupning och saknar uppgifter.
+
+   GDPR: bara MasteryK3 (localStorage), inget nät. */
 (function(){
   'use strict';
-  // FLIKAR-index → Del4-nod (belägg: FLIKAR, ekvationer-balans.js:190-198). Loggningen härleds ur
-  // den AKTIVA sektionen (aktivFlik) — inte ur ?ko= — så balansmetoden loggar oavsett hur d4-sidan
-  // nås (kapitelkort ELLER karta-deeplink). Endast de två live-sektionerna; övriga flikar = ingen logg.
-  var FLIK_NOD = {
-    1: 'alg-ekv-ensidig:rakna',    // FLIKAR[1] = "Grunderna" (niva 0, ensidig)
-    2: 'alg-ekv-badaled:rakna'     // FLIKAR[2] = "Variabel i båda leden" (niva 1)
-  };
-  // Inverterad karta för ?ko=-routern (deeplink → sektion).
-  var SEKTION = {}; Object.keys(FLIK_NOD).forEach(function(i){ SEKTION[FLIK_NOD[i]] = +i; });
+
+  // Nod → bladets ordningsnummer i blad-nav (deeplink). Loggningen går via data-nod, inte via detta.
+  var BLAD_FOR_NOD = { 'alg-ekv-ensidig:rakna': 0, 'alg-ekv-badaled:rakna': 2 };
 
   function aktuellNod(){
-    try { var q = new URLSearchParams(location.search), ko = q.get('ko'), f = q.get('formaga');
-      return (ko && f) ? ko + ':' + f : null; } catch(e){ return null; }
+    try {
+      var q = new URLSearchParams(location.search), ko = q.get('ko'), f = q.get('formaga');
+      return (ko && f) ? ko + ':' + f : null;
+    } catch(e){ return null; }
   }
-  var deepNod = aktuellNod();
 
-  // ── 1. Router: ?ko= pre-väljer sektionen (griper globalen aktivFlik + visaFlik; logiken orörd) ──
+  // ── 1. Deeplink: öppna rätt blad ──
   function route(){
-    if(deepNod == null || SEKTION[deepNod] == null) return;
-    if(typeof aktivFlik === 'undefined' || typeof visaFlik !== 'function') return;
-    if(aktivFlik !== SEKTION[deepNod]){
-      aktivFlik = SEKTION[deepNod];
-      if(typeof renderFlikar === 'function') renderFlikar();
-      visaFlik();
-    }
+    var nod = aktuellNod(); if(!nod || BLAD_FOR_NOD[nod] == null) return;
+    var knappar = document.querySelectorAll('#blad-nav .blad-nav-btn');
+    var k = knappar[BLAD_FOR_NOD[nod]]; if(k) k.click();
   }
 
-  // ── 2. Observerande loggning: en löst ekvation (.uppg-klar.show) = ett event, till AKTIV sektions nod ──
-  function nodForFlik(){ return (typeof aktivFlik !== 'undefined') ? FLIK_NOD[aktivFlik] : null; }
-  var loggade = (typeof WeakSet === 'function') ? new WeakSet() : null;   // en .uppg-klar loggas en gång
+  // ── 2. En löst ekvation = ett event, till uppgiftens egen nod ──
+  var loggade = (typeof WeakSet === 'function') ? new WeakSet() : null;
   function hantera(el){
     if(!window.MasteryK3 || !el || !el.classList || !el.classList.contains('uppg-klar')) return;
-    if(!el.classList.contains('show')) return;                            // bara när ekvationen är LÖST
-    var node = nodForFlik(); if(!node) return;                            // bara de två live-sektionerna
+    if(!el.classList.contains('show')) return;
+    var block = el.closest && el.closest('[data-nod]'); if(!block) return;
+    var nod = block.getAttribute('data-nod'); if(!nod) return;
     if(loggade){ if(loggade.has(el)) return; loggade.add(el); }
-    window.MasteryK3.loggaForsok(node, 'ratt');                           // en löst ekvation = ett event
+    window.MasteryK3.loggaForsok(nod, 'ratt');
   }
   function startObs(){
-    var root = document.getElementById('card') || document.body;
+    var root = document.querySelector('.tab-panel[data-panel="ova"]') || document.body;
     new MutationObserver(function(muts){
       muts.forEach(function(m){
         if(m.type === 'attributes'){ hantera(m.target); }

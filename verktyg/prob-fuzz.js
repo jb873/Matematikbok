@@ -237,6 +237,9 @@ const RATT = { uttryck: { H: 'x', C: 'x + 12' },
 function med(andring){ return Object.assign({}, RATT, andring); }
 
 ok('hela lösningen är rätt', R.ratta(hc, RATT).status === 'ratt', JSON.stringify(R.ratta(hc, RATT)));
+// Problemlösningen kapar mellanled: TRE rader i 2x + 12 = 48 räcker (en rad per operation).
+ok('tre rader i 2x + 12 = 48 godkänns (kort läge)',
+   R.ratta(hc, med({ rader: [{ vl: '2x + 12', hl: '48' }, { vl: '2x', hl: '36' }, { vl: 'x', hl: '18' }] })).status === 'ratt');
 ok('fel tecken i uttrycket → steg 1', avSteg(R.ratta(hc, med({ uttryck: { H: 'x', C: 'x - 12' } }))) === 'uttryck');
 ok('en del utan uttryck → steg 1',    avSteg(R.ratta(hc, med({ uttryck: { H: 'x', C: '' } }))) === 'uttryck');
 ok('ingen del är x → steg 1',         avSteg(R.ratta(hc, med({ uttryck: { H: '18', C: '30' } }))) === 'uttryck');

@@ -205,8 +205,9 @@ window.K3_TAXONOMI = {
     {
       "id": "alg-ekv-ensidig:rakna", "namn": "Lösa ekvationer (balansmetoden)", "parent": "alg-ekv-ensidig", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
-      "begrepp": "Lös ekvationer med en obekant på ena sidan (även bråk-koefficient och decimaler) med balansmetoden.",
-      "visning": null
+      "begrepp": "Lös ekvationer med en obekant på ena sidan (även bråk-koefficient och decimaler) med balansmetoden. Öva-bladen: en operation, sedan två.",
+      "visning": { "utbudslista": ["k3d4"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 1,
+                   "etikett": "räkna", "formagaKey": "rakna", "niva": null, "kommer": true }
     },
     {
       "id": "alg-ekv-badaled", "namn": "Variabel på båda sidor", "parent": "alg-ekvationer", "niva": "deldoman",
@@ -217,8 +218,9 @@ window.K3_TAXONOMI = {
     {
       "id": "alg-ekv-badaled:rakna", "namn": "Variabel på båda sidor", "parent": "alg-ekv-badaled", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
-      "begrepp": "Lös ekvationer med variabel i båda leden genom att samla x på en sida.",
-      "visning": null
+      "begrepp": "Lös ekvationer med variabel i båda leden. Omkastningen (största x-koefficienten till vänster) är tillåten men inte krävd.",
+      "visning": { "utbudslista": ["k3d4"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 2,
+                   "etikett": "räkna", "formagaKey": "rakna", "niva": null, "kommer": true }
     },
     {
       "id": "alg-ekv-parentes", "namn": "Parentes i ekvation", "parent": "alg-ekvationer", "niva": "deldoman",
