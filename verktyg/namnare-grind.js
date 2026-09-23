@@ -157,12 +157,42 @@ const PROBE7 = `(function(){
     var b = { blad: namn, synligIn: 0, doldIn: 0, synligGrid: 0, doldGrid: 0, ejTackta: 0 };
     var ins = Array.from(root.querySelectorAll('.ovn-in'));
     ins.forEach(function(i){ if(synlig(i)) b.synligIn++; else b.doldIn++; });
+    // k2-kopiornas egna radtyper: raden är EN svarsenhet (som i modulens egen räkning), och rutorna
+    // inuti den ska då inte räknas var för sig.
+    var RADSEL = '.brak-svar-rad, .brak-fragerad, .brak-forlang-rad, .val-rad, .stam-rad';
+    var rader = Array.from(root.querySelectorAll(RADSEL)).filter(synlig);
+    var selar = Array.from(root.querySelectorAll('.para-sel')).filter(synlig);
+    b.valRader = Array.from(root.querySelectorAll('.val-rad')).filter(synlig).length;   // knapprad utan ruta
+    b.paraSelar = selar.length;                                                          // <select> utan ruta
+    b.radTyper = rader.length;
     var tomma = ins.filter(function(i){ var d = i.dataset; return (d.text !== undefined && dec(d.text) === '') || (d.svar !== undefined && d.svar === ''); }).length;
     b.platshallare = ins.length > 0 && tomma === ins.length;   // byggar-platshållare (tomt facit i varje ruta) → rapporteras med ?, fälls ej
     root.querySelectorAll('.valruta-grid, .ovn-val-grid, .ovn-flerval-grid').forEach(function(g){ if(!synlig(g)) b.doldGrid++; else b.synligGrid++; });
     root.querySelectorAll('.brak-svar-rad, .brak-fragerad').forEach(function(row){ var h = row.querySelector('.brak-hel'), t = row.querySelector('.brak-t'), n = row.querySelector('.brak-n'); if(h && row.dataset.hel !== undefined){ h.value = row.dataset.hel; ev(h, 'input'); } if(t && row.dataset.t !== undefined){ t.value = row.dataset.t; ev(t, 'input'); } if(n && row.dataset.n !== undefined){ n.value = row.dataset.n; ev(n, 'input'); } });
     ins.forEach(function(i){ if(i.closest('.brak-svar-rad, .brak-fragerad') && /brak-(hel|t|n)\\b/.test(i.className)) return; if(/brak-cell|brak-kladd|brak-bada-dec|forlang-tal|forlang-dec/.test(i.className)){ b.ejTackta++; return; } fyll(i, b); });
-    root.querySelectorAll('.valruta-grid').forEach(function(g){ var ratta = dec(g.dataset.ratt).split('|').map(norm); g.querySelectorAll('.valruta-btn').forEach(function(bt){ var bv = norm(dec(bt.dataset.val)); var ar = ratta.indexOf(bv) >= 0; if(ar !== bt.classList.contains('is-vald')) bt.click(); }); });
+    // val-rad: klicka knappen vars data-val = radens data-ratt
+    root.querySelectorAll('.val-rad').forEach(function(rad){
+      var r = rad.dataset.ratt, bt = Array.from(rad.querySelectorAll('.val-knapp')).filter(function(k){ return k.dataset.val === r; })[0];
+      if(bt) bt.click(); else b.ejTackta++;
+    });
+    // para-sel: <select> med data-ratt
+    root.querySelectorAll('.para-sel').forEach(function(sel){ if(sel.dataset.ratt){ sel.value = sel.dataset.ratt; ev(sel, 'change'); } else b.ejTackta++; });
+    // brak-forlang-rad: hundra/dec ur radens data
+    root.querySelectorAll('.brak-forlang-rad').forEach(function(row){
+      var h = row.querySelector('.forlang-tal'), d = row.querySelector('.forlang-dec');
+      if(h && row.dataset.hundra !== undefined){ h.value = row.dataset.hundra; ev(h, 'input'); }
+      if(d && row.dataset.dec !== undefined){ d.value = String(row.dataset.dec).replace('.', ','); ev(d, 'input'); }
+      if(!h && !d) b.ejTackta++;
+    });
+    root.querySelectorAll('.valruta-grid').forEach(function(g){
+      // TVÅ varianter: kärnans (facit på griden, data-val per knapp) och k2-kopiornas (facit PER KNAPP, data-ratt=1|0)
+      var perKnapp = !!g.querySelector('.valruta-btn[data-ratt]');
+      var ratta = dec(g.dataset.ratt || '').split('|').map(norm);
+      g.querySelectorAll('.valruta-btn').forEach(function(bt){
+        var ar = perKnapp ? bt.dataset.ratt === '1' : ratta.indexOf(norm(dec(bt.dataset.val))) >= 0;
+        if(ar !== bt.classList.contains('is-vald')) bt.click();
+      });
+    });
     root.querySelectorAll('.ovn-val-grid').forEach(function(g){ var bt = g.querySelector('.ovn-val-btn[data-val="' + g.dataset.valsvar + '"]'); if(bt) bt.click(); else b.ejTackta++; });
     root.querySelectorAll('.ovn-flerval-grid').forEach(function(g){ var r = g.dataset.ratt.split(','); g.querySelectorAll('.ovn-flerval-btn').forEach(function(bt){ var ar = r.indexOf(bt.dataset.tal) >= 0; if(ar !== bt.classList.contains('is-vald')) bt.click(); }); });
     var kn = root.querySelector('[data-action="kontroll"]'); if(!kn){ b.ingenKnapp = true; ut.blad.push(b); return; }
@@ -181,7 +211,7 @@ const PROBE7 = `(function(){
 })()`;
 
 const SIDOR8 = fs.readdirSync(path.join(ROOT, 'ak8/k1')).filter(f => /\.html$/.test(f) && f !== 'index.html').map(f => 'ak8/k1/' + f);
-const SIDOR7 = ['ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => p + '/index.html');
+const SIDOR7 = ['ak7/k2/d1-andel-antal', 'ak7/k2/d2-byta-form', 'ak7/k2/d3-forlanga-forkorta', 'ak7/k2/d4-jamfora-brak', 'ak7/k2/d5-addsub-brak', 'ak7/k2/d6-multiplikation-brak', 'ak7/k2/d7-division-brak', 'ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => p + '/index.html');
 const TMP = path.join(os.tmpdir(), 'namnare-' + process.pid);
 function kor(sida, probe, seed){
   const pf = TMP + '-probe.js', pre = TMP + '-pre.js'; fs.writeFileSync(pf, probe); fs.writeFileSync(pre, PRE(seed));
@@ -220,11 +250,15 @@ SIDOR7.forEach(sida => {
     if(b.ingenKnapp){ console.log('? ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ingen Kontrollera-knapp'); return; }
     if(b.platshallare){ console.log('? ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': PLATSHÅLLARE (tomt facit i alla rutor — kan aldrig ge full pott)'); return; }
     const brott = [];
-    if(b.namnare > b.synligIn + b.synligGrid) brott.push('NÄMNAREN ' + b.namnare + ' > synliga rutor ' + b.synligIn + ' + grids ' + b.synligGrid);
+    // Enhet = en SYNLIG ifyllbar ruta, eller en svarsenhet UTAN ruta (knapprad, select, valgrid).
+    // Rader som består av rutor räknas alltså via sina rutor — modulerna räknar olika (d5/d6 räknar varje
+    // stegruta), och invarianten är att nämnaren aldrig får vara STÖRRE än det eleven kan fylla i.
+    var enheter = b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0);
+    if(b.namnare > enheter) brott.push('NÄMNAREN ' + b.namnare + ' > synliga svarsenheter ' + enheter + ' (rutor ' + b.synligIn + ' + grids ' + b.synligGrid + ' + knapprader ' + (b.valRader || 0) + ' + val ' + (b.paraSelar || 0) + ')');
     if(b.doldIn || b.doldGrid) brott.push('DOLDA i visat blad: rutor ' + b.doldIn + ', grids ' + b.doldGrid);
     if(!b.ejTackta && b.namnare > 0 && b.ratt !== b.namnare) brott.push('allt fyllt ur data men ' + b.ratt + ' av ' + b.namnare);
     fel += brott.length;
-    console.log((brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + b.synligIn + '+' + b.synligGrid + (b.ejTackta ? ' · ej täckta ' + b.ejTackta : '') + (b.namnare === 0 ? ' · TOMT BLAD' : '') + (brott.length ? '\n     ' + brott.join('\n     ') : ''));
+    console.log((brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + (b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0)) + (b.ejTackta ? ' · ej täckta ' + b.ejTackta : '') + (b.namnare === 0 ? ' · TOMT BLAD' : '') + (brott.length ? '\n     ' + brott.join('\n     ') : ''));
   });
 });
 try { fs.unlinkSync(TMP + '-probe.js'); fs.unlinkSync(TMP + '-pre.js'); } catch(e){}

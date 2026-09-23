@@ -52,12 +52,26 @@ const PROBE7 = `(function(){
     var b = { blad: namn, rader: 0, gronFastFel: [], perRutaSaknas: [], provade: 0 };
     var SEL = '.ovn-in[data-svar], .ovn-in[data-forenkla]';   // uttrycksrutor (pyramid/magisk kvadrat, k3 d3) räknas med
     var rader = Array.from(root.querySelectorAll('.ovn-rad')).filter(function(r){ return r.querySelectorAll(SEL).length >= 2; });
-    b.rader = rader.length; if(!rader.length){ ut.blad.push(b); return; }
+    // k2: bråkrader vars facit står på RADEN (data-hel/t/n) och vars rutor är .brak-cell
+    var brakRader = Array.from(root.querySelectorAll('.brak-svar-rad, .brak-fragerad')).filter(function(r){ return r.querySelectorAll('.brak-hel, .brak-t, .brak-n').length >= 2; });
+    b.rader = rader.length + brakRader.length; if(!b.rader){ ut.blad.push(b); return; }
     rader.forEach(function(r){ var ins = Array.from(r.querySelectorAll(SEL)); ins.forEach(function(inp, i){
       var uttryck = inp.dataset.forenkla !== undefined, ratt = uttryck ? inp.dataset.visa : inp.dataset.svar;
       inp.value = i === ins.length - 1 ? ratt : (uttryck ? ratt + ' + 1' : String(parseFloat(String(ratt).replace(',', '.')) + 1).replace('.', ','));   // fel värde i alla utom sista
       ev(inp, 'input'); }); });
+    // k2-bråkrader: sista rutan rätt, övriga fel (facit ur radens data)
+    brakRader.forEach(function(r){
+      var cel = ['hel', 't', 'n'].map(function(k){ return { el: r.querySelector('.brak-' + k), v: r.dataset[k] }; }).filter(function(x){ return x.el; });
+      cel.forEach(function(c, i){ c.el.value = (i === cel.length - 1) ? c.v : String(parseInt(c.v, 10) + 1); ev(c.el, 'input'); });
+    });
     var kn = root.querySelector('[data-action="kontroll"]') || (root.parentElement && root.parentElement.querySelector('[data-action="kontroll"]')) || document.querySelector('[data-action="kontroll"]'); if(kn) kn.click();
+    brakRader.forEach(function(r){
+      b.provade++;
+      var marks = Array.from(r.querySelectorAll('.ovn-mark')).map(function(m){ return m.textContent; });
+      var cel = Array.from(r.querySelectorAll('.brak-hel, .brak-t, .brak-n'));
+      var st = cel.map(function(i){ return i.classList.contains('correct') ? 'ok' : i.classList.contains('wrong') ? 'fel' : '-'; });
+      if(marks.length && marks.every(function(m){ return m === '\u2713'; })) b.gronFastFel.push('bråkrad [' + st.join(',') + ']');
+    });
     rader.forEach(function(r){ var ins = Array.from(r.querySelectorAll(SEL)); b.provade++;
       var marks = ins.map(function(i){ var n = i.nextElementSibling; return (n && n.classList.contains('ovn-mark')) ? n.textContent : '-'; });
       var st = ins.map(function(i){ return i.classList.contains('correct') ? 'ok' : i.classList.contains('wrong') ? 'fel' : '-'; });
@@ -74,7 +88,7 @@ const PROBE7 = `(function(){
   return ut;
 })()`;
 const SIDOR8 = fs.readdirSync(path.join(ROOT, 'ak8/k1')).filter(f => /\.html$/.test(f) && f !== 'index.html').map(f => ['ak8/k1/' + f, PROBE8]);
-const SIDOR7 = ['ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => [p + '/index.html', PROBE7]);
+const SIDOR7 = ['ak7/k2/d1-andel-antal', 'ak7/k2/d2-byta-form', 'ak7/k2/d3-forlanga-forkorta', 'ak7/k2/d4-jamfora-brak', 'ak7/k2/d5-addsub-brak', 'ak7/k2/d6-multiplikation-brak', 'ak7/k2/d7-division-brak', 'ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => [p + '/index.html', PROBE7]);
 let fel = 0, provade = 0;
 console.log('FLERRUTS-GRIND — sista rutan rätt, övriga fel: raden får inte bli ✓; tallinje/talföljd/hopp visar status per ruta\n');
 SIDOR8.concat(SIDOR7).forEach(([sida, probe]) => {
