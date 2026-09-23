@@ -92,7 +92,10 @@ function fardighetUrTaxonomi(tax, utbudslistaId){
       return { ko: gr.rubrik, drills: gr.rader.map(function(n){
         var v = n.visning;
         return { titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0],
-                 formagaKey: v.formagaKey || n.id.split(':')[1], niva: v.niva || undefined, kommer: !!v.kommer };
+                 formagaKey: v.formagaKey || n.id.split(':')[1], niva: v.niva || undefined,
+                 // kommer = inget innehåll alls · drillKommer = bladet finns men drillen saknas.
+                 // Båda ger dämpat kort: ett kort får aldrig leda in i tomrum.
+                 kommer: !!(v.kommer || v.drillKommer) };
       }) };
     });
 }

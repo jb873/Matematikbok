@@ -76,95 +76,17 @@ var STEG = [
 var LAGE = 'utskriven';          // ekvationskapitlets läge: varje operation skrivs ut på båda sidor
 var uppgifter = [], aktivtFalt = null;
 
-function autoStorlek(inp){ var len = (inp.value || '').length; inp.setAttribute('size', Math.max(3, len + 1)); }
-function skapaTextSeg(vars){
-  var inp = document.createElement('input');
-  inp.type = 'text'; inp.className = 'seg-text'; inp.setAttribute('inputmode', 'text'); inp.setAttribute('data-kp', 'fri');
-  inp.setAttribute('data-vars', vars || 'xy');          // keypadens bokstäver: uppgiftens variabel
-  inp.setAttribute('aria-label', 'rad i lösningen');    // namnger rutan, ger inget exempel
-  autoStorlek(inp);
-  inp.addEventListener('focus', function(){ aktivtFalt = inp; });
-  inp.addEventListener('input', function(){ autoStorlek(inp); });
-  inp.addEventListener('keydown', function(e){ tangent(e, inp); });
-  return inp;
-}
-function skapaBrakSeg(vars){
-  var w = document.createElement('span'); w.className = 'seg-brak';
-  var t = document.createElement('input'), s = document.createElement('span'), n = document.createElement('input');
-  [t, n].forEach(function(inp, i){
-    inp.type = 'text'; inp.className = 'brak-tal'; inp.setAttribute('inputmode', 'text'); inp.setAttribute('data-kp', 'fri');
-    inp.setAttribute('data-vars', vars || 'xy');
-    inp.setAttribute('aria-label', i === 0 ? 'täljare' : 'nämnare');
-    autoStorlek(inp);
-    inp.addEventListener('focus', function(){ aktivtFalt = inp; });
-    inp.addEventListener('input', function(){ autoStorlek(inp); });
-    inp.addEventListener('keydown', function(e){ tangent(e, inp); });
-  });
-  s.className = 'brak-streck';
-  w.appendChild(t); w.appendChild(s); w.appendChild(n);
-  w._tIn = t; w._nIn = n; return w;
-}
-function tangent(e, inp){
-  if(e.key === 'Enter'){ e.preventDefault(); var u = uppFor(inp); if(u) nyRad(u); return; }
-}
-function uppFor(inp){
-  var g = inp.closest('.eq-grid');
-  for(var i = 0; i < uppgifter.length; i++) if(uppgifter[i].grid === g) return uppgifter[i];
-  return null;
-}
+// ── RAD-UI: DELAD komponent (ekv-kedja.js, laddas före denna fil) ──
+var K = (typeof window !== 'undefined' && window.EkvKedja) || null;
 function nyRad(upp){
-  var grid = upp.grid;
-  var vlWrap = document.createElement('div'); vlWrap.className = 'eq-vl';
-  var vlSida = document.createElement('div'); vlSida.className = 'sida sida-vl'; vlSida.appendChild(skapaTextSeg(upp.vars)); vlWrap.appendChild(vlSida);
-  var eqWrap = document.createElement('div'); eqWrap.className = 'eq-eq'; eqWrap.textContent = '=';
-  var hlWrap = document.createElement('div'); hlWrap.className = 'eq-hl';
-  var hlSida = document.createElement('div'); hlSida.className = 'sida sida-hl'; hlSida.appendChild(skapaTextSeg(upp.vars)); hlWrap.appendChild(hlSida);
-  var status = document.createElement('div'); status.className = 'eq-status';
-  grid.appendChild(vlWrap); grid.appendChild(eqWrap); grid.appendChild(hlWrap); grid.appendChild(status);
-  var rad = { vlSida: vlSida, hlSida: hlSida, status: status, vlWrap: vlWrap, hlWrap: hlWrap };
-  upp.rader.push(rad);
-  [vlSida, hlSida].forEach(function(s){ s.addEventListener('input', function(){ rensaFarg(rad); }); });
-  var f = vlSida.querySelector('.seg-text'); if(f){ f.focus(); aktivtFalt = f; }
-  return rad;
+  var r = K.rad(upp.grid, { vars: upp.vars, onEnter: function(){ nyRad(upp); } });
+  upp.rader.push(r); r.fokus(); return r;
 }
-function rensaFarg(rad){
-  rad.vlWrap.classList.remove('rad-ok', 'rad-fel'); rad.hlWrap.classList.remove('rad-ok', 'rad-fel');
-  rad.status.textContent = ''; rad.status.style.color = '';
-}
-function infogaTecken(upp, tecken){
-  if(!aktivtFalt || aktivtFalt.closest('.eq-grid') !== upp.grid){
-    var sr = upp.rader[upp.rader.length - 1]; aktivtFalt = sr.vlSida.querySelector('.seg-text');
-  }
-  if(!aktivtFalt) return;
-  var inp = aktivtFalt, start = inp.selectionStart, end = inp.selectionEnd;
-  if(typeof start === 'number'){
-    inp.value = inp.value.slice(0, start) + tecken + inp.value.slice(end);
-    inp.selectionStart = inp.selectionEnd = start + tecken.length;
-  } else inp.value += tecken;
-  autoStorlek(inp); inp.focus();
-}
-function infogaBrakI(upp){
-  if(!aktivtFalt || aktivtFalt.closest('.eq-grid') !== upp.grid){
-    var sr = upp.rader[upp.rader.length - 1]; aktivtFalt = sr.vlSida.querySelector('.seg-text');
-  }
-  if(!aktivtFalt) return;
-  var sida = aktivtFalt.closest('.sida'); if(!sida) return;
-  var brak = skapaBrakSeg(upp.vars), nyText = skapaTextSeg(upp.vars);
-  if(aktivtFalt.nextSibling){ sida.insertBefore(brak, aktivtFalt.nextSibling); sida.insertBefore(nyText, brak.nextSibling); }
-  else { sida.appendChild(brak); sida.appendChild(nyText); }
-  brak._tIn.focus(); aktivtFalt = brak._tIn;
-}
-function lasSida(sidaEl){
-  var bitar = [];
-  Array.prototype.forEach.call(sidaEl.childNodes, function(node){
-    if(node.classList && node.classList.contains('seg-text')){ if(node.value.trim() !== '') bitar.push(node.value.trim()); }
-    else if(node.classList && node.classList.contains('seg-brak')){
-      var t = node._tIn.value.trim(), n = node._nIn.value.trim();
-      if(t !== '' || n !== '') bitar.push('(' + (t || '0') + ')/(' + (n || '1') + ')');
-    }
-  });
-  return bitar.join('');
-}
+function lasSida(sidaEl){ return K.las(sidaEl); }
+function rensaFarg(rad){ K.rensa(rad); }
+function infogaTecken(upp, tecken){ K.infogaTecken(upp.grid, tecken); }
+function infogaBrakI(upp){ K.infogaBrak(upp.grid, { vars: upp.vars }); }
+
 function arLost(vl, hl){ return _EP ? _EP.arLost(vl, hl) : false; }
 
 // ── RÄTTNING ──────────────────────────────────────────────────────────────────────────────────
@@ -178,13 +100,8 @@ function kontrolleraUppg(upp){
     if(vl === '' && hl === '') continue;
     hade = true; antal++;
     var e = parseEkvation(vl, hl);
-    if(!e || !sammaLosning(forra, e)){
-      rad.vlWrap.classList.add('rad-fel'); rad.hlWrap.classList.add('rad-fel');
-      rad.status.textContent = '✗'; rad.status.style.color = 'var(--red)';
-      allaOk = false; break;
-    }
-    rad.vlWrap.classList.add('rad-ok'); rad.hlWrap.classList.add('rad-ok');
-    rad.status.textContent = '✓'; rad.status.style.color = 'var(--green)';
+    if(!e || !sammaLosning(forra, e)){ K.markera(rad, false); allaOk = false; break; }
+    K.markera(rad, true);
     forra = e;
     if(harUnikLosning(e) && arLost(vl, hl)) nadde = true;
   }
@@ -193,11 +110,7 @@ function kontrolleraUppg(upp){
   var forFa = nadde && krav != null && antal < krav;
   if(forFa){
     var sistRad = upp.rader.filter(function(r){ return lasSida(r.vlSida) !== '' || lasSida(r.hlSida) !== ''; }).pop();
-    if(sistRad){
-      sistRad.vlWrap.classList.remove('rad-ok'); sistRad.hlWrap.classList.remove('rad-ok');
-      sistRad.vlWrap.classList.add('rad-fel'); sistRad.hlWrap.classList.add('rad-fel');
-      sistRad.status.textContent = '✗'; sistRad.status.style.color = 'var(--red)';
-    }
+    if(sistRad) K.markera(sistRad, false);
   }
   var klar = allaOk && nadde && !forFa;
   upp.klarEl.classList.toggle('show', klar);
@@ -305,4 +218,4 @@ function kontrollera(steg, hintEl){
   AK8_UI.bindKeypad(document.body);
 })();
 
-if(typeof window !== 'undefined') window.EkvKedja = { STEG: STEG, renderSteg: renderSteg, uppgifter: function(){ return uppgifter; }, lage: function(l){ if(l) LAGE = l; return LAGE; } };
+if(typeof window !== 'undefined') window.EkvBlad = { STEG: STEG, renderSteg: renderSteg, uppgifter: function(){ return uppgifter; }, lage: function(l){ if(l) LAGE = l; return LAGE; } };

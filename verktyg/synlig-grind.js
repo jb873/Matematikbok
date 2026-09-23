@@ -81,7 +81,7 @@ function surfade(){
       const p = String(n.id).split(':'), fk = n.visning.formagaKey || p[1];
       let url = fileUrl(path.join(ROOT, ram)) + '?ko=' + encodeURIComponent(p[0]) + '&formaga=' + encodeURIComponent(fk) + '&embed=1';
       if(n.visning.niva && n.visning.niva < 3) url += '&maxniva=' + n.visning.niva;
-      out.push({ id: n.id, kap, utbud: n.visning.utbudslista, kommer: !!n.visning.kommer, url });
+      out.push({ id: n.id, kap, utbud: n.visning.utbudslista, kommer: !!(n.visning.kommer || n.visning.drillKommer), url });
     }
   }
   return out;

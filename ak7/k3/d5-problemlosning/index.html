@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matematik · Algebra · Ekvationer</title>
+<title>Matematik · Algebra · Problemlösning</title>
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
@@ -176,6 +176,26 @@
 .global-hint.ok{color:var(--green-dk);} .global-hint.fel{color:var(--red-dk);}
 .niva-rubrik{font-family:var(--serif);font-size:24px;font-weight:600;margin:10px 0 8px;}
 @media (max-width:560px){ .eq-kort{padding:6px 16px 24px;} .eq-grid{gap:6px;} }
+
+/* ── PROBLEMLÖSNINGENS BLAD: metoden är formen. Stegen står under varandra i ETT rutnät, så att
+   likhetstecknen är i linje hela vägen ner och stegen ändå syns som tre skilda ting. ── */
+.prob-kort{max-width:920px;margin:0 auto;padding:6px 28px 30px;}
+.prob-uppg{padding:20px 0 22px;border-top:1px solid var(--paper-dk);}
+.prob-uppg:first-of-type{border-top:none;}
+.prob-fraga{font-size:16.5px;line-height:1.55;color:var(--ink);margin:2px 0 14px;max-width:62ch;}
+.prob-grid{margin-left:2px;row-gap:6px;}
+.prob-steg-rub{font-family:var(--cinzel);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);margin:10px 0 2px;padding-top:8px;border-top:1px dashed var(--paper-dk);}
+.prob-grid > .prob-steg-rub:first-child{margin-top:0;padding-top:0;border-top:none;}
+.prob-knapprad{margin:2px 0 0;}
+.prob-svarrad{display:flex;align-items:center;gap:10px;}
+.prob-svar{font-family:var(--serif);font-size:21px;font-weight:500;color:var(--ink);background:#fff;
+  border:2px solid var(--gold-lt);border-radius:8px;padding:6px 12px;min-width:200px;outline:none;}
+.prob-svar:focus{box-shadow:0 0 0 3px rgba(196,154,64,.18);}
+.prob-svar.ratt{border-color:var(--green);color:var(--green-dk);}
+.prob-svar.fel{border-color:var(--red);color:var(--red-dk);}
+.prob-svar-status{font-size:18px;}
+.uppg-besked{color:var(--red-dk);font-size:14.5px;margin-top:10px;max-width:60ch;}
 </style>
 </head>
 <body>
@@ -189,14 +209,14 @@
     <span class="crumb-sep">›</span>
     <a href="../../../ak7-k3.html">Kapitel 3</a>
     <span class="crumb-sep">›</span>
-    <span class="crumb-current">Ekvationer</span>
+    <span class="crumb-current">Problemlösning</span>
   </div>
 </nav>
 
 <header class="hero">
-  <div class="hero-eyebrow">Delkapitel 4 · Kapitel 3</div>
-  <h1 class="hero-title">Ekvationer med <em>balansmetoden</em></h1>
-  <p class="hero-desc">Bygg din egen lösning – skriv en ny rad i taget. Gör samma sak på båda sidor och skriv ut varje steg, så att någon annan kan följa din uträkning.</p>
+  <div class="hero-eyebrow">Delkapitel 5 · Kapitel 3</div>
+  <h1 class="hero-title">Problemlösning med <em>ekvationer</em></h1>
+  <p class="hero-desc">Skriv en ekvation ur texten, lös den med balansmetoden och svara på frågan.</p>
   <a class="hero-back" href="../../../ak7-k3.html">← Alla delkapitel</a>
 </header>
 
@@ -208,15 +228,13 @@
   <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
-<!-- PANEL: FÖRELÄSNING — panelen ägs av föreläsningsregistret -->
+<!-- PANEL: FÖRELÄSNING — panelen ägs av föreläsningsregistret (metodstegen hör hemma här) -->
 <section class="tab-panel" data-panel="forelasningar"></section>
 
-<!-- PANEL: ÖVA — trappan i tre steg bakom bladnavigeringen -->
+<!-- PANEL: ÖVA — piloten: variant 1. De fyra andra varianterna byggs efter granskningen. -->
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
-  <div id="blad-steg1" class="blad-mount"><div class="ovn-wrap" id="sheet-steg1"></div></div>
-  <div id="blad-steg2" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-steg2"></div></div>
-  <div id="blad-steg3" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-steg3"></div></div>
+  <div id="blad-instruktion" class="blad-mount"><div class="ovn-wrap" id="sheet-instruktion"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -235,18 +253,20 @@
 
 <footer>
   <div>Digitalt läromedel i matematik</div>
-  <span>Delkapitel 4</span>
+  <span>Delkapitel 5</span>
 </footer>
 
 <!-- MASTERY (k3-store) -->
 <script src="../../../js/mastery-karna.js"></script>
 <script src="../../../js/mastery-k3.js"></script>
 
-<!-- MOTOR: delad parser + balansmetodens kedja -->
+<!-- MOTOR: delad parser + kedjans rad-UI + modellen + rättaren + bladet -->
 <script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../../js/motor/ekvationer-balans/ekv-parser.js"></script>
 <script src="../../../js/motor/ekvationer-balans/ekv-kedja.js"></script>
-<script src="../../../js/motor/ekvationer-balans/ekvationer-balans.js"></script>
+<script src="../../../js/motor/problemlosning/prob-modell.js"></script>
+<script src="../../../js/motor/problemlosning/prob-rattare.js"></script>
+<script src="../../../js/motor/problemlosning/prob-blad.js"></script>
 
 <!-- TAXONOMI + delade kontrakt: föreläsningsregistret, färdiga test, sidskalet -->
 <script src="../../../js/data/k3-taxonomi.js"></script>
@@ -255,22 +275,27 @@
 <script src="../../../js/motor/blad/delkapitel-skal.js"></script>
 
 <script>
-// Sidan monteras av det delade skalet: flikväxling, blad-nav och färdighetshubben.
-// Bladen är redan renderade av ekvationer-balans.js (ett steg per mount).
+// Sidan monteras av det delade skalet. Bladet är redan renderat av prob-blad.js.
 DelkapitelSkal.montera({
-  ova: [
-    { titel: 'En operation',            mount: 'steg1' },
-    { titel: 'Två operationer',         mount: 'steg2' },
-    { titel: 'Variabel i båda leden',   mount: 'steg3' }
-  ],
+  ova: [ { titel: 'Följa en instruktion', mount: 'instruktion' } ],
   taxonomi:    function(){ return window.K3_TAXONOMI; },
-  utbudslista: 'k3d4',
+  utbudslista: 'k3d5',
   ram:         '../../../ak7-k3-ram.html',
-  forel:       'ak7-k3-d4'
+  forel:       'ak7-k3-d5'
 });
 </script>
 
-<script src="../../../js/motor/ekvationer-balans/k3-balans-wiring.js"></script>
+<!-- Keypaden: en delad, fast nedtill (fälten bär data-vars per uppgift) -->
+<script>
+(function(){
+  if(!(window.AK8_UI && AK8_UI.keypadHTML) || document.getElementById('prob-keypad')) return;
+  var w = document.createElement('div'); w.innerHTML = AK8_UI.keypadHTML({ vars: 'x' });
+  var kp = w.firstChild; if(!kp) return;
+  kp.id = 'prob-keypad'; document.body.appendChild(kp);
+  AK8_UI.bindKeypad(document.body);
+})();
+</script>
+
 <script src="../../../js/motor/keypad-clearance.js"></script>
 <script src="../../../js/elevfeedback.js" defer></script>
 </body>

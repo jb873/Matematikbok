@@ -275,7 +275,7 @@ window.K3_TAXONOMI = {
       "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
       "begrepp": "Ta reda på det okända talet ur en instruktion i flera steg (nivå 2: med parentes, 2(x + 3) = 16).",
       "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med tal och delar", "gruppordning": 0, "radordning": 1,
-                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "drillKommer": true }
     },
     {
       "id": "alg-prob-delar:problem", "namn": "Personer eller delar", "parent": "alg-prob-text", "niva": "lovnod",

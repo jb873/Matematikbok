@@ -118,7 +118,7 @@ const rows = [], saknade = [], kommerUtanDrill = [];
     if (!ls) {
       // visning.kommer = platsen är deklarerad men innehållet är inte byggt (hubben visar kortet
       // disabled). Det är inte ett kort som leder in i tomrum — räknas separat, inte som brott.
-      if (vis && vis.kommer) kommerUtanDrill.push(kap + ' ' + nod);
+      if (vis && (vis.kommer || vis.drillKommer)) kommerUtanDrill.push(kap + ' ' + nod);
       else saknade.push(kap + ' ' + nod + ' (kort utan deeplink-post)');
       return;
     }
