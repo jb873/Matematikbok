@@ -293,13 +293,13 @@ window.K2_TAXONOMI = {
       "id": "brak-div-bh:rakna", "namn": "Dividera bråktal med heltal", "parent": "brak-div", "niva": "lovnod",
       "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakHeltal",
       "begrepp": "Räkna ut kvoten av ett bråk och ett heltal, svar i enklaste form.",
-      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 0, "titel": "Bråktal ÷ heltal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 0, "titel": "Dividera bråktal med heltal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-div-hb:rakna", "namn": "Dividera heltal med bråktal", "parent": "brak-div", "niva": "lovnod",
       "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "RAKNA", "generator": "divHeltalBrak",
       "begrepp": "Räkna ut kvoten av ett heltal och ett bråk, svar i enklaste form.",
-      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 1, "titel": "Heltal ÷ bråktal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 1, "titel": "Dividera heltal med bråktal", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-div-bb", "namn": "Dividera bråktal med bråktal (visa metod)", "parent": "brak-div", "niva": "deldoman",
@@ -311,7 +311,7 @@ window.K2_TAXONOMI = {
       "id": "brak-div-bb:rakna", "namn": "Dividera bråktal med bråktal (visa metod)", "parent": "brak-div-bb", "niva": "lovnod",
       "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakBrak",
       "begrepp": "Visa hela metoden (komplext bråk → × inverterade nämnaren → förkorta → svar) för bråk delat med bråk.",
-      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 2, "titel": "Bråktal ÷ bråktal (visa metod)", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 2, "titel": "Dividera bråk med bråk – visa metoden", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     /* SYSTER-NOD (täckningsrapport, godkänd): invertera direkt — den kortare vägen utan
        femstegskedjan, för elever som förstått VARFÖR inverteringen fungerar. Egen nod →
@@ -326,7 +326,7 @@ window.K2_TAXONOMI = {
       "id": "brak-div-inv:rakna", "namn": "Dividera bråktal med bråktal (invertera)", "parent": "brak-div-inv", "niva": "lovnod",
       "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "RAKNA", "generator": "divBrakBrak",
       "begrepp": "Invertera nämnaren och multiplicera direkt; svar i enklaste form. Ingen utskriven femstegskedja krävs.",
-      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 3, "titel": "Bråktal ÷ bråktal (invertera)", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": "k2d7", "grupp": "Division med bråk", "gruppordning": 0, "radordning": 3, "titel": "Dividera bråk med bråk – invertera", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "brak-div-reciprok", "namn": "Skriva reciprok (invertera ett tal)", "parent": "brak-div", "niva": "deldoman",
