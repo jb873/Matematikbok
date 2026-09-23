@@ -1,116 +1,15 @@
 /* FAMILJ D · EKVATIONSMOTOR (balansmetod, egen parser) — ak7-k3-d4-ekvationer.html
    Byte-identiskt utbrutet (hela scriptet, logik orörd). Bespoke, delar inget med A/B/C.
    Test/Fördjupning-flikarna är innehålls-platshållare ("inte byggt än"), ej motorer. */
-// ── Ekvationsparser ──
-// Tolkar ett uttryck som "5x + 3" till {a: x-koefficient, b: konstant}
-// Hanterar: tal, x med koefficient (5x, x, -x, 3x), +, -, mellanslag, enkel division (y/3 → men vi håller oss till x här)
-function parseSida(str){
-  str = String(str).replace(/\s+/g,'').replace(/\u2212/g,'-').replace(/·/g,'*').replace(/(\d),(\d)/g,'$1.$2');
-  if(str==='') return null;
-  // Hantera parentes-bråk från bråk-segment: (uttryck)/(uttryck)
-  // Ersätt (A)/(B) med ett värde om båda är rena uttryck – men vi behöver behålla x.
-  // Strategi: tolka hela strängen term för term, där en term kan vara (…)/(…).
-  // Först: dela upp på toppnivå-+/- (utanför parenteser).
-  var termer = delaTermer(str);
-  if(!termer) return null;
-  var a=0, b=0;
-  for(var i=0;i<termer.length;i++){
-    var res = tolkaTerm(termer[i]);
-    if(!res) return null;
-    a += res.a; b += res.b;
-  }
-  return {a:a, b:b};
-}
-
-// dela en sträng i termer på toppnivå (+/- utanför parenteser), varje term med tecken
-function delaTermer(str){
-  if(str[0]!=='+' && str[0]!=='-') str='+'+str;
-  var termer=[], djup=0, start=0;
-  for(var i=0;i<str.length;i++){
-    var c=str[i];
-    if(c==='(') djup++;
-    else if(c===')') djup--;
-    else if((c==='+'||c==='-') && djup===0 && i>0){
-      termer.push(str.slice(start,i)); start=i;
-    }
-  }
-  termer.push(str.slice(start));
-  if(djup!==0) return null;
-  return termer;
-}
-
-// tolka EN term (med ledande tecken) → {a, b}
-function tolkaTerm(term){
-  var tecken = term[0]==='-' ? -1 : 1;
-  var kropp = term.replace(/^[+\-]/,'');
-  if(kropp==='') return null;
-  // division? hitta toppnivå-/
-  var namnareStr=null, taljareStr=kropp, djup=0, slashPos=-1;
-  for(var i=0;i<kropp.length;i++){
-    if(kropp[i]==='(') djup++;
-    else if(kropp[i]===')') djup--;
-    else if(kropp[i]==='/' && djup===0){ slashPos=i; break; }
-  }
-  var namnare=1;
-  if(slashPos>=0){
-    taljareStr = kropp.slice(0,slashPos);
-    namnareStr = kropp.slice(slashPos+1);
-    // nämnaren måste vara ett rent tal (ev. inom parentes)
-    var nStr = namnareStr.replace(/^\(|\)$/g,'');
-    namnare = parseFloat(nStr);
-    if(isNaN(namnare) || namnare===0) return null;
-  }
-  // täljaren kan vara (uttryck) eller enkelt – ta bort omslutande parentes
-  var tStr = taljareStr.replace(/^\(|\)$/g,'');
-  // täljaren kan själv innehålla +/- (t.ex. (5x+3)/5)
-  var inreTermer = delaTermer(tStr);
-  if(!inreTermer) return null;
-  var a=0,b=0;
-  for(var j=0;j<inreTermer.length;j++){
-    var it = inreTermer[j];
-    var itTecken = it[0]==='-' ? -1 : 1;
-    var itKropp = it.replace(/^[+\-]/,'');
-    if(itKropp.indexOf('x')>=0){
-      var koef=itKropp.replace('x',''); if(koef==='')koef='1';
-      var k=parseFloat(koef); if(isNaN(k))return null;
-      a += itTecken*k;
-    } else {
-      var v=parseFloat(itKropp); if(isNaN(v))return null;
-      b += itTecken*v;
-    }
-  }
-  return {a: tecken*a/namnare, b: tecken*b/namnare};
-}
-
-// tolkar "VL = HL" → samlad form A·x = B (flytta allt till ena sidan)
-// returnerar {A, B, losning} eller null vid ogiltigt
-function parseEkvation(vl, hl){
-  var L = parseSida(vl), H = parseSida(hl);
-  if(!L || !H) return null;
-  var A = L.a - H.a;     // x-koefficient samlad till vänster
-  var B = H.b - L.b;     // konstant samlad till höger
-  return {A:A, B:B};
-}
-
-// samma lösning? jämför A1·x=B1 mot A2·x=B2
-// giltigt om båda har en unik lösning och den är samma, ELLER båda saknar/oändliga på samma sätt
-function sammaLosning(e1, e2){
-  if(!e1 || !e2) return false;
-  var EPS=1e-9;
-  var unik1 = Math.abs(e1.A)>EPS, unik2 = Math.abs(e2.A)>EPS;
-  if(unik1 && unik2){
-    return Math.abs(e1.B/e1.A - e2.B/e2.A) < EPS;
-  }
-  // om någon är 0=0 (alltid sann) eller 0=k (aldrig sann) – matcha bara om båda är samma typ
-  if(!unik1 && !unik2){
-    var sann1 = Math.abs(e1.B)<EPS, sann2 = Math.abs(e2.B)<EPS;
-    return sann1===sann2;
-  }
-  return false;
-}
-
-function harUnikLosning(e){ return e && Math.abs(e.A)>1e-9; }
-function losningAv(e){ return e.B/e.A; }
+// ── Ekvationsparser: DELAD (js/motor/ekvationer-balans/ekv-parser.js, laddas före denna fil) ──
+// Låg förr som en kopia här. Samma funktioner, samma beteende — och sedan 2026-09-23 även
+// parenteser (2(x + 3) = 16), som problemlösningens rättare kräver och som kedjan nu godtar.
+var _EP = (typeof window !== 'undefined' && window.EkvParser) || null;
+var parseSida     = function(s){ return _EP ? _EP.parseSida(s) : null; };
+var parseEkvation = function(vl, hl){ return _EP ? _EP.parseEkvation(vl, hl) : null; };
+var sammaLosning  = function(a, b){ return _EP ? _EP.sammaLosning(a, b) : false; };
+var harUnikLosning= function(e){ return _EP ? _EP.harUnikLosning(e) : false; };
+var losningAv     = function(e){ return _EP ? _EP.losningAv(e) : NaN; };
 function snygg(tal){
   var r = Math.round(tal*1e6)/1e6;
   return String(r);
