@@ -148,54 +148,75 @@
   <a class="hero-back" href="../../../ak7-k3.html">← Alla delkapitel</a>
 </header>
 
-<!-- FLIKRAD -->
+<!-- FLIKRAD (val-rad) — samma fyra flikar som sjuans övriga delkapitel -->
 <div class="tab-row" id="tab-row">
-  <button class="tab-btn is-active" data-tab="forelasningar">Föreläsningar</button>
-  <button class="tab-btn" data-tab="skriva">Skriva uttryck</button>
-  <button class="tab-btn" data-tab="tolka">Tolka uttryck</button>
-  <button class="tab-btn" data-tab="berakna">Beräkna med uttryck</button>
-  <button class="tab-btn is-kommer" data-tab="test" disabled aria-disabled="true">Test</button>   <!-- BLAD_TEST är en platshållare (blad-k3-d1.js) → oklickbar tills innehåll finns -->
+  <button class="tab-btn" data-tab="forelasningar">Föreläsning</button>
+  <button class="tab-btn is-active" data-tab="ova">Öva</button>
+  <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
+  <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
-<!-- PANEL: FÖRELÄSNINGAR -->
-<section class="tab-panel is-active" data-panel="forelasningar">
-  <div class="lecture-list" id="lecture-list"></div>
-  <div class="lecture-player" id="lecture-player">
-    <div class="lecture-frame" id="lecture-frame"></div>
-    <a class="lecture-yt-link" id="lecture-yt-link" href="#" target="_blank" rel="noopener">
-      Filmen startar inte? Öppna den på YouTube ↗
-    </a>
+<!-- PANEL: FÖRELÄSNING — panelen ägs av föreläsningsregistret (js/data/forelasningar.js) -->
+<section class="tab-panel" data-panel="forelasningar"></section>
+
+<!-- PANEL: ÖVA (default) — blad-nav + ett helt arbetsblad i taget (författad ordning) -->
+<section class="tab-panel is-active" data-panel="ova">
+  <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
+
+  <div id="blad-skriva"  class="blad-mount" hidden><div class="ovn-wrap" id="sheet-skriva"></div></div>
+  <div id="blad-tolka"   class="blad-mount" hidden><div class="ovn-wrap" id="sheet-tolka"></div></div>
+  <div id="blad-berakna" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-berakna"></div></div>
+</section>
+
+<!-- PANEL: FÄRDIGHETSTRÄNING -->
+<section class="tab-panel" data-panel="fardighet">
+  <div class="fard-layout">
+    <div class="fard-lista" id="fardighet-lista" role="tablist" aria-label="Färdigheter"></div>
+    <div class="fard-scen" id="fard-scen">
+      <div class="fard-tom" id="fard-tom"><p>Välj en färdighet till vänster</p></div>
+      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
+    </div>
   </div>
 </section>
 
-<!-- PANEL: SKRIVA UTTRYCK -->
-<section class="tab-panel" data-panel="skriva">
-  <div class="ovn-wrap" id="sheet-skriva"></div>
-</section>
-
-<!-- PANEL: TOLKA UTTRYCK -->
-<section class="tab-panel" data-panel="tolka">
-  <div class="ovn-wrap" id="sheet-tolka"></div>
-</section>
-
-<!-- PANEL: BERÄKNA MED UTTRYCK -->
-<section class="tab-panel" data-panel="berakna">
-  <div class="ovn-wrap" id="sheet-berakna"></div>
-</section>
-
-<!-- PANEL: TEST -->
-<section class="tab-panel" data-panel="test">
-  <div class="ovn-wrap" id="sheet-test"></div>
-</section>
+<!-- PANEL: TEST — fylls av k3-fardiga-test.js (auto-init) -->
+<section class="tab-panel" data-panel="test"></section>
 
 <footer>
   <div>Digitalt läromedel i matematik</div>
   <span>Delkapitel 1</span>
 </footer>
 
+<!-- MASTERY (k3-store) -->
+<script src="../../../js/mastery-karna.js"></script>
+<script src="../../../js/mastery-k3.js"></script>
+
+<!-- MOTOR: bladkärnan (heltals-släkten) + delkapitlets uppgiftsdata -->
 <script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1.js"></script>
+
+<!-- TAXONOMI + delade kontrakt: föreläsningsregistret, färdiga test, sidskalet -->
+<script src="../../../js/data/k3-taxonomi.js"></script>
+<script src="../../../js/data/forelasningar.js"></script>
+<script src="../../../js/data/k3-fardiga-test.js"></script>
+<script src="../../../js/motor/blad/delkapitel-skal.js"></script>
+
+<script>
+// Sidan monteras av det delade skalet: flikväxling, blad-nav och färdighetshubben.
+// Öva-bladen i lektionsordning; hubben byggs ur taxonomins utbudslista k3d1.
+DelkapitelSkal.montera({
+  ova: [
+    { titel: 'Skriva uttryck',      mount: 'skriva',  data: BLAD_K3_D1.skriva },
+    { titel: 'Tolka uttryck',       mount: 'tolka',   data: BLAD_K3_D1.tolka },
+    { titel: 'Beräkna med uttryck', mount: 'berakna', data: BLAD_K3_D1.berakna }
+  ],
+  taxonomi:    function(){ return window.K3_TAXONOMI; },
+  utbudslista: 'k3d1',
+  ram:         '../../../ak7-k3-ram.html',
+  forel:       'ak7-k3-d1'
+});
+</script>
 
 <script src="../../../js/motor/keypad-clearance.js"></script>
 <script src="../../../js/elevfeedback.js" defer></script>

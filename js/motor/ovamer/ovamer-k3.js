@@ -5,6 +5,14 @@ var NAMN = ['Nadia','Hugo','Selma','Omar','Vera','Elliot','Saga','Noel','Tuva','
 var RAKNEORD = ['noll','en','två','tre','fyra','fem','sex','sju','åtta','nio','tio'];
 function emojiRad(antal, emoji){ var s=''; for(var i=0;i<antal;i++) s+=emoji; return s; }
 
+// Omgång utan upprepning — DELAD distinktOmgang (js/motor/metod/metod-karna.js, laddad av ramen).
+// Nyckeln är uppgiftens synliga innehåll: två uppgifter som ser likadana ut för eleven är samma uppgift.
+function k3Omgang(gen, n){
+  function nyckel(t){ return JSON.stringify([t && t.fraga, t && t.svar, t && t.intro, t && t.vansterText, t && t.accept]); }
+  if(typeof distinktOmgang === 'function') return distinktOmgang(gen, n, nyckel);
+  var ut = []; for(var i = 0; i < n; i++) ut.push(gen()); return ut;
+}
+
 function genTolkaBild(level){
   var v = VAROR.slice().sort(function(){return Math.random()-0.5;});
   var v1=v[0], v2=v[1];
@@ -72,7 +80,7 @@ function tolkaEngine(kategori){
   var sub = kategori==='bild'? 'Titta på bilden och skriv med ord vad personen köpt.'
           : kategori==='varde'? 'Sätt in värdena på a och b och räkna ut kostnaden.'
           : 'Skriv ett uttryck med variabeln. Använd · för gånger.';
-  function nyOmgang(){ omgang=[]; for(var i=0;i<OMG;i++) omgang.push(gen(level)); idx=0; results=[]; }
+  function nyOmgang(){ omgang=k3Omgang(function(){ return gen(level); }, OMG); idx=0; results=[]; }
 
   function render(){
     if(idx>=omgang.length){
@@ -114,13 +122,13 @@ function tolkaEngine(kategori){
       +'<div class="ex-fraga" style="margin-top:10px;">'+task.fraga+'</div>'
       +'<div class="svar-rad">'+svarFalt+'</div>'
       +'<div class="ex-feedback" id="fb"></div>'
-      +(task.svarTyp==='uttryck'?keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','b','·','+','\u2212']):(task.svarTyp==='tal'?keypadHTML(['7','8','9','4','5','6','1','2','3','0']):''))
+      +(task.svarTyp==='uttryck'?keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','b','·','+','\u2212'], k3Vars(task.svar)):(task.svarTyp==='tal'?keypadHTML(['7','8','9','4','5','6','1','2','3','0']):''))
       +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
       +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
     var inp=document.getElementById('svar');
     setTimeout(function(){ inp.focus(); },50);
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); check(); } });
-    bindKeypad();
+    bindKeypad(task.svarTyp==='uttryck' ? k3Vars(task.svar) : '');
     document.getElementById('check').onclick=check;
     document.getElementById('back').onclick=function(){ renderTolkaUttryck(); };
 
@@ -172,14 +180,30 @@ function renderTolkaUttryck(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function keypadHTML(ops){
+// Vilka variabler en uppgift kan kräva — läses ur FACIT, inte ur uppgiftstexten (texten är svenska
+// ord och innehåller förstås a, b, p …). Ordsvar ger inga variabler alls.
+function k3Vars(facit){
+  var t = String(facit == null ? '' : facit);
+  if(t === '' || /[a-zåäö]{3,}/i.test(t)) return '';
+  var ut = ''; 'xyabp'.split('').forEach(function(v){ if(t.indexOf(v) > -1) ut += v; });
+  return ut;
+}
+// Keypaden: EN delad implementation (AK8_UI) — samma tangentbord som bladen och testen.
+function keypadHTML(ops, vars){
+  if(window.AK8_UI && AK8_UI.keypadHTML) return AK8_UI.keypadHTML({ vars: vars || '', builders: false });
   if(!ops || !ops.length) return '';
   var h='<div class="keypad">';
   ops.forEach(function(op){ h+='<button type="button" class="kp-btn" data-op="'+op+'">'+op+'</button>'; });
   return h+'</div>';
 }
-function bindKeypad(){
+// data-vars på svarsrutorna → bindKeypad tänder rätt bokstäver när rutan får fokus.
+function k3SattVars(falt, vars){
+  (falt || []).forEach(function(f){ if(!f) return; if(vars) f.setAttribute('data-vars', vars); else f.removeAttribute('data-vars'); });
+}
+function bindKeypad(vars){
   var inp=document.getElementById('svar'); if(!inp) return;
+  k3SattVars([inp], vars);
+  if(window.AK8_UI && AK8_UI.bindKeypad && document.querySelector('.keypad .kp-key')){ AK8_UI.bindKeypad(app); return; }
   document.querySelectorAll('.kp-btn').forEach(function(btn){
     btn.onclick=function(){ inp.value+=btn.dataset.op; inp.focus(); };
   });
@@ -258,7 +282,7 @@ function genBerakna(level){
 function beraknaEngine(){
   document.getElementById('hero').style.display='none';
   var level=1, omgang=[], idx=0, results=[], OMG=6;
-  function nyOmgang(){ omgang=[]; for(var i=0;i<OMG;i++) omgang.push(genBerakna(level)); idx=0; results=[]; }
+  function nyOmgang(){ omgang=k3Omgang(function(){ return genBerakna(level); }, OMG); idx=0; results=[]; }
 
   function render(){
     if(idx>=omgang.length){
@@ -301,7 +325,7 @@ function beraknaEngine(){
       +'<div class="scorebar">'+dots+'</div>'
       +'<div class="svar-rad" style="font-size:18px;">'+ledHtml+'</div>'
       +'<div class="ex-feedback" id="fb"></div>'
-      +keypadHTML(['7','8','9','4','5','6','1','2','3','0','·','+','\u2212'])
+      +keypadHTML(['7','8','9','4','5','6','1','2','3','0','·','+','\u2212'], '')
       +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
       +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
     var ledFalt=Array.prototype.slice.call(app.querySelectorAll('.ex-in'));
@@ -319,7 +343,7 @@ function beraknaEngine(){
         });
       }
     });
-    bindKeypadMulti(ledFalt);
+    bindKeypadMulti(ledFalt, '');   // insättningen ger tal, inga bokstäver
     document.getElementById('check').onclick=check;
     document.getElementById('back').onclick=function(){ renderOversikt(); };
 
@@ -348,7 +372,9 @@ function beraknaEngine(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function bindKeypadMulti(falt){
+function bindKeypadMulti(falt, vars){
+  k3SattVars(falt, vars);
+  if(window.AK8_UI && AK8_UI.bindKeypad && document.querySelector('.keypad .kp-key')){ AK8_UI.bindKeypad(app); return; }
   var sist=falt[0];
   falt.forEach(function(f){ f.addEventListener('focus',function(){ sist=f; }); });
   document.querySelectorAll('.kp-btn').forEach(function(btn){
@@ -466,7 +492,7 @@ function forenklaEngine(kategori){
   var titel = {en:'Förenkla · en variabel', tva:'Förenkla · två variabler', omkrets:'Förenkla · omkrets', brak:'Förenkla · med division'}[kategori];
   var sub = kategori==='omkrets'? 'Skriv uppställningen och det förenklade uttrycket.'
           : 'Lägg ihop termer av samma sort. Skriv det förenklade uttrycket.';
-  function nyOmgang(){ omgang=[]; for(var i=0;i<OMG;i++) omgang.push(gen(level)); idx=0; results=[]; }
+  function nyOmgang(){ omgang=k3Omgang(function(){ return gen(level); }, OMG); idx=0; results=[]; }
 
   function render(){
     if(idx>=omgang.length){
@@ -505,7 +531,7 @@ function forenklaEngine(kategori){
     app.innerHTML='<div class="view"><div class="exercise-card">'
       +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2><div class="ex-sub">'+sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'
       +'<div class="scorebar">'+dots+'</div>'+kropp
-      +'<div class="ex-feedback" id="fb"></div>'+keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','b','·','+','\u2212'])
+      +'<div class="ex-feedback" id="fb"></div>'+keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','b','·','+','\u2212'], k3Vars(task.svar))
       +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
       +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
     var falt=Array.prototype.slice.call(app.querySelectorAll('.ex-in'));
@@ -520,7 +546,7 @@ function forenklaEngine(kategori){
         });
       }
     });
-    bindKeypadMulti(falt);
+    bindKeypadMulti(falt, k3Vars(task.svar));
     document.getElementById('check').onclick=check;
     document.getElementById('back').onclick=function(){ renderForenkla(); };
 
@@ -731,14 +757,15 @@ function skrivaEngine(kategori){
   function nyOmgang(){
     omgang=[]; idx=0; results=[];
     if(kategori==='figur'){
+      // spridning mellan figurtyper (ingen upprepad typ i rad) OCH inga upprepade uppgifter
       var sista=null;
-      for(var i=0;i<OMG;i++){
+      omgang = k3Omgang(function(){
         var t, forsok=0;
         do { t=gen(level); forsok++; } while(t.figurTyp===sista && forsok<12);
-        sista=t.figurTyp; omgang.push(t);
-      }
+        sista=t.figurTyp; return t;
+      }, OMG);
     } else {
-      for(var j=0;j<OMG;j++) omgang.push(gen(level));
+      omgang = k3Omgang(function(){ return gen(level); }, OMG);
     }
   }
 
@@ -778,7 +805,7 @@ function skrivaEngine(kategori){
     app.innerHTML='<div class="view"><div class="exercise-card">'
       +'<div class="ex-header"><h2 class="ex-title">'+titel+'</h2><div class="ex-sub">'+sub+'</div><span class="ex-level">Nivå '+level+'</span></div>'
       +'<div class="scorebar">'+dots+'</div>'+kropp
-      +'<div class="ex-feedback" id="fb"></div>'+keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','·','/','+','\u2212'])
+      +'<div class="ex-feedback" id="fb"></div>'+keypadHTML(['7','8','9','4','5','6','1','2','3','0','x','y','a','·','/','+','\u2212'], k3Vars(task.svar))
       +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
       +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
     var falt=Array.prototype.slice.call(app.querySelectorAll('.ex-in'));
@@ -793,7 +820,7 @@ function skrivaEngine(kategori){
         if(ny!==f.value){ var fp=ff(fore).length; f.value=ny; try{f.setSelectionRange(fp,fp);}catch(e){} }
       });
     });
-    bindKeypadMulti(falt);
+    bindKeypadMulti(falt, k3Vars(task.svar));
     document.getElementById('check').onclick=check;
     document.getElementById('back').onclick=function(){ renderSkriva(); };
 

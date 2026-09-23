@@ -154,22 +154,38 @@
   <a class="hero-back" href="../../../ak7-k3.html">← Alla delkapitel</a>
 </header>
 
-<!-- FLIKRAD. Föreläsning, Färdighetsträning och Test byggs efter öva-bladen → oklickbara tills de har
-     innehåll (is-kommer, samma regel som färdighetskortens visning.kommer). -->
+<!-- FLIKRAD (val-rad) — samma fyra flikar som sjuans övriga delkapitel -->
 <div class="tab-row" id="tab-row">
-  <button class="tab-btn is-kommer" data-tab="forelasningar" disabled aria-disabled="true">Föreläsningar</button>
+  <button class="tab-btn" data-tab="forelasningar">Föreläsning</button>
   <button class="tab-btn is-active" data-tab="ova">Öva</button>
-  <button class="tab-btn is-kommer" data-tab="fardighet" disabled aria-disabled="true">Färdighetsträning</button>
-  <button class="tab-btn is-kommer" data-tab="test" disabled aria-disabled="true">Test</button>
+  <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
+  <button class="tab-btn" data-tab="test">Test</button>
 </div>
+
+<!-- PANEL: FÖRELÄSNING — panelen ägs av föreläsningsregistret -->
+<section class="tab-panel" data-panel="forelasningar"></section>
 
 <!-- PANEL: ÖVA — tre blad (A, B, C) bakom bladnavigeringen -->
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
-  <div id="blad-a" class="blad-mount"><div class="ovn-wrap" id="sheet-a"></div></div>
+  <div id="blad-a" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-a"></div></div>
   <div id="blad-b" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-b"></div></div>
   <div id="blad-c" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-c"></div></div>
 </section>
+
+<!-- PANEL: FÄRDIGHETSTRÄNING -->
+<section class="tab-panel" data-panel="fardighet">
+  <div class="fard-layout">
+    <div class="fard-lista" id="fardighet-lista" role="tablist" aria-label="Färdigheter"></div>
+    <div class="fard-scen" id="fard-scen">
+      <div class="fard-tom" id="fard-tom"><p>Välj en färdighet till vänster</p></div>
+      <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL: TEST — fylls av k3-fardiga-test.js (auto-init) -->
+<section class="tab-panel" data-panel="test"></section>
 
 <footer>
   <div>Digitalt läromedel i matematik</div>
@@ -183,22 +199,25 @@
 <script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3.js"></script>
+
+<!-- TAXONOMI + delade kontrakt: föreläsningsregistret, färdiga test, sidskalet -->
+<script src="../../../js/data/k3-taxonomi.js"></script>
+<script src="../../../js/data/forelasningar.js"></script>
+<script src="../../../js/data/k3-fardiga-test.js"></script>
+<script src="../../../js/motor/blad/delkapitel-skal.js"></script>
+
 <script>
-(function(){
-  // Bladnavigering (A/B/C) — samma mönster som k1-sidornas OVA-lista.
-  var OVA = [ {titel:'Blad A', mount:'a'}, {titel:'Blad B', mount:'b'}, {titel:'Blad C', mount:'c'} ];
-  var navEl = document.getElementById('blad-nav'), mounts = [], knappar = [];
-  function visa(i){ OVA.forEach(function(b, j){ if(mounts[j]) mounts[j].hidden = (j !== i); if(knappar[j]){ var on = (j === i); knappar[j].classList.toggle('is-active', on); knappar[j].setAttribute('aria-selected', on ? 'true' : 'false'); } }); }
-  OVA.forEach(function(b, i){
-    mounts[i] = document.getElementById('blad-' + b.mount);
-    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'blad-nav-btn'; btn.setAttribute('role', 'tab'); btn.title = b.titel;
-    btn.innerHTML = '<span class="blad-nav-nr">' + (i + 1) + '</span>' + b.titel;
-    btn.onclick = function(){ visa(i); };
-    navEl.appendChild(btn); knappar[i] = btn;
-  });
-  visa(0);
-})();
+// Bladen är redan renderade av blad-k3-d3.js (egna mounts) — skalet sköter flikar, blad-nav,
+// färdighetshubb och föreläsning. Samma anrop som d1.
+DelkapitelSkal.montera({
+  ova: [ { titel: 'Blad A', mount: 'a' }, { titel: 'Blad B', mount: 'b' }, { titel: 'Blad C', mount: 'c' } ],
+  taxonomi:    function(){ return window.K3_TAXONOMI; },
+  utbudslista: 'k3d3',
+  ram:         '../../../ak7-k3-ram.html',
+  forel:       'ak7-k3-d3'
+});
 </script>
+
 <script src="../../../js/motor/keypad-clearance.js"></script>
 <script src="../../../js/elevfeedback.js" defer></script>
 </body>

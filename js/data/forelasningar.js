@@ -20,7 +20,11 @@
   var AK8_FORELASNINGAR = {
     // Kvadratrötter (dk11) är NYTT stoff — sjuan har ingen genomgång att spegla. Joachim avgör om
     // han spelar in en; tills dess är ytan ärligt tom (inte fylld med annat).
-    'kvadratrotter': []
+    'kvadratrotter': [],
+    // SJUAN (order 2026-09-23): nycklar på formen 'ak7-kN-dM'. Tom lista = ärligt tom yta, ingen
+    // prosa på sidan. k3/d1 bar en kvarglömd kopia som lovade filmer om NEGATIVA TAL — fel ämne.
+    'ak7-k3-d1': [],
+    'ak7-k3-d3': []
   };
 
   // ELEVTEXT som fält (intro/varning/titel) — elevtext-låset ser bara kända fältnamn, inte textContent-tilldelningar.
@@ -69,10 +73,17 @@
 
   // Rendera Föreläsning-flikens innehåll. panelEl = <section data-panel="forelasning">, delNr = bokens nr.
   function renderForelFlik(panelEl, delNr){
+    var dk = delkapitelFor(delNr);
+    renderFilmer(panelEl, dk ? videorFor(dk.id) : []);
+  }
+
+  // Nyckel-ingången: samma yta, men delId anges direkt (sjuans delkapitel har ingen AK8_K1_BOK).
+  function renderFlik(panelEl, delId){ renderFilmer(panelEl, videorFor(delId)); }
+
+  function renderFilmer(panelEl, filmer){
     if(!panelEl) return;
     injiceraCss();
-    var dk = delkapitelFor(delNr);
-    var filmer = dk ? videorFor(dk.id) : [];
+    filmer = filmer || [];
     var wrap = document.createElement('div'); wrap.className = 'forel-wrap';
 
     if(!filmer.length){
@@ -124,5 +135,6 @@
     panelEl.innerHTML = ''; panelEl.appendChild(wrap);
   }
 
-  window.AK8_FOREL = { register: AK8_FORELASNINGAR, videorFor: videorFor, renderForelFlik: renderForelFlik };
+  window.AK8_FOREL = { register: AK8_FORELASNINGAR, videorFor: videorFor, renderForelFlik: renderForelFlik, renderFlik: renderFlik };
+  window.FOREL     = window.AK8_FOREL;   // samma modul, namn utan årskurs (sjuan monterar mot denna)
 })();

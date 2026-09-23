@@ -1,121 +1,28 @@
-/* FAMILJ A · ARBETSSIDANS MOTOR — ak7-k3-d1-algebraiska-uttryck.html
-   Byte-identiskt utbrutet (hela scriptet, logik orörd). Egen generation. */
-// ---- FLIKVÄXLING ----
-var tabRow = document.getElementById('tab-row');
-tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    var id = btn.dataset.tab;
-    tabRow.querySelectorAll('.tab-btn').forEach(function(b){
-      b.classList.toggle('is-active', b === btn);
-    });
-    document.querySelectorAll('.tab-panel').forEach(function(p){
-      p.classList.toggle('is-active', p.dataset.panel === id);
-    });
-    window.scrollTo({top:0, behavior:'smooth'});
-  });
-});
+/* blad-k3-d1.js — UPPGIFTSDATA för åk7 · kapitel 3 · delkapitel 1 "Algebraiska uttryck".
+   Ren data. Sidan monteras av DelkapitelSkal (js/motor/blad/delkapitel-skal.js): flikväxling,
+   blad-nav och färdighetshubben ligger i skalet, föreläsningen i föreläsningsregistret
+   (js/data/forelasningar.js). Den här filen kan därför laddas var som helst — ramen läser
+   talbanken utan att rendera något (jfr blad-k2-d5.js).
 
-// ---- FÖRELÄSNINGAR ----
-// id = YouTube-videons id. Tumnagel hämtas automatiskt från YouTube.
-var FORELASNINGAR = [
-  // Lägg in negativa tal-föreläsningarna här när YouTube-länkarna är klara,
-  // t.ex. {id:'VIDEO_ID', titel:'Motsatta tal och tallinjen', tag:'Föreläsning'},
-];
+   TALBANK: BLAD_K3_D1.talBank(nod) ger testets tal ur ÖVA-bladens data, samma metod som k2:
+   ÖVA äger talen, testet hämtar dem. Radtyperna ligger i blad-karna-b.js (heltals-släkten). */
+(function(){
+'use strict';
 
-var lectureList = document.getElementById('lecture-list');
-var player = document.getElementById('lecture-player');
-var frame = document.getElementById('lecture-frame');
-var ytLink = document.getElementById('lecture-yt-link');
-var aktivKort = null;
+// Noder (k3-taxonomin). Loggen sätts per grupp längst ned — varje blad matar sin nod.
+var NOD_SKRIVA  = 'alg-skriva:kommunikation';
+var NOD_TOLKA   = 'alg-tolka:begrepp';
+var NOD_BERAKNA = 'alg-berakna:rakna';
 
-FORELASNINGAR.forEach(function(f){
-  var card = document.createElement('div');
-  card.className = 'lecture-card';
-  card.innerHTML =
-      '<div class="lecture-thumb">'
-        + '<img src="https://img.youtube.com/vi/' + f.id + '/mqdefault.jpg" alt="" loading="lazy">'
-        + '<div class="lecture-play"><span>▶</span></div>'
-      + '</div>'
-    + '<div class="lecture-meta">'
-      + '<div class="lecture-title">' + f.titel + '</div>'
-      + '<div class="lecture-tag">' + f.tag + '</div>'
-    + '</div>'
-    + '<div class="lecture-state" data-state>Spela film</div>';
-  card.addEventListener('click', function(){
-    if(aktivKort === card){
-      // klick på samma kort igen -> stäng
-      stopPlayer();
-      return;
-    }
-    if(aktivKort){
-      aktivKort.classList.remove('is-playing');
-      aktivKort.querySelector('[data-state]').textContent = 'Spela film';
-    }
-    aktivKort = card;
-    card.classList.add('is-playing');
-    card.querySelector('[data-state]').textContent = 'Spelas nu';
-    // origin/widget_referrer hjälper YouTube känna igen domänen och
-    // undvika "fel 153". location.origin är tomt vid file://-visning –
-    // då hoppar vi över parametern så inbäddningen inte bryts.
-    var origin = (location.origin && location.origin.indexOf('http') === 0)
-      ? '&origin=' + encodeURIComponent(location.origin)
-        + '&widget_referrer=' + encodeURIComponent(location.origin)
-      : '';
-    frame.innerHTML = '<iframe src="https://www.youtube.com/embed/' + f.id
-      + '?rel=0&playsinline=1&enablejsapi=1' + origin + '" title="' + f.titel
-      + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
-    ytLink.href = 'https://youtu.be/' + f.id;
-    player.classList.add('is-open');
-    // flytta spelaren direkt under det klickade kortet
-    card.insertAdjacentElement('afterend', player);
-    player.scrollIntoView({behavior:'smooth', block:'center'});
-  });
-  lectureList.appendChild(card);
-});
-
-if(FORELASNINGAR.length === 0){
-  lectureList.innerHTML = '<div class="placeholder-note" style="padding:24px;">'
-    + '<span class="pn-icon">📽️</span>'
-    + '<span>Föreläsningar om negativa tal läggs in här när länkarna är klara.</span>'
-  + '</div>';
-}
-
-function stopPlayer(){
-  if(aktivKort){
-    aktivKort.classList.remove('is-playing');
-    aktivKort.querySelector('[data-state]').textContent = 'Spela film';
-    aktivKort = null;
-  }
-  player.classList.remove('is-open');
-  frame.innerHTML = '';
-}
-
-// ============================================================
-// ÖVNINGSMOTOR – ligger i den delade kärnan blad-karna-b.js
-// (heltals-släkten; laddas FÖRE denna fil). Här finns bara bladets
-// egna generatorer och uppgiftsdata. Radtyper: se kärnan.
-// ============================================================
-// ============================================================
-// UPPGIFTSDATA – negativa tal
-// ============================================================
-
-// --- 1 · BEGREPP OCH FÖRSTÅELSE ---
-// ============================================================
-// ÖVNINGSBLAD – Algebraiska uttryck (kapitel 3, del 1)
-// ============================================================
-
-// --- SKRIVA UTTRYCK (platshållare – byggs härnäst) ---
-// --- SKRIVA UTTRYCK ---
 var BLAD_SKRIVA = {
   titel:'Skriva uttryck',
-  intro:'Skriv ett uttryck eller välj rätt alternativ. Använd x och de andra variablerna. Skriv · för gånger och / för delat. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'1. Nora har x stycken kapsyler. Välj det uttryck som visar hur många kapsyler Nora har om', rader:[
+    {rubrik:'Nora har x stycken kapsyler. Välj det uttryck som visar hur många kapsyler Nora har om', rader:[
       {typ:'valruta', fraga:'hon får fyra nya kapsyler', alt:['x − 4','x + 4','4x'], ratt:['x+4']},
       {typ:'valruta', fraga:'hon ger bort tre kapsyler', alt:['x − 3','3x','x + 3'], ratt:['x-3']},
       {typ:'valruta', fraga:'hon får dubbelt så många till', alt:['2x','3x','x/2'], ratt:['2x']}
     ]},
-    {rubrik:'2. Skriv ett uttryck för längden av den röda sträckan', rader:[
+    {rubrik:'Skriv ett uttryck för längden av den röda sträckan', rader:[
       {typ:'bild', svarTyp:'uttryck', fraga:'Röda sträckan =', svar:'x+3', accept:['x+3','3+x'],
        svg:'<svg viewBox="0 0 320 70" width="320" height="70" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="22" x2="290" y2="22" stroke="#c0392b" stroke-width="3"/><line x1="30" y1="16" x2="30" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="290" y1="16" x2="290" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="30" y1="48" x2="180" y2="48" stroke="#333" stroke-width="2"/><line x1="180" y1="48" x2="290" y2="48" stroke="#333" stroke-width="2"/><line x1="30" y1="42" x2="30" y2="54" stroke="#333" stroke-width="2"/><line x1="180" y1="42" x2="180" y2="54" stroke="#333" stroke-width="2"/><line x1="290" y1="42" x2="290" y2="54" stroke="#333" stroke-width="2"/><text x="105" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text><text x="235" y="65" text-anchor="middle" font-size="14" font-style="italic">3</text></svg>'},
       {typ:'bild', svarTyp:'uttryck', fraga:'Röda sträckan =', svar:'x+4', accept:['x+4','4+x'],
@@ -123,33 +30,33 @@ var BLAD_SKRIVA = {
       {typ:'bild', svarTyp:'uttryck', fraga:'Röda sträckan =', svar:'3x', accept:['3x','x+x+x'],
        svg:'<svg viewBox="0 0 320 70" width="320" height="70" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="22" x2="290" y2="22" stroke="#c0392b" stroke-width="3"/><line x1="30" y1="16" x2="30" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="290" y1="16" x2="290" y2="28" stroke="#c0392b" stroke-width="2"/><line x1="30" y1="48" x2="290" y2="48" stroke="#333" stroke-width="2"/><line x1="30" y1="42" x2="30" y2="54" stroke="#333" stroke-width="2"/><line x1="117" y1="42" x2="117" y2="54" stroke="#333" stroke-width="2"/><line x1="204" y1="42" x2="204" y2="54" stroke="#333" stroke-width="2"/><line x1="290" y1="42" x2="290" y2="54" stroke="#333" stroke-width="2"/><text x="73" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text><text x="160" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text><text x="247" y="65" text-anchor="middle" font-size="14" font-style="italic">x</text></svg>'}
     ]},
-    {rubrik:'3. Tilde är a cm lång. Skriv ett uttryck för längden av en person som är', rader:[
+    {rubrik:'Tilde är a cm lång. Skriv ett uttryck för längden av en person som är', rader:[
       {typ:'uttryck', fraga:'10 cm längre än Tilde', svar:'a+10', accept:['a+10','10+a']},
       {typ:'uttryck', fraga:'18 cm kortare än Tilde', svar:'a−18', accept:['a-18']},
       {typ:'uttryck', fraga:'dubbelt så lång som Tilde', svar:'2a', accept:['2a','a·2','a+a']},
       {typ:'uttryck', fraga:'hälften så lång som Tilde', svar:'a/2', accept:['a/2']}
     ]},
-    {rubrik:'4. Elsa är x år gammal', rader:[
+    {rubrik:'Elsa är x år gammal', rader:[
       {typ:'uttryck', fraga:'Elsas bror är 2 år äldre än henne. Skriv ett uttryck för broderns ålder.', svar:'x+2', accept:['x+2','2+x']},
       {typ:'uttryck', fraga:'Elsas syster är dubbelt så gammal som Elsa. Skriv ett uttryck för systerns ålder.', svar:'2x', accept:['2x','x·2','x+x']},
       {typ:'uttryck', fraga:'Skriv ett uttryck för syskonens sammanlagda ålder (Elsa + bror + syster).', svar:'4x+2', accept:['4x+2','2+4x']}
     ]},
-    {rubrik:'5. Vilket eller vilka uttryck beskriver kvadratens omkrets? (sidan är z)', rader:[
+    {rubrik:'Vilket eller vilka uttryck beskriver kvadratens omkrets? (sidan är z)', rader:[
       {typ:'valruta', flera:true, fraga:'Välj alla som stämmer:', alt:['4z','4 · z','4 + z','z + z + z + z'], ratt:['4z','4·z','z+z+z+z']}
     ]},
-    {rubrik:'6. Skriv ett uttryck för figurens omkrets och förenkla det', rader:[
+    {rubrik:'Skriv ett uttryck för figurens omkrets och förenkla det', rader:[
       {typ:'bild', svarTyp:'uttryck', fraga:'Triangel:  omkrets =', svar:'12x', accept:['12x','3x+5x+4x'],
        svg:'<svg viewBox="0 0 200 150" width="200" height="150" xmlns="http://www.w3.org/2000/svg"><polygon points="40,120 40,40 150,120" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="26" y="82" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="105" y="74" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">5x</text><text x="95" y="138" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">4x</text></svg>'},
       {typ:'bild', svarTyp:'uttryck', fraga:'Rektangel:  omkrets =', svar:'8x', accept:['8x','3x+x+3x+x'],
        svg:'<svg viewBox="0 0 220 120" width="220" height="120" xmlns="http://www.w3.org/2000/svg"><rect x="45" y="35" width="130" height="52" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="110" y="28" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="110" y="104" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="33" y="65" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">x</text><text x="187" y="65" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">x</text></svg>'}
     ]},
-    {rubrik:'7. Para ihop genom att skriva rätt uttryck', rader:[
+    {rubrik:'Para ihop genom att skriva rätt uttryck', rader:[
       {typ:'uttryck', fraga:'5 mer än b', svar:'b+5', accept:['b+5','5+b']},
       {typ:'uttryck', fraga:'Hälften så mycket som b', svar:'b/2', accept:['b/2']},
       {typ:'uttryck', fraga:'Dubbelt så mycket som b', svar:'2b', accept:['2b','b·2','b+b']},
       {typ:'uttryck', fraga:'5 mindre än b', svar:'b−5', accept:['b-5']}
     ]},
-    {rubrik:'8. En glass kostar x kr, en läsk kostar 5 kr mer än glassen och en smörgås kostar 10 kr mer än glassen', rader:[
+    {rubrik:'En glass kostar x kr, en läsk kostar 5 kr mer än glassen och en smörgås kostar 10 kr mer än glassen', rader:[
       {typ:'uttryck', fraga:'Skriv ett uttryck för vad en glass, en läsk och en smörgås kostar sammanlagt (förenklat).', svar:'3x+15', accept:['3x+15','15+3x']},
       {typ:'enkel', vansterText:'Om allt tillsammans kostar 60 kr, vad kostar en glass? (kr)', svar:15}
     ]}
@@ -158,7 +65,6 @@ var BLAD_SKRIVA = {
 
 var BLAD_TOLKA = {
   titel:'Tolka uttryck',
-  intro:'Tolka vad uttrycket betyder utifrån bilden, och räkna sedan ut vad det kostar. Skriv svaret och tryck på Kontrollera.',
   grupper:[
     {rubrik:'En glass kostar a kronor och en läsk kostar b kronor', rader:[
       {typ:'bild', svarTyp:'text',
@@ -211,10 +117,8 @@ var BLAD_TOLKA = {
   ]
 };
 
-// --- BERÄKNA MED UTTRYCK ---
 var BLAD_BERAKNA = {
   titel:'Beräkna med uttryck',
-  intro:'Sätt in värdet på variabeln och visa mellanleden på raden. Skriv insättningen, förenklingen och svaret i fälten. Tryck sedan på Kontrollera.',
   grupper:[
     {rubrik:'Beräkna värdet för 5y − 3', rader:[
       {typ:'flerled', vansterText:'5y − 3, &nbsp;y = 2', led:[
@@ -272,21 +176,85 @@ var BLAD_BERAKNA = {
   ]
 };
 
-var BLAD_TEST = {
-  titel:'Test',
-  intro:'Det här avsnittet byggs senare.',
-  grupper:[
-    {rubrik:'Kommer snart', rader:[
-      {typ:'ordtext', fraga:'Testuppgifter läggs in här.', svar:'', accept:['']}
-    ]}
-  ]
+// ── Evidens: varje grupp loggar till sitt bladnod i MasteryK3 (opt-in via data-logg i kärnan) ──
+[[BLAD_SKRIVA, NOD_SKRIVA], [BLAD_TOLKA, NOD_TOLKA], [BLAD_BERAKNA, NOD_BERAKNA]].forEach(function(par){
+  (par[0].grupper || []).forEach(function(g){ g.logg = g.logg || par[1]; g.loggStore = 'k3'; });
+});
+
+// ── TALBANK — testets tal ur ÖVA-bladens data (order 2026-09-23) ──────────────────────────────
+// En post per uppgift, med det som testgeneratorn behöver: uppgiftstexten, facit och (för
+// beräkna-bladet) mellanleden. Texten är öva-bladets egen — testet frågar samma sak.
+var BANK = (function(){
+  var b = {};
+  function lagg(nod, post){ (b[nod] = b[nod] || []).push(post); }
+
+  (BLAD_SKRIVA.grupper || []).forEach(function(g){
+    (g.rader || []).forEach(function(r){
+      if(r.typ === 'uttryck' && r.svar) lagg(NOD_SKRIVA, { slag: 'uttryck', stam: g.rubrik, fraga: r.fraga, svar: r.svar, accept: (r.accept || []).slice() });
+      else if(r.typ === 'bild' && r.svarTyp === 'uttryck' && r.svar) lagg(NOD_SKRIVA, { slag: 'figur', stam: g.rubrik, fraga: r.fraga, svar: r.svar, accept: (r.accept || []).slice(), svg: r.svg || '' });
+      else if(r.typ === 'enkel' && typeof r.svar === 'number') lagg(NOD_SKRIVA, { slag: 'varde', stam: g.rubrik, fraga: r.vansterText, svar: r.svar });
+      else if(r.typ === 'valruta' && !r.flera && r.alt && r.ratt && r.ratt.length === 1) lagg(NOD_SKRIVA, { slag: 'val', stam: g.rubrik, fraga: r.fraga, alt: r.alt.slice(), ratt: r.ratt[0] });
+      else if(r.typ === 'valruta' && r.flera && r.alt && r.ratt) lagg(NOD_SKRIVA, { slag: 'flera', stam: g.rubrik, fraga: r.fraga, alt: r.alt.slice(), ratt: r.ratt.slice() });
+    });
+  });
+
+  // Räkneord för alternativen (samma ord som bladet använder).
+  var ORD = ['noll', 'en', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta'];
+  function ordFor(n){ return ORD[n] || String(n); }
+  // "tre glassar och två läsk" → ['tre','glassar','två','läsk']
+  function delaSvar(txt){
+    var m = String(txt).match(/^(\S+)\s+(.+?)\s+och\s+(\S+)\s+(.+)$/);
+    return m ? { n1: m[1], v1: m[2], n2: m[3], v2: m[4] } : null;
+  }
+  // Fel-alternativ ur bladets egen mening: kasten om antalen, och ett antal för mycket.
+  function felAlternativ(txt, koef){
+    var d = delaSvar(txt); if(!d) return [];
+    var ut = [];
+    if(d.n1 !== d.n2) ut.push(d.n2 + ' ' + d.v1 + ' och ' + d.n1 + ' ' + d.v2);
+    if(koef && koef[0]) ut.push(ordFor(koef[0] + 1) + ' ' + d.v1 + ' och ' + d.n2 + ' ' + d.v2);
+    return ut.filter(function(x, i, a){ return x !== txt && a.indexOf(x) === i; });
+  }
+
+  (BLAD_TOLKA.grupper || []).forEach(function(g){
+    // Gruppens uttryck står i bild-radens fråga ("… om uttrycket 3a + 2b beskriver kostnaden?").
+    var uttryck = null, koef = null;
+    (g.rader || []).forEach(function(r){
+      if(uttryck || !r.fraga) return;
+      var m = String(r.fraga).match(/uttrycket\s+(\d+\s*[a-z]\s*\+\s*\d+\s*[a-z])/i);
+      if(m){ uttryck = m[1].replace(/\s+/g, ' ').trim();
+             var k = uttryck.match(/(\d+)\s*[a-z]\s*\+\s*(\d+)\s*[a-z]/); if(k) koef = [parseInt(k[1], 10), parseInt(k[2], 10)]; }
+    });
+    (g.rader || []).forEach(function(r){
+      if(r.typ === 'enkel' && typeof r.svar === 'number') lagg(NOD_TOLKA, { slag: 'varde', stam: g.rubrik, fraga: r.vansterText, svar: r.svar, uttryck: uttryck });
+      else if(r.typ === 'uttryck' && r.svar) lagg(NOD_TOLKA, { slag: 'uttryck', stam: g.rubrik, fraga: r.fraga, svar: r.svar, accept: (r.accept || []).slice() });
+      else if(r.typ === 'bild' && r.svarTyp === 'text' && r.svar) lagg(NOD_TOLKA, { slag: 'ord', stam: g.rubrik, fraga: r.fraga, svar: r.svar, uttryck: uttryck, fel: felAlternativ(r.svar, koef) });
+    });
+  });
+
+  (BLAD_BERAKNA.grupper || []).forEach(function(g){
+    (g.rader || []).forEach(function(r){
+      if(r.typ !== 'flerled' || !r.led || !r.led.length) return;
+      var sista = r.led[r.led.length - 1];
+      if(typeof sista.svar !== 'number') return;
+      var mellan = r.led.slice(0, -1).map(function(L){ return (L.visa || (L.accept && L.accept[0]) || '').trim(); }).filter(Boolean);
+      // vansterHtml bär bladets staplade bråk — testet behöver samma uttryck som text (x/2 + 5).
+      var uttryck = (r.vansterText || '').trim();
+      if(!uttryck && r.vansterHtml){
+        uttryck = String(r.vansterHtml)
+          .replace(/<span class="brak"><span class="taljare">([^<]*)<\/span><span class="namnare">([^<]*)<\/span><\/span>/g, '$1/$2')
+          .replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+      }
+      lagg(NOD_BERAKNA, { slag: 'flerled', stam: g.rubrik, uttryck: uttryck, mellan: mellan, svar: sista.svar });
+    });
+  });
+  return b;
+})();
+
+window.BLAD_K3_D1 = {
+  skriva:  BLAD_SKRIVA,
+  tolka:   BLAD_TOLKA,
+  berakna: BLAD_BERAKNA,
+  noder:   { skriva: NOD_SKRIVA, tolka: NOD_TOLKA, berakna: NOD_BERAKNA },
+  talBank: function(nod){ return (BANK[String(nod)] || []).slice(); }
 };
-
-// ============================================================
-// Bygg upp bladen
-// ============================================================
-bygg_blad(document.getElementById('sheet-skriva'),  BLAD_SKRIVA);
-bygg_blad(document.getElementById('sheet-tolka'),   BLAD_TOLKA);
-bygg_blad(document.getElementById('sheet-berakna'), BLAD_BERAKNA);
-bygg_blad(document.getElementById('sheet-test'),    BLAD_TEST);
-
+})();

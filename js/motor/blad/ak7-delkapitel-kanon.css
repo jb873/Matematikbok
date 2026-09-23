@@ -671,6 +671,40 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 .fard-skill-formaga{font-family:var(--cinzel,'Cinzel');font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint,#7a6e65);}
 .fard-skill.is-active{background:var(--navy,#0f1e2e);border-color:var(--navy,#0f1e2e);}
 .fard-skill.is-kommer{opacity:.45;cursor:default;pointer-events:none;}
+/* Test-flikens ruta + det inbäddade testets tillbaka-knapp. Delade 2026-09-23 (låg som
+   inline-kopia i varje k1/k2-sida, saknades helt på k3-sidorna). */
+.test-note{max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt);border:1px solid var(--paper-dk);border-left:4px solid var(--gold);border-radius:6px;text-align:center;color:var(--ink-soft);}
+.test-note h3{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--ink);margin-bottom:8px;}
+.test-note p{font-size:14px;line-height:1.6;max-width:480px;margin:0 auto 16px;}
+.test-note a{display:inline-block;font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);background:var(--gold-lt);padding:10px 20px;border-radius:5px;text-decoration:none;transition:background .15s;}
+.test-note a:hover{background:#fff;}
+.test-embed-topp{max-width:920px;margin:16px auto 12px;padding:0 28px;}
+.test-tillbaka{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);background:var(--paper-lt);border:1px solid var(--paper-dk);border-radius:5px;padding:9px 16px;cursor:pointer;transition:background .15s,border-color .15s;}
+.test-tillbaka:hover{background:#fff;border-color:var(--gold-lt);}
+
+/* Bladknappen (numrerad pill). Låg tidigare som inline-kopia i varje k1-sida — delad 2026-09-23
+   så att alla delkapitel som monterar mot DelkapitelSkal ser likadana ut. */
+.blad-nav-btn{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--cinzel);font-size:12.5px;letter-spacing:.03em;
+  color:var(--ink-soft);background:var(--paper-lt);
+  border:1px solid var(--paper-dk);border-radius:8px;
+  padding:9px 15px;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s,box-shadow .15s;
+}
+.blad-nav-btn:hover{border-color:var(--gold-lt);color:var(--ink);}
+.blad-nav-nr{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  background:var(--paper-dk);color:var(--ink-faint);
+  font-family:var(--cinzel);font-size:11px;font-weight:600;
+  transition:background .15s,color .15s;
+}
+.blad-nav-btn.is-active{
+  background:var(--navy);border-color:var(--navy);color:#fff;
+  box-shadow:0 3px 10px rgba(15,30,46,.18);
+}
+.blad-nav-btn.is-active .blad-nav-nr{background:var(--gold-lt);color:var(--navy);}
 .blad-nav-btn.is-kommer, .tab-btn.is-kommer{opacity:.45;cursor:default;pointer-events:none;}   /* tomt blad/flik: syns, leder inte in i tomrum (order 2026-09-22) */
 .fard-skill.is-active .fard-skill-titel{color:#fff;}
 .fard-skill.is-active .fard-skill-formaga{color:var(--gold-lt,#c49a40);}

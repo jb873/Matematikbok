@@ -50,6 +50,22 @@ function testNumericGen(genId, titel, omrade, makeItem){
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
 }
+// Algebraiskt uttryck (poly): makeItem → {key, prompt, answer, vars?, expl}. answer = facit-uttrycket
+// i förenklad form. Rättas på värde + form: rätt värde men oförenklat ger AlgBraks besked
+// ("Rätt värde – men två termer hör ihop. Slå ihop dem.") i stället för bara fel.
+function testPolyGen(genId, titel, omrade, makeItem){
+  return function(seen, opts){
+    const subs = []; let tries = 0;
+    while(subs.length < 4 && tries < 120){
+      tries++;
+      const it = makeItem(opts && opts.variant);
+      if(!it || seen.has(genId+'-'+it.key)) continue;
+      seen.add(genId+'-'+it.key);
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'poly', prompt:it.prompt, answer:it.answer, vars:it.vars||'xyabp', explanation:it.expl||'' });
+    }
+    return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
+  };
+}
 function testFlervalGen(genId, titel, omrade, makeItem){
   return function(seen){
     const subs = []; let tries = 0;
@@ -399,6 +415,15 @@ function renderSubInput(qNum, subIdx, s){
         ${s.options.map(opt => `<button class="test-sub-markera-btn" data-val="${opt}">${opt}</button>`).join('')}
       </div>
     `;
+  } else if(s.type === 'poly'){
+    // Algebraiskt uttryck i en ruta. data-vars säger vilka bokstäver keypaden ska tända.
+    inputHtml = `
+      <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
+      <div class="test-sub-input-row">
+        <span class="test-sub-eq">Svar:</span>
+        <input type="text" class="test-sub-input" inputmode="text" data-vars="${s.vars || 'xyabp'}" style="width:200px;text-align:left;padding:0 10px;" data-sub-input="${idBase}-poly" aria-label="uttryck">
+      </div>
+    `;
   } else if(s.type === 'ordsvar'){
     // Skriv svaret med ORD (t.ex. platsvärde: tiotal). Rättas mot ordet (tål plural/böjning).
     inputHtml = `
@@ -500,6 +525,9 @@ function readSubAnswer(qNum, subIdx, s){
     const sel = document.querySelectorAll(`[data-sub-id="${idBase}"] .is-selected`);
     const vals = Array.prototype.map.call(sel, b => b.dataset.val);
     return vals.length ? vals : null;
+  } else if(s.type === 'poly'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-poly"]`);
+    return inp && inp.value.trim() ? inp.value.trim() : null;
   } else if(s.type === 'ordsvar'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-ord"]`);
     return inp && inp.value.trim() ? inp.value.trim() : null;
@@ -579,6 +607,8 @@ function restoreSubAnswer(qNum, subIdx, s, val){
     const inp = document.querySelector(`[data-sub-input="${idBase}-str"]`); if(inp) inp.value = val;
   } else if(s.type === 'markera'){
     if(Array.isArray(val)) val.forEach(v => { const b = document.querySelector(`[data-sub-id="${idBase}"] [data-val="${v}"]`); if(b) b.classList.add('is-selected'); });
+  } else if(s.type === 'poly'){
+    const inp = document.querySelector(`[data-sub-input="${idBase}-poly"]`); if(inp) inp.value = val;
   } else if(s.type === 'ordsvar'){
     const inp = document.querySelector(`[data-sub-input="${idBase}-ord"]`); if(inp) inp.value = val;
   }
@@ -766,6 +796,18 @@ function gradeSub(s, ans){
     const valt = ans.slice().sort().join(','), ratt = (s.correct || []).slice().sort().join(',');
     return {status: valt === ratt ? 'correct' : 'wrong', given: ans.join(', ') || '(inga)'};
   }
+  if(s.type === 'poly'){
+    // VÄRDE + FORM (AlgBrak.gradePoly). status 'form' = rätt värde, fel form → fel svar MED besked,
+    // samma två lägen som bråkrättningen. Utan AlgBrak: ren formjämförelse (som utvform).
+    const AB = (typeof window !== 'undefined') ? window.AlgBrak : null;
+    if(AB && AB.gradePoly){
+      const r = AB.gradePoly(ans, s.answer);
+      if(r.status === 'ratt') return {status:'correct', given: String(ans)};
+      return {status:'wrong', given: String(ans) + (r.besked ? ' — ' + r.besked : '')};
+    }
+    const _n = (x) => String(x).toLowerCase().replace(/[·×*\s]/g,'').replace(/[−–—]/g,'-').replace(/,/g,'.');
+    return {status: _n(ans) === _n(s.answer) ? 'correct' : 'wrong', given: String(ans)};
+  }
   if(s.type === 'ordsvar'){
     // Rättas mot ordet, tål plural/böjning (tiotal/tiotalet, tiondel/tiondelar/tiondelen) — som öva-bladet.
     const _norm = (x) => String(x).toLowerCase().replace(/[^a-zåäö]/g,'').replace(/(arna|erna|ar|er|na|en|et|s)$/,'');
@@ -786,6 +828,7 @@ function svarSignatur(q){
       case 'primfakt':      return 'pf' + s.target;
       case 'gata':          return 'g' + s.answer;
       case 'numeric':       return 'n' + s.answer;
+      case 'poly':          return 'py' + s.answer;
       case 'brak':          { var d = gcd(s.talj, s.namn) || 1; return 'f' + (s.talj / d) + '/' + (s.namn / d); }
       case 'mellanled':     { var e = gcd(s.slutTalj, s.slutNamn) || 1; return 'm' + (s.slutTalj / e) + '/' + (s.slutNamn / e); }
       case 'mellanled-num': return 'mn' + s.slutVarde;
@@ -889,6 +932,9 @@ function renderReviewSub(sr){
   } else if(sub.type === 'markera'){
     questionText = sub.prompt;
     correctAnswerText = (sub.correct || []).join(', ') + (sub.explanation ? ` — ${sub.explanation}` : '');
+  } else if(sub.type === 'poly'){
+    questionText = sub.prompt;
+    correctAnswerText = sub.answer + (sub.explanation ? ` — ${sub.explanation}` : '');
   } else if(sub.type === 'ordsvar'){
     questionText = sub.prompt;
     correctAnswerText = sub.answer + (sub.explanation ? ` — ${sub.explanation}` : '');
@@ -1608,6 +1654,6 @@ function renderTestResult(){
 
   window.ProvbyggarMotor = {
     montera: montera,
-    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen, mellanled: testMellanledGen, mellanledNum: testMellanledNumGen, gp: testGpGen }
+    gen: { numeric: testNumericGen, flerval: testFlervalGen, product: testProductGen, brak: testBrakGen, mellanled: testMellanledGen, mellanledNum: testMellanledNumGen, gp: testGpGen, poly: testPolyGen }
   };
 })();

@@ -12,6 +12,9 @@
 <script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/motor/blad/likhetsrattare.js"></script>
 <script src="js/data/k3-taxonomi.js"></script>
+<script src="js/data/k3-fardiga-test.js"></script>
+<script src="js/motor/alg-brak.js"></script>
+<script src="js/motor/blad/blad-k3-d1.js"></script>
 <script src="js/motor/metod/metod-karna.js"></script>
 <script src="js/mastery-karna.js"></script>
 <script src="js/mastery-k3.js"></script>
@@ -34,6 +37,9 @@
   --sans:'Source Serif 4',Georgia,serif;
   --mono:'Source Serif 4',Georgia,serif;
 }
+/* ── INBÄDDAT LÄGE (?embed=1): dölj kromet, visa bara övningen/testet (delkapitlens flikar äger ramen) ── */
+body.embed .topnav, body.embed .hero, body.embed footer{ display:none !important; }
+body.embed .wrap{ padding:12px 14px 24px; max-width:100%; }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 
@@ -461,19 +467,148 @@ var G = ProvbyggarMotor.gen;
 function rI(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
 function rP(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
+// ── ÖVA-BLADENS TALBANK (blad-k3-d1.js). Testet frågar samma uppgifter som öva-bladet; när banken
+// är slut (eller posten inte passar generatorns form) faller generatorn tillbaka på egna tal.
+// Samma metod som k2:s bankPost (ak7-k2-ram.html) — ÖVA äger talen, testet hämtar dem.
+function d1Bank(nod, slag){
+  var B = window.BLAD_K3_D1; if(!B) return [];
+  var lista = B.talBank(nod);
+  return slag ? lista.filter(function(p){ return p.slag === slag; }) : lista;
+}
+function d1Post(nod, slag){ var l = d1Bank(nod, slag); return l.length ? rP(l) : null; }
+function stamKort(stam){ return String(stam || '').replace(/^\d+\.\s*/, '').replace(/\s+$/, ''); }
+function foga(stam, fraga){
+  var a = stamKort(stam).replace(/[\s.]+$/, ''), b = String(fraga || '').trim();
+  if(!b) return a + '.';
+  // Rubriker som bara instruerar bladet ("Para ihop genom att skriva rätt uttryck") bär ingen
+  // information om uppgiften — då står uppgiften för sig själv i testet.
+  if(/^(Para ihop|Skriv ett uttryck|Välj)/i.test(a)) return 'Skriv ett uttryck för ' + b.charAt(0).toLowerCase() + b.slice(1);
+  return a + (/^[A-ZÅÄÖ]/.test(b) ? '. ' : ' ') + b;
+}
+function rensaText(t){ return String(t || '').replace(/&nbsp;/g, ' ').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(); }
+// "5y − 3, y = 2" → { expr:'5y − 3', villkor:'y = 2' }; villkoret kan också stå i gruppens rubrik.
+function beraknaDelar(post){
+  var u = rensaText(post.uttryck), bitar = u.split(',');
+  var expr = bitar[0].trim(), villkor = bitar.slice(1).join(',').trim();
+  if(!villkor){ var m = rensaText(post.stam).match(/\bom\s+(.+)$/i); villkor = m ? m[1].trim() : ''; }
+  return { expr: expr, villkor: villkor };
+}
+
 var K3_TEST_GENERATORS = {
   // Del1 · Tolka uttryck — värde-varianten (ordproblem → tal). Speglar genTolkaVarde (plain numeric).
   'alg-tolka': { snabb: [ G.numeric('k3-tolka-varde', 'Tolka uttryck – sätt in värdet', 'alg-tolka', function(){
+    var bp = d1Post('alg-tolka:begrepp', 'varde');   // ÖVA-bladets tal först
+    if(bp && bp.uttryck) return { key: 'tb' + bp.uttryck + bp.svar,
+      prompt: foga(bp.stam, rensaText(bp.fraga).replace(/^Hur mycket betalade/, 'Kostnaden beskrivs av uttrycket ' + bp.uttryck + '. Hur mycket betalade')),
+      ans: bp.svar, expl: 'Sätt in värdena i ' + bp.uttryck + ': svaret blir ' + bp.svar + ' kr.' };
     var VAROR = [['glass','glassar'],['läsk','läsk'],['munk','munkar'],['pizza','pizzor'],['äpple','äpplen'],['banan','bananer']];
     var v1 = rP(VAROR), v2; do { v2 = rP(VAROR); } while(v2 === v1);
     var n1 = rI(2,5), n2 = rI(2,5), a = rI(5,30), b = rI(5,30), svar = n1*a + n2*b;
     return { key:'tv'+n1+'_'+n2+'_'+a+'_'+b+'_'+v1[0]+v2[0],
       prompt:'En '+v1[0]+' kostar a kr och en '+v2[0]+' kostar b kr. Anna köper '+n1+' '+v1[1]+' och '+n2+' '+v2[1]+'. Hur mycket betalar hon om a = '+a+' och b = '+b+'?',
       ans: svar, expl: n1+'·'+a+' + '+n2+'·'+b+' = '+(n1*a)+' + '+(n2*b)+' = '+svar+' kr.' };
-  }) ] },
+  }),
+    // Tolka VAD uttrycket beskriver — bladets emoji-uppgifter som flerval (bilden ersätts av alternativen).
+    G.flerval('k3-tolka-vad', 'Vad beskriver uttrycket?', 'alg-tolka', function(){
+      var bp = d1Post('alg-tolka:begrepp', 'ord');
+      if(!bp || !bp.uttryck || !bp.fel || !bp.fel.length) return null;
+      return { key: 'tv' + bp.uttryck, prompt: foga(bp.stam, rensaText(bp.fraga)),
+        options: [bp.svar].concat(bp.fel).sort(), answer: bp.svar, expl: bp.uttryck + ' betyder ' + bp.svar + '.' };
+    }),
+    // Bladets sista grupp: skriv ett eget uttryck ur en text (rättas på värde + form).
+    G.poly('k3-tolka-uttryck', 'Skriv uttrycket ur texten', 'alg-tolka', function(){
+      var bp = d1Post('alg-tolka:begrepp', 'uttryck');
+      if(!bp) return null;
+      return { key: 'tu' + bp.svar + bp.fraga.slice(0, 18), prompt: rensaText(bp.fraga), answer: bp.svar, vars: 'xyabp',
+        expl: 'Uttrycket blir ' + bp.svar + '.' };
+    })
+  ] },
+  // Del1 · Skriva uttryck — ETT uttryck i en ruta, rättat på värde + form (AlgBrak.gradePoly):
+  // "x + x + x" när facit är "3x" ger beskedet att termerna ska slås ihop. Talen ur ÖVA-bladet.
+  'alg-skriva': { snabb: [
+    G.poly('k3-skriva-uttryck', 'Skriv ett uttryck', 'alg-skriva', function(){
+      var poster = d1Bank('alg-skriva:kommunikation').filter(function(p){ return p.slag === 'uttryck' || (p.slag === 'figur' && p.svg); });
+      var bp = poster.length ? rP(poster) : null;
+      if(bp && bp.slag === 'figur') return { key: 'sf' + bp.svar + bp.fraga.slice(0, 14),
+        prompt: stamKort(bp.stam).replace(/[\s.]+$/, '') + ':<div class="test-figur" style="margin:8px 0;">' + bp.svg + '</div>' + rensaText(bp.fraga),
+        answer: bp.svar, vars: 'xyabp', expl: 'Uttrycket blir ' + bp.svar + '.' };
+      if(bp) return { key: 'su' + bp.svar + bp.fraga.slice(0, 18), prompt: foga(bp.stam, rensaText(bp.fraga)),
+        answer: bp.svar, vars: 'xyabp', expl: 'Uttrycket blir ' + bp.svar + '.' };
+      // egna tal när banken är slut: samma uppgiftsform som bladets grupp 3/4
+      var v = rP(['x', 'y', 'a', 'b']), n = rI(2, 12), slag = rP(['plus', 'minus', 'gange']);
+      var svar = slag === 'plus' ? v + ' + ' + n : slag === 'minus' ? v + ' − ' + n : n + v;
+      var text = slag === 'plus' ? n + ' mer än ' + v : slag === 'minus' ? n + ' mindre än ' + v : n + ' gånger så mycket som ' + v;
+      return { key: 'sg' + svar, prompt: 'Ett tal kallas ' + v + '. Skriv ett uttryck för ' + text + '.',
+        answer: svar, vars: 'xyabp', expl: 'Uttrycket blir ' + svar + '.' };
+    }),
+    G.flerval('k3-skriva-val', 'Välj rätt uttryck', 'alg-skriva', function(){
+      var bp = d1Post('alg-skriva:kommunikation', 'val');
+      if(!bp) return null;
+      function norm(x){ return String(x).replace(/\s|·/g, '').replace(/[−–—]/g, '-'); }
+      var ratt = bp.alt.filter(function(a){ return norm(a) === norm(bp.ratt); })[0] || bp.alt[0];
+      return { key: 'sv' + bp.fraga.slice(0, 22), prompt: foga(bp.stam, rensaText(bp.fraga)) + '?',
+        options: bp.alt.slice(), answer: ratt, expl: 'Rätt uttryck är ' + ratt + '.' };
+    }),
+    // Bladets grupp 5: FLERA uttryck beskriver samma omkrets (markera alla som stämmer).
+    // Handskriven generator — motorns markera-typ har ingen fabrik (samma som k1:s udda/jämna).
+    function(seen){
+      var subs = [], tries = 0;
+      var FIGURER = [ { namn: 'en kvadrat', sidor: 4 }, { namn: 'en liksidig triangel', sidor: 3 },
+                      { namn: 'en regelbunden femhörning', sidor: 5 }, { namn: 'en regelbunden sexhörning', sidor: 6 } ];
+      while(subs.length < 2 && tries < 60){
+        tries++;
+        var bp = (tries === 1) ? d1Post('alg-skriva:kommunikation', 'flera') : null;
+        var prompt, alt, ratt, nyckel;
+        if(bp){
+          function nrm(x){ return String(x).replace(/\s|·/g, ''); }
+          prompt = stamKort(bp.stam);   // bladets rubrik ÄR frågan
+          alt = bp.alt.slice();
+          ratt = alt.filter(function(a){ return bp.ratt.some(function(r){ return nrm(r) === nrm(a); }); });
+          nyckel = 'kf-blad';
+        } else {
+          var f = rP(FIGURER), v = rP(['x', 'y', 'a', 'b', 'z']), n = f.sidor;
+          prompt = 'Sidan i ' + f.namn + ' är ' + v + '. Vilka uttryck beskriver omkretsen?';
+          alt = [n + v, n + ' · ' + v, n + ' + ' + v, Array(n + 1).join(v + ' + ').replace(/ \+ $/, '')];
+          ratt = [alt[0], alt[1], alt[3]];
+          nyckel = 'kf-' + f.sidor + v;
+        }
+        if(seen.has(nyckel)) continue;
+        seen.add(nyckel);
+        subs.push({ label: String.fromCharCode(97 + subs.length) + ')', type: 'markera',
+          prompt: prompt, options: alt, correct: ratt, explanation: 'Rätt: ' + ratt.join(', ') + '.' });
+      }
+      return subs.length ? { generator: 'k3-skriva-flera', title: 'Vilka uttryck beskriver omkretsen?', omrade: 'alg-skriva', subs: subs } : null;
+    },
+    // Bladets grupp 8: uttrycket ställs upp och priset räknas ut baklänges.
+    G.numeric('k3-skriva-varde', 'Räkna ut priset ur uttrycket', 'alg-skriva', function(){
+      var bp = d1Post('alg-skriva:kommunikation', 'varde');
+      if(bp) return { key: 'spv' + bp.svar + rensaText(bp.fraga).slice(0, 16), prompt: foga(bp.stam, rensaText(bp.fraga)),
+        ans: bp.svar, likhet: false, expl: 'Svaret är ' + bp.svar + ' kr.' };
+      var pris = rI(8, 30), p1 = rI(2, 12), p2 = rI(2, 12), tot = 3 * pris + p1 + p2;
+      return { key: 'spg' + pris + '_' + p1 + '_' + p2,
+        prompt: 'En glass kostar x kr, en läsk kostar ' + p1 + ' kr mer än glassen och en smörgås kostar ' + p2 + ' kr mer än glassen. Om allt tillsammans kostar ' + tot + ' kr, vad kostar en glass? (kr)',
+        ans: pris, likhet: false, expl: '3x + ' + (p1 + p2) + ' = ' + tot + ' ger x = ' + pris + ' kr.' };
+    })
+  ] },
   // Del1 · Beräkna med uttryck — insättning MED numeriskt mellanled (led: produkten a·val, ≠ slutvärde).
   // Speglar drillens insättnings-kedja (blad-k3-d1 flerled); rättas på VÄRDE per led + slutvärde.
   'alg-berakna': { snabb: [ G.mellanledNum('k3-berakna', 'Beräkna med uttryck (visa mellanled)', 'alg-berakna', function(){
+    // ÖVA-bladets tal först — posterna på formen "k·v ± c" med ETT variabelvärde passar mellanledsformen.
+    var poster = d1Bank('alg-berakna:rakna', 'flerled').filter(function(p){
+      var d = beraknaDelar(p);
+      return /^\d+[a-z]\s*[+\u2212-]\s*\d+$/.test(d.expr) && /^[a-z]\s*=\s*-?\d+$/.test(d.villkor);
+    });
+    if(poster.length){
+      var bp = rP(poster), d = beraknaDelar(bp);
+      var m = d.expr.match(/^(\d+)([a-z])\s*([+\u2212-])\s*(\d+)$/), mv = d.villkor.match(/^([a-z])\s*=\s*(-?\d+)$/);
+      var koef = parseInt(m[1], 10), tecken = (m[3] === '+'), konst = parseInt(m[4], 10), varde = parseInt(mv[2], 10);
+      var prod = koef * varde;
+      return { key: 'bb' + d.expr + d.villkor,
+        prompt: 'Beräkna ' + d.expr + ' när ' + d.villkor + '. Räkna steg för steg.',
+        led: [ { fraga: koef + ' · ' + varde, varde: prod, facit: String(prod) } ],
+        slutVarde: bp.svar, slutHint: prod + (tecken ? ' + ' : ' − ') + konst,
+        expl: d.expr + ' = ' + koef + '·' + varde + (tecken ? ' + ' : ' − ') + konst + ' = ' + bp.svar + '.' };
+    }
     var v = rP(['x','y','a']), a = rI(2,9), val = rI(2,9), c = rI(1,9), plus = Math.random() < 0.5;
     var prod = a*val, res = plus ? prod + c : prod - c;
     if(res <= 0){ plus = true; res = prod + c; }   // håll svaret positivt (subtypen visar heltal)
@@ -482,11 +617,26 @@ var K3_TEST_GENERATORS = {
       led:[ { fraga:a+' · '+val, varde: prod, facit: String(prod) } ],
       slutVarde: res, slutHint: prod+(plus?' + ':' − ')+c,
       expl: a+v+' '+(plus?'+':'−')+' '+c+' = '+a+'·'+val+' '+(plus?'+':'−')+' '+c+' = '+prod+(plus?' + ':' − ')+c+' = '+res+'.' };
-  }) ] }
+  }),
+    // Samma uppgifter som öva-bladet, utan mellanledsrutor: sätt in värdet och svara.
+    G.numeric('k3-berakna-varde', 'Beräkna uttryckets värde', 'alg-berakna', function(){
+      var bp = d1Post('alg-berakna:rakna', 'flerled');
+      if(!bp) return null;
+      var d = beraknaDelar(bp);
+      if(!d.expr || !d.villkor) return null;
+      return { key: 'bv' + d.expr + d.villkor, prompt: 'Beräkna ' + d.expr + ' när ' + d.villkor + '.',
+        ans: bp.svar, likhet: false, expl: d.expr + ' = ' + bp.svar + ' när ' + d.villkor + '.' };
+    })
+  ] }
 };
 var K3_GEN_NOD = {
-  'k3-tolka-varde': 'alg-tolka:begrepp',
-  'k3-berakna':     'alg-berakna:rakna'
+  'k3-tolka-varde':    'alg-tolka:begrepp',
+  'k3-tolka-vad':      'alg-tolka:begrepp',
+  'k3-skriva-uttryck': 'alg-skriva:kommunikation',
+  'k3-skriva-val':     'alg-skriva:kommunikation',
+  'k3-skriva-flera':   'alg-skriva:kommunikation',
+  'k3-berakna':        'alg-berakna:rakna',
+  'k3-berakna-varde':  'alg-berakna:rakna'
 };
 
 // Provbyggarens 3-panels-skal i k3-ramens #app (mirror k2:s pbShell/pbShow/pbNav).
@@ -532,11 +682,27 @@ var PB = ProvbyggarMotor.montera({
 // ============================================================
 // START — provbyggar-deeplink, ko-deeplink, annars översikt
 // ============================================================
-if(/[?&]view=test-config/i.test(location.search)){
-  var _mdel = location.search.match(/[?&]del=([a-z0-9]+)/i);
+var _hs = location.search;
+
+// Inbäddat läge: delkapitlens Färdighetsträning och Test öppnar ramen i en iframe — ramens eget
+// krom (topnav/hero/footer) hör till sidan runtomkring, inte till övningen.
+if(/[?&]embed=1\b/.test(_hs)) document.body.classList.add('embed');
+
+// Deeplink: ?view=test-fardigt&del=k3dN&test=M — FÄRDIGT delkapitel-test (urvalet ur K3_FARDIGA)
+// → PB.byggFardigt bygger (coverage-seedning + färdigt-läge) och går direkt till take.
+if(/[?&]view=test-fardigt/i.test(_hs)){
+  var _mfd = _hs.match(/[?&]del=([a-z0-9-]+)/i), _mft = _hs.match(/[?&]test=([0-9]+)/i);
+  var _ftester = (window.K3_FARDIGA && _mfd) ? K3_FARDIGA.tester(_mfd[1]) : [];
+  var _ft = _ftester[_mft ? (parseInt(_mft[1], 10) - 1) : 0] || _ftester[0];
+  var _mret = _hs.match(/[?&]retur=([^&\s]+)/i), _mrtx = _hs.match(/[?&]retur_txt=([^&\s]+)/i);
+  if(_ft){ PB.byggFardigt({ nodes: _ft.nodes, antal: _ft.antal, varianter: _ft.varianter || null,
+    retur: _mret ? decodeURIComponent(_mret[1]) : null, returTxt: _mrtx ? decodeURIComponent(_mrtx[1]) : null }); }
+  else { PB.setDel(_mfd ? _mfd[1] : null); pbNav('test-config'); }
+} else if(/[?&]view=test-config/i.test(_hs)){
+  var _mdel = _hs.match(/[?&]del=([a-z0-9]+)/i);
   PB.setDel((_mdel && /^k3d/.test(_mdel[1])) ? _mdel[1] : null);
   pbNav('test-config');
-} else if(!/[?&]ko=[^&\s]/i.test(location.search)){ renderOversikt(); }
+} else if(!/[?&]ko=[^&\s]/i.test(_hs)){ renderOversikt(); }
 </script>
 <script src="js/motor/ovamer/ovamer-k3.js"></script>
 <!-- MasteryK3-loggning (elev-lokal, localStorage) laddas i head; deeplink-router + #fb-observatör här. -->
