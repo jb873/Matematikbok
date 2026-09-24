@@ -104,10 +104,10 @@ function render(mount, blad){
     // STEG 3 — svaret
     var svarRub = K.helRad(grid, 'prob-steg-rub'); svarRub.textContent = TEXT.svar.etikett;
     var svarRad = K.helRad(grid, 'prob-svarrad');
-    var svarIn = document.createElement('input');
-    svarIn.type = 'text'; svarIn.className = 'prob-svar'; svarIn.setAttribute('inputmode', 'text');
-    svarIn.setAttribute('data-kp', 'fri'); svarIn.setAttribute('data-vars', '');
-    svarIn.setAttribute('aria-label', TEXT.svar.etikett);
+    // Svarsrutan är en segment-yta: texten skrivs i ett fält, och bråkknappen kan bygga ett
+    // staplat bråk här precis som i kedjans rutor (svaret kan vara ett bråk).
+    var svarIn = document.createElement('div'); svarIn.className = 'prob-svar sida';
+    svarIn.appendChild(K.textSeg({ vars: '', etikett: TEXT.svar.etikett }));
     var svarStatus = document.createElement('span'); svarStatus.className = 'prob-svar-status';
     svarRad.appendChild(svarIn); svarRad.appendChild(svarStatus);
 
@@ -137,11 +137,11 @@ function svarPaUppgift(s){
   var rader = [K.radPar(s.ekvRad)].concat(s.kedja.map(K.radPar))
                 .filter(function(p){ return p.vl !== '' || p.hl !== ''; });
   var uttryck = {}; uttryck[s.delNyckel] = (s.u.variabel || 'x');   // det okända talet ÄR x
-  var svar = {}; svar[s.delNyckel] = s.svarIn.value;
+  var svar = {}; svar[s.delNyckel] = K.las(s.svarIn);
   return { uttryck: uttryck, rader: rader, svar: svar };
 }
 function besvarad(s){
-  if(s.svarIn.value.trim() !== '') return true;
+  if(K.las(s.svarIn).trim() !== '') return true;
   var p = K.radPar(s.ekvRad); if(p.vl !== '' || p.hl !== '') return true;
   return s.kedja.some(function(r){ return !K.tomRad(r); });
 }
@@ -160,7 +160,7 @@ function kontrollera(state, hintEl){
     if(res.status === 'ratt'){
       K.markera(s.ekvRad, true);
       s.kedja.forEach(function(r){ if(!K.tomRad(r)) K.markera(r, true); });
-      s.svarIn.classList.add('ratt'); s.svarStatus.textContent = '✓';
+      s.svarIn.classList.add('ratt'); s.svarStatus.textContent = '✓';   // klassen sitter på ytan
       s.klarEl.classList.add('show');
       klara++;
       logga(s.u.nod, 'ratt');

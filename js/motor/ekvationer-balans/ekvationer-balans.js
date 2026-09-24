@@ -215,7 +215,8 @@ function kontrollera(steg, hintEl){
   var w = document.createElement('div'); w.innerHTML = AK8_UI.keypadHTML({ vars: 'xy' });
   var kp = w.firstChild; if(!kp) return;
   kp.id = 'ekv-keypad'; document.body.appendChild(kp);
-  AK8_UI.bindKeypad(document.body);
+  // Bråkknappen bygger ett staplat bråk i raden (kedjans rutor äger byggartangenterna).
+  AK8_UI.bindKeypad(document.body, { byggare: K && K.byggare });
 })();
 
 if(typeof window !== 'undefined') window.EkvBlad = { STEG: STEG, renderSteg: renderSteg, uppgifter: function(){ return uppgifter; }, lage: function(l){ if(l) LAGE = l; return LAGE; } };

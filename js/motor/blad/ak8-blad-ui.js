@@ -374,6 +374,13 @@
     var vars = inp && inp.dataset && inp.dataset.vars;   // data-vars="xy" → just de variablerna aktiva (algebra); saknas → alla grå
     if(vars) ('' + vars).split('').forEach(function(v){ if(VARIABLER.indexOf(v) > -1) till[v] = 1; });
     if(bygg){ till['frac'] = 1; till['pot'] = 1; }   // EN bråkknapp (order 2026-09-21): komplexbråket byggs med samma knapp inne i täljare/nämnare
+    // data-bygg="frac" (eller "frac pot"): rutan säger VILKA byggare den kan bära. Utan attributet
+    // gäller kontexten ovan. En ruta som bara kan bära bråk ska inte tända potensknappen.
+    var byggLista = inp && inp.dataset && inp.dataset.bygg;
+    if(byggLista != null){
+      delete till['frac']; delete till['pot'];
+      ('' + byggLista).split(/[\s,]+/).forEach(function(b){ if(b === 'frac' || b === 'pot') till[b] = 1; });
+    }
     return till;
   }
   function graderaKeypad(kp, inp){
@@ -568,6 +575,11 @@
         e.preventDefault();
         if(!active || active.disabled){ var f = mount.querySelector('input:not([disabled])'); if(f) active = f; else return; }
         var k = btn.dataset.key, ml = parseInt(active.getAttribute('maxlength') || '0', 10);
+        // Byggartangenterna kan ägas av monteringen (kedjans rutor bygger sitt eget bråk-segment).
+        // Utan hook, eller när den returnerar false, görs som förut.
+        if(opts.byggare && (k === 'frac' || k === 'pot' || k === 'back')){
+          if(opts.byggare(k, active) === true){ active.dispatchEvent(new Event('input', { bubbles: true })); return; }
+        }
         if(k === 'back'){ active.value = active.value.slice(0, -1); }
         else if(!ml || active.value.length < ml){ active.value += k; }
         active.dispatchEvent(new Event('input', { bubbles:true }));

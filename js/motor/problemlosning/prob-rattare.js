@@ -145,8 +145,16 @@ var ENHETSORD = {
   'cm': ['cm'], 'm': ['m', 'meter'], 'dl': ['dl'], 'st': ['st', 'stycken'],
   'grader': ['grader', 'grad', '°'], 'cm²': ['cm2', 'cm²', 'kvadratcentimeter'], 'm²': ['m2', 'm²', 'kvadratmeter']
 };
+// Talet i ett svar: "30 kg", "Calle är 30 kg", "3/4 kg" och det byggda bråket "(3)/(4) kg" ska alla
+// ge samma värde — två skrivsätt får aldrig ge olika utfall. Enhetsorden plockas bort, sedan prövas
+// hela uttrycket med parsern; först om det inte går tas första talet i texten.
 function talUr(text){
   var s = String(text).replace(/(\d)[  ](?=\d{3}\b)/g, '$1').replace(/−/g, '-').replace(/,/g, '.');
+  var utanOrd = s.replace(/[a-zåäöA-ZÅÄÖ°²]+/g, ' ').trim();
+  if(utanOrd !== '' && EP){
+    var p = EP.parseSida(utanOrd);
+    if(p && Math.abs(p.a) < EPS && isFinite(p.b)) return p.b;
+  }
   var m = s.match(/-?\d+(\.\d+)?/);
   return m ? parseFloat(m[0]) : null;
 }

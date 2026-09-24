@@ -189,9 +189,10 @@
 .prob-grid > .prob-steg-rub:first-child{margin-top:0;padding-top:0;border-top:none;}
 .prob-knapprad{margin:2px 0 0;}
 .prob-svarrad{display:flex;align-items:center;gap:10px;}
-.prob-svar{font-family:var(--serif);font-size:21px;font-weight:500;color:var(--ink);background:#fff;
-  border:2px solid var(--gold-lt);border-radius:8px;padding:6px 12px;min-width:200px;outline:none;}
-.prob-svar:focus{box-shadow:0 0 0 3px rgba(196,154,64,.18);}
+.prob-svar{display:inline-flex;align-items:center;min-height:42px;background:#fff;
+  border:2px solid var(--gold-lt);border-radius:8px;padding:2px 12px;min-width:200px;}
+.prob-svar:focus-within{box-shadow:0 0 0 3px rgba(196,154,64,.18);}
+.prob-svar .seg-text{font-size:21px;text-align:left;min-width:8ch;}
 .prob-svar.ratt{border-color:var(--green);color:var(--green-dk);}
 .prob-svar.fel{border-color:var(--red);color:var(--red-dk);}
 .prob-svar-status{font-size:18px;}
@@ -292,7 +293,8 @@ DelkapitelSkal.montera({
   var w = document.createElement('div'); w.innerHTML = AK8_UI.keypadHTML({ vars: 'x' });
   var kp = w.firstChild; if(!kp) return;
   kp.id = 'prob-keypad'; document.body.appendChild(kp);
-  AK8_UI.bindKeypad(document.body);
+  // Bråkknappen bygger ett staplat bråk i rutan (och radera tar bort ett tomt bråk igen).
+  AK8_UI.bindKeypad(document.body, { byggare: window.EkvKedja && EkvKedja.byggare });
 })();
 </script>
 

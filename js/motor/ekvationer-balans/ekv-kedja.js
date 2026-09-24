@@ -23,6 +23,7 @@ function textSeg(opts){
   var inp = document.createElement('input');
   inp.type = 'text'; inp.className = 'seg-text';
   inp.setAttribute('inputmode', 'text'); inp.setAttribute('data-kp', 'fri');
+  inp.setAttribute('data-bygg', 'frac');                 // rutan kan bära ett bråk, inte en potens
   inp.setAttribute('data-vars', opts.vars || 'xy');
   inp.setAttribute('aria-label', opts.etikett || 'rad i lösningen');
   autoStorlek(inp);
@@ -39,12 +40,19 @@ function brakSeg(opts){
   [t, n].forEach(function(inp, i){
     inp.type = 'text'; inp.className = 'brak-tal';
     inp.setAttribute('inputmode', 'text'); inp.setAttribute('data-kp', 'fri');
+    inp.setAttribute('data-bygg', 'frac');               // bråk i bråket byggs med samma knapp
     inp.setAttribute('data-vars', opts.vars || 'xy');
     inp.setAttribute('aria-label', i === 0 ? 'täljare' : 'nämnare');
     autoStorlek(inp);
     inp.addEventListener('focus', function(){ aktivtFalt = inp; });
     inp.addEventListener('input', function(){ autoStorlek(inp); });
     if(opts.onEnter) inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); opts.onEnter(); } });
+    inp.addEventListener('keydown', function(e){
+      if(e.key !== 'Backspace' || inp.value !== '') return;
+      var annan = (inp === t) ? n : t;
+      if(annan.value !== '') return;                     // bara ett TOMT bråk tas bort
+      e.preventDefault(); taBortBrak(w);
+    });
   });
   streck.className = 'brak-streck';
   w.appendChild(t); w.appendChild(streck); w.appendChild(n);
@@ -119,6 +127,49 @@ function infogaTecken(rot, tecken){
   } else inp.value += tecken;
   autoStorlek(inp); inp.focus();
 }
+// Ta bort ett bråk-segment och lämna fokus i textrutan före det (samma som att radera ett tecken).
+function taBortBrak(brak){
+  var sida = brak.parentNode; if(!sida) return null;
+  var fore = brak.previousSibling, efter = brak.nextSibling;
+  // den tomma textrutan som skapades efter bråket följer med
+  if(efter && efter.classList && efter.classList.contains('seg-text') && efter.value === '') sida.removeChild(efter);
+  sida.removeChild(brak);
+  var kvar = fore && fore.classList && fore.classList.contains('seg-text') ? fore : sida.querySelector('.seg-text');
+  if(kvar){ kvar.focus(); aktivtFalt = kvar; }
+  if(sida.firstChild == null) sida.appendChild(textSeg({}));
+  var handelse = document.createEvent ? new Event('input', { bubbles: true }) : null;
+  if(handelse && kvar) kvar.dispatchEvent(handelse);
+  return kvar;
+}
+
+// Bygg ett staplat bråk VID en given ruta (den som har fokus när knappen trycks).
+function brakVid(inp, opts){
+  opts = opts || {};
+  if(!inp) return null;
+  // Står markören i ett bråks täljare/nämnare? Då byggs bråket därinne (komplext bråk).
+  var sida = inp.closest('.sida') || inp.parentNode;
+  if(inp.classList.contains('brak-tal')) return null;    // ett bråk i ett bråk: inte i kedjan
+  if(!sida) return null;
+  var vars = opts.vars || inp.getAttribute('data-vars') || 'xy';
+  var brak = brakSeg({ vars: vars }), nyText = textSeg({ vars: vars, etikett: inp.getAttribute('aria-label') });
+  if(inp.nextSibling){ sida.insertBefore(brak, inp.nextSibling); sida.insertBefore(nyText, brak.nextSibling); }
+  else { sida.appendChild(brak); sida.appendChild(nyText); }
+  brak._tIn.focus(); aktivtFalt = brak._tIn;
+  return brak;
+}
+
+// Keypadens byggartangenter för kedjans rutor: bråkknappen bygger, radera tar bort ett tomt bråk.
+function byggare(key, inp){
+  if(!inp) return false;
+  if(key === 'frac') return !!brakVid(inp, {});
+  if(key === 'back' && inp.classList && inp.classList.contains('brak-tal') && inp.value === ''){
+    var brak = inp.closest('.seg-brak');
+    var annan = brak && (brak._tIn === inp ? brak._nIn : brak._tIn);
+    if(brak && annan && annan.value === ''){ taBortBrak(brak); return true; }
+  }
+  return false;
+}
+
 function infogaBrak(rot, opts){
   var inp = aktivInom(rot); if(!inp) return;
   var sida = inp.closest('.sida'); if(!sida) return;
@@ -130,7 +181,8 @@ function infogaBrak(rot, opts){
 
 var API = { rad: rad, helRad: helRad, rensa: rensa, markera: markera, las: las, radPar: radPar,
             tomRad: tomRad, textSeg: textSeg, brakSeg: brakSeg, infogaTecken: infogaTecken,
-            infogaBrak: infogaBrak, autoStorlek: autoStorlek };
+            infogaBrak: infogaBrak, brakVid: brakVid, taBortBrak: taBortBrak, byggare: byggare,
+            autoStorlek: autoStorlek };
 if(typeof window !== 'undefined') window.EkvKedja = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();
