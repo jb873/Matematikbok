@@ -102,7 +102,8 @@
   function kedjaCeller(radEl){ return [].slice.call(radEl.querySelectorAll('.ak8-cell .ak8-expr')); }
 
   // ── AUTO-VÄXANDE RUTA ──
-  function grow(inp){
+  // opts.min = golv i pixlar (rutans egen bredd). Utan opts: åttans egna minimum per roll.
+  function grow(inp, opts){
     if(!inp) return;
     // Stående bråk-ruta (fr-ruta): KOMPAKT – storlek efter täljare/nämnare, INTE utdragen till textbredd.
     // Gäller BARA bråk byggda i en uttrycks-cell (.ak8-expr); förrenderade bråk-svar (d5/d7 kanoniska
@@ -113,7 +114,7 @@
       inp.style.width = Math.max(18, Math.min(inp.scrollWidth + 2, 120)) + 'px';
       return;
     }
-    var min = inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-pexp') ? 26 : inp.classList.contains('ak8-in-sm') ? 34 : 74);
+    var min = (opts && opts.min) || (inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-pexp') ? 26 : inp.classList.contains('ak8-in-sm') ? 34 : 74));
     if(inp.value === '' && inp.classList.contains('ak8-exprtxt')){
       var ex = inp.closest('.ak8-expr');   // tom OCH ensam i cellen (inget bråk/potens byggt) → full svarsbredd
       if(ex && !ex.querySelector('.ovn-brak, .ak8-pot') && ex.querySelectorAll('.ak8-exprtxt').length === 1) min = 74;

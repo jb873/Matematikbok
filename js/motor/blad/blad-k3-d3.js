@@ -58,14 +58,14 @@
         f('5x − 6y − 2x + 8y', '3x + 2y'), f('8x − 5y + 3x + 2y', '11x − 3y')
       ]),
       G('Skriv ett uttryck för figurens omkrets och förenkla det så långt som möjligt', [
-        { typ: 'omkrets', svg: F.rektangel({ bredd: '4x', hojd: '3' }), svar: '8x + 6', vars: 'x' }
+        { typ: 'omkrets', svg: F.rektangel({ bredd: '4x', hojd: '3' }), sidor: ['4x','3','4x','3'], svar: '8x + 6', vars: 'x' }
       ]),
       G('Förenkla uttryck', [
         f('3y + 5 − y', '2y + 5'), f('8a + 6 − 3a − 4', '5a + 2', 'ab'),
         f('7y − 3 − 6y + 7', 'y + 4'), f('9a − 2 + 6a − 3', '15a − 5', 'ab')
       ]),
       G('Skriv ett uttryck för figurens omkrets och förenkla det så långt som möjligt', [
-        { typ: 'omkrets', svg: F.fyrhorning({ sidor: ['18', '5x', '12', '3x'], enhet: 'cm' }), svar: '8x + 30', vars: 'x' }
+        { typ: 'omkrets', svg: F.fyrhorning({ sidor: ['18', '5x', '12', '3x'], enhet: 'cm' }), sidor: ['18','5x','12','3x'], svar: '8x + 30', vars: 'x' }
       ]),
       G('Beräkna värdet av uttrycket när x = 4 och y = 2', [
         tal('3x + 4y', 20), tal('6x + 2 − 3y', 20), tal('8x − 5 + 6y − 10', 29)
@@ -75,8 +75,8 @@
         f('5a + 4b + 9 − 2b − 8', '5a + 2b + 1', 'ab'), f('4y + 2x + 8 − 3y − 5', '2x + y + 3')
       ]),
       G('Skriv ett uttryck för figurens omkrets och förenkla det så långt som möjligt', [
-        { typ: 'omkrets', svg: F.triangel({ ben: '3y', bas: '4' }), svar: '6y + 4', vars: 'y' },
-        { typ: 'omkrets', svg: F.femhorning({ sidor: ['5', '2b', '4', '6a', '3a'] }), svar: '9a + 2b + 9', vars: 'ab' }
+        { typ: 'omkrets', svg: F.triangel({ ben: '3y', bas: '4' }), sidor: ['3y','3y','4'], svar: '6y + 4', vars: 'y' },
+        { typ: 'omkrets', svg: F.femhorning({ sidor: ['5', '2b', '4', '6a', '3a'] }), sidor: ['5','2b','4','6a','3a'], svar: '9a + 2b + 9', vars: 'ab' }
       ]),
       G('Beräkna värdet av 13 − 6x när x = 1,1', [ tal('13 − 6x', 6.4) ], NOD_VARDE)
     ]

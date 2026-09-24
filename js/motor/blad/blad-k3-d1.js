@@ -45,9 +45,9 @@ var BLAD_SKRIVA = {
       {typ:'valruta', flera:true, fraga:'Välj alla som stämmer:', alt:['4z','4 · z','4 + z','z + z + z + z'], ratt:['4z','4·z','z+z+z+z']}
     ]},
     {rubrik:'Skriv ett uttryck för figurens omkrets och förenkla det', rader:[
-      {typ:'bild', svarTyp:'uttryck', fraga:'Triangel:  omkrets =', svar:'12x', accept:['12x','3x+5x+4x'],
+      {typ:'bild', svarTyp:'uttryck', fraga:'Triangel:  omkrets =', svar:'12x', sidor:['3x','5x','4x'], vars:'x', accept:['12x','3x+5x+4x'],
        svg:'<svg viewBox="0 0 200 150" width="200" height="150" xmlns="http://www.w3.org/2000/svg"><polygon points="40,120 40,40 150,120" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="26" y="82" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="105" y="74" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">5x</text><text x="95" y="138" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">4x</text></svg>'},
-      {typ:'bild', svarTyp:'uttryck', fraga:'Rektangel:  omkrets =', svar:'8x', accept:['8x','3x+x+3x+x'],
+      {typ:'bild', svarTyp:'uttryck', fraga:'Rektangel:  omkrets =', svar:'8x', sidor:['3x','x','3x','x'], vars:'x', accept:['8x','3x+x+3x+x'],
        svg:'<svg viewBox="0 0 220 120" width="220" height="120" xmlns="http://www.w3.org/2000/svg"><rect x="45" y="35" width="130" height="52" fill="#b8c4e0" stroke="#3a4a72" stroke-width="2.5"/><text x="110" y="28" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="110" y="104" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">3x</text><text x="33" y="65" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">x</text><text x="187" y="65" text-anchor="middle" font-size="14" font-style="italic" fill="#27365a">x</text></svg>'}
     ]},
     {rubrik:'Para ihop genom att skriva rätt uttryck', rader:[

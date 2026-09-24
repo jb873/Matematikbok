@@ -185,6 +185,12 @@
   }
   function termAntal(str){ var f = polyForm(str, { tillatBrak: true, tillatEtta: true }); return f.fel === 'tom' ? 0 : f.termer; }
 
+  var OMKRETSBESKED = {
+    utanUppstallning: 'Skriv först figurens sidor adderade, och förenkla sedan: sida + sida + … = svaret.',
+    uppstallningFel:  'Det första ledet ska vara figurens sidor adderade.',
+    kedjebrott:       'Alla led ska vara lika mycket värda.',
+    tom:              'Skriv uppställningen och förenklingen.'
+  };
   var FORMBESKED = {
     likaTermer:      'Rätt värde – men två termer hör ihop. Slå ihop dem.',
     ejMultiplicerad: 'Rätt värde – men räkna ut multiplikationen i termen.',
@@ -221,6 +227,50 @@
     return { status: 'ratt' };
   }
 
+  // OMKRETS SOM KEDJA (order 2026-09-24): "x + 3x + x + 3x = 8x" i EN ruta.
+  //   · första ledet   = figurens sidor adderade, i valfri ordning
+  //   · sista ledet    = förenklat och rätt värde
+  //   · led däremellan = tillåtna, så länge alla led är lika mycket värda
+  // Bara slutsvaret (utan uppställning) är inte fel VÄRDE — det saknar uppställningen, och beskedet
+  // säger just det.
+  function termerAv(uttryck){
+    var s = String(uttryck).replace(/\s+/g, '').replace(/[\u2212\u2013\u2014]/g, '-').replace(/[·*]/g, '');
+    if(s === '') return [];
+    if(s[0] !== '+' && s[0] !== '-') s = '+' + s;
+    var ut = [], nu = '';
+    for(var i = 0; i < s.length; i++){
+      if((s[i] === '+' || s[i] === '-') && i > 0){ ut.push(nu); nu = s[i] === '-' ? '-' : ''; }
+      else if(i === 0){ nu = s[i] === '-' ? '-' : ''; }
+      else nu += s[i];
+    }
+    ut.push(nu);
+    return ut.filter(function(t){ return t !== '' && t !== '-'; }).map(function(t){ return t.toLowerCase(); });
+  }
+  function sammaTermer(uttryck, sidor){
+    var a = termerAv(uttryck).sort();
+    var b = (sidor || []).map(function(x){ return String(x).replace(/\s+/g, '').replace(/[·*]/g, '').toLowerCase(); }).sort();
+    if(a.length !== b.length) return false;
+    for(var i = 0; i < a.length; i++) if(a[i] !== b[i]) return false;
+    return true;
+  }
+  function gradeOmkrets(elev, sidor, facit){
+    if(elev == null || ('' + elev).trim() === '') return { status: 'fel', tom: true, besked: OMKRETSBESKED.tom };
+    var led = String(elev).split('=').map(function(d){ return d.trim(); }).filter(function(d){ return d !== ''; });
+    if(led.length < 2) return { status: 'utanUppstallning', besked: OMKRETSBESKED.utanUppstallning };
+    var forsta;
+    try { forsta = parse(led[0]); } catch(err){ return { status: 'fel', parsefel: true, besked: 'Kunde inte tolka uttrycket.' }; }
+    for(var i = 1; i < led.length; i++){
+      var p;
+      try { p = parse(led[i]); } catch(err){ return { status: 'fel', parsefel: true, besked: 'Kunde inte tolka uttrycket.' }; }
+      if(!pointEqual(forsta, p)) return { status: 'kedjebrott', ledNr: i + 1, besked: OMKRETSBESKED.kedjebrott };
+    }
+    if(!sammaTermer(led[0], sidor)) return { status: 'uppstallningFel', besked: OMKRETSBESKED.uppstallningFel };
+    var sista = gradePoly(led[led.length - 1], facit);
+    if(sista.status === 'ratt') return { status: 'ratt' };
+    if(sista.status === 'form') return { status: 'form', besked: sista.besked };
+    return { status: 'fel', besked: sista.besked };
+  }
+
   // Två sidor i en rektangel (öppen uppgift): sidorna a och b ska tillsammans ge HALVA omkretsen.
   // Många svar är rätt; en sida får inte vara 0 (då är det ingen rektangel).
   function gradeSidor(sidaA, sidaB, halvaOmkretsen){
@@ -234,7 +284,8 @@
     return { status: 'ratt' };
   }
 
-  var API = { parse: parse, pointEqual: pointEqual, grade: grade, gradePoly: gradePoly, gradeSidor: gradeSidor, gradeOppet: gradeOppet, polyForm: polyForm, termAntal: termAntal, _rf: { rf: rf, rfDiv: rfDiv, pEval: pEval, pIsConst: pIsConst }, VARS: VARS };
+  var API = { gradeOmkrets: gradeOmkrets, OMKRETSBESKED: OMKRETSBESKED, termerAv: termerAv, sammaTermer: sammaTermer,
+              parse: parse, pointEqual: pointEqual, grade: grade, gradePoly: gradePoly, gradeSidor: gradeSidor, gradeOppet: gradeOppet, polyForm: polyForm, termAntal: termAntal, _rf: { rf: rf, rfDiv: rfDiv, pEval: pEval, pIsConst: pIsConst }, VARS: VARS };
   if(typeof window !== 'undefined') window.AlgBrak = API;
   if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

@@ -663,8 +663,14 @@ function bladHTML(blad){
         html += '<div class="alg-bild">' + rad.svg + '</div>';
         html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
         html += '<span class="ovn-text">' + (rad.fraga || 'Omkrets') + '</span>';
-        html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-vars="' + (rad.vars || 'xy')
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
+        // MED SIDOR I DATA: en kedjeruta — uppställningen och förenklingen i SAMMA ruta
+        // ("x + 3x + x + 3x = 8x"). Utan sidor: som förr, bara det förenklade uttrycket.
+        html += rad.sidor
+          ? '<input class="ovn-in bred ovn-kedja" data-omkrets="' + encodeURIComponent(rad.svar)
+            + '" data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '" data-vars="' + (rad.vars || 'xy')
+            + '" data-visa="' + rad.sidor.join(' + ') + ' = ' + rad.svar + '" inputmode="text" autocomplete="off">'
+          : '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-vars="' + (rad.vars || 'xy')
+            + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
         html += '</div></div>';
       } else if(rad.typ === 'oppet'){
         // ÖPPET SVAR: eleven skriver ETT EGET uttryck med bestämt antal termer som förenklas till målet.
@@ -724,7 +730,12 @@ function bladHTML(blad){
         html += '<div class="alg-bild">' + rad.svg + '</div>';
         html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
         html += '<span class="ovn-text">' + (rad.fraga||'') + '</span>';
-        if(rad.svarTyp === 'uttryck'){
+        if(rad.svarTyp === 'uttryck' && rad.sidor){
+          // OMKRETS UR FIGUREN: kedjeruta (uppställning = förenkling), som omkrets-raden.
+          html += '<input class="ovn-in bred ovn-kedja" data-omkrets="' + encodeURIComponent(rad.svar)
+            + '" data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '" data-vars="' + (rad.vars || 'xy')
+            + '" data-visa="' + rad.sidor.join(' + ') + ' = ' + rad.svar + '" inputmode="text" autocomplete="off">';
+        } else if(rad.svarTyp === 'uttryck'){
           var accB = (rad.accept || [rad.svar]).join('|');
           html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(accB)
             + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
@@ -942,6 +953,24 @@ function bygg_blad(rotEl, blad){
   });
 
   // Valruta-knappar: enkel- eller flerval
+  // ── VÄXANDE RUTOR: uttrycksrutor växer med innehållet (AK8_UI.grow — samma funktion som åttans
+  // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
+  // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
+  // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text]';
+  function vaxRuta(inp){
+    if(!inp || !window.AK8_UI || !AK8_UI.grow) return;
+    if(inp.dataset.minw === undefined){
+      var b = Math.round(inp.getBoundingClientRect().width);
+      inp.dataset.minw = String(b > 0 ? b : 90);
+    }
+    AK8_UI.grow(inp, { min: parseInt(inp.dataset.minw, 10) });
+  }
+  rotEl.querySelectorAll(VAXER).forEach(function(inp){
+    vaxRuta(inp);
+    inp.addEventListener('input', function(){ vaxRuta(inp); });
+  });
+
   rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
     var flera = grid.dataset.flera === '1';
     grid.querySelectorAll('.valruta-btn').forEach(function(btn){
@@ -980,6 +1009,13 @@ function bygg_blad(rotEl, blad){
         ok = _rf.status === 'ratt';
         if(_rf.status === 'form') _besked = _rf.besked;
         else if(_rf.parsefel) _besked = _rf.besked;
+      } else if(inp.dataset.omkrets !== undefined){
+        // OMKRETS SOM KEDJA: uppställningen (figurens sidor adderade) + förenklingen i samma ruta.
+        // Bara slutsvaret är inte "fel värde" — det saknar uppställningen, och beskedet säger det.
+        var _so = decodeURIComponent(inp.dataset.sidor || '').split('|').filter(Boolean);
+        var _rk = window.AlgBrak ? window.AlgBrak.gradeOmkrets(inp.value, _so, decodeURIComponent(inp.dataset.omkrets)) : { status: 'fel' };
+        ok = _rk.status === 'ratt';
+        if(!ok && _rk.besked) _besked = _rk.besked;
       } else if(inp.dataset.oppet !== undefined){
         // ÖPPET SVAR: eget uttryck med bestämt antal termer som förenklas till målet.
         var _ro = window.AlgBrak ? window.AlgBrak.gradeOppet(inp.value, decodeURIComponent(inp.dataset.oppet), parseInt(inp.dataset.termer, 10)) : { status: 'fel' };
@@ -1106,6 +1142,7 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.intmin !== undefined) facit = 'ett tal mellan ' + String(parseFloat(inp.dataset.intmin)).replace('.', ',') + ' och ' + String(parseFloat(inp.dataset.intmax)).replace('.', ',');
         else if(inp.dataset.faktor !== undefined) facit = 'produkt = ' + parseInt(inp.dataset.faktor, 10) + ', ' + parseInt(inp.dataset.antal, 10) + ' faktorer (minst 2 var)';
         else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
+        else if(inp.dataset.omkrets !== undefined) facit = inp.dataset.visa;   // "3x + 5x + 4x = 12x"
         else if(inp.dataset.forenkla !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.oppet !== undefined) facit = 'ett eget uttryck med ' + inp.dataset.termer + ' termer som förenklas till ' + inp.dataset.visa;
         else facit = inp.dataset.svar.replace('.', ',');
