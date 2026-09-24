@@ -14,6 +14,75 @@ const args = process.argv.slice(2), BARA = (i => i >= 0 ? args[i + 1] : null)(ar
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 const PRE = `(function(){ var s = 0x2F6E2B1; Math.random = function(){ s |= 0; s = s + 0x6D2B79F5 | 0; var t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   window.__onerr = []; window.addEventListener('error', function(e){ window.__onerr.push(e.message + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno); }); try { localStorage.clear(); } catch(e){} })();`;
+// PROBLEMLÖSNINGENS BLAD (d5): varje ruta visar sin EGEN status. Provet: fyll allt rätt ur
+// modellen utom EN enhet → den ska bli fel och de andra rätt, och uppgiften får inte bli löst.
+const PROBE_D5 = `(function(){
+  var ut = { onerr: window.__onerr, blad: [] };
+  function synlig(el){ return !!(el.offsetParent) && getComputedStyle(el).visibility !== 'hidden'; }
+  function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
+  function skrivYta(y, v){ if(!y) return; var f = y.querySelector('.seg-text'); if(!f) return; f.value = v; ev(f, 'input'); }
+  function fyllBlad(kort, blad, bryt){
+    var M = window.ProbModell, uppgEl = kort.querySelectorAll('.prob-uppg'), brutna = [];
+    blad.uppgifter.forEach(function(u, i){
+      var el = uppgEl[i]; if(!el) return;
+      var l = M.losningsforslag(u); if(!l) return;
+      var nycklar = M.nycklarAv(u);
+      if(el.querySelectorAll('.prob-delrad').length){
+        var nyDel = el.querySelector('.prob-nydel'), v = 0;
+        while(el.querySelectorAll('.prob-delrad').length < nycklar.length && nyDel && v++ < 9) nyDel.click();
+        nycklar.forEach(function(k, ri){
+          var dr = el.querySelectorAll('.prob-delrad')[ri];
+          var ir = el.querySelectorAll('.prob-insattrad')[ri], sr = el.querySelectorAll('.prob-svarrad2')[ri];
+          var sv = l.svar[k];
+          if(bryt === 'sista' && nycklar.length > 1 && ri < nycklar.length - 1){ sv = '999' + (u.enhet ? ' ' + u.enhet : ''); brutna.push(i + ':' + ri); }
+          skrivYta(dr && dr.querySelector('.prob-uttryck'), l.uttryck[k]);
+          skrivYta(ir && ir.querySelector('.prob-varde'), l.insattning[k]);
+          skrivYta(sr && sr.querySelector('.prob-svar'), sv);
+        });
+      } else {
+        skrivYta(el.querySelector('.prob-svar'), l.svar[nycklar[0]]);
+      }
+      var rader = [l.ekvation].concat(l.kedja);
+      var knapp = Array.prototype.filter.call(el.querySelectorAll('.mini-btn'), function(b){ return !b.classList.contains('prob-nydel'); })[0];
+      var v2 = 0;
+      while(el.querySelectorAll('.eq-vl .seg-text').length < rader.length && knapp && v2++ < 9) knapp.click();
+      var vl = el.querySelectorAll('.eq-vl .seg-text'), hl = el.querySelectorAll('.eq-hl .seg-text');
+      rader.forEach(function(r, ri){ if(!vl[ri]) return; vl[ri].value = r.vl; hl[ri].value = r.hl; ev(vl[ri], 'input'); ev(hl[ri], 'input'); });
+    });
+    return brutna;
+  }
+  function bladen(){
+    var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn'));
+    var B = ['ProbBlad', 'ProbBlad2', 'ProbBlad3', 'ProbBlad4', 'ProbBlad5']
+              .map(function(n){ return window[n] && window[n].BLAD; }).filter(Boolean);
+    return nav.map(function(k, i){ return { knapp: k, data: B[i] }; }).filter(function(x){ return !!x.data; });
+  }
+  function oppna(x){
+    x.knapp.click();
+    var m = Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0];
+    return m && m.querySelector('.prob-kort');
+  }
+  bladen().forEach(function(x){
+    var kort = oppna(x); if(!kort) return;
+    fyllBlad(kort, x.data, 'sista');
+    var kn = kort.querySelector('[data-action="kontroll"]'); if(!kn) return;
+    kn.click();
+    var b = { blad: x.knapp.textContent.trim().slice(0, 26), rader: 0, provade: 0, gronFastFel: [], perRutaSaknas: [] };
+    Array.prototype.forEach.call(kort.querySelectorAll('.prob-uppg'), function(u, ui){
+      var sv = Array.prototype.filter.call(u.querySelectorAll('.prob-svar'), synlig);
+      if(sv.length < 2) return;                       // en enda svarsruta = ingen flerrutsrad
+      b.rader++; b.provade++;
+      var st = sv.map(function(y){ return y.classList.contains('fel') ? 'fel' : y.classList.contains('ratt') ? 'ratt' : '-'; });
+      if(u.querySelector('.uppg-klar.show')) b.gronFastFel.push('uppg ' + (ui + 1) + ' ✓ trots ' + (sv.length - 1) + ' felaktiga svar');
+      if(st[st.length - 1] !== 'ratt') b.gronFastFel.push('uppg ' + (ui + 1) + ' sista rutan rätt men ' + st[st.length - 1]);
+      var saknas = st.slice(0, -1).filter(function(s2){ return s2 !== 'fel'; }).length;
+      if(saknas) b.perRutaSaknas.push('uppg ' + (ui + 1) + ': ' + saknas + ' felaktiga rutor omarkerade (' + st.join(',') + ')');
+    });
+    ut.blad.push(b);
+  });
+  return ut;
+})()`;
+
 // ÅK8 (AK8_UI-blad): per blad-flik
 const PROBE8 = `(function(){
   var ut = { onerr: window.__onerr, blad: [] };
@@ -91,7 +160,8 @@ const SIDOR8 = fs.readdirSync(path.join(ROOT, 'ak8/k1')).filter(f => /\.html$/.t
 const SIDOR7 = ['ak7/k2/d1-andel-antal', 'ak7/k2/d2-byta-form', 'ak7/k2/d3-forlanga-forkorta', 'ak7/k2/d4-jamfora-brak', 'ak7/k2/d5-addsub-brak', 'ak7/k2/d6-multiplikation-brak', 'ak7/k2/d7-division-brak', 'ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => [p + '/index.html', PROBE7]);
 let fel = 0, provade = 0;
 console.log('FLERRUTS-GRIND — sista rutan rätt, övriga fel: raden får inte bli ✓; tallinje/talföljd/hopp visar status per ruta\n');
-SIDOR8.concat(SIDOR7).forEach(([sida, probe]) => {
+const SIDOR_D5 = [['ak7/k3/d5-problemlosning/index.html', PROBE_D5]];
+SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   const tmp = path.join(os.tmpdir(), 'flerruts-' + process.pid + '.js'), pre = path.join(os.tmpdir(), 'flerruts-pre-' + process.pid + '.js');
   fs.writeFileSync(tmp, probe); fs.writeFileSync(pre, PRE);

@@ -149,7 +149,97 @@ function granska(u){
   return fel;
 }
 
-var API = { varden: varden, granska: granska, grenarAv: grenarAv, nycklarAv: nycklarAv,
+// ── KANONISK LÖSNING ────────────────────────────────────────────────────────────────────────
+// Koefficienterna är rationella: de skrivs som bråk (x/3), aldrig som avrundade decimaler —
+// annars ger flyttalen uttryck som "0,333333333x + 1,9e-8", som ingen elev skriver.
+function brak(v){
+  for(var q = 1; q <= 1000; q++) if(Math.abs(v * q - Math.round(v * q)) < 1e-7) return { p: Math.round(v * q), q: q };
+  return null;
+}
+function talStr(v){
+  var b = brak(v);
+  if(b && b.q === 1) return String(b.p);
+  if(b) return b.p + '/' + b.q;
+  return String(Math.round(v * 1e6) / 1e6).replace('.', ',');
+}
+function linjart(a, b, v){
+  var s = '';
+  if(Math.abs(a) > 1e-9){
+    var ba = brak(a);
+    if(ba && ba.q === 1) s = (ba.p === 1) ? v : (ba.p === -1 ? '-' + v : ba.p + v);
+    else if(ba) s = ((ba.p === 1) ? v : (ba.p === -1 ? '-' + v : ba.p + '·' + v)) + '/' + ba.q;
+    else s = talStr(a) + v;
+  }
+  if(Math.abs(b) > 1e-9){
+    var t = talStr(Math.abs(b));
+    s += s ? ((b > 0 ? ' + ' : ' - ') + t) : (b > 0 ? t : '-' + t);
+  }
+  return s || '0';
+}
+// Övriga delar som funktioner av den valda: pinna den valda vid två värden och läs av lutningen.
+function uttryckMed(u, gren, valdDel){
+  var nycklar = nycklarAv(u), v = u.variabel || 'x';
+  var sant = varden(u, gren); if(sant.fel) return null;
+  var bas = sant.varden[valdDel];
+  function pinnat(pin){
+    var rader = [];
+    gren.relationer.forEach(function(e){ var r = ekvationsRad(e, nycklar); if(r) rader.push(r); });
+    var p = ekvationsRad(valdDel + ' = ' + pin, nycklar); if(p) rader.push(p);
+    var l = los(rader, nycklar);
+    return l.fel ? null : l.varden;
+  }
+  var u0 = pinnat(bas), u1 = pinnat(bas + 1);
+  if(!u0 || !u1) return null;
+  var ut = {};
+  nycklar.forEach(function(k){
+    var a = u1[k] - u0[k], b = u0[k] - a * bas;
+    ut[k] = linjart(a, b, v);
+  });
+  return ut;
+}
+// Hela lösningen: uttryck, ekvation, kedja (kort läge), värden och svar.
+function losningsforslag(u, gren, valdDel){
+  gren = gren || grenarAv(u)[0];
+  var nycklar = nycklarAv(u), v = u.variabel || 'x';
+  valdDel = valdDel || nycklar[0];
+  var uttryck = uttryckMed(u, gren, valdDel);
+  if(!uttryck || String(uttryck[valdDel]).trim() !== v){
+    // den valda delen blev inte x självt (t.ex. en känd del) → pröva de övriga
+    for(var i = 0; i < nycklar.length; i++){
+      var kand = uttryckMed(u, gren, nycklar[i]);
+      if(kand && String(kand[nycklar[i]]).trim() === v){ uttryck = kand; valdDel = nycklar[i]; break; }
+    }
+  }
+  if(!uttryck) return null;
+  var sant = varden(u, gren); if(sant.fel) return null;
+
+  // ekvationen = villkoret med uttrycken insatta
+  var delar = String(gren.villkor[0]).split('=');
+  var vl = delar[0], hl = delar[1];
+  nycklar.forEach(function(k){
+    var re = new RegExp(k + '(?![0-9])', 'g');
+    vl = vl.replace(re, '(' + uttryck[k] + ')'); hl = hl.replace(re, '(' + uttryck[k] + ')');
+  });
+  var EP2 = (typeof window !== 'undefined' && window.EkvParser) ||
+            (typeof require === 'function' ? require('../ekvationer-balans/ekv-parser.js') : null);
+  var L = EP2.parseSida(vl, { variabel: v }), H = EP2.parseSida(hl, { variabel: v });
+  var A = L.a - H.a, B = H.b - L.b, k0 = L.b - H.b;
+  var kedja = [];
+  if(Math.abs(L.b) > 1e-9) kedja.push({ vl: linjart(A, k0, v), hl: talStr(B + k0) });
+  if(Math.abs(Math.abs(A) - 1) > 1e-9) kedja.push({ vl: linjart(A, 0, v), hl: talStr(B) });
+  kedja.push({ vl: v, hl: talStr(B / A) });
+
+  var svar = {}, insattning = {};
+  nycklar.forEach(function(k){
+    insattning[k] = talStr(sant.varden[k]);
+    svar[k] = talStr(sant.varden[k]) + (u.enhet ? ' ' + u.enhet : '');
+  });
+  return { valdDel: valdDel, uttryck: uttryck, ekvation: { vl: vl.trim(), hl: hl.trim() },
+           kedja: kedja, varden: sant.varden, insattning: insattning, svar: svar, gren: gren.id };
+}
+
+var API = { losningsforslag: losningsforslag, uttryckMed: uttryckMed, linjart: linjart, talStr: talStr,
+            varden: varden, granska: granska, grenarAv: grenarAv, nycklarAv: nycklarAv,
             linjarForm: linjarForm, ekvationsRad: ekvationsRad, utvardera: utvardera };
 if(typeof window !== 'undefined') window.ProbModell = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;

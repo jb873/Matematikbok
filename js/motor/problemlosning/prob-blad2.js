@@ -121,6 +121,7 @@ function ordnaDelar(u, radUttryck){
 function render(mount, blad){
   mount.innerHTML = '';
   var kort = document.createElement('div'); kort.className = 'prob-kort';
+  kort.setAttribute('data-blad', blad.id);
   var rub = document.createElement('div'); rub.className = 'niva-rubrik'; rub.textContent = blad.titel;
   kort.appendChild(rub);
 
@@ -131,12 +132,14 @@ function render(mount, blad){
 
   var actions = document.createElement('div'); actions.className = 'actions';
   var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'btn primary'; kn.textContent = TEXT.kontroll.titel;
+  kn.setAttribute('data-action', 'kontroll');
   var rn = document.createElement('button'); rn.type = 'button'; rn.className = 'btn subtle'; rn.textContent = TEXT.omstart.titel;
   var hint = document.createElement('div'); hint.className = 'global-hint';
-  kn.onclick = function(){ kontrollera(state, hint); };
+  var sammanf = document.createElement('div'); sammanf.className = 'ovn-sammanf'; sammanf.setAttribute('data-sammanf', '');
+  kn.onclick = function(){ kontrollera(state, hint, sammanf); };
   rn.onclick = function(){ render(mount, blad); };
   actions.appendChild(kn); actions.appendChild(rn);
-  kort.appendChild(actions); kort.appendChild(hint);
+  kort.appendChild(actions); kort.appendChild(sammanf); kort.appendChild(hint);
   mount.appendChild(kort);
   return state;
 }
@@ -261,7 +264,23 @@ function rensaUppgift(s){
   s.beskedEl.textContent = ''; s.klarEl.classList.remove('show');
 }
 
-function kontrollera(state, hintEl){
+// Svarsenheterna i EN uppgift: uttryck + insättning + svar per delrad, ekvationsraden och varje
+// IFYLLD kedjerad. En tom extra kedjerad är en erbjuden rad, inte en svarsenhet.
+function enheter(s){
+  return s.delRader.length * 3 + 1 + s.kedja.filter(function(r){ return !K.tomRad(r); }).length;
+}
+function ratta_enheter(s){
+  var n = 0;
+  s.delRader.forEach(function(d){
+    if(d.uttryckYta.classList.contains('ratt')) n++;
+    if(d.vardeYta.classList.contains('ratt')) n++;
+    if(d.svarYta.classList.contains('ratt')) n++;
+  });
+  if(s.ekvRad.vlWrap.classList.contains('rad-ok')) n++;
+  s.kedja.forEach(function(r){ if(r.vlWrap.classList.contains('rad-ok')) n++; });
+  return n;
+}
+function kontrollera(state, hintEl, sammanfEl){
   var klara = 0, besvarade = 0;
   state.forEach(function(s){
     rensaUppgift(s);
@@ -318,16 +337,26 @@ function kontrollera(state, hintEl){
       s.delRader.forEach(function(d){ d.uttryckYta.classList.add('ratt'); });
       K.markera(s.ekvRad, true);
       s.kedja.forEach(function(r){ if(!K.tomRad(r)) K.markera(r, true); });
-      var d2 = res.del && radFor[res.del];
-      if(d2){
-        if(res.steg === 'insattning') d2.vardeYta.classList.add('fel');
-        else { d2.svarYta.classList.add('fel'); d2.svarStatus.textContent = '✗'; }
-      }
+      // varje ruta i steget bär sitt eget omdöme — inte bara den första felaktiga
+      var per = res.per || { insattning: {}, svar: {} };
+      ord.ordning.forEach(function(nyckel, i){
+        var d3 = s.delRader[i]; if(!d3) return;
+        if(per.insattning[nyckel] === true) d3.vardeYta.classList.add('ratt');
+        else if(per.insattning[nyckel] === false) d3.vardeYta.classList.add('fel');
+        if(per.svar[nyckel] === true){ d3.svarYta.classList.add('ratt'); d3.svarStatus.textContent = '✓'; }
+        else if(per.svar[nyckel] === false){ d3.svarYta.classList.add('fel'); d3.svarStatus.textContent = '✗'; }
+      });
+
     }
     s.beskedEl.textContent = res.besked || '';
     logga(s.u.nod, 'fel');
   });
 
+  if(sammanfEl){
+    var tot = 0, ratt = 0;
+    state.forEach(function(s){ tot += enheter(s); ratt += ratta_enheter(s); });
+    sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.';
+  }
   if(!besvarade){ hintEl.className = 'global-hint'; hintEl.textContent = ''; return; }
   if(klara === state.length){ hintEl.className = 'global-hint ok'; hintEl.textContent = TEXT.allaRatt.hint; }
   else { hintEl.className = 'global-hint'; hintEl.textContent = TEXT.pagang.hint; }

@@ -218,48 +218,58 @@ function ratta(u, svar){
   var sant = MOD.varden(u, gren);
   if(sant.fel) return { status: 'fel', steg: 'uppgift', besked: 'Uppgiften går inte att lösa entydigt (' + sant.fel + ').' };
 
+  // varje ruta bär sitt eget omdöme i det steg där felet ligger; stegen före är godkända
+  var per = { uttryck: {}, insattning: {}, svar: {} };
+  MOD.nycklarAv(u).forEach(function(k){ per.uttryck[k] = true; });
+
   // STEG 2 — ekvationen (rad 1 i kedjan)
   var rader = (svar.rader || []).filter(function(r){ return r && (!tom(r.vl) || !tom(r.hl)); });
-  if(!rader.length) return { status: 'fel', steg: 'ekvation', besked: BESKED.ekvationOlaslig.hint, gren: gren.id };
+  if(!rader.length) return { status: 'fel', steg: 'ekvation', besked: BESKED.ekvationOlaslig.hint, gren: gren.id, per: per };
   var ekvFel = provaEkvation(u, gren, uttryck, rader[0]);
-  if(ekvFel) return Object.assign({ status: 'fel', gren: gren.id }, ekvFel);
+  if(ekvFel) return Object.assign({ status: 'fel', gren: gren.id, per: per }, ekvFel);
 
   // STEG 3 — balansmetoden
   var kedja = provaKedja(u, rader);
-  if(kedja.steg) return Object.assign({ status: 'fel', gren: gren.id }, kedja);
+  if(kedja.steg) return Object.assign({ status: 'fel', gren: gren.id, per: per }, kedja);
 
   // STEG 4 — insättningen i elevens EGNA uttryck
   var x = kedja.losning, varden = {};
   MOD.nycklarAv(u).forEach(function(k){ varden[k] = EP.varde(uttryck[k], x, opts); });
   if(svar.insattning){
-    var nycklar = MOD.nycklarAv(u);
+    var nycklar = MOD.nycklarAv(u), insFel = null;
     for(var i = 0; i < nycklar.length; i++){
-      var k2 = nycklar[i], t = svar.insattning[k2];
-      if(tom(t)) return { status: 'fel', steg: 'insattning', del: k2, besked: BESKED.svarSaknas.hint, gren: gren.id };
-      var vr = vardeUr(t, opts);
-      if(vr.fel === 'kedjebrott')
-        return { status: 'fel', steg: 'insattning', del: k2, besked: BESKED.insattningKedja.hint, gren: gren.id };
-      if(vr.fel || Math.abs(vr.varde - varden[k2]) > 1e-6)
-        return { status: 'fel', steg: 'insattning', del: k2, besked: BESKED.insattningFel.hint, gren: gren.id };
+      var k2 = nycklar[i], t = svar.insattning[k2], b = null;
+      if(tom(t)) b = BESKED.svarSaknas.hint;
+      else {
+        var vr = vardeUr(t, opts);
+        if(vr.fel === 'kedjebrott') b = BESKED.insattningKedja.hint;
+        else if(vr.fel || Math.abs(vr.varde - varden[k2]) > 1e-6) b = BESKED.insattningFel.hint;
+      }
+      per.insattning[k2] = !b;
+      if(b && !insFel) insFel = { status: 'fel', steg: 'insattning', del: k2, besked: b, gren: gren.id };
     }
+    if(insFel) return Object.assign(insFel, { per: per });
   }
 
   // Följdfrågan (Area: / Omkrets:) — mellan balansmetoden och svaret
   if(u.foljdfraga){
     var mal = MOD.utvardera(u.foljdfraga.uttryck, sant.varden);
     var f = provaSvarsfalt(svar.foljd, mal, u.foljdfraga.enhet, opts);
-    if(f) return { status: 'fel', steg: 'foljd', besked: f.fel, enhetSaknas: !!f.enhetSaknas, gren: gren.id };
+    per.foljd = !f;
+    if(f) return { status: 'fel', steg: 'foljd', besked: f.fel, enhetSaknas: !!f.enhetSaknas, gren: gren.id, per: per };
   }
 
   // STEG 5 — svaret: ett fält per del, alla delar besvaras alltid
-  var svarDelar = u.svarDelar || MOD.nycklarAv(u), svarFalt = svar.svar || {};
+  var svarDelar = u.svarDelar || MOD.nycklarAv(u), svarFalt = svar.svar || {}, svarFel = null;
   for(var s = 0; s < svarDelar.length; s++){
     var d = svarDelar[s];
     var r = provaSvarsfalt(svarFalt[d], sant.varden[d], u.enhet, opts);
-    if(r) return { status: 'fel', steg: 'svar', del: d, besked: r.fel, enhetSaknas: !!r.enhetSaknas, gren: gren.id };
+    per.svar[d] = !r;
+    if(r && !svarFel) svarFel = { status: 'fel', steg: 'svar', del: d, besked: r.fel, enhetSaknas: !!r.enhetSaknas, gren: gren.id };
   }
+  if(svarFel) return Object.assign(svarFel, { per: per });
 
-  return { status: 'ratt', steg: null, gren: gren.id, losning: x, varden: sant.varden };
+  return { status: 'ratt', steg: null, gren: gren.id, losning: x, varden: sant.varden, per: per };
 }
 
 var API = { ratta: ratta, BESKED: BESKED, provaUttryck: provaUttryck, provaEkvation: provaEkvation,

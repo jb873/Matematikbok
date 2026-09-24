@@ -212,6 +212,84 @@ const PROBE7 = `(function(){
   return ut;
 })()`;
 
+// ── PROBLEMLÖSNINGENS BLAD (d5): egna ruttyper, facit ur modellen ──
+// SVARSENHET = en ruta eller rad som rättningen markerar: uttryck, insättning, svar, ekvationsraden
+// och varje IFYLLD kedjerad. En tom extra kedjerad är en erbjuden rad, inte en svarsenhet.
+const PROBE_D5 = `(function(){
+  var ut = { onerr: window.__onerr, blad: [] };
+  function synlig(el){ return !!(el.offsetParent) && getComputedStyle(el).visibility !== 'hidden'; }
+  function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
+  function skrivYta(y, v){ if(!y) return; var f = y.querySelector('.seg-text'); if(!f) return; f.value = v; ev(f, 'input'); }
+  function fyllBlad(kort, blad, bryt){
+    var M = window.ProbModell, uppgEl = kort.querySelectorAll('.prob-uppg'), brutna = [];
+    blad.uppgifter.forEach(function(u, i){
+      var el = uppgEl[i]; if(!el) return;
+      var l = M.losningsforslag(u); if(!l) return;
+      var nycklar = M.nycklarAv(u);
+      if(el.querySelectorAll('.prob-delrad').length){
+        var nyDel = el.querySelector('.prob-nydel'), v = 0;
+        while(el.querySelectorAll('.prob-delrad').length < nycklar.length && nyDel && v++ < 9) nyDel.click();
+        nycklar.forEach(function(k, ri){
+          var dr = el.querySelectorAll('.prob-delrad')[ri];
+          var ir = el.querySelectorAll('.prob-insattrad')[ri], sr = el.querySelectorAll('.prob-svarrad2')[ri];
+          var sv = l.svar[k];
+          if(bryt === 'sista' && nycklar.length > 1 && ri < nycklar.length - 1){ sv = '999' + (u.enhet ? ' ' + u.enhet : ''); brutna.push(i + ':' + ri); }
+          skrivYta(dr && dr.querySelector('.prob-uttryck'), l.uttryck[k]);
+          skrivYta(ir && ir.querySelector('.prob-varde'), l.insattning[k]);
+          skrivYta(sr && sr.querySelector('.prob-svar'), sv);
+        });
+      } else {
+        skrivYta(el.querySelector('.prob-svar'), l.svar[nycklar[0]]);
+      }
+      var rader = [l.ekvation].concat(l.kedja);
+      var knapp = Array.prototype.filter.call(el.querySelectorAll('.mini-btn'), function(b){ return !b.classList.contains('prob-nydel'); })[0];
+      var v2 = 0;
+      while(el.querySelectorAll('.eq-vl .seg-text').length < rader.length && knapp && v2++ < 9) knapp.click();
+      var vl = el.querySelectorAll('.eq-vl .seg-text'), hl = el.querySelectorAll('.eq-hl .seg-text');
+      rader.forEach(function(r, ri){ if(!vl[ri]) return; vl[ri].value = r.vl; hl[ri].value = r.hl; ev(vl[ri], 'input'); ev(hl[ri], 'input'); });
+    });
+    return brutna;
+  }
+  function bladen(){
+    var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn'));
+    var B = ['ProbBlad', 'ProbBlad2', 'ProbBlad3', 'ProbBlad4', 'ProbBlad5']
+              .map(function(n){ return window[n] && window[n].BLAD; }).filter(Boolean);
+    return nav.map(function(k, i){ return { knapp: k, data: B[i] }; }).filter(function(x){ return !!x.data; });
+  }
+  function oppna(x){
+    x.knapp.click();
+    var m = Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0];
+    return m && m.querySelector('.prob-kort');
+  }
+  bladen().forEach(function(x){
+    var kort = oppna(x); if(!kort) return;
+    var b = { blad: x.knapp.textContent.trim().slice(0, 26) };
+    fyllBlad(kort, x.data, '');
+    var kn = kort.querySelector('[data-action="kontroll"]');
+    if(!kn){ b.ingenKnapp = true; ut.blad.push(b); return; }
+    kn.click();
+    var alla = Array.prototype.slice.call(kort.querySelectorAll('.prob-uttryck, .prob-varde, .prob-svar'));
+    b.ytor = alla.filter(synlig).length;
+    b.dolda = alla.length - b.ytor;
+    var rader = 0;
+    Array.prototype.forEach.call(kort.querySelectorAll('.prob-uppg'), function(u){
+      var vlar = u.querySelectorAll('.eq-vl'), hlar = u.querySelectorAll('.eq-hl');
+      for(var i = 0; i < vlar.length; i++){
+        var ifylld = Array.prototype.some.call(vlar[i].querySelectorAll('input'), function(x2){ return x2.value.trim() !== ''; }) ||
+                     Array.prototype.some.call((hlar[i] || vlar[i]).querySelectorAll('input'), function(x2){ return x2.value.trim() !== ''; });
+        if(ifylld) rader++;
+      }
+    });
+    b.rader = rader; b.enheter = b.ytor + rader;
+    var sm = kort.querySelector('[data-sammanf]');
+    b.sammanf = sm ? sm.textContent.replace(/\\s+/g, ' ').trim() : null;
+    var m = b.sammanf && b.sammanf.match(/(\\d+) av (\\d+)/);
+    if(m){ b.ratt = +m[1]; b.namnare = +m[2]; }
+    ut.blad.push(b);
+  });
+  return ut;
+})()`;
+
 const SIDOR8 = fs.readdirSync(path.join(ROOT, 'ak8/k1')).filter(f => /\.html$/.test(f) && f !== 'index.html').map(f => 'ak8/k1/' + f);
 const SIDOR7 = ['ak7/k2/d1-andel-antal', 'ak7/k2/d2-byta-form', 'ak7/k2/d3-forlanga-forkorta', 'ak7/k2/d4-jamfora-brak', 'ak7/k2/d5-addsub-brak', 'ak7/k2/d6-multiplikation-brak', 'ak7/k2/d7-division-brak', 'ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov'].map(p => p + '/index.html');
 const TMP = path.join(os.tmpdir(), 'namnare-' + process.pid);
@@ -242,6 +320,25 @@ SIDOR8.forEach(sida => {
     });
   }
 });
+// d5: problemlösningens blad (egna ruttyper)
+['ak7/k3/d5-problemlosning/index.html'].forEach(sida => {
+  if(BARA && !sida.includes(BARA)) return;
+  const u = kor(sida, PROBE_D5, 0x2F6E2B1);
+  if(!u.blad || !u.blad.length){ fel++; console.log('✗ ' + sida + ': inga blad mätta — ' + (u.err || 'bladen hittades inte')); return; }
+  if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel — ' + u.onerr.join(' · ')); }
+  u.blad.forEach(b => {
+    blad++;
+    const brott = [];
+    if(b.ingenKnapp) brott.push('ingen Kontrollera-knapp');
+    if(b.dolda) brott.push(b.dolda + ' dolda svarsenheter');
+    if(b.namnare == null) brott.push('ingen "X av Y"-summering');
+    else if(b.namnare !== b.enheter) brott.push('nämnaren ' + b.namnare + ' ≠ ' + b.enheter + ' synliga svarsenheter');
+    else if(b.ratt !== b.namnare) brott.push('allt fyllt ur modellen men ' + b.ratt + ' av ' + b.namnare);
+    if(brott.length){ fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + brott.join(' · ')); }
+    else console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + b.enheter + ' (' + b.ytor + ' rutor + ' + b.rader + ' rader)');
+  });
+});
+
 SIDOR7.forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   const u = kor(sida, PROBE7, 0x2F6E2B1); if(!u.blad){ fel++; console.log('✗ ' + sida + ': inget svar — ' + u.err); return; }
