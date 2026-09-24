@@ -197,6 +197,26 @@
 .prob-svar.fel{border-color:var(--red);color:var(--red-dk);}
 .prob-svar-status{font-size:18px;}
 .uppg-besked{color:var(--red-dk);font-size:14.5px;margin-top:10px;max-width:60ch;}
+
+/* ── FEMSTEGSFORMEN (variant 2): steg 1 och steg 4 bredvid varandra — samma rader, först
+   uttrycken och sedan värdena. Raderna är inte förtryckta; knappen lägger till fler. ── */
+.prob-tvakol{display:grid;grid-template-columns:minmax(260px,1fr) minmax(200px,1fr);gap:10px 28px;align-items:start;margin:4px 0 14px;}
+.prob-delrad,.prob-insattrad,.prob-svarrad2{display:flex;align-items:center;gap:8px;min-height:42px;}
+.prob-namn{font-family:var(--body);font-size:16px;color:var(--ink);background:#fff;border:1.5px solid var(--paper-dk);
+  border-radius:7px;padding:5px 9px;width:110px;outline:none;}
+.prob-namn:focus{border-color:var(--gold-lt);}
+.prob-kolon{color:var(--ink-faint);font-size:18px;}
+.prob-uttryck,.prob-varde{display:inline-flex;align-items:center;min-height:38px;background:#fff;
+  border:2px solid var(--paper-dk);border-radius:8px;padding:2px 10px;min-width:120px;}
+.prob-uttryck:focus-within,.prob-varde:focus-within{border-color:var(--gold-lt);box-shadow:0 0 0 3px rgba(196,154,64,.15);}
+.prob-uttryck.ratt,.prob-varde.ratt,.prob-svar.ratt{border-color:var(--green);}
+.prob-uttryck.fel,.prob-varde.fel,.prob-svar.fel{border-color:var(--red);}
+.prob-eko{font-family:var(--serif);font-size:19px;color:var(--ink-soft);min-width:96px;text-align:right;}
+.prob-lika{color:var(--ink-faint);font-size:19px;}
+.prob-nydel{margin-top:6px;}
+.prob-svarlista{display:flex;flex-direction:column;gap:8px;margin:2px 0 6px;}
+.prob-svarrad2 .prob-eko{text-align:left;min-width:110px;}
+@media (max-width:640px){ .prob-tvakol{grid-template-columns:1fr;} .prob-eko{min-width:70px;} }
 </style>
 </head>
 <body>
@@ -236,6 +256,7 @@
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
   <div id="blad-instruktion" class="blad-mount"><div class="ovn-wrap" id="sheet-instruktion"></div></div>
+  <div id="blad-delar" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-delar"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -268,6 +289,7 @@
 <script src="../../../js/motor/problemlosning/prob-modell.js"></script>
 <script src="../../../js/motor/problemlosning/prob-rattare.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad.js"></script>
+<script src="../../../js/motor/problemlosning/prob-blad2.js"></script>
 
 <!-- TAXONOMI + delade kontrakt: föreläsningsregistret, färdiga test, sidskalet -->
 <script src="../../../js/data/k3-taxonomi.js"></script>
@@ -278,7 +300,8 @@
 <script>
 // Sidan monteras av det delade skalet. Bladet är redan renderat av prob-blad.js.
 DelkapitelSkal.montera({
-  ova: [ { titel: 'Följa en instruktion', mount: 'instruktion' } ],
+  ova: [ { titel: 'Följa en instruktion', mount: 'instruktion' },
+         { titel: 'Personer eller delar', mount: 'delar' } ],
   taxonomi:    function(){ return window.K3_TAXONOMI; },
   utbudslista: 'k3d5',
   ram:         '../../../ak7-k3-ram.html',
