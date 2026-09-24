@@ -28,7 +28,13 @@ function textSeg(opts){
   inp.setAttribute('aria-label', opts.etikett || 'rad i lösningen');
   autoStorlek(inp);
   inp.addEventListener('focus', function(){ aktivtFalt = inp; });
-  inp.addEventListener('input', function(){ autoStorlek(inp); });
+  // Mellanrum kring räknetecken och riktigt minustecken: DELAD autoSpace (AK8_UI), samma som
+  // åttans uttrycksceller. "2x+12" blir "2x + 12" och "48-12" blir "48 − 12" medan eleven skriver;
+  // markören står kvar på sin plats och rättningen påverkas inte (parsern sanerar ändå).
+  inp.addEventListener('input', function(){
+    if(window.AK8_UI && AK8_UI.autoSpace) AK8_UI.autoSpace(inp);
+    autoStorlek(inp);
+  });
   if(opts.onEnter) inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); opts.onEnter(); } });
   return inp;
 }
@@ -45,7 +51,10 @@ function brakSeg(opts){
     inp.setAttribute('aria-label', i === 0 ? 'täljare' : 'nämnare');
     autoStorlek(inp);
     inp.addEventListener('focus', function(){ aktivtFalt = inp; });
-    inp.addEventListener('input', function(){ autoStorlek(inp); });
+    inp.addEventListener('input', function(){
+      if(window.AK8_UI && AK8_UI.autoSpace) AK8_UI.autoSpace(inp);
+      autoStorlek(inp);
+    });
     if(opts.onEnter) inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); opts.onEnter(); } });
     inp.addEventListener('keydown', function(e){
       if(e.key !== 'Backspace' || inp.value !== '') return;

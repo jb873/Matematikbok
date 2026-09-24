@@ -44,6 +44,7 @@ var BESKED = {
   forFaRader:     { hint: 'Visa ett steg i taget – det behövs fler rader innan x står ensamt.' },
   ejLost:         { hint: 'Sista raden ska vara x = tal, med x i vänsterledet.' },
   insattningFel:  { hint: 'Värdet stämmer inte med ditt eget uttryck.' },
+  insattningKedja:{ hint: 'Leden i rutan är inte lika mycket värda.' },
   svarSaknas:     { hint: 'Alla delar ska ha ett svar.' },
   svarTalFel:     { hint: 'Fel värde.' },
   svarEnhetSaknas:{ hint: 'Talet är rätt – men enheten saknas.' },
@@ -158,6 +159,27 @@ function talUr(text){
   var m = s.match(/-?\d+(\.\d+)?/);
   return m ? parseFloat(m[0]) : null;
 }
+// VÄRDET I EN RUTA. Rutan får bära uträkningen, inte bara svaret:
+//   "30"  ·  "18 + 12"  ·  "18 + 12 = 30"   → alla är värda trettio.
+// Står flera led i rutan måste de vara lika mycket värda (samma regel som beräkningsrutorna).
+function vardeUr(text, opts){
+  var led = String(text == null ? '' : text).split('=').map(function(d){ return d.trim(); }).filter(function(d){ return d !== ''; });
+  if(!led.length) return { fel: 'tom' };
+  var varden = [];
+  for(var i = 0; i < led.length; i++){
+    // Ett led som är UTTRYCKET självt (x + 12) har inget värde — det är bara upprepat ur steg 1,
+    // precis som i metodens skiss: x + 12 = 18 + 12 = 30. Det hoppas över.
+    var p = EP && opts && opts.variabel && EP.parseSida(led[i], opts);
+    if(p && Math.abs(p.a) > 1e-9) continue;
+    var v = talUr(led[i]);
+    if(v === null) return { fel: 'otolkat' };
+    varden.push(v);
+  }
+  if(!varden.length) return { fel: 'otolkat' };
+  for(var j = 1; j < varden.length; j++) if(Math.abs(varden[j] - varden[0]) > 1e-6) return { fel: 'kedjebrott' };
+  return { varde: varden[varden.length - 1] };
+}
+
 function harEnhet(text, enhet){
   if(!enhet) return true;
   var s = String(text).toLowerCase().replace(/[.,;:!?]/g, ' ');
@@ -167,10 +189,11 @@ function harEnhet(text, enhet){
     return new RegExp('(^|[^a-zåäö0-9])' + ee.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-zåäö0-9]|$)').test(s + ' ');
   });
 }
-function provaSvarsfalt(text, varde, enhet){
+function provaSvarsfalt(text, varde, enhet, opts){
   if(tom(text)) return { fel: BESKED.svarSaknas.hint };
-  var tal = talUr(text);
-  if(tal === null || Math.abs(tal - varde) > 1e-6) return { fel: BESKED.svarTalFel.hint };
+  var vr = vardeUr(text, opts);
+  if(vr.fel === 'kedjebrott') return { fel: BESKED.insattningKedja.hint };
+  if(vr.fel || Math.abs(vr.varde - varde) > 1e-6) return { fel: BESKED.svarTalFel.hint };
   if(!harEnhet(text, enhet)) return { fel: BESKED.svarEnhetSaknas.hint, enhetSaknas: true };
   return null;
 }
@@ -213,9 +236,10 @@ function ratta(u, svar){
     for(var i = 0; i < nycklar.length; i++){
       var k2 = nycklar[i], t = svar.insattning[k2];
       if(tom(t)) return { status: 'fel', steg: 'insattning', del: k2, besked: BESKED.svarSaknas.hint, gren: gren.id };
-      var v = EP.parseSida(String(t), opts);
-      var tal = v && Math.abs(v.a) < EPS ? v.b : talUr(t);
-      if(tal === null || Math.abs(tal - varden[k2]) > 1e-6)
+      var vr = vardeUr(t, opts);
+      if(vr.fel === 'kedjebrott')
+        return { status: 'fel', steg: 'insattning', del: k2, besked: BESKED.insattningKedja.hint, gren: gren.id };
+      if(vr.fel || Math.abs(vr.varde - varden[k2]) > 1e-6)
         return { status: 'fel', steg: 'insattning', del: k2, besked: BESKED.insattningFel.hint, gren: gren.id };
     }
   }
@@ -223,7 +247,7 @@ function ratta(u, svar){
   // Följdfrågan (Area: / Omkrets:) — mellan balansmetoden och svaret
   if(u.foljdfraga){
     var mal = MOD.utvardera(u.foljdfraga.uttryck, sant.varden);
-    var f = provaSvarsfalt(svar.foljd, mal, u.foljdfraga.enhet);
+    var f = provaSvarsfalt(svar.foljd, mal, u.foljdfraga.enhet, opts);
     if(f) return { status: 'fel', steg: 'foljd', besked: f.fel, enhetSaknas: !!f.enhetSaknas, gren: gren.id };
   }
 
@@ -231,7 +255,7 @@ function ratta(u, svar){
   var svarDelar = u.svarDelar || MOD.nycklarAv(u), svarFalt = svar.svar || {};
   for(var s = 0; s < svarDelar.length; s++){
     var d = svarDelar[s];
-    var r = provaSvarsfalt(svarFalt[d], sant.varden[d], u.enhet);
+    var r = provaSvarsfalt(svarFalt[d], sant.varden[d], u.enhet, opts);
     if(r) return { status: 'fel', steg: 'svar', del: d, besked: r.fel, enhetSaknas: !!r.enhetSaknas, gren: gren.id };
   }
 
