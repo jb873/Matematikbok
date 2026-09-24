@@ -262,6 +262,7 @@
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
   <div id="blad-instruktion" class="blad-mount"><div class="ovn-wrap" id="sheet-instruktion"></div></div>
   <div id="blad-delar" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-delar"></div></div>
+  <div id="blad-foljd" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-foljd"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -295,6 +296,7 @@
 <script src="../../../js/motor/problemlosning/prob-rattare.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad2.js"></script>
+<script src="../../../js/motor/problemlosning/prob-blad3.js"></script>
 
 <!-- TAXONOMI + delade kontrakt: föreläsningsregistret, färdiga test, sidskalet -->
 <script src="../../../js/data/k3-taxonomi.js"></script>
@@ -306,7 +308,8 @@
 // Sidan monteras av det delade skalet. Bladet är redan renderat av prob-blad.js.
 DelkapitelSkal.montera({
   ova: [ { titel: 'Följa en instruktion', mount: 'instruktion' },
-         { titel: 'Personer eller delar', mount: 'delar' } ],
+         { titel: 'Personer eller delar', mount: 'delar' },
+         { titel: 'Tal som följer på varandra', mount: 'foljd' } ],
   taxonomi:    function(){ return window.K3_TAXONOMI; },
   utbudslista: 'k3d5',
   ram:         '../../../ak7-k3-ram.html',

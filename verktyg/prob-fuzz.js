@@ -269,5 +269,34 @@ const areaLos = heltLosning(area, MOD.grenarAv(area)[0], 'A');
 ok('area-uppgiften löst med parentes', areaLos && R.ratta(area, areaLos).status === 'ratt', JSON.stringify(areaLos && R.ratta(area, areaLos)));
 ok('fel omkrets → steg foljd', areaLos && avSteg(R.ratta(area, Object.assign({}, areaLos, { foljd: '30 cm' }))) === 'foljd');
 
+// ── VARIANT 3: tal som följer på varandra (bladets egna uppgifter) ──────────────────────────
+console.log('\nTal som följer på varandra (variant 3):');
+const FOLJD = require('../js/motor/problemlosning/prob-blad3.js').BLAD.uppgifter;
+FOLJD.forEach(u => {
+  const gren = MOD.grenarAv(u)[0];
+  const nycklar = MOD.nycklarAv(u);
+  const utfall = nycklar.map(k => {
+    const l = MOD.losningsforslag(u, gren, k);
+    if(!l) return null;
+    return R.ratta(u, { uttryck: l.uttryck, rader: [l.ekvation].concat(l.kedja),
+                        insattning: l.insattning, svar: l.svar }).status;
+  });
+  ok(u.id + ': alla ' + nycklar.length + ' val av x godkänns',
+     utfall.every(x => x === 'ratt'), JSON.stringify(utfall));
+});
+
+// jämna tal skrivna som om de följde på varandra med 1 → identiteten brister på steg 1
+const jamna = FOLJD.filter(u => (u.relationer || []).indexOf('B = A + 2') >= 0)[0];
+const jamnaNyck = MOD.nycklarAv(jamna);
+const felUttryck = {}; jamnaNyck.forEach((k, i) => { felUttryck[k] = i ? 'x + ' + i : 'x'; });
+ok('jämna tal med x + 1 i stället för x + 2 → steg 1',
+   avSteg(R.ratta(jamna, { uttryck: felUttryck, rader: [{ vl: '3x + 3', hl: '216' }], svar: {} })) === 'uttryck');
+
+// fyra tal men bara tre rader i steg 1 → en del saknar uttryck
+const fyraTal = FOLJD.filter(u => MOD.nycklarAv(u).length === 4)[0];
+const treRader = {}; MOD.nycklarAv(fyraTal).slice(0, 3).forEach((k, i) => { treRader[k] = i ? 'x + ' + i : 'x'; });
+ok('fyra tal med tre rader i steg 1 → steg 1',
+   avSteg(R.ratta(fyraTal, { uttryck: treRader, rader: [{ vl: '3x + 3', hl: '174' }], svar: {} })) === 'uttryck');
+
 console.log('\n' + (fel ? '✗ PROB-FUZZ RÖD · ' : '✓ PROB-FUZZ GRÖN · ') + prov + ' prov · ' + fel + ' fel');
 process.exit(fel ? 1 : 0);

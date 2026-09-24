@@ -282,14 +282,14 @@ window.K3_TAXONOMI = {
       "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
       "begrepp": "Två eller flera delar som hör ihop: en är x, de andra uttrycks med x, och summan ger ekvationen (nivå 2: tre delar).",
       "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med tal och delar", "gruppordning": 0, "radordning": 2,
-                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "drillKommer": true }
     },
     {
       "id": "alg-prob-foljd:problem", "namn": "Tal som följer på varandra", "parent": "alg-prob-text", "niva": "lovnod",
       "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
       "begrepp": "Tre eller fyra tal som följer på varandra (även jämna) med känd summa – skriv dem med x och lös.",
       "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med tal och delar", "gruppordning": 0, "radordning": 3,
-                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "drillKommer": true }
     },
     {
       "id": "alg-prob-likhet:problem", "namn": "Två uttryck som är lika", "parent": "alg-prob-text", "niva": "lovnod",

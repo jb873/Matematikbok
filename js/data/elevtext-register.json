@@ -1557,5 +1557,14 @@
   "sub | Vilken exponent? Basen är 10.",
   "sub | Vilken exponent? Basen är given.",
   "sub | Vilket tal ska x vara?"
+ ],
+ "js/motor/problemlosning/prob-blad3.js": [
+  "fraga | Fyra jämna tal som följer på varandra har summan 180. Vilka är talen?",
+  "fraga | Fyra tal som följer på varandra har summan 174. Vilka är talen?",
+  "fraga | Tre jämna tal som följer på varandra har summan 216. Vilka är talen?",
+  "fraga | Tre tal som följer på varandra har summan 168. Vilka är talen?",
+  "fraga | Tre tal som följer på varandra har summan 234. Vilka är talen?",
+  "namn | Tal",
+  "titel | Tal som följer på varandra"
  ]
 }
