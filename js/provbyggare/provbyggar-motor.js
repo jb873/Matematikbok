@@ -61,7 +61,7 @@ function testPolyGen(genId, titel, omrade, makeItem){
       const it = makeItem(opts && opts.variant);
       if(!it || seen.has(genId+'-'+it.key)) continue;
       seen.add(genId+'-'+it.key);
-      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'poly', prompt:it.prompt, answer:it.answer, vars:it.vars||'xyabp', explanation:it.expl||'' });
+      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'poly', prompt:it.prompt, answer:it.answer, vars:it.vars||'xyabcn', explanation:it.expl||'' });
     }
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
@@ -421,7 +421,7 @@ function renderSubInput(qNum, subIdx, s){
       <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
-        <input type="text" class="test-sub-input" inputmode="text" data-vars="${s.vars || 'xyabp'}" style="width:200px;text-align:left;padding:0 10px;" data-sub-input="${idBase}-poly" aria-label="uttryck">
+        <input type="text" class="test-sub-input" inputmode="text" data-vars="${s.vars || 'xyabcn'}" style="width:200px;text-align:left;padding:0 10px;" data-sub-input="${idBase}-poly" aria-label="uttryck">
       </div>
     `;
   } else if(s.type === 'ordsvar'){

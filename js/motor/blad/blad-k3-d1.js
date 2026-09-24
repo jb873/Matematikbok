@@ -41,8 +41,8 @@ var BLAD_SKRIVA = {
       {typ:'uttryck', fraga:'Elsas syster är dubbelt så gammal som Elsa. Skriv ett uttryck för systerns ålder.', svar:'2x', accept:['2x','x·2','x+x']},
       {typ:'uttryck', fraga:'Skriv ett uttryck för syskonens sammanlagda ålder (Elsa + bror + syster).', svar:'4x+2', accept:['4x+2','2+4x']}
     ]},
-    {rubrik:'Vilket eller vilka uttryck beskriver kvadratens omkrets? (sidan är z)', rader:[
-      {typ:'valruta', flera:true, fraga:'Välj alla som stämmer:', alt:['4z','4 · z','4 + z','z + z + z + z'], ratt:['4z','4·z','z+z+z+z']}
+    {rubrik:'Vilket eller vilka uttryck beskriver kvadratens omkrets? (sidan är x)', rader:[
+      {typ:'valruta', flera:true, fraga:'Välj alla som stämmer:', alt:['4x','4 · x','4 + x','x + x + x + x'], ratt:['4x','4·x','x+x+x+x']}
     ]},
     {rubrik:'Skriv ett uttryck för figurens omkrets och förenkla det', rader:[
       {typ:'bild', svarTyp:'uttryck', fraga:'Triangel:  omkrets =', svar:'12x', sidor:['3x','5x','4x'], vars:'x', accept:['12x','3x+5x+4x'],

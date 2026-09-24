@@ -16,7 +16,12 @@
    vad kommunikationen kräver). Raden är den delade komponenten (ekv-kedja.js) — samma rad som i
    ekvationskapitlet. Rättningen är ProbRattare: första felet i metodordningen pekas ut.
 
-   Ingen rättning förrän Kontrollera. Inga hjälptexter, inga platshållare. */
+   Ingen rättning förrän Kontrollera. Inga hjälptexter, inga platshållare.
+
+   NÄR NIVÅ 2 BYGGS (notering 2026-09-24): likheterna i dokumentet använder bokstaven s
+   ("2s + 18 = 3s + 6"). BYT TILL x. Rättaren bär sex bokstäver — x, y, a, b, c, n — och en
+   sjunde för en enda uppgift är inte värt det (Joachims beslut). Samma sak gäller varje
+   kommande uppgift med en bokstav utanför de sex: byt bokstaven, inte rättaren. */
 (function(){
 'use strict';
 

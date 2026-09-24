@@ -704,7 +704,7 @@ function bladHTML(blad){
         rad.rutor.forEach(function(c){
           html += (c.fast !== undefined)
             ? '<span class="alg-ruta alg-ruta-fast">' + c.fast + '</span>'
-            : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-vars="' + (rad.vars || 'xyp')
+            : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-vars="' + (rad.vars || 'xy')
               + '" data-visa="' + c.svar + '" inputmode="text" autocomplete="off">';
         });
         html += '</div></div>';

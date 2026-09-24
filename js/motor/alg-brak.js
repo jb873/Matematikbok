@@ -8,7 +8,10 @@
    Node + browser. Ingen nätväg. */
 (function(){
   'use strict';
-  var VARS = ['x', 'y', 'a', 'b', 'p'];   // 'p' tillagd 2026-09-22 (åk7 k3 d3: magiska kvadrater)
+  // SEX BOKSTÄVER (Joachim 2026-09-24): de som nästintill alltid används i böckerna. 'n' är
+  // reserverad för mönster (platsnumret i en talföljd). 'p' och 'z' utgår — de kom från enstaka
+  // uppgifter, och 'z' skrivs dessutom lätt så att det ser ut som en tvåa.
+  var VARS = ['x', 'y', 'a', 'b', 'c', 'n'];
   var NOLLKEY = VARS.map(function(){ return 0; }).join(',');   // nyckel-ariteten följer VARS (förr hårdkodad '0,0,0,0')
 
   // ── Rational ──

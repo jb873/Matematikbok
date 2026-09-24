@@ -519,7 +519,7 @@ var K3_TEST_GENERATORS = {
     G.poly('k3-tolka-uttryck', 'Skriv uttrycket ur texten', 'alg-tolka', function(){
       var bp = d1Post('alg-tolka:begrepp', 'uttryck');
       if(!bp) return null;
-      return { key: 'tu' + bp.svar + bp.fraga.slice(0, 18), prompt: rensaText(bp.fraga), answer: bp.svar, vars: 'xyabp',
+      return { key: 'tu' + bp.svar + bp.fraga.slice(0, 18), prompt: rensaText(bp.fraga), answer: bp.svar, vars: 'xyabcn',
         expl: 'Uttrycket blir ' + bp.svar + '.' };
     })
   ] },
@@ -531,15 +531,15 @@ var K3_TEST_GENERATORS = {
       var bp = poster.length ? rP(poster) : null;
       if(bp && bp.slag === 'figur') return { key: 'sf' + bp.svar + bp.fraga.slice(0, 14),
         prompt: stamKort(bp.stam).replace(/[\s.]+$/, '') + ':<div class="test-figur" style="margin:8px 0;">' + bp.svg + '</div>' + rensaText(bp.fraga),
-        answer: bp.svar, vars: 'xyabp', expl: 'Uttrycket blir ' + bp.svar + '.' };
+        answer: bp.svar, vars: 'xyabcn', expl: 'Uttrycket blir ' + bp.svar + '.' };
       if(bp) return { key: 'su' + bp.svar + bp.fraga.slice(0, 18), prompt: foga(bp.stam, rensaText(bp.fraga)),
-        answer: bp.svar, vars: 'xyabp', expl: 'Uttrycket blir ' + bp.svar + '.' };
+        answer: bp.svar, vars: 'xyabcn', expl: 'Uttrycket blir ' + bp.svar + '.' };
       // egna tal när banken är slut: samma uppgiftsform som bladets grupp 3/4
       var v = rP(['x', 'y', 'a', 'b']), n = rI(2, 12), slag = rP(['plus', 'minus', 'gange']);
       var svar = slag === 'plus' ? v + ' + ' + n : slag === 'minus' ? v + ' − ' + n : n + v;
       var text = slag === 'plus' ? n + ' mer än ' + v : slag === 'minus' ? n + ' mindre än ' + v : n + ' gånger så mycket som ' + v;
       return { key: 'sg' + svar, prompt: 'Ett tal kallas ' + v + '. Skriv ett uttryck för ' + text + '.',
-        answer: svar, vars: 'xyabp', expl: 'Uttrycket blir ' + svar + '.' };
+        answer: svar, vars: 'xyabcn', expl: 'Uttrycket blir ' + svar + '.' };
     }),
     G.flerval('k3-skriva-val', 'Välj rätt uttryck', 'alg-skriva', function(){
       var bp = d1Post('alg-skriva:kommunikation', 'val');

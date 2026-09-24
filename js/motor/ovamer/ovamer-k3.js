@@ -185,7 +185,7 @@ function renderTolkaUttryck(){
 function k3Vars(facit){
   var t = String(facit == null ? '' : facit);
   if(t === '' || /[a-zåäö]{3,}/i.test(t)) return '';
-  var ut = ''; 'xyabp'.split('').forEach(function(v){ if(t.indexOf(v) > -1) ut += v; });
+  var ut = ''; 'xyabcn'.split('').forEach(function(v){ if(t.indexOf(v) > -1) ut += v; });
   return ut;
 }
 // Keypaden: EN delad implementation (AK8_UI) — samma tangentbord som bladen och testen.

@@ -129,10 +129,10 @@
         fh(brak('15x', '3') + ' + ' + brak('18y', '2') + ' + 3 + 7,5x − 0,4y − 9', '12,5x + 8,6y − 6')
       ]),
       G('Fyll i de tomma rutorna så att summan blir lika stor lodrätt, vågrätt och diagonalt.', [
-        { typ: 'magisk', vars: 'p', summa: '3p + 12', rutor: [
-          { fast: 'p + 1' }, { svar: '2p + 5' }, { fast: '6' },
-          { svar: '9' },     { fast: 'p + 4' },  { svar: '2p − 1' },
-          { svar: '2p + 2' }, { svar: '3' },     { svar: 'p + 7' }
+        { typ: 'magisk', vars: 'x', summa: '3x + 12', rutor: [
+          { fast: 'x + 1' }, { svar: '2x + 5' }, { fast: '6' },
+          { svar: '9' },     { fast: 'x + 4' },  { svar: '2x − 1' },
+          { svar: '2x + 2' }, { svar: '3' },     { svar: 'x + 7' }
         ] },
         { typ: 'magisk', vars: 'y', summa: '3y + 9', rutor: [
           { svar: 'y + 2' },  { svar: '6' },     { svar: '2y + 1' },

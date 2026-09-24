@@ -396,7 +396,7 @@
   }
 
   // ── KEYPAD ──  opts: { ops:[...], builders:bool }
-  var VARIABLER = ['x', 'y', 'a', 'b', 'p'];   // samma uppsättning som algebra-rättaren (alg-brak.js VARS)
+  var VARIABLER = ['x', 'y', 'a', 'b', 'c', 'n'];   // samma uppsättning som algebra-rättaren (alg-brak.js VARS)
   var FRAC_ICON = '<span class="kp-frac"><span class="kp-frac-t"></span><span class="kp-frac-l"></span><span class="kp-frac-n"></span></span>';
   var POT_ICON = '<span class="kp-pot"><span class="kp-pot-b"></span><span class="kp-pot-e"></span></span>';
   // Staplat komplex-bråk: två små bråk-glyfer kring ett tjockt streck (delad byggsten).
