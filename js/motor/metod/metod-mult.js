@@ -310,7 +310,9 @@ function renderMultTabell(body){
   let startTime = 0;
   let timerInterval = null;
 
-  if(!state.tabellBest) state.tabellBest = {};
+  // Rekordet ligger i den delade mekanismen (js/motor/metod/rekord.js), inte i ramens state:
+  // state lever bara till sidan laddas om, och drillen laddas om varje gång eleven öppnar den.
+  var REKORD_DRILL = 'mult-tabell';
 
   function stopTimer(){
     if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
@@ -346,8 +348,7 @@ function renderMultTabell(body){
     let cards = '';
     for(let i=0; i<TABELL_NIVAER.length; i++){
       const lv = TABELL_NIVAER[i];
-      const best = state.tabellBest[lv.nr];
-      const bestTxt = best ? '🏆 Rekord: ' + formatTid(best) : 'Inget rekord än';
+      const bestTxt = Rekord.text(REKORD_DRILL, lv.nr);
       cards += '<button class="tabell-card" data-niva="' + i + '">'
         + '<div class="tabell-card-num">' + lv.nr + '</div>'
         + '<div class="tabell-card-body">'
@@ -377,13 +378,10 @@ function renderMultTabell(body){
     const alltRatt = right === total && total > 0;
     const snitt = total > 0 ? elapsed / total : 0;
 
-    // Rekord: bara helt felfria omgångar räknas
-    const tidigare = state.tabellBest[nivå.nr];
-    let nyttRekord = false;
-    if(alltRatt && (!tidigare || elapsed < tidigare)){
-      state.tabellBest[nivå.nr] = elapsed;
-      nyttRekord = true;
-    }
+    // Rekord: bara helt felfria omgångar räknas (regeln bor i Rekord.spara)
+    const rk = Rekord.spara(REKORD_DRILL, nivå.nr, elapsed, alltRatt);
+    const tidigare = rk.tidigare;
+    const nyttRekord = rk.nytt;
     let rekordHTML = '';
     if(nyttRekord){
       rekordHTML = '<div class="tabell-rekord nytt">🏆 Nytt rekord på nivå ' + nivå.nr + '!</div>';

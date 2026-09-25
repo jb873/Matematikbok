@@ -388,7 +388,8 @@ function renderDivTabell(body){
     {nr:3, namn:'Nämnare 8 till 12', desc:'Nämnaren är 8–12.', nLo:8, nHi:12}
   ];
   var niva = null, omgang = [], idx = 0, results = [], startTime = 0, timerInterval = null;
-  if(!state.divTabellBest) state.divTabellBest = {};
+  // Samma delade mekanism som multiplikationstabellen — en egen drill-nyckel, inget eget lager.
+  var REKORD_DRILL = 'div-tabell';
   function stopTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval = null; } }
   function formatTid(ms){
     var s = ms / 1000;
@@ -415,8 +416,7 @@ function renderDivTabell(body){
     var cards = '';
     for(var i=0; i<TABELL_NIVAER.length; i++){
       var lv = TABELL_NIVAER[i];
-      var best = state.divTabellBest[lv.nr];
-      var bestTxt = best ? '🏆 Rekord: ' + formatTid(best) : 'Inget rekord än';
+      var bestTxt = Rekord.text(REKORD_DRILL, lv.nr);
       cards += '<button class="tabell-card" data-niva="' + i + '">'
         + '<div class="tabell-card-num">' + lv.nr + '</div>'
         + '<div class="tabell-card-body">'
@@ -444,11 +444,8 @@ function renderDivTabell(body){
     var total = results.length;
     var alltRatt = right === total && total > 0;
     var snitt = total > 0 ? elapsed / total : 0;
-    var tidigare = state.divTabellBest[niva.nr];
-    var nyttRekord = false;
-    if(alltRatt && (!tidigare || elapsed < tidigare)){
-      state.divTabellBest[niva.nr] = elapsed; nyttRekord = true;
-    }
+    var rk = Rekord.spara(REKORD_DRILL, niva.nr, elapsed, alltRatt);
+    var tidigare = rk.tidigare, nyttRekord = rk.nytt;
     var rekordHTML = '';
     if(nyttRekord){
       rekordHTML = '<div class="tabell-rekord nytt">🏆 Nytt rekord på nivå ' + niva.nr + '!</div>';
