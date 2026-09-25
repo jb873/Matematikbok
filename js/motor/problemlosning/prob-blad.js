@@ -39,7 +39,8 @@ var TEXT = {
   omstart:    { titel: 'Börja om' },
   klar:       { titel: '✓ Löst!' },
   allaRatt:   { hint: 'Alla uppgifter lösta.' },
-  pagang:     { hint: 'Läs beskedet vid uppgiften och gå vidare.' }
+  pagang:     { hint: 'Läs beskedet vid uppgiften och gå vidare.' },
+  obedomt:    { hint: 'Där steg 1 inte stämmer är resten inte rättad.' }
 };
 
 // ── UPPGIFTERNA: variant 1 ur dokumentet (Problemlösning Nivå 1) ──────────────────────────────
@@ -155,15 +156,19 @@ function besvarad(s){
 }
 
 // Svarsenheterna i EN uppgift: ekvationsraden + ifyllda kedjerader + svarsrutan.
-function enheter(s){
-  return 1 + s.kedja.filter(function(r){ return !K.tomRad(r); }).length + 1;
+// En enhet är BEDÖMD när den bär ett omdöme. Det som inte prövats räknas varken upp eller ned.
+function ytaOmdome(el){ return el.classList.contains('ratt') ? 1 : el.classList.contains('fel') ? 0 : null; }
+function radOmdome(r){ return r.vlWrap.classList.contains('rad-ok') ? 1 : r.vlWrap.classList.contains('rad-fel') ? 0 : null; }
+function las_summa(delar){
+  var tot = 0, ratt = 0, obedomt = 0;
+  delar.forEach(function(v){ if(v === null) obedomt++; else { tot++; ratt += v; } });
+  return { tot: tot, ratt: ratt, obedomt: obedomt };
 }
-function ratta_enheter(s){
-  var n = 0;
-  if(s.ekvRad.vlWrap.classList.contains('rad-ok')) n++;
-  s.kedja.forEach(function(r){ if(r.vlWrap.classList.contains('rad-ok')) n++; });
-  if(s.svarIn.classList.contains('ratt')) n++;
-  return n;
+function summaAv(s){
+  var v = [radOmdome(s.ekvRad)];
+  s.kedja.forEach(function(r){ if(!K.tomRad(r)) v.push(radOmdome(r)); });
+  v.push(ytaOmdome(s.svarIn));
+  return las_summa(v);
 }
 function kontrollera(state, hintEl, sammanfEl){
   var klara = 0, besvarade = 0;
@@ -203,9 +208,10 @@ function kontrollera(state, hintEl, sammanfEl){
     logga(s.u.nod, 'fel');
   });
   if(sammanfEl){
-    var tot = 0, ratt = 0;
-    state.forEach(function(s){ tot += enheter(s); ratt += ratta_enheter(s); });
-    sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.';
+    var tot = 0, ratt = 0, obedomt = 0;
+    state.forEach(function(s){ if(!besvarad(s)) return; var v = summaAv(s); tot += v.tot; ratt += v.ratt; obedomt += v.obedomt; });
+    sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.'
+                          + (obedomt ? ' ' + TEXT.obedomt.hint : '');
   }
   if(!besvarade){ hintEl.className = 'global-hint'; hintEl.textContent = ''; return; }
   if(klara === state.length){ hintEl.className = 'global-hint ok'; hintEl.textContent = TEXT.allaRatt.hint; }

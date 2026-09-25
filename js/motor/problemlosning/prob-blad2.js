@@ -48,6 +48,7 @@ var TEXT = {
   klar:      { titel: '✓ Löst!' },
   allaRatt:  { hint: 'Alla uppgifter lösta.' },
   pagang:    { hint: 'Läs beskedet vid uppgiften och gå vidare.' },
+  obedomt:   { hint: 'Där steg 1 inte stämmer är resten inte rättad.' },
   forFaDelar:{ hint: 'Alla delar i uppgiften ska ha en rad.' },
   forManga:  { hint: 'Uppgiften har färre delar än så.' }
 };
@@ -157,6 +158,13 @@ function renderUppgift(kort, u, idx){
   var fraga = document.createElement('p'); fraga.className = 'prob-fraga'; fraga.textContent = u.fraga;
   block.appendChild(fraga);
 
+  // FIGUREN ur data: ett ändrat tal ändrar figur och facit tillsammans.
+  if(u.fig && window.SvgAlgebraFigur && SvgAlgebraFigur[u.fig.typ]){
+    var figEl = document.createElement('div'); figEl.className = 'prob-figur';
+    figEl.innerHTML = SvgAlgebraFigur[u.fig.typ](u.fig);
+    block.appendChild(figEl);
+  }
+
   // ── STEG 1 + 4: delarna till vänster, insättningen bredvid ──
   var tva = document.createElement('div'); tva.className = 'prob-tvakol';
   var vk = document.createElement('div'), hk = document.createElement('div');
@@ -222,6 +230,18 @@ function renderUppgift(kort, u, idx){
   nyRadB.onclick = function(){ var r = nyKedjeRad(); grid.appendChild(knappRad); r.fokus(); };
   knappRad.appendChild(nyRadB);
 
+  // ── FÖLJDFRÅGAN: en egen rad mellan balansmetoden och svaret (arean är en multiplikation) ──
+  var foljdYta = null, foljdStatus = null;
+  if(u.foljdfraga){
+    var frad = document.createElement('div'); frad.className = 'prob-foljdrad';
+    var fet = document.createElement('span'); fet.className = 'prob-foljd-etikett'; fet.textContent = u.foljdfraga.etikett;
+    foljdYta = document.createElement('div'); foljdYta.className = 'prob-foljd sida';
+    foljdYta.appendChild(K.textSeg({ vars: '', etikett: u.foljdfraga.etikett }));
+    foljdStatus = document.createElement('span'); foljdStatus.className = 'prob-svar-status';
+    frad.appendChild(fet); frad.appendChild(foljdYta); frad.appendChild(foljdStatus);
+    block.appendChild(frad);
+  }
+
   // ── STEG 5-ytan (fylls av nyDelRad) ──
   var svarHuvud = document.createElement('div'); svarHuvud.className = 'prob-steg-rub'; svarHuvud.textContent = TEXT.svar.etikett;
   var svarListaEl = document.createElement('div'); svarListaEl.className = 'prob-svarlista';
@@ -239,7 +259,8 @@ function renderUppgift(kort, u, idx){
 
   kort.appendChild(block);
   nyDelRad();                       // EN rad att börja i; resten lägger eleven till
-  return { u: u, delRader: delRader, ekvRad: ekvRad, kedja: kedja, klarEl: klar, beskedEl: besked, block: block };
+  return { u: u, delRader: delRader, ekvRad: ekvRad, kedja: kedja, klarEl: klar, beskedEl: besked, block: block,
+           foljdYta: foljdYta, foljdStatus: foljdStatus };
 }
 
 function steghuvudGrid(grid, text){
@@ -261,24 +282,27 @@ function rensaUppgift(s){
     d.svarYta.classList.remove('ratt', 'fel');
     d.svarStatus.textContent = '';
   });
+  if(s.foljdYta){ s.foljdYta.classList.remove('ratt', 'fel'); s.foljdStatus.textContent = ''; }
   s.beskedEl.textContent = ''; s.klarEl.classList.remove('show');
 }
 
 // Svarsenheterna i EN uppgift: uttryck + insättning + svar per delrad, ekvationsraden och varje
 // IFYLLD kedjerad. En tom extra kedjerad är en erbjuden rad, inte en svarsenhet.
-function enheter(s){
-  return s.delRader.length * 3 + 1 + s.kedja.filter(function(r){ return !K.tomRad(r); }).length;
+// En enhet är BEDÖMD när den bär ett omdöme. Det som inte prövats räknas varken upp eller ned.
+function ytaOmdome(el){ return el.classList.contains('ratt') ? 1 : el.classList.contains('fel') ? 0 : null; }
+function radOmdome(r){ return r.vlWrap.classList.contains('rad-ok') ? 1 : r.vlWrap.classList.contains('rad-fel') ? 0 : null; }
+function las_summa(delar){
+  var tot = 0, ratt = 0, obedomt = 0;
+  delar.forEach(function(v){ if(v === null) obedomt++; else { tot++; ratt += v; } });
+  return { tot: tot, ratt: ratt, obedomt: obedomt };
 }
-function ratta_enheter(s){
-  var n = 0;
-  s.delRader.forEach(function(d){
-    if(d.uttryckYta.classList.contains('ratt')) n++;
-    if(d.vardeYta.classList.contains('ratt')) n++;
-    if(d.svarYta.classList.contains('ratt')) n++;
-  });
-  if(s.ekvRad.vlWrap.classList.contains('rad-ok')) n++;
-  s.kedja.forEach(function(r){ if(r.vlWrap.classList.contains('rad-ok')) n++; });
-  return n;
+function summaAv(s){
+  var v = [];
+  s.delRader.forEach(function(d){ v.push(ytaOmdome(d.uttryckYta), ytaOmdome(d.vardeYta), ytaOmdome(d.svarYta)); });
+  if(s.foljdYta) v.push(ytaOmdome(s.foljdYta));
+  v.push(radOmdome(s.ekvRad));
+  s.kedja.forEach(function(r){ if(!K.tomRad(r)) v.push(radOmdome(r)); });
+  return las_summa(v);
 }
 function kontrollera(state, hintEl, sammanfEl){
   var klara = 0, besvarade = 0;
@@ -306,13 +330,15 @@ function kontrollera(state, hintEl, sammanfEl){
     });
     var harInsattning = ord.ordning.some(function(n){ return insattning[n].trim() !== ''; });
     var res = R.ratta(s.u, { uttryck: ord.uttryck, rader: rader,
-                             insattning: harInsattning ? insattning : null, svar: svar });
+                             insattning: harInsattning ? insattning : null, svar: svar,
+                             foljd: s.foljdYta ? K.las(s.foljdYta) : undefined });
     var radFor = {};
     ord.ordning.forEach(function(nyckel, i){ radFor[nyckel] = s.delRader[i]; });
 
     if(res.status === 'ratt'){
       s.delRader.forEach(function(d){ d.uttryckYta.classList.add('ratt'); d.vardeYta.classList.add('ratt');
                                       d.svarYta.classList.add('ratt'); d.svarStatus.textContent = '✓'; });
+      if(s.foljdYta){ s.foljdYta.classList.add('ratt'); s.foljdStatus.textContent = '✓'; }
       K.markera(s.ekvRad, true);
       s.kedja.forEach(function(r){ if(!K.tomRad(r)) K.markera(r, true); });
       s.klarEl.classList.add('show');
@@ -333,10 +359,16 @@ function kontrollera(state, hintEl, sammanfEl){
       var i = Math.max(1, (res.rad || ifyllda.length)) - 1;
       for(var j = 0; j < i && j < ifyllda.length; j++) K.markera(ifyllda[j], true);
       if(ifyllda[i]) K.markera(ifyllda[i], false);
+    } else if(res.steg === 'foljd'){
+      s.delRader.forEach(function(d){ d.uttryckYta.classList.add('ratt'); d.vardeYta.classList.add('ratt'); });
+      K.markera(s.ekvRad, true);
+      s.kedja.forEach(function(r){ if(!K.tomRad(r)) K.markera(r, true); });
+      if(s.foljdYta){ s.foljdYta.classList.add('fel'); s.foljdStatus.textContent = '✗'; }
     } else if(res.steg === 'insattning' || res.steg === 'svar'){
       s.delRader.forEach(function(d){ d.uttryckYta.classList.add('ratt'); });
       K.markera(s.ekvRad, true);
       s.kedja.forEach(function(r){ if(!K.tomRad(r)) K.markera(r, true); });
+      if(s.foljdYta && res.per && res.per.foljd) { s.foljdYta.classList.add('ratt'); s.foljdStatus.textContent = '✓'; }
       // varje ruta i steget bär sitt eget omdöme — inte bara den första felaktiga
       var per = res.per || { insattning: {}, svar: {} };
       ord.ordning.forEach(function(nyckel, i){
@@ -353,9 +385,10 @@ function kontrollera(state, hintEl, sammanfEl){
   });
 
   if(sammanfEl){
-    var tot = 0, ratt = 0;
-    state.forEach(function(s){ tot += enheter(s); ratt += ratta_enheter(s); });
-    sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.';
+    var tot = 0, ratt = 0, obedomt = 0;
+    state.forEach(function(s){ if(!besvarad(s)) return; var v = summaAv(s); tot += v.tot; ratt += v.ratt; obedomt += v.obedomt; });
+    sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.'
+                          + (obedomt ? ' ' + TEXT.obedomt.hint : '');
   }
   if(!besvarade){ hintEl.className = 'global-hint'; hintEl.textContent = ''; return; }
   if(klara === state.length){ hintEl.className = 'global-hint ok'; hintEl.textContent = TEXT.allaRatt.hint; }
