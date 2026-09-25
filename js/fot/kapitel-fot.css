@@ -43,6 +43,15 @@
 /* fadeUp — sjuan har egen (nav-card); här för åk8/åk9 (prov-card). Identisk → oskadlig dubblett. */
 @keyframes fadeUp{ from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 
+/* Tonade platser: fadeUp slutar på opacity 1, och en animation med fill-mode both vinner över
+   vanliga deklarationer — därför får de en egen kurva som slutar på .62 i stället.
+   Utan den här raden ser ett kort utan innehåll ut som alla andra, fast det inte går att klicka på. */
+@keyframes kapitelFotTonad{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:.62;transform:translateY(0)}
+}
+.ova-banner.is-kommer,.prov-card.is-kommer{animation-name:kapitelFotTonad;}
+
 /* ── "Kommer senare" = synlig, märkt, EJ KLICKBAR (div + chip, ingen pekare, ingen hover) ── */
 .ova-banner.is-kommer,.prov-card.is-kommer{opacity:.62;cursor:default;pointer-events:none;}
 .kf-chip{flex-shrink:0;font-family:var(--cinzel,'Cinzel');font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;

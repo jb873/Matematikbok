@@ -175,6 +175,15 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   to{opacity:1;transform:translateY(0)}
 }
 
+/* Tonade platser: fadeUp slutar på opacity 1, och en animation med fill-mode both vinner över
+   vanliga deklarationer — därför får de en egen kurva som slutar på .6 i stället.
+   Utan den här raden ser ett kort utan innehåll ut som alla andra, fast det inte går att klicka på. */
+@keyframes fadeUpTonad{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:.6;transform:translateY(0)}
+}
+.nav-card.is-soon{animation-name:fadeUpTonad;}
+
 @media(max-width:600px){
   .card-body{flex-wrap:wrap;gap:12px}
   .card-num{min-width:auto}
