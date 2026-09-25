@@ -74,6 +74,15 @@ function iUtbud(visning, utbudslistaId){
   var u = visning && visning.utbudslista;
   return Array.isArray(u) ? u.indexOf(utbudslistaId) >= 0 : u === utbudslistaId;
 }
+// BAND PER KAPITEL: visning.niva är drillens nivåtak. Ett tal = samma tak var noden än listas.
+// Ett objekt = tak per utbudslista, { "k3d5": 1, "prob1": 3 }, så att samma färdighet kan ligga
+// på olika band i sjuans och åttans kapitel utan att noden dubbleras.
+function bandFor(visning, utbudslistaId){
+  var n = visning && visning.niva;
+  if(n === null || n === undefined) return undefined;
+  if(typeof n === 'object') return n[utbudslistaId];
+  return n;
+}
 function fardighetUrTaxonomi(tax, utbudslistaId){
   var noder = (tax && tax.noder) || [];
   var rader = noder.filter(function(n){
@@ -92,7 +101,7 @@ function fardighetUrTaxonomi(tax, utbudslistaId){
       return { ko: gr.rubrik, drills: gr.rader.map(function(n){
         var v = n.visning;
         return { titel: (v.titel || n.namn), formaga: v.etikett, ko: n.id.split(':')[0],
-                 formagaKey: v.formagaKey || n.id.split(':')[1], niva: v.niva || undefined,
+                 formagaKey: v.formagaKey || n.id.split(':')[1], niva: bandFor(v, utbudslistaId),
                  // kommer = inget innehåll alls · drillKommer = bladet finns men drillen saknas.
                  // Båda ger dämpat kort: ett kort får aldrig leda in i tomrum.
                  kommer: !!(v.kommer || v.drillKommer) };
@@ -144,5 +153,5 @@ function montera(cfg){
   forelasning(cfg.forel);
 }
 
-window.DelkapitelSkal = { montera: montera, fardighetUrTaxonomi: fardighetUrTaxonomi, iUtbud: iUtbud };
+window.DelkapitelSkal = { montera: montera, fardighetUrTaxonomi: fardighetUrTaxonomi, iUtbud: iUtbud, bandFor: bandFor };
 })();

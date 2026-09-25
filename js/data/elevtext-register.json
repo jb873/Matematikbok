@@ -1679,5 +1679,23 @@
   "hint | Visa ett steg i taget – det behövs fler rader innan x står ensamt.",
   "hint | Värdet stämmer inte med ditt eget uttryck.",
   "hint | Värdet stämmer inte."
+ ],
+ "ak8/k2/index.html": [
+  "sub | Multiplicera in i parentes, och förenkla uttryck med parenteser.",
+  "sub | Parenteser i ekvationen, fler delar och figurer.",
+  "sub | Problem där sambandet bär lösningen: procent och förhållande.",
+  "sub | Räkna med potenser där basen är en variabel.",
+  "sub | Skriv en ekvation ur texten och lös den med balansmetoden.",
+  "sub | Talföljder, uttryck för mönster och att räkna med dem.",
+  "sub | Tolka och skriva uttryck med variabler, och räkna med uttryck.",
+  "sub | Två okända och ekvationssystem.",
+  "titel | Algebraiska uttryck",
+  "titel | Mönster",
+  "titel | Problemlösning nivå 1",
+  "titel | Problemlösning nivå 2",
+  "titel | Problemlösning nivå 3",
+  "titel | Problemlösning nivå 4",
+  "titel | Uttryck med parentes",
+  "titel | Uttryck med potenser"
  ]
 }

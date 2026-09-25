@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematik · Åk 8 · Kapitel 2 · Algebra</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<!-- Navigationssidornas stil som DELAD fil (de äldre sidorna bär den fortfarande inline). -->
+<link rel="stylesheet" href="../../js/kapitel/navsida.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 8</span></div>
+  <div class="nav-crumbs">
+    <a href="../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../index.html">Årskurs 8</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Kapitel 2</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow">Kapitel 2 · Årskurs 8</div>
+  <h1 class="hero-title">Algebra och <em>problemlösning</em></h1>
+  <p class="hero-desc">Välj ett delkapitel för att komma till dess föreläsningar och övningar.</p>
+  <a class="hero-back" href="../index.html">← Alla kapitel</a>
+</header>
+
+<div class="section-label">Delkapitel</div>
+
+<main class="card-grid" id="delkapitel-grid"></main>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Kapitel 2</span>
+</footer>
+
+<script src="../../js/data/k3-taxonomi.js"></script>
+<script src="../../js/motor/blad/delkapitel-skal.js"></script>
+<script src="../../js/kapitel/kapitel-lista.js"></script>
+<script>
+// ÅTTANS ALGEBRAKAPITEL — de åtta delkapitlen som PLATSER (order 2026-09-25).
+// Ingen av dem har innehåll än: alla står som 'soon' utan fil, och då ritar monteraren ett tonat
+// kort utan länk. Ett kort får aldrig leda in i tomrum. När ett delkapitel byggs får det sin fil
+// och status 'open' — inget annat ändras här.
+//
+// utbud pekar ut delkapitlets utbudslista i taxonomin, och nodernas namn listas under
+// beskrivningen. Problemlösningens fyra nivåkapitel (prob1–prob4) delar lövnoder med sjuans k3:
+// samma nod listad i två kapitel. De fyra första delkapitlen har inga noder taggade än.
+//
+// ELEVTEXT som fält (elevtext-låset ser fältnamnen). Joachim sätter ordalydelsen.
+KapitelLista.montera({
+  mount: 'delkapitel-grid',
+  taxonomi: function(){ return window.K3_TAXONOMI; },
+  delkapitel: [
+    { nr: 1, titel: 'Algebraiska uttryck',   sub: 'Tolka och skriva uttryck med variabler, och räkna med uttryck.',  fil: null, typ: 'avsnitt', status: 'soon' },
+    { nr: 2, titel: 'Mönster',               sub: 'Talföljder, uttryck för mönster och att räkna med dem.',           fil: null, typ: 'avsnitt', status: 'soon' },
+    { nr: 3, titel: 'Uttryck med parentes',  sub: 'Multiplicera in i parentes, och förenkla uttryck med parenteser.', fil: null, typ: 'avsnitt', status: 'soon' },
+    { nr: 4, titel: 'Uttryck med potenser',  sub: 'Räkna med potenser där basen är en variabel.',                     fil: null, typ: 'avsnitt', status: 'soon' },
+    { nr: 5, titel: 'Problemlösning nivå 1', sub: 'Skriv en ekvation ur texten och lös den med balansmetoden.',        fil: null, typ: 'avsnitt', status: 'soon', utbud: 'prob1' },
+    { nr: 6, titel: 'Problemlösning nivå 2', sub: 'Parenteser i ekvationen, fler delar och figurer.',                  fil: null, typ: 'avsnitt', status: 'soon', utbud: 'prob2' },
+    { nr: 7, titel: 'Problemlösning nivå 3', sub: 'Problem där sambandet bär lösningen: procent och förhållande.',     fil: null, typ: 'avsnitt', status: 'soon', utbud: 'prob3' },
+    { nr: 8, titel: 'Problemlösning nivå 4', sub: 'Två okända och ekvationssystem.',                                   fil: null, typ: 'avsnitt', status: 'soon', utbud: 'prob4' }
+  ]
+});
+</script>
+
+<script src="../../js/elevfeedback.js" defer></script>
+</body>
+</html>
