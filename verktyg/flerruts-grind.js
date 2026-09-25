@@ -93,11 +93,156 @@ const PROBE8 = `(function(){
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
   function tal(s){ return (String(s).match(/-?\\d+(?:,\\d+)?/g) || []); }
   var knappar = Array.from(document.querySelectorAll('.blad-nav-btn'));
+
+  // ── KEDJERADER (fri och fast): samma ledruta, .ak8-cell > .ak8-expr ──
+  function skrivLed(cell, txt){
+    var i = cell.querySelector('.ak8-exprtxt'); if(!i) return false;
+    i.value = txt; ev(i, 'input'); return true;
+  }
+  function ledCeller(r){
+    return Array.prototype.filter.call(r.querySelectorAll('.ak8-cell .ak8-expr'), function(c){
+      return !c.closest('.ak8-extra');            // dolda extra-led hör inte till svaret
+    });
+  }
+  // Facittexten → värde. "rätt: 3" · "rätt 9/4" · "rätt 2 1/4" · "−11" · "0,36"
+  function facitVarde(txt){
+    if(!txt) return null;
+    var t = String(txt).replace(/[−–—]/g, '-').replace(/\\s+/g, ' ');
+    var i = t.lastIndexOf('rätt');
+    if(i >= 0) t = t.slice(i + 4).replace(/^[:\\s]+/, '');
+    t = t.split('—')[0].trim();
+    // Facit kan vara en HEL kedja ("3³ − 2³ = 27 − 8 = 19") — svaret står sist. Ta SISTA värdet.
+    var re = /(-?\\d+(?:[.,]\\d+)?)\\s+(\\d+)\\s*\\/\\s*(\\d+)|(-?\\d+)\\s*\\/\\s*(\\d+)|(-?\\d+(?:[.,]\\d+)?)/g, mm, sista = null;
+    while((mm = re.exec(t)) !== null){
+      if(mm[1] !== undefined){ var h = parseFloat(mm[1].replace(',', '.')); var v = Math.abs(h) + (+mm[2]) / (+mm[3]); sista = h < 0 ? -v : v; }
+      else if(mm[4] !== undefined) sista = (+mm[4]) / (+mm[5]);
+      else sista = parseFloat(mm[6].replace(',', '.'));
+    }
+    return sista;
+  }
+  // Ett värde skrivet så att ledrutan tolkar det: bråk när det inte går jämnt ut.
+  function ledText(v){
+    if(Math.abs(v - Math.round(v)) < 1e-9) return String(Math.round(v));
+    for(var n = 2; n <= 400; n++){ var t = v * n; if(Math.abs(t - Math.round(t)) < 1e-9) return Math.round(t) + '/' + n; }
+    return String(v).replace('.', ',');
+  }
+  function radGron(r){ var m = r.querySelector('.ovn-mark'); return !!m && m.textContent.indexOf('✓') >= 0; }
+
+  function kedjeProv(m, kn, b){
+    var rader = Array.prototype.slice.call(m.querySelectorAll('.ak8-rad-kedja'));
+    b.rader += rader.length;
+    if(!rader.length) return;
+
+    // 1) fyll allt fel → facit faller ut vid Kontrollera
+    var kandidater = [];
+    rader.forEach(function(r){
+      var celler = ledCeller(r);
+      // Ett ENDA led går inte att pröva: det finns inget tidigare led att göra fel.
+      // (Raderna där mellanledet är frivilligt, {fri:true}, ritar bara en ruta.)
+      if(celler.length < 2 || r.querySelector('.ak8-pot')){ b.ejTackta.push(r.querySelector('.ak8-q') ? r.querySelector('.ak8-q').textContent.trim().slice(0, 26) : 'kedjerad'); return; }
+      var ok = celler.every(function(c){ return skrivLed(c, '0'); });
+      if(!ok){ b.ejTackta.push('kedjerad (ingen textruta)'); return; }
+      kandidater.push({ r: r, celler: celler });
+    });
+    if(!kandidater.length) return;
+    kn.click();
+    kandidater.forEach(function(k){
+      var f = k.r.querySelector('.ak8-fasit');
+      k.varde = f ? facitVarde(f.textContent) : null;
+    });
+
+    // 2) ALLA led rätt → raden ska bli grön. Slutledets FORM är bladets krav, inte grindens
+    //    gissning, så tre skrivsätt prövas i tur och ordning: ren text, byggt bråk, byggt blandat
+    //    tal. Den rad som inte blir grön av något av dem går inte att pröva → ej täckt.
+    function brakDelar(v){
+      for(var n = 2; n <= 400; n++){ var t = v * n; if(Math.abs(t - Math.round(t)) < 1e-9) return { t: Math.round(t), n: n }; }
+      return null;
+    }
+    function byggBrak(cell, hel, t, n){
+      // En redan byggd bråkruta skulle blockera nästa försök (blandad form) — rutan nollställs
+      // till en ren textruta först. Keypadens fokus-lyssnare ligger på mount, så den nya rutan följer
+      // med. Textrutan hämtas EFTER nollställningen: annars pekar den på ett bortkopplat element.
+      if(cell.querySelector('.ovn-brak')) cell.innerHTML = '<input class="ak8-in ak8-exprtxt" inputmode="text" autocomplete="off">';
+      var inp = cell.querySelector('.ak8-exprtxt'); if(!inp) return false;
+      inp.value = hel ? String(hel) : '';
+      inp.focus(); ev(inp, 'focusin'); ev(inp, 'input');
+      var key = document.querySelector('.kp-key[data-key="frac"]');
+      if(!key) return false;
+      key.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+      var fr = cell.querySelector('.ovn-brak'); if(!fr) return false;
+      var ft = fr.querySelector('.ak8-frt'), fn = fr.querySelector('.ak8-frn');
+      if(!ft || !fn) return false;
+      ft.value = String(t); ev(ft, 'input');
+      fn.value = String(n); ev(fn, 'input');
+      return true;
+    }
+    function fyllText(k){ k.celler.forEach(function(c){ skrivLed(c, k.txt); }); }
+
+    var provbara = [];
+    kandidater.forEach(function(k){
+      if(k.varde === null || !isFinite(k.varde)){ b.ejTackta.push('kedjerad (facit oläsligt)'); return; }
+      k.txt = ledText(k.varde);
+      fyllText(k);
+      provbara.push(k);
+    });
+    if(!provbara.length) return;
+    kn.click();
+    var prov2 = [], kvar = [];
+    provbara.forEach(function(k){ if(radGron(k.r)) prov2.push(k); else kvar.push(k); });
+
+    // försök 2: slutledet som ett BYGGT bråk (t/n) — ett bråksvar är aldrig ren text
+    var kvar2 = [];
+    if(kvar.length){
+      kvar.forEach(function(k){
+        var d = brakDelar(k.varde);
+        if(!d){ kvar2.push(k); return; }
+        fyllText(k);
+        var sist = k.celler[k.celler.length - 1];
+        k.byggt = byggBrak(sist, 0, d.t, d.n) ? d : null;
+        if(!k.byggt) kvar2.push(k);
+      });
+      kn.click();
+      kvar.forEach(function(k){ if(k.byggt && radGron(k.r)) prov2.push(k); else if(k.byggt) kvar2.push(k); });
+    }
+    // försök 3: slutledet som BLANDAT tal (hel + t/n) — grupper som kräver blandad form
+    if(kvar2.length){
+      kvar2.forEach(function(k){
+        var v = Math.abs(k.varde), tecken = k.varde < 0 ? -1 : 1, hel = Math.floor(v);
+        var d = brakDelar(v - hel);
+        if(!hel || !d){ k.blandat = null; return; }
+        fyllText(k);
+        var sist = k.celler[k.celler.length - 1];
+        k.blandat = byggBrak(sist, tecken * hel, d.t, d.n) ? d : null;
+      });
+      kn.click();
+      kvar2.forEach(function(k){
+        if(k.blandat && radGron(k.r)) prov2.push(k);
+        else b.ejTackta.push('kedjerad (blir inte grön av rätt svar: ' + k.txt + ')');
+      });
+    }
+    if(!prov2.length) return;
+
+    // 3) sista ledet rätt, ett TIDIGARE led fel → raden får inte vara grön
+    prov2.forEach(function(k){
+      // slutledet står kvar precis som när raden blev grön (text eller byggd bråkruta) —
+      // bara de TIDIGARE leden görs fel.
+      k.celler.forEach(function(c, i){ if(i < k.celler.length - 1) skrivLed(c, ledText(k.varde + 1)); });
+    });
+    kn.click();
+    prov2.forEach(function(k){
+      b.provade++;
+      if(radGron(k.r)){
+        var q = k.r.querySelector('.ak8-q');
+        b.gronFastFel.push('kedja: ' + (q ? q.textContent.trim().slice(0, 30) : '?') + ' (sista ' + k.txt + ', tidigare fel)');
+      }
+    });
+  }
+
   function mat(namn){
     var mount = document.querySelector('[id^="sheet-"]') || document.querySelector('.ovn-sheet'); if(!mount) return;
     var kn = mount.querySelector('[data-kontroll]'); if(!kn) return;
     var rader = Array.from(mount.querySelectorAll('.ak8-rad')).filter(function(r){ return r.querySelectorAll('.ak8-svar[data-idx]').length === 1 && r.querySelectorAll('.ak8-in').length > 1 && !r.querySelector('.ak8-chip, .ak8-vf, .ak8-tal, .ak8-korval, .ovn-brak, .ak8-pot, .ak8-cell'); });
-    var b = { blad: namn, rader: rader.length, gronFastFel: [], perRutaSaknas: [], provade: 0 };
+    var b = { blad: namn, rader: rader.length, gronFastFel: [], perRutaSaknas: [], ejTackta: [], provade: 0 };
     rader.forEach(function(r){ r.querySelectorAll('.ak8-in').forEach(function(i){ i.value = '0'; ev(i, 'input'); }); }); kn.click();
     var facit = rader.map(function(r){ var f = r.querySelector('.ak8-fasit'); return f ? tal(f.textContent.replace(/^[^:]*:/, '')) : null; });
     rader.forEach(function(r, ri){ var ins = Array.from(r.querySelectorAll('.ak8-in')), f = facit[ri]; if(!f || f.length !== ins.length) return;
@@ -112,6 +257,7 @@ const PROBE8 = `(function(){
       var perRuta = st[st.length - 1] === 'ok' && st.slice(0, -1).every(function(x){ return x === 'fel'; });
       if(/pilarna|talföljd|följd|hopp|tallinje/i.test(rub) && !perRuta) b.perRutaSaknas.push(rub.slice(0, 40) + ' [' + st.join(',') + ']');
     });
+    kedjeProv(mount, kn, b);       // åttans kedjerader (fri och fast) — egen fyllning, egen regel
     ut.blad.push(b);
   }
   if(knappar.length) knappar.forEach(function(k){ k.click(); mat(k.textContent.trim().slice(0, 30)); }); else mat('(enda)');
@@ -178,6 +324,7 @@ SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
     provade += b.provade;
     const bad = b.gronFastFel.length + b.perRutaSaknas.length; fel += bad;
     console.log((bad ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.provade + '/' + b.rader + ' flerrutsrader provade'
+      + ((b.ejTackta && b.ejTackta.length) ? ' · ej täckta ' + b.ejTackta.length + ' (' + [...new Set(b.ejTackta)].slice(0, 3).join(' ; ') + ')' : '')
       + (b.gronFastFel.length ? ' · GRÖN FAST FEL: ' + b.gronFastFel.join(' ; ') : '') + (b.perRutaSaknas.length ? ' · status per ruta saknas: ' + b.perRutaSaknas.slice(0, 3).join(' ; ') : ''));
   });
   try { fs.unlinkSync(tmp); fs.unlinkSync(pre); } catch(e){}
