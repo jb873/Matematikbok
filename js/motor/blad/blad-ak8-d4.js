@@ -6,6 +6,7 @@
    exponent-lag). Exponenter = äkta upphöjd notation, stående bråk, vänsterställt. */
 (function(){
   'use strict';
+  var LR = window.Likhetsrattare;   // fri kedja: värde per led (delad rättare, samma som bråkbladen)
   var F = window;   // fracSpan/fracRuta ur blad-karna.js
 
   // ── Facit-numerik ──
@@ -49,6 +50,12 @@
   // GP-kedja: vänster = [gp-cell] = … . leds = [{k,e} | {kind:'gpfrac',k,e,namn}]. Sista ledet kräver koeff∈[1,10).
   function KGP(vanster, leds, facit){ return { typ:'kgp', vanster:vanster, leds:leds, facit:facit }; }
   // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
+
+  // ── FRI KEDJA (delad mekanism, samma som bråkbladen d6–d8): "uttryck = [led] = [led] … + led".
+  //    Eleven arbetar bort ett led i taget i prioriteringsordningen och får hoppa över steg hon
+  //    klarar i huvudet: 3 + 4 · 2 − 2³ kan bli 3 + 4 · 2 − 8, 3 + 8 − 8, 3 — eller 3 + 8 − 8 direkt.
+  //    Varje ifyllt led rättas PÅ VÄRDE; minst ett mellanled före svaret, annars syns ingenting. ──
+  function FRI(vanster, varde, facit){ return { typ:'frikedja', vanster:vanster, varde:varde, facit:facit }; }
 
   function G(rubrik, rader, hint){ return { rubrik:rubrik, rader:rader, hint:hint }; }
 
@@ -144,15 +151,20 @@
   // ══════════════════════════════════════════════════════════════════════════════════════
   // BLAD 3 — Prioriteringsregeln med potenser
   // ══════════════════════════════════════════════════════════════════════════════════════
+  // Prioriteringsordningen ÄR uppgiften här, så varje rad är en fri kedja — inte en svarsruta.
   var PRIO = { nr:3, titel:'Prioriteringsregeln med potenser', nod:'prio-potenser', uppg:[
     G('Beräkna', [
-      T(potP('4 · 2', 2) + ' =', 64), T('5 · ' + pot(2, 4) + ' =', 80), T('5 · 2 + ' + pot(3, 3) + ' =', 37), T('25 − ' + pot(6, 2) + ' =', -11)
+      FRI(potP('4 · 2', 2), 64, '64'), FRI('5 · ' + pot(2, 4), 80, '80'),
+      FRI('5 · 2 + ' + pot(3, 3), 37, '37'), FRI('25 − ' + pot(6, 2), -11, '−11')
     ]),
     G('Beräkna', [
-      T(potP('0,2 · 3', 2) + ' =', 0.36), T('3 · ' + potP('2 − 1,9', 2) + ' =', 0.03), BR('4 · ' + potP(fr(3, 4), 2) + ' =', 9, 4)
+      FRI(potP('0,2 · 3', 2), 0.36, '0,36'), FRI('3 · ' + potP('2 − 1,9', 2), 0.03, '0,03'),
+      FRI('4 · ' + potP(fr(3, 4), 2), 9 / 4, '9/4')
     ]),
     G('Beräkna', [
-      T('3 + 4 · 2 − ' + pot(2, 3) + ' =', 3), T('(36 − 3 · ' + pot(2, 2) + ') + ' + pot(3, 2) + ' =', 33), BR(potP(fr(5, 3), 2) + ' − 12 · ' + potP(fr(1, 2), 2) + ' =', -2, 9)
+      FRI('3 + 4 · 2 − ' + pot(2, 3), 3, '3'),
+      FRI('(36 − 3 · ' + pot(2, 2) + ') + ' + pot(3, 2), 33, '33'),
+      FRI(potP(fr(5, 3), 2) + ' − 12 · ' + potP(fr(1, 2), 2), -2 / 9, '−2/9')
     ])
   ] };
 
@@ -270,8 +282,23 @@
   function gpCellHTML(){ return '<span class="ak8-gp"><input class="ak8-in ak8-gpk" inputmode="text" autocomplete="off">·<span class="pot"><input class="ak8-in ak8-in-sm ak8-gpb" inputmode="numeric" autocomplete="off"><sup><input class="ak8-in ak8-in-sm ak8-gpe" inputmode="text" autocomplete="off"></sup></span></span>'; }
   function gpFracHTML(){ return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + gpCellHTML() + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + gpCellHTML() + '</span></span>'; }
   function gpRead(cell){ var k = pNum(cell.querySelector('.ak8-gpk').value), b = pNum(cell.querySelector('.ak8-gpb').value), e = AK8_UI.evalArith(cell.querySelector('.ak8-gpe').value); return { k:k, base:b, e:e, num:(isFinite(k) && isFinite(b) && isFinite(e)) ? k * Math.pow(b, e) : NaN }; }
+  // elevtext som fält (låset ser hint:) — Joachim sätter ordalydelsen
+  var TEXT = { mellanled: { hint: '— visa ett mellanled före svaret' } };
+
   function renderRad(r){
     var idx = CHECKS.length;
+    if(r.typ === 'frikedja'){
+      // Fri kedja: varje IFYLLT led ska ha uppgiftens värde, och minst två led (ett mellanled +
+      // svaret) måste vara ifyllda. Rättningen är värde, som i bråkens kedja.
+      CHECKS.push(function(el){
+        var celler = AK8_UI.kedjaCeller(el).filter(LR.fylld);
+        var allaLika = celler.length > 0 && celler.every(function(c){ return LR.likhet(LR.mixedEval(c), r.varde); });
+        var ok = allaLika && celler.length >= 2;
+        return { ok: ok, kedja: true,
+                 facit: r.facit + (allaLika && celler.length < 2 ? ' ' + TEXT.mellanled.hint : '') };
+      });
+      return AK8_UI.kedjaRadHTML(idx, r.vanster + ' <span class="ovn-text ak8-eq">=</span>');
+    }
     if(r.typ === 'tal'){
       CHECKS.push(function(el){ return { ok: likhetOk(AK8_UI.cellRead(el, 'sv').num, r.facit), facit: fmt(r.facit) }; });
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '">' + AK8_UI.ansCell('sv') + '</span></div>';
@@ -425,13 +452,15 @@
   }
 
   function kontrollera(mount){
-    var svar = mount.querySelectorAll('.ak8-svar[data-idx]'), tot = 0, ratt = 0;
+    // .ak8-svar bär data-idx på svarsraderna; den fria kedjan bär det på .ak8-rad (delad markup).
+    var svar = mount.querySelectorAll('.ak8-svar[data-idx], .ak8-rad[data-idx]'), tot = 0, ratt = 0;
     svar.forEach(function(el){
       var res = CHECKS[+el.dataset.idx](el);
       if(res.flagg) return;
       tot++;
       if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
-      if(res.korval){ var s = el.querySelector('.ak8-korval.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel'); }
+      if(res.kedja){ el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
+      else if(res.korval){ var s = el.querySelector('.ak8-korval.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel'); }
       else { AK8_UI.markeraRutor(el, res); }   // per ruta/cell (res.per / res.perCell) — raden ✓ bara om alla rätt
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);   // ✓/✗-bock + puls (ingen låsning → retry)
       if(res.ok){ ratt++; }
