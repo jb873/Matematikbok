@@ -36,10 +36,47 @@
   function mitten(pts){ var sx = 0, sy = 0; pts.forEach(function(p){ sx += p[0]; sy += p[1]; }); return [sx / pts.length, sy / pts.length]; }
   function enhetTxt(o, w){ return o.enhet ? '<text class="' + TXT + ' af-enhet" x="' + (w - 4) + '" y="14" text-anchor="end">(' + esc(o.enhet) + ')</text>' : ''; }
 
+  function undertext(o, w, h){
+    return o.under ? '<text class="' + TXT + ' af-under" x="' + (w / 2) + '" y="' + (h - 4) + '" text-anchor="middle">' + esc(o.under) + '</text>' : '';
+  }
   function figur(pts, matt, opts, w, h, alt){
-    var m = mitten(pts), s = svgStart(w, h, alt) + poly(pts);
+    var m = mitten(pts), s = svgStart(w, h, opts.alt || alt) + poly(pts);
     pts.forEach(function(p, i){ var q = pts[(i + 1) % pts.length]; if(matt[i]) s += sidEtikett(p, q, m, matt[i], opts.avstand); });
-    return s + enhetTxt(opts, w) + '</svg>';
+    return s + enhetTxt(opts, w) + undertext(opts, w, h) + '</svg>';
+  }
+
+  // Hörnets etikett: bokstaven utanför hörnet, ett eventuellt gradtal innanför.
+  function hornEtikett(p, mitt, bokstav, varde){
+    var dx = p[0] - mitt[0], dy = p[1] - mitt[1], len = Math.sqrt(dx * dx + dy * dy) || 1;
+    var ut = '';
+    if(bokstav){
+      var bx = p[0] + dx / len * 14, by = p[1] + dy / len * 14;
+      ut += '<text class="' + TXT + ' af-horn" x="' + bx.toFixed(1) + '" y="' + (by + 5).toFixed(1) + '" text-anchor="middle">' + esc(bokstav) + '</text>';
+    }
+    if(varde){
+      var ix = p[0] - dx / len * 30, iy = p[1] - dy / len * 30;
+      ut += '<text class="' + TXT + '" x="' + ix.toFixed(1) + '" y="' + (iy + 5).toFixed(1) + '" text-anchor="middle">' + esc(varde) + '</text>';
+    }
+    return ut;
+  }
+
+  // Triangel med namngivna hörn och kända vinklar. Formen är sned med flit: en liksidig ritning
+  // antyder lika vinklar. vinklar[i] tomt = okänd vinkel, som eleven själv sätter namn på.
+  function vinkeltriangel(o){
+    var w = 250, h = 160, pts = [[46, 128], [212, 128], [104, 30]];
+    var horn = o.horn || ['A', 'B', 'C'], vinklar = o.vinklar || [];
+    var m = mitten(pts);
+    var namn = horn.filter(Boolean).join(', ');
+    var s2 = svgStart(w, h, o.alt || ('Triangel med hörnen ' + namn)) + poly(pts);
+    pts.forEach(function(p, i){ s2 += hornEtikett(p, m, horn[i], vinklar[i]); });
+    return s2 + undertext(o, w, h) + '</svg>';
+  }
+
+  // Triangel vars SIDOR är namngivna (sida a, b, c) — samma sneda form.
+  function sidtriangel(o){
+    var w = 250, h = 160, pts = [[46, 128], [212, 128], [104, 30]];
+    var sidor = o.sidor || ['', '', ''];
+    return figur(pts, sidor, o, w, h, o.alt || ('Triangel med sidorna ' + sidor.filter(Boolean).join(', ')));
   }
 
   function rektangel(o){
@@ -64,5 +101,6 @@
     return figur(pts, o.sidor, o, w, h, 'Femhörning med sidorna ' + o.sidor.join(', '));
   }
 
-  window.SvgAlgebraFigur = { rektangel: rektangel, fyrhorning: fyrhorning, triangel: triangel, femhorning: femhorning };
+  window.SvgAlgebraFigur = { rektangel: rektangel, fyrhorning: fyrhorning, triangel: triangel, femhorning: femhorning,
+                             vinkeltriangel: vinkeltriangel, sidtriangel: sidtriangel };
 })();

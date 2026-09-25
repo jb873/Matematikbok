@@ -298,5 +298,49 @@ const treRader = {}; MOD.nycklarAv(fyraTal).slice(0, 3).forEach((k, i) => { treR
 ok('fyra tal med tre rader i steg 1 → steg 1',
    avSteg(R.ratta(fyraTal, { uttryck: treRader, rader: [{ vl: '3x + 3', hl: '174' }], svar: {} })) === 'uttryck');
 
+// ── VARIANT 4 OCH 5: vinklar och omkrets (bladens egna uppgifter) ───────────────────────────
+function helt(u, gren, valdDel){
+  const l = MOD.losningsforslag(u, gren, valdDel);
+  if(!l) return null;
+  const sv = { uttryck: l.uttryck, rader: [l.ekvation].concat(l.kedja), insattning: l.insattning, svar: l.svar };
+  if(u.foljdfraga){
+    const mal = MOD.utvardera(u.foljdfraga.uttryck, MOD.varden(u, gren).varden);
+    sv.foljd = mal + ' ' + u.foljdfraga.enhet;
+  }
+  return sv;
+}
+[['Vinklar (variant 4)', '../js/motor/problemlosning/prob-blad4.js'],
+ ['Omkrets (variant 5)', '../js/motor/problemlosning/prob-blad5.js']].forEach(([rubrik, modul]) => {
+  console.log('\n' + rubrik + ':');
+  require(modul).BLAD.uppgifter.forEach(u => {
+    MOD.grenarAv(u).forEach(gren => {
+      const nycklar = MOD.nycklarAv(u);
+      const utfall = nycklar.map(k => { const sv = helt(u, gren, k); return sv ? R.ratta(u, sv).status : 'ingen'; });
+      const g = MOD.grenarAv(u).length > 1 ? ' [' + gren.id + ']' : '';
+      ok(u.id + g + ': alla ' + nycklar.length + ' val av x godkänns', utfall.every(x => x === 'ratt'), JSON.stringify(utfall));
+    });
+  });
+});
+
+// Den likbenta triangelns två lösningar är OLIKA svar, båda rätt — inte samma räkning två gånger.
+const likbent = require('../js/motor/problemlosning/prob-blad4.js').BLAD.uppgifter.filter(u => MOD.grenarAv(u).length > 1)[0];
+const tva = MOD.grenarAv(likbent).map(g => JSON.stringify(MOD.varden(likbent, g).varden));
+ok('likbent: två skilda lösningar, båda godkända', tva[0] !== tva[1] && tva.length === 2, tva.join(' vs '));
+
+// Arean rättas för sig: rätt sidor men fel area faller på steg foljd, inte på svaret.
+const areaU = require('../js/motor/problemlosning/prob-blad5.js').BLAD.uppgifter.filter(u => u.foljdfraga)[0];
+const areaSv = helt(areaU, MOD.grenarAv(areaU)[0], 'A');
+ok('arean rätt → hela uppgiften rätt', R.ratta(areaU, areaSv).status === 'ratt');
+ok('fel area → steg foljd', avSteg(R.ratta(areaU, Object.assign({}, areaSv, { foljd: '99 cm²' }))) === 'foljd');
+ok('area utan enhet → steg foljd', avSteg(R.ratta(areaU, Object.assign({}, areaSv, { foljd: '45' }))) === 'foljd');
+
+// Vinkelsumman är villkoret: en ekvation utan 180 håller inte.
+const vinkelU = require('../js/motor/problemlosning/prob-blad4.js').BLAD.uppgifter[0];
+const vinkelSv = helt(vinkelU, MOD.grenarAv(vinkelU)[0], 'C');
+ok('vinkelsumman: ekvation utan 180 → steg 2',
+   avSteg(R.ratta(vinkelU, Object.assign({}, vinkelSv, { rader: [{ vl: '3x + 60', hl: '160' }] }))) === 'ekvation');
+ok('svar utan enhet (grader) → steg 5',
+   avSteg(R.ratta(vinkelU, Object.assign({}, vinkelSv, { svar: { A: '60', B: '80 grader', C: '40 grader' } }))) === 'svar');
+
 console.log('\n' + (fel ? '✗ PROB-FUZZ RÖD · ' : '✓ PROB-FUZZ GRÖN · ') + prov + ' prov · ' + fel + ' fel');
 process.exit(fel ? 1 : 0);

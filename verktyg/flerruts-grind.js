@@ -42,6 +42,10 @@ const PROBE_D5 = `(function(){
       } else {
         skrivYta(el.querySelector('.prob-svar'), l.svar[nycklar[0]]);
       }
+      if(el.querySelector('.prob-foljd') && u.foljdfraga){
+        var mal = M.utvardera(u.foljdfraga.uttryck, M.varden(u, M.grenarAv(u)[0]).varden);
+        skrivYta(el.querySelector('.prob-foljd'), mal + ' ' + u.foljdfraga.enhet);
+      }
       var rader = [l.ekvation].concat(l.kedja);
       var knapp = Array.prototype.filter.call(el.querySelectorAll('.mini-btn'), function(b){ return !b.classList.contains('prob-nydel'); })[0];
       var v2 = 0;

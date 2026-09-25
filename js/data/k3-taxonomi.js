@@ -311,14 +311,14 @@ window.K3_TAXONOMI = {
       "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
       "begrepp": "Vinklar som uttrycks med varandra, med vinkelsumman 180 grader som villkor.",
       "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med vinklar och figurer", "gruppordning": 1, "radordning": 1,
-                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "drillKommer": true }
     },
     {
       "id": "alg-prob-omkrets:problem", "namn": "Geometriska figurer · omkrets", "parent": "alg-prob-geometri", "niva": "lovnod",
       "arskursRelevans": {"ak7":"mal","ak8":"mal"}, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEM", "generator": null,
       "begrepp": "Sidor som uttrycks med varandra, med omkretsen som villkor – omkretsen är sidorna adderade.",
       "visning": { "utbudslista": ["k3d5","prob1"], "grupp": "Problem med vinklar och figurer", "gruppordning": 1, "radordning": 2,
-                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "kommer": true }
+                   "etikett": "problemlösning", "formagaKey": "problem", "niva": null, "drillKommer": true }
     },
     {
       "id": "alg-prob-area:problem", "namn": "Geometriska figurer · area", "parent": "alg-prob-geometri", "niva": "lovnod",

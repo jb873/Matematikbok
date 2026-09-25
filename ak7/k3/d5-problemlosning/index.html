@@ -221,6 +221,25 @@
 .prob-nydel{margin-top:6px;}
 .prob-svarlista{display:flex;flex-direction:column;gap:8px;margin:2px 0 6px;}
 .prob-svarrad2 .prob-eko{text-align:left;min-width:110px;}
+/* FIGUREN (varianterna 4 och 5): ritad ur data, schematisk. Den visar formen och de kända
+   talen — de okända sidorna och vinklarna är omärkta, för att namnge dem är steg 1. */
+.prob-figur{margin:6px 0 12px;}
+.prob-figur .af-svg{width:100%;max-width:250px;height:auto;}
+.prob-figur .af-yta{fill:var(--paper-lt,#faf7f1);}
+.prob-figur .af-kant{stroke:var(--ink-soft,#3d3630);stroke-width:2;fill-opacity:.7;}
+.prob-figur .af-matt{font-family:var(--serif);font-size:15px;fill:var(--ink,#12110f);}
+.prob-figur .af-horn{font-family:var(--serif);font-size:15px;font-weight:600;fill:var(--ink-soft,#3d3630);}
+.prob-figur .af-under{font-family:var(--body);font-size:14px;fill:var(--ink-soft,#3d3630);}
+
+/* FÖLJDFRÅGAN: arean är ingen ekvationsrad utan en multiplikation — egen rad mellan
+   balansmetoden och svaret, med sin etikett framför rutan. */
+.prob-foljdrad{display:flex;align-items:center;gap:10px;margin:10px 0 4px;}
+.prob-foljd-etikett{font-family:var(--cinzel,'Cinzel');font-size:13px;letter-spacing:.04em;color:var(--ink-faint);min-width:64px;}
+.prob-foljd{display:inline-flex;align-items:center;min-height:40px;background:#fff;
+  border:2px solid var(--paper-dk);border-radius:8px;padding:2px 12px;min-width:160px;}
+.prob-foljd:focus-within{border-color:var(--gold-lt);box-shadow:0 0 0 3px rgba(196,154,64,.15);}
+.prob-foljd.ratt{border-color:var(--green);}
+.prob-foljd.fel{border-color:var(--red);}
 @media (max-width:640px){ .prob-tvakol{grid-template-columns:1fr;} .prob-eko{min-width:70px;} }
 </style>
 </head>
@@ -263,6 +282,8 @@
   <div id="blad-instruktion" class="blad-mount"><div class="ovn-wrap" id="sheet-instruktion"></div></div>
   <div id="blad-delar" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-delar"></div></div>
   <div id="blad-foljd" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-foljd"></div></div>
+  <div id="blad-vinklar" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-vinklar"></div></div>
+  <div id="blad-omkrets" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-omkrets"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -294,9 +315,12 @@
 <script src="../../../js/motor/ekvationer-balans/ekv-kedja.js"></script>
 <script src="../../../js/motor/problemlosning/prob-modell.js"></script>
 <script src="../../../js/motor/problemlosning/prob-rattare.js"></script>
+<script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad2.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad3.js"></script>
+<script src="../../../js/motor/problemlosning/prob-blad4.js"></script>
+<script src="../../../js/motor/problemlosning/prob-blad5.js"></script>
 
 <!-- TAXONOMI + delade kontrakt: föreläsningsregistret, färdiga test, sidskalet -->
 <script src="../../../js/data/k3-taxonomi.js"></script>
@@ -309,7 +333,9 @@
 DelkapitelSkal.montera({
   ova: [ { titel: 'Följa en instruktion', mount: 'instruktion' },
          { titel: 'Personer eller delar', mount: 'delar' },
-         { titel: 'Tal som följer på varandra', mount: 'foljd' } ],
+         { titel: 'Tal som följer på varandra', mount: 'foljd' },
+         { titel: 'Vinklar', mount: 'vinklar' },
+         { titel: 'Omkrets', mount: 'omkrets' } ],
   taxonomi:    function(){ return window.K3_TAXONOMI; },
   utbudslista: 'k3d5',
   ram:         '../../../ak7-k3-ram.html',
