@@ -39,6 +39,8 @@ function led(k, v, forst){
   if(forst) return (k < 0 ? '−' : '') + t;
   return (k < 0 ? ' − ' : ' + ') + t;
 }
+// Talet eleven SER: minustecknet är U+2212, decimaltecknet komma. Datan behåller talet som tal.
+function talText(n){ return String(n).replace('.', ',').replace(/^-/, '−'); }
 function konst(c, forst){
   if(forst) return String(c);
   return (c < 0 ? ' − ' : ' + ') + Math.abs(c);
@@ -98,7 +100,7 @@ function forenklaRad(r, variant, egenskap){
     // konstanterna: båda med decimal, och de får inte ta ut varandra
     var C = ri(r, 2, 29), E = ri(r, 2, 29), varv = 0;
     while((C % 10 === 0) && varv++ < 40) C = ri(r, 2, 29);
-    while((E === C || E % 10 === 0) && varv++ < 80) E = ri(r, 2, 29);
+    while((E === C || E % 10 === 0 || (C - E) % 10 === 0) && varv++ < 120) E = ri(r, 2, 29);
     var kv = (k * P - D) / 10, kon = (C - E) / 10;
     function dec(x){ return String(Math.round(x * 10) / 10).replace('.', ','); }
     return { fraga: k + ' · ' + dec(P / 10) + 'x' + ' + ' + dec(C / 10) + ' − ' + dec(D / 10) + 'x' + ' − ' + dec(E / 10),
@@ -127,12 +129,24 @@ function beraknaRad(r, variant){
     var v2 = v === 'x' ? 'y' : 'x', k2 = ri(r, 2, 9), y = ri(r, 1, 9);
     while(y === x) y = ri(r, 1, 9);            // olika värden, annars går de inte att skilja åt
     return { fraga: term(k, v) + led(k2, v2), varden: v + ' = ' + x + ', ' + v2 + ' = ' + y,
-             svar: k * x + k2 * y };
+             svar: k * x + k2 * y, svarText: talText(k * x + k2 * y) };
   }
   if(variant === 'minus'){
-    return { fraga: term(k, v) + konst(-c), varden: v + ' = ' + x, svar: k * x - c };
+    return { fraga: term(k, v) + konst(-c), varden: v + ' = ' + x, svar: k * x - c, svarText: talText(k * x - c) };
   }
-  return { fraga: term(k, v) + konst(c), varden: v + ' = ' + x, svar: k * x + c };
+  if(variant === 'decimalVarde'){            // värdet är ett decimaltal (sjuans 13 − 6x när x = 1,1)
+    var kd = ri(r, 2, 9), cd = ri(r, 8, 20), tiond = ri(r, 11, 29);
+    while(tiond % 10 === 0) tiond = ri(r, 11, 29);   // aldrig ett helt värde: decimalen ÄR uppgiften
+    var td = tiond / 10;
+    var svar = Math.round((cd - kd * td) * 100) / 100;
+    return { fraga: cd + ' − ' + term(kd, v), varden: v + ' = ' + talText(td),
+             svar: svar, svarText: talText(svar) };
+  }
+  if(variant === 'omvand'){                  // konstanten först: 20 − 3x
+    var ko = ri(r, 2, 9), co = ri(r, 12, 40), xo = ri(r, 1, 9);
+    return { fraga: co + ' − ' + term(ko, v), varden: v + ' = ' + xo, svar: co - ko * xo, svarText: talText(co - ko * xo) };
+  }
+  return { fraga: term(k, v) + konst(c), varden: v + ' = ' + x, svar: k * x + c, svarText: talText(k * x + c) };
 }
 
 // ── FLIK 2 · SKRIVA: text → uttryck ──
@@ -143,6 +157,20 @@ function skrivaRad(r, variant){
   if(variant === 'kortare') return { fraga: n + ' cm kortare', svar: v + ' − ' + n, varibel: v };
   if(variant === 'ganger') return { fraga: k + ' gånger så lång', svar: term(k, v), varibel: v };
   if(variant === 'halften') return { fraga: 'hälften så lång', svar: v + '/2', varibel: v };
+  if(variant === 'delat'){                 // dela i lika delar: en tredjedel, en fjärdedel …
+    var del = ri(r, 3, 6), ORD = { 3: 'en tredjedel', 4: 'en fjärdedel', 5: 'en femtedel', 6: 'en sjättedel' };
+    return { fraga: ORD[del] + ' så lång', svar: v + '/' + del, varibel: v };
+  }
+  if(variant === 'sammansatt'){             // två steg i en mening: k gånger så lång, plus n
+    var ks = ri(r, 2, 6), ns = ri(r, 2, 15);
+    return { fraga: ks + ' gånger så lång, och sedan ' + ns + ' cm längre', svar: term(ks, v) + ' + ' + ns, varibel: v };
+  }
+  if(variant === 'omkrets'){                // figurens sidor som DATA — figuren ritas ur dem
+    var s1 = ri(r, 2, 6), s2 = ri(r, 2, 9);
+    return { fraga: 'rektangel med sidorna ' + term(s1, v) + ' och ' + s2,
+             sidor: [term(s1, v), String(s2), term(s1, v), String(s2)],
+             svar: term(2 * s1, v) + ' + ' + (2 * s2), varibel: v };
+  }
   return { fraga: n + ' mer än ' + v, svar: v + ' + ' + n, varibel: v };
 }
 
@@ -157,6 +185,7 @@ function tolkaRad(r, varor){
   var p1 = ri(r, s1[0], s1[1]), p2 = ri(r, s2[0], s2[1]);
   while(p2 === p1) p2 = ri(r, s2[0], s2[1]);
   var bok = [varor.b1, varor.b2];
+  if(varor.utanKoeff) a = 1;                 // "en smörgås och tre juicer" — a står utan siffra
   return { uttryck: term(a, bok[0]) + ' + ' + term(b, bok[1]),
            svar: varor.ord(a, b),
            varden: bok[0] + ' = ' + p1 + ', ' + bok[1] + ' = ' + p2,
@@ -171,15 +200,20 @@ function haller(flik, rad, egenskap){
   var f = B.BAND.EGENSKAPER[egenskap];
   return !f || f(rad.fraga, rad.svar);
 }
-function dra(flik, fn, egenskap, r){
+// vakt = en mängd redan dragna uppgifter i samma blad; en upprepning dras om.
+function dra(flik, fn, egenskap, r, vakt){
   for(var i = 0; i < 40; i++){
     var rad = fn(r);
-    if(haller(flik, rad, egenskap)) return rad;
+    var nyckel = sanera((rad.fraga || rad.uttryck || '') + '|' + (rad.svar || ''));
+    if(haller(flik, rad, egenskap) && !(vakt && vakt[nyckel])){
+      if(vakt) vakt[nyckel] = 1;
+      return rad;
+    }
   }
   var sista = fn(r); sista.omarkt = true; return sista;
 }
 
-var API = { rng: rng, ri: ri, val: val, dra: dra, haller: haller,
+var API = { rng: rng, ri: ri, val: val, dra: dra, haller: haller, talText: talText,
             forenklaRad: forenklaRad, beraknaRad: beraknaRad, skrivaRad: skrivaRad, tolkaRad: tolkaRad,
             term: term, led: led, konst: konst };
 if(typeof window !== 'undefined') window.GEN_AK8_ALG1 = API;

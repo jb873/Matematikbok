@@ -21,10 +21,15 @@
 
 var BAND = {
   // ── Talområden per flik (samma som sjuans förlagor) ──
+  // TVÅ NIVÅER: läsa uttrycket, och skriva ett eget.
   tolka: {
     bokstaver: ['a', 'b', 'x', 'y'],
     antal:     [2, 6],        // hur många av varje vara uttrycket beskriver
-    pris:      [4, 40]        // yttre ram; varje vara har sitt eget spann nedan
+    pris:      [4, 40],       // yttre ram; varje vara har sitt eget spann nedan
+    nivaer: {
+      1: { varianter: ['tvaVaror'],            antal: [2, 6] },
+      2: { varianter: ['utanKoeff', 'eget'],   antal: [1, 8] }
+    }
   },
 
   // VARORNA med rimliga priser. En juice för 28 kr bredvid en smörgås för 4 kr är ett tal som
@@ -37,15 +42,26 @@ var BAND = {
     { b1:'x', b2:'y', ental:['äpple','päron'],      flertal:['äpplen','päron'],       pris:[[4,9],[5,12]] },
     { b1:'a', b2:'b', ental:['kaka','kopp te'],     flertal:['kakor','koppar te'],    pris:[[12,25],[20,35]] }
   ],
+  // TRE NIVÅER: översätta en mening · dela och jämföra · läsa en figur och förenkla.
   skriva: {
     tal:       [2, 20],       // "10 cm längre", "3 år äldre"
     koeff:     [2, 9],        // "dubbelt så", "tre gånger så"
-    sidor:     [2, 9]         // figurernas sidor (x, 3x, 4 …)
+    sidor:     [2, 9],        // figurernas sidor (x, 3x, 4 …)
+    nivaer: {
+      1: { varianter: ['langre', 'kortare', 'ganger', 'mer'] },
+      2: { varianter: ['halften', 'delat', 'sammansatt'] },
+      3: { varianter: ['omkrets', 'sammansatt'] }
+    }
   },
+  // TVÅ NIVÅER: ett värde insatt · två värden, subtraktion och decimaltal.
   berakna: {
     varde:     [0, 12],       // värdet variabeln får
     koeff:     [2, 9],
-    konstant:  [1, 20]
+    konstant:  [1, 20],
+    nivaer: {
+      1: { varianter: ['plus', 'minus'],            varde: [0, 12] },
+      2: { varianter: ['tva', 'decimalVarde', 'omvand'], varde: [1, 12] }
+    }
   },
   // TRE NIVÅER, en per blad — samma trappa som sjuans A, B och C.
   // Nivån säger vilka VARIANTER bladet bygger av och hur stora talen får vara. Svårigheten ligger
