@@ -27,8 +27,8 @@ var BAND = {
     antal:     [2, 6],        // hur många av varje vara uttrycket beskriver
     pris:      [4, 40],       // yttre ram; varje vara har sitt eget spann nedan
     nivaer: {
-      1: { varianter: ['tvaVaror'],            antal: [2, 6] },
-      2: { varianter: ['utanKoeff', 'eget'],   antal: [1, 8] }
+      1: { varianter: ['tvaVaror'],          antal: [2, 6] },
+      2: { varianter: ['tvaVaror', 'eget'],  antal: [2, 6] }
     }
   },
 
@@ -48,9 +48,9 @@ var BAND = {
     koeff:     [2, 9],        // "dubbelt så", "tre gånger så"
     sidor:     [2, 9],        // figurernas sidor (x, 3x, 4 …)
     nivaer: {
-      1: { varianter: ['langre', 'kortare', 'ganger', 'mer'] },
-      2: { varianter: ['halften', 'delat', 'sammansatt'] },
-      3: { varianter: ['omkrets', 'sammansatt'] }
+      1: { varianter: ['valruta', 'langre', 'kortare', 'ganger', 'mer'] },
+      2: { varianter: ['strackfigur', 'halften', 'paraIhop'] },
+      3: { varianter: ['omkrets', 'sammanlagd', 'prisKedja'] }
     }
   },
   // TVÅ NIVÅER: ett värde insatt · två värden, subtraktion och decimaltal.
@@ -58,9 +58,10 @@ var BAND = {
     varde:     [0, 12],       // värdet variabeln får
     koeff:     [2, 9],
     konstant:  [1, 20],
+    // Sjuans rader är MELLANLEDSKEDJOR: uttrycket, värdet insatt, uträkningen, svaret.
     nivaer: {
-      1: { varianter: ['plus', 'minus'],            varde: [0, 12] },
-      2: { varianter: ['tva', 'decimalVarde', 'omvand'], varde: [1, 12] }
+      1: { varianter: ['flerledEn'],                 varde: [0, 12] },
+      2: { varianter: ['flerledTva', 'flerledFigur'], varde: [1, 12] }
     }
   },
   // TRE NIVÅER, en per blad — samma trappa som sjuans A, B och C.
@@ -73,9 +74,9 @@ var BAND = {
     nivaer: {
       1: { varianter: ['summa', 'differens', 'noll', 'faktor', 'decimal', 'tva'],
            koeff: [2, 12], konstant: [1, 15] },
-      2: { varianter: ['tva', 'negativKoeff', 'konstant', 'femTermer'],
+      2: { varianter: ['tva', 'negativKoeff', 'konstant', 'femTermer', 'omkretsForenkla'],
            koeff: [2, 9],  konstant: [1, 12] },
-      3: { varianter: ['decimalFlera', 'parentesNeg', 'femTermer', 'negativKoeff'],
+      3: { varianter: ['decimalFlera', 'parentesNeg', 'oppet', 'pyramid', 'magisk', 'sidor'],
            koeff: [1, 7],  konstant: [1, 9], tiondelar: [1, 9] }
     }
   },
