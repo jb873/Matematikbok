@@ -31,7 +31,8 @@ function sanera(s){ return String(s).replace(/[\s ]/g, '').replace(/[−–—]/
 function term(k, v){
   if(k === 1) return v;
   if(k === -1) return '−' + v;
-  return String(k).replace('.', ',') + v;
+  // minustecknet är U+2212 överallt eleven ser det — aldrig ASCII-bindestreck
+  return String(k).replace('.', ',').replace(/^-/, '−') + v;
 }
 function led(k, v, forst){
   var t = term(Math.abs(k), v);
@@ -74,6 +75,40 @@ function forenklaRad(r, variant, egenskap){
     var p = ri(r, 3, 9), q = ri(r, 2, p - 1), s1 = ri(r, 2, 8), s2 = ri(r, 2, 8);
     return { fraga: led(p, v1, true) + led(s1, v2) + led(-q, v1) + led(s2, v2),
              svar: term(p - q, v1) + led(s1 + s2, v2) };
+  }
+  if(variant === 'negativKoeff'){          // svaret får en NEGATIV koefficient: 8x − 5y + 3x + 2y
+    var na = ri(r, 3, 9), nb = ri(r, 3, 9), nc = ri(r, 2, 9), nd = ri(r, 2, nb - 1);   // nb ≥ 3: annars blir skillnaden noll
+    return { fraga: led(na, 'x', true) + led(-nb, 'y') + led(nc, 'x') + led(nd, 'y'),
+             svar: term(na + nc, 'x') + led(nd - nb, 'y') };
+  }
+  if(variant === 'femTermer'){              // fem led, två variabler och en konstant
+    var fa = ri(r, 2, 8), fb = ri(r, 2, 8), fc = ri(r, 1, fa - 1) || 1, fd = ri(r, 2, 8), fe = ri(r, 1, 9);
+    return { fraga: led(fa, 'y', true) + led(fb, 'x') + led(-fc, 'y') + led(fd, 'x') + konst(fe),
+             svar: term(fb + fd, 'x') + led(fa - fc, 'y') + konst(fe) };
+  }
+  if(variant === 'decimalFlera'){           // decimaler i flera termer, ofta negativt facit
+    var T3 = (B.BAND.forenkla.nivaer && B.BAND.forenkla.nivaer[3].tiondelar) || [1, 9];
+    var k = ri(r, 2, 8), P = ri(r, T3[0], T3[1]);
+    // Koefficienten ska bli LITEN och ofta negativ (sjuans rad ger −0,1x). Skillnaden väljs FÖRST,
+    // en till nio tiondelar med tecken, och D räknas fram ur den — då kan villkoret aldrig missas.
+    var delta = ri(r, 1, 9) * (r() < 0.6 ? -1 : 1);       // oftare negativ koefficient
+    var D = k * P - delta;
+    if(D < 2){ delta = -Math.abs(delta); D = k * P - delta; }
+    if(D % 10 === 0){ delta += (Math.abs(delta) >= 9 ? -1 : 1) * (delta < 0 ? -1 : 1); D = k * P - delta; }
+    // konstanterna: båda med decimal, och de får inte ta ut varandra
+    var C = ri(r, 2, 29), E = ri(r, 2, 29), varv = 0;
+    while((C % 10 === 0) && varv++ < 40) C = ri(r, 2, 29);
+    while((E === C || E % 10 === 0) && varv++ < 80) E = ri(r, 2, 29);
+    var kv = (k * P - D) / 10, kon = (C - E) / 10;
+    function dec(x){ return String(Math.round(x * 10) / 10).replace('.', ','); }
+    return { fraga: k + ' · ' + dec(P / 10) + 'x' + ' + ' + dec(C / 10) + ' − ' + dec(D / 10) + 'x' + ' − ' + dec(E / 10),
+             svar: (kv < 0 ? '−' : '') + dec(Math.abs(kv)) + 'x' + (kon < 0 ? ' − ' : ' + ') + dec(Math.abs(kon)) };
+  }
+  if(variant === 'parentesNeg'){             // negativ term i parentes, tre delar i svaret
+    var pa = ri(r, 2, 7), pb = ri(r, 2, 8), pc = ri(r, 1, 9), pd = ri(r, 1, 5), pe = ri(r, 2, 8), pf = ri(r, 1, 12);
+    while(pf === pc) pf = ri(r, 1, 12);
+    return { fraga: '(−' + term(pa, 'x') + ')' + led(pb, 'y') + konst(pc) + led(-pd, 'x') + led(pe, 'y') + konst(-pf),
+             svar: term(-(pa + pd), 'x') + led(pb + pe, 'y') + konst(pc - pf) };
   }
   // 'konstant': termer + konstanter
   var K = B.BAND.forenkla.konstant;

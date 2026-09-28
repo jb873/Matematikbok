@@ -47,10 +47,21 @@ var BAND = {
     koeff:     [2, 9],
     konstant:  [1, 20]
   },
+  // TRE NIVÅER, en per blad — samma trappa som sjuans A, B och C.
+  // Nivån säger vilka VARIANTER bladet bygger av och hur stora talen får vara. Svårigheten ligger
+  // i formen (negativa koefficienter, decimaler i flera termer, negativt facit), inte i talstorleken.
   forenkla: {
     koeff:     [2, 12],
     termer:    [2, 4],
-    konstant:  [1, 15]
+    konstant:  [1, 15],
+    nivaer: {
+      1: { varianter: ['summa', 'differens', 'noll', 'faktor', 'decimal', 'tva'],
+           koeff: [2, 12], konstant: [1, 15] },
+      2: { varianter: ['tva', 'negativKoeff', 'konstant', 'femTermer'],
+           koeff: [2, 9],  konstant: [1, 12] },
+      3: { varianter: ['decimalFlera', 'parentesNeg', 'femTermer', 'negativKoeff'],
+           koeff: [1, 7],  konstant: [1, 9], tiondelar: [1, 9] }
+    }
   },
 
   // ── Regler som gäller alla fyra flikarna ──
