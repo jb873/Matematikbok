@@ -24,8 +24,19 @@ var BAND = {
   tolka: {
     bokstaver: ['a', 'b', 'x', 'y'],
     antal:     [2, 6],        // hur många av varje vara uttrycket beskriver
-    pris:      [4, 30]        // värdet en bokstav får i följdfrågan
+    pris:      [4, 40]        // yttre ram; varje vara har sitt eget spann nedan
   },
+
+  // VARORNA med rimliga priser. En juice för 28 kr bredvid en smörgås för 4 kr är ett tal som
+  // eleven inte tror på, och då tappar sammanhanget sin poäng. Spannet står per vara.
+  // Räkneordet och pluralformen står också här: "te" räknas i koppar.
+  VAROR: [
+    { b1:'a', b2:'b', ental:['smörgås','juice'],    flertal:['smörgåsar','juicer'],   pris:[[25,45],[15,25]] },
+    { b1:'a', b2:'b', ental:['biljett','popcorn'],  flertal:['biljetter','popcorn'],  pris:[[80,140],[30,60]] },
+    { b1:'x', b2:'y', ental:['bok','penna'],        flertal:['böcker','pennor'],      pris:[[60,120],[8,20]] },
+    { b1:'x', b2:'y', ental:['äpple','päron'],      flertal:['äpplen','päron'],       pris:[[4,9],[5,12]] },
+    { b1:'a', b2:'b', ental:['kaka','kopp te'],     flertal:['kakor','koppar te'],    pris:[[12,25],[20,35]] }
+  ],
   skriva: {
     tal:       [2, 20],       // "10 cm längre", "3 år äldre"
     koeff:     [2, 9],        // "dubbelt så", "tre gånger så"

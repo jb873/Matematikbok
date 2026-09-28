@@ -117,8 +117,10 @@ function tolkaRad(r, varor){
   // olika antal och olika pris: annars syns inte vilken bokstav som hör till vilken vara
   var a = ri(r, T.antal[0], T.antal[1]), b = ri(r, T.antal[0], T.antal[1]);
   while(b === a) b = ri(r, T.antal[0], T.antal[1]);
-  var p1 = ri(r, T.pris[0], T.pris[1]), p2 = ri(r, T.pris[0], T.pris[1]);
-  while(p2 === p1) p2 = ri(r, T.pris[0], T.pris[1]);
+  // varans EGET prisspann när det finns, annars flikens yttre ram
+  var s1 = (varor.pris && varor.pris[0]) || T.pris, s2 = (varor.pris && varor.pris[1]) || T.pris;
+  var p1 = ri(r, s1[0], s1[1]), p2 = ri(r, s2[0], s2[1]);
+  while(p2 === p1) p2 = ri(r, s2[0], s2[1]);
   var bok = [varor.b1, varor.b2];
   return { uttryck: term(a, bok[0]) + ' + ' + term(b, bok[1]),
            svar: varor.ord(a, b),
