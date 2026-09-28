@@ -178,7 +178,8 @@
   // Liten aritmetik-utvärderare (+ − × / parenteser, unärt minus) — ingen eval.
   function evalArith(s){ return window.AK8_UI.evalArith(s); }   // DELAD utvärderare, lat uppslagning (förr lokal; d2:s tog inte 'x' som gånger — order 2026-09-18 FAS 1)
   // Teckenchips för ekvation: display + JS-operator.
-  var EKV_OPS = [['+','+'], ['−','-'], ['×','*'], ['÷','/']];
+  // Division skrivs / (eller som staplat bråk) överallt annars — chipet ska inte vara undantaget.
+  var EKV_OPS = [['+','+'], ['−','-'], ['×','*'], ['/','/']];
   function ekvChips(){ return EKV_OPS.map(function(o){ return '<button type="button" class="ak8-chip" data-op="' + o[1] + '">' + o[0] + '</button>'; }).join(''); }
 
   function renderRad(r){

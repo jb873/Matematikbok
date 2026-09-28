@@ -52,13 +52,24 @@ const PROBE = `(function(){
   }
   function talruta(i){ return !uttrycksruta(i) && !i.matches('[data-nokeypad],[data-text]'); }
 
+  // Den keypad eleven ser: den som ritas (höjd > 0) och inte är undanställd. En sida kan ha flera
+  // (widget-keypads inuti uppställningar) — den första i DOM-ordning är inte nödvändigtvis rätt.
+  function synligKeypad(){
+    var alla = Array.prototype.slice.call(document.querySelectorAll('.keypad'));
+    var ritad = alla.filter(function(k){
+      return !k.classList.contains('keypad-hidden') && k.getBoundingClientRect().height > 0;
+    });
+    return ritad[ritad.length - 1] || alla[alla.length - 1] || null;
+  }
+
   function mat(namn, root){
     var alla = rutor(root);
     if(!alla.length) return;
     var y = { yta: namn, rutor: alla.length, brott: [] };
 
     // KEYPAD
-    var kp = document.querySelector('.kp-key');
+    var kpEl = synligKeypad();
+    var kp = kpEl && kpEl.querySelector('.kp-key');
     if(!kp) y.brott.push('KEYPAD saknas');
 
     // TECKEN — mätt som EFFEKT, inte som attribut: data-kp/data-vars är ett sätt att säga det,
@@ -66,8 +77,12 @@ const PROBE = `(function(){
     var uttr = alla.filter(uttrycksruta);
     y.uttrycksrutor = uttr.length;
     function tand(k){
-      var b = document.querySelector('.kp-key[data-key="' + k + '"]');
+      var b = kpEl && kpEl.querySelector('.kp-key[data-key="' + k + '"]');
       return !!b && !b.classList.contains('kp-inactive') && b.getAttribute('aria-disabled') !== 'true';
+    }
+    function adress(inp){
+      return (inp.className || '') + '[' + Array.prototype.map.call(inp.attributes, function(x){ return x.name; })
+        .filter(function(n){ return n.indexOf('data-') === 0; }).join(',') + ']';
     }
     function lage(inp){
       inp.focus(); ev(inp, 'focusin');
@@ -77,12 +92,12 @@ const PROBE = `(function(){
       var L = lage(uttr[0]);
       y.tecken = L;
       var slackta = Object.keys(L).filter(function(k){ return !L[k]; });
-      if(slackta.length) y.brott.push('TECKEN: uttrycksrutan har ' + slackta.join(', ') + ' släckta');
+      if(slackta.length) y.brott.push('TECKEN: ' + slackta.join(', ') + ' släckta i ' + adress(uttr[0]));
     }
     var talrutor = alla.filter(talruta);
     if(talrutor.length && kp){
       var T = lage(talrutor[0]);
-      if(T.plus && T.gang && T.del) y.brott.push('TECKEN: talrutan har räknetecken tända');
+      if(T.plus && T.gang && T.del) y.brott.push('TECKEN: räknetecken tända i talrutan ' + adress(talrutor[0]));
     }
 
     // AUTOSPACE + GROW på den första uttrycksrutan
@@ -109,7 +124,7 @@ const PROBE = `(function(){
     // Bara rutor som SÄGER att de bär bråk: en kedjeruta för ett tal ska inte erbjuda bråkknappen.
     var brakruta = alla.filter(function(i){ return i.hasAttribute('data-bygg') || (i.getAttribute('data-kp') || '').match(/fri|bygg/); })[0];
     if(brakruta){
-      var fk = document.querySelector('.kp-key[data-key="frac"]');
+      var fk = kpEl && kpEl.querySelector('.kp-key[data-key="frac"]');
       if(!fk) y.brott.push('BRÅK: ingen bråkknapp fast rutorna ska bära bråk');
       else if(fk.classList.contains('kp-inactive') || fk.getAttribute('aria-disabled') === 'true') y.brott.push('BRÅK: bråkknappen är grå');
       else {

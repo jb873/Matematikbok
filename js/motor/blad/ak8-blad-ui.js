@@ -369,6 +369,9 @@
     else {
       var expr = !!(inp && inp.closest && inp.closest('.ak8-expr'));
       uttryck = expr || !!(inp && inp.matches && inp.matches('.ak8-mel,.ak8-pexp,.ak8-gpe,.ak8-in-oms,.ak8-exprtxt,[data-mellan],[data-term]'));
+      // Potensens BAS läses med pNum, inte evalArith — ett uttryck där kan rättaren inte tolka,
+      // så räknetecknen ska vara grå även om cellen ligger inuti .ak8-expr. Exponenten tar 4 + 5.
+      if(inp && inp.matches && inp.matches('.ak8-pbase,.ak8-gpb')) uttryck = false;
       bygg = expr;
     }
     if(uttryck){ till['+'] = 1; till['·'] = 1; till['/'] = 1; till['('] = 1; till[')'] = 1; }
