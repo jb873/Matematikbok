@@ -71,7 +71,7 @@ var BLAD_TOLKA = {
        fraga:'Vad har Nadia köpt om uttrycket 3a + 2b beskriver kostnaden?',
        svar:'tre glassar och två läsk',
        accept:['treglassarochtvåläsk','3glass2läsk','treglassartvåläsk','3glassar2läsk','treglasstvåläsk'],
-       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍦🍦🍦<span class="emoji-text">3 glassar · a kr</span></span><span class="emoji-grupp">🥤🥤<span class="emoji-text">2 läsk · b kr</span></span></div>'},
+       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍦<span class="emoji-text">glass · a kr</span></span><span class="emoji-grupp">🥤<span class="emoji-text">läsk · b kr</span></span></div>'},
       {typ:'enkel', vansterText:'Hur mycket betalade Nadia om a = 12 och b = 8?', svar:52}
     ]},
     {rubrik:'En munk kostar a kronor och en kaffe kostar b kronor', rader:[
@@ -79,7 +79,7 @@ var BLAD_TOLKA = {
        fraga:'Vad har Elliot köpt om uttrycket 4a + 2b beskriver kostnaden?',
        svar:'fyra munkar och två kaffe',
        accept:['fyramunkarochtvåkaffe','4munk2kaffe','fyramunkartvåkaffe','4munkar2kaffe','fyramunkartvåkoppar'],
-       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍩🍩🍩🍩<span class="emoji-text">4 munkar · a kr</span></span><span class="emoji-grupp">☕☕<span class="emoji-text">2 kaffe · b kr</span></span></div>'},
+       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍩<span class="emoji-text">munk · a kr</span></span><span class="emoji-grupp">☕<span class="emoji-text">kaffe · b kr</span></span></div>'},
       {typ:'enkel', vansterText:'Hur mycket betalade Elliot om a = 9 och b = 15?', svar:66}
     ]},
     {rubrik:'En tröja kostar a kronor och ett par strumpor kostar b kronor', rader:[
@@ -87,7 +87,7 @@ var BLAD_TOLKA = {
        fraga:'Vad har Hugo köpt om uttrycket 2a + 5b beskriver kostnaden?',
        svar:'två tröjor och fem par strumpor',
        accept:['tvåtröjorochfemparstrumpor','2tröjor5strumpor','tvåtröjorfemparstrumpor','2tröjor5parstrumpor','tvåtröjorfemstrumpor'],
-       svg:'<div class="emoji-bild"><span class="emoji-grupp">👕👕<span class="emoji-text">2 tröjor · a kr</span></span><span class="emoji-grupp">🧦🧦🧦🧦🧦<span class="emoji-text">5 par strumpor · b kr</span></span></div>'},
+       svg:'<div class="emoji-bild"><span class="emoji-grupp">👕<span class="emoji-text">tröja · a kr</span></span><span class="emoji-grupp">🧦<span class="emoji-text">par strumpor · b kr</span></span></div>'},
       {typ:'enkel', vansterText:'Hur mycket betalade Hugo om a = 20 och b = 6?', svar:70}
     ]},
     {rubrik:'En pizza kostar x kronor och en läsk kostar y kronor', rader:[
@@ -95,7 +95,7 @@ var BLAD_TOLKA = {
        fraga:'Vad har Vera köpt om uttrycket 2x + 3y beskriver kostnaden?',
        svar:'två pizzor och tre läsk',
        accept:['tvåpizzorochtreläsk','2pizza3läsk','tvåpizzortreläsk','2pizzor3läsk','tvåpizzatreläsk'],
-       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍕🍕<span class="emoji-text">2 pizzor · x kr</span></span><span class="emoji-grupp">🥤🥤🥤<span class="emoji-text">3 läsk · y kr</span></span></div>'},
+       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍕<span class="emoji-text">pizza · x kr</span></span><span class="emoji-grupp">🥤<span class="emoji-text">läsk · y kr</span></span></div>'},
       {typ:'enkel', vansterText:'Hur mycket betalade Vera om x = 45 och y = 12?', svar:126}
     ]},
     {rubrik:'Ett äpple kostar x kronor och en banan kostar y kronor', rader:[
@@ -103,7 +103,7 @@ var BLAD_TOLKA = {
        fraga:'Vad har Omar köpt om uttrycket 6x + 4y beskriver kostnaden?',
        svar:'sex äpplen och fyra bananer',
        accept:['sexäpplenochfyrabananer','6äpple4banan','sexäpplenfyrabananer','6äpplen4bananer','sexäpplefyrabananer'],
-       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍎🍎🍎🍎🍎🍎<span class="emoji-text">6 äpplen · x kr</span></span><span class="emoji-grupp">🍌🍌🍌🍌<span class="emoji-text">4 bananer · y kr</span></span></div>'},
+       svg:'<div class="emoji-bild"><span class="emoji-grupp">🍎<span class="emoji-text">äpple · x kr</span></span><span class="emoji-grupp">🍌<span class="emoji-text">banan · y kr</span></span></div>'},
       {typ:'enkel', vansterText:'Hur mycket betalade Omar om x = 3 och y = 5?', svar:38}
     ]},
     {rubrik:'Skriv ett eget uttryck', rader:[

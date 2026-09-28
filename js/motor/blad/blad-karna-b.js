@@ -639,6 +639,7 @@ function bladHTML(blad){
             + '" data-par="' + radNummer + '" inputmode="decimal" autocomplete="off">';
         }
       } else if(rad.typ === 'uttryck'){
+        // Bokstäverna rutan ska erbjuda: radens egna vars, annars de som facit använder.
         // svaret är ett algebraiskt uttryck (rättas normaliserat)
         if(rad.likhet){
           html += '<span class="ovn-text ovn-num">' + rad.fraga + '</span>';
@@ -648,6 +649,7 @@ function bladHTML(blad){
         }
         var acceptU = (rad.accept || [rad.svar]).join('|');
         html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(acceptU)
+          + '" data-kp="uttryck" data-vars="' + varsAv(rad)
           + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
       } else if(rad.typ === 'forenkla'){
         // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
@@ -655,7 +657,7 @@ function bladHTML(blad){
         // variabelknapparna på keypaden för just den här rutan.
         html += '<span class="ovn-text ovn-num">' + (rad.fragaHtml || rad.fraga) + '</span>';
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
-        html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-vars="' + (rad.vars || 'xy')
+        html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
           + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off"' + (rad.placeholder ? '' : '') + '>';   // ingen platshållartext (Joachim)
       } else if(rad.typ === 'omkrets'){
         // OMKRETS UR FIGUR: figuren (SVG ur svg-algebrafigur.js) + ett förenklat uttryck som svar.
@@ -667,9 +669,9 @@ function bladHTML(blad){
         // ("x + 3x + x + 3x = 8x"). Utan sidor: som förr, bara det förenklade uttrycket.
         html += rad.sidor
           ? '<input class="ovn-in bred ovn-kedja" data-omkrets="' + encodeURIComponent(rad.svar)
-            + '" data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '" data-vars="' + (rad.vars || 'xy')
+            + '" data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
             + '" data-visa="' + rad.sidor.join(' + ') + ' = ' + rad.svar + '" inputmode="text" autocomplete="off">'
-          : '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-vars="' + (rad.vars || 'xy')
+          : '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
             + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
         html += '</div></div>';
       } else if(rad.typ === 'oppet'){
@@ -678,7 +680,7 @@ function bladHTML(blad){
         // vara oförenklat).
         html += '<span class="ovn-text" style="min-width:150px;">' + (rad.fraga || '') + '</span>';
         html += '<input class="ovn-in bred" data-oppet="' + encodeURIComponent(rad.mal) + '" data-termer="' + (rad.termer || 4)
-          + '" data-vars="' + (rad.vars || 'x') + '" data-visa="' + rad.mal + '" inputmode="text" autocomplete="off">';
+          + '" data-kp="uttryck" data-vars="' + (rad.vars || 'x') + '" data-visa="' + rad.mal + '" inputmode="text" autocomplete="off">';
       } else if(rad.typ === 'pyramid'){
         // ADDITIONSPYRAMID: varje ruta = summan av de två under. Rutor med 'fast' är givna, övriga
         // fylls i. EN RUTA = ETT SVAR (egen markering) — flerrutsrad enligt order 2026-09-21.
@@ -688,7 +690,7 @@ function bladHTML(blad){
           r.forEach(function(c){
             html += (c.fast !== undefined)
               ? '<span class="alg-ruta alg-ruta-fast">' + c.fast + '</span>'
-              : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-vars="' + (rad.vars || 'xy')
+              : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
                 + '" data-visa="' + c.svar + '" inputmode="text" autocomplete="off">';
           });
           html += '</div>';
@@ -704,7 +706,7 @@ function bladHTML(blad){
         rad.rutor.forEach(function(c){
           html += (c.fast !== undefined)
             ? '<span class="alg-ruta alg-ruta-fast">' + c.fast + '</span>'
-            : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-vars="' + (rad.vars || 'xy')
+            : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
               + '" data-visa="' + c.svar + '" inputmode="text" autocomplete="off">';
         });
         html += '</div></div>';
@@ -714,9 +716,9 @@ function bladHTML(blad){
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
         html += '<div class="alg-sidor" data-halva="' + encodeURIComponent(rad.halva) + '" data-visa="' + rad.visa + '">';
-        html += '<input class="ovn-in bred" data-sida="1" data-vars="' + (rad.vars || 'x') + '" inputmode="text" autocomplete="off">';
+        html += '<input class="ovn-in bred" data-sida="1" data-kp="uttryck" data-vars="' + (rad.vars || 'x') + '" inputmode="text" autocomplete="off">';
         html += '<span class="ovn-text" style="margin:0 6px;">och</span>';
-        html += '<input class="ovn-in bred" data-sida="2" data-vars="' + (rad.vars || 'x') + '" inputmode="text" autocomplete="off">';
+        html += '<input class="ovn-in bred" data-sida="2" data-kp="uttryck" data-vars="' + (rad.vars || 'x') + '" inputmode="text" autocomplete="off">';
         html += '</div></div>';
       } else if(rad.typ === 'ordtext'){
         // fritext som tolkning (rättas mot lista av godkända formuleringar)
@@ -733,11 +735,12 @@ function bladHTML(blad){
         if(rad.svarTyp === 'uttryck' && rad.sidor){
           // OMKRETS UR FIGUREN: kedjeruta (uppställning = förenkling), som omkrets-raden.
           html += '<input class="ovn-in bred ovn-kedja" data-omkrets="' + encodeURIComponent(rad.svar)
-            + '" data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '" data-vars="' + (rad.vars || 'xy')
+            + '" data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
             + '" data-visa="' + rad.sidor.join(' + ') + ' = ' + rad.svar + '" inputmode="text" autocomplete="off">';
         } else if(rad.svarTyp === 'uttryck'){
           var accB = (rad.accept || [rad.svar]).join('|');
           html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(accB)
+            + '" data-kp="uttryck" data-vars="' + varsAv(rad)
             + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
         } else if(rad.svarTyp === 'text'){
           var accBt = (rad.accept || [rad.svar]).join('|');
@@ -865,6 +868,16 @@ function bladHTML(blad){
   return html;
 }
 
+  // Variablerna en uttrycksruta ska erbjuda: radens vars om den finns, annars bokstäverna i facit
+  // (AlgBraks sex: x y a b c n). Utan detta står bokstavsknapparna grå och eleven kan inte svara.
+  function varsAv(rad){
+    if(rad && rad.vars) return rad.vars;
+    var t = String((rad && rad.svar) || '') + ' ' + (((rad && rad.accept) || []).join(' '));
+    var ut = '';
+    ['x', 'y', 'a', 'b', 'c', 'n'].forEach(function(v){ if(t.indexOf(v) >= 0 && ut.indexOf(v) < 0) ut += v; });
+    return ut || 'x';
+  }
+
 function bygg_blad(rotEl, blad){
   rotEl.innerHTML = bladHTML(blad);
 
@@ -957,7 +970,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text]';
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-oms]';
   function vaxRuta(inp){
     if(!inp || !window.AK8_UI || !AK8_UI.grow) return;
     if(inp.dataset.minw === undefined){
@@ -966,9 +979,17 @@ function bygg_blad(rotEl, blad){
     }
     AK8_UI.grow(inp, { min: parseInt(inp.dataset.minw, 10) });
   }
+  // MELLANRUM KRING TECKEN (AK8_UI.autoSpace — samma funktion som åttans blad och k3:s d4/d5):
+  // eleven skriver 3+4 och rutan visar 3 + 4, utan att markören flyttar sig. Uttrycksrutor bara;
+  // en ruta med ett rent tal ska inte få mellanrum.
   rotEl.querySelectorAll(VAXER).forEach(function(inp){
+    // mellanledet är ett uttryck (3 + 4 · 2 − 8) även utan data-vars — det ska ha mellanrum
+    var uttrycksruta = inp.matches('[data-vars],[data-mellan],[data-oms]');
     vaxRuta(inp);
-    inp.addEventListener('input', function(){ vaxRuta(inp); });
+    inp.addEventListener('input', function(){
+      if(uttrycksruta && window.AK8_UI && AK8_UI.autoSpace) AK8_UI.autoSpace(inp);
+      vaxRuta(inp);
+    });
   });
 
   rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
