@@ -8,7 +8,7 @@
 
   // Byggbara noder — spegel av K3_GEN_NOD-värdena i ak7-k3-ram.html (HÅLL I SYNK).
   var BYGGBARA = {};
-  ['alg-tolka:begrepp', 'alg-skriva:kommunikation', 'alg-berakna:rakna'
+  ['alg-tolka:begrepp', 'alg-skriva:kommunikation', 'alg-berakna:rakna', 'alg-samla:rakna'
   ].forEach(function(n){ BYGGBARA[n] = 1; });
 
   // Antal test-TYPER (snabb-generatorer) per nod — spegel av K3_GEN_NOD. Default 1.
@@ -37,8 +37,20 @@
     var n = tax && tax.noder && tax.noder.filter(function(x){ return x.id === id; })[0];
     return (n && n.visning && n.visning.grupp) || 'Övrigt';
   }
+  // ÅTTANS DELKAPITEL 1: tre test med stigande svårighet i stället för ett per grupp.
+  // Nivån är bandets — test 1 hämtar ur bladens nivå 1, test 2 ur 1–2, test 3 ur alla.
+  var ALG1_TRAPPA = [
+    { titel: 'Test 1 · en variabel',              maxNiva: 1, antal: 12 },
+    { titel: 'Test 2 · två variabler',            maxNiva: 2, antal: 14 },
+    { titel: 'Test 3 · sammansatta uttryck',      maxNiva: 3, antal: 16 }
+  ];
   function tester(del){
     var noder = byggbaraNoder(del); if(!noder.length) return [];
+    if(del === 'alg1'){
+      return ALG1_TRAPPA.map(function(t){
+        return { titel: t.titel, nodes: noder.slice(), antal: t.antal, maxNiva: t.maxNiva };
+      });
+    }
     var ordning = [], grupper = {};
     noder.forEach(function(n){ var g = gruppAv(n); if(!grupper[g]){ grupper[g] = []; ordning.push(g); } grupper[g].push(n); });
     return ordning.map(function(g){ var ns = grupper[g]; return { titel: g, nodes: ns, antal: antalFor(ns) }; });
@@ -147,7 +159,10 @@
     if(typeof document !== 'undefined' && document.querySelector){
       var _tp = document.querySelector('.tab-panel[data-panel="test"]');
       var _m = (location.pathname || '').match(/\/(d\d+)-/);
-      if(_tp && _m){ renderTestFlik(_tp, 'k3' + _m[1], '../../../ak7-k3-ram.html'); initFlikrad(); }
+      // Åttans kapitel 2 ligger under /ak8/k2/ och har egna del-id (alg1 …).
+      var _ak8 = /\/ak8\/k2\//.test(location.pathname || '');
+      var _del = _ak8 ? ({ d1: 'alg1' })[_m && _m[1]] : (_m ? 'k3' + _m[1] : null);
+      if(_tp && _del){ renderTestFlik(_tp, _del, '../../../ak7-k3-ram.html'); initFlikrad(); }
     }
   } catch(e){}
 })();

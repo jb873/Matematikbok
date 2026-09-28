@@ -51,9 +51,40 @@ function ova(lista){
       if(knappar[j]){ var on = (j === i); knappar[j].classList.toggle('is-active', on); knappar[j].setAttribute('aria-selected', on ? 'true' : 'false'); }
     });
   }
+  // En flik med FLERA blad får en egen rad underflikar inuti sin mount. Bladen byggs på samma
+  // sätt som ett ensamt blad — samma bygg_blad, samma data-form.
+  function underflikar(p, mountEl){
+    if(!mountEl) return;
+    var rad = document.createElement('div'); rad.className = 'blad-subnav'; rad.setAttribute('role', 'tablist');
+    var ytor = [], knappar = [];
+    p.blad.forEach(function(b, j){
+      var yta = document.createElement('div'); yta.className = 'ovn-wrap'; yta.id = 'sheet-' + b.id;
+      yta.hidden = j !== 0;
+      ytor[j] = yta;
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'blad-nav-btn blad-subnav-btn'; btn.setAttribute('role', 'tab');
+      btn.innerHTML = '<span class="blad-nav-nr">' + (j + 1) + '</span>' + b.titel;
+      btn.onclick = function(){
+        ytor.forEach(function(y, k){ y.hidden = k !== j; });
+        knappar.forEach(function(x, k){ var on = k === j; x.classList.toggle('is-active', on); x.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      };
+      knappar[j] = btn; rad.appendChild(btn);
+    });
+    mountEl.appendChild(rad);
+    ytor.forEach(function(y){ mountEl.appendChild(y); });
+    knappar[0].classList.add('is-active'); knappar[0].setAttribute('aria-selected', 'true');
+    p.blad.forEach(function(b, j){
+      if(b.data && typeof window.bygg_blad === 'function'){
+        window.bygg_blad(ytor[j], Object.assign({}, b.data, { stegvis: false, titel: b.data.titel || b.titel, onResultat: function(){} }));
+      }
+    });
+  }
+
   lista.forEach(function(p, i){
     var data = p.data || window[p.dataNamn], sheet = document.getElementById('sheet-' + p.mount);
-    if(data && sheet && typeof window.bygg_blad === 'function'){
+    if(p.blad && p.blad.length){
+      underflikar(p, document.getElementById('blad-' + p.mount));
+    } else if(data && sheet && typeof window.bygg_blad === 'function'){
       window.bygg_blad(sheet, Object.assign({}, data, { stegvis: false, titel: p.titel, onResultat: function(){} }));
     }
     mounts[i] = document.getElementById('blad-' + p.mount);

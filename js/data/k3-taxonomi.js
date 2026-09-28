@@ -60,7 +60,7 @@ window.K3_TAXONOMI = {
       "id": "alg-tolka:begrepp", "namn": "Tolka uttryck", "parent": "alg-tolka", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "BEGREPP", "generator": "tolkaEngine",
       "begrepp": "Tolka vad ett uttryck står för och koppla uttryck till bild och situation.",
-      "visning": { "utbudslista": "k3d1", "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 0, "titel": "Tolka uttryck", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
+      "visning": { "utbudslista": ["k3d1","alg1"], "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 0, "titel": "Tolka uttryck", "etikett": "begrepp", "formagaKey": "begrepp", "niva": null }
     },
     {
       "id": "alg-skriva", "namn": "Skriva uttryck", "parent": "alg-uttryck", "niva": "deldoman",
@@ -72,7 +72,7 @@ window.K3_TAXONOMI = {
       "id": "alg-skriva:kommunikation", "namn": "Skriva uttryck", "parent": "alg-skriva", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "KOMMUNIKATION", "generator": "skrivaEngine",
       "begrepp": "Skriv ett uttryck som beskriver en text, figur eller sträcka med variabler.",
-      "visning": { "utbudslista": "k3d1", "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 1, "titel": "Skriva uttryck", "etikett": "kommunikation", "formagaKey": "kommunikation", "niva": null }
+      "visning": { "utbudslista": ["k3d1","alg1"], "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 1, "titel": "Skriva uttryck", "etikett": "kommunikation", "formagaKey": "kommunikation", "niva": null }
     },
     {
       "id": "alg-berakna", "namn": "Beräkna med uttryck", "parent": "alg-uttryck", "niva": "deldoman",
@@ -84,7 +84,7 @@ window.K3_TAXONOMI = {
       "id": "alg-berakna:rakna", "namn": "Beräkna med uttryck", "parent": "alg-berakna", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": "beraknaEngine",
       "begrepp": "Sätt in variabelns värde och beräkna uttryckets värde (med mellanled).",
-      "visning": { "utbudslista": "k3d1", "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 2, "titel": "Beräkna med uttryck", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": ["k3d1","alg1"], "grupp": "Algebraiska uttryck", "gruppordning": 0, "radordning": 2, "titel": "Beräkna med uttryck", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
 
     /* ═══════════════ Del 2 · Mönster (kommer senare) ═══════════════
@@ -157,7 +157,7 @@ window.K3_TAXONOMI = {
       "id": "alg-samla:rakna", "namn": "Förenkla uttryck", "parent": "alg-samla", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": "forenklaEngine",
       "begrepp": "Samla lika termer och skriv uttrycket i enklaste form.",
-      "visning": { "utbudslista": "k3d3", "grupp": "Förenkla uttryck", "gruppordning": 0, "radordning": 0, "titel": "Förenkla uttryck", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
+      "visning": { "utbudslista": ["k3d3","alg1"], "grupp": "Förenkla uttryck", "gruppordning": 0, "radordning": 0, "titel": "Förenkla uttryck", "etikett": "räkna", "formagaKey": "rakna", "niva": null }
     },
     {
       "id": "alg-samla-faktor", "namn": "Multiplicera och dela en term", "parent": "alg-forenkla", "niva": "deldoman",
@@ -169,7 +169,8 @@ window.K3_TAXONOMI = {
       "id": "alg-samla-faktor:rakna", "namn": "Multiplicera och dela en term", "parent": "alg-samla-faktor", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Multiplicera ett tal med en term (5 · 3x) och dela en term med ett tal (28x/2).",
-      "visning": null
+      "visning": { "utbudslista": ["k3d3","alg1"], "grupp": "Förenkla uttryck", "gruppordning": 1, "radordning": 1,
+                   "etikett": "räkna", "formagaKey": "rakna", "niva": null, "drillKommer": true }
     },
     {
       "id": "alg-forenkla-parentes", "namn": "Förenkla med parentes", "parent": "alg-forenkla", "niva": "deldoman",

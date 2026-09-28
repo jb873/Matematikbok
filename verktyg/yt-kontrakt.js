@@ -165,7 +165,7 @@ const PROBE = `(function(){
 // Ytorna: alla delkapitelsidor och åttans blad-sidor (ram-filerna är drillar → läslistan).
 function sidor(){
   const ut = [];
-  ['ak7/k1', 'ak7/k2', 'ak7/k3'].forEach(kap => {
+  ['ak7/k1', 'ak7/k2', 'ak7/k3', 'ak8/k2'].forEach(kap => {
     const d = path.join(ROOT, kap);
     if(!fs.existsSync(d)) return;
     fs.readdirSync(d, { withFileTypes: true }).filter(e => e.isDirectory()).forEach(e => {

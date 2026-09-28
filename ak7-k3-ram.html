@@ -12,6 +12,12 @@
 <script src="js/motor/blad/ak8-blad-ui.js"></script>
 <script src="js/motor/blad/likhetsrattare.js"></script>
 <script src="js/data/k3-taxonomi.js"></script>
+<!-- Åttans delkapitel 1 delar den här ramen: bandet, generatorn och bladen laddas så att dess
+     färdiga test kan hämta ur åttans egen talbank (bara när del=alg1). -->
+<script src="js/motor/figur/svg-algebrafigur.js"></script>
+<script src="js/data/band-ak8-alg1.js"></script>
+<script src="js/motor/blad/gen-ak8-alg1.js"></script>
+<script src="js/motor/blad/blad-ak8-alg1.js"></script>
 <script src="js/data/k3-fardiga-test.js"></script>
 <script src="js/motor/alg-brak.js"></script>
 <script src="js/motor/blad/blad-k3-d1.js"></script>
@@ -470,9 +476,13 @@ function rP(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 // ── ÖVA-BLADENS TALBANK (blad-k3-d1.js). Testet frågar samma uppgifter som öva-bladet; när banken
 // är slut (eller posten inte passar generatorns form) faller generatorn tillbaka på egna tal.
 // Samma metod som k2:s bankPost (ak7-k2-ram.html) — ÖVA äger talen, testet hämtar dem.
+// ÅTTANS LÄGE: ett färdigt test med del=alg1 hämtar ur åttans blad i stället för sjuans, med
+// nivåtaket som testets trappsteg sätter. Utan det läget är allt precis som förut.
+var AK8_ALG1 = null;   // { maxNiva }
 function d1Bank(nod, slag){
-  var B = window.BLAD_K3_D1; if(!B) return [];
-  var lista = B.talBank(nod);
+  var B = AK8_ALG1 ? window.BLAD_AK8_ALG1 : window.BLAD_K3_D1;
+  if(!B) return [];
+  var lista = AK8_ALG1 ? B.talBank(nod, AK8_ALG1.maxNiva) : B.talBank(nod);
   return slag ? lista.filter(function(p){ return p.slag === slag; }) : lista;
 }
 function d1Post(nod, slag){ var l = d1Bank(nod, slag); return l.length ? rP(l) : null; }
@@ -695,6 +705,7 @@ if(/[?&]view=test-fardigt/i.test(_hs)){
   var _ftester = (window.K3_FARDIGA && _mfd) ? K3_FARDIGA.tester(_mfd[1]) : [];
   var _ft = _ftester[_mft ? (parseInt(_mft[1], 10) - 1) : 0] || _ftester[0];
   var _mret = _hs.match(/[?&]retur=([^&\s]+)/i), _mrtx = _hs.match(/[?&]retur_txt=([^&\s]+)/i);
+  if(_ft && _mfd && _mfd[1] === 'alg1') AK8_ALG1 = { maxNiva: _ft.maxNiva || 3 };
   if(_ft){ PB.byggFardigt({ nodes: _ft.nodes, antal: _ft.antal, varianter: _ft.varianter || null,
     retur: _mret ? decodeURIComponent(_mret[1]) : null, returTxt: _mrtx ? decodeURIComponent(_mrtx[1]) : null }); }
   else { PB.setDel(_mfd ? _mfd[1] : null); pbNav('test-config'); }
