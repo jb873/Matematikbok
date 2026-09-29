@@ -17,14 +17,15 @@
      PLATSHÅLLARE  inga placeholder-texter i svarsrutor
      DIVISION    ingen ÷ i uppgiftstexten — division skrivs som staplat bråk
 
-   LÄSLISTA (går inte att avgöra mekaniskt — läs själv vid granskning)
-     · Etiketter framför rutan får stå, hjälptexter i öva får inte. Gränsen är språklig:
-       "Area:" namnger, "Skriv ett mellanled först" instruerar. Se elevtext-låset, som kräver att
-       varje elevtext ligger i ett FALT-fält och godkänns per fil.
-     · Bekräftelsesteg i drillar (inget auto-advance). Drillarna kör i ram-filer med egen
-       flödeslogik; kontrollen kräver att man spelar en omgång per drill.
-     · Att exemplet inte sammanfaller med en uppgift i samma grupp: verktyg/exempel-svep.js.
-     · Att rutorna går att MÄTA: verktyg/namnare-grind.js och verktyg/flerruts-grind.js.
+   VAD DEN HÄR GRINDEN INTE TÄCKER
+     · Gränsen mellan etikett och hjälptext är språklig ("Area:" namnger, "Skriv ett mellanled
+       först" instruerar) och avgörs inte här. Elevtext-låset kräver att varje elevtext ligger i
+       ett FALT-fält och godkänns per fil.
+     · Angränsande grindar: exempel-svep.js (exemplet ≠ uppgift i samma grupp), namnare-grind.js
+       och flerruts-grind.js (att rutorna går att MÄTA).
+     · Plattformsreglerna i stort — inklusive de som ingen grind vaktar ännu, och vad som skulle
+       krävas för att mäta dem — står i KONVENTIONER.md. Den listan bor på ETT ställe; skriv inte
+       av den hit.
 
    KÖR:  node verktyg/yt-kontrakt.js [--sida <delsträng>]
    Exit 1 vid brott. Ingen nätväg, ingen fil ändras. */
