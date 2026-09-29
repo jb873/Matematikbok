@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="sv">
+<!--
+  MALL FÖR EN KAPITELSIDA — sidan som listar ett kapitels delkapitel.
+
+  ETT NYTT KAPITEL SKAPAS GENOM ATT LÄGGA TILL DATA, INTE GENOM ATT KOPIERA EN SIDA.
+  Kopiera den här filen, byt ut data i Kapitelsida.montera, och rör inget annat. All form —
+  kicker med linjer, rubriken i Cormorant, ingressen, "← Alla kapitel", etiketten DELKAPITEL,
+  korten med blå vänsterkant och DEL N — ritas av js/kapitel/kapitelsida.js.
+
+  DE TRE REGLERNA SOM GRINDEN VAKTAR (verktyg/kapitelsida-grind.js):
+    1. Sidan monteras via Kapitelsida.montera. Ingen egen markup för huvudet eller korten.
+    2. Ingen kapitelsidestil inline. navsida.css är källan; fonts.css måste länkas.
+    3. STATUSEN HÄRLEDS UR INNEHÅLLET och sätts aldrig för hand. Ett delkapitel med innehåll
+       har en fil och är öppet; ett utan fil blir ett tonat kort utan länk. Skriv aldrig ett
+       status-fält — det gick att sätta för hand och drev isär från verkligheten: åttans elva
+       delkapitel stod som BYGGER medan alla elva var byggda, nians nio som "skelett" medan sju
+       var tomma och klickbara.
+
+  SÖKVÄGAR: ligger sidan i roten är bas '' och prefixen nedan tomma. Ligger den i ak8/k2/ är
+  bas '../../' och skripten laddas med samma prefix.
+
+  ELEVTEXT: all text eleven läser ligger i fält (titel, sub, ingress …) så elevtext-låset ser
+  den. Joachim sätter ordalydelsen — skriv aldrig en beskrivning själv. Saknas den står namnet
+  ensamt tills han levererat meningen.
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Åk N · Kapitel N</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../js/kapitel/navsida.css">
+<!-- Bara om kapitlet har en fot (Kunskapsläge + Träna inför provet): -->
+<link rel="stylesheet" href="../../js/fot/kapitel-fot.css">
+</head>
+<body>
+
+<script src="../../js/kapitel/kapitel-lista.js"></script>
+<script src="../../js/kapitel/kapitelsida.js"></script>
+<script src="../../js/fot/kapitel-fot.js"></script>
+<script>
+Kapitelsida.montera({
+  arskurs: 8,                       // syns i kickern och i smulan
+  kapitel: 2,
+  bas: '../../',                    // prefix till rotens filer; '' om sidan ligger i roten
+  arskursSida: '../index.html',     // dit "← Alla kapitel" och smulan går
+
+  // Klammern markerar den del av rubriken som blir guld kursiv. Sjuans mönster: delen efter "och".
+  titel: 'Ämnet och {det som är nytt}',
+  ingress: 'Välj ett delkapitel för att komma till dess föreläsningar och övningar.',
+
+  // Ett delkapitel per rad. fil: null = platsen syns, är tonad och går inte att klicka på.
+  // typ: 'avsnitt' (blå kant) | 'prov' (guld) | 'fordjupning' (lila).
+  // utbud (valfritt) pekar ut delkapitlets utbudslista i taxonomin; då listas nodernas namn
+  // under beskrivningen, så platsen visar vad den ska hålla innan den är byggd.
+  delkapitel: [
+    { nr: 1, titel: 'Delkapitlets namn', sub: 'En mening om vad delkapitlet innehåller.', fil: 'd1-slug/index.html', typ: 'avsnitt' },
+    { nr: 2, titel: 'Nästa delkapitel',  sub: 'En mening till.',                          fil: null,                 typ: 'avsnitt' }
+  ],
+
+  // Kapitel-foten — utelämna hela fältet om kapitlet inte har någon fot.
+  // Texten är data: utan egna fält gäller sjuans k1 ordagrant.
+  fot: {
+    kunskapslage:   { href: 'karta/index.html', status: 'live' },
+    skapaTest:      { href: '../../ak8-k1-ram.html?view=test-config', status: 'live' },
+    sjalvskattning: { status: 'kommer' }
+  }
+});
+</script>
+
+<script src="../../js/elevfeedback.js" defer></script>
+</body>
+</html>

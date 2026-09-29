@@ -9,25 +9,44 @@
    config = {
      mountId?:        'kapitel-fot',     // element att rendera i (default)
      eyebrowText?:    'Begreppskarta · självskattning',
-     kunskapslage:    { href, status:'live'|'kommer' },
-     skapaTest:       { href, status:'live'|'kommer' },
-     sjalvskattning:  { href, status:'live'|'kommer' }
-   } */
+     kunskapslage:    { href, status:'live'|'kommer', rubrik?, titel?, sub?, knapp? },
+     skapaTest:       { href, status:'live'|'kommer', titel?, sub? },
+     sjalvskattning:  { href, status:'live'|'kommer', titel?, sub? },
+     provRubrik?:     'Träna inför provet'
+   }
+   TEXTEN ÄR DATA. Standarden är sjuans k1, ordagrant. k2 och k3 bar förr handskrivna fötter med
+   egna ord ("Bråkets framsida", och k3:s "Öva mer"/metodträning) — de orden ligger nu i deras
+   data i stället för i var sin kopia av koden. Skillnad hör hemma i data. */
 (function(){
   'use strict';
+  // ELEVTEXT som fält (elevtext-låset ser fältnamnen). Standarden är sjuans k1, ordagrant.
+  var T = {
+    kunskapslage: { rubrik: 'Kunskapsläge' },
+    prov:         { rubrik: 'Träna inför provet' },
+    banner: {
+      titel: 'Kunskapsläge — var står jag?',
+      sub:   'Områdets framsida: en karta färgad av det du faktiskt övat, och en självskattning där du tar ställning själv. Se vad som sitter och vad som är kvar. Färdighetsträningen når du inne i varje delkapitel.',
+      knapp: 'Öppna →',
+      kommer: 'Kommer'
+    },
+    test:  { titel: 'Skapa eget test',
+             sub:   'Välj 3–5 moment du vill testa dig på, så sätts ett eget övningstest ihop.' },
+    sjalv: { titel: 'Självskattning',
+             sub:   'Ta ställning själv: Kan · Osäker · Kan ej – för varje färdighet. Bredvid står evidensen från det du övat.' }
+  };
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   // Kunskapsläge-bannern (mörk). live → <a>, kommer → <div> + chip i btn-positionen.
   function bannerHtml(cfg, eyebrow){
     var kommer = cfg.status === 'kommer';
     var inner =
-        '<div class="ova-banner-icon">🧭</div>'
+        '<div class="ova-banner-icon">' + (cfg.ikon || '🧭') + '</div>'
       + '<div class="ova-banner-body">'
         + '<div class="ova-banner-eyebrow">' + esc(eyebrow) + '</div>'
-        + '<div class="ova-banner-title">Kunskapsläge — var står jag?</div>'
-        + '<div class="ova-banner-desc">Områdets framsida: en karta färgad av det du faktiskt övat, och en självskattning där du tar ställning själv. Se vad som sitter och vad som är kvar. Färdighetsträningen når du inne i varje delkapitel.</div>'
+        + '<div class="ova-banner-title">' + esc(cfg.titel || T.banner.titel) + '</div>'
+        + '<div class="ova-banner-desc">' + esc(cfg.sub || T.banner.sub) + '</div>'
       + '</div>'
-      + '<div class="ova-banner-btn">' + (kommer ? 'Kommer' : 'Öppna →') + '</div>';
+      + '<div class="ova-banner-btn">' + (kommer ? esc(T.banner.kommer) : esc(cfg.knapp || T.banner.knapp)) + '</div>';
     return kommer
       ? '<div class="ova-banner is-kommer" aria-disabled="true">' + inner + '</div>'
       : '<a class="ova-banner" href="' + esc(cfg.href) + '">' + inner + '</a>';
@@ -42,7 +61,7 @@
         + '<div class="prov-card-title">' + esc(titel) + '</div>'
         + '<div class="prov-card-desc">' + esc(desc) + '</div>'
       + '</div>'
-      + (kommer ? '<span class="kf-chip">Kommer</span>' : '<div class="prov-card-arrow">›</div>');
+      + (kommer ? '<span class="kf-chip">' + esc(T.banner.kommer) + '</span>' : '<div class="prov-card-arrow">›</div>');
     return kommer
       ? '<div class="prov-card is-kommer" aria-disabled="true">' + inner + '</div>'
       : '<a class="prov-card" href="' + esc(cfg.href) + '">' + inner + '</a>';
@@ -58,15 +77,15 @@
     var sjalv   = config.sjalvskattning || { status:'kommer' };
 
     mount.innerHTML =
-        '<div class="section-label">Kunskapsläge</div>'
+        '<div class="section-label">' + esc(kunskap.rubrik || T.kunskapslage.rubrik) + '</div>'
       + bannerHtml(kunskap, eyebrow)
-      + '<div class="section-label">Träna inför provet</div>'
+      + '<div class="section-label">' + esc(config.provRubrik || T.prov.rubrik) + '</div>'
       + '<div class="prov-grid">'
-        + provCardHtml(test,  '📝', 'Skapa eget test', 'Välj 3–5 moment du vill testa dig på, så sätts ett eget övningstest ihop.')
-        + provCardHtml(sjalv, '✓',  'Självskattning',  'Ta ställning själv: Kan · Osäker · Kan ej – för varje färdighet. Bredvid står evidensen från det du övat.')
+        + provCardHtml(test,  test.ikon  || '📝', test.titel  || T.test.titel,  test.sub  || T.test.sub)
+        + provCardHtml(sjalv, sjalv.ikon || '✓',  sjalv.titel || T.sjalv.titel, sjalv.sub || T.sjalv.sub)
       + '</div>';
     return mount;
   }
 
-  window.KapitelFot = { montera: montera };
+  window.KapitelFot = { montera: montera, TEXT: T };
 })();

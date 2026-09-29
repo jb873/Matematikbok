@@ -81,7 +81,9 @@ function montera(cfg){
     + '</header>'
     + '<div class="section-label">' + esc(TEXT.delkapitel.rubrik) + '</div>'
     + '<main class="card-grid" id="delkapitel-grid"></main>'
-    + '<div id="kapitel-fot"></div>'
+    // Monteringspunkten för kapitel-foten ritas bara när kapitlet HAR en fot. En tom div på en
+    // sida utan fot är död markup, och död markup blir förr eller senare någons felsökning.
+    + (cfg.fot ? '<div id="kapitel-fot"></div>' : '')
     + '<footer><div>' + esc(TEXT.fot.titel) + '</div><span>'
     +   esc(txt(TEXT.kapitel.titel, kap)) + '</span></footer>';
 

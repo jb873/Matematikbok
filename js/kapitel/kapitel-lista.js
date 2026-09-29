@@ -74,6 +74,9 @@ function kort(d, tax){
     el = document.createElement('div'); el.className = 'nav-card is-soon';
     el.setAttribute('aria-disabled', 'true');
   }
+  // Kortets SLAG står i markupen, inte bara i färgen: ett öppet prov-kort får badgen "open" och
+  // vore annars omöjligt att skilja från ett vanligt delkapitel utifrån. Grinden läser den här.
+  if(d.typ === 'prov') el.className += ' is-prov';
   if(arFordjupning) el.className += ' is-fordjupning';
   el.innerHTML = inner;
   return el;

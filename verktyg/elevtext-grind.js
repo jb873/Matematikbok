@@ -55,7 +55,9 @@ function attrMall(raw) {
 // kvrot + forelasningar.js): någon skapar en mapp och ingen minns uppräkningen. Nu är en ny katalog
 // automatiskt INNANFÖR. Låset kan bara bli rödare, aldrig tystare. Antalet skannade filer skrivs ut vid
 // varje körning (självrapport) — en ny katalog syns som en siffra som ökat, inte som tystnad.
-const EXKLUDERA = ['Arkiv', '.claude', 'verktyg', 'fonts', 'node_modules', '.git'];   // toppnivå-kataloger
+// mallar/ = förlagor som kopieras när något nytt byggs. Deras platshållartext når aldrig en
+// elev, och ska inte registreras som elevtext — det som byggs UR mallen granskas i sin egen fil.
+const EXKLUDERA = ['Arkiv', '.claude', 'verktyg', 'fonts', 'node_modules', '.git', 'mallar'];   // toppnivå-kataloger
 function kallor() {
   const list = [];
   (function ga(rel) {
