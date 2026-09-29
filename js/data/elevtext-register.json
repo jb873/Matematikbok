@@ -518,8 +518,6 @@
   "titel | Byggs snart"
  ],
  "js/motor/blad/blad-k1d4.js": [
-  "hint | {} Här finns även <strong>hundradelar</strong> – dem skriver du med nämnaren 100 (t.ex. 0,07 = 7/100).",
-  "hint | {} Här finns även bråk vars nämnare är 20, 25 eller 50 – förläng dem till hundradelar.",
   "intro | Ett samlingstest för hela delkapitlet. Tre områden.",
   "intro | Skriv bråket som decimaltal och decimaltalet som bråk i enklaste form. Här finns både enkla tal och svårare med hundradelar.",
   "intro | Tiondelar och hundradelar är bryggan mellan formerna. Här finns både enkla tal och svårare – förläng bråket till hundradelar och läs av decimaltalet.",

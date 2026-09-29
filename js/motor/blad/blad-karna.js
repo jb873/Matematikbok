@@ -174,11 +174,9 @@ function bladHTML(blad){
       + '</div>';
   }
 
-  html += '<div class="brak-hint">' + (blad.hint
-    ? blad.hint
-    : ('<strong>Tänk på:</strong> svara alltid i <strong>enklaste form</strong>. '
-       + (blad.mellanled ? 'Visa hur du räknar i uträkningsrutan – t.ex. hur du förlänger – innan du skriver svaret. ' : '')
-       + 'Är svaret i blandad form (större än 1) finns en liten ruta till vänster för heltalet.')) + '</div>';
+  // .brak-hint borttagen (order 2026-10-01): inga hjälptexter i öva. Facket ritades ALLTID, och
+  // utan egen text fylldes det med en standardinstruktion — bladet fick en hjälptext ingen skrivit.
+  // Rättarens besked efter svar rörs inte; det är återkoppling, inte instruktion.
 
   blad.grupper.forEach(function(grupp, gi){
     html += '<div class="ovn-grupp">';

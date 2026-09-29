@@ -26,9 +26,6 @@ function gSample(arr, k){
   return kopia.slice(0, k);
 }
 
-var BTFORM_HINT = '<strong>Tänk på:</strong> skriv decimaltal med <strong>komma</strong> (t.ex. 0,75) '
-  + 'och bråk i <strong>enklaste form</strong>.';
-var BTFORM_HINT2 = BTFORM_HINT + ' Här finns även <strong>åttondelar</strong>.';
 
 // Bygg ett blad ur poolerna för given nivå
 function bladBTform(niva, forsta){
@@ -51,7 +48,6 @@ function bladBTform(niva, forsta){
     intro: niva === 2
       ? 'Nu även åttondelar. Skriv bråken som decimaltal och decimaltalen som bråk i enklaste form.'
       : 'Skriv bråken som decimaltal och decimaltalen som bråk i enklaste form.',
-    hint: niva === 2 ? BTFORM_HINT2 : BTFORM_HINT,
     keypadOps: [','],
     grupper: [
       {rubrik:'Skriv bråket som decimaltal', rader:
@@ -86,9 +82,7 @@ function radForlang(t, n){
   return {typ:'brakForlang', taljare:t, namnare:n, hundra: t * 100 / n, decSvar: avr(t / n, 6)};
 }
 
-var HUNDRA_HINT = '<strong>Tänk på:</strong> en tiondel skrivs med nämnaren <strong>10</strong> och en hundradel med nämnaren <strong>100</strong>. '
   + 'När du förlänger ett bråk till hundradelar kan du läsa av decimaltalet direkt.';
-var HUNDRA_HINT2 = HUNDRA_HINT + ' På den här nivån finns även bråk vars nämnare är 20, 25 eller 50 – förläng dem till hundradelar.';
 
 function bladHundra(niva, forsta){
   var decPool  = niva === 2 ? HUNDRA_DEC1.concat(HUNDRA_DEC2) : HUNDRA_DEC1;
@@ -111,7 +105,6 @@ function bladHundra(niva, forsta){
     intro: niva === 2
       ? 'Använd tiondelar och hundradelar som brygga mellan bråkform och decimalform.'
       : 'Använd tiondelar som brygga mellan bråkform och decimalform.',
-    hint: niva === 2 ? HUNDRA_HINT2 : HUNDRA_HINT,
     keypadOps: [','],
     grupper: [
       {rubrik:'Skriv decimaltalet i bråkform', rader:
@@ -129,9 +122,6 @@ function GEN_HUNDRA_N2(){ return bladHundra(2, false); }
 // ============================================================
 //  DEL 3 · TEST – VISA VAD DU KAN  (samlingstest för delkapitlet)
 // ============================================================
-var TEST_HINT  = '<strong>Testet:</strong> visa att du klarar hela delkapitlet. '
-  + 'Skriv decimaltal med komma och bråk i <strong>enklaste form</strong>.';
-var TEST_HINT2 = TEST_HINT + ' På nivå 2 finns även åttondelar och hundradelar som förkortas.';
 
 function bladTest(niva, forsta){
   var poolBD = niva === 2 ? TERM2 : TERM1;
@@ -156,7 +146,6 @@ function bladTest(niva, forsta){
   return {
     titel: 'Test – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
     intro: 'Ett samlingstest för hela delkapitlet. Tre områden.',
-    hint: niva === 2 ? TEST_HINT2 : TEST_HINT,
     keypadOps: [','],
     isTest: true,
     grupper: [
@@ -192,7 +181,6 @@ function bladBrakDec(forsta){
   return {
     titel: 'Bråk ↔ decimal',
     intro: 'Skriv bråket som decimaltal och decimaltalet som bråk i enklaste form. Här finns både enkla tal och svårare med hundradelar.',
-    hint: BTFORM_HINT + ' Här finns även <strong>hundradelar</strong> – dem skriver du med nämnaren 100 (t.ex. 0,07 = 7/100).',
     keypadOps: [','],
     grupper: bdMergeGrupper(b1.grupper, b2.grupper)
   };
@@ -202,7 +190,6 @@ function bladTionHundra(forsta){
   return {
     titel: 'Tiondelar & hundradelar',
     intro: 'Tiondelar och hundradelar är bryggan mellan formerna. Här finns både enkla tal och svårare – förläng bråket till hundradelar och läs av decimaltalet.',
-    hint: HUNDRA_HINT + ' Här finns även bråk vars nämnare är 20, 25 eller 50 – förläng dem till hundradelar.',
     keypadOps: [','],
     grupper: bdMergeGrupper(b1.grupper, b2.grupper)
   };
