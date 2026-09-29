@@ -1773,5 +1773,36 @@
  ],
  "ak8/k1/index.html": [
   "titel | {}Kapitel 1"
+ ],
+ "js/data/ak8-k1-bok.js": [
+  "titel | Addition och subtraktion",
+  "titel | Addition och subtraktion, blad 1",
+  "titel | Addition och subtraktion, blad 2",
+  "titel | Beräkningar",
+  "titel | Division",
+  "titel | Division, blad 1",
+  "titel | Division, blad 2",
+  "titel | Grunder",
+  "titel | Grunder i bråk",
+  "titel | Grundpotenser",
+  "titel | Kvadratrötter",
+  "titel | Multiplicera och dividera med små tal",
+  "titel | Multiplicera och dividera med stora och små tal",
+  "titel | Multiplicera och dividera med stora tal",
+  "titel | Multiplikation",
+  "titel | Multiplikation och division",
+  "titel | Multiplikation och division med 10, 100 och 1000",
+  "titel | Multiplikation, blad 1",
+  "titel | Multiplikation, blad 2",
+  "titel | Negativa tal",
+  "titel | Potenser",
+  "titel | Potenser grund",
+  "titel | Prioriteringsregeln med potenser",
+  "titel | Räkna i positionssystemet",
+  "titel | Räkna med bråk",
+  "titel | Storlek och ordning",
+  "titel | Tal och {tals användning}",
+  "titel | Tiopotenser",
+  "titel | Tiosystemet"
  ]
 }

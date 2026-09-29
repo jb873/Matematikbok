@@ -4,7 +4,8 @@
       en åk8-kopia av en åk7-nod. Detta är årskursens ORDNING + blad-indelning; noderna
       är gemensamma och pekas ut via nod-id. ──
 
-   Varje delkapitel: { nr, id, titel, fil, blad:[ { nr, titel, roll, noder:[nod-id…] } ] }.
+   Varje delkapitel: { nr, id, titel, beskrivning, fil, blad:[ { nr, titel, roll, noder:[…] } ] }.
+   beskrivning = den mening kapitelsidan visar under titeln (ELEVTEXT, Joachims ordalydelse).
    INGET status-fält: kapitelsidan HÄRLEDER statusen ur fil (finns den → öppet, saknas den →
    kommer, tonat och oklickbart). Fältet fanns och stod på 'bygger' för alla elva medan alla elva
    var byggda och i bruk — ett handsatt fält driver isär från verkligheten. Lägg inte tillbaka det.
@@ -19,10 +20,13 @@
 window.AK8_K1_BOK = {
   arskurs: 'ak8',
   kapitel: 'k1',
-  titel: 'Tal och tals användning',          // ⚠️ kapiteltitel bekräftas av Joachim
+  // Klammern är kapitelsidans markering för den guld kursiva delen (js/kapitel/kapitelsida.js).
+  // Samma mönster som sjuans kapitel: delen efter "och" är guld. Joachim godkände 2026-09-29.
+  titel: 'Tal och {tals användning}',
   delkapitel: [
     {
       nr: 2, id: 'berakningar', titel: 'Beräkningar', fil: 'berakningar.html',
+      beskrivning: 'Multiplikation och division med tiopotenser, och med stora och små tal.',
       // Fyra mult/div-blad byggda (ur Joachims fyra docx). Prioriteringsregeln utan potenser
       // = tom slot, byggs i egen order. Noderna är sjuans Del 5/6/7 med {ak8:repetition}.
       blad: [
@@ -39,6 +43,7 @@ window.AK8_K1_BOK = {
       // Nod-taggning (stöd/repetition) på blad-/nod-nivå LÄMNAS OSATT — Joachim sätter den
       // efteråt (som negativa tal). Noderna är sjuans k1 (position:*), återanvända — inga nya.
       nr: 1, id: 'grunder', titel: 'Grunder', roll: 'stod', fil: 'grunder.html',
+      beskrivning: 'Tiosystemet, att räkna i positionssystemet och att ordna tal efter storlek.',
       blad: [
         { nr: 1, titel: 'Tiosystemet',               noder: ['position:begrepp', 'primtal:begrepp', 'primtal:rakna', 'delbarhet:rakna'] },
         { nr: 2, titel: 'Räkna i positionssystemet', noder: ['position:rakna', 'position:resonera'] },
@@ -52,6 +57,7 @@ window.AK8_K1_BOK = {
       // k2 saknade: likformiga bråk (brak-likformig) och tid↔bråk/decimal (brak-tid). Motor:
       // blad-ak8-d5.js (återanvänder ak8-blad-ui + svg-andel + svg-tallinje). minNiva ej satt.
       nr: 4, id: 'rakna-med-brak', titel: 'Räkna med bråk', fil: 'rakna-med-brak.html',
+      beskrivning: 'Bråkbegreppet och grunderna för att räkna med bråk.',
       blad: [
         { nr: 1, titel: 'Grunder i bråk', roll: 'repetition', noder: [
           'andel-hela:resonera', 'brak-blandad:rakna', 'brak-likformig:rakna', 'brak-forkorta:rakna', 'brak-forlanga:rakna',
@@ -66,6 +72,7 @@ window.AK8_K1_BOK = {
       // Noderna är sjuans brak-add/brak-sub {ak8:repetition} + ny nod brak-lana {ak8:mal} (nytt
       // mål i åttan). Problemlösnings-fliken byggs i egen order. minNiva ej satt.
       nr: 5, id: 'addsub-brak', titel: 'Addition och subtraktion', fil: 'addsub-brak.html',
+      beskrivning: 'Addera och subtrahera bråk med olika nämnare och i blandad form.',
       blad: [
         { nr: 1, titel: 'Addition och subtraktion, blad 1', roll: 'repetition', noder: ['brak-add:rakna', 'brak-sub:rakna', 'brak-blandad:rakna', 'brak-lana:rakna'] },
         { nr: 2, titel: 'Addition och subtraktion, blad 2', roll: 'repetition', noder: ['brak-add:rakna', 'brak-sub:rakna', 'brak-lana:rakna'] }
@@ -78,6 +85,7 @@ window.AK8_K1_BOK = {
       // Noderna: sjuans brak-mult {ak8:repetition} + ny nod brak-mult-forkorta {ak8:mal} (förkorta-innan =
       // egen färdighet i åttan, för stora tal). Problemlösning byggs kombinerad med division. minNiva ej satt.
       nr: 6, id: 'mult-brak', titel: 'Multiplikation', fil: 'mult-brak.html',
+      beskrivning: 'Multiplicera bråk med bråk, med heltal och i blandad form.',
       blad: [
         { nr: 1, titel: 'Multiplikation, blad 1', roll: 'repetition', noder: ['brak-mult-rakna:rakna', 'brak-mult-forkorta:rakna'] },
         { nr: 2, titel: 'Multiplikation, blad 2', roll: 'repetition', noder: ['brak-mult-rakna:rakna', 'brak-mult-forkorta:rakna'] }
@@ -91,6 +99,7 @@ window.AK8_K1_BOK = {
       // delade Likhetsrattare. Nya noder: brak-div-reciprok {ak8:mal}; brak-div-inv fick ak8:mal.
       // förkorta-innan återanvänder brak-mult-forkorta. De 2 ordproblemen bor kvar i dk5. minNiva ej satt.
       nr: 7, id: 'div-brak', titel: 'Division', fil: 'div-brak.html',
+      beskrivning: 'Dividera bråk med heltal, heltal med bråk och bråk med bråk.',
       blad: [
         { nr: 1, titel: 'Division, blad 1', roll: 'mal', noder: ['brak-div-reciprok:rakna', 'brak-div-hb:rakna', 'brak-div-bh:rakna', 'brak-div-bb:rakna', 'brak-div-inv:rakna'] },
         { nr: 2, titel: 'Division, blad 2', roll: 'mal', noder: ['brak-div-hb:rakna', 'brak-div-bh:rakna', 'brak-div-bb:rakna'] }   // brak-mult-forkorta borttagen 2026-09-21: bladets förkorta-grupp är bråk delat med bråk (testet täcker öva)
@@ -98,6 +107,7 @@ window.AK8_K1_BOK = {
     },
     {
       nr: 3, id: 'negativa-tal', titel: 'Negativa tal', fil: 'negativa-tal.html',
+      beskrivning: 'Negativa tal i de fyra räknesätten – med multiplikation och division som nytt.',
       blad: [
         { nr: 1, titel: 'Grunder',                     roll: 'repetition', noder: ['neg-begrepp:begrepp'] },
         { nr: 2, titel: 'Addition och subtraktion',    roll: 'repetition', noder: ['neg-rakna:addsub'] },
@@ -110,6 +120,7 @@ window.AK8_K1_BOK = {
       // (Färdighetsträning) + de nya {ak8:mal}-noderna (pot-*) byggs i FAS 3; prio-potenser
       // återanvänds. minNiva sätts när talurvalet spikats (FAS 3).
       nr: 8, id: 'potenser', titel: 'Potenser', fil: 'potenser.html',
+      beskrivning: 'Potensform, potenslagarna och prioriteringsregeln med potenser.',
       blad: [
         { nr: 1, titel: 'Potenser grund',                  noder: ['pot-begrepp:skriva', 'pot-begrepp:evaluera', 'pot-begrepp:tabell', 'pot-begrepp:figur', 'pot-addsub:rakna'] },
         { nr: 2, titel: 'Multiplikation och division',      noder: ['pot-multdiv:rakna', 'pot-multdiv:losut', 'pot-multdiv:resonera'] },
@@ -122,6 +133,7 @@ window.AK8_K1_BOK = {
       // begreppsnod (tio-rakna:prefix, blad-only). Motorn är dessutom negativ-exponent-kapabel
       // (a^(−k)=1/a^k, stående bråk) men det gate:as i talurvalet — inget blad använder det än.
       nr: 9, id: 'tiopotenser', titel: 'Tiopotenser', fil: 'tiopotenser.html',
+      beskrivning: 'Stora och små tal skrivna som tiopotenser.',
       blad: [
         { nr: 1, titel: 'Tiopotenser', noder: ['tio-rakna:skriva', 'tio-rakna:evaluera', 'tio-rakna:rakna', 'tio-rakna:addsub', 'tio-rakna:losut', 'tio-rakna:prefix'] }
       ]
@@ -131,6 +143,7 @@ window.AK8_K1_BOK = {
       // som potens/tiopotens; nytt koefficient- + normaliserings-lager ovanpå (ingen ny motor).
       // Ett blad, exakt-författat ur TRANSKRIPTION-ak8-grundpotenser.md. minNiva sätts i egen order.
       nr: 10, id: 'grundpotenser', titel: 'Grundpotenser', fil: 'grundpotenser.html',
+      beskrivning: 'Grundpotensform – ett tal som en faktor gånger en tiopotens.',
       blad: [
         { nr: 1, titel: 'Grundpotenser', noder: ['gp-rakna:skriva', 'gp-rakna:multdiv', 'gp-rakna:addsub', 'gp-rakna:losut'] }
       ]
@@ -139,6 +152,7 @@ window.AK8_K1_BOK = {
       // Kvadratrötter (dk11) — nytt innehåll. Introduktion inför nian; nodfamiljen ärvs (samma nod, högre nivå).
       // Dokument 1 = Joachims PDF, oförändrat. Blad-motor blad-ak8-kvrot.js, egen SVG-figur för uppgift 4.
       nr: 11, id: 'kvadratrotter', titel: 'Kvadratrötter', fil: 'kvadratrotter.html',
+      beskrivning: 'Kvadratrot och kvadrattal, och att räkna med kvadratrötter.',
       blad: [
         { nr: 1, titel: 'Kvadratrötter', noder: ['kvadrat-area:rakna', 'kvadrat-rakna:rakna', 'kvadrat-skala:rakna', 'rot-sida:rakna', 'rot-berakna:rakna', 'rot-uppskatta:rakna', 'rot-decimal:rakna', 'rot-narmevarde:rakna'] }
       ]
