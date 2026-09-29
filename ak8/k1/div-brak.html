@@ -13,7 +13,9 @@
   .topnav a{ color:rgba(255,255,255,.8); text-decoration:none; } .topnav .brand{ font-family:var(--cinzel); letter-spacing:.06em; }
   .nav-crumbs{ display:flex; align-items:center; gap:8px; } .nav-crumbs a:hover{ color:var(--gold-lt); }
   .nav-crumbs .crumb-sep{ opacity:.35; } .nav-crumbs .crumb-current{ color:rgba(255,255,255,.85); }
-  @media(max-width:560px){ .nav-crumbs .crumb-hem{ display:none; } }
+  /* Smulan får radbryta på smal skärm. Utan det stack den ut två pixlar förbi vyporten och
+     gjorde hela sidan sidledes scrollbar — två pixlar räcker. */
+  @media(max-width:560px){ .nav-crumbs .crumb-hem{ display:none; } .topnav{ flex-wrap:wrap; padding:10px 14px; } .nav-crumbs{ flex-wrap:wrap; } }
   .hero{ background:var(--navy); color:#fff; padding:24px 26px 40px; text-align:center; }
   .hero .eyebrow{ font-family:var(--cinzel); font-size:12px; letter-spacing:.16em; color:var(--gold-lt); text-transform:uppercase; }
   .hero h1{ font-family:var(--serif); font-size:38px; font-weight:500; margin:8px 0 6px; } .hero h1 em{ color:var(--gold-lt); font-style:italic; }

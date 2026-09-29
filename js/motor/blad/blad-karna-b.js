@@ -899,22 +899,10 @@ function bygg_blad(rotEl, blad){
     inp.addEventListener('input', function(){
       inp.classList.remove('correct','wrong');
       egnaMarken(inp);   // rutans egen ✓/✗ + facit bort vid ändring (inte grannarnas)
-      // Auto-mellanrum runt + och − i mellanled-fält (data-form)
-      if(inp.dataset.form !== undefined){
-        var pos = inp.selectionStart;
-        var fore = inp.value.slice(0, pos);
-        var ny = inp.value
-          .replace(/\s*([+\u2212-])\s*/g, ' $1 ')   // mellanrum runt + och −
-          .replace(/\s{2,}/g, ' ')                    // inga dubbla mellanrum
-          .replace(/^\s+/, '');                        // inget inledande mellanrum
-        if(ny !== inp.value){
-          // justera markörposition efter inskjutna mellanrum
-          var foreNy = fore.replace(/\s*([+\u2212-])\s*/g, ' $1 ').replace(/\s{2,}/g,' ').replace(/^\s+/,'');
-          inp.value = ny;
-          var nyPos = foreNy.length;
-          try{ inp.setSelectionRange(nyPos, nyPos); }catch(e){}
-        }
-      }
+      // Mellanrum runt räknetecken i mellanledsrutan: DELAD rutin (AK8_UI.autoSpace), samma som
+      // åttans blad och k3. Här låg förr en egen som bara kände + och − — den skrev "5·2 − 3",
+      // mellanrum runt minus men inte runt gånger. Två rutiner för samma sak driver isär.
+      if(inp.dataset.form !== undefined && window.AK8_UI && AK8_UI.autoSpace) AK8_UI.autoSpace(inp);
     });
   });
 

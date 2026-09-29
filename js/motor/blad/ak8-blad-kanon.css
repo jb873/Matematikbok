@@ -32,7 +32,10 @@
 .ak8-vf.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.16); color:#15803d; }
 .ak8-vf.fel{ border-color:#c0392b; background:rgba(192,57,43,.14); color:#b91c1c; }
 .ak8-rad-kedja .ak8-svar{ flex-wrap:wrap; }
-.ak8-tabell{ border-collapse:collapse; margin:6px 0; }
+/* En bred tabell ska scrolla i SIN EGEN ruta, inte dra ut dokumentet. Potenstabellen gjorde
+   sidan 545 px bred på en 360 px skärm — då kan eleven scrolla sidled på hela sidan, och
+   uppgiften glider ur bild medan hon skriver. display:block gör tabellen till sin egen scrollyta. */
+.ak8-tabell{ border-collapse:collapse; margin:6px 0; display:block; max-width:100%; overflow-x:auto; }
 .ak8-tabell th, .ak8-tabell td{ border:1px solid var(--paper-dk); padding:6px 12px; text-align:center; font-size:18px; }
 .ak8-tabell th{ font-family:var(--cinzel); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); background:rgba(0,0,0,.02); }
 .ak8-tabell .ak8-in-sm{ width:48px; }

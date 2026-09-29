@@ -414,6 +414,19 @@
       bygg = expr;
     }
     if(uttryck){ till['+'] = 1; till['·'] = 1; till['/'] = 1; till['('] = 1; till[')'] = 1; }
+    // MELLANLEDSRUTAN (data-form): rättaren jämför skriven form och godtar uttryck. Vilka tecken
+    // den godtar står i rutans egen accept-lista — tänd exakt dem, varken mer eller mindre.
+    // Ett tecken keypaden erbjuder men rättaren underkänner är en fälla, inte en hjälp.
+    var form = inp && inp.dataset && inp.dataset.form;
+    if(form != null){
+      var accept = '';
+      try { accept = decodeURIComponent(form); } catch(e){ accept = String(form); }
+      if(accept.indexOf('+') >= 0) till['+'] = 1;
+      if(/[·*×]/.test(accept)) till['\u00b7'] = 1;
+      if(accept.indexOf('/') >= 0) till['/'] = 1;
+      if(accept.indexOf('(') >= 0){ till['('] = 1; till[')'] = 1; }
+      // − ligger redan i bassetet (negativa tal skrivs överallt).
+    }
     var vars = inp && inp.dataset && inp.dataset.vars;   // data-vars="xy" → just de variablerna aktiva (algebra); saknas → alla grå
     if(vars) ('' + vars).split('').forEach(function(v){ if(VARIABLER.indexOf(v) > -1) till[v] = 1; });
     if(bygg){ till['frac'] = 1; till['pot'] = 1; }   // EN bråkknapp (order 2026-09-21): komplexbråket byggs med samma knapp inne i täljare/nämnare

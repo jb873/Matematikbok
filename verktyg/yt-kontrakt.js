@@ -16,6 +16,7 @@
      MINUS       keypadens − och tangentbordets - ger samma värde (pNum)
      PLATSHÅLLARE  inga placeholder-texter i svarsrutor
      DIVISION    ingen ÷ i uppgiftstexten — division skrivs som staplat bråk
+     BREDD       inget dokument blir bredare än vyporten (mätt på 360 px, egen körning)
 
    VAD DEN HÄR GRINDEN INTE TÄCKER
      · Gränsen mellan etikett och hjälptext är språklig ("Area:" namnger, "Skriv ett mellanled
@@ -266,6 +267,25 @@ const PROBE = `(function(){
 })()`;
 
 // Ytorna: alla delkapitelsidor och åttans blad-sidor (ram-filerna är drillar → läslistan).
+// Bredd-proben: vad som sticker ut, och vad som gör det. Utan adressen går brottet inte att
+// åtgärda — "sidan är för bred" säger inte vilket element som är för brett.
+const BREDD_PROBE = `(function(){
+  var d = document.documentElement, over = [];
+  if(d.scrollWidth > window.innerWidth + 1){
+    Array.prototype.forEach.call(document.querySelectorAll('*'), function(el){
+      var r = el.getBoundingClientRect();
+      if(r.width > 0 && Math.round(r.right) > window.innerWidth + 1){
+        var a = el.tagName.toLowerCase()
+              + (el.className && typeof el.className === 'string' && el.className
+                 ? '.' + el.className.split(/\\s+/).slice(0, 2).join('.') : '');
+        if(over.length < 5 && over.indexOf(a) < 0) over.push(a + ' →' + Math.round(r.right) + 'px');
+      }
+    });
+  }
+  return { onerr: window.__onerr || null, vyport: window.innerWidth, dok: d.scrollWidth, over: over };
+})()`;
+const BREDD = 360;
+
 function sidor(){
   const ut = [];
   ['ak7/k1', 'ak7/k2', 'ak7/k3', 'ak8/k2'].forEach(kap => {
@@ -288,6 +308,8 @@ function sidor(){
 
 const TMP = path.join(os.tmpdir(), 'ytkontrakt-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);
+const TMPB = path.join(os.tmpdir(), 'ytbredd-' + process.pid + '.js');
+fs.writeFileSync(TMPB, BREDD_PROBE);
 let fel = 0, ytor = 0, sidorMatta = 0;
 console.log('YT-KONTRAKT — keypad · tecken · autospace · grow · bråk · minus · platshållare · division\n');
 sidor().forEach(sida => {
@@ -299,6 +321,20 @@ sidor().forEach(sida => {
   if(!u){ console.log('? ' + sida + ': inget svar'); return; }
   sidorMatta++;
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + u.onerr.join(' | ')); }
+  // BREDD — egen körning på telefonbredd. Ett dokument bredare än vyporten betyder att eleven
+  // kan scrolla sidled på hela sidan; på telefon glider uppgiften ur bild medan hon skriver.
+  const rb = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMPB,
+                                '--wait', '1200', '--timeout', '40000', '--viewport', BREDD + 'x800'],
+                       { encoding: 'utf8', timeout: 90000 });
+  let ub = null;
+  try { ub = JSON.parse((rb.stdout || '').trim().split('\n').pop()); } catch(e){}
+  if(ub && ub.dok > ub.vyport + 1){
+    fel++;
+    console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · BREDD: dokumentet blir ' + ub.dok
+      + ' px på en ' + ub.vyport + ' px skärm — eleven kan scrolla sidled\n     '
+      + (ub.over.length ? ub.over.join('\n     ') : '(hittade inget enskilt element)'));
+  }
+
   (u.ytor || []).forEach(y => {
     ytor++;
     if(!y.brott.length){ console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.rutor + ' rutor, ' + y.uttrycksrutor + ' uttryck)'); return; }
@@ -307,5 +343,6 @@ sidor().forEach(sida => {
   });
 });
 try { fs.unlinkSync(TMP); } catch(e){}
+try { fs.unlinkSync(TMPB); } catch(e){}
 console.log('\n' + (fel ? '✗ YT-KONTRAKT RÖTT (' + fel + ')' : '✓ YT-KONTRAKT GRÖNT') + ' · ' + ytor + ' ytor på ' + sidorMatta + ' sidor');
 process.exit(fel ? 1 : 0);
