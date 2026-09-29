@@ -40,7 +40,9 @@
   .tl-marker-dot{ fill:var(--blue); stroke:#fff; stroke-width:1.2; cursor:pointer; }
   .tl-marker-txt{ fill:var(--blue); font-family:var(--serif); font-weight:600; font-size:14px; text-anchor:middle; cursor:pointer; }
   /* stående bråk */
-  .fr-ruta{ width:52px !important; height:32px; }
+  /* Utan !important vinner kanonens .ovn-brak .ak8-in.fr-ruta (54px) — och grow kan mäta (width:1ch
+     slogs förr också bort) och växa förbi måttet. Raden gäller kvar utanför .ovn-brak. */
+  .fr-ruta{ width:52px; height:32px; }
   /* kontroll + sammanfattning */
   /* Färdighetsträning */
   .fard-layout{ max-width:920px; margin:0 auto; padding:18px 24px 44px; display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }

@@ -103,24 +103,62 @@
 
   // ── AUTO-VÄXANDE RUTA ──
   // opts.min = golv i pixlar (rutans egen bredd). Utan opts: åttans egna minimum per roll.
+  //
+  // MÅTTET ÄR EN FORM, INTE ETT TAK. En smal exponentruta ska SE ut som en exponent när den är
+  // tom — men mellanledet i 3⁴ · 3⁵ skrivs 4 + 5, och då ska rutan följa med. För de rutor vars
+  // bredd är formgiven i CSS läses måttet ur rutan själv och blir golv; för övriga gäller
+  // rollkonstanten som förut.
+  var EGET_MATT = '.ak8-pexp,.ak8-gpe,.ak8-pbase,.ak8-gpb';
+  function egetMatt(inp){
+    if(inp.dataset.golv == null){
+      var inline = inp.style.width;
+      inp.style.width = '';                                   // mät utan vår egen inline-bredd
+      var w = Math.round(inp.getBoundingClientRect().width);
+      inp.style.width = inline;
+      if(w > 0) inp.dataset.golv = String(w);                  // osynlig ruta mäts nästa gång
+    }
+    return Number(inp.dataset.golv || 0);
+  }
   function grow(inp, opts){
     if(!inp) return;
     // Stående bråk-ruta (fr-ruta): KOMPAKT – storlek efter täljare/nämnare, INTE utdragen till textbredd.
     // Gäller BARA bråk byggda i en uttrycks-cell (.ak8-expr); förrenderade bråk-svar (d5/d7 kanoniska
     // bcell) ligger utanför .ak8-expr och behåller sin CSS-bredd.
     if(inp.classList.contains('fr-ruta')){
-      if(!inp.closest('.ak8-expr')) return;
+      if(!inp.closest('.ak8-expr')){
+        // Förrenderat bråk-svar (d5/d7 kanoniska bcell): CSS-bredden är rutans FORM och behålls
+        // när den är tom — men som golv. Förr returnerade grow här, och en täljare som var bredare
+        // än formen klipptes tyst. Samma felklass som exponentrutan: ett mått utan koppling.
+        var golvB = egetMatt(inp);
+        inp.style.width = '1ch';
+        inp.style.width = Math.max(golvB, Math.min(inp.scrollWidth + 6, 340)) + 'px';
+        return;
+      }
       inp.style.width = '1ch';
       inp.style.width = Math.max(18, Math.min(inp.scrollWidth + 2, 120)) + 'px';
       return;
     }
     var min = (opts && opts.min) || (inp.classList.contains('ak8-exprtxt') ? 16 : (inp.classList.contains('ak8-pexp') ? 26 : inp.classList.contains('ak8-in-sm') ? 34 : 74));
+    // Rutor vars bredd är formgiven för innehållet (potensens och grundpotensens bas/exponent):
+    // CSS-måttet är GOLVET, inte ett tak som rollkonstanten får skriva över. Utan detta öppnade
+    // exponentrutan som 26 px fast .pot sup .ak8-pexp bett om 44 — ett tecken i stället för 4 + 5.
+    if(!(opts && opts.min) && inp.matches(EGET_MATT)) min = Math.max(min, egetMatt(inp));
     if(inp.value === '' && inp.classList.contains('ak8-exprtxt')){
       var ex = inp.closest('.ak8-expr');   // tom OCH ensam i cellen (inget bråk/potens byggt) → full svarsbredd
       if(ex && !ex.querySelector('.ovn-brak, .ak8-pot') && ex.querySelectorAll('.ak8-exprtxt').length === 1) min = 74;
     }
     inp.style.width = '1ch';
     inp.style.width = Math.max(min, Math.min(inp.scrollWidth + 6, 340)) + 'px';
+  }
+
+  // VÄXT MED RUTANS EGET MÅTT SOM GOLV — för kärnor utanför åttans blad (sjuans bråk-släkt), där
+  // rollkonstanterna inte gäller: en 26 px stegruta ska inte bli 74 px, den ska stanna på 26 och
+  // växa först när talet kräver det. Tom ruta ser ut precis som förut.
+  function vaxMedGolv(inp){
+    if(!inp) return;
+    var golv = egetMatt(inp);
+    if(!golv) return;                    // osynlig ruta: mät inte, väx inte — nästa gång den syns
+    grow(inp, { min: golv });
   }
 
   // ── UTTRYCKS-CELL (text + inbäddade bråk/potenser; byggs via keypadens byggar-knappar) ──
@@ -633,7 +671,7 @@
   window.AK8_UI = {
     pNum: pNum, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
-    grow: grow, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
+    grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,

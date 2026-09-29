@@ -112,6 +112,7 @@ const PROBE = `(function(){
       if(p.value.indexOf('3 + 4') < 0 && p.value.indexOf('3 \\u002b 4') < 0) y.brott.push('AUTOSPACE: "3+4" blev "' + p.value + '" i ' + vem);
       p.value = '123456789012345'; ev(p, 'input');
       if(Math.round(p.getBoundingClientRect().width) <= Math.round(f0)) y.brott.push('GROW: rutan växer inte — ' + vem);
+      p.value = ''; ev(p, 'input');
       // MINUS: keypadens − (U+2212) och tangentbordets - ska ge samma värde
       if(window.AK8_UI && AK8_UI.pNum){
         var a = AK8_UI.pNum('\\u22125'), b = AK8_UI.pNum('-5');
@@ -119,6 +120,47 @@ const PROBE = `(function(){
       }
       p.value = ''; ev(p, 'input');
     }
+
+    // GROW PER RUTTYP (order 2026-09-29): måttet är en FORM, inte ett tak. En smal exponentruta ska
+    // se ut som en exponent när den är tom — men mellanledet i 3⁴ · 3⁵ skrivs 4 + 5, och då måste
+    // rutan följa med. Exponentrutan öppnade som 26 px fast .pot sup .ak8-pexp bett om 44: grow()s
+    // rollkonstant skrev över CSS-regeln, och bara ett tecken fick plats.
+    //
+    // MÄTT SOM EFFEKT: texten mäts med canvas i rutans EGET typsnitt och jämförs med rutans inre
+    // bredd. scrollWidth duger inte — en <input> rapporterar samma scrollWidth som clientWidth så
+    // fort texten scrollats, och döljer därmed precis det som ska hittas.
+    //
+    // Provsträngen är densamma som smalrute-svepets: ett fyrsiffrigt tal i en talruta, ett uttryck
+    // i en uttrycksruta. Två verktyg som provar olika innehåll säger olika saker om samma ruta, och
+    // då går ingen av dem att lita på. En längre sträng skulle dessutom fälla varje avsiktligt
+    // kompakt ruta — samma lärdom som de tjugosex falska brotten när kontraktet mätte formen.
+    //
+    // ÖPPET (rapporterat, inte avgjort): sjuans uppställnings- och följdrutor (data-svar, undantagna
+    // från VAXER för att hålla formen i rutnät) klipper ett SEXsiffrigt tal. Om det ska växa är en
+    // formfråga för uppställningen, inte något svepet ska avgöra.
+    (function(){
+      var settTyp = {};
+      alla.forEach(function(inp){
+        var typ = (inp.className || '').replace(/\s+/g, '.');
+        if(settTyp[typ]) return;                       // en per ruttyp räcker — rapporten är per typ
+        settTyp[typ] = 1;
+        var cs = getComputedStyle(inp);
+        var c = document.createElement('canvas').getContext('2d');
+        c.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+        var gammalt = inp.value;
+        var txt = uttrycksruta(inp) ? '12 + 15' : '1234';
+        inp.value = ''; ev(inp, 'input');
+        txt.split('').forEach(function(ch){ inp.value += ch; ev(inp, 'input'); });
+        var inre = inp.getBoundingClientRect().width
+                 - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0)
+                 - parseFloat(cs.borderLeftWidth || 0) - parseFloat(cs.borderRightWidth || 0);
+        var behovs = Math.ceil(c.measureText(inp.value).width);
+        if(behovs > Math.round(inre) + 1)
+          y.brott.push('GROW: "' + inp.value + '" behöver ' + behovs + ' px men rutan ger '
+                     + Math.round(inre) + ' — ' + adress(inp));
+        inp.value = gammalt; ev(inp, 'input');
+      });
+    })();
 
     // BRÅK: en ruta som ska bära bråk kräver en byggarknapp som fungerar
     // Bara rutor som SÄGER att de bär bråk: en kedjeruta för ett tal ska inte erbjuda bråkknappen.

@@ -600,6 +600,8 @@ function bygg_blad(rotEl, blad){
   inputs.forEach(function(inp, i){
     inp.addEventListener('focus', function(){ fokus = i; });
     inp.addEventListener('input', function(){
+      // Rutan följer talet: måttet är formen (34 px bråkcell, 26 px stegruta), inte ett tak.
+      if(window.AK8_UI && AK8_UI.vaxMedGolv) AK8_UI.vaxMedGolv(inp);
       inp.classList.remove('correct','wrong');
       if(inp.classList.contains('brak-cell')){
         var rad = inp.closest('.brak-svar-rad, .brak-fragerad');

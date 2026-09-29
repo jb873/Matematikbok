@@ -75,7 +75,9 @@
 .ak8-intro{ font-size:13.5px; color:var(--ink-faint); font-style:italic; margin:0 0 12px; }
 .ak8-mel{ width:150px; text-align:left; padding:0 8px; }
 .ak8-sv{ width:96px; }
-.ak8-gpb{ width:38px !important; height:30px; }
+/* Grundpotensens bas: 38 px är formgivet mått, och GOLV — inte tak. Specificiteten (inte
+   !important) håller det mot sidornas .pot > .ak8-in-sm{width:42px}, så grow kan växa förbi. */
+.ak8-gpb, .pot > .ak8-in-sm.ak8-gpb{ width:38px; height:30px; }
 .ak8-gp{ display:inline-flex; align-items:center; gap:1px; }
 .ak8-gpk{ width:56px; }
 .ak8-termometer{ display:flex; justify-content:center; margin:6px 0 16px; }

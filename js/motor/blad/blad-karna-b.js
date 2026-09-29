@@ -970,14 +970,14 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-oms]';
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in';   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  // EN mätning, EN funktion: AK8_UI.vaxMedGolv läser rutans eget mått och använder det som golv.
+  // Förr mättes bredden här, med 90 px som reserv när mätningen gav 0 — och en ruta som låg i en
+  // DOLD flik när bladet bands mättes just så. Ordna-rutan (56 px) öppnade 90 px av det skälet.
+  // Nu hoppas en osynlig ruta över i stället för att gissa; nästa gång den syns mäts den rätt.
   function vaxRuta(inp){
-    if(!inp || !window.AK8_UI || !AK8_UI.grow) return;
-    if(inp.dataset.minw === undefined){
-      var b = Math.round(inp.getBoundingClientRect().width);
-      inp.dataset.minw = String(b > 0 ? b : 90);
-    }
-    AK8_UI.grow(inp, { min: parseInt(inp.dataset.minw, 10) });
+    if(!inp || !window.AK8_UI || !AK8_UI.vaxMedGolv) return;
+    AK8_UI.vaxMedGolv(inp);
   }
   // MELLANRUM KRING TECKEN (AK8_UI.autoSpace — samma funktion som åttans blad och k3:s d4/d5):
   // eleven skriver 3+4 och rutan visar 3 + 4, utan att markören flyttar sig. Uttrycksrutor bara;
