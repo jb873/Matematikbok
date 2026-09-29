@@ -1,113 +1,62 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Matematik · Åk 8 · Kapitel 1</title>
-<style>
-  :root{ --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65; --paper:#f7f3ea; --paper-lt:#faf7f1; --paper-dk:#ede6d6; --navy:#0f1e2e; --gold:#9a7228; --gold-lt:#c49a40; --blue:#2f6ea0; --serif:'Source Serif 4',Georgia,serif; --cinzel:'Cinzel','Times New Roman',serif; }
-  *{ box-sizing:border-box; } body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); }
-  .topnav{ background:var(--navy); color:#fff; padding:14px 26px; display:flex; align-items:center; justify-content:space-between; gap:14px; font-size:13px; }
-  .topnav .brand{ font-family:var(--cinzel); letter-spacing:.06em; }
-  .topnav a{ color:rgba(255,255,255,.8); text-decoration:none; } .topnav .sep{ opacity:.5; }
-  .nav-crumbs{ display:flex; align-items:center; gap:8px; }
-  .nav-crumbs a:hover{ color:var(--gold-lt); }
-  .nav-crumbs .crumb-sep{ opacity:.35; }
-  .nav-crumbs .crumb-current{ color:rgba(255,255,255,.85); }
-  @media(max-width:560px){ .nav-crumbs .crumb-hem{ display:none; } }
-  .hero{ background:var(--navy); color:#fff; padding:26px 26px 46px; text-align:center; }
-  .hero .eyebrow{ font-family:var(--cinzel); font-size:12px; letter-spacing:.18em; color:var(--gold-lt); }
-  .hero h1{ font-family:var(--serif); font-size:40px; font-weight:500; margin:8px 0 6px; } .hero h1 em{ color:var(--gold-lt); font-style:italic; }
-  .hero p{ max-width:560px; margin:0 auto; color:rgba(255,255,255,.75); font-size:15px; line-height:1.6; }
-  .wrap{ max-width:860px; margin:0 auto; padding:28px 24px 60px; }
-  .del{ display:flex; align-items:flex-start; gap:16px; padding:16px 18px; background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:10px; margin-bottom:12px; text-decoration:none; color:inherit; }
-  .del.open:hover{ border-color:var(--gold-lt); box-shadow:0 3px 12px rgba(0,0,0,.05); }
-  .del.kommer{ opacity:.6; }
-  .del-nr{ flex-shrink:0; width:38px; height:38px; border-radius:50%; background:var(--navy); color:#fff; font-family:var(--cinzel); display:flex; align-items:center; justify-content:center; font-size:16px; }
-  .del.kommer .del-nr{ background:var(--paper-dk); color:var(--ink-faint); }
-  .del-titel{ font-size:20px; font-weight:600; }
-  .del-blad{ margin-top:4px; color:var(--ink-faint); font-size:13.5px; }
-  .del-badge{ margin-left:auto; align-self:center; font-family:var(--cinzel); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
-  .kommer-not{ margin-top:18px; padding:14px 16px; border:1px dashed var(--paper-dk); border-radius:8px; color:var(--ink-faint); font-size:13.5px; font-style:italic; }
-  footer{ text-align:center; padding:30px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--paper-dk); }
-</style>
+<!-- Sidan saknade fonts.css. Cormorant och Cinzel fanns därför inte, och rubriken föll tillbaka
+     på Source Serif — det var inte ett designval utan en saknad rad. -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../js/kapitel/navsida.css">
 <link rel="stylesheet" href="../../js/fot/kapitel-fot.css">
 </head>
 <body>
-<nav class="topnav">
-  <span class="brand">Matematik · Åk 8</span>
-  <div class="nav-crumbs">
-    <a class="crumb-hem" href="../../index.html">Matematikbok</a>
-    <span class="crumb-sep">›</span>
-    <a href="../index.html">Årskurs 8</a>
-    <span class="crumb-sep">›</span>
-    <span class="crumb-current">Kapitel 1</span>
-  </div>
-</nav>
-<header class="hero">
-  <div class="eyebrow">Årskurs 8 · Kapitel 1</div>
-  <h1 id="hero-titel">Tal</h1>
-  <p>Kapitlets delkapitel. Öva-bladen och färdighetsträningen delar noder med årskurs 7 – du fortsätter på samma färdigheter, på högre nivå.</p>
-</header>
-<div class="wrap">
-  <div id="del-lista"></div>
-  <div class="kommer-not" id="kommer-not"></div>
-</div>
-
-<!-- Kapitel-fot (delad modul) — åttan: Kunskapsläge (karta) + Skapa eget test live; Självskattning kommer (matris saknas). -->
-<div id="kapitel-fot"></div>
-
-<footer>Digitalt läromedel i matematik · Åk 8 · Kapitel 1</footer>
 
 <script src="../../js/data/ak8-k1-bok.js"></script>
-<script>
-(function(){
-  var bok = window.AK8_K1_BOK || { delkapitel: [] };
-  document.getElementById('hero-titel').textContent = bok.titel || 'Kapitel 1';
-  var lista = document.getElementById('del-lista');
-  var byggda = {}; (bok.delkapitel || []).forEach(function(d){ byggda[d.nr] = d; });
-  // Rendera minst 10 slottar, men aldrig färre än bokens högsta delkapitel-nr (single-source på nr).
-  var maxNr = (bok.delkapitel || []).reduce(function(m, d){ return Math.max(m, d.nr || 0); }, 10);
-  for(var nr = 1; nr <= maxNr; nr++){
-    var d = byggda[nr];
-    if(d && d.fil){
-      // byggd/byggande sida → öppen länk
-      var a = document.createElement('a'); a.className = 'del open'; a.href = d.fil;
-      var blad = (d.blad || []).map(function(b){ return b.titel; }).join(' · ');
-      a.innerHTML = '<div class="del-nr">' + nr + '</div>'
-        + '<div><div class="del-titel">' + d.titel + '</div><div class="del-blad">' + blad + '</div></div>'
-        + '<div class="del-badge">' + (d.status === 'bygger' ? 'bygger' : 'öppen') + '</div>';
-      lista.appendChild(a);
-    } else if(d){
-      // titelsatt men ingen sida än (t.ex. stöd-delkapitel som väntar på blad)
-      var div = document.createElement('div'); div.className = 'del kommer';
-      div.innerHTML = '<div class="del-nr">' + nr + '</div>'
-        + '<div><div class="del-titel">' + d.titel + '</div><div class="del-blad">byggs senare</div></div>'
-        + '<div class="del-badge">' + (d.roll === 'stod' ? 'stöd · kommer' : 'kommer') + '</div>';
-      lista.appendChild(div);
-    } else {
-      // ingen post → generisk kommer-slot
-      var div = document.createElement('div'); div.className = 'del kommer';
-      div.innerHTML = '<div class="del-nr">' + nr + '</div>'
-        + '<div><div class="del-titel">Delkapitel ' + nr + '</div><div class="del-blad">titel fastställs</div></div>'
-        + '<div class="del-badge">kommer</div>';
-      lista.appendChild(div);
-    }
-  }
-  document.getElementById('kommer-not').textContent =
-    'Delkapitlens titlar och nod-indelning fylls i i js/data/ak8-k1-bok.js allteftersom de fastställs. '
-    + 'Noderna är gemensamma med åk 7 (single-source) – ingen åk8-kopia skapas.';
-})();
-</script>
+<script src="../../js/kapitel/kapitel-lista.js"></script>
+<script src="../../js/kapitel/kapitelsida.js"></script>
 <script src="../../js/fot/kapitel-fot.js"></script>
 <script>
-  // Åttan: karta (live), provbyggaren (live), självskattning (live — taxonomi-driven, union k1+k2).
-  KapitelFot.montera({
-    kunskapslage:   { href: 'karta/index.html', status: 'live' },
-    skapaTest:      { href: '../../ak8-k1-ram.html?view=test-config', status: 'live' },
-    sjalvskattning: { href: 'sjalvskattning/index.html', status: 'live' }
+// ÅTTANS KAPITEL 1 — kapitelsidan som DATA, på den delade renderaren (order 2026-09-29).
+//
+// ORDNINGEN OCH TITLARNA BOR I BOKEN (js/data/ak8-k1-bok.js) och delas med delkapitel-sidorna,
+// ramen, föreläsningsregistret och delkapitel-grinden. Sidan läser därifrån i stället för att
+// hålla en andra lista — enkällsprincipen gäller också navigationen.
+//
+// STATUSEN HÄRLEDS UR fil. Förr stod status:'bygger' i boken på alla elva, och alla elva var
+// byggda och i bruk: chipet sa BYGGER på en öppen dörr. Fältet är borttaget ur boken.
+//
+// ⚠️ BESKRIVNINGARNA SAKNAS. Förr listades bladnamnen under titeln ("Division, blad 1 · Division,
+//    blad 2") — en innehållsförteckning, inte en beskrivning. Tills Joachim satt beskrivningarna
+//    står namnet ensamt. Ingen maskinskriven mening sätts i deras ställe.
+(function(){
+  var bok = window.AK8_K1_BOK || { delkapitel: [] };
+  var delar = (bok.delkapitel || []).slice().sort(function(a, b){ return a.nr - b.nr; })
+    .map(function(d){
+      return { nr: d.nr, titel: d.titel, sub: d.beskrivning || '', fil: d.fil || null,
+               typ: d.typ || 'avsnitt' };
+    });
+
+  Kapitelsida.montera({
+    arskurs: 8,
+    kapitel: 1,
+    bas: '../../',
+    arskursSida: '../index.html',
+    // ⚠️ Rubriken är bokens titel. Vilken del som ska vara guld kursiv (klammer) väntar på Joachim.
+    titel: bok.titel || 'Kapitel 1',
+    // Sjuans ingress ordagrant — åttans egen var maskinskriven. Väntar på Joachims besked.
+    ingress: 'Välj ett delkapitel för att komma till dess föreläsningar och övningar.',
+    delkapitel: delar,
+    // Åttan: karta (live), provbyggaren (live), självskattning (live — taxonomi-driven, union k1+k2).
+    fot: {
+      kunskapslage:   { href: 'karta/index.html', status: 'live' },
+      skapaTest:      { href: '../../ak8-k1-ram.html?view=test-config', status: 'live' },
+      sjalvskattning: { href: 'sjalvskattning/index.html', status: 'live' }
+    }
   });
+})();
 </script>
+
 <script src="../../js/elevfeedback.js" defer></script>
 </body>
 </html>

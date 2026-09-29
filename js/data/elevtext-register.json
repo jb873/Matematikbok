@@ -1738,5 +1738,40 @@
   "titel | Tolka uttryck – blad 2",
   "vansterText | Hur mycket kostar det om {}?",
   "vansterText | {}, &nbsp;"
+ ],
+ "js/kapitel/kapitelsida.js": [
+  "rubrik | Delkapitel",
+  "titel | Digitalt läromedel i matematik",
+  "titel | Kapitel {n}",
+  "titel | Matematikbok",
+  "titel | Åk {n}",
+  "titel | Årskurs {n}",
+  "titel | ← Alla kapitel"
+ ],
+ "ak7-k1.html": [
+  "sub | Addition, subtraktion, multiplikation och division samt prioriteringsregeln.",
+  "sub | Bråkbegreppet och att växla mellan bråkform och decimalform.",
+  "sub | Hur tal förändras vid multiplikation och division med tiopotenser.",
+  "sub | Kort och lång division med stora tal och med decimaltal.",
+  "sub | Multiplikation med stora tal och med tal mindre än ett.",
+  "sub | Närmevärde, avrundningsregler och ungefärliga beräkningar.",
+  "sub | Positionssystemet, siffrans värde och hur tal byggs upp.",
+  "sub | Repetition inför prov med en självskattningsmatris för alla områden.",
+  "sub | Tal mindre än noll – motsatta tal, storleksordna och räkna med negativa tal.",
+  "sub | Utmaningar och fördjupande uppgifter för den som vill mer.",
+  "titel | Avrundning och överslagsräkning",
+  "titel | Bråkform och decimalform",
+  "titel | Division med stora och små tal",
+  "titel | Fyra räknesätt",
+  "titel | Fördjupning",
+  "titel | Multiplikation med stora och små tal",
+  "titel | Multiplikation och division med 10, 100 och 1000",
+  "titel | Negativa tal",
+  "titel | Plugg till prov",
+  "titel | Positionssystem och talförståelse",
+  "titel | Positionssystem och {fyra räknesätt}"
+ ],
+ "ak8/k1/index.html": [
+  "titel | {}Kapitel 1"
  ]
 }

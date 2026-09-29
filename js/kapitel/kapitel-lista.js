@@ -6,8 +6,12 @@
    migreras hit senare.
 
    REGELN SOM BÄR PLATSERNA: ett delkapitel utan innehåll får kortet 'is-soon' — tonat, utan pil,
-   och utan <a>. Ett kort får aldrig leda in i tomrum. Bara status 'open' TILLSAMMANS med en fil
-   ger en länk.
+   och utan <a>. Ett kort får aldrig leda in i tomrum.
+
+   STATUSEN HÄRLEDS UR FILEN, sätts aldrig för hand. Förr krävdes status:'open' tillsammans med en
+   fil — och fältet drev isär från verkligheten: åttans elva delkapitel stod som BYGGER fast alla
+   elva var byggda och i bruk, nians sju tomma skelett var klickbara. Nu är filen hela signalen.
+   Ett status-fält i datan läses inte längre; kapitel-grinden fäller det som ligger kvar.
 
    NODERNA PER PLATS: en plats kan peka ut en utbudslista (visning.utbudslista i taxonomin). Då
    listas lövnodernas namn under beskrivningen, så att platsen visar vad den ska hålla innan den
@@ -41,8 +45,10 @@ function noderFor(tax, id){
 
 function kort(d, tax){
   var arFordjupning = d.typ === 'fordjupning' || /fördjupning/i.test(d.titel || '');
-  var stripe = d.typ === 'prov' ? 'var(--gold)' : (arFordjupning ? '#7c6a9c' : '#16a34a');
-  var badge = (d.status === 'open' && d.fil)
+  // Kantfärgen säger vad kortet ÄR (prov, fördjupning, vanligt delkapitel) — inte vilken sida det
+  // ligger på. Blå överallt är Joachims beslut 2026-09-29; förr var k1 blå och k2/k3 gröna.
+  var stripe = d.typ === 'prov' ? 'var(--gold)' : (arFordjupning ? '#7c6a9c' : 'var(--blue)');
+  var badge = d.fil
     ? '<div class="card-badge open">Öppet</div><div class="card-arrow">›</div>'
     : '<div class="card-badge ' + (d.typ === 'prov' ? 'prov' : 'soon') + '">'
         + (d.typ === 'prov' ? 'Prov' : 'Kommer senare') + '</div>';
@@ -61,7 +67,7 @@ function kort(d, tax){
     + '</div>';
 
   var el;
-  if(d.status === 'open' && d.fil){
+  if(d.fil){
     el = document.createElement('a'); el.className = 'nav-card'; el.href = d.fil;
   } else {
     // platsen syns, är tonad och går inte att klicka på
