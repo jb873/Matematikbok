@@ -153,7 +153,14 @@ html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-famil
 .keypad-vars{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
 .kp-key.varkey{color:var(--navy,#0f1e2e);font-style:italic;}
 @media (max-width:430px){ /* keypad-smal: allt ryms på EN rad även på telefon */ .keypad{gap:4px;padding:8px 6px;} .keypad-vars{grid-template-columns:repeat(2,40px);} }   /* smal byggar-kolumn: bråk över potens */
-.kp-inactive{opacity:.5;pointer-events:none;cursor:default;}   /* grå, syns men går ej att klicka (fast layout) */
+/* GRÅ: tecknet gäller inte här. Dämpad botten + dämpad text vid FULL opacitet — förr låg
+   hela knappen på opacity .5 och symbolen försvann; man såg inte vad som inte gick att trycka på. */
+/* Specificiteten (.kp-key + två klasser) gör regeln oberoende av ordningen: .kp-key.op kommer
+   efter i flera filer, och ett släckt räknetecken behöll annars sin guldton. */
+.kp-key.kp-inactive, .kp-key.kp-inactive.op, .kp-key.kp-inactive.varkey, .kp-key.kp-inactive.kp-fracbtn, .kp-key.kp-inactive.kp-potbtn{
+  opacity:1; pointer-events:none; cursor:default;
+  background:#f3eee4; color:#7a6e65; border-color:var(--line);
+}
 .kp-key{height:40px;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:var(--mono);font-size:18px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;transition:background .12s;}
 .kp-key:hover{background:var(--bg-soft);} .kp-key:active{transform:scale(.92);}
 .kp-key.op{color:var(--navy,#0f1e2e);font-weight:700;} .kp-key.util{background:var(--bg-soft);color:var(--ink-soft);font-size:15px;} .kp-key.span2{grid-column:span 2;} .kp-key.span3{grid-column:span 3;}

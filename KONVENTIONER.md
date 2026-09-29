@@ -30,7 +30,8 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 | Konvention | Funktionen bor i | Grind |
 |---|---|---|
 | **Måttet är ett golv, inte ett tak.** En smal ruta ska se ut som den gör när den är tom, och växa när innehållet kräver det. Aldrig `!important` på bredden — det slår ut både växten och mätningen. | `AK8_UI.grow` · `AK8_UI.vaxMedGolv` | `verktyg/smalruta-svep.js` · `verktyg/yt-kontrakt.js` |
-| **En yta med rutor har keypad, tecken, autoSpace, bråkknapp och inga platshållare.** | `js/motor/blad/ak8-blad-ui.js` | `verktyg/yt-kontrakt.js` |
+| **En yta med rutor har keypad, tecken, autoSpace, bråkknapp och inga platshållare.** Kontraktet trycker på en knapp och prövar *varje* rutas tecken mot dess eget facit — inte bara ytans första ruta. | `js/motor/blad/ak8-blad-ui.js` | `verktyg/yt-kontrakt.js` |
+| **Keypadens formgivning är EN fil**, med tre tydligt åtskilda lägen: aktiv, grå (tecknet gäller inte här — dämpad men läsbar, aldrig genomskinlig) och nedtryckt. Låg förr som en ordagrann kopia i nitton sidors `<style>`. | `js/motor/keypad.css` | `verktyg/yt-kontrakt.js` |
 | **Varje synlig ruta räknas och rättas.** Nämnaren är antalet synliga svarsfält. | bladmotorernas kontroll | `verktyg/namnare-grind.js` |
 | **Varje ruta i en rad markeras för sig.** | `AK8_UI.markeraRutor` (`res.per`) | `verktyg/flerruts-grind.js` |
 | **Svarsformen är bindande** (blandad / bråk / decimal / enklaste) och står i data per grupp. | `Likhetsrattare.finalStatus` | `verktyg/svarform-koll.js` |

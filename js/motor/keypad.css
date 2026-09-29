@@ -1,0 +1,62 @@
+/* keypad.css — DEN DELADE KEYPADENS FORMGIVNING (order 2026-09-30).
+
+   Låg förr som en ordagrann kopia i nitton sidors <style>-block. En formändring krävde nitton
+   likadana rättningar, och den som glömde en fick en sida som såg annorlunda ut — precis det som
+   hände med tonade kort och med kapitelsidorna. Nu är den en fil; sidorna länkar den.
+
+   Länkas FÖRE sidans egen <style>, så att en sida fortfarande kan skriva över en enskild regel.
+   Använder sidans palett-variabler (--paper-lt, --paper-dk, --ink …) med reserv, eftersom
+   navigations- och bladsidorna sätter dem i sina egna :root.
+
+   ALLTID fixed nedtill; keypad-clearance.js sätter mätt body-padding.
+
+   TRE LÄGEN, tydligt åtskilda (order 2026-09-30, FEL 3):
+     aktiv      vit botten, mörk text, tydlig kant — knappen går att trycka på
+     grå        tecknet gäller inte i den här rutan: dämpad botten och dämpad text, men
+                symbolen är HELT ogenomskinlig. Förr låg hela knappen på opacity .5 och
+                symbolen försvann; man kunde inte se vad som stod i rutan.
+     nedtryckt  guldbotten med vit symbol + knappen krymper — går inte att blanda ihop
+                med de andra två. */
+
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:var(--paper-lt,#faf7f1);border-top:1px solid var(--paper-dk,#ede6d6);box-shadow:0 -3px 14px rgba(15,30,46,.08);}
+.keypad-hidden{display:none !important;}
+.keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px;}
+.keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
+.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start;}
+.keypad-vars{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
+.kp-key.varkey{color:var(--navy,#0f1e2e);font-style:italic;}
+/* TELEFON: byggar-kolumnen hamnar ändå på egen rad när bredden inte räcker. Då ska den ligga
+   som en RAD (3 knappar bredvid varandra), inte som en 128 px hög pelare. Med tre knappar i
+   kolumn blev keypaden 321 px hög på 360 px; som rad blir den 232 — lägre än före likhetstecknet. */
+@media (max-width:430px){ /* keypad-smal: allt ryms på EN rad även på telefon */ .keypad{gap:4px;padding:8px 6px;} .keypad-vars{grid-template-columns:repeat(2,40px);} .keypad-build{grid-template-columns:repeat(3,42px);} }
+
+/* ── AKTIV ── */
+.kp-key{height:40px;border:1.5px solid var(--paper-dk,#ede6d6);border-radius:8px;background:#fff;font-family:var(--serif,'Cormorant Garamond',Georgia,serif);font-size:18px;font-weight:600;color:var(--ink,#12110f);cursor:pointer;transition:transform .08s,background .1s,color .1s,border-color .1s;display:flex;align-items:center;justify-content:center;user-select:none;}
+.kp-key:hover{background:var(--paper-dk,#ede6d6);}
+.kp-key.op{color:var(--gold,#9a7228);font-weight:700;}
+.kp-key.util{background:var(--paper,#f6f1e8);color:var(--ink-faint,#7a6e65);font-size:15px;}
+.kp-key.span2{grid-column:span 2;}
+.kp-key.span3{grid-column:span 3;}
+.kp-fracbtn, .kp-potbtn{color:var(--navy,#0f1e2e);}
+
+/* ── GRÅ: tecknet gäller inte här ──
+   Dämpad botten och dämpad text i stället för genomskinlighet. Knappen läses fortfarande — man
+   ser VAD som inte går att trycka på.
+   Specificiteten (.kp-key + två klasser) gör regeln oberoende av ordningen: .kp-key.op ligger
+   efter den här i flera filer, och ett släckt räknetecken behöll annars sin guldton. */
+.kp-key.kp-inactive, .kp-key.kp-inactive.op, .kp-key.kp-inactive.varkey, .kp-key.kp-inactive.kp-fracbtn, .kp-key.kp-inactive.kp-potbtn{
+  opacity:1; pointer-events:none; cursor:default;
+  background:var(--paper,#f6f1e8); color:var(--ink-faint,#7a6e65);
+  border-color:var(--paper-dk,#ede6d6); font-weight:600;
+}
+
+/* ── NEDTRYCKT ── */
+.kp-key:active{transform:scale(.92);background:var(--gold,#9a7228);border-color:var(--gold,#9a7228);color:#fff;}
+
+/* Byggar-ikonerna ritas med currentColor och följer därför alla tre lägena. */
+.kp-frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1px;}
+.kp-frac-t, .kp-frac-n{width:15px;height:9px;border:1.4px solid currentColor;border-radius:2px;}
+.kp-frac-l{width:19px;height:2px;background:currentColor;}
+.kp-pot{display:inline-flex;align-items:flex-start;}
+.kp-pot-b{width:14px;height:14px;border:1.6px solid currentColor;border-radius:2px;}
+.kp-pot-e{width:8px;height:8px;border:1.6px solid currentColor;border-radius:2px;margin-left:1px;margin-top:-4px;}

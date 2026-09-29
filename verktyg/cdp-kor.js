@@ -6,7 +6,7 @@
    någonsin i källträdet. Node ≥22 (inbyggd WebSocket), ingen npm.
 
    KÖR:
-     node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms] [--pre fil.js] [--screenshot ut.png] [--size WxH]
+     node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms] [--pre fil.js] [--screenshot ut.png] [--size WxH] [--viewport WxH]
        <js-fil> = en JS-text som EVALUERAS i sidan; får vara ett async-uttryck / IIFE som returnerar ett
                   Promise. Resultatet (JSON) skrivs på stdout.
      Exempel:
@@ -29,6 +29,9 @@ const preI = args.indexOf('--pre'), PRE = preI >= 0 ? fs.readFileSync(path.resol
 // --size WxH: fönsterstorlek (default 900x1200).
 const shotI = args.indexOf('--screenshot'), SHOT = shotI >= 0 ? path.resolve(args[shotI + 1]) : null;
 const sizeI = args.indexOf('--size'), SIZE = sizeI >= 0 ? args[sizeI + 1].split('x').map(Number) : [900, 1200];
+// --viewport WxH: sidans VYPORT när proben körs. --size styr bara fönstret och skärmdumpen, så
+// en mätning av telefonbredd krävde det här: window.innerWidth var 500 fast --size sa 360.
+const vpI = args.indexOf('--viewport'), VIEWPORT = vpI >= 0 ? args[vpI + 1].split('x').map(Number) : null;
 // --console: sidans console.log strömmas (Runtime.consoleAPICalled) till stderr som `console: …` — de sista raderna före
 // en tidsgräns pekar ut var sidan hängde (testgen-fuzz loggar generatorns namn före varje anrop).
 const KONSOL = args.includes('--console');
@@ -70,12 +73,13 @@ async function waitPort(){ for(let i = 0; i < 200; i++){ try { return await getJ
       pending[i] = m => { clearTimeout(tm); res(m); }; ws.send(JSON.stringify({ id: i, method, params: params || {} })); });
     await send('Page.enable'); await send('Runtime.enable');
     if(PRE) await send('Page.addScriptToEvaluateOnNewDocument', { source: PRE });
+    if(VIEWPORT) await send('Emulation.setDeviceMetricsOverride', { width: VIEWPORT[0], height: VIEWPORT[1], deviceScaleFactor: 1, mobile: false });
     await send('Page.navigate', { url });
     await new Promise(r => setTimeout(r, WAIT));
     const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true, timeout: TIMEOUT });
     if(r.result && r.result.exceptionDetails){ console.error('FEL i sidan:', JSON.stringify(r.result.exceptionDetails.exception || r.result.exceptionDetails, null, 0).slice(0, 600)); code = 1; }
     else console.log(JSON.stringify(r.result && r.result.result ? r.result.result.value : null));
-    if(SHOT){ await send('Emulation.setDeviceMetricsOverride', { width: SIZE[0], height: SIZE[1], deviceScaleFactor: 1, mobile: false }); const sh = await send('Page.captureScreenshot', { format: 'png' }); if(sh.result && sh.result.data){ fs.writeFileSync(SHOT, Buffer.from(sh.result.data, 'base64')); console.error('skärmdump: ' + SHOT); } }
+    if(SHOT){ if(!VIEWPORT) await send('Emulation.setDeviceMetricsOverride', { width: SIZE[0], height: SIZE[1], deviceScaleFactor: 1, mobile: false }); const sh = await send('Page.captureScreenshot', { format: 'png' }); if(sh.result && sh.result.data){ fs.writeFileSync(SHOT, Buffer.from(sh.result.data, 'base64')); console.error('skärmdump: ' + SHOT); } }
     ws.close();
   } catch(e){ console.error('cdp-kor:', e.message); code = 1; }
   finally { clearTimeout(vakthund); dodaChrome(); setTimeout(() => { try { fs.rmSync(prof, { recursive: true, force: true }); } catch(e){} process.exit(code); }, 300); }

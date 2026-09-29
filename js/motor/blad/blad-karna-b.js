@@ -971,6 +971,10 @@ function bygg_blad(rotEl, blad){
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
   var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in';   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
+  // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
+  // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
+  window.BLAD_VAXER = VAXER;
   // EN mätning, EN funktion: AK8_UI.vaxMedGolv läser rutans eget mått och använder det som golv.
   // Förr mättes bredden här, med 90 px som reserv när mätningen gav 0 — och en ruta som låg i en
   // DOLD flik när bladet bands mättes just så. Ordna-rutan (56 px) öppnade 90 px av det skälet.

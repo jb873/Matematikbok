@@ -367,8 +367,9 @@
   function autoSpace(inp){
     var v = inp.value, pos = inp.selectionStart == null ? v.length : inp.selectionStart;
     var out = v.replace(/[-\u2013\u2014]/g, '\u2212').replace(/[*\u00d7]/g, '\u00b7');
-    out = out.replace(/\s*([+\u2212\u00b7\/])\s*/g, function(m, op, i){ return i === 0 ? op : ' ' + op + ' '; });
-    if(!/[+\u2212\u00b7\/]\s*$/.test(out)) out = out.replace(/\s+$/, '');   // mellanrummet efter ett tecken står kvar tills nästa del skrivits
+    // = får mellanrum som räknetecknen: kedjan ska läsas "x + 3x = 4x", inte "x + 3x=4x".
+    out = out.replace(/\s*([+\u2212\u00b7\/=])\s*/g, function(m, op, i){ return i === 0 ? op : ' ' + op + ' '; });
+    if(!/[+\u2212\u00b7\/=]\s*$/.test(out)) out = out.replace(/\s+$/, '');   // mellanrummet efter ett tecken står kvar tills nästa del skrivits
     if(out === v) return;
     var before = v.slice(0, pos).replace(/\s+/g, '').length, np = 0, seen = 0;
     while(np < out.length && seen < before){ if(out[np] !== ' ') seen++; np++; }
@@ -416,6 +417,11 @@
     var vars = inp && inp.dataset && inp.dataset.vars;   // data-vars="xy" → just de variablerna aktiva (algebra); saknas → alla grå
     if(vars) ('' + vars).split('').forEach(function(v){ if(VARIABLER.indexOf(v) > -1) till[v] = 1; });
     if(bygg){ till['frac'] = 1; till['pot'] = 1; }   // EN bråkknapp (order 2026-09-21): komplexbråket byggs med samma knapp inne i täljare/nämnare
+    // LIKHETSTECKNET tänds bara i en ruta som bär en KEDJA — hela ledet i en ruta
+    // ("x + 3x + x + 3x = 8x"). I en vanlig svarsruta är = inget eleven ska skriva.
+    var kedja = !!(inp && inp.matches && inp.matches('.ovn-kedja,[data-kedja]'))
+             || (m ? /kedja/.test(m) : false);
+    if(kedja) till['='] = 1;
     // data-bygg="frac" (eller "frac pot"): rutan säger VILKA byggare den kan bära. Utan attributet
     // gäller kontexten ovan. En ruta som bara kan bära bråk ska inte tända potensknappen.
     var byggLista = inp && inp.dataset && inp.dataset.bygg;
@@ -469,9 +475,13 @@
     html += '<div class="keypad-vars">';
     VARIABLER.forEach(function(v){ html += k(v, v, 'varkey' + (aktivaVars.indexOf(v) > -1 ? '' : ' kp-inactive')); });
     html += '</div>';
-    // Byggare (1 smal kol): bråk ÖVER potens. Grå tills builder-kontext (opts.builders).
+    // Byggar-kolumnen (1 smal kol): bråk, potens och likhetstecken. Grå tills rutan säger att de
+    // gäller. = ligger HÄR och inte bland operatorerna: ops-blocket är fullt på 2 kolumner, och en
+    // tredje kolumn hade gjort keypaden bredare på en telefon där den redan spiller över. Den här
+    // kolumnen har oanvänd höjd — tecknet kostar noll pixlar.
     var bi = opts.builders ? '' : ' kp-inactive';
     html += '<div class="keypad-build">'
+      + k('=', '=', 'op kp-inactive')
       + '<button type="button" class="kp-key op kp-fracbtn' + bi + '" data-key="frac" title="Bygg stående bråk"' + (bi ? ' aria-disabled="true" tabindex="-1"' : '') + '>' + FRAC_ICON + '</button>'
       + '<button type="button" class="kp-key op kp-potbtn' + bi + '" data-key="pot" title="Bygg potens: bas och exponent"' + (bi ? ' aria-disabled="true" tabindex="-1"' : '') + '>' + POT_ICON + '</button>'
       // (komplexbråks-knappen borttagen 2026-09-21 — Joachim: en knapp som gör rätt sak där markören står; opts.komplex ignoreras)

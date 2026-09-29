@@ -88,11 +88,58 @@ const PROBE = `(function(){
       inp.focus(); ev(inp, 'focusin');
       return { plus: tand('+'), minus: tand('\u2212'), gang: tand('\u00b7'), del: tand('/') };
     }
+    // TECKEN — VARJE uttrycksruta, inte bara ytans första. En ruta längre ned kan bära ett annat
+    // teckenbehov, och den som bara mäter ruta ett ser aldrig det.
     if(uttr.length && kp){
-      var L = lage(uttr[0]);
-      y.tecken = L;
-      var slackta = Object.keys(L).filter(function(k){ return !L[k]; });
-      if(slackta.length) y.brott.push('TECKEN: ' + slackta.join(', ') + ' släckta i ' + adress(uttr[0]));
+      y.tecken = lage(uttr[0]);
+      var settT = {};
+      uttr.forEach(function(inp){
+        var typ = adress(inp);
+        if(settT[typ]) return;                 // en per ruttyp räcker — rapporten är per typ
+        settT[typ] = 1;
+        var L = lage(inp);
+        var slackta = Object.keys(L).filter(function(k){ return !L[k]; });
+        if(slackta.length) y.brott.push('TECKEN: ' + slackta.join(', ') + ' släckta i ' + typ);
+      });
+    }
+
+    // BOKSTÄVER — rutans facit säger vilka bokstäver svaret behöver; de ska vara tända.
+    // Granskades inte alls förr: TECKEN läste bara räknetecknen.
+    if(kp){
+      var settB = {};
+      alla.forEach(function(inp){
+        var facit = inp.getAttribute('data-visa') || '';
+        if(!facit) return;
+        var typ = adress(inp);
+        if(settB[typ]) return;
+        settB[typ] = 1;
+        inp.focus(); ev(inp, 'focusin');
+        ['x','y','a','b','c','n'].forEach(function(v){
+          // bokstaven ska stå fristående i facit, inte inuti ett ord
+          if(!new RegExp('(^|[^a-zåäöA-ZÅÄÖ])' + v + '([^a-zåäöA-ZÅÄÖ]|$)').test(facit)) return;
+          if(!tand(v)) y.brott.push('BOKSTAV: facit "' + facit.slice(0, 32) + '" behöver ' + v + ', som är släckt i ' + typ);
+        });
+        // TECKEN I FACIT: ett tecken som facit kräver måste finnas på keypaden alls.
+        ['=', '(', ')', '/'].forEach(function(t){
+          if(facit.indexOf(t) < 0) return;
+          var b = kpEl && kpEl.querySelector('.kp-key[data-key="' + t + '"]');
+          if(!b) y.brott.push('TECKEN SAKNAS: facit "' + facit.slice(0, 32) + '" behöver ' + t + ', som inte finns på keypaden');
+          else if(b.classList.contains('kp-inactive')) y.brott.push('TECKEN: facit "' + facit.slice(0, 32) + '" behöver ' + t + ', som är släckt i ' + typ);
+        });
+      });
+    }
+
+    // TRYCK — når ett knapptryck fram till rutan? Keypaden kan vara monterad och ändå obunden.
+    // Eleven trycker med mousedown; det är den vägen som ska mätas.
+    if(uttr.length && kp){
+      var p0 = uttr[0], fore0 = p0.value;
+      p0.focus(); ev(p0, 'focusin');
+      var kn = kpEl && kpEl.querySelector('.kp-key[data-key="5"]:not(.kp-inactive)');
+      if(kn){
+        kn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        if(p0.value === fore0) y.brott.push('TRYCK: keypadens 5 når inte fram till ' + adress(p0));
+        p0.value = fore0; ev(p0, 'input');
+      }
     }
     var talrutor = alla.filter(talruta);
     if(talrutor.length && kp){
@@ -148,8 +195,21 @@ const PROBE = `(function(){
         var c = document.createElement('canvas').getContext('2d');
         c.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
         var gammalt = inp.value;
-        var txt = uttrycksruta(inp) ? '12 + 15' : '1234';
+        // Rutor som SKA växa fylls tills texten är bredare än det tomma måttet — en sträng som får
+        // plats ändå prövar ingenting ("12 + 15" rymdes i en 124 px-ruta som aldrig växte).
+        // Rutor som medvetet hålls fasta (uppställningens data-svar, rutnäten) prövas med ett
+        // rimligt innehåll i stället. Vilka som är vilka står i kärnans egen lista, inte här.
         inp.value = ''; ev(inp, 'input');
+        var csT = getComputedStyle(inp);
+        var tomInre = Math.round(inp.getBoundingClientRect().width
+          - parseFloat(csT.paddingLeft || 0) - parseFloat(csT.paddingRight || 0)
+          - parseFloat(csT.borderLeftWidth || 0) - parseFloat(csT.borderRightWidth || 0));
+        var vaxSel = window.BLAD_VAXER || null;
+        var skaVaxa = (vaxSel && inp.matches(vaxSel))
+                   || !!(window.AK8_UI && AK8_UI.EGET_MATT && inp.matches(AK8_UI.EGET_MATT));
+        var enhet = uttrycksruta(inp) ? '12x + 15y + ' : '1234';
+        var txt = enhet;
+        if(skaVaxa){ while(c.measureText(txt).width <= tomInre && txt.length < 60) txt += enhet; }
         txt.split('').forEach(function(ch){ inp.value += ch; ev(inp, 'input'); });
         var inre = inp.getBoundingClientRect().width
                  - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0)

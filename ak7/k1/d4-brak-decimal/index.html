@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-brakblad-kanon.css">
+<!-- Keypadens formgivning: DELAD fil. Låg förr som en ordagrann kopia här. -->
+<link rel="stylesheet" href="../../../js/motor/keypad.css">
 <style>
 /* Sidspecifika + isärdrivna regler (kvar efter css-flytten 2026-09-19). Det delade ligger i ak7-delkapitel-kanon.css + ak7-brakblad-kanon.css, länkade ovan. */
 :root{
@@ -74,29 +76,7 @@
 }
 /* Skärmtangentbord – samma stil som öva-delen */
 /* Delad AK8_UI-keypad (migrerad från egen .ovn-keypad). ALLTID fixed nedtill; keypad-clearance.js
-   sätter mätt body-padding. Universella nav-paletten (--paper-lt m.fl.) finns i sidans :root. */.keypad{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:var(--paper-lt);border-top:1px solid var(--paper-dk);box-shadow:0 -3px 14px rgba(15,30,46,.08);}
-.keypad-hidden{display:none !important;}
-.keypad-digits{display:grid;grid-template-columns:repeat(3,42px);gap:4px;}
-.keypad-ops{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
-.keypad-build{display:grid;grid-template-columns:42px;gap:4px;align-content:start;}
-.keypad-vars{display:grid;grid-template-columns:repeat(2,42px);gap:4px;align-content:start;}
-.kp-key.varkey{color:var(--navy,#0f1e2e);font-style:italic;}
-@media (max-width:430px){ /* keypad-smal: allt ryms på EN rad även på telefon */ .keypad{gap:4px;padding:8px 6px;} .keypad-vars{grid-template-columns:repeat(2,40px);} }
-.kp-inactive{opacity:.5;pointer-events:none;cursor:default;}
-.kp-key{height:40px;border:1.5px solid var(--paper-dk);border-radius:8px;background:#fff;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);cursor:pointer;transition:transform .08s,background .1s;display:flex;align-items:center;justify-content:center;user-select:none;}
-.kp-key:hover{background:var(--paper-dk);}
-.kp-key:active{transform:scale(.92);}
-.kp-key.op{color:var(--gold);font-weight:700;}
-.kp-key.util{background:var(--paper);color:var(--ink-faint);font-size:15px;}
-.kp-key.span2{grid-column:span 2;}
-.kp-key.span3{grid-column:span 3;}
-.kp-fracbtn, .kp-potbtn{color:var(--navy);}
-.kp-frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1px;}
-.kp-frac-t, .kp-frac-n{width:15px;height:9px;border:1.4px solid currentColor;border-radius:2px;}
-.kp-frac-l{width:19px;height:2px;background:currentColor;}
-.kp-pot{display:inline-flex;align-items:flex-start;}
-.kp-pot-b{width:14px;height:14px;border:1.6px solid currentColor;border-radius:2px;}
-.kp-pot-e{width:8px;height:8px;border:1.6px solid currentColor;border-radius:2px;margin-left:1px;margin-top:-4px;}
+   sätter mätt body-padding. Universella nav-paletten (--paper-lt m.fl.) finns i sidans :root. */
 .kp-kbrakbtn{color:var(--navy);}
 .kp-kbrak{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1.5px;}
 .kp-kbrak-f{width:13px;height:7px;border:1.4px solid currentColor;border-radius:2px;}
