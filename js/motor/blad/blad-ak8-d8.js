@@ -184,7 +184,7 @@
       var res = CHECKS[+el.dataset.idx](el);
       tot++;
       if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
-      el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
+      el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; if(String(i.value).trim()==='') return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); });
       AK8_UI.markera(el, res.ok);
       if(res.ok){ ratt++; }
       else if(!el.querySelector('.ak8-fasit')){ var f = document.createElement('span'); f.className = 'ak8-fasit'; f.textContent = (res.besked ? res.besked + ' ' : '') + 'rätt ' + res.facit; el.appendChild(f); }

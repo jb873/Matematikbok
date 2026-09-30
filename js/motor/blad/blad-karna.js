@@ -387,6 +387,8 @@ function bygg_blad(rotEl, blad){
       var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
       egnaMarken(inp);   // rutans EGNA fasit + markering (inte radens — se egnaMarken)
       inp.classList.remove('correct','wrong','just-checked');
+      // OBESVARAD RUTA RÄTTAS INTE: räknas i nämnaren, men får varken markering eller facit.
+      if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok;
       if(inp.dataset.enhet) ok = (String(inp.value).toLowerCase().replace(/[\s.]/g,'') === String(inp.dataset.enhet).toLowerCase().replace(/[\s.]/g,''));
       else if(inp.dataset.rund){
@@ -416,6 +418,8 @@ function bygg_blad(rotEl, blad){
       totalt++;
       row.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
       boxar.forEach(function(b){ b.classList.remove('correct','wrong','just-checked'); });
+      // Bråksvaret är EN enhet. Är hela raden tom är den obesvarad — inte fel.
+      if(boxar.every(function(b){ return String(b.value).trim() === ''; })) return;
 
       var cH = parseInt(row.dataset.hel, 10);
       var cT = parseInt(row.dataset.t, 10);
@@ -437,10 +441,10 @@ function bygg_blad(rotEl, blad){
       var ankare = row.querySelector('.brak-svar');
       if(ok){
         ratt++;
-        boxar.forEach(function(b){ b.classList.add('correct','just-checked'); });
+        boxar.forEach(function(b){ if(String(b.value).trim()==='') return; b.classList.add('correct','just-checked'); });
         ankare.insertAdjacentElement('afterend', mk);
       } else {
-        boxar.forEach(function(b){ b.classList.add('wrong','just-checked'); });
+        boxar.forEach(function(b){ if(String(b.value).trim()==='') return; b.classList.add('wrong','just-checked'); });
         ankare.insertAdjacentElement('afterend', mk);
         var f = document.createElement('span'); f.className = 'ovn-fasit';
         f.textContent = 'rätt svar: ' + row.dataset.facit;
@@ -463,8 +467,8 @@ function bygg_blad(rotEl, blad){
       var cT   = parseInt(row.dataset.t,   10);
       var cN   = parseInt(row.dataset.n,   10);
       // Decimal
-      if(decIn){
-        totalt++;
+      if(decIn) totalt++;
+      if(decIn && String(decIn.value).trim() !== ''){
         var decOk = jamforTal(decIn.value, cDec);
         if(decOk){ ratt++; decIn.classList.add('correct','just-checked'); decIn.insertAdjacentElement('afterend', marker(true)); }
         else {
@@ -500,8 +504,8 @@ function bygg_blad(rotEl, blad){
       [talIn, decIn].filter(Boolean).forEach(function(b){ b.classList.remove('correct','wrong','just-checked'); });
       var cHundra = parseInt(row.dataset.hundra, 10);
       var cDec = parseFloat(row.dataset.dec);
-      if(talIn){
-        totalt++;
+      if(talIn) totalt++;
+      if(talIn && String(talIn.value).trim() !== ''){
         var talOk = (talIn.value || '').trim() !== '' && parseInt(talIn.value, 10) === cHundra;
         var frak = row.querySelector('.forlang-frak');
         if(talOk){ ratt++; talIn.classList.add('correct','just-checked'); frak.insertAdjacentElement('afterend', marker(true)); }
@@ -513,8 +517,8 @@ function bygg_blad(rotEl, blad){
         }
         setTimeout(function(){ if(talIn) talIn.classList.remove('just-checked'); }, 500);
       }
-      if(decIn){
-        totalt++;
+      if(decIn) totalt++;
+      if(decIn && String(decIn.value).trim() !== ''){
         var decOk = jamforTal(decIn.value, cDec);
         if(decOk){ ratt++; decIn.classList.add('correct','just-checked'); decIn.insertAdjacentElement('afterend', marker(true)); }
         else {

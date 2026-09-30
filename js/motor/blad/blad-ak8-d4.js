@@ -459,7 +459,7 @@
       if(res.flagg) return;
       tot++;
       if(!AK8_UI.besvarad(el)) return;   // tom ruta = obesvarad: räknad i nämnaren men ej markerad/rättad/ratt (full pott kräver att ALLA rutor är besvarade + rätta)
-      if(res.kedja){ el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
+      if(res.kedja){ el.querySelectorAll('.ak8-in').forEach(function(i){ if(i.closest('.ak8-extra')) return; if(String(i.value).trim()==='') return; i.classList.add(res.ok ? 'ak8-ok' : 'ak8-fel'); }); }
       else if(res.korval){ var s = el.querySelector('.ak8-korval.sel'); if(s) s.classList.add(res.ok ? 'ratt' : 'fel'); }
       else { AK8_UI.markeraRutor(el, res); }   // per ruta/cell (res.per / res.perCell) — raden ✓ bara om alla rätt
       AK8_UI.markera(el.closest('.ak8-rad') || el, res.ok);   // ✓/✗-bock + puls (ingen låsning → retry)

@@ -481,6 +481,9 @@
     });
     if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(rotEl);
     function markera(inp,ok,facit){
+      // OBESVARAD RUTA RÄTTAS INTE: ingen färg, inget kryss, inget facit. Den är redan räknad i
+      // nämnaren av anroparen — uppgiften finns kvar att göra.
+      if(String(inp.value).trim()==='') return;
       var mark=document.createElement('span'); mark.className='ovn-mark '+(ok?'ok':'fel'); mark.textContent=ok?'✓':'✗';
       inp.classList.add(ok?'correct':'wrong'); inp.insertAdjacentElement('afterend',mark);
       if(!ok&&facit!=null){ var f=document.createElement('span'); f.className='ovn-fasit'; f.textContent='rätt svar: '+facit; mark.insertAdjacentElement('afterend',f); }
@@ -512,8 +515,11 @@
             mOk = allNum && Math.abs(sum-svar)<1e-6 && (boxes.length<2||noDump);
             facitTxt='rätt svar: summan ska bli '+String(svar).replace('.',',');
           }
-          boxes.forEach(function(b){ b.classList.add(mOk?'correct':'wrong'); });
-          markEfter(grp,mOk, mOk?null:facitTxt);
+          // Mellanledet är EN enhet. Är hela gruppen tom är den obesvarad — inte fel.
+          if(boxes.some(function(b){ return String(b.value).trim()!==''; })){
+            boxes.forEach(function(b){ b.classList.add(mOk?'correct':'wrong'); });
+            markEfter(grp,mOk, mOk?null:facitTxt);
+          }
           totalt++; if(mOk)ratt++;
           var sInp=row.querySelector('.ova-slutsvar');
           var sOk=jamforTal(sInp.value,svar); markera(sInp,sOk,sOk?null:String(svar).replace('.',',')); totalt++; if(sOk)ratt++;
@@ -526,8 +532,11 @@
           var tsum=tvals.reduce(function(a,v){return a+(isNaN(v)?0:v);},0);
           var tnoDump=!tvals.some(function(v){return Math.abs(v-tsumma)<1e-6;});
           var tOk=tallNum && Math.abs(tsum-tsumma)<1e-6 && (tboxes.length<2||tnoDump);
-          tboxes.forEach(function(b){ b.classList.add(tOk?'correct':'wrong'); });
-          markEfter(tgrp,tOk, tOk?null:'ska summeras till '+String(tsumma).replace('.',','));
+          // Termgruppen är EN enhet. Är hela gruppen tom är den obesvarad — inte fel.
+          if(tboxes.some(function(b){ return String(b.value).trim()!==''; })){
+            tboxes.forEach(function(b){ b.classList.add(tOk?'correct':'wrong'); });
+            markEfter(tgrp,tOk, tOk?null:'ska summeras till '+String(tsumma).replace('.',','));
+          }
           totalt++; if(tOk)ratt++;
         } else {
           row.querySelectorAll('.ovn-in').forEach(function(inp){

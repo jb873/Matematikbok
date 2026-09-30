@@ -53,6 +53,9 @@
     var perOk = per && per.length === ins.length;
     Array.prototype.forEach.call(ins, function(i, k){
       if(i.closest('.ak8-extra')) return;
+      // OBESVARAD RUTA FÄRGAS INTE. En rad kan vara delvis ifylld — då ska bara de rutor eleven
+      // faktiskt skrivit i få en färg. En tom ruta är något hon inte hunnit till, inte ett fel.
+      if(String(i.value).trim() === '') return;
       var ok = res.ok;
       if(perOk) ok = per[k];
       else if(perCell){ var c = i.closest('[data-r]'); if(c && c.dataset.r in perCell) ok = perCell[c.dataset.r]; }
@@ -100,6 +103,20 @@
     if(mindre) mindre.hidden = (tot - extra) <= 2;
   }
   function kedjaCeller(radEl){ return [].slice.call(radEl.querySelectorAll('.ak8-cell .ak8-expr')); }
+
+  // ── EVIDENSEN FÖLJER FÖRSTA FÖRSÖKET PER RUTA ──
+  // Kontrollera loggade förr varje besvarad ruta vid VARJE tryck: fel svar gav [fel], rättat gav
+  // [fel, ratt], och ett tredje tryck [fel, ratt, ratt]. Eftersom mastery räknar rätt-eventen kunde
+  // eleven rätta sig fram till grönt. Nu räknas det första försöket; senare tryck ändrar vad hon
+  // SER, inte vad som loggats. Flaggan sitter på elementet — ett nytt blad ger ett nytt försök.
+  // el = rutan (eller radens element när svaret är en enhet av flera rutor).
+  function loggaForstaForsoket(el, store, nod, ok){
+    if(!el || !nod || !store || !store.loggaForsok) return false;
+    if(el.dataset.loggat) return false;
+    el.dataset.loggat = '1';
+    store.loggaForsok(nod, ok ? 'ratt' : 'fel');
+    return true;
+  }
 
   // ── AUTO-VÄXANDE RUTA ──
   // opts.min = golv i pixlar (rutans egen bredd). Utan opts: åttans egna minimum per roll.
@@ -694,7 +711,7 @@
   window.AK8_UI = {
     pNum: pNum, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
-    grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
+    grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,

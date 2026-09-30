@@ -1014,6 +1014,10 @@ function bygg_blad(rotEl, blad){
       // Ta bort rutans EGNA tidigare fasit + markering (inte grannarnas — se egnaMarken)
       egnaMarken(inp);
       inp.classList.remove('correct','wrong','just-checked');
+      // OBESVARAD RUTA RÄTTAS INTE. Den räknas i nämnaren (uppgiften finns kvar att göra) men får
+      // varken markering, kryss, facit eller loggning. Samma regel som sid-paren redan hade.
+      // Utan den gav ett enda Kontrollera bort hela bladets facit.
+      if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok, _besked = null;
       if(inp.dataset.forenkla !== undefined){
         // FÖRENKLA: värde + skriven form (AlgBrak.gradePoly). 'form' = rätt värde men inte förenklat
@@ -1127,8 +1131,9 @@ function bygg_blad(rotEl, blad){
       // hamnade algebra-evidensen i k1-storen. data-logg-store sätts av bladets data (grupp.loggStore).
       var _store = (_grEl && _grEl.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
       // Omskrivningscellen (data-oms) loggas EJ separat — annars två evidens per uppgift; svarscellen bär loggen.
-      if(_loggNod && inp.dataset.oms === undefined && String(inp.value).trim() !== '' && _store && _store.loggaForsok){
-        _store.loggaForsok(_loggNod, ok ? 'ratt' : 'fel');
+      if(_loggNod && inp.dataset.oms === undefined && String(inp.value).trim() !== ''
+         && window.AK8_UI && AK8_UI.loggaForstaForsoket){
+        AK8_UI.loggaForstaForsoket(inp, _store, _loggNod, ok);
       }
       // Bocken/krysset – stor, syns tydligt
       var mark = document.createElement('span');
@@ -1214,7 +1219,7 @@ function bygg_blad(rotEl, blad){
       }
       var _gr = box.closest('.ovn-grupp'), _nod = _gr && _gr.getAttribute('data-logg');
       var _st = (_gr && _gr.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
-      if(_nod && _st && _st.loggaForsok) _st.loggaForsok(_nod, okS ? 'ratt' : 'fel');
+      if(_nod && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(box, _st, _nod, okS);
     });
 
     // Rätta flervalsfrågor

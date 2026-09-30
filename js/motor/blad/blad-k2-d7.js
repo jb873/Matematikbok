@@ -117,10 +117,12 @@
         var ok = hel
           ? parseInt(hel.value, 10) === parseInt(rad.dataset.hel, 10)
           : (parseInt(t.value, 10) === parseInt(rad.dataset.t, 10) && parseInt(n.value, 10) === parseInt(rad.dataset.n, 10));
-        rutor.forEach(function(el){ el.classList.remove('correct', 'wrong'); if(fyllt) el.classList.add(ok ? 'correct' : 'wrong'); });
+        // Bara rutor eleven skrivit i får färg. Raden kan vara delvis ifylld — den tomma rutan
+        // är något hon inte hunnit till, inte ett fel.
+        rutor.forEach(function(el){ el.classList.remove('correct', 'wrong'); if(fyllt && String(el.value).trim() !== '') el.classList.add(ok ? 'correct' : 'wrong'); });
         if(!fyllt) return;
         if(ok) ratt++;
-        if(nod && window.MasteryK2 && MasteryK2.loggaForsok) MasteryK2.loggaForsok(nod, ok ? 'ratt' : 'fel');
+        if(nod && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(rutor[0], window.MasteryK2, nod, ok);
       });
     });
     var sam = mount.querySelector('[data-sammanf]');

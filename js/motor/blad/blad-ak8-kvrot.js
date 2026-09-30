@@ -197,7 +197,7 @@
       UI.markera(el.closest('.ak8-rad') || el, res.ok);
       // Loggning: en besvarad ruta = ett försök (rätt/fel). Tidsspärren i mastery.js kollapsar upprepade klick.
       var grEl = el.closest('.ovn-grupp'), loggNod = grEl && grEl.getAttribute('data-logg');
-      if(loggNod && window.Mastery && window.Mastery.loggaForsok) window.Mastery.loggaForsok(loggNod, res.ok ? 'ratt' : 'fel');
+      if(loggNod && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(el, window.Mastery, loggNod, res.ok);
       if(res.ok){ ratt++; }
       else { var f = document.createElement('span'); f.className = 'ak8-fasit'; f.innerHTML = 'rätt: ' + res.facit; el.appendChild(f); }
     });

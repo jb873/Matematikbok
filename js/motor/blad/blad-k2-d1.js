@@ -137,16 +137,22 @@
       totalt++; var typ=el.dataset.typ, ok=false;
       el.querySelectorAll('.ovn-in').forEach(function(inp){ inp.classList.remove('correct','wrong'); });
       var old=el.parentNode.querySelector('.d1-fasit'); if(old) old.remove();
+      // OBESVARAD ENHET RÄTTAS INTE: den är räknad (totalt++ ovan) men får varken färg eller
+      // facit. Enheten kan besvaras med rutor, med chips (val/flerval) eller genom att fylla i
+      // ett rutnät — alla tre räknas som svar.
+      var _svarat = Array.prototype.some.call(el.querySelectorAll('.ovn-in'), function(i){ return String(i.value).trim() !== ''; })
+                 || !!el.querySelector('.d1-chip.sel') || !!el.querySelector('.fylld');
+      if(!_svarat) return;
       if(typ==='brak'){
         var t=parseInt(el.querySelector('.d1-in-t').value,10),n=parseInt(el.querySelector('.d1-in-n').value,10),ft=+el.dataset.t,fn=+el.dataset.n;
         ok=isFinite(t)&&isFinite(n)&&n!==0&&Math.abs(t/n-ft/fn)<1e-9;
-        el.querySelectorAll('.ovn-in').forEach(function(inp){inp.classList.add(ok?'correct':'wrong');});
+        el.querySelectorAll('.ovn-in').forEach(function(inp){ if(String(inp.value).trim()==='') return; inp.classList.add(ok?'correct':'wrong'); });
         if(!ok){var f=document.createElement('span');f.className='d1-fasit';f.innerHTML='rätt svar: '+ft+'/'+fn;el.insertAdjacentElement('afterend',f);}
       } else if(typ==='villkor-hela'){
         var varde=+el.dataset.varde,brak=[]; el.querySelectorAll('.d1-svarbrak').forEach(function(sb){brak.push({t:parseInt(sb.querySelector('.d1-in-t').value,10),n:parseInt(sb.querySelector('.d1-in-n').value,10)});});
         var giltiga=brak.every(function(b){return isFinite(b.t)&&isFinite(b.n)&&b.n!==0&&Math.abs(b.t/b.n-varde)<1e-9;});
         var seen={},dist=true; brak.forEach(function(b){if(!isFinite(b.t)||!b.n)return;var k=b.t+'/'+b.n;if(seen[k])dist=false;seen[k]=1;});
-        ok=giltiga&&dist; el.querySelectorAll('.ovn-in').forEach(function(inp){inp.classList.add(ok?'correct':'wrong');});
+        ok=giltiga&&dist; el.querySelectorAll('.ovn-in').forEach(function(inp){ if(String(inp.value).trim()==='') return; inp.classList.add(ok?'correct':'wrong'); });
         if(!ok){var f2=document.createElement('span');f2.className='d1-fasit';f2.innerHTML='tre olika bråk lika med '+varde+' (t.ex. 2/1, 4/2, 6/3)';el.insertAdjacentElement('afterend',f2);}
       } else if(typ==='flerval'){
         var ri=el.dataset.ratt.split(',').map(Number),chips=Array.prototype.slice.call(el.querySelectorAll('.d1-chip')); ok=true;

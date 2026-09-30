@@ -419,6 +419,9 @@ function bygg_blad(rotEl, blad){
       // Steg-celler (femledad uppställning): rätta och färglägg, men utan inline-markörer
       if(inp.classList.contains('brak-steg-cell')){
         inp.classList.remove('correct','wrong','just-checked');
+        // Obesvarad steg-cell rättas inte — räknas, men färgläggs inte. Uppställningens tomma
+        // rutor är de eleven inte hunnit till, inte fel hon gjort.
+        if(String(inp.value).trim() === ''){ totalt++; return; }
         var okS = jamforLed(inp, parseFloat(inp.dataset.svar));
         totalt++;
         if(okS){ ratt++; inp.classList.add('correct','just-checked'); }
@@ -429,6 +432,8 @@ function bygg_blad(rotEl, blad){
       var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
       rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
       inp.classList.remove('correct','wrong','just-checked');
+      // OBESVARAD RUTA RÄTTAS INTE: räknas i nämnaren, men får varken markering eller facit.
+      if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok;
       if(inp.dataset.enhet) ok = (String(inp.value).toLowerCase().replace(/[\s.]/g,'') === String(inp.dataset.enhet).toLowerCase().replace(/[\s.]/g,''));
       else ok = jamforLed(inp, parseFloat(inp.dataset.svar));
@@ -454,6 +459,8 @@ function bygg_blad(rotEl, blad){
       totalt++;
       row.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
       boxar.forEach(function(b){ b.classList.remove('correct','wrong','just-checked'); });
+      // Bråksvaret är EN enhet. Är hela raden tom är den obesvarad — inte fel.
+      if(boxar.every(function(b){ return String(b.value).trim() === ''; })) return;
 
       var cH = parseInt(row.dataset.hel, 10);
       var cT = parseInt(row.dataset.t, 10);
@@ -475,10 +482,10 @@ function bygg_blad(rotEl, blad){
       var ankare = row.querySelector('.brak-svar');
       if(ok){
         ratt++;
-        boxar.forEach(function(b){ b.classList.add('correct','just-checked'); });
+        boxar.forEach(function(b){ if(String(b.value).trim()==='') return; b.classList.add('correct','just-checked'); });
         ankare.insertAdjacentElement('afterend', mk);
       } else {
-        boxar.forEach(function(b){ b.classList.add('wrong','just-checked'); });
+        boxar.forEach(function(b){ if(String(b.value).trim()==='') return; b.classList.add('wrong','just-checked'); });
         ankare.insertAdjacentElement('afterend', mk);
         var f = document.createElement('span'); f.className = 'ovn-fasit';
         f.textContent = 'rätt svar: ' + row.dataset.facit;

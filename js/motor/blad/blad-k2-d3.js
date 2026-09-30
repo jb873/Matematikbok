@@ -530,6 +530,8 @@ function bygg_blad(rotEl, blad){
       var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
       rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
       inp.classList.remove('correct','wrong','just-checked');
+      // OBESVARAD RUTA RÄTTAS INTE: räknas i nämnaren, men får varken markering eller facit.
+      if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok;
       if(inp.dataset.enhet) ok = (String(inp.value).toLowerCase().replace(/[\s.]/g,'') === String(inp.dataset.enhet).toLowerCase().replace(/[\s.]/g,''));
       else if(inp.dataset.rund){
@@ -559,6 +561,8 @@ function bygg_blad(rotEl, blad){
       totalt++;
       row.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
       boxar.forEach(function(b){ b.classList.remove('correct','wrong','just-checked'); });
+      // Bråksvaret är EN enhet. Är hela raden tom är den obesvarad — inte fel.
+      if(boxar.every(function(b){ return String(b.value).trim() === ''; })) return;
 
       var cH = parseInt(row.dataset.hel, 10);
       var cT = parseInt(row.dataset.t, 10);
@@ -580,10 +584,10 @@ function bygg_blad(rotEl, blad){
       var ankare = row.querySelector('.brak-svar');
       if(ok){
         ratt++;
-        boxar.forEach(function(b){ b.classList.add('correct','just-checked'); });
+        boxar.forEach(function(b){ if(String(b.value).trim()==='') return; b.classList.add('correct','just-checked'); });
         ankare.insertAdjacentElement('afterend', mk);
       } else {
-        boxar.forEach(function(b){ b.classList.add('wrong','just-checked'); });
+        boxar.forEach(function(b){ if(String(b.value).trim()==='') return; b.classList.add('wrong','just-checked'); });
         ankare.insertAdjacentElement('afterend', mk);
         var f = document.createElement('span'); f.className = 'ovn-fasit';
         f.textContent = 'rätt svar: ' + row.dataset.facit;
@@ -606,8 +610,8 @@ function bygg_blad(rotEl, blad){
       var cT   = parseInt(row.dataset.t,   10);
       var cN   = parseInt(row.dataset.n,   10);
       // Decimal
-      if(decIn){
-        totalt++;
+      if(decIn) totalt++;
+      if(decIn && String(decIn.value).trim() !== ''){
         var decOk = jamforTal(decIn.value, cDec);
         if(decOk){ ratt++; decIn.classList.add('correct','just-checked'); decIn.insertAdjacentElement('afterend', marker(true)); }
         else {
@@ -662,6 +666,8 @@ function bygg_blad(rotEl, blad){
       var tEl = rad.querySelector('.stam-t'), nEl = rad.querySelector('.stam-n');
       tEl.classList.remove('correct','wrong'); nEl.classList.remove('correct','wrong');
       var tv = (tEl.value || '').trim(), nv = (nEl.value || '').trim();
+      // Obesvarad rad rättas inte: räknad i nämnaren, men varken färgad eller facit-visad.
+      if(tv === '' && nv === '') return;
       var nNum = parseInt(nv, 10);
       var tOk = (tv === '1');
       var nOk = (/^\d+$/.test(nv) && nNum >= 2);
@@ -670,8 +676,8 @@ function bygg_blad(rotEl, blad){
         tEl.classList.add('correct'); nEl.classList.add('correct');
         rad.appendChild(marker(true));
       } else {
-        tEl.classList.add(tOk ? 'correct' : 'wrong');
-        nEl.classList.add(nOk ? 'correct' : 'wrong');
+        if(tv !== '') tEl.classList.add(tOk ? 'correct' : 'wrong');
+        if(nv !== '') nEl.classList.add(nOk ? 'correct' : 'wrong');
         rad.appendChild(marker(false));
         var f = document.createElement('span'); f.className = 'ovn-fasit';
         f.textContent = '1 i täljaren, ett heltal ≥ 2 i nämnaren';
