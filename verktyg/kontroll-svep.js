@@ -20,7 +20,9 @@
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
+const Sidor = require('./sidor');
 const args = process.argv.slice(2);
+if(Sidor.lista(args, sidor())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
@@ -85,24 +87,9 @@ const PROBE = `(function(){
 })()`;
 
 // Bladsidorna i alla tre årskurserna.
-function sidor(){
-  const ut = [];
-  ['ak7/k1', 'ak7/k2', 'ak7/k3', 'ak8/k2'].forEach(kap => {
-    const d = path.join(ROOT, kap);
-    if(!fs.existsSync(d)) return;
-    fs.readdirSync(d, { withFileTypes: true }).filter(e => e.isDirectory()).forEach(e => {
-      const p = path.join(d, e.name, 'index.html');
-      if(fs.existsSync(p)) ut.push(path.relative(ROOT, p).replace(/\\/g, '/'));
-    });
-  });
-  ['ak8/k1', 'ak9/k1'].forEach(kap => {
-    const d = path.join(ROOT, kap);
-    if(!fs.existsSync(d)) return;
-    fs.readdirSync(d).filter(f => /\.html$/.test(f) && f !== 'index.html')
-      .forEach(f => ut.push(kap + '/' + f));
-  });
-  return ut;
-}
+// Sidmängden bor i verktyg/sidor.js — EN upptäckare för alla svep (V9). Här låg förut en
+// ordagrann kopia av samma readdir-funktion; fyra verktyg bar var sin.
+function sidor(){ return Sidor.blad(); }
 
 const TMP = path.join(os.tmpdir(), 'kontrollsvep-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);

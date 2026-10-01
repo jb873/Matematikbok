@@ -22,7 +22,9 @@
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
+const Sidor = require('./sidor');
 const args = process.argv.slice(2);
+if(Sidor.lista(args, sidor())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
@@ -90,18 +92,9 @@ const PROBE = `(function(){
 })()`;
 
 // Sidorna: alla html-filer utanför Arkiv (ram-filerna med, de bär samma stilblock).
-function sidor(){
-  const ut = [];
-  (function gå(d){
-    fs.readdirSync(d, { withFileTypes: true }).forEach(e => {
-      if(e.name === 'Arkiv' || e.name === '.git' || e.name === 'node_modules' || e.name === 'fonts') return;
-      const p = path.join(d, e.name);
-      if(e.isDirectory()) gå(p);
-      else if(/\.html$/.test(e.name)) ut.push(path.relative(ROOT, p).replace(/\\/g, '/'));
-    });
-  })(ROOT);
-  return ut.sort();
-}
+// Tonad-svepet mäter opacitet på ALLA sidor, inte bara bladen — egen mängd ur samma
+// upptäckare (verktyg/sidor.js), så ingen sida kan falla ur.
+function sidor(){ return Sidor.allaHtml(); }
 
 const TMP = path.join(os.tmpdir(), 'tonad-' + process.pid);
 fs.writeFileSync(TMP + '.js', PROBE);

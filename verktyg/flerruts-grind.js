@@ -10,6 +10,7 @@
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
+const Sidor = require('./sidor');
 const args = process.argv.slice(2), BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 const PRE = `(function(){ var s = 0x2F6E2B1; Math.random = function(){ s |= 0; s = s + 0x6D2B79F5 | 0; var t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -306,8 +307,10 @@ const PROBE7 = `(function(){
   Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var sh = akt && akt.querySelector('.ovn-sheet'); if(sh) mat(('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 30), sh); }); });
   return ut;
 })()`;
-const SIDOR8 = fs.readdirSync(path.join(ROOT, 'ak8/k1')).filter(f => /\.html$/.test(f) && f !== 'index.html').map(f => ['ak8/k1/' + f, PROBE8]);
-const SIDOR7 = ['ak7/k2/d1-andel-antal', 'ak7/k2/d2-byta-form', 'ak7/k2/d3-forlanga-forkorta', 'ak7/k2/d4-jamfora-brak', 'ak7/k2/d5-addsub-brak', 'ak7/k2/d6-multiplikation-brak', 'ak7/k2/d7-division-brak', 'ak7/k3/d2-monster', 'ak7/k3/d3-forenkla-uttryck', 'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal', 'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning', 'ak7/k1/d10-pluggtillprov', 'ak7/k3/d1-algebraiska-uttryck', 'ak7/k3/d7-pluggtillprov', 'ak8/k2/d1-algebraiska-uttryck'].map(p => [p + '/index.html', PROBE7]);
+const BLADSIDOR = Sidor.alla();   // sanningsmängden ur verktyg/sidor.js (V9)
+const SIDOR8 = BLADSIDOR.filter(p => p.indexOf('ak8/k1/') === 0).map(p => [p, PROBE8]);
+const SIDOR7 = BLADSIDOR.filter(p => /^(ak7|ak8\/k2)\//.test(p) && p !== 'ak7/k3/d5-problemlosning/index.html').map(p => [p, PROBE7]);
+if(Sidor.lista(args, SIDOR8.concat(SIDOR7).map(x => x[0]).concat(['ak7/k3/d5-problemlosning/index.html']))) process.exit(0);
 let fel = 0, provade = 0;
 console.log('FLERRUTS-GRIND — sista rutan rätt, övriga fel: raden får inte bli ✓; tallinje/talföljd/hopp visar status per ruta\n');
 const SIDOR_D5 = [['ak7/k3/d5-problemlosning/index.html', PROBE_D5]];

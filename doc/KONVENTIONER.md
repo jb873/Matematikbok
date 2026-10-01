@@ -80,10 +80,10 @@ De här är lika bindande som allt annat i filen. Skillnaden är att de i dag b�
 | **Figurer ritas om med egna värden.** En figur som återanvänds med nya tal ska visa de nya talen. | `SvgAlgebraFigur`, `SvgTermometer`, `svg-andel`, `svg-tallinje` | **Delvis** | En figur som *genereras ur data* är rätt per konstruktion; risken är en handskriven SVG eller en figur som behållit gamla tal. Mätningen: varje tal som syns i figuren ska finnas i radens data. Det kräver att figuren bär sina värden i DOM (ett `data`-attribut på figur-elementet) — den kopplingen finns inte i dag och måste läggas till först. |
 | **En nod finns när färdigheten bedöms separat.** Bedöms något för sig ska det ha en egen plats i taxonomin, annars försvinner evidensen in i en grannfärdighet. | taxonomin ⟷ bladen/testen | **Nej, inte som dom** | Att två färdigheter är *olika* är en bedömning, inte en mätning. Det mekaniska som går: lista grupper som rättas för sig (egen rättar-typ eller egen svarsform) men loggar till samma nod som en strukturellt annorlunda grupp. Det ger **kandidater att läsa**, aldrig ett grönt eller rött. |
 | **Delad nod loggas i sin hemvist.** Samma färdighet i två årskurser är EN nod; årskursen taggar den, den kopieras aldrig. | `js/data/*-taxonomi.js`, alla generatorer | **Ja, låg–medel** | `koppling-grind` kontrollerar redan att varje loggad nyckel finns i taxonomin. Tillägget: ingen färdighet får vara definierad på två ställen (dubblett-id eller två noder med samma namn/innehåll i olika kapitel), och en generators loggade nyckel ska vara nodens kanoniska id. |
-| **En ny sida går in i grindarnas listor samma dag den byggs.** Grindarnas sidlistor är **explicita** — `namnare-grind` och `flerruts-grind` mätte inte Mönster-bladet förrän det lades till (108 → 110 blad). En grind som inte känner sidan är grön om den, och det ser ut som ett godkännande. | alla svep och grindar med en sidlista | **Ja, billigt** | En grind som själv letar upp sidorna på disk (varje `index.html` under `ak7/ ak8/ ak9/` som laddar en bladmotor) och kräver att varje funnen sida finns i varje sidlista. Mängden får bara minska via en uttrycklig undantagsrad med skäl. **Byggs nu** (steg 3 i kanoniseringsordern 2026-10-01). |
-| **Slumpen ska vara äkta oberoende.** Två uppgifter i rad får inte bära samma tal, och en serie får inte vandra (stigande svårighet, upprepade mönster, samma operand om och om igen). `distinktOmgang` fäller bara ordagranna dubbletter inom en omgång — den säger ingenting om serien. | alla generatorer | **Ja, medel** | En slumpkvalitetsfuzz: dra långa serier per generator och nivå, kör **runs-test** (följer tecknen/storlekarna en slump eller vandrar de?) och autokorrelation på lag 1–3, och fäll vid utslag utanför tröskeln. Kräver att varje generator går att dra N gånger utan DOM — det gör de redan i `testgen-fuzz`. **Byggs nu** (steg 3 i kanoniseringsordern 2026-10-01). |
 
-**Sju av nio kan bli riktiga grindar** (hjälptexter, mellanled på värde, bekräftelsesteg, förvald ruta, delad nod — och de två nyss tillagda, som byggs nu). **En kräver ett datakrok först** (figurerna — figuren måste bära sina värden). **En kan aldrig bli mer än en läslista** (nod när färdigheten bedöms separat), eftersom den vilar på en bedömning av vad som är två olika färdigheter.
+**Fem av sju kan bli riktiga grindar** (hjälptexter, mellanled på värde, bekräftelsesteg, förvald ruta, delad nod). **En kräver ett datakrok först** (figurerna — figuren måste bära sina värden). **En kan aldrig bli mer än en läslista** (nod när färdigheten bedöms separat), eftersom den vilar på en bedömning av vad som är två olika färdigheter.
+
+Två rader stod här till 2026-10-01 och står inte kvar: *ny sida in i grindarnas listor* och *äkta oberoende slump*. De hörde aldrig hit — de är delade plattformsregler (V9 och V10), och de har verktyg nu: `verktyg/sidlist-grind.js` och `verktyg/slump-fuzz.js`. Raderna flyttade alltså inte för att de blev mindre bindande, utan för att de blev mätta.
 
 ---
 
@@ -114,8 +114,8 @@ bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någo
 | V6 | **Ett bevis på en vy säger inget om de andra.** Mät per flik, per blad, per årskurs/sida. | `verktyg/kontroll-svep.js` · `verktyg/delkapitel-grind.js` — mäter per flik och per blad |
 | V7 | **Mät innan du tror på utfallet.** Grinden har flera gånger fällt något som var rätt. |  |
 | V8 | **Kör grindarna en i taget.** Parallella körningar ger falska träffar. |  |
-| V9 | **Nya sidor måste in i grindarnas listor** — annars växer material utanför mätningen. |  |
-| V10 | **Generatorer: äkta oberoende slump**, verifierad med runs-test/autokorrelation — inte bara "inga dubbletter" (gäller varje ämne med slumpade uppgifter: matte, flipcards, tidslinjeövningar). |  |
+| V9 | **Nya sidor måste in i grindarnas listor** — annars växer material utanför mätningen. | `verktyg/sidlist-grind.js` — mängderna bor i `verktyg/sidor.js` och letas upp på disk; en ny sida kommer in i alla sex svepen av sig själv |
+| V10 | **Generatorer: äkta oberoende slump**, verifierad med runs-test/autokorrelation — inte bara "inga dubbletter" (gäller varje ämne med slumpade uppgifter: matte, flipcards, tidslinjeövningar). | `verktyg/slump-fuzz.js` — runs-test + autokorrelation (lag 1–3) + upprepningsöverskott; fäller vid z-värde över 4 i minst två av tre omgångar |
 
 #### Arkitektur — alla ämnen
 
@@ -123,7 +123,7 @@ bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någo
 |---|---|---|
 | A1 | **Delade moduler, inte kopior.** En kopia driver isär även när den är märkt som kopia. DELAD-basen ärvs/synkas; kopieras aldrig. | `verktyg/delkapitel-grind.js` (delad CSS + delat skal) · `verktyg/koppling-grind.js` (nod ⟷ generator) — men sidornas inline-CSS-kopior vaktas inte |
 
-Fem av elva rader har en grind. **Sex har ingen** — V2 och V7 är läsregler, V8 står bara i grindarnas huvud, och V9 och V10 byggs nu (steg 3 i kanoniseringsordern). A1 vaktas för skal och CSS-kanon men inte för sidornas inline-kopior.
+Åtta av elva rader har en grind. **Tre har ingen** — V2 och V7 är läsregler (de säger hur man bygger och läser ett prov, inte vad sidan ska göra), och V8 står bara i grindarnas huvud. A1 vaktas för skal och CSS-kanon men inte för sidornas inline-kopior. V9 och V10 byggdes 2026-10-01.
 
 > **Vad den här sektionen ersätter.** Av de elva reglerna stod **en** nedskriven förut: V1,
 > som prosa i DEL 6 i Kemiboken och Svenskboken. Det blockcitatet står kvar ordagrant där
