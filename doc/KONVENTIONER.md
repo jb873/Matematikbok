@@ -4,6 +4,8 @@
 
 En ny observation som kan påverka **plattformen** — alltså också geografi, historia, kemi och svenska — skrivs i [`PLATTFORMS-ANDRINGAR.md`](PLATTFORMS-ANDRINGAR.md), inte här. Hit flyttas den när den är beslutad och har en funktion att bo i.
 
+**§1–§6 är mattens egna** (navigation, delkapitelsidor, rutor, text, taxonomi — och de regler ingen grind vaktar ännu). Sektionen **Delade plattformsregler** längst ner är däremot ordagrant samma text som i de fyra andra ämnenas `KOMPONENTER-INNEHALL`: ändras den här ska den speglas, och DELAD-BAS höjas i alla ämnen samtidigt.
+
 En konvention som bara finns som en kopia i en redan byggd fil ärvs inte. Nästa sida byggs utan den, och ingen märker det förrän någon klickar. Därför står varje konvention här med **var funktionen bor** och **vad som vaktar den**.
 
 > Regeln bakom listan: **det som är en funktion ärvs, det som är en kopia ärvs inte.**
@@ -14,14 +16,14 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 
 ---
 
-## Navigation
+## §1 Navigation
 
 | Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
 | **Kapitelsidan = renderaren, statusen härledd.** Ett nytt kapitel skapas genom att lägga till data. Ett delkapitel med innehåll har en fil och är öppet; ett utan fil är ett tonat kort utan länk. Inget status-fält får sättas för hand. | `js/kapitel/kapitelsida.js` · korten i `js/kapitel/kapitel-lista.js` · stilen i `js/kapitel/navsida.css` · mallen i `mallar/kapitelsida.html` | `verktyg/kapitelsida-grind.js` |
 | **Kapitel-foten är en modul, texten är data.** Kunskapsläge + Träna inför provet. Utan egna fält gäller sjuans k1 ordagrant. | `js/fot/kapitel-fot.js` | `verktyg/kapitelsida-grind.js` (indirekt — faller via sidans render) |
 
-## Delkapitlets sidor
+## §2 Delkapitlets sidor
 
 | Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
@@ -31,7 +33,7 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 | **Testet täcker övningen.** Testet hämtar sina tal ur öva-bladets talbank; en fråga per generator, alla noder. | bladmotorns `talBank(nod)` | `verktyg/delkapitel-grind.js` · `verktyg/testgen-fuzz.js` |
 | **Drillen upprepar inte sig själv** inom en omgång. | `distinktOmgang` i metod-kärnan | `verktyg/delkapitel-grind.js` |
 
-## Rutorna eleven skriver i
+## §3 Rutorna eleven skriver i
 
 | Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
@@ -46,7 +48,7 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 | **Varje ruta i en rad markeras för sig.** | `AK8_UI.markeraRutor` (`res.per`) | `verktyg/flerruts-grind.js` |
 | **Svarsformen är bindande** (blandad / bråk / decimal / enklaste) och står i data per grupp. | `Likhetsrattare.finalStatus` | `verktyg/svarform-koll.js` |
 
-## Texten
+## §4 Texten
 
 | Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
@@ -55,7 +57,7 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 | **Exemplet sammanfaller inte med en uppgift i samma grupp.** | `ExempelVakt` i metod-kärnan | `verktyg/exempel-svep.js` |
 | **Namngivande ord får stå, instruerande inte.** "Omkrets:" namnger; "Skriv ett mellanled först" instruerar. | — | **—** läslista; går inte att mäta |
 
-## Kopplingen till taxonomin
+## §5 Kopplingen till taxonomin
 
 | Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
@@ -65,7 +67,7 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 
 ---
 
-## Regler som ingen grind vaktar ännu
+## §6 Regler som ingen grind vaktar ännu
 
 De här är lika bindande som allt annat i filen. Skillnaden är att de i dag bärs av att någon minns dem — och **allt som bara står nedskrivet glöms**. Kolumnen längst till höger säger vad som skulle krävas för att flytta regeln från minnet till en mätning.
 
@@ -85,22 +87,72 @@ De här är lika bindande som allt annat i filen. Skillnaden är att de i dag b�
 
 ---
 
-## Hur en grind ska vara byggd (§1–§8)
+## Delade plattformsregler — kanoniserade i alla ämnen
 
-Numren är stabila: en ny regel läggs **sist**, ingen omnumrering, så att en hänvisning till "§4" betyder samma sak nästa år. De åtta är plattformsregler — de gäller lika i geografi, historia, kemi och svenska, och kanoniseras i respektive repos `KOMPONENTER-INNEHALL`.
+### Verifieringsregler — och vad som vaktar dem
 
-1. **Mät effekten, inte attributet.** `getComputedStyle().fontFamily` säger `'Cormorant Garamond'` även när filen inte finns; `scrollWidth` säger att texten ryms så fort den scrollats; ett `data-`-attribut säger vad någon tänkte, inte vad eleven ser. En grind som mäter formen blir ett hinder för allt som gör rätt på ett annat sätt.
+**🔗 DELAD** · DELAD-BAS v1.2 · kanoniserad 2026-10-01, bevisad i matematikbygget (Spår 3)
 
-2. **Mät aldrig något som beror på vem som kör provet.** `document.fonts.check('16px "Cormorant Garamond"')` svarar ja om typsnittet råkar vara **installerat på maskinen** — grönt hos den som bygger, rött hos eleven som saknar det. Den sortens grind är farligare än ingen grind alls, eftersom den är grön just där någon tittar. Mät vad **sidan själv levererar** (en FontFace i `document.fonts` kommer från sidans `@font-face`), aldrig vad datorn råkar ha. Samma sak gäller skärmstorlek, installerade teckensnitt, tidszon, språkinställning och allt annat som följer med maskinen och inte med sidan. Vill du pröva ett villkor som beror på omgivningen — telefonbredd, till exempel — så **ställ in omgivningen i provet** (`cdp-kor.js --viewport`) i stället för att lita på den du råkar ha.
+**META-PRINCIP: en regel som bara står nedskriven glöms.** Det har hänt sju gånger i
+mattearbetet. Varje *bevisad* regel ska vaktas av en **grind eller ett kontrakt**, inte bara
+dokumenteras. Dokumentet stoppar *ovetande*; bara enforcement stoppar *regression*. Vid varje
+ny regel: fråga **"vad vaktar den?"** — står svaret tomt är regeln ännu inte skyddad.
 
-3. **Mät på rätt ställe.** En sida kan bära flera keypads och flera flikar. Mät per flik, per blad, per yta.
+Kolumnen **Vad vaktar den** är ärlig. Står det ett verktyg finns ett prov som fäller när regeln
+bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någon minns den.
+**En tom cell är en TODO, inte ett klartecken.** Den ska skava.
 
-4. **Negativt verifiera varje ben.** Återinför felet och se att grinden fäller.
+#### Verifiering — varje ämne med interaktivitet eller JS
 
-5. **Ett prov som faller av fel skäl verifierar ingenting.** Läs *varför* grinden blev röd, inte bara *att* den blev det. KORT-provet i kapitelside-grinden gav ett kommer-kort en länk till en fil som inte fanns; grinden föll — men på den trasiga länken, inte på klickbarheten. Det hade sett ut som en fungerande negativ verifiering av ett ben som i själva verket aldrig prövades. Bryt den mekanism benet påstår sig vakta, ingenting annat, och kontrollera att brottet som rapporteras är benets eget.
+| # | Regel | Vad vaktar den (matte) |
+|---|---|---|
+| V1 | **Verifiera i headless Chromium**, inte enbart node-harness — harness ger falska gröna bockar. Skalet puppeterar motorns **publika kontroller**, aldrig internt state (testa som en elev). | `verktyg/cdp-kor.js` — varje grind körs mot sidan som eleven öppnar den (`file://`), med `window.onerror` kopplad |
+| V2 | **En grind ska negativt verifieras** — återinför felet och se att den fäller. En grind som aldrig fällt är inte bevisad. |  |
+| V3 | **Mät effekten, inte attributet.** Ett kontrakt som mäter *formen* blir ett hinder för allt som gör rätt på annat sätt. | `verktyg/yt-kontrakt.js` — trycker på en knapp och mäter renderingen, inte attributet |
+| V4 | **Mät det eleven ser**, inte det första som råkar matcha i DOM-ordningen. | `verktyg/yt-kontrakt.js` (facit-drivet per ruta) · `verktyg/namnare-grind.js` · `verktyg/flerruts-grind.js` |
+| V5 | **Synlighet hör till beviset.** Ett grönt logikprov kan dölja en tom rendering. | `verktyg/synlig-grind.js` · `verktyg/tonad-svep.js` (mäter opacitet EFTER animationen) |
+| V6 | **Ett bevis på en vy säger inget om de andra.** Mät per flik, per blad, per årskurs/sida. | `verktyg/kontroll-svep.js` · `verktyg/delkapitel-grind.js` — mäter per flik och per blad |
+| V7 | **Mät innan du tror på utfallet.** Grinden har flera gånger fällt något som var rätt. |  |
+| V8 | **Kör grindarna en i taget.** Parallella körningar ger falska träffar. |  |
+| V9 | **Nya sidor måste in i grindarnas listor** — annars växer material utanför mätningen. |  |
+| V10 | **Generatorer: äkta oberoende slump**, verifierad med runs-test/autokorrelation — inte bara "inga dubbletter" (gäller varje ämne med slumpade uppgifter: matte, flipcards, tidslinjeövningar). |  |
 
-6. **Inget undantag i grinden.** Går något inte att mäta ska markupen ändras, inte grinden få ett undantag. Går det ändå inte: skriv ned gränsen i grindens huvud.
+#### Arkitektur — alla ämnen
 
-7. **En i taget.** Parallell körning ger CDP-timeouts.
+| # | Regel | Vad vaktar den (matte) |
+|---|---|---|
+| A1 | **Delade moduler, inte kopior.** En kopia driver isär även när den är märkt som kopia. DELAD-basen ärvs/synkas; kopieras aldrig. | `verktyg/delkapitel-grind.js` (delad CSS + delat skal) · `verktyg/koppling-grind.js` (nod ⟷ generator) — men sidornas inline-CSS-kopior vaktas inte |
 
-8. **Kör provet i en riktig webbläsare, inte i en node-harness.** Den äldsta av de åtta, och den som stod oskriven längst. En harness som importerar modulen och anropar den provar koden; eleven möter sidan. Node-harnessen gav flera falska gröna bockar i matematikbygget — en modul som räknade rätt i noden renderade fel, laddades inte, eller doldes av en annan flik. Varje grind här körs därför genom `verktyg/cdp-kor.js` mot sidan som eleven öppnar den (`file://`), med `window.onerror` kopplad så att ett JS-fel fäller provet i stället för att tystna. Noll nätväg: en grind som hämtar något över nätet mäter nätet.
+Fem av elva rader har en grind. **Sex har ingen** — V2 och V7 är läsregler, V8 står bara i grindarnas huvud, och V9 och V10 byggs nu (steg 3 i kanoniseringsordern). A1 vaktas för skal och CSS-kanon men inte för sidornas inline-kopior.
+
+> **Vad den här sektionen ersätter.** Av de elva reglerna stod **en** nedskriven förut: V1,
+> som prosa i DEL 6 i Kemiboken och Svenskboken. Det blockcitatet står kvar ordagrant där
+> det står — den här sektionen utökar det, ersätter det inte. Geografiboken och Historiaboken
+> hade inte ens den. **V10 fanns inte nedskriven någonstans.** De övriga nio
+> bars av praxis i mattearbetet utan att vara kanon i något ämne.
+
+---
+
+### Mattens anteckningar till reglerna
+
+Texten ovan är **delad** — den står ordagrant likadan i geografins, historians, kemins och
+svenskans `KOMPONENTER-INNEHALL`. Ändra den inte här utan att spegla; det är hela skälet till
+DELAD-BAS-stämpeln. Nedan står mattens egna anteckningar: varje regel med det fall som
+bevisade den. De två sista hör inte till de elva — de är matte-egna tillägg, och kandidater
+att lyfta in i den delade uppsättningen.
+
+1. **Mät effekten, inte attributet.** *(V3.)* `getComputedStyle().fontFamily` säger `'Cormorant Garamond'` även när filen inte finns; `scrollWidth` säger att texten ryms så fort den scrollats; ett `data-`-attribut säger vad någon tänkte, inte vad eleven ser. En grind som mäter formen blir ett hinder för allt som gör rätt på ett annat sätt.
+
+2. **Mät aldrig något som beror på vem som kör provet.** *(Matte-eget — INTE en av de elva. Kandidat att lyfta.)* `document.fonts.check('16px "Cormorant Garamond"')` svarar ja om typsnittet råkar vara **installerat på maskinen** — grönt hos den som bygger, rött hos eleven som saknar det. Den sortens grind är farligare än ingen grind alls, eftersom den är grön just där någon tittar. Mät vad **sidan själv levererar** (en FontFace i `document.fonts` kommer från sidans `@font-face`), aldrig vad datorn råkar ha. Samma sak gäller skärmstorlek, installerade teckensnitt, tidszon, språkinställning och allt annat som följer med maskinen och inte med sidan. Vill du pröva ett villkor som beror på omgivningen — telefonbredd, till exempel — så **ställ in omgivningen i provet** (`cdp-kor.js --viewport`) i stället för att lita på den du råkar ha.
+
+3. **Mät på rätt ställe.** *(V4 och V6.)* En sida kan bära flera keypads och flera flikar. Mät per flik, per blad, per yta.
+
+4. **Negativt verifiera varje ben.** *(V2.)* Återinför felet och se att grinden fäller.
+
+5. **Ett prov som faller av fel skäl verifierar ingenting.** *(V7.)* Läs *varför* grinden blev röd, inte bara *att* den blev det. KORT-provet i kapitelside-grinden gav ett kommer-kort en länk till en fil som inte fanns; grinden föll — men på den trasiga länken, inte på klickbarheten. Det hade sett ut som en fungerande negativ verifiering av ett ben som i själva verket aldrig prövades. Bryt den mekanism benet påstår sig vakta, ingenting annat, och kontrollera att brottet som rapporteras är benets eget.
+
+6. **Inget undantag i grinden.** *(Matte-eget — INTE en av de elva. Kandidat att lyfta.)* Går något inte att mäta ska markupen ändras, inte grinden få ett undantag. Går det ändå inte: skriv ned gränsen i grindens huvud.
+
+7. **En i taget.** *(V8.)* Parallell körning ger CDP-timeouts.
+
+8. **Kör provet i en riktig webbläsare, inte i en node-harness.** *(V1.)* Den äldsta av de åtta, och den som stod oskriven längst. En harness som importerar modulen och anropar den provar koden; eleven möter sidan. Node-harnessen gav flera falska gröna bockar i matematikbygget — en modul som räknade rätt i noden renderade fel, laddades inte, eller doldes av en annan flik. Varje grind här körs därför genom `verktyg/cdp-kor.js` mot sidan som eleven öppnar den (`file://`), med `window.onerror` kopplad så att ett JS-fel fäller provet i stället för att tystna. Noll nätväg: en grind som hämtar något över nätet mäter nätet.
