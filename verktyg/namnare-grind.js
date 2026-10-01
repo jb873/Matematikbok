@@ -15,6 +15,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const MP = require('./matpunkt').skapa('namnare-grind.js');   // V14
 const args = process.argv.slice(2), arg = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const BARA = arg('--sida'), SEEDS = +(arg('--seeds') || 1);
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
@@ -309,11 +310,13 @@ let fel = 0, blad = 0;
 console.log('NÄMNARE-GRIND — nämnaren = synliga svarsenheter · inga dolda · rätt ifyllt = full pott\n');
 SIDOR8.forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
+  MP.forsok(sida);
   for(let k = 0; k < SEEDS; k++){
     const seed = 0x2F6E2B1 + k * 7919;
     const s1 = kor(sida, PROBE8_SAMLA, seed); if(!s1.blad){ fel++; console.log('✗ ' + sida + ': inget svar (samla) — ' + s1.err); continue; }
     const s2 = kor(sida, PROBE8_FYLL.replace(/__FACIT__/g, () => JSON.stringify(s1.blad)), seed); if(!s2.blad){ fel++; console.log('✗ ' + sida + ': inget svar (fyll) — ' + s2.err); continue; }
     if(s2.onerr && s2.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + s2.onerr.join(' | ')); }
+    MP.rakna(sida, s2.blad.length);
     s2.blad.forEach((b, bi) => {
       blad++;
       const brott = [], ob = (s1.blad[bi] || {}).obesvarbara || [];
@@ -330,9 +333,11 @@ SIDOR8.forEach(sida => {
 // d5: problemlösningens blad (egna ruttyper)
 ['ak7/k3/d5-problemlosning/index.html'].forEach(sida => {
   if(BARA && !sida.includes(BARA)) return;
+  MP.forsok(sida);
   const u = kor(sida, PROBE_D5, 0x2F6E2B1);
   if(!u.blad || !u.blad.length){ fel++; console.log('✗ ' + sida + ': inga blad mätta — ' + (u.err || 'bladen hittades inte')); return; }
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel — ' + u.onerr.join(' · ')); }
+  MP.rakna(sida, u.blad.length);
   u.blad.forEach(b => {
     blad++;
     const brott = [];
@@ -348,8 +353,10 @@ SIDOR8.forEach(sida => {
 
 SIDOR7.forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
+  MP.forsok(sida);
   const u = kor(sida, PROBE7, 0x2F6E2B1); if(!u.blad){ fel++; console.log('✗ ' + sida + ': inget svar — ' + u.err); return; }
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + u.onerr.join(' | ')); }
+  MP.rakna(sida, u.blad.length);
   u.blad.forEach(b => {
     blad++;
     if(b.onabar){ console.log('? ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ONÅBAR (ingen flik/nav visar bladet)'); return; }
@@ -368,5 +375,6 @@ SIDOR7.forEach(sida => {
   });
 });
 try { fs.unlinkSync(TMP + '-probe.js'); fs.unlinkSync(TMP + '-pre.js'); } catch(e){}
+fel += MP.granska();   // V14: en sida i listan måste ge minst en mätpunkt
 console.log('\n' + (fel ? '✗ NÄMNARE-GRIND RÖD (' + fel + ')' : '✓ NÄMNARE-GRIND GRÖN') + ' · ' + blad + ' blad mätta');
 process.exit(fel ? 1 : 0);

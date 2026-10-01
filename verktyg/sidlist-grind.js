@@ -41,19 +41,26 @@ const VERKTYG = [
   { fil: 'tonad-svep.js',     vad: 'inget tonat som ska vara läsbart' }
 ];
 
-/* Nians fyra öva-blad körs av AK9_OVA med egna radtyper. Nämnar- och flerruts-proberna läser
-   sjuans och åttans radtyper; på nians sidor hittar de noll rutor och skulle rapportera "tomt
-   blad" — ett grönt svar på en fråga de inte ställt. Undantaget gäller tills proberna lärt sig
-   AK9_OVA:s markup, på samma sätt som de fick lära sig k2-kopiornas radtyper 2026-09-23. */
+/* Nians fyra öva-sidor står utanför nämnar- och flerruts-grindens listor. Proberna läser
+   sjuans och åttans radtyper; nians öva-sidor bygger sina blad på annat sätt, och proberna
+   skulle hitta noll rutor och rapportera "tomt blad" — ett grönt svar på en fråga de inte
+   ställt. Undantaget gäller tills proberna lärt sig markupen, som de fick lära sig
+   k2-kopiornas radtyper 2026-09-23.
+
+   VARJE RAD BÄR ETT BEVIS, och grinden prövar det i sidans källa — samma krav som EJ_MOTOR
+   och V14:s skäl-lista. Det kravet kom till 2026-10-01 och avslöjade genast att mitt eget
+   skäl var fel: raderna sade "AK9_OVA-radtyper", men strängen AK9_OVA står bara i EN av de
+   fyra sidorna. Tre kör öva-sekvensen, och den fjärde är fördjupningssidan som bygger sin
+   yta inline. Ett skäl utan bevis är en gissning med auktoritet. */
 const UNDANTAG = [
-  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/rakna-med-brak-akr9-ova.html',  skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' },
-  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/rakna-med-brak-fordjupning.html', skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' },
-  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/rakna-med-brak-ova.html',       skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' },
-  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/tal-och-berakna-ova.html',      skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' },
-  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/rakna-med-brak-akr9-ova.html',  skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' },
-  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/rakna-med-brak-fordjupning.html', skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' },
-  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/rakna-med-brak-ova.html',       skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' },
-  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/tal-och-berakna-ova.html',      skal: 'AK9_OVA-radtyper — proben läser sjuans/åttans' }
+  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/rakna-med-brak-akr9-ova.html',    bevis: 'ova-sekvens',       skal: 'nians öva-sekvens — proben läser sjuans/åttans radtyper' },
+  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/rakna-med-brak-ova.html',         bevis: 'ova-sekvens',       skal: 'nians öva-sekvens — proben läser sjuans/åttans radtyper' },
+  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/tal-och-berakna-ova.html',        bevis: 'ova-sekvens',       skal: 'nians öva-sekvens — proben läser sjuans/åttans radtyper' },
+  { verktyg: 'namnare-grind.js',  sida: 'ak9/k1/rakna-med-brak-fordjupning.html', bevis: 'AK8_UI.keypadHTML', skal: 'fördjupningssidan bygger sin bladyta inline, utan egen motorfil' },
+  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/rakna-med-brak-akr9-ova.html',    bevis: 'ova-sekvens',       skal: 'nians öva-sekvens — proben läser sjuans/åttans radtyper' },
+  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/rakna-med-brak-ova.html',         bevis: 'ova-sekvens',       skal: 'nians öva-sekvens — proben läser sjuans/åttans radtyper' },
+  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/tal-och-berakna-ova.html',        bevis: 'ova-sekvens',       skal: 'nians öva-sekvens — proben läser sjuans/åttans radtyper' },
+  { verktyg: 'flerruts-grind.js', sida: 'ak9/k1/rakna-med-brak-fordjupning.html', bevis: 'AK8_UI.keypadHTML', skal: 'fördjupningssidan bygger sin bladyta inline, utan egen motorfil' }
 ];
 
 // sidor.js äger mängderna; cdp-kor.js är körare, inte svep.
@@ -89,6 +96,13 @@ VERKTYG.forEach(v => {
   }
   // Ett undantag som inte längre behövs ska bort, annars döljer det nästa riktiga lucka.
   dottUndantag.forEach(s => F(v.fil + ': undantaget för ' + s + ' behövs inte längre — ta bort raden ur UNDANTAG'));
+  // Och skälet ska vara SANT, inte bara skrivet: beviset måste stå i sidans källa.
+  UNDANTAG.filter(u => u.verktyg === v.fil).forEach(function(u){
+    const abs = path.join(ROOT, u.sida);
+    const kalla = fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : '';
+    if(!kalla) F(v.fil + ': undantaget pekar på ' + u.sida + ' som inte finns');
+    else if(kalla.indexOf(u.bevis) < 0) F(v.fil + ': skälet för ' + u.sida + ' säger "' + u.skal + '" men beviset ' + u.bevis + ' finns inte i sidan');
+  });
 });
 
 // ── BEN 2: MOTORER ────────────────────────────────────────────────────────────────────────

@@ -30,14 +30,21 @@ const ROOT = path.join(__dirname, '..');
    blad-ak8-kvrot) står utanför mönstret och syns bara för mappen. Att välja en av vägarna hade
    tappat sidor åt ena eller andra hållet. */
 const MOTOR = /blad-karna|ak8-blad-ui|blad-k2-d|blad-k3-d|blad-ak8-d|ProbBlad|AK9_OVA/;
-const MOTORMAPP = ['js/motor/blad', 'js/motor/problemlosning'];
+const MOTORMAPP = ['js/motor/blad', 'js/motor/problemlosning', 'js/motor/ekvationer-balans'];
 
-/* Filer i bladmapparna som INTE är bladmotorer. Varje rad är ett påstående med skäl, och
+/* Filer i motormapparna som INTE är bladmotorer. Varje rad är ett påstående med skäl, och
    sidlist-grinden prövar att påståendet håller. Allt annat i mapparna räknas som motor — så en
-   ny motor kommer in av sig själv i stället för att behöva skrivas in i ett mönster. */
+   ny motor kommer in av sig själv i stället för att behöva skrivas in i ett mönster.
+
+   OBS att listan svarar på EN fråga: "definierar filen ett blad?" Den svarar INTE på frågan
+   "visar det att sidan har rutor om filen laddas?" — de är olika. `ak8-blad-ui.js` är inget
+   blad, men en sida som laddar det delade rut-UI:t HAR rutor, och därför står den kvar i
+   MOTOR-mönstret. Mätt 2026-10-01: tas den ur mönstret tappas nians fördjupningssida, som
+   bygger sin bladyta inline med `AK8_UI.keypadHTML` utan en egen motorfil. Den som läser
+   detta som en motsägelse läser två frågor som en. */
 const EJ_MOTOR = {
-  'delkapitel-skal.js': 'flikskalet (flikar, band, underflikar) — renderar ingen bladyta',
-  'ak8-blad-ui.js': 'delat rut-UI (keypad, grow, markeraRutor) — laddas AV blad, är inget blad'
+  'delkapitel-skal.js': 'flikskalet (flikar, band, underflikar) — definierar inget blad',
+  'ak8-blad-ui.js': 'delat rut-UI (keypad, grow, markeraRutor) — definierar inget blad, men dess närvaro visar att sidan har rutor'
 };
 
 const HOPPA = new Set(['Arkiv', '.git', 'node_modules', 'fonts', 'mallar']);

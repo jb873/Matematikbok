@@ -21,6 +21,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const MP = require('./matpunkt').skapa('kontroll-svep.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
@@ -98,6 +99,7 @@ const perArskurs = {};
 console.log('KONTROLL-SVEP — en obesvarad ruta är inte fel\n');
 sidor().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
+  MP.forsok(sida);
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
                                '--wait', '2000', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
   let u = null;
@@ -107,6 +109,7 @@ sidor().forEach(sida => {
   const ar = sida.slice(0, 3);
   perArskurs[ar] = perArskurs[ar] || { blad: 0, trasiga: 0 };
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + u.onerr.join(' | ')); }
+  MP.rakna(sida, (u.blad || []).length);
   (u.blad || []).forEach(x => {
     blad++; perArskurs[ar].blad++;
     if(x.fel){ console.log('? ' + sida + ' · ' + x.blad + ': ' + x.fel); return; }
@@ -129,6 +132,7 @@ Object.keys(perArskurs).sort().forEach(a => {
   const p = perArskurs[a];
   console.log('  ' + a + ': ' + p.blad + ' blad, ' + p.trasiga + ' ger bort facit');
 });
+fel += MP.granska();   // V14: en sida i listan måste ge minst en mätpunkt
 console.log('\n' + (fel ? '✗ KONTROLL-SVEP RÖTT (' + fel + ')' : '✓ KONTROLL-SVEP GRÖNT')
   + ' · ' + blad + ' blad på ' + sidorMatta + ' sidor');
 process.exit(fel ? 1 : 0);

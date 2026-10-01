@@ -91,7 +91,7 @@ Två rader stod här till 2026-10-01 och står inte kvar: *ny sida in i grindarn
 
 ### Verifieringsregler — och vad som vaktar dem
 
-**🔗 DELAD** · DELAD-BAS v1.3 · kanoniserad 2026-10-01, bevisad i matematikbygget (Spår 3) · utökad med V11–V13
+**🔗 DELAD** · DELAD-BAS v1.4 · kanoniserad 2026-10-01, bevisad i matematikbygget (Spår 3) · utökad med V11–V14
 
 **META-PRINCIP: en regel som bara står nedskriven glöms.** Det har hänt sju gånger i
 mattearbetet. Varje *bevisad* regel ska vaktas av en **grind eller ett kontrakt**, inte bara
@@ -119,6 +119,7 @@ bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någo
 | V11 | **En grind får inte ha en väg ut som hoppar mätningen.** En early-return, en vakt eller ett undantag som avslutar grinden *utan att mäta* ger grönt utan bevis. Belagt: `if(vs.length < 2) return` i slumpfuzzen lät alla tre injicerade felen passera — grinden mätte inte, och grönt såg ut som ett godkännande. | **—** *byggs*: en negativ verifiering som fäller när mätningen hoppas över, och på sikt en lint mot tidiga returer före mätpunkten |
 | V12 | **Kör den negativa verifieringen i exakt det läge grinden ska köras i.** Annars godkänner provet ett läge som aldrig prövas. Belagt: samma fel som V11 — den negativa verifieringen kördes med en omgång och grinden med tre, och blev falskt grön i båda ändar. | *disciplin* — kan inte vaktas mekaniskt. Står i grindens huvud och bärs av praxis |
 | V13 | **Mät aldrig något som beror på vem eller var provet körs.** En miljö- eller maskinberoende kontroll är grön där någon tittar och säger ingenting om elevens vy. Mät den renderade elevvyn, inte körmiljön. Belagt: `document.fonts.check` svarar ja om typsnittet är installerat på maskinen — grönt hos byggaren, rött hos eleven. Skärpning av V3 och V4. | **—** *byggs*: en plats är rättad (`yt-kontrakt` läser en FontFace ur `document.fonts` i stället för `document.fonts.check`), men inget prov hindrar nästa |
+| V14 | **En sida i grindens lista måste ge minst en mätpunkt.** Ger den noll — noll blad, noll rader, noll ytor — är grinden röd, utom där ett dokumenterat skäl säger annat, och skälet prövas av grinden. V9 garanterar att en sida ligger i listan; V14 garanterar att en sida i listan faktiskt mäts. Belagt: `ak7/k3/d4-ekvationer` kom in i nämnar-grindens lista, gav noll blad, fick inte ens en utskriven rad — och grinden slutade "GRÖN · 107 blad mätta". Ett undantag duger bara som rad i en lista med ett skäl grinden kan verifiera, aldrig som tyst noll. | inbyggd i grindarna via `verktyg/matpunkt.js` — nämnar-grind, flerruts-grind, kontroll-svep och yt-kontrakt fäller och namnger sidan. Skäl-listan `SKAL` bär ett bevis som prövas i sidans källa, som `EJ_MOTOR` i `sidor.js` — och är **tom** i dag: mätningen visade att ingen av de sju nollorna är avsiktlig. Utanför räckvidden, med skäl i modulen: smalruta-svep (enheten är ruttyp) och tonad-svep (enheten är CSS-regel på alla sidor) |
 
 #### Arkitektur — alla ämnen
 
@@ -126,7 +127,7 @@ bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någo
 |---|---|---|
 | A1 | **Delade moduler, inte kopior.** En kopia driver isär även när den är märkt som kopia. DELAD-basen ärvs/synkas; kopieras aldrig. | `verktyg/delkapitel-grind.js` (delad CSS + delat skal) · `verktyg/koppling-grind.js` (nod ⟷ generator) — men sidornas inline-CSS-kopior vaktas inte |
 
-Åtta av fjorton rader har en grind. **Fem har ingen:** V2 och V7 är läsregler (de säger hur man bygger och läser ett prov, inte vad sidan ska göra), V8 står bara i grindarnas huvud, och V11 och V13 väntar på vakter som ska byggas. **V12 räknas inte dit** — den kan inte vaktas mekaniskt och är disciplin, inte en TODO. A1 vaktas för skal och CSS-kanon men inte för sidornas inline-kopior. V9 och V10 byggdes 2026-10-01.
+Nio av femton rader har en grind. **Fem har ingen:** V2 och V7 är läsregler (de säger hur man bygger och läser ett prov, inte vad sidan ska göra), V8 står bara i grindarnas huvud, och V11 och V13 väntar på vakter som ska byggas. **V12 räknas inte dit** — den kan inte vaktas mekaniskt och är disciplin, inte en TODO. A1 vaktas för skal och CSS-kanon men inte för sidornas inline-kopior. V9, V10 och V14 byggdes 2026-10-01.
 
 > **Vad den här sektionen ersätter.** Av de elva reglerna stod **en** nedskriven förut: V1,
 > som prosa i DEL 6 i Kemiboken och Svenskboken. Det blockcitatet står kvar ordagrant där
@@ -141,6 +142,12 @@ bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någo
 > verifiering som kördes i ett annat läge än grinden. **Regel före vakt** — de canoniseras nu
 > med ärlig vaktkolumn, och vakterna byggs i en senare omgång. V12 får ingen: den kan inte
 > vaktas mekaniskt.
+
+> **V14 (2026-10-01).** Komplementet till V9, och belagt av samma tråd som V11 och V12: grön
+> medan noll mäts. V9 stängde hålet att en sida kan stå utanför listan; V14 stänger hålet att
+> en sida kan stå i listan och ändå inte mätas. Vakten tvingar fram ett val som förut gjordes
+> av tystnaden: en **avsiktlig** nolla (grinden mäter en sorts rad sidan inte har) skrivs som
+> skäl med bevis, en **oavsiktlig** nolla är ett fynd att utreda. Förut var båda tyst gröna.
 
 ---
 

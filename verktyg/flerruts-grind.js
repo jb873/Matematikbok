@@ -11,6 +11,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const MP = require('./matpunkt').skapa('flerruts-grind.js');   // V14
 const args = process.argv.slice(2), BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 const PRE = `(function(){ var s = 0x2F6E2B1; Math.random = function(){ s |= 0; s = s + 0x6D2B79F5 | 0; var t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -316,12 +317,14 @@ console.log('FLERRUTS-GRIND — sista rutan rätt, övriga fel: raden får inte 
 const SIDOR_D5 = [['ak7/k3/d5-problemlosning/index.html', PROBE_D5]];
 SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
   if(BARA && sida.indexOf(BARA) < 0) return;
+  MP.forsok(sida);
   const tmp = path.join(os.tmpdir(), 'flerruts-' + process.pid + '.js'), pre = path.join(os.tmpdir(), 'flerruts-pre-' + process.pid + '.js');
   fs.writeFileSync(tmp, probe); fs.writeFileSync(pre, PRE);
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp, '--pre', pre, '--wait', '2000', '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
   let ut = null; try { ut = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!ut){ fel++; console.log('✗ ' + sida + ': inget svar — ' + (r.stderr || '').trim().split('\n').pop()); return; }
   if(ut.onerr && ut.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + ut.onerr.join(' | ')); }
+  MP.rakna(sida, (ut.blad || []).length);
   ut.blad.forEach(b => {
     if(!b.rader) return;
     provade += b.provade;
@@ -332,5 +335,6 @@ SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
   });
   try { fs.unlinkSync(tmp); fs.unlinkSync(pre); } catch(e){}
 });
+fel += MP.granska();   // V14: en sida i listan måste ge minst en mätpunkt
 console.log('\n' + (fel ? '✗ FLERRUTS-GRIND RÖD (' + fel + ')' : '✓ FLERRUTS-GRIND GRÖN') + ' · ' + provade + ' rader provade');
 process.exit(fel ? 1 : 0);

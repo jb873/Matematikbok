@@ -34,6 +34,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const MP = require('./matpunkt').skapa('yt-kontrakt.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
@@ -300,6 +301,7 @@ let fel = 0, ytor = 0, sidorMatta = 0;
 console.log('YT-KONTRAKT — keypad · tecken · autospace · grow · bråk · minus · platshållare · division\n');
 sidor().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
+  MP.forsok(sida);
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
                                '--wait', '2000', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
   let u = null;
@@ -321,6 +323,7 @@ sidor().forEach(sida => {
       + (ub.over.length ? ub.over.join('\n     ') : '(hittade inget enskilt element)'));
   }
 
+  MP.rakna(sida, (u.ytor || []).length);
   (u.ytor || []).forEach(y => {
     ytor++;
     if(!y.brott.length){ console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.rutor + ' rutor, ' + y.uttrycksrutor + ' uttryck)'); return; }
@@ -330,5 +333,6 @@ sidor().forEach(sida => {
 });
 try { fs.unlinkSync(TMP); } catch(e){}
 try { fs.unlinkSync(TMPB); } catch(e){}
+fel += MP.granska();   // V14: en sida i listan måste ge minst en mätpunkt
 console.log('\n' + (fel ? '✗ YT-KONTRAKT RÖTT (' + fel + ')' : '✓ YT-KONTRAKT GRÖNT') + ' · ' + ytor + ' ytor på ' + sidorMatta + ' sidor');
 process.exit(fel ? 1 : 0);
