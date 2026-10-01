@@ -91,7 +91,7 @@ Två rader stod här till 2026-10-01 och står inte kvar: *ny sida in i grindarn
 
 ### Verifieringsregler — och vad som vaktar dem
 
-**🔗 DELAD** · DELAD-BAS v1.2 · kanoniserad 2026-10-01, bevisad i matematikbygget (Spår 3)
+**🔗 DELAD** · DELAD-BAS v1.3 · kanoniserad 2026-10-01, bevisad i matematikbygget (Spår 3) · utökad med V11–V13
 
 **META-PRINCIP: en regel som bara står nedskriven glöms.** Det har hänt sju gånger i
 mattearbetet. Varje *bevisad* regel ska vaktas av en **grind eller ett kontrakt**, inte bara
@@ -116,6 +116,9 @@ bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någo
 | V8 | **Kör grindarna en i taget.** Parallella körningar ger falska träffar. |  |
 | V9 | **Nya sidor måste in i grindarnas listor** — annars växer material utanför mätningen. | `verktyg/sidlist-grind.js` — mängderna bor i `verktyg/sidor.js` och letas upp på disk; en ny sida kommer in i alla sex svepen av sig själv |
 | V10 | **Generatorer: äkta oberoende slump**, verifierad med runs-test/autokorrelation — inte bara "inga dubbletter" (gäller varje ämne med slumpade uppgifter: matte, flipcards, tidslinjeövningar). | `verktyg/slump-fuzz.js` — runs-test + autokorrelation (lag 1–3) + upprepningsöverskott; fäller vid z-värde över 4 i minst två av tre omgångar |
+| V11 | **En grind får inte ha en väg ut som hoppar mätningen.** En early-return, en vakt eller ett undantag som avslutar grinden *utan att mäta* ger grönt utan bevis. Belagt: `if(vs.length < 2) return` i slumpfuzzen lät alla tre injicerade felen passera — grinden mätte inte, och grönt såg ut som ett godkännande. | **—** *byggs*: en negativ verifiering som fäller när mätningen hoppas över, och på sikt en lint mot tidiga returer före mätpunkten |
+| V12 | **Kör den negativa verifieringen i exakt det läge grinden ska köras i.** Annars godkänner provet ett läge som aldrig prövas. Belagt: samma fel som V11 — den negativa verifieringen kördes med en omgång och grinden med tre, och blev falskt grön i båda ändar. | *disciplin* — kan inte vaktas mekaniskt. Står i grindens huvud och bärs av praxis |
+| V13 | **Mät aldrig något som beror på vem eller var provet körs.** En miljö- eller maskinberoende kontroll är grön där någon tittar och säger ingenting om elevens vy. Mät den renderade elevvyn, inte körmiljön. Belagt: `document.fonts.check` svarar ja om typsnittet är installerat på maskinen — grönt hos byggaren, rött hos eleven. Skärpning av V3 och V4. | **—** *byggs*: en plats är rättad (`yt-kontrakt` läser en FontFace ur `document.fonts` i stället för `document.fonts.check`), men inget prov hindrar nästa |
 
 #### Arkitektur — alla ämnen
 
@@ -123,13 +126,21 @@ bryts. Står cellen tom finns ingen mätning, och regeln bärs bara av att någo
 |---|---|---|
 | A1 | **Delade moduler, inte kopior.** En kopia driver isär även när den är märkt som kopia. DELAD-basen ärvs/synkas; kopieras aldrig. | `verktyg/delkapitel-grind.js` (delad CSS + delat skal) · `verktyg/koppling-grind.js` (nod ⟷ generator) — men sidornas inline-CSS-kopior vaktas inte |
 
-Åtta av elva rader har en grind. **Tre har ingen** — V2 och V7 är läsregler (de säger hur man bygger och läser ett prov, inte vad sidan ska göra), och V8 står bara i grindarnas huvud. A1 vaktas för skal och CSS-kanon men inte för sidornas inline-kopior. V9 och V10 byggdes 2026-10-01.
+Åtta av fjorton rader har en grind. **Fem har ingen:** V2 och V7 är läsregler (de säger hur man bygger och läser ett prov, inte vad sidan ska göra), V8 står bara i grindarnas huvud, och V11 och V13 väntar på vakter som ska byggas. **V12 räknas inte dit** — den kan inte vaktas mekaniskt och är disciplin, inte en TODO. A1 vaktas för skal och CSS-kanon men inte för sidornas inline-kopior. V9 och V10 byggdes 2026-10-01.
 
 > **Vad den här sektionen ersätter.** Av de elva reglerna stod **en** nedskriven förut: V1,
 > som prosa i DEL 6 i Kemiboken och Svenskboken. Det blockcitatet står kvar ordagrant där
 > det står — den här sektionen utökar det, ersätter det inte. Geografiboken och Historiaboken
 > hade inte ens den. **V10 fanns inte nedskriven någonstans.** De övriga nio
 > bars av praxis i mattearbetet utan att vara kanon i något ämne.
+
+> **Tillägget 2026-10-01: V11–V13.** Tre regler till, och alla tre är belagda i samma
+> arbetspass som skrev dem — de kommer ur fel som faktiskt gjordes, inte ur en genomgång av
+> vad som *kunde* gå fel. Två av dem (V11, V12) föddes ur ett och samma fel: en grind som var
+> grön för tre injicerade fel därför att den hoppade över mätningen, och en negativ
+> verifiering som kördes i ett annat läge än grinden. **Regel före vakt** — de canoniseras nu
+> med ärlig vaktkolumn, och vakterna byggs i en senare omgång. V12 får ingen: den kan inte
+> vaktas mekaniskt.
 
 ---
 
