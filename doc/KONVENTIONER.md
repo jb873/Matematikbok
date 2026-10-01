@@ -1,23 +1,29 @@
 # KONVENTIONER — vad som är kontrakt, och vad som vaktar det
 
-En konvention som bara finns som en kopia i en redan byggd fil ärvs inte. Nästa sida byggs utan den, och ingen märker det förrän någon klickar. Därför står varje konvention här med **var funktionen bor** och **vilken grind som kör den**.
+**Läs först.** Det här är matterepots regeldokument. Allt som byggs under `ak7/`, `ak8/`, `ak9/`, `js/` och `verktyg/` lyder under det.
+
+En ny observation som kan påverka **plattformen** — alltså också geografi, historia, kemi och svenska — skrivs i [`PLATTFORMS-ANDRINGAR.md`](PLATTFORMS-ANDRINGAR.md), inte här. Hit flyttas den när den är beslutad och har en funktion att bo i.
+
+En konvention som bara finns som en kopia i en redan byggd fil ärvs inte. Nästa sida byggs utan den, och ingen märker det förrän någon klickar. Därför står varje konvention här med **var funktionen bor** och **vad som vaktar den**.
 
 > Regeln bakom listan: **det som är en funktion ärvs, det som är en kopia ärvs inte.**
 
 Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 
+**Kolumnen "Vad vaktar den" är ärlig.** Står det ett verktyg finns ett prov som fäller när regeln bryts. Står det `—` finns ingen mätning, och regeln bärs bara av att någon minns den. **En tom cell är en TODO, inte ett klartecken.** Den ska skava.
+
 ---
 
 ## Navigation
 
-| Konvention | Funktionen bor i | Grind |
+| Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
 | **Kapitelsidan = renderaren, statusen härledd.** Ett nytt kapitel skapas genom att lägga till data. Ett delkapitel med innehåll har en fil och är öppet; ett utan fil är ett tonat kort utan länk. Inget status-fält får sättas för hand. | `js/kapitel/kapitelsida.js` · korten i `js/kapitel/kapitel-lista.js` · stilen i `js/kapitel/navsida.css` · mallen i `mallar/kapitelsida.html` | `verktyg/kapitelsida-grind.js` |
-| **Kapitel-foten är en modul, texten är data.** Kunskapsläge + Träna inför provet. Utan egna fält gäller sjuans k1 ordagrant. | `js/fot/kapitel-fot.js` | (ingår i kapitelside-grinden via sidans render) |
+| **Kapitel-foten är en modul, texten är data.** Kunskapsläge + Träna inför provet. Utan egna fält gäller sjuans k1 ordagrant. | `js/fot/kapitel-fot.js` | `verktyg/kapitelsida-grind.js` (indirekt — faller via sidans render) |
 
 ## Delkapitlets sidor
 
-| Konvention | Funktionen bor i | Grind |
+| Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
 | **Föreläsning = video ur registret.** Aldrig prosa, aldrig inline-video. | `js/data/forelasningar.js` · `AK8_FOREL.renderForelFlik` | `verktyg/delkapitel-grind.js` |
 | **Bladen delar kanon-CSS och omslag.** Inga sidegna `.ovn-`/`.ak8-`-regler inline. | `js/motor/blad/ak8-blad-kanon.css` · `AK8_UI.renderSheet` | `verktyg/delkapitel-grind.js` |
@@ -27,7 +33,7 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 
 ## Rutorna eleven skriver i
 
-| Konvention | Funktionen bor i | Grind |
+| Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
 | **Måttet är ett golv, inte ett tak.** En smal ruta ska se ut som den gör när den är tom, och växa när innehållet kräver det. Aldrig `!important` på bredden — det slår ut både växten och mätningen. | `AK8_UI.grow` · `AK8_UI.vaxMedGolv` | `verktyg/smalruta-svep.js` · `verktyg/yt-kontrakt.js` |
 | **En yta med rutor har keypad, tecken, autoSpace, bråkknapp och inga platshållare.** Kontraktet trycker på en knapp och prövar *varje* rutas tecken mot dess eget facit — inte bara ytans första ruta. | `js/motor/blad/ak8-blad-ui.js` | `verktyg/yt-kontrakt.js` |
@@ -36,22 +42,22 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 | **Inget dokument blir bredare än vyporten.** Blir det bredare kan eleven scrolla sidled på hela sidan, och på telefon glider uppgiften ur bild medan hon skriver. Brett innehåll — tabeller, figurer, flikrader — scrollar i sin **egen** ruta eller radbryter. | sidornas layout; tabeller via `.ak8-tabell` i `ak8-blad-kanon.css` | `verktyg/yt-kontrakt.js` (BREDD, mätt på 360 px i egen körning) |
 | **Varje synlig ruta räknas och rättas.** Nämnaren är antalet synliga svarsfält. | bladmotorernas kontroll | `verktyg/namnare-grind.js` |
 | **Kontrollera rättar bara rutor eleven svarat i.** En tom ruta är obesvarad, inte fel: ingen färg, inget kryss, inget facit — men den räknas i nämnaren, uppgiften finns kvar att göra. Gäller också inuti ett svar som består av flera rutor: bara de ifyllda färgas. Annars ger ett enda tryck bort hela bladets facit, och det noggranna arbetssättet — en uppgift i taget, Kontrollera efter varje — straffas hårdast. | bladmotorernas kontroll · `AK8_UI.markeraRutor` | `verktyg/kontroll-svep.js` |
-| **Evidensen följer FÖRSTA försöket per ruta.** Senare tryck ändrar vad eleven ser, inte vad som loggats. Utan regeln kunde hon rätta sig fram till grönt — och tillsammans med facit-läckan skriva av svaret först. | `AK8_UI.loggaForstaForsoket` | (mäts med diagnos-proben; se commit 2026-09-30) |
+| **Evidensen följer FÖRSTA försöket per ruta.** Senare tryck ändrar vad eleven ser, inte vad som loggats. Utan regeln kunde hon rätta sig fram till grönt — och tillsammans med facit-läckan skriva av svaret först. | `AK8_UI.loggaForstaForsoket` | **—** mätt EN gång med diagnos-proben (commit `9e5772d`). Ingen grind kör om den. |
 | **Varje ruta i en rad markeras för sig.** | `AK8_UI.markeraRutor` (`res.per`) | `verktyg/flerruts-grind.js` |
 | **Svarsformen är bindande** (blandad / bråk / decimal / enklaste) och står i data per grupp. | `Likhetsrattare.finalStatus` | `verktyg/svarform-koll.js` |
 
 ## Texten
 
-| Konvention | Funktionen bor i | Grind |
+| Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
 | **All elevtext ligger i ett FALT-fält och godkänns per fil.** Ingen maskinskriven mening når eleven. | fälten `titel`/`rubrik`/`sub`/`fraga`/… | `verktyg/elevtext-grind.js` |
 | **Ingen byggar-riktad text renderas för elev.** | — | `verktyg/platshallar-svep.js` |
 | **Exemplet sammanfaller inte med en uppgift i samma grupp.** | `ExempelVakt` i metod-kärnan | `verktyg/exempel-svep.js` |
-| **Namngivande ord får stå, instruerande inte.** "Omkrets:" namnger; "Skriv ett mellanled först" instruerar. | — | läslista (går inte att mäta) |
+| **Namngivande ord får stå, instruerande inte.** "Omkrets:" namnger; "Skriv ett mellanled först" instruerar. | — | **—** läslista; går inte att mäta |
 
 ## Kopplingen till taxonomin
 
-| Konvention | Funktionen bor i | Grind |
+| Konvention | Funktionen bor i | Vad vaktar den |
 |---|---|---|
 | **En generator pekar på en nod som finns, och en mastery-nyckel går att spåra tillbaka.** | `js/data/*-taxonomi.js` | `verktyg/koppling-grind.js` |
 | **Byggt material är nåbart** — ingen nod med innehåll saknas i utbudslistan. | `visning.utbudslista` | `verktyg/synlig-grind.js` |
@@ -72,12 +78,16 @@ De här är lika bindande som allt annat i filen. Skillnaden är att de i dag b�
 | **Figurer ritas om med egna värden.** En figur som återanvänds med nya tal ska visa de nya talen. | `SvgAlgebraFigur`, `SvgTermometer`, `svg-andel`, `svg-tallinje` | **Delvis** | En figur som *genereras ur data* är rätt per konstruktion; risken är en handskriven SVG eller en figur som behållit gamla tal. Mätningen: varje tal som syns i figuren ska finnas i radens data. Det kräver att figuren bär sina värden i DOM (ett `data`-attribut på figur-elementet) — den kopplingen finns inte i dag och måste läggas till först. |
 | **En nod finns när färdigheten bedöms separat.** Bedöms något för sig ska det ha en egen plats i taxonomin, annars försvinner evidensen in i en grannfärdighet. | taxonomin ⟷ bladen/testen | **Nej, inte som dom** | Att två färdigheter är *olika* är en bedömning, inte en mätning. Det mekaniska som går: lista grupper som rättas för sig (egen rättar-typ eller egen svarsform) men loggar till samma nod som en strukturellt annorlunda grupp. Det ger **kandidater att läsa**, aldrig ett grönt eller rött. |
 | **Delad nod loggas i sin hemvist.** Samma färdighet i två årskurser är EN nod; årskursen taggar den, den kopieras aldrig. | `js/data/*-taxonomi.js`, alla generatorer | **Ja, låg–medel** | `koppling-grind` kontrollerar redan att varje loggad nyckel finns i taxonomin. Tillägget: ingen färdighet får vara definierad på två ställen (dubblett-id eller två noder med samma namn/innehåll i olika kapitel), och en generators loggade nyckel ska vara nodens kanoniska id. |
+| **En ny sida går in i grindarnas listor samma dag den byggs.** Grindarnas sidlistor är **explicita** — `namnare-grind` och `flerruts-grind` mätte inte Mönster-bladet förrän det lades till (108 → 110 blad). En grind som inte känner sidan är grön om den, och det ser ut som ett godkännande. | alla svep och grindar med en sidlista | **Ja, billigt** | En grind som själv letar upp sidorna på disk (varje `index.html` under `ak7/ ak8/ ak9/` som laddar en bladmotor) och kräver att varje funnen sida finns i varje sidlista. Mängden får bara minska via en uttrycklig undantagsrad med skäl. **Byggs nu** (steg 3 i kanoniseringsordern 2026-10-01). |
+| **Slumpen ska vara äkta oberoende.** Två uppgifter i rad får inte bära samma tal, och en serie får inte vandra (stigande svårighet, upprepade mönster, samma operand om och om igen). `distinktOmgang` fäller bara ordagranna dubbletter inom en omgång — den säger ingenting om serien. | alla generatorer | **Ja, medel** | En slumpkvalitetsfuzz: dra långa serier per generator och nivå, kör **runs-test** (följer tecknen/storlekarna en slump eller vandrar de?) och autokorrelation på lag 1–3, och fäll vid utslag utanför tröskeln. Kräver att varje generator går att dra N gånger utan DOM — det gör de redan i `testgen-fuzz`. **Byggs nu** (steg 3 i kanoniseringsordern 2026-10-01). |
 
-**Fem av sju kan bli riktiga grindar** (hjälptexter, mellanled på värde, bekräftelsesteg, förvald ruta, delad nod). **En kräver ett datakrok först** (figurerna — figuren måste bära sina värden). **En kan aldrig bli mer än en läslista** (nod när färdigheten bedöms separat), eftersom den vilar på en bedömning av vad som är två olika färdigheter.
+**Sju av nio kan bli riktiga grindar** (hjälptexter, mellanled på värde, bekräftelsesteg, förvald ruta, delad nod — och de två nyss tillagda, som byggs nu). **En kräver ett datakrok först** (figurerna — figuren måste bära sina värden). **En kan aldrig bli mer än en läslista** (nod när färdigheten bedöms separat), eftersom den vilar på en bedömning av vad som är två olika färdigheter.
 
 ---
 
-## Hur en grind ska vara byggd
+## Hur en grind ska vara byggd (§1–§8)
+
+Numren är stabila: en ny regel läggs **sist**, ingen omnumrering, så att en hänvisning till "§4" betyder samma sak nästa år. De åtta är plattformsregler — de gäller lika i geografi, historia, kemi och svenska, och kanoniseras i respektive repos `KOMPONENTER-INNEHALL`.
 
 1. **Mät effekten, inte attributet.** `getComputedStyle().fontFamily` säger `'Cormorant Garamond'` även när filen inte finns; `scrollWidth` säger att texten ryms så fort den scrollats; ett `data-`-attribut säger vad någon tänkte, inte vad eleven ser. En grind som mäter formen blir ett hinder för allt som gör rätt på ett annat sätt.
 
@@ -92,3 +102,5 @@ De här är lika bindande som allt annat i filen. Skillnaden är att de i dag b�
 6. **Inget undantag i grinden.** Går något inte att mäta ska markupen ändras, inte grinden få ett undantag. Går det ändå inte: skriv ned gränsen i grindens huvud.
 
 7. **En i taget.** Parallell körning ger CDP-timeouts.
+
+8. **Kör provet i en riktig webbläsare, inte i en node-harness.** Den äldsta av de åtta, och den som stod oskriven längst. En harness som importerar modulen och anropar den provar koden; eleven möter sidan. Node-harnessen gav flera falska gröna bockar i matematikbygget — en modul som räknade rätt i noden renderade fel, laddades inte, eller doldes av en annan flik. Varje grind här körs därför genom `verktyg/cdp-kor.js` mot sidan som eleven öppnar den (`file://`), med `window.onerror` kopplad så att ett JS-fel fäller provet i stället för att tystna. Noll nätväg: en grind som hämtar något över nätet mäter nätet.

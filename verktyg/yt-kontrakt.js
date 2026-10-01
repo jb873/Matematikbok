@@ -25,7 +25,7 @@
      · Angränsande grindar: exempel-svep.js (exemplet ≠ uppgift i samma grupp), namnare-grind.js
        och flerruts-grind.js (att rutorna går att MÄTA).
      · Plattformsreglerna i stort — inklusive de som ingen grind vaktar ännu, och vad som skulle
-       krävas för att mäta dem — står i KONVENTIONER.md. Den listan bor på ETT ställe; skriv inte
+       krävas för att mäta dem — står i doc/KONVENTIONER.md. Den listan bor på ETT ställe; skriv inte
        av den hit.
 
    KÖR:  node verktyg/yt-kontrakt.js [--sida <delsträng>]
