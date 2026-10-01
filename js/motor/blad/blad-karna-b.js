@@ -699,8 +699,13 @@ function bladHTML(blad){
         // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
         // Rättas av AlgBrak.gradePoly — värde + skriven form, två åtskilda besked. data-vars öppnar
         // variabelknapparna på keypaden för just den här rutan.
-        html += '<span class="ovn-text ovn-num">' + (rad.fragaHtml || rad.fraga) + '</span>';
-        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        // Utan frågetext står rubriken för frågan ("Beskriv mönstret med en formel") — då ska
+        // varken texten eller likhetstecknet ritas, bara rutan.
+        var _fr = rad.fragaHtml || rad.fraga || '';
+        if(_fr){
+          html += '<span class="ovn-text ovn-num">' + _fr + '</span>';
+          html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        }
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
           + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off"' + (rad.placeholder ? '' : '') + '>';   // ingen platshållartext (Joachim)
       } else if(rad.typ === 'omkrets'){

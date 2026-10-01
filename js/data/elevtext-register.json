@@ -1883,26 +1883,48 @@
   "titel | Öva · grundnivå (sex dokument)"
  ],
  "js/motor/blad/blad-k3-d2.js": [
+  "rubrik | Använd ett korrekt uttryck och beräkna antalet knappar i figur nummer 70",
   "rubrik | Använd ett korrekt uttryck och beräkna antalet prickar i figur nummer 70",
+  "rubrik | Beskriv mönstret med de blå kulorna med en formel",
+  "rubrik | Beskriv mönstret med en formel",
+  "rubrik | Beskriv mönstret med kulorna med en formel",
+  "rubrik | Beskriv mönstret med stickorna med en formel",
   "rubrik | Detta är de första figurerna i ett mönster",
   "rubrik | Detta är de tre första figurerna i ett mönster",
   "rubrik | Gör en talföljd där mönstret är \"Multiplicera med tre och lägg till ett\"",
   "rubrik | Gör en talföljd där mönstret ökar med tre, använd fyra tal",
+  "rubrik | Gör färdigt mönstren",
+  "rubrik | Gör färdigt talföljderna",
+  "rubrik | Hur många blå kulor har figur 10",
   "rubrik | Hur många bollar finns det i figur nio",
   "rubrik | Hur många bollar finns det i mönstret – fyll i tabellen",
+  "rubrik | Hur många kulor finns det i figur nio",
+  "rubrik | Hur många kulor finns det i mönstret – fyll i tabellen",
+  "rubrik | Hur många kulor har figur 30",
+  "rubrik | Hur många stickor finns det i mönstret – fyll i tabellen",
+  "rubrik | Hur många stickor har figur 100",
+  "rubrik | Hur många stickor har figur 6",
   "rubrik | Skriv de tal som saknas i talföljden",
   "rubrik | Skriv de tre nästa talen i talföljden",
+  "rubrik | Skriv talföljden för antalet knappar i de fem första figurerna",
   "rubrik | Skriv talföljden för antalet prickar i de fem första figurerna",
   "rubrik | Vilka tal saknas i mönstren",
+  "rubrik | Vilket eller vilka av uttrycken visar antalet knappar",
   "rubrik | Vilket eller vilka av uttrycken visar antalet prickar",
   "rubrik | Välj det uttrycket som hör till mönstret",
   "titel | Mönster – nivå 1",
+  "titel | Mönster – nivå 2",
   "vansterText | Hur många kulor har figur 7",
   "vansterText | Hur många stickor har figur 6",
+  "vansterText | Hur många stickor har figur 7",
+  "vansterText | Hur många stickor har figur 8",
   "vansterText | Vilken figur har 17 kulor",
-  "vansterText | Vilken figur har 22 stickor"
+  "vansterText | Vilken figur har 22 stickor",
+  "vansterText | Vilken figur har 43 stickor",
+  "vansterText | Vilken figur har 76 stickor"
  ],
  "ak7/k3/d2-monster/index.html": [
-  "titel | Nivå 1"
+  "titel | Nivå 1",
+  "titel | Nivå 2"
  ]
 }

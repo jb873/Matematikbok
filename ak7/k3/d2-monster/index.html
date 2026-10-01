@@ -149,6 +149,7 @@
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
   <div id="blad-n1" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-n1"></div></div>
+  <div id="blad-n2" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-n2"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -189,9 +190,9 @@
 <script>
 // Bladen är redan renderade av blad-k3-d2.js (egen mount) — skalet sköter flikar, blad-nav,
 // färdighetshubb och föreläsning. Samma anrop som d1 och d3.
-// PILOT: bara Nivå 1. Nivå 2 byggs efter Joachims granskning.
+// Två blad: dokumentets egna nivåer.
 DelkapitelSkal.montera({
-  ova: [ { titel: 'Nivå 1', mount: 'n1' } ],
+  ova: [ { titel: 'Nivå 1', mount: 'n1' }, { titel: 'Nivå 2', mount: 'n2' } ],
   taxonomi:    function(){ return window.K3_TAXONOMI; },
   utbudslista: 'k3d2',
   ram:         '../../../ak7-k3-ram.html',
