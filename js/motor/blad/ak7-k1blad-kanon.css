@@ -206,3 +206,25 @@ input.alg-ruta{width:100%;}
 .alg-magisk-summa em{font-style:italic;color:var(--ink,#2b2620);}
 .alg-sidor{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .alg-pyramid .alg-ruta{width:124px;min-width:124px;}   /* lika breda rutor → radernas antal ger pyramidformen */
+
+/* ── MÖNSTER (k3 d2) ────────────────────────────────────────────────────────────────────────
+   Figurraden, tabellen och den öppna talföljden. Figurerna ritas av js/motor/figur/svg-monster.js;
+   här styrs bara hur de ligger. */
+.ovn-figurrad{display:block;padding:6px 0 2px;}
+.monster-rad{display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap;}
+.monster-figur{margin:0;text-align:center;}
+.monster-figur figcaption{font-family:var(--cinzel,'Cinzel');font-size:11px;letter-spacing:.06em;
+  color:var(--ink-faint,#7a6e65);margin-top:4px;text-transform:lowercase;}
+/* Tabellen scrollar i SIN egen ruta om den inte får plats — inget dokument bredare än vyporten. */
+.ovn-tabellrad{align-items:flex-start;flex-wrap:wrap;}
+.monster-tabell{border-collapse:collapse;margin:2px 0 2px 4px;display:block;max-width:100%;overflow-x:auto;}
+.monster-tabell th{font-family:var(--body,'Source Serif 4');font-size:14px;font-weight:600;
+  color:var(--ink-soft,#3d3630);text-align:left;padding:6px 12px 6px 0;white-space:nowrap;
+  border-bottom:1.5px solid var(--paper-dk,#ede6d6);}
+.monster-tabell tr:last-child th{border-bottom:none;}
+.monster-tabell td{padding:5px 10px;text-align:center;font-size:17px;min-width:46px;
+  border-bottom:1.5px solid var(--paper-dk,#ede6d6);}
+.monster-tabell tr:last-child td{border-bottom:none;}
+.monster-tabell .ovn-in{width:48px;text-align:center;}
+.ovn-oppenfoljd{flex-wrap:wrap;}
+.ovn-oppen-in{width:76px;text-align:center;}

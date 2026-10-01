@@ -22,6 +22,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 global.window = {};
 require(path.join(ROOT, 'js/motor/figur/svg-monster.js'));
+require(path.join(ROOT, 'js/motor/blad/monster-villkor.js'));
 const M = global.window.SvgMonster;
 
 // Figur 1–3 avlästa ur dokumentets bilder (word/media), familj för familj.
@@ -93,6 +94,31 @@ Object.keys(M.FAMILJER).forEach(namn => {
   else console.log('✓ ' + namn.padEnd(20) + ' ' + f.uttryck.padEnd(8) + ' · n=1…30 · figur 1–3 = ' + forl.join(', '));
 });
 
+
+// ── VILLKORSRÄTTAREN för de öppna talföljderna ────────────────────────────────────────────
+// Uppgift 7 och 8 har inget facit — vilken följd som helst duger om villkoret håller. Då måste
+// det som INTE ska godkännas prövas lika noga som det som ska. De tre första fälls-fallen är
+// Joachims (order 2026-09-30): för få tal, fel differens, och en följd där bara första steget
+// följer regeln.
+const V = global.window.MonsterVillkor;
+const DIFF = { typ: 'differens', d: 3 }, REK = { typ: 'rekursiv', k: 3, m: 1 };
+const VILLKORSPROV = [
+  ['godtas', 'fyra tal som ökar med 3',         ['2','5','8','11'],  DIFF, 4, 'ratt'],
+  ['godtas', 'fyra tal, tre gånger plus ett',   ['2','7','22','67'], REK,  4, 'ratt'],
+  ['godtas', 'negativa tal',                    ['-4','-1','2','5'], DIFF, 4, 'ratt'],
+  ['fälls',  'tre tal i stället för fyra',      ['2','5','8'],       DIFF, 4, 'fel'],
+  ['fälls',  'differens 4 i stället för 3',     ['2','6','10','14'], DIFF, 4, 'fel'],
+  ['fälls',  'bara första steget följer regeln',['2','7','20','60'], REK,  4, 'fel'],
+  ['fälls',  'tom ruta i mitten',               ['2','','8','11'],   DIFF, 4, 'fel'],
+  ['fälls',  'bokstav i stället för tal',       ['2','x','8','11'],  DIFF, 4, 'fel'],
+  ['fälls',  'sista steget fel',                ['2','5','8','12'],  DIFF, 4, 'fel']
+];
+console.log('\nVILLKORSRÄTTAREN (öppna talföljder)');
+VILLKORSPROV.forEach(p => {
+  const r = V.prova(p[2], p[3], p[4]);
+  if(r.status === p[5]) console.log('  ✓ ' + p[0].padEnd(7) + p[1]);
+  else { fel++; console.log('  ✗ ' + p[0].padEnd(7) + p[1] + ' — gav ' + r.status + ', väntat ' + p[5]); }
+});
 console.log('\n' + (fel ? '✗ MÖNSTER-FUZZ RÖTT (' + fel + ')' : '✓ MÖNSTER-FUZZ GRÖN')
   + ' · ' + familjer + ' familjer');
 process.exit(fel ? 1 : 0);

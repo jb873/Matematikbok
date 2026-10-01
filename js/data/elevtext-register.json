@@ -1881,5 +1881,28 @@
   "titel | Test",
   "titel | Öva",
   "titel | Öva · grundnivå (sex dokument)"
+ ],
+ "js/motor/blad/blad-k3-d2.js": [
+  "rubrik | Använd ett korrekt uttryck och beräkna antalet prickar i figur nummer 70",
+  "rubrik | Detta är de första figurerna i ett mönster",
+  "rubrik | Detta är de tre första figurerna i ett mönster",
+  "rubrik | Gör en talföljd där mönstret är \"Multiplicera med tre och lägg till ett\"",
+  "rubrik | Gör en talföljd där mönstret ökar med tre, använd fyra tal",
+  "rubrik | Hur många bollar finns det i figur nio",
+  "rubrik | Hur många bollar finns det i mönstret – fyll i tabellen",
+  "rubrik | Skriv de tal som saknas i talföljden",
+  "rubrik | Skriv de tre nästa talen i talföljden",
+  "rubrik | Skriv talföljden för antalet prickar i de fem första figurerna",
+  "rubrik | Vilka tal saknas i mönstren",
+  "rubrik | Vilket eller vilka av uttrycken visar antalet prickar",
+  "rubrik | Välj det uttrycket som hör till mönstret",
+  "titel | Mönster – nivå 1",
+  "vansterText | Hur många kulor har figur 7",
+  "vansterText | Hur många stickor har figur 6",
+  "vansterText | Vilken figur har 17 kulor",
+  "vansterText | Vilken figur har 22 stickor"
+ ],
+ "ak7/k3/d2-monster/index.html": [
+  "titel | Nivå 1"
  ]
 }

@@ -343,10 +343,14 @@ function bladHTML(blad){
   blad.grupper.forEach(function(grupp, gi){
     // data-logg (valfritt) märker en grupp vars besvarade rutor ska matas till mastery.
     // Utan data-logg loggas ingenting (opt-in) — de fyra äldre bladen rörs inte.
-    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + (grupp.loggStore ? ' data-logg-store="' + grupp.loggStore + '"' : '') + '>';
+    // loggarEj: gruppen loggar INTE, och skälet står i markupen. En frånvaro säger inget —
+    // den som läser ska se att det är ett beslut, inte något någon glömt (Joachim 2026-09-30).
+    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + (grupp.loggStore ? ' data-logg-store="' + grupp.loggStore + '"' : '') + (grupp.loggarEj ? ' data-loggar-ej="' + grupp.loggarEj + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     grupp.rader.forEach(function(rad){
-      radNummer++;
+      // En figurrad bär inget svar — den hör till uppgiften och ska inte ta en bokstav, annars
+      // hoppar deluppgifterna över a) varje gång en figur står först.
+      if(rad.typ !== 'figur') radNummer++;
       var bokstav = String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
       // (radtyper ur k1-d10/k3-d7 — plugg till prov — flyttade till kärnan 2026-09-19; kolliderande namn omdöpta)
       if(rad.typ === 'faktor'){
@@ -562,6 +566,46 @@ function bladHTML(blad){
         return;
       }
       // Talföljd: vissa termer givna, andra (null) är ifyllnadsrutor
+      // FIGUR: mönstrets tre första figurer, ritade ur regeln (SvgMonster). Inget svar.
+      if(rad.typ === 'figur'){
+        html += '<div class="ovn-rad ovn-figurrad">'
+          + (window.SvgMonster ? window.SvgMonster.treForsta(rad.familj, { alt: rad.alt || '' }) : '')
+          + '</div>';
+        return;
+      }
+
+      // TABELL: "fyll i tabellen". Tomma celler är vanliga svarsrutor — de rättas, räknas och
+      // loggas av kärnans slinga, så tabellen behöver ingen egen rättning.
+      if(rad.typ === 'tabell'){
+        html += '<div class="ovn-rad ovn-tabellrad" data-rad="' + radNummer + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += '<table class="monster-tabell"><tbody>';
+        html += '<tr><th>' + rad.etiketter[0] + '</th>'
+              + rad.huvud.map(function(h){ return '<td>' + h + '</td>'; }).join('') + '</tr>';
+        html += '<tr><th>' + rad.etiketter[1] + '</th>'
+              + rad.varden.map(function(v, k){
+                  return '<td>' + (v === null
+                    ? '<input class="ovn-in ovn-tabellruta" data-svar="' + rad.facit[k] + '" inputmode="decimal" autocomplete="off">'
+                    : visaTal(v)) + '</td>';
+                }).join('') + '</tr>';
+        html += '</tbody></table></div>';
+        return;
+      }
+
+      // ÖPPEN TALFÖLJD: eleven gör en EGEN följd. Inget facit — villkoret är svaret.
+      if(rad.typ === 'talfoljdOppen'){
+        html += '<div class="ovn-rad ovn-oppenfoljd" data-rad="' + radNummer + '"'
+              + ' data-villkor="' + encodeURIComponent(JSON.stringify(rad.villkor)) + '"'
+              + ' data-rutor="' + rad.rutor + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        for(var oi = 0; oi < rad.rutor; oi++){
+          if(oi > 0) html += '<span class="ovn-foljd-komma">,</span>';
+          html += '<input class="ovn-in ovn-oppen-in" inputmode="text" autocomplete="off">';
+        }
+        html += '</div>';
+        return;
+      }
+
       if(rad.typ === 'talfoljd'){
         html += '<div class="ovn-rad ovn-foljd-rad" data-rad="' + radNummer + '">';
         html += '<span class="ovn-label">' + bokstav + ')</span>';
@@ -958,7 +1002,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in';   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1009,6 +1053,9 @@ function bygg_blad(rotEl, blad){
     // Sid-paret (typ 'sidor') rättas som PAR i en egen loop nedan — hoppas över här, annars räknas
     // rutorna en gång till i nämnaren och facit-kedjan saknar data-svar.
     aktivaInputs = aktivaInputs.filter(function(inp){ return inp.dataset.sida === undefined; });
+    // Den öppna talföljden rättas som EN enhet mot villkoret, i egen loop nedan — rutorna har
+    // inget data-svar och skulle annars räknas som obesvarade fel.
+    aktivaInputs = aktivaInputs.filter(function(inp){ return !inp.classList.contains('ovn-oppen-in'); });
     aktivaInputs.forEach(function(inp){
       var rad = inp.parentElement;
       // Ta bort rutans EGNA tidigare fasit + markering (inte grannarnas — se egnaMarken)
@@ -1125,7 +1172,10 @@ function bygg_blad(rotEl, blad){
       // loggas som försök — FEL registreras som 'fel' (orange), rätt som 'ratt'. Grupp 4
       // (decimaler) saknar data-logg → matar inte mastery. Tidsspärren i mastery.js kollapsar
       // upprepade Kontrollera-klick i samma pass, så retention inte blåses upp.
-      var _grEl = inp.closest('.ovn-grupp');
+      // Noden söks på NÄRMASTE förälder med data-logg — raden först, gruppen sedan. En rad som
+      // tränar något annat än sin grupp bär då sin egen nod (Joachims beslut 2026-09-30: logga
+      // per deluppgift när antal och formel står i samma uppgift).
+      var _grEl = inp.closest('[data-logg]') || inp.closest('.ovn-grupp');
       var _loggNod = _grEl && _grEl.getAttribute('data-logg');
       // STORE-ROUTE: k1-taxonomin bor i window.Mastery, k3 (algebra) i window.MasteryK3. Utan route
       // hamnade algebra-evidensen i k1-storen. data-logg-store sätts av bladets data (grupp.loggStore).
@@ -1197,6 +1247,34 @@ function bygg_blad(rotEl, blad){
       var ok = allaValdaRatt && (flera ? valda.length===antalRatta : valda.length===1);
       if(ok) ratt++;
     });
+    // ÖPPEN TALFÖLJD: rättas mot villkoret, inte mot ett facit. Hela raden är ETT svar.
+    rotEl.querySelectorAll('.ovn-oppenfoljd').forEach(function(rad){
+      totalt++;
+      var rutor = [].slice.call(rad.querySelectorAll('.ovn-oppen-in'));
+      rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
+      rutor.forEach(function(i){ i.classList.remove('correct', 'wrong', 'just-checked'); });
+      if(rutor.every(function(i){ return String(i.value).trim() === ''; })) return;   // obesvarad
+      var villkor = JSON.parse(decodeURIComponent(rad.dataset.villkor));
+      var res = window.MonsterVillkor
+        ? window.MonsterVillkor.prova(rutor.map(function(i){ return i.value; }), villkor, parseInt(rad.dataset.rutor, 10))
+        : { status: 'fel' };
+      var okO = res.status === 'ratt';
+      rutor.forEach(function(i){
+        if(String(i.value).trim() === '') return;                 // tom ruta färgas inte
+        i.classList.add(okO ? 'correct' : 'wrong', 'just-checked');
+      });
+      // marker() finns bara i bråk-kärnan; den här kärnan bygger bocken själv.
+      var mkO = document.createElement('span');
+      mkO.className = 'ovn-mark ' + (okO ? 'ok' : 'fel');
+      mkO.textContent = okO ? '✓' : '✗';
+      rad.appendChild(mkO);
+      if(okO) ratt++;
+      else if(res.besked){
+        var fo = document.createElement('span'); fo.className = 'ovn-fasit';
+        fo.textContent = res.besked; rad.appendChild(fo);
+      }
+    });
+
     // Rätta öppna sid-par (typ 'sidor'): a + b = halva omkretsen. Paret = ETT svar i nämnaren,
     // men båda rutorna får sin egen markering (flerruts-regeln).
     rotEl.querySelectorAll('.alg-sidor').forEach(function(box){

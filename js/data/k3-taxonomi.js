@@ -106,7 +106,7 @@ window.K3_TAXONOMI = {
       "id": "alg-talfoljd:resonera", "namn": "Fortsätta talföljd", "parent": "alg-talfoljd", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RESONERA", "generator": null,
       "begrepp": "Hitta mönstret och skriv de tre nästa talen i följden.",
-      "visning": null
+      "visning": { "utbudslista": "k3d2", "kommer": true }
     },
     {
       "id": "alg-monster-uttryck", "namn": "Välja och skapa uttryck", "parent": "alg-monster", "niva": "deldoman",
@@ -118,7 +118,7 @@ window.K3_TAXONOMI = {
       "id": "alg-monster-uttryck:kommunikation", "namn": "Välja och skapa uttryck", "parent": "alg-monster-uttryck", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "KOMMUNIKATION", "generator": null,
       "begrepp": "Beskriv ett mönster med ett uttryck – välj rätt eller skapa eget.",
-      "visning": null
+      "visning": { "utbudslista": "k3d2", "kommer": true }
     },
     {
       "id": "alg-monster-rakna", "namn": "Räkna med uttryck ur mönster", "parent": "alg-monster", "niva": "deldoman",
@@ -130,7 +130,7 @@ window.K3_TAXONOMI = {
       "id": "alg-monster-rakna:rakna", "namn": "Räkna med uttryck ur mönster", "parent": "alg-monster-rakna", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Räkna ut en term längre fram med mönstrets uttryck.",
-      "visning": null
+      "visning": { "utbudslista": "k3d2", "kommer": true }
     },
 
     /* ═══════════════ Del 3 · Förenkla uttryck (sida kommer; MOTOR finns) ═══════════════
