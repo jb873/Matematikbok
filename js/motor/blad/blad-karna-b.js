@@ -1310,8 +1310,13 @@ function bygg_blad(rotEl, blad){
       totalt++;
       var ratt_svar = grid.dataset.valsvar;
       var valt = grid.dataset.valt;
+      grid.querySelectorAll('.ovn-val-btn').forEach(function(b){ b.classList.remove('correct','wrong'); });
+      // Har eleven inte valt något är uppgiften OBESVARAD, och då markeras ingenting — allra
+      // minst det rätta alternativet. Här färgades det rätta svaret grönt även med noll tryck,
+      // vilket pekade ut svaret precis lika tydligt som ett facit på en tom ruta. Samma regel,
+      // samma skäl. Uppgiften räknas ändå i nämnaren (totalt ovan), så den finns kvar att göra.
+      if(!valt) return;
       grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
-        b.classList.remove('correct','wrong');
         if(b.dataset.val === ratt_svar) b.classList.add('correct');
         else if(b.dataset.val === valt) b.classList.add('wrong');
       });

@@ -1,4 +1,4 @@
-/* kontroll-svep.js — KONTROLLERA FÅR INTE GE BORT FACIT (order 2026-09-30).
+/* kontroll-svep.js — mäter rutor OCH valrutnät (valrutnäten tillagda 2026-10-02) — KONTROLLERA FÅR INTE GE BORT FACIT (order 2026-09-30).
 
    En elev rapporterade det: svara på EN uppgift, tryck Kontrollera, och alla andra visas som fel
    med rätt svar utskrivet. Bladet är förbrukat efter första trycket.
@@ -49,17 +49,25 @@ const PROBE = `(function(){
              || document.querySelector('.ovn-sheet') || document.body;
     var rutor = Array.prototype.filter.call(mount.querySelectorAll('input.ovn-in, input.ak8-in'), synlig)
       .filter(function(i){ return !i.disabled && !i.readOnly; });
-    if(!rutor.length) return;
+    // Valrutnäten mäts med samma regel som rutorna. Ett blad som BARA har rutnät mättes förut
+    // inte alls — det föll ur på raden nedan.
+    var grids = Array.prototype.filter.call(
+      mount.querySelectorAll('.ovn-val-grid, .tl-valgrid, .val-rad, .ovn-flerval-grid'), synlig);
+    if(!rutor.length && !grids.length) return;
+    // Vilka rutnät är OBESVARADE när vi trycker? Dem får rättningen inte markera.
+    var gridsUtanVal = grids.filter(function(g){ return !g.querySelector('.is-vald, .selected'); });
 
     // EN ruta besvaras; resten lämnas tomma. Finns facit i DOM skrivs det rätta svaret, annars
     // en etta — provet gäller de ANDRA rutorna, och om det besvarade är rätt eller fel spelar
     // ingen roll för dem. Utan reserven testades åttans blad aldrig: deras facit bor i radens
     // data, inte i ett attribut, så ingen ruta besvarades och provet mätte ingenting.
-    var mal = rutor.filter(function(i){ return i.getAttribute('data-svar') || i.getAttribute('data-visa'); })[0] || rutor[0];
+    var mal = rutor.filter(function(i){ return i.getAttribute('data-svar') || i.getAttribute('data-visa'); })[0] || rutor[0] || null;
     var svarad = mal;
-    mal.focus(); mal.dispatchEvent(new Event('focusin', { bubbles: true }));
-    mal.value = mal.getAttribute('data-svar') || mal.getAttribute('data-visa') || '1';
-    mal.dispatchEvent(new Event('input', { bubbles: true }));
+    if(mal){
+      mal.focus(); mal.dispatchEvent(new Event('focusin', { bubbles: true }));
+      mal.value = mal.getAttribute('data-svar') || mal.getAttribute('data-visa') || '1';
+      mal.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     var kn = kontrollKnapp();
     if(!kn){ ut.blad.push({ blad: b ? b.textContent.trim() : '(enda)', fel: 'ingen Kontrollera-knapp' }); return; }
     var facitFore = facitEl(mount).length;
@@ -74,11 +82,20 @@ const PROBE = `(function(){
       var i = rad && rad.querySelector('input.ovn-in, input.ak8-in');
       return i && String(i.value).trim() === '';
     });
+    // Ett obesvarat rutnät som fått correct/wrong pekar ut svaret. Vi räknar rutnäten, inte
+    // knapparna: ett rutnät med en grön knapp har gett bort sin uppgift, hur många knappar det
+    // än har.
+    var valUtanVal = gridsUtanVal.filter(function(g){ return g.querySelector('.correct, .wrong'); });
     ut.blad.push({
       blad: b ? b.textContent.trim() : '(enda)',
       rutor: rutor.length, tomma: tomma.length,
       markerade: markerade.length,
       facitPaTom: facitPaTom.length,
+      valRutnat: grids.length, valObesvarade: gridsUtanVal.length, valUtanVal: valUtanVal.length,
+      valExempel: valUtanVal.slice(0, 2).map(function(g){
+        var k = g.querySelector('.correct');
+        return (k ? k.textContent.trim().slice(0, 14) : '?') + ' markerad utan val';
+      }),
       svaradStatus: svarad ? status(svarad) : '(ingen ruta med facit)',
       exempel: facitPaTom.slice(0, 2).map(function(f){ return f.textContent.replace(/\\s+/g, ' ').trim().slice(0, 34); })
     });
@@ -112,18 +129,26 @@ sidor().forEach(sida => {
   MP.rakna(sida, (u.blad || []).length);
   (u.blad || []).forEach(x => {
     blad++; perArskurs[ar].blad++;
-    MP.varde(sida, x.blad, { rutor: x.rutor, tomma: x.tomma, markerade: x.markerade, facitPaTom: x.facitPaTom });
+    // V11 vaktar de värden ett BESKED vilar på. Ger proben inget besked — "ingen Kontrollera-
+    // knapp" — finns inget att vakta, och grinden säger det högt med ett ?. Anmälan står därför
+    // EFTER den returen. (Nian har nio sådana sidor: drill- och provsidor som svepet öppnar men
+    // inte kan döma. Ingen av dem är en bladsida, så V14 kräver dem inte heller.)
     if(x.fel){ console.log('? ' + sida + ' · ' + x.blad + ': ' + x.fel); return; }
-    const brott = x.markerade + x.facitPaTom;
+    MP.varde(sida, x.blad, { rutor: x.rutor, tomma: x.tomma, markerade: x.markerade,
+                             facitPaTom: x.facitPaTom, valRutnat: x.valRutnat, valUtanVal: x.valUtanVal });
+    const brott = x.markerade + x.facitPaTom + (x.valUtanVal || 0);
     if(!brott){
       console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + x.blad
-        + ' (' + x.rutor + ' rutor, ' + x.tomma + ' lämnades tomma)');
+        + ' (' + x.rutor + ' rutor, ' + x.tomma + ' lämnades tomma'
+        + (x.valRutnat ? ', ' + x.valRutnat + ' valrutnät varav ' + x.valObesvarade + ' obesvarade' : '') + ')');
       return;
     }
     fel += brott; perArskurs[ar].trasiga++;
     console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + x.blad
       + ': ' + x.markerade + ' tomma rutor markerade, ' + x.facitPaTom + ' fick facit'
-      + (x.exempel.length ? '\n     ' + x.exempel.join(' | ') : ''));
+      + (x.valUtanVal ? ', ' + x.valUtanVal + ' obesvarade valrutnät markerade' : '')
+      + (x.exempel.length ? '\n     ' + x.exempel.join(' | ') : '')
+      + ((x.valExempel && x.valExempel.length) ? '\n     ' + x.valExempel.join(' | ') : ''));
   });
 });
 try { fs.unlinkSync(TMP); } catch(e){}

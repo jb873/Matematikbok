@@ -652,9 +652,11 @@ function bygg_blad(rotEl, blad){
       if(ok){
         ratt++;
         sel.classList.add('correct');
-      } else {
-        if(sel) sel.classList.add('wrong');
-        // markera rätt alternativ
+      } else if(sel){
+        sel.classList.add('wrong');
+        // markera rätt alternativ — men BARA när eleven svarat. Utan sel-villkoret pekades det
+        // rätta alternativet ut även på en obesvarad uppgift, eftersom ok då är falskt och
+        // grenen kördes ändå. Samma regel som för tomma rutor: obesvarat markeras inte.
         knappar.forEach(function(b){ if(b.dataset.val === ratt2) b.classList.add('correct'); });
       }
     });
