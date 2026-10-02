@@ -336,6 +336,7 @@ sidor().forEach(sida => {
   MP.rakna(sida, (u.ytor || []).length);
   (u.ytor || []).forEach(y => {
     ytor++;
+    MP.varde(sida, y.yta, { rutor: y.rutor, uttrycksrutor: y.uttrycksrutor });
     if(!y.brott.length){ console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.rutor + ' rutor, ' + y.uttrycksrutor + ' uttryck)'); return; }
     fel += y.brott.length;
     console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + '\n     ' + y.brott.join('\n     '));

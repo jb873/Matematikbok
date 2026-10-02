@@ -112,6 +112,7 @@ sidor().forEach(sida => {
   MP.rakna(sida, (u.blad || []).length);
   (u.blad || []).forEach(x => {
     blad++; perArskurs[ar].blad++;
+    MP.varde(sida, x.blad, { rutor: x.rutor, tomma: x.tomma, markerade: x.markerade, facitPaTom: x.facitPaTom });
     if(x.fel){ console.log('? ' + sida + ' · ' + x.blad + ': ' + x.fel); return; }
     const brott = x.markerade + x.facitPaTom;
     if(!brott){

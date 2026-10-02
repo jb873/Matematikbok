@@ -326,6 +326,7 @@ SIDOR8.forEach(sida => {
       if(b.fel.length) brott.push('FACIT GODTAS EJ: ' + b.fel.slice(0, 3).join(' ; '));
       if(!b.ejTackta && !b.fel.length && b.ratt !== b.namnare) brott.push('allt fyllt ur facit men ' + b.ratt + ' av ' + b.namnare);
       fel += brott.length;
+      MP.varde(sida, b.blad, { ratt: b.ratt, namnare: b.namnare });
       console.log((brott.length ? '✗ ' : '✓ ') + sida.replace('ak8/k1/', '') + (SEEDS > 1 ? ' s' + k : '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + b.synligaSvar + ' · fyllda ' + b.fyllda + (b.ejTackta ? ' · ej täckta ' + b.ejTackta : '') + (brott.length ? '\n     ' + brott.join('\n     ') : ''));
     });
   }
@@ -346,6 +347,7 @@ SIDOR8.forEach(sida => {
     if(b.namnare == null) brott.push('ingen "X av Y"-summering');
     else if(b.namnare !== b.enheter) brott.push('nämnaren ' + b.namnare + ' ≠ ' + b.enheter + ' synliga svarsenheter');
     else if(b.ratt !== b.namnare) brott.push('allt fyllt ur modellen men ' + b.ratt + ' av ' + b.namnare);
+    MP.varde(sida, b.blad, { ratt: b.ratt, namnare: b.namnare });   // V11
     if(brott.length){ fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + brott.join(' · ')); }
     else console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + b.enheter + ' (' + b.ytor + ' rutor + ' + b.rader + ' rader)');
   });
@@ -371,6 +373,7 @@ SIDOR7.forEach(sida => {
     if(b.doldIn || b.doldGrid) brott.push('DOLDA i visat blad: rutor ' + b.doldIn + ', grids ' + b.doldGrid);
     if(!b.ejTackta && b.namnare > 0 && b.ratt !== b.namnare) brott.push('allt fyllt ur data men ' + b.ratt + ' av ' + b.namnare);
     fel += brott.length;
+    MP.varde(sida, b.blad, { ratt: b.ratt, namnare: b.namnare });
     console.log((brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + (b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0)) + (b.ejTackta ? ' · ej täckta ' + b.ejTackta : '') + (b.namnare === 0 ? ' · TOMT BLAD' : '') + (brott.length ? '\n     ' + brott.join('\n     ') : ''));
   });
 });

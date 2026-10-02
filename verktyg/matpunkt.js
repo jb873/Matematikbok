@@ -6,7 +6,15 @@
  * ut en rad om den, och slutade med "GRÖN · 107 blad mätta". Nians fyra öva-blad gav samma
  * tysta noll. Det är samma lögn som startade hela tråden — grön medan noll mäts — ett lager in.
  *
- * V9 garanterar MEDLEMSKAP. V14 garanterar MÄTNING.
+ * V9 garanterar MEDLEMSKAP. V14 garanterar MÄTNING. V11 garanterar att mätningen BLEV ETT
+ * VÄRDE.
+ *
+ * V11 (en grind får inte ha en väg ut som hoppar mätningen) mäts här på utfallet i stället för
+ * på kodvägen: varje grind anmäler de värden den sedan skriver ut, och ett värde som är
+ * undefined, null, NaN eller tom sträng fäller. Skälet är belagt: namnar-grinden skrev
+ * "✓ … 2Tallinjer: undefined/undefined" — den nådde bladet, mätte ingenting, och kallade det
+ * grönt. Att leta tidiga returer i källtexten hade mätt kodens FORM; det här mäter vad
+ * mätningen blev.
  *
  * SÅ HÄR ANVÄNDS DEN i en grind:
  *     const MP = require('./matpunkt').skapa('namnare-grind.js');
@@ -93,12 +101,25 @@ const UTANFOR = {
 
 function skapa(verktyg){
   const matt = {};        // sida -> antal mätpunkter
+  const varden = [];      // V11: de värden grinden bygger sitt besked på
   const forsokta = [];
   const skal = SKAL.filter(s => s.verktyg === verktyg);
 
   return {
     forsok: function(sida){ if(forsokta.indexOf(sida) < 0) forsokta.push(sida); if(!(sida in matt)) matt[sida] = 0; },
     rakna: function(sida, antal){ matt[sida] = (matt[sida] || 0) + (antal || 0); },
+
+    /* V11: grinden anmäler de värden den bygger sitt besked på. Ett värde som inte blev ett
+       värde fäller — oavsett hur grönt beskedet ser ut. Grinden väljer själv VAD som är dess
+       mätning; den som anmäler fel saker vaktas inte, och det syns i att listan är tom. */
+    varde: function(sida, namn, obj){
+      Object.keys(obj || {}).forEach(function(k){
+        var v = obj[k];
+        var trasigt = v === undefined || v === null || v === '' ||
+                      (typeof v === 'number' && !isFinite(v));
+        varden.push({ sida: sida, namn: namn, nyckel: k, varde: v, trasigt: trasigt });
+      });
+    },
 
     granska: function(){
       if(UTANFOR[verktyg]) return 0;
@@ -145,6 +166,20 @@ function skapa(verktyg){
           (undantagna.length ? ' (' + undantagna.length + ' undantagna med prövat skäl)' : ''));
       }
       undantagna.forEach(u => console.log('      undantagen: ' + u));
+
+      // ── V11: blev mätningen ett värde? ──────────────────────────────────────────────────
+      if(varden.length){
+        const trasiga = varden.filter(v => v.trasigt);
+        if(trasiga.length){
+          brott += trasiga.length;
+          console.log('  ✗ V11: ' + trasiga.length + ' mätvärde(n) blev aldrig ett värde — grinden skrev besked utan att mäta:');
+          trasiga.slice(0, 12).forEach(t => console.log('      ' + t.sida + ' · ' + t.namn + ' · ' + t.nyckel + ' = ' + String(t.varde)));
+          if(trasiga.length > 12) console.log('      … och ' + (trasiga.length - 12) + ' fler');
+        } else {
+          console.log('  ✓ V11: alla ' + varden.length + ' anmälda mätvärden blev verkliga värden');
+        }
+      }
+
       // En etikett som inte längre behövs döljer nästa riktiga nolla, precis som ett dött skäl.
       ETIKETT.filter(e => forsokta.indexOf(e.sida) >= 0 && (matt[e.sida] || 0) > 0).forEach(function(e){
         brott++;

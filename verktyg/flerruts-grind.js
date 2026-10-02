@@ -329,6 +329,7 @@ SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
     if(!b.rader) return;
     provade += b.provade;
     const bad = b.gronFastFel.length + b.perRutaSaknas.length; fel += bad;
+    MP.varde(sida, b.blad, { provade: b.provade, rader: b.rader });
     console.log((bad ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.provade + '/' + b.rader + ' flerrutsrader provade'
       + ((b.ejTackta && b.ejTackta.length) ? ' · ej täckta ' + b.ejTackta.length + ' (' + [...new Set(b.ejTackta)].slice(0, 3).join(' ; ') + ')' : '')
       + (b.gronFastFel.length ? ' · GRÖN FAST FEL: ' + b.gronFastFel.join(' ; ') : '') + (b.perRutaSaknas.length ? ' · status per ruta saknas: ' + b.perRutaSaknas.slice(0, 3).join(' ; ') : ''));

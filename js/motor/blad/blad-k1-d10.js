@@ -898,7 +898,11 @@ function renderTallinjeDok(){
     + '<button type="button" class="ovn-kontroll" data-action="kontroll" data-tl-kontroll>Kontrollera</button>'
     + '<button type="button" class="ovn-aterstall" data-tl-reset>Återställ</button>'
     + '</div>';
-  html += '<div class="ovn-sammanf" data-tl-sammanf style="display:none;"></div>';
+  // `data-sammanf` är plattformens attribut för bladets "X av Y"-summering, och det är DÄR
+  // nämnar-grinden läser nämnaren. Bladet bar bara sitt egna data-tl-sammanf, så grinden fick
+  // undefined och skrev ändå ✓ — V11 fäller numera just det. Båda attributen står kvar: sidans
+  // egen kod läser sitt, grinden läser plattformens.
+  html += '<div class="ovn-sammanf" data-sammanf data-tl-sammanf style="display:none;"></div>';
   // FAS3: delad AK8_UI-keypad (tallinje-dokumentet saknade inmatningsknappar → surfplatta kunde ej svara).
   if(window.AK8_UI && AK8_UI.keypadHTML) html += AK8_UI.keypadHTML();
   html += '</div></div>';
