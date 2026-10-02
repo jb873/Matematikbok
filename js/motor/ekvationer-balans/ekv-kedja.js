@@ -21,7 +21,13 @@ function autoStorlek(inp){ inp.setAttribute('size', Math.max(3, (inp.value || ''
 function textSeg(opts){
   opts = opts || {};
   var inp = document.createElement('input');
-  inp.type = 'text'; inp.className = 'seg-text';
+  // `ak8-in` är plattformens klass för en svarsruta i en kedjerad — samma som åttans kedjor.
+  // Den står här för att kedjans rutor ska MÄTAS som alla andra svarsrutor (V14), inte för att
+  // de ska se annorlunda ut. Mätt 2026-10-02 i båda sidorna som använder kedjan: klassen är
+  // inert. Computed style identisk, bredden 56 px före och 102 px efter inskriven text med och
+  // utan den, size-attributet 3 → 8 i båda fallen. (`ovn-in` prövades först och förkastades:
+  // den ger höjd 29 → 42 px och radie 0 → 6 px.)
+  inp.type = 'text'; inp.className = 'seg-text ak8-in';
   inp.setAttribute('inputmode', 'text'); inp.setAttribute('data-kp', 'fri');
   inp.setAttribute('data-bygg', 'frac');                 // rutan kan bära ett bråk, inte en potens
   inp.setAttribute('data-vars', opts.vars || 'xy');

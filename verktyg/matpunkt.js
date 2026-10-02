@@ -57,8 +57,7 @@ const SKAL = [
    * ÖPPEN FRÅGA, Joachims: SKA balansmetoden ge återkoppling per ruta? Om ja ligger rättningen
    * i motorn, inte i grinden, och då ska de tre raderna bort. */
   { verktyg: 'namnare-grind.js',  sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: fri kedja, besked per uppgiftskort, inget facit i DOM — grindens enhet (facit per rad) finns inte' },
-  { verktyg: 'flerruts-grind.js', sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: ingen status per ruta i raden — grindens enhet finns inte' },
-  { verktyg: 'kontroll-svep.js',  sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: ingen status per ruta alls — grindens enhet finns inte' }
+  { verktyg: 'flerruts-grind.js', sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: ingen status per ruta i raden — grindens enhet finns inte' }
 
   // Nians fyra öva-blad hör INTE hit för namnare/flerruts: de ligger inte i de grindarnas
   // listor alls, så V14 ser dem aldrig där. Det är ett MEDLEMSKAPS-undantag, och det står i
