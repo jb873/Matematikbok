@@ -892,7 +892,10 @@ function renderTallinjeDok(){
     html += '</div></div>';
   });
   html += '<div class="ovn-kontroll-rad">'
-    + '<button type="button" class="ovn-kontroll" data-tl-kontroll>Kontrollera</button>'
+    // `data-action="kontroll"` är plattformens attribut för Kontrollera-knappen, och det är
+    // DET nämnar-grinden letar efter. Utan det hoppade grinden över bladet och skrev "ingen
+    // Kontrollera-knapp" — och det var därför facit-läckan ovan kunde leva ouppdagad.
+    + '<button type="button" class="ovn-kontroll" data-action="kontroll" data-tl-kontroll>Kontrollera</button>'
     + '<button type="button" class="ovn-aterstall" data-tl-reset>Återställ</button>'
     + '</div>';
   html += '<div class="ovn-sammanf" data-tl-sammanf style="display:none;"></div>';
@@ -921,6 +924,11 @@ function renderTallinjeDok(){
       var rad = inp.closest('.tl-svar');
       rad.querySelectorAll('.ovn-mark, .ovn-fasit').forEach(function(f){ f.remove(); });
       inp.classList.remove('correct','wrong');
+      // En TOM ruta är obesvarad, inte fel: ingen färg, inget kryss, inget facit. Den räknas
+      // ändå i nämnaren (totalt ovan), så uppgiften finns kvar att göra. Utan den här raden gav
+      // ett enda tryck på Kontrollera bort sexton svar på det här bladet — samma fel som
+      // rättades i 9e5772d, men just det här bladet nåddes aldrig av en grind.
+      if(!String(inp.value).trim()) return;
       var ok = jamforTal(inp.value, parseFloat(inp.dataset.tlsvar));
       var mark = document.createElement('span');
       mark.className = 'ovn-mark ' + (ok?'ok':'fel');
@@ -937,8 +945,12 @@ function renderTallinjeDok(){
     rot.querySelectorAll('.tl-valgrid').forEach(function(grid){
       totalt++;
       var rattSvar = grid.dataset.valsvar, valt = grid.dataset.valt;
+      grid.querySelectorAll('.ovn-val-btn').forEach(function(b){ b.classList.remove('correct','wrong'); });
+      // Samma regel för valrutnäten: har eleven inte valt något är uppgiften obesvarad, och då
+      // markeras INGENTING — allra minst det rätta alternativet. Här färgades det rätta svaret
+      // grönt även när ingen knapp var tryckt, vilket pekade ut svaret lika tydligt som ett facit.
+      if(!valt) return;
       grid.querySelectorAll('.ovn-val-btn').forEach(function(b){
-        b.classList.remove('correct','wrong');
         if(b.dataset.val === rattSvar) b.classList.add('correct');
         else if(b.dataset.val === valt) b.classList.add('wrong');
       });
