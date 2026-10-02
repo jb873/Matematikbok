@@ -37,12 +37,33 @@ const ROOT = Sidor.ROOT;
  * utreda — innehåll eller generator saknas. Skillnaden är hela poängen med listan, och den
  * får inte avgöras av vilket av de två som är bekvämast. */
 const SKAL = [
-  // Tom med flit. Fylls bara av en nolla som är AVSIKTLIG, och först efter mätning.
-  //
-  // Nians fyra öva-blad hör INTE hit: de ligger inte i nämnar- och flerruts-grindens listor
-  // alls, så V14 ser dem aldrig. De är ett MEDLEMSKAPS-undantag och står i V9:s UNDANTAG i
-  // sidlist-grind.js. Hade de legat här hade skälet aldrig prövats — en ursäkt som inte kan
-  // falla ut är precis den tysta raden V14 finns för att förbjuda.
+  /* d4 EKVATIONER — balansmetoden. Enda bevisade avvikelsen i systemet.
+   *
+   * Sidan har 36 synliga rutor (`input.seg-text`, data-kp/bygg/vars) och en Kontrollera-knapp,
+   * men balansmotorn sätter INGEN status per ruta och ingen per rad: noll träffar på
+   * seg-ok/seg-fel/ak8-ok/ak8-fel/ovn-mark i alla fyra filerna under js/motor/ekvationer-balans.
+   * Den ger ETT besked per uppgiftskort, i ett `global-hint`. Facit står inte i DOM — parsern
+   * räknar ut det.
+   *
+   * De tre grindarnas mätenhet är just det som saknas: status per ruta (kontroll-svep), status
+   * per ruta inuti en rad (flerruts) och facit per rad att fylla ur (namnare). Enheten finns
+   * alltså inte på sidan, och det är AVSIKTLIGT — balansmetodens poäng är elevens egen kedja
+   * med fri radlängd ("+ Ny rad"), inte en ifyllnadsövning med bock per ruta.
+   *
+   * Det här är därför inget bekvämlighetsundantag: en klassmappning hade gett proberna rutor de
+   * inte kan bedöma, och kontroll-svepet hade blivit GRÖNT för att ingenting är markerat
+   * någonstans — inte för att tomma rutor lämnas i fred. Samma lögn V14 byggdes mot.
+   *
+   * ÖPPEN FRÅGA, Joachims: SKA balansmetoden ge återkoppling per ruta? Om ja ligger rättningen
+   * i motorn, inte i grinden, och då ska de tre raderna bort. */
+  { verktyg: 'namnare-grind.js',  sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: fri kedja, besked per uppgiftskort, inget facit i DOM — grindens enhet (facit per rad) finns inte' },
+  { verktyg: 'flerruts-grind.js', sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: ingen status per ruta i raden — grindens enhet finns inte' },
+  { verktyg: 'kontroll-svep.js',  sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: ingen status per ruta alls — grindens enhet finns inte' }
+
+  // Nians fyra öva-blad hör INTE hit för namnare/flerruts: de ligger inte i de grindarnas
+  // listor alls, så V14 ser dem aldrig där. Det är ett MEDLEMSKAPS-undantag, och det står i
+  // V9:s UNDANTAG i sidlist-grind.js. Ett skäl som aldrig kan falla ut är precis den tysta
+  // raden V14 finns för att förbjuda.
 ];
 
 /* Räckvidden, utskriven i stället för tyst utelämnad. V14 gäller grindar vars mätenhet är
