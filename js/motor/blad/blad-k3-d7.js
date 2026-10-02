@@ -140,7 +140,9 @@ function renderDoklista(){
   pluggDoklista.innerHTML = '<div class="plugg-doklista-rubrik">' + grupp.namn
     + ' &mdash; välj ett dokument</div>'
     + grupp.dok.map(function(d){
-    return '<button class="plugg-dok" data-dok="' + d.id + '"'
+    // `blad-subnav-btn` = plattformens klass för en underflik, så sidan mäts som alla andra
+    // (V14). Samma ändring som i blad-k1-d10.js, och mätt på samma sätt: klassen är inert.
+    return '<button class="plugg-dok blad-subnav-btn" data-dok="' + d.id + '"'
       + (d.klar ? '' : ' style="opacity:.55;"') + '>'
       + '<span class="plugg-dok-nr">' + d.nr + '</span>'
       + '<span class="plugg-dok-namn">' + d.namn + '</span>'

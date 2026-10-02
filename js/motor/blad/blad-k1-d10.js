@@ -567,7 +567,12 @@ function renderDoklista(){
   pluggDoklista.innerHTML = '<div class="plugg-doklista-rubrik">' + grupp.namn
     + ' &mdash; välj ett dokument</div>'
     + grupp.dok.map(function(d){
-    return '<button class="plugg-dok" data-dok="' + d.id + '"'
+    // `blad-subnav-btn` är plattformens klass för en underflik — den som växlar vilket blad som
+    // visas. Dokumentknappen ÄR det här, och klassen står här för att sidan ska mätas som alla
+    // andra (V14): svepen går igenom `.blad-nav-btn, .blad-subnav-btn` och klickar fram varje
+    // blad. Mätt 2026-10-02: klassen är inert på den här knappen, computed style identisk.
+    // (`blad-nav-btn` prövades först och FÖRKASTADES: den ger vit text på krämfärgad botten.)
+    return '<button class="plugg-dok blad-subnav-btn" data-dok="' + d.id + '"'
       + (d.klar ? '' : ' style="opacity:.55;"') + '>'
       + '<span class="plugg-dok-nr">' + d.nr + '</span>'
       + '<span class="plugg-dok-namn">' + d.namn + '</span>'
