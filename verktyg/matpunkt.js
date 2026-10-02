@@ -65,6 +65,21 @@ const SKAL = [
   // raden V14 finns för att förbjuda.
 ];
 
+/* KÄNDA RÖDA MED ORSAK. En rad här gör INGENTING grönt — sidan räknas som brott precis som
+   förut. Den enda skillnaden är att utskriften säger varför den är röd, och att granska() kan
+   skilja en känd röd från en NY. Utan den skillnaden blir fyra eviga röda ett brus som döljer
+   den femte, och då är grinden lika tyst som när den var grön.
+
+   Nians fyra öva-sidor: strukturen är annorlunda uppbyggd och ännu inte genomtänkt. Att städa
+   dem nu vore att låsa en struktur innan den är bestämd, och att skriva ett skäl vore att
+   påstå att nollan är avsiktlig. Ingetdera är sant. De tas när nian arbetas igenom. */
+const ETIKETT = [
+  { sida: 'ak9/k1/rakna-med-brak-akr9-ova.html',    etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
+  { sida: 'ak9/k1/rakna-med-brak-fordjupning.html', etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
+  { sida: 'ak9/k1/rakna-med-brak-ova.html',         etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
+  { sida: 'ak9/k1/tal-och-berakna-ova.html',        etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' }
+];
+
 /* Räckvidden, utskriven i stället för tyst utelämnad. V14 gäller grindar vars mätenhet är
  * blad/rader/ytor på en bladsida. Två svep står utanför, och det är ett beslut med skäl:
  *   smalruta-svep — enheten är RUTTYP, och en bladsida utan smala rutor har inga att mäta;
@@ -108,9 +123,21 @@ function skapa(verktyg){
       console.log('\nV14 — mätpunkter per sida');
       if(nollor.length){
         brott += nollor.length;
-        console.log('  ✗ ' + nollor.length + ' sida(or) i listan gav NOLL mätpunkter, utan skäl:');
-        nollor.forEach(s => console.log('      ' + s));
-        console.log('      En oavsiktlig nolla är ett fynd att utreda — skriv inte bort den som skäl.');
+        // Kända röda och nya röda skiljs i utskriften. Båda är brott; bara den nya är en nyhet.
+        const kanda = nollor.filter(s => ETIKETT.some(e => e.sida === s));
+        const nya = nollor.filter(s => !ETIKETT.some(e => e.sida === s));
+        if(nya.length){
+          console.log('  ✗ ' + nya.length + ' NY röd: sida i listan gav NOLL mätpunkter, utan skäl och utan etikett:');
+          nya.forEach(s => console.log('      ' + s));
+          console.log('      En oavsiktlig nolla är ett fynd att utreda — skriv inte bort den som skäl.');
+        }
+        if(kanda.length){
+          console.log('  ✗ ' + kanda.length + ' känd röd (räknas som brott, orsaken känd):');
+          kanda.forEach(function(s){
+            const e = ETIKETT.find(x => x.sida === s);
+            console.log('      [' + e.etikett + '] ' + s + ' — ' + e.skal);
+          });
+        }
       }
       gamla.forEach(function(g){ brott++; console.log('  ✗ gammalt skäl: ' + g); });
       if(!nollor.length && !gamla.length){
@@ -118,16 +145,23 @@ function skapa(verktyg){
           (undantagna.length ? ' (' + undantagna.length + ' undantagna med prövat skäl)' : ''));
       }
       undantagna.forEach(u => console.log('      undantagen: ' + u));
+      // En etikett som inte längre behövs döljer nästa riktiga nolla, precis som ett dött skäl.
+      ETIKETT.filter(e => forsokta.indexOf(e.sida) >= 0 && (matt[e.sida] || 0) > 0).forEach(function(e){
+        brott++;
+        console.log('  ✗ etiketten för ' + e.sida + ' behövs inte längre — sidan ger ' + matt[e.sida] + ' mätpunkter');
+      });
       return brott;
     }
   };
 }
 
-module.exports = { skapa, SKAL, UTANFOR };
+module.exports = { skapa, SKAL, ETIKETT, UTANFOR };
 
 if(require.main === module){
   console.log('V14 — skäl-listan (' + SKAL.length + ' rader):');
   SKAL.forEach(s => console.log('  ' + s.verktyg.padEnd(18) + s.sida + '  [bevis: ' + s.bevis + ']  ' + s.skal));
+  console.log('\nKända röda med orsak (' + ETIKETT.length + ' rader) — röda, inte gröna:');
+  ETIKETT.forEach(e => console.log('  [' + e.etikett + '] ' + e.sida));
   console.log('\nUtanför V14:s räckvidd:');
   Object.keys(UTANFOR).forEach(k => console.log('  ' + k.padEnd(18) + UTANFOR[k]));
 }

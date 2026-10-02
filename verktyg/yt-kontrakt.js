@@ -253,6 +253,16 @@ const PROBE = `(function(){
     ut.ytor.push(y);
   }
 
+  /* Plattformens bladnavigering är TVÅ nivåer: flik (.blad-nav-btn) och underflik
+     (.blad-subnav-btn). Här läses bara den första, och därför mäter yt-kontraktet inte de
+     sidor vars blad ligger bakom en underflik — plugg-sidorna ger noll ytor.
+     PRÖVAT OCH ÅTERSTÄLLT 2026-10-02: att bara lägga .blad-subnav-btn i samma PLATTA lista
+     kostade mer än det gav. Plugg-sidorna kom in (6 rader), men fem sjuan-sidor föll ur och
+     gav noll — d3-negativa-tal, d6-multiplikation, d7-division, d8-avrundning,
+     d4-jamfora-brak — och summan gick från 97 ytor på 56 sidor till 88 på 55. På en sida med
+     BÅDA nivåerna hamnar proben i en annan vy när underflikarna ligger i samma svep.
+     Rätt lösning är en NÄSTLAD genomgång: klicka flik, läs om underflikarna, klicka var och en.
+     Det är en egen ändring, inte en selektor-rad. Kontroll-svepet mäter plugg-sidorna redan. */
   var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn, .blad-nav-btn'));
   if(nav.length){
     nav.forEach(function(k){
