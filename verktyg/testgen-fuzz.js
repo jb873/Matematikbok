@@ -50,7 +50,7 @@ console.log('TESTGEN-FUZZ — ' + N + ' anrop × ' + FRON + ' frön per generato
 RAMAR.forEach(ram => {
   const tmp = path.join(os.tmpdir(), 'testgen-' + process.pid + '-' + ram + '.js'), pre = path.join(os.tmpdir(), 'testgen-pre-' + process.pid + '.js');
   fs.writeFileSync(tmp, PROBE); fs.writeFileSync(pre, PRE);
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, ram)), tmp, '--pre', pre, '--wait', '2500', '--timeout', '90000', '--console'], { encoding: 'utf8', timeout: 150000 });
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, ram)), tmp, '--pre', pre, '--vanta-pa', 'generatorer', '--timeout', '90000', '--console'], { encoding: 'utf8', timeout: 150000 });
   const rad = (r.stdout || '').trim().split('\n').pop() || '';
   let ut = null; try { ut = JSON.parse(rad); } catch(e){}
   if(!ut){

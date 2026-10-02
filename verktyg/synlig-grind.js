@@ -61,7 +61,7 @@ function cdp(url){
   fs.writeFileSync(tmp, PROBE);
   const pre = tmp.replace(/\.js$/, '-pre.js'); fs.writeFileSync(pre, PRE);
   let r; for(let forsok = 0; forsok < 2; forsok++){
-    r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), url, tmp, '--pre', pre, '--wait', '1800', '--timeout', '40000'], { encoding: 'utf8', timeout: 90000 });
+    r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), url, tmp, '--pre', pre, '--vanta-pa', 'laddad', '--timeout', '40000'], { encoding: 'utf8', timeout: 90000 });
     if(r.status === 0) break;
     if(!(r.signal || /svarade inte på CDP-porten|hittar ingen sid-target|vakthund|CDP-steg tidsgränsat|WebSocket/.test(r.stderr || ''))) break;
   }

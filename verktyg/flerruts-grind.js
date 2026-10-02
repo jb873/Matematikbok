@@ -320,7 +320,7 @@ SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
   MP.forsok(sida);
   const tmp = path.join(os.tmpdir(), 'flerruts-' + process.pid + '.js'), pre = path.join(os.tmpdir(), 'flerruts-pre-' + process.pid + '.js');
   fs.writeFileSync(tmp, probe); fs.writeFileSync(pre, PRE);
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp, '--pre', pre, '--wait', '2000', '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp, '--pre', pre, '--vanta-pa', 'blad', '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
   let ut = null; try { ut = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!ut){ fel++; console.log('✗ ' + sida + ': inget svar — ' + (r.stderr || '').trim().split('\n').pop()); return; }
   if(ut.onerr && ut.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + ut.onerr.join(' | ')); }

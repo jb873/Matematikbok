@@ -158,7 +158,7 @@ RAMAR.forEach(ram => {
   const perOmgang = [];
   for(let o = 0; o < OMG; o++){
     const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, ram)), tmp,
-      '--pre', pre, '--wait', '2500', '--timeout', '120000'], { encoding: 'utf8', timeout: 180000 });
+      '--pre', pre, '--vanta-pa', 'generatorer', '--timeout', '120000'], { encoding: 'utf8', timeout: 180000 });
     let u = null;
     try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
     if(!u || u.fel){

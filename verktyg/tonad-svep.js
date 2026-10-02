@@ -104,7 +104,7 @@ console.log('TONAD-SVEP — opacity mätt EFTER animationen; en animation med fi
 sidor().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP + '.js',
-                               '--wait', '1800', '--timeout', '60000'],
+                               '--vanta-pa', 'laddad', '--timeout', '60000'],
                       { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}

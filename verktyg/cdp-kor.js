@@ -6,7 +6,9 @@
    någonsin i källträdet. Node ≥22 (inbyggd WebSocket), ingen npm.
 
    KÖR:
-     node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms] [--pre fil.js] [--screenshot ut.png] [--size WxH] [--viewport WxH]
+     node verktyg/cdp-kor.js <url> <js-fil> [--vanta-pa blad|laddad|generatorer|<uttryck>] [--vanta-tak ms]
+                              [--wait ms] [--timeout ms] [--pre fil.js] [--screenshot ut.png] [--size WxH] [--viewport WxH]
+     --vanta-pa ersätter --wait: väntan på ett VILLKOR i stället för på en klocka. Se noten vid VILLKOR_NAMN.
        <js-fil> = en JS-text som EVALUERAS i sidan; får vara ett async-uttryck / IIFE som returnerar ett
                   Promise. Resultatet (JSON) skrivs på stdout.
      Exempel:
@@ -22,6 +24,36 @@ const url = args[0], jsFile = args[1];
 if(!url || !jsFile){ console.error('användning: node verktyg/cdp-kor.js <url> <js-fil> [--wait ms] [--timeout ms]'); process.exit(2); }
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? parseInt(args[i + 1], 10) : d; };
 const WAIT = opt('--wait', 1200), TIMEOUT = opt('--timeout', 60000);
+/* --vanta-pa <namn|uttryck>: VÄNTA PÅ ETT VILLKOR i stället för på en klocka.
+   En fast väntetid är en kapplöpning mot renderingen, och den förloras under last: samma svep
+   gav 17 falska nollor i en körning och noll i nästa, med noll JS-fel och sidor som mätte grönt
+   en i taget. Väntan sker i TVÅ faser:
+
+     FAS A — dokumentet är laddat OCH DOM:en har slutat växa (två lika nodräkningar i rad).
+             Det är anti-kapplöpningen: en halvbyggd sida mäts aldrig. Taket är --vanta-tak
+             (20 s). Nås det har sidan aldrig blivit klar → eget besked, exit 1.
+     FAS B — finns mätpunkterna? Nådatid --vanta-nad (2,5 s) efter att sidan blivit stabil.
+             Hittas de inte körs proben ÄNDÅ, med besked på stderr. Svepet mäter då noll, och
+             V14 avgör om just den sidan borde ha haft mätpunkter.
+
+   Domen om "borde ha mätpunkter" hör hos grinden, inte hos köraren: köraren vet inte vilka
+   sidor som ska ha blad. Första försöket lät taket avbryta körningen, och då försvann karta,
+   kunskapsläge och nians drillsidor ur svepet — 22 sidor som helt riktigt saknar bladmarkörer
+   och vars DOM är stabil på 143 noder. */
+const VILLKOR_NAMN = {
+  // En bladsida är mätbar när svarsrutor, valrutnät ELLER bladnavigering finns. Navigeringen
+  // räknas med därför att proberna själva klickar fram bladen (plugg-sidorna renderar inget
+  // före ett dokumentval).
+  blad: "document.querySelector('input.ovn-in, input.ak8-in, input.seg-text, .ovn-val-grid, .blad-nav-btn, .blad-subnav-btn, .plugg-dok')",
+  // Sidor som mäts i sin helhet (CSS, bredd, tonade kort) — klara när dokumentet är laddat.
+  laddad: "document.readyState === 'complete'",
+  // Provbyggar-ramarna: generatorerna är fångade när --pre-fällan satt window.__GENS.
+  generatorer: "window.__GENS && Object.keys(window.__GENS).length"
+};
+const vantaI = args.indexOf('--vanta-pa');
+const VANTA = vantaI >= 0 ? args[vantaI + 1] : null;
+const VANTA_TAK = opt('--vanta-tak', 20000);   // FAS A: tak för "laddad och stabil"
+const VANTA_NAD = opt('--vanta-nad', 2500);    // FAS B: nådatid för att mätpunkterna ska dyka upp
 // --pre <js-fil>: körs i sidan FÖRE dess egna skript (Page.addScriptToEvaluateOnNewDocument) — t.ex. för att
 // fånga IIFE-lokala objekt genom att wrappa en global fabrik (window.__PB via ProvbyggarMotor.montera).
 const preI = args.indexOf('--pre'), PRE = preI >= 0 ? fs.readFileSync(path.resolve(args[preI + 1]), 'utf8') : null;
@@ -44,7 +76,7 @@ const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'cdp-kor-'));
 // och Chrome-barnet överlever som zombie som håller port/resurser → nästa körning hänger (kaskad). Därför:
 // (1) egen VAKTHUND som alltid hinner städa före yttre timeout, (2) TRÄD-kill (taskkill /T) så renderer/gpu dör med.
 function dodaChrome(){ try { if(process.platform === 'win32') spawnSync('taskkill', ['/PID', String(chrome.pid), '/T', '/F'], { stdio: 'ignore' }); else chrome.kill('SIGKILL'); } catch(e){} }
-const DEADLINE = WAIT + TIMEOUT + 15000;
+const DEADLINE = (VANTA ? VANTA_TAK + VANTA_NAD : WAIT) + TIMEOUT + 15000;
 const vakthund = setTimeout(() => { console.error('cdp-kor: vakthund — deadline ' + DEADLINE + ' ms passerad, städar Chrome'); dodaChrome(); try { fs.rmSync(prof, { recursive: true, force: true }); } catch(e){} process.exit(1); }, DEADLINE);
 vakthund.unref && vakthund.unref();
 const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--allow-file-access-from-files', '--no-first-run',
@@ -75,7 +107,54 @@ async function waitPort(){ for(let i = 0; i < 200; i++){ try { return await getJ
     if(PRE) await send('Page.addScriptToEvaluateOnNewDocument', { source: PRE });
     if(VIEWPORT) await send('Emulation.setDeviceMetricsOverride', { width: VIEWPORT[0], height: VIEWPORT[1], deviceScaleFactor: 1, mobile: false });
     await send('Page.navigate', { url });
-    await new Promise(r => setTimeout(r, WAIT));
+
+    if(VANTA){
+      const uttryck = VILLKOR_NAMN[VANTA] || VANTA;
+      // send() ger hela CDP-meddelandet: värdet ligger på message.result.result.value — samma
+      // väg som proben läses på nedan. Ett steg för grunt och villkoret blir aldrig sant.
+      const las = async (expr) => {
+        const p = await send('Runtime.evaluate', { expression: expr, returnByValue: true });
+        return (p && p.result && p.result.result && p.result.result.value) || {};
+      };
+      const PROV_A = '(function(){ return { klar: document.readyState === "complete",'
+                   + ' noder: document.getElementsByTagName("*").length }; })()';
+      const PROV_B = '(function(){ try { return { ok: !!(' + uttryck + ') }; }'
+                   + ' catch(e){ return { ok: false, fel: String(e.message || e) }; } })()';
+
+      // FAS A — laddad och stabil. Det här är anti-kapplöpningen: en halvbyggd sida mäts aldrig.
+      const tA = Date.now();
+      let stabil = false, forra = -1;
+      while(Date.now() - tA < VANTA_TAK){
+        const v = await las(PROV_A);
+        if(v.klar && v.noder === forra && v.noder > 0){ stabil = true; break; }
+        forra = v.noder;
+        await new Promise(r => setTimeout(r, 120));
+      }
+      if(!stabil){
+        console.error('cdp-kor: sidan blev aldrig laddad och stabil inom ' + VANTA_TAK + ' ms · ' + url);
+        clearTimeout(vakthund); dodaChrome();
+        try { fs.rmSync(prof, { recursive: true, force: true }); } catch(e){}
+        process.exit(1);
+      }
+
+      // FAS B — finns mätpunkterna? Hittas de inte körs proben ändå; svepet mäter noll och V14
+      // avgör om sidan borde ha haft dem. Köraren vet inte vilka sidor som ska ha blad.
+      const tB = Date.now();
+      let funna = false, sistaFel = null;
+      while(Date.now() - tB < VANTA_NAD){
+        const v = await las(PROV_B);
+        if(v.fel) sistaFel = v.fel;
+        if(v.ok){ funna = true; break; }
+        await new Promise(r => setTimeout(r, 120));
+      }
+      if(!funna){
+        console.error('cdp-kor: inga mätpunkter för villkoret "' + VANTA + '" inom ' + VANTA_NAD
+          + ' ms efter att sidan blivit stabil — kör proben ändå'
+          + (sistaFel ? ' (fel i villkoret: ' + sistaFel + ')' : '') + ' · ' + url);
+      }
+    } else {
+      await new Promise(r => setTimeout(r, WAIT));
+    }
     const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true, timeout: TIMEOUT });
     if(r.result && r.result.exceptionDetails){ console.error('FEL i sidan:', JSON.stringify(r.result.exceptionDetails.exception || r.result.exceptionDetails, null, 0).slice(0, 600)); code = 1; }
     else console.log(JSON.stringify(r.result && r.result.result ? r.result.result.value : null));

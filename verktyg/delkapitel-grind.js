@@ -99,7 +99,7 @@ for(const p of pages){
   else ok('blad: inga inline blad-regler');
 
   // ── 2b BLAD runtime: Öva renderar .ovn-sheet ──
-  const rt = cdp(fileUrl(abs), `({ sheet: !!document.querySelector('.ovn-sheet'), h2: !!document.querySelector('.ovn-sheet > h2'), celler: document.querySelectorAll('.ak8-svar[data-idx], .ak8-in').length })`, ['--wait', '1800']);
+  const rt = cdp(fileUrl(abs), `({ sheet: !!document.querySelector('.ovn-sheet'), h2: !!document.querySelector('.ovn-sheet > h2'), celler: document.querySelectorAll('.ak8-svar[data-idx], .ak8-in').length })`, ['--vanta-pa', 'blad']);
   if(rt.fel) fel('blad runtime: ' + rt.fel);
   else if(!rt.sheet || !rt.h2) fel('blad runtime: Öva saknar .ovn-sheet/h2 (omslaget) — montera via AK8_UI.renderSheet');
   else ok('blad runtime: .ovn-sheet + h2 renderade (' + rt.celler + ' celler)');
@@ -127,7 +127,7 @@ for(const p of pages){
           if(document.getElementById('summary-next-btn')) break;
         }
         return { antal: shown.length, distinkta: new Set(shown).size };
-      })()`, ['--wait', '1800', '--timeout', '60000']);
+      })()`, ['--vanta-pa', 'blad', '--timeout', '60000']);
       const tag = d.ko + '/' + d.f;
       if(r.fel && /ingen kontrollknapp|ingen exercise-card/.test(r.fel)) varn('drill ' + tag + ': harness-form ej stödd av grinden (' + r.fel.slice(0, 40) + ') — ej bedömd');
       else if(r.fel){ if(KAND_SKULD_KO.test(d.ko)) skuld('drill ' + tag + ': kunde inte köras (' + r.fel.slice(0, 60) + ')'); else fel('drill ' + tag + ': ' + r.fel.slice(0, 120)); }
@@ -194,7 +194,7 @@ const t = cdp(fileUrl(path.join(ROOT, 'ak8-k1-ram.html')), `(function(){
     });
   });
   return ut;
-})()`, ['--pre', pre, '--wait', '2500', '--timeout', '120000']);
+})()`, ['--pre', pre, '--vanta-pa', 'blad', '--timeout', '120000']);
 if(!t || t.fel) fel('test (' + sida + '): ' + (t ? t.fel : 'inget svar'));
 else if(!Array.isArray(t)) fel('test (' + sida + '): oväntat svar från ramen: ' + JSON.stringify(t).slice(0, 300));
 else if(!t.length) ok('test (' + sida + '): inget färdigt test för sidan');

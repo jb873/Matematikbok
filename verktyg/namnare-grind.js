@@ -303,7 +303,7 @@ if(Sidor.lista(args, SIDOR8.concat(SIDOR7, ['ak7/k3/d5-problemlosning/index.html
 const TMP = path.join(os.tmpdir(), 'namnare-' + process.pid);
 function kor(sida, probe, seed){
   const pf = TMP + '-probe.js', pre = TMP + '-pre.js'; fs.writeFileSync(pf, probe); fs.writeFileSync(pre, PRE(seed));
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), pf, '--pre', pre, '--wait', '2000', '--timeout', '120000'], { encoding: 'utf8', timeout: 180000 });
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), pf, '--pre', pre, '--vanta-pa', 'blad', '--timeout', '120000'], { encoding: 'utf8', timeout: 180000 });
   try { return JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){ return { err: ((r.stderr || '') + (r.stdout || '')).trim().split('\n').pop() }; }
 }
 let fel = 0, blad = 0;

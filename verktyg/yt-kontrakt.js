@@ -313,7 +313,7 @@ sidor().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   MP.forsok(sida);
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
-                               '--wait', '2000', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
+                               '--vanta-pa', 'blad', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!u){ console.log('? ' + sida + ': inget svar'); return; }
@@ -322,7 +322,7 @@ sidor().forEach(sida => {
   // BREDD — egen körning på telefonbredd. Ett dokument bredare än vyporten betyder att eleven
   // kan scrolla sidled på hela sidan; på telefon glider uppgiften ur bild medan hon skriver.
   const rb = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMPB,
-                                '--wait', '1200', '--timeout', '40000', '--viewport', BREDD + 'x800'],
+                                '--vanta-pa', 'laddad', '--timeout', '40000', '--viewport', BREDD + 'x800'],
                        { encoding: 'utf8', timeout: 90000 });
   let ub = null;
   try { ub = JSON.parse((rb.stdout || '').trim().split('\n').pop()); } catch(e){}

@@ -130,7 +130,7 @@ console.log('SMALRUTE-SVEP — måttet ska vara ett golv, inte ett tak\n');
 sidor().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
-                               '--wait', '2000', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
+                               '--vanta-pa', 'blad', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!u){ console.log('? ' + sida + ': inget svar'); return; }
