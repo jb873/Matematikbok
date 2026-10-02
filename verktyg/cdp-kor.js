@@ -75,7 +75,27 @@ const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'cdp-kor-'));
 // STÄDNING (viktigt): dödas node utifrån (spawnSync-timeout → TerminateProcess på Windows) körs inga handlers,
 // och Chrome-barnet överlever som zombie som håller port/resurser → nästa körning hänger (kaskad). Därför:
 // (1) egen VAKTHUND som alltid hinner städa före yttre timeout, (2) TRÄD-kill (taskkill /T) så renderer/gpu dör med.
-function dodaChrome(){ try { if(process.platform === 'win32') spawnSync('taskkill', ['/PID', String(chrome.pid), '/T', '/F'], { stdio: 'ignore' }); else chrome.kill('SIGKILL'); } catch(e){} }
+/* Städningen dödar TVÅ vägar, och den andra är inte överflödig.
+   Träd-killen (/T på vår egen pid) biter bara om startprocessen fortfarande är förälder. Chrome
+   låter ibland startprocessen avsluta sig och lämnar webbläsarträdet föräldralöst — då dödar /T
+   ingenting, och en hel instans (~10 processer) står kvar. Mätt 2026-10-02 från rent läge:
+   körning 1 och 2 lämnade noll processer, körning 3 lämnade tio. Intermittent, alltså, och över
+   ett tiokörningsbevis (560 starter) blev det 197 kvarglömda processer som ströp maskinen — och
+   DET var vad som gjorde den fasta väntetiden till en förlorad kapplöpning.
+   Andra vägen matchar på profilmappens namn, som är unikt per körning (mkdtemp). Den kan
+   därför aldrig råka döda Joachims egen Chrome. */
+function dodaChrome(){
+  try {
+    if(process.platform !== 'win32'){ chrome.kill('SIGKILL'); return; }
+    spawnSync('taskkill', ['/PID', String(chrome.pid), '/T', '/F'], { stdio: 'ignore' });
+    const profNamn = path.basename(prof);
+    spawnSync('powershell', ['-NoProfile', '-Command',
+      "Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | " +
+      "Where-Object { $_.CommandLine -like '*" + profNamn + "*' } | " +
+      "ForEach-Object { try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {} }"],
+      { stdio: 'ignore', timeout: 15000 });
+  } catch(e){}
+}
 const DEADLINE = (VANTA ? VANTA_TAK + VANTA_NAD : WAIT) + TIMEOUT + 15000;
 const vakthund = setTimeout(() => { console.error('cdp-kor: vakthund — deadline ' + DEADLINE + ' ms passerad, städar Chrome'); dodaChrome(); try { fs.rmSync(prof, { recursive: true, force: true }); } catch(e){} process.exit(1); }, DEADLINE);
 vakthund.unref && vakthund.unref();
