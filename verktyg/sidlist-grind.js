@@ -38,7 +38,9 @@ const VERKTYG = [
   { fil: 'smalruta-svep.js',  vad: 'måttet är ett golv' },
   { fil: 'namnare-grind.js',  vad: 'varje synlig ruta räknas och rättas' },
   { fil: 'flerruts-grind.js', vad: 'varje ruta i en rad markeras för sig' },
-  { fil: 'tonad-svep.js',     vad: 'inget tonat som ska vara läsbart' }
+  { fil: 'tonad-svep.js',     vad: 'inget tonat som ska vara läsbart' },
+  { fil: 'keypad-grind.js',   vad: 'keypaden är alltid helt upplåst' },
+  { fil: 'mellanled-grind.js', vad: 'en uppgift som begär mellanled har plats för det' }
 ];
 
 /* Nians fyra öva-sidor står utanför nämnar- och flerruts-grindens listor. Proberna läser

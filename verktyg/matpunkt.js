@@ -98,7 +98,11 @@ const ETIKETT = [
  * Får något av dem en per-blad-enhet hör det hit. */
 const UTANFOR = {
   'smalruta-svep.js': 'enheten är ruttyp; en bladsida utan smala rutor har inget att mäta',
-  'tonad-svep.js': 'enheten är CSS-regel på repots alla sidor; noll döda regler är rätt utfall'
+  'tonad-svep.js': 'enheten är CSS-regel på repots alla sidor; noll döda regler är rätt utfall',
+  // Enheten är "grupp med mellanledssignal". De flesta bladsidor har ingen, helt riktigt — att
+  // kräva en mätpunkt per sida hade gjort varje sida utan mellanledsuppgift röd. Grinden mäter
+  // ändå: den rapporterar antalet grupper med signal, och V11 vaktar att värdena blev värden.
+  'mellanled-grind.js': 'enheten är grupp med mellanledssignal; de flesta sidor har ingen sådan grupp'
 };
 
 function skapa(verktyg){
