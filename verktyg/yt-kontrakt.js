@@ -18,6 +18,9 @@
      GROW        rutan växer med innehållet
      BRÅK        bråkknappen finns när en ruta ska kunna bära bråk, och bygger i den
      MINUS       keypadens − och tangentbordets - ger samma värde (pNum)
+     TUSENTAL    "1 400" och "1400" är samma tal. Tusentalsmellanslag får inte ändra värdet,
+                 i varken pNum eller pInt — och kommatecknet och mellanslagen runt ett
+                 räknetecken måste stå kvar: bara mellanslag MELLAN TVÅ SIFFROR tas bort.
      PLATSHÅLLARE  inga placeholder-texter i svarsrutor
      DIVISION    ingen ÷ i uppgiftstexten — division skrivs som staplat bråk
      BREDD       inget dokument blir bredare än vyporten (mätt på 360 px, egen körning)
@@ -50,10 +53,20 @@ const LASUPP = args.includes('--lasupp');
 // att kunna visa att kontraktets övriga ben fortfarande fäller efter att gråningsbenet togs
 // bort — ett prov som bara visar grönt visar inte att grinden kan bli röd.
 const LAS = args.includes('--las');
+// --sabba tusental: bryter sanitiseringen I SIDAN så att "1 400" avvisas igen. Negativ
+// verifiering av TUSENTAL-benet — samma yta, samma läge, en gång med felet och en gång utan.
+// Ett prov som bara visar grönt visar inte att grinden kan bli röd.
+const SABBA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sabba'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
 const PROBE = `(function(){
-  var LASUPP = ${LASUPP}, LAS = ${LAS};
+  var LASUPP = ${LASUPP}, LAS = ${LAS}, SABBA = ${JSON.stringify(SABBA)};
+  // Saboteringen läggs FÖRE all mätning, på den delade modulen själv — där felet satt.
+  if(SABBA === 'tusental' && window.AK8_UI && AK8_UI.pNum){
+    var _oN = AK8_UI.pNum, _oI = AK8_UI.pInt, _tu = /\\d[\\s\\u00a0\\u202f]\\d/;
+    AK8_UI.pNum = function(x){ return _tu.test(String(x)) ? NaN : _oN(x); };
+    AK8_UI.pInt = function(x){ return _tu.test(String(x)) ? NaN : _oI(x); };
+  }
   var ut = { onerr: window.__onerr || null, ytor: [] };
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles: true })); }
   function synlig(el){ return !!el.offsetParent; }
@@ -174,6 +187,35 @@ const PROBE = `(function(){
        följdes, och ingen sida kunnat vara grön hos både det här kontraktet och keypad-grinden.
        Keypadens tändning vaktas nu av verktyg/keypad-grind.js, som kräver det MOTSATTA: att
        varje tecken är tänt. Återinför inte det här benet. */
+
+    /* TUSENTAL står UTANFÖR if(p) med flit: det prövar den delade PARSERN, inte en ruta, och
+       ska därför mätas på varje yta med inmatning — även de som bara har talrutor. Ett parser-
+       prov bakom villkoret "ytan har en uttrycksruta" hade tigit där, och tystnad läses som
+       godkänt (V14). FYND att besluta om: MINUS-benet nedan är också ett rent parser-prov men
+       står kvar inuti if(p) — alltså omätt på ytor utan uttrycksruta. Inte flyttat här, för
+       det skulle ändra ett befintligt bens täckning i samma steg som ett nytt ben läggs in. */
+    /* TUSENTAL: tusentalsavgränsaren är ett SKRIVSÄTT, inte ett annat tal. Rått parseInt läste
+       "1 400" som 1 — alltså inte ett avvisat svar utan ett tyst felläst. Båda delade läsarna
+       prövas, och motprovet står med: kommat och mellanslagen runt ett räknetecken ska stå kvar. */
+    if(window.AK8_UI && AK8_UI.pNum && !AK8_UI.pInt){
+      y.brott.push('TUSENTAL: AK8_UI.pInt saknas \\u2014 sidan laddar en \\u00e4ldre kopia av den delade parsern');
+    } else if(window.AK8_UI && AK8_UI.pNum){
+      [['1 400', 1400], ['1400', 1400], ['12 000', 12000], ['1 400 000', 1400000]].forEach(function(c){
+        var vN = AK8_UI.pNum(c[0]), vI = AK8_UI.pInt(c[0]);
+        if(vN !== c[1]) y.brott.push('TUSENTAL: pNum("' + c[0] + '") ger ' + vN + ', ska ge ' + c[1]);
+        if(vI !== c[1]) y.brott.push('TUSENTAL: pInt("' + c[0] + '") ger ' + vI + ', ska ge ' + c[1]);
+      });
+      // tusental OCH decimal i samma tal: kommat får inte strykas med mellanslaget
+      if(AK8_UI.pNum('1 400,5') !== 1400.5)
+        y.brott.push('TUSENTAL: pNum("1 400,5") ger ' + AK8_UI.pNum('1 400,5') + ', ska ge 1400.5');
+      if(AK8_UI.pNum('6,8') !== 6.8)
+        y.brott.push('TUSENTAL: decimalkommat trasigt \\u2014 pNum("6,8") ger ' + AK8_UI.pNum('6,8'));
+      // mellanslagen runt ett räknetecken rörs inte: uttrycket ska fortfarande räknas
+      if(AK8_UI.avTusental && AK8_UI.avTusental('3 \\u00b7 4') !== '3 \\u00b7 4')
+        y.brott.push('TUSENTAL: avTusental tömde mellanrummet runt räknetecknet \\u2014 "3 \\u00b7 4" blev "' + AK8_UI.avTusental('3 \\u00b7 4') + '"');
+      if(AK8_UI.evalArith && AK8_UI.evalArith('3 \\u00b7 4') !== 12)
+        y.brott.push('TUSENTAL: evalArith("3 \\u00b7 4") ger ' + AK8_UI.evalArith('3 \\u00b7 4') + ', ska ge 12');
+    }
 
     // AUTOSPACE + GROW på den första uttrycksrutan
     var p = uttr[0];
@@ -331,7 +373,8 @@ fs.writeFileSync(TMP, PROBE);
 const TMPB = path.join(os.tmpdir(), 'ytbredd-' + process.pid + '.js');
 fs.writeFileSync(TMPB, BREDD_PROBE);
 let fel = 0, ytor = 0, sidorMatta = 0;
-console.log('YT-KONTRAKT — keypad · tecken · autospace · grow · bråk · minus · platshållare · division\n');
+console.log('YT-KONTRAKT — keypad · tecken · autospace · grow · bråk · minus · tusental · platshållare · division'
+  + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
 sidor().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   MP.forsok(sida);

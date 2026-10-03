@@ -13,6 +13,26 @@
 
   // ── numerik (samma normalisering som motorerna) ──
   function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // FAS1: även en-/em-dash, ej bara U+2212
+  /* TUSENTALSMELLANSLAG: 1 400 är samma tal som 1400, och båda skrivsätten ska godtas —
+     "flera skrivsätt, samma värde" (doc/KONVENTIONER.md §3). Bara mellanslag MELLAN TVÅ SIFFROR
+     tas bort, så att mellanslag kring räknetecken (3 · 4, autoSpace) och decimalkomma (6,8) är
+     orörda: 1 400,5 blir 1400,5. Loopen klarar flera grupper (1 400 000 → 1400000), eftersom en
+     global ersättning inte tar överlappande träffar. NBSP och narrow NBSP räknas som mellanslag
+     — det är dem en kopierad siffra ur ett dokument ofta bär.
+     pNum strippar ALLA mellanslag och behövde inget tillägg; det här finns för de rättare som
+     använder parseInt på elevens text (provbyggaren, sjuans bråkblad). */
+  function avTusental(s){
+    var t = String(s == null ? '' : s), f;
+    do { f = t; t = t.replace(/(\d)[\s  ](\d)/g, '$1$2'); } while(t !== f);
+    return t;
+  }
+  // Heltalsläsning med samma sanering som pNum, men parseInt-semantik bevarad (en kvot-ruta som
+  // får "1.5" ger 1, precis som förut). Ersätter rått parseInt(el.value, 10) i rättarna.
+  function pInt(s){
+    if(s == null) return NaN;
+    var t = avTusental(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.');
+    return t === '' ? NaN : parseInt(t, 10);
+  }
   // Aritmetik-utvärderare (byte-identisk med mellanleds-motorn): + − · / parenteser.
   function evalArith(s){
     s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(/[·×x]/g, '*').replace(/÷/g, '/').replace(/,/g, '.');   // sanering: en-/em-dash, ej bara U+2212
@@ -651,7 +671,7 @@
   }
 
   window.AK8_UI = {
-    pNum: pNum, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
+    pNum: pNum, pInt: pInt, avTusental: avTusental, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
     grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,

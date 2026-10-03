@@ -466,7 +466,7 @@ function bygg_blad(rotEl, blad){
       var cT = parseInt(row.dataset.t, 10);
       var cN = parseInt(row.dataset.n, 10);
       var fyll = function(el){ return el ? (el.value || '').trim() : ''; };
-      var lika = function(el, v){ return el && fyll(el) !== '' && parseInt(el.value, 10) === v; };
+      var lika = function(el, v){ return el && fyll(el) !== '' && AK8_UI.pInt(el.value) === v; };
       var ok;
       if(cT === 0){
         // helt tal: bara heltalsrutan finns

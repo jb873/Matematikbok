@@ -681,7 +681,7 @@ function bygg_blad(rotEl, blad){
       var cT = parseInt(row.dataset.t, 10);
       var cN = parseInt(row.dataset.n, 10);
       var fyll = function(el){ return el ? (el.value || '').trim() : ''; };
-      var lika = function(el, v){ return el && fyll(el) !== '' && parseInt(el.value, 10) === v; };
+      var lika = function(el, v){ return el && fyll(el) !== '' && AK8_UI.pInt(el.value) === v; };
       var ok;
       if(cT === 0){
         // helt tal: bara heltalsrutan finns
@@ -735,8 +735,8 @@ function bygg_blad(rotEl, blad){
       var nCells = Array.from(row.querySelectorAll('.tre-n'));
       totalt++;
       // läs in elevens produkter
-      var tVals = tCells.map(function(c){ return parseInt(c.value, 10); });
-      var nVals = nCells.map(function(c){ return parseInt(c.value, 10); });
+      var tVals = tCells.map(function(c){ return AK8_UI.pInt(c.value); });
+      var nVals = nCells.map(function(c){ return AK8_UI.pInt(c.value); });
       var tFyllda = tVals.every(function(v){ return !isNaN(v) && v > 0; });
       var nFyllda = nVals.every(function(v){ return !isNaN(v) && v > 0; });
       var mtT = tVals.reduce(function(a,b){ return a*b; }, 1);

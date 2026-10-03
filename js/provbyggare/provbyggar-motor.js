@@ -651,7 +651,7 @@ function gradeSub(s, ans){
   }
   if(s.type === 'sum'){
     if(!Array.isArray(ans)) return {status:'skipped'};
-    const nums = ans.map(v => parseInt(v));
+    const nums = ans.map(v => AK8_UI.pInt(v));
     if(nums.some(isNaN) || nums.length !== s.antal) return {status:'wrong', given: ans.join(' + ')};
     if(nums.some(n => n < 1)) return {status:'wrong', given: ans.join(' + ')};
     const sum = nums.reduce((a,b) => a+b, 0);
@@ -659,7 +659,7 @@ function gradeSub(s, ans){
   }
   if(s.type === 'product'){
     if(!Array.isArray(ans)) return {status:'skipped'};
-    const nums = ans.map(v => parseInt(v));
+    const nums = ans.map(v => AK8_UI.pInt(v));
     if(nums.some(isNaN) || nums.length !== s.antal) return {status:'wrong', given: ans.join(' · ')};
     if(nums.some(n => n < 2)) return {status:'wrong', given: ans.join(' · ')};
     const prod = nums.reduce((a,b) => a*b, 1);
@@ -675,7 +675,7 @@ function gradeSub(s, ans){
     return {status: prod === s.target ? 'correct' : 'wrong', given: ans};
   }
   if(s.type === 'gata'){
-    const num = parseInt(ans);
+    const num = AK8_UI.pInt(ans);
     if(isNaN(num)) return {status:'wrong', given: ans};
     if(num === s.answer || (s.alt && s.alt.includes(num))) return {status:'correct', given: String(num)};
     return {status:'wrong', given: String(num)};
@@ -687,7 +687,7 @@ function gradeSub(s, ans){
   }
   if(s.type === 'brak'){
     if(!Array.isArray(ans)) return {status:'skipped'};
-    const t = parseInt(ans[0]), n = parseInt(ans[1]);
+    const t = AK8_UI.pInt(ans[0]), n = AK8_UI.pInt(ans[1]);
     if(isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: fx(ans[0]||'?', ans[1]||'?')};
     const vardeOk = (t * s.namn === n * s.talj);   // t/n === talj/namn (samma värde)
     const enklast = (gcd(t, n) === 1);             // enklaste form (gcd=1)
@@ -697,15 +697,15 @@ function gradeSub(s, ans){
     if(!ans || !ans.led) return {status:'skipped'};
     // Varje LED rättas på VÄRDE (valfri giltig korsförkortning godtas) — speglat från drillens mellanRatt.
     const ledOk = (s.led || []).every((L, i) => {
-      const t = parseInt(ans.led[i] && ans.led[i][0]), n = parseInt(ans.led[i] && ans.led[i][1]);
+      const t = AK8_UI.pInt(ans.led[i] && ans.led[i][0]), n = AK8_UI.pInt(ans.led[i] && ans.led[i][1]);
       if(isNaN(t) || isNaN(n) || n === 0) return false;
       return Math.abs(t / n - L.varde) < 1e-9;
     });
     // SLUTSVAR: den DELADE tre-läges-regeln (Likhetsrattare.finalStatus) mot s.svarform — samma rättare som
     // öva-bladen, kravet ur data. Valfri heltals-ruta (shel) före bråket. Facit reducerat (gcd=1) av generatorn.
-    const st = parseInt(ans.slut && ans.slut[0]), sn = parseInt(ans.slut && ans.slut[1]);
+    const st = AK8_UI.pInt(ans.slut && ans.slut[0]), sn = AK8_UI.pInt(ans.slut && ans.slut[1]);
     const shelStr = ans.slutHel, harHel = !(shelStr == null || String(shelStr).trim() === '');
-    const shel = harHel ? parseInt(shelStr) : 0;
+    const shel = harHel ? AK8_UI.pInt(shelStr) : 0;
     const brakTom = !(ans.slut && (String(ans.slut[0]).trim() || String(ans.slut[1]).trim()));
     let slutOk = false, besked = '';
     if(s.slutNamn === 1){                                   // facit är ett heltal
@@ -738,7 +738,7 @@ function gradeSub(s, ans){
     if(!ans) return {status:'skipped'};
     const num = (x) => parseFloat(String(x).replace(',','.').replace(/[−–—]/g,'-').replace(/\s/g,''));
     const ledOk = (s.led || []).every((L, i) => { const v = num(ans.led && ans.led[i]); return !isNaN(v) && Math.abs(v - L.varde) < 1e-6; });
-    const koeff = num(ans.koeff), exp = parseInt(String(ans.exp).replace(/[−–—]/g,'-'), 10);   // FAS1: neg. exponent med U+2212 → -
+    const koeff = num(ans.koeff), exp = AK8_UI.pInt(ans.exp);   // DELAD parser: minusvarianter (U+2212) och tusentalsmellanslag
     // FORM-MEDVETEN (speglar drillens gp-check): koeff normaliserad [1,10) + rätt koeff/exponent (15·10¹⁷ underkänns → 1,5·10¹⁸).
     const slutOk = !isNaN(koeff) && koeff >= 1 && koeff < 10 && !isNaN(exp)
       && Math.abs(koeff - s.slutKoeff) < 1e-9 && exp === s.slutExp;
@@ -757,7 +757,7 @@ function gradeSub(s, ans){
   if(s.type === 'blandad'){
     // Oäkta → blandad form, enklaste form. talj/namn = det oäkta bråket.
     if(!ans || typeof ans !== 'object') return {status:'skipped'};
-    const h = parseInt(ans.hel), t = parseInt(ans.t), n = parseInt(ans.n);
+    const h = AK8_UI.pInt(ans.hel), t = AK8_UI.pInt(ans.t), n = AK8_UI.pInt(ans.n);
     const given = (isNaN(h)?'?':h) + ' ' + fx(isNaN(t)?'?':t, isNaN(n)?'?':n);
     if(isNaN(h) || isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: given};
     const vardeOk = ((h * n + t) * s.namn === s.talj * n);   // h + t/n === talj/namn (samma värde)

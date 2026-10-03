@@ -220,7 +220,7 @@
         totalt++;
         var t = rad.querySelector('.brak-t'), n = rad.querySelector('.brak-n');
         var fyllt = (t && t.value.trim() !== '') || (n && n.value.trim() !== '');
-        var ok = !!t && !!n && parseInt(t.value, 10) === parseInt(rad.dataset.t, 10) && parseInt(n.value, 10) === parseInt(rad.dataset.n, 10);
+        var ok = !!t && !!n && AK8_UI.pInt(t.value) === parseInt(rad.dataset.t, 10) && AK8_UI.pInt(n.value) === parseInt(rad.dataset.n, 10);
         [t, n].forEach(function(el){ if(el){ el.classList.remove('correct', 'wrong'); if(fyllt) el.classList.add(ok ? 'correct' : 'wrong'); } });
         if(!fyllt) return;
         if(ok) ratt++;
@@ -234,7 +234,7 @@
         for(var i = 0; i < k.antal; i++){
           var tEl = document.getElementById('d4k-' + nr + '-' + i + '-t'), nEl = document.getElementById('d4k-' + nr + '-' + i + '-n');
           if((tEl && tEl.value.trim() !== '') || (nEl && nEl.value.trim() !== '')) fyllt = true;
-          svar.push({ t: parseInt((tEl || {}).value, 10), n: parseInt((nEl || {}).value, 10) });
+          svar.push({ t: AK8_UI.pInt((tEl || {}).value), n: AK8_UI.pInt((nEl || {}).value) });
         }
         var ok = valideraKonstr(k, svar);
         box.querySelectorAll('.d4-in').forEach(function(el){ el.classList.remove('correct', 'wrong'); if(fyllt) el.classList.add(ok ? 'correct' : 'wrong'); });
@@ -305,7 +305,7 @@
     mount.querySelectorAll('.d4-kontr-btn').forEach(function(b){
       b.onclick = function(){
         var nr = +b.dataset.nr, k = KONSTR[nr], res = document.getElementById('d4kres-' + nr), svar = [];
-        for(var i = 0; i < k.antal; i++){ svar.push({ t: parseInt((document.getElementById('d4k-' + nr + '-' + i + '-t') || {}).value, 10), n: parseInt((document.getElementById('d4k-' + nr + '-' + i + '-n') || {}).value, 10) }); }
+        for(var i = 0; i < k.antal; i++){ svar.push({ t: AK8_UI.pInt((document.getElementById('d4k-' + nr + '-' + i + '-t') || {}).value), n: AK8_UI.pInt((document.getElementById('d4k-' + nr + '-' + i + '-n') || {}).value) }); }
         var ok = valideraKonstr(k, svar);
         res.className = 'd4-kontr-res ' + (ok ? 'ratt' : 'fel');
         res.innerHTML = ok ? '✓ Rätt – uppfyller villkoret!' : '✗ Uppfyller inte villkoret. ' + k.ex;

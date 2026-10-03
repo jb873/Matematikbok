@@ -568,7 +568,7 @@ function bygg_blad(rotEl, blad){
       var cT = parseInt(row.dataset.t, 10);
       var cN = parseInt(row.dataset.n, 10);
       var fyll = function(el){ return el ? (el.value || '').trim() : ''; };
-      var lika = function(el, v){ return el && fyll(el) !== '' && parseInt(el.value, 10) === v; };
+      var lika = function(el, v){ return el && fyll(el) !== '' && AK8_UI.pInt(el.value) === v; };
       var ok;
       if(cT === 0){
         // helt tal: bara heltalsrutan finns
@@ -604,7 +604,7 @@ function bygg_blad(rotEl, blad){
       var tIn   = row.querySelector('.brak-t');
       var nIn   = row.querySelector('.brak-n');
       [decIn, helIn, tIn, nIn].filter(Boolean).forEach(function(b){ b.classList.remove('correct','wrong','just-checked'); });
-      var lika = function(el, v){ return el && (el.value||'').trim()!=='' && parseInt(el.value,10)===v; };
+      var lika = function(el, v){ return el && (el.value||'').trim()!=='' && AK8_UI.pInt(el.value)===v; };
       var cDec = parseFloat(row.dataset.dec);
       var cH   = parseInt(row.dataset.hel, 10);
       var cT   = parseInt(row.dataset.t,   10);
@@ -670,9 +670,12 @@ function bygg_blad(rotEl, blad){
       var tv = (tEl.value || '').trim(), nv = (nEl.value || '').trim();
       // Obesvarad rad rättas inte: räknad i nämnaren, men varken färgad eller facit-visad.
       if(tv === '' && nv === '') return;
-      var nNum = parseInt(nv, 10);
-      var tOk = (tv === '1');
-      var nOk = (/^\d+$/.test(nv) && nNum >= 2);
+      // Tusentalsmellanslag bort före BÅDE formkontrollen och värdet: "1 400" är samma
+      // nämnare som "1400", och heltalsmönstret nedan skulle annars fälla skrivsättet.
+      var nvN = AK8_UI.avTusental(nv);
+      var nNum = AK8_UI.pInt(nv);
+      var tOk = (AK8_UI.avTusental(tv) === '1');
+      var nOk = (/^\d+$/.test(nvN) && nNum >= 2);
       if(tOk && nOk){
         ratt++;
         tEl.classList.add('correct'); nEl.classList.add('correct');
