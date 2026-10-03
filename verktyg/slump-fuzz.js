@@ -74,11 +74,9 @@ const PRE = `(function(){
         M.montera = function(cfg){ window.__GENS = cfg.generators; return m0.apply(this, arguments); }; } } });
 })();`;
 
-const PROBE = `(function(){
-  var G = window.__GENS; if(!G) return { fel: 'inga generatorer fångade' };
-  var N = ${N}, SABBA = ${JSON.stringify(SABBA)};
-
-  function forstaTal(s){ var m = String(s == null ? '' : s).match(/-?\\d+(?:[.,]\\d+)?/); return m ? parseFloat(m[0].replace(',', '.')) : null; }
+/* Statistiken, delad av provytan och drillytan. Brutet ut 2026-10-03 när drillarna
+   kom in: två ytor ska mäta med SAMMA prov, och en kopia driver isär. */
+const STATISTIK = `  function forstaTal(s){ var m = String(s == null ? '' : s).match(/-?\\d+(?:[.,]\\d+)?/); return m ? parseFloat(m[0].replace(',', '.')) : null; }
 
   // ── proven ──────────────────────────────────────────────────────────────────────────────
   function runs(x){
@@ -109,6 +107,13 @@ const PROBE = `(function(){
     return { obs: +obs.toFixed(4), vantat: +vantat.toFixed(4), z: (obs - vantat) / sd, distinkt: Object.keys(rakn).length };
   }
 
+`;
+
+const PROBE = `(function(){
+  var G = window.__GENS; if(!G) return { fel: 'inga generatorer fångade' };
+  var N = ${N}, SABBA = ${JSON.stringify(SABBA)};
+
+${STATISTIK}
   var ut = [];
   Object.keys(G).forEach(function(ko){
     ['snabb', 'problem'].forEach(function(kind){
@@ -218,10 +223,79 @@ RAMAR.forEach(ram => {
   }
 });
 
-console.log('\n' + matta + ' generatorer mätta' + (hoppade ? ' · ' + hoppade + ' OMÄTTA' : ''));
+console.log('\n' + matta + ' PROVgeneratorer mätta' + (hoppade ? ' · ' + hoppade + ' OMÄTTA' : ''));
 if(korta.length){
   console.log('OMÄTTA — prompten ger färre än 100 tal, följden går inte att pröva statistiskt:');
   korta.forEach(k => console.log('    ' + k));
+}
+
+/* ── DRILLYTAN — samma prov, andra ytan ───────────────────────────────────────────────────
+   Drillarnas generatorer var V10:s andra omätta yta. Enumereringen sker i sidan (se
+   verktyg/slump-drill.js): window.gen* som returnerar en uppgift, plus registren
+   OVNING_RENDERS/K2_DRILL vars drillar genererar inline och måste renderas om.
+   Kravet är detsamma: |z| > GRANS i minst två av omgångarna. */
+if(!args.includes('--bara-prov')){
+  const DRILL = require('./slump-drill');
+  const dtmp = path.join(os.tmpdir(), 'slumpdrill-' + process.pid + '.js');
+  fs.writeFileSync(dtmp, DRILL.probe(STATISTIK, N, SABBA));
+  console.log('\nDRILLYTAN — ' + N + ' dragningar × ' + OMG + ' omgångar (renderare: 250)\n');
+
+  let dMatta = 0, dGranskade = 0;
+  const dUtanTal = [];
+  const dBrott = {};
+
+  RAMAR.forEach(ram => {
+    const omg = [];
+    for(let o = 0; o < OMG; o++){
+      const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, ram)), dtmp,
+        '--pre', pre, '--vanta-pa', 'laddad', '--timeout', '180000'], { encoding: 'utf8', timeout: 240000 });
+      let u = null;
+      try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
+      if(!u){ fel++; console.log('✗ ' + ram + ' omgång ' + (o + 1) + ': drillproben svarade inte'); return; }
+      if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + ram + ': JS-fel — ' + u.onerr.slice(0, 2).join(' · ')); }
+      omg.push(u);
+    }
+    if(omg.length < OMG) return;
+
+    omg[0].utanTal.forEach(t => { if(dUtanTal.indexOf(ram + ' · ' + t) < 0) dUtanTal.push(ram + ' · ' + t); });
+
+    ['gen', 'renderare'].forEach(yta => {
+      omg[0][yta].forEach((p0, i) => {
+        dGranskade++;
+        if(p0.kast){ fel++; console.log('  ✗ ' + p0.namn + ': kastade — ' + p0.kast); return; }
+        if(!p0.falt) return;
+        dMatta++;
+        Object.keys(p0.falt).forEach(falt => {
+          [['RUNS', v => v.runs && v.runs.z], ['AUTOKORR lag1', v => v.l1 && v.l1.z],
+           ['AUTOKORR lag2', v => v.l2 && v.l2.z], ['AUTOKORR lag3', v => v.l3 && v.l3.z],
+           ['UPPREP', v => v.upp && Math.max(0, v.upp.z)]].forEach(([ben, z]) => {
+            const vs = omg.map(u => (u[yta][i] && u[yta][i].falt && u[yta][i].falt[falt]) ? z(u[yta][i].falt[falt]) : null)
+              .filter(v => v !== null && v !== undefined && isFinite(v));
+            if(!vs.length) return;
+            const over = vs.filter(v => Math.abs(v) > GRANS);
+            if(over.length >= Math.min(2, vs.length)){
+              fel++;
+              dBrott[p0.namn] = 1;
+              console.log('  ✗ ' + ram.replace('.html', '') + ' · ' + p0.namn + ' · fält "' + falt + '" · ' + ben +
+                ': z = ' + over.map(v => v.toFixed(1)).join(', ') + ' i ' + over.length + '/' + vs.length + ' omgångar');
+            }
+          });
+        });
+      });
+    });
+    console.log('  ' + ram.replace('.html', '').padEnd(14) + omg[0].gen.length + ' gen-generatorer · ' +
+      omg[0].renderare.length + ' renderare · ' + omg[0].utanTal.length + ' utan tal');
+  });
+
+  console.log('\n' + dMatta + ' DRILLgeneratorer mätta av ' + dGranskade + ' granskade');
+  if(dUtanTal.length){
+    console.log('DOKUMENTERAD GRÄNS — går inte att runs-testa (figur- och ordgeneratorer, inget tal i uppgiften):');
+    dUtanTal.forEach(t => console.log('    ' + t));
+  }
+  if(Object.keys(dBrott).length) console.log('✗ ' + Object.keys(dBrott).length + ' DRILL(ar) med beroende följd: ' + Object.keys(dBrott).join(', '));
+  else if(dMatta) console.log('✓ drillytan: ingen följd vandrar, upprepar sig eller låter sig förutsägas');
+  // V11: grön med noll mätta är en överträdelse, inte ett godkännande.
+  if(!dMatta){ fel++; console.log('✗ V11: drillytan mätte NOLL generatorer — grönt skulle vara en lögn'); }
 }
 console.log(fel ? '✗ ' + Object.keys(brottPerGen).length + ' generator(er) med beroende följd' :
   '✓ SLUMP-FUZZ GRÖN — ingen följd vandrar, upprepar sig eller låter sig förutsägas');
