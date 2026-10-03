@@ -151,10 +151,16 @@
       var body = el('div', 'nr-huvud-body');
 
       (hr.grupper || []).forEach(function(g, gi){
-        var gOpen = (forst && gi === 0);
-        var grp = el('div', 'nr-grp' + (gOpen ? ' is-open' : ''));
-        var gh = el('div', 'nr-grp-h', g.rubrik + ' ' + chev(gOpen));
-        grp.appendChild(gh);
+        /* En grupp UTAN rubrik ritas platt: inget dragspelshuvud, alltid öppen. Platta blad
+           (de flesta k1-sidorna har inga varianter) ska inte kosta två klick för ett blad. */
+        var platt = !g.rubrik;
+        var gOpen = platt || (forst && gi === 0);
+        var grp = el('div', 'nr-grp' + (gOpen ? ' is-open' : '') + (platt ? ' nr-grp-platt' : ''));
+        var gh = null;
+        if(!platt){
+          gh = el('div', 'nr-grp-h', g.rubrik + ' ' + chev(gOpen));
+          grp.appendChild(gh);
+        }
         var gbody = el('div', 'nr-grp-body');
 
         (g.varianter || []).forEach(function(v){
@@ -177,7 +183,7 @@
         });
 
         grp.appendChild(gbody);
-        gh.addEventListener('click', function(){ toggleGrp(grp); });
+        if(gh) gh.addEventListener('click', function(){ toggleGrp(grp); });
         body.appendChild(grp);
       });
 

@@ -88,6 +88,10 @@ body.embed .nr-dold-embed{ display:none !important; }
 .nr-grp.is-open .nr-grp-h{background:var(--paper-dk);color:var(--ink);}
 .nr-grp-h .nr-chev{color:var(--ink-faint);font-size:11px;}
 .nr-grp-body{display:none;padding:3px 7px 7px;}
+/* Rubriklös grupp: inget dragspelshuvud, så ingen låd-ram heller — raderna ligger direkt
+   under huvudrubriken. Används där bladen är platta (inga A/B-stenciler). */
+.nr-grp.nr-grp-platt{border:0;background:none;}
+.nr-grp.nr-grp-platt .nr-grp-body{padding:0;}
 .nr-grp.is-open .nr-grp-body{display:block;}
 
 /* ── VARIANT (klick laddar den i arbetsytan) ── */

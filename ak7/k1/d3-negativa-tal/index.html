@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
 <!-- Keypadens formgivning: DELAD fil. Låg förr som en ordagrann kopia här. -->
 <link rel="stylesheet" href="../../../js/motor/keypad.css">
 <style>
@@ -148,6 +149,10 @@
   <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
+<!-- NAVIGATIONSRAMEN ritas hit (lagerväxlare + två spalter). Flikraden ovan
+     göms av navram-delkapitel.js men står KVAR — motorfilen läser #tab-row. -->
+<div id="navram"></div>
+
 <!-- PANEL: FÖRELÄSNING (blad-filen renderar #lecture-list) -->
 <section class="tab-panel" data-panel="forelasningar">
   <div class="lecture-list" id="lecture-list"></div>
@@ -214,6 +219,11 @@
 
 <!-- SKAL: blad-nav (Öva) + Färdighetsträning ur taxonomin. Körs efter blad-filen
      (bladen redan auto-renderade in i sheet-*). Motorn/blad-filen orörd. -->
+<!-- NAVIGATIONSRAMEN: delad nivårad + ram + delkapitel-receptet -->
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/navram/navram-delkapitel.js"></script>
+
 <script>
 (function(){
   var RAM='../../../ak7-k1-ram.html';
@@ -312,6 +322,11 @@
     if(e.source !== frame.contentWindow) return;
     frame.style.height = Math.max(320, Math.min(e.data.__fardHeight, 2200)) + 'px';
   });
+
+  /* NAVIGATIONSRAMEN monteras SIST: receptet speglar #blad-nav, #fardighet-lista och
+     filmlistan, så de måste vara byggda först. Sidans logik är oförändrad — varje variant
+     i vänsterspalten delegerar klicket till originalknappen. */
+  if(window.NavRamDelkapitel) window.NavRamDelkapitel.montera({ nivaPrefix: 'k1d3' });
 })();
 </script>
 
