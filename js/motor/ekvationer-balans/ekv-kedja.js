@@ -104,12 +104,32 @@ function helRad(grid, klass){
 function rensa(r){
   r.vlWrap.classList.remove('rad-ok', 'rad-fel'); r.hlWrap.classList.remove('rad-ok', 'rad-fel');
   r.status.textContent = ''; r.status.style.color = '';
+  [r.vlSida, r.hlSida].forEach(function(sida){
+    Array.prototype.forEach.call(sida.querySelectorAll('input'), function(i){
+      i.classList.remove('correct', 'wrong', 'ak8-ok', 'ak8-fel');
+    });
+  });
 }
+/* Radens status, i TVÅ ordförråd för samma dom.
+   Kedjan har alltid markerat per rad — `rad-ok`/`rad-fel` på radens båda led plus ✓/✗ i
+   statuscellen. Det ordförrådet är kedjans eget, och grindarna läser plattformens
+   (`correct`/`wrong`, `ak8-ok`/`ak8-fel`). Därför bär rutorna nu BÅDA: samma dom, läsbar också
+   för ett svep. Mätt 2026-10-03: klasserna är visuellt inerta på en `seg-text`-ruta (computed
+   style identisk). `ovn-mark` på statuscellen prövades och FÖRKASTADES — den gör bredden 24 → 0
+   och display block → flex, alltså en trasig cell.
+   Bara rutor med INNEHÅLL får status: en tom ruta i en i övrigt besvarad rad är obesvarad, och
+   får varken färg eller kryss (samma regel som på alla andra blad). */
 function markera(r, ok){
   rensa(r);
   r.vlWrap.classList.add(ok ? 'rad-ok' : 'rad-fel'); r.hlWrap.classList.add(ok ? 'rad-ok' : 'rad-fel');
   r.status.textContent = ok ? '✓' : '✗';
   r.status.style.color = ok ? 'var(--green)' : 'var(--red)';
+  [r.vlSida, r.hlSida].forEach(function(sida){
+    Array.prototype.forEach.call(sida.querySelectorAll('input'), function(i){
+      if(String(i.value).trim() === '') return;
+      i.classList.add(ok ? 'correct' : 'wrong', ok ? 'ak8-ok' : 'ak8-fel');
+    });
+  });
 }
 
 // Läser en sida: textsegment och bråksegment i ordning → "(t)/(n)" för bråken.

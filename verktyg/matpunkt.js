@@ -45,32 +45,34 @@ const ROOT = Sidor.ROOT;
  * utreda — innehåll eller generator saknas. Skillnaden är hela poängen med listan, och den
  * får inte avgöras av vilket av de två som är bekvämast. */
 const SKAL = [
-  /* d4 EKVATIONER — balansmetoden. Enda bevisade avvikelsen i systemet.
+  /* d4 EKVATIONER — balansmetoden. Enda bevisade avvikelsen i systemet, och skälen är mätta
+   * 2026-10-03 efter att per-rad-domen ytlagts.
    *
-   * Sidan har 36 synliga rutor (`input.seg-text`, data-kp/bygg/vars) och en Kontrollera-knapp,
-   * men balansmotorn sätter INGEN status per ruta och ingen per rad: noll träffar på
-   * seg-ok/seg-fel/ak8-ok/ak8-fel/ovn-mark i alla fyra filerna under js/motor/ekvationer-balans.
-   * Den ger ETT besked per uppgiftskort, i ett `global-hint`. Facit står inte i DOM — parsern
-   * räknar ut det.
+   * RÄTTELSE av de tidigare skälen: de sade att motorn saknar status per rad. Det var fel.
+   * `kontrolleraUppg` har alltid graderat PER RAD — varje rad tolkas som en ekvation och prövas
+   * med `sammaLosning`, alltså på värde — och `K.markera` sätter `rad-ok`/`rad-fel` plus ✓/✗.
+   * Jag sökte på seg-ok/ak8-ok/correct/ovn-mark, och inget av dem var motorns ordförråd. Mitt
+   * grep avgjorde slutsatsen. Rutorna bär nu ÄVEN plattformens `correct`/`wrong` (mätt inert),
+   * så domen är läsbar för ett svep.
    *
-   * De tre grindarnas mätenhet är just det som saknas: status per ruta (kontroll-svep), status
-   * per ruta inuti en rad (flerruts) och facit per rad att fylla ur (namnare). Enheten finns
-   * alltså inte på sidan, och det är AVSIKTLIGT — balansmetodens poäng är elevens egen kedja
-   * med fri radlängd ("+ Ny rad"), inte en ifyllnadsövning med bock per ruta.
+   * Och ändå mäter dessa två grindar noll blad på sidan — därför att deras ENHET inte finns i
+   * en fri kedja, inte därför att markupen skiljer:
    *
-   * Det här är därför inget bekvämlighetsundantag: en klassmappning hade gett proberna rutor de
-   * inte kan bedöma, och kontroll-svepet hade blivit GRÖNT för att ingenting är markerat
-   * någonstans — inte för att tomma rutor lämnas i fred. Samma lögn V14 byggdes mot.
+   *   namnare  kräver en "X av Y"-summering där Y = antalet synliga svarsenheter. I kedjan är
+   *            antalet rader ELEVENS VAL (avtagande scaffolding: fler led för nybörjaren, färre
+   *            för den skicklige, ner till miniminivån i `minstaAntalRader`). En fast nämnare
+   *            motsäger metoden.
+   *   flerruts fyller varje ruta med 0 och jämför mot ett FACIT PER RAD. En balansrad har inget
+   *            facit — eleven hittar själv ett giltigt likhetsled, och 0 = 0 är giltigt men inte
+   *            uppgiftens ekvation. Grinden skulle mäta något som inte finns.
    *
-   * ÖPPEN FRÅGA, Joachims: SKA balansmetoden ge återkoppling per ruta? Om ja ligger rättningen
-   * i motorn, inte i grinden, och då ska de tre raderna bort. */
-  { verktyg: 'namnare-grind.js',  sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: fri kedja, besked per uppgiftskort, inget facit i DOM — grindens enhet (facit per rad) finns inte' },
-  { verktyg: 'flerruts-grind.js', sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'balansmetoden: ingen status per ruta i raden — grindens enhet finns inte' }
-
-  // Nians fyra öva-blad hör INTE hit för namnare/flerruts: de ligger inte i de grindarnas
-  // listor alls, så V14 ser dem aldrig där. Det är ett MEDLEMSKAPS-undantag, och det står i
-  // V9:s UNDANTAG i sidlist-grind.js. Ett skäl som aldrig kan falla ut är precis den tysta
-  // raden V14 finns för att förbjuda.
+   * kontroll-svep mäter d4 utan undantag sedan 2026-10-02 (tre blad, grönt).
+   *
+   * ÖPPEN FRÅGA, Joachims: noll undantag kräver ett REGELBESLUT, inte mer markup — antingen att
+   * nämnarregeln inte gäller en fri kedja (och grinden får veta det), eller att varje kedjerad
+   * ska ha ett facit, vilket motsäger den fria kedjan. Jag väljer inte åt dig. */
+  { verktyg: 'namnare-grind.js',  sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'fri kedja: antalet rader är elevens val, så nämnaren "synliga svarsenheter" är rörlig med flit' },
+  { verktyg: 'flerruts-grind.js', sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'fri kedja: ingen facit per rad att fylla ur — grinden fyller 0 och jämför mot ett facit som inte finns' }
 ];
 
 /* KÄNDA RÖDA MED ORSAK. En rad här gör INGENTING grönt — sidan räknas som brott precis som
