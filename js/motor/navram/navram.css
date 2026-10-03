@@ -25,6 +25,19 @@
    det slår ut både växten och mätningen.) */
 .nr-dold{ display:none !important; }
 
+/* ── INRE DUBBLETT-FLIKAR ──
+   Varje vy som portas in i ramen bär med sig sin GAMLA inre flikrad, och den blir en andra ingång
+   till något spalten redan har. Kunskapsläget var första fallet (Karta · Självskattning).
+
+   Skillnaden mot .nr-dold: den här raden ska synas när sidan besöks SJÄLV och döljas när den är
+   inbäddad. Därför scopad till body.embed, som vyn sätter ur ?embed=1. En vy som portas märker sin
+   inre rad med den här klassen — en delad mekanism, inte en lapp per sida.
+
+   Kräver att vyn länkar navram.css. Logiken bakom raden rörs ALDRIG: i kunskapsläget bor
+   jämför-mot-bevis i sjalvskattning.js och matas av samma window.Mastery som kartan får, inte av
+   flikarna. */
+body.embed .nr-dold-embed{ display:none !important; }
+
 /* ── LAGERVÄXLAREN (alltid närvarande; den är också tillbaka-vägen) ── */
 .nr-lager{
   display:flex;justify-content:center;

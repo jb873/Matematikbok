@@ -15,6 +15,7 @@
   .sj-intro{font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:66ch;margin:0 0 22px;}
   .sj-intro em{font-style:italic;color:var(--ink);}
 </style>
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
 </head>
 <body>
 <!-- EMBED-LÄGE: sidan bäddas in i navigationsramens "Kunskapsläge". Då döljs sidans egen
@@ -36,7 +37,10 @@
   <h1>Var står jag?</h1>
   <p class="lede">Två sätt att se samma sak. <em>Kartan</em> är evidens — färgad av det du faktiskt övat. <em>Självskattningen</em> är din egen bild. Där de möts syns bekräftelsen; där de skiljer sig syns vad som är värt att titta på.</p>
 
-  <div class="tabs" id="tabs">
+    <!-- INRE FLIKRAD: göms när vyn är inbäddad i navigationsramen (Självskattning nås via
+       vänsterspalten där), synlig när sidan besöks själv. KVAR i DOM: sidans eget skript läser
+       #tabs .tab på tre ställen, och jämför-mot-bevis-logiken ligger i sjalvskattning.js. -->
+  <div class="tabs nr-dold-embed" id="tabs">
     <button class="tab on" data-panel="karta">Karta</button>
     <button class="tab" data-panel="sjalv">Självskattning</button>
   </div>
