@@ -407,70 +407,14 @@
     }
   }
 
-  // ── FAS 2: KONTEXT-GRÅNING ──  Fast layout, men bara de tecken RÄTTAREN accepterar för den
-  // fokuserade rutan är aktiva; resten blir grå (.kp-inactive). Läget härleds ur rutans RÄTTAR-TYP
-  // via dess befintliga markör-klasser — INGEN separat tillåtenhetslista (samma källa som rättningen):
-  //   • plain pNum-ruta (default)        → siffror, komma, minus, radera
-  //   • uttrycks-cell (evalArith): .ak8-mel/.ak8-pexp/.ak8-gpe/.ak8-in-oms/.ak8-exprtxt,
-  //       [data-mellan]/[data-term], eller inuti .ak8-expr → även + · / ( )
-  //   • builder-cell (inuti .ak8-expr)   → även bråk/potens (frac/pot/kbrak)
-  //   • √ och π accepteras av ingen rättare ännu → ALLTID grå (plats reserverad).
-  //   • data-kp på rutan överstyr ('tal' | 'uttryck' | 'bygg' | 'fri'=allt aktivt).
-  var KP_BAS = ['0','1','2','3','4','5','6','7','8','9',',','−','back'];
-  function tillatnaTecken(inp){
-    var till = {}; for(var i = 0; i < KP_BAS.length; i++) till[KP_BAS[i]] = 1;
-    var m = inp && inp.dataset && inp.dataset.kp, uttryck, bygg;
-    // 'fri' = opt-out: alla normala tecken aktiva (√/π förblir grå — ingen rättare).
-    if(m){ uttryck = m === 'fri' || /uttryck|term/.test(m); bygg = m === 'fri' || /bygg/.test(m); }
-    else {
-      var expr = !!(inp && inp.closest && inp.closest('.ak8-expr'));
-      uttryck = expr || !!(inp && inp.matches && inp.matches('.ak8-mel,.ak8-pexp,.ak8-gpe,.ak8-in-oms,.ak8-exprtxt,[data-mellan],[data-term]'));
-      // Potensens BAS läses med pNum, inte evalArith — ett uttryck där kan rättaren inte tolka,
-      // så räknetecknen ska vara grå även om cellen ligger inuti .ak8-expr. Exponenten tar 4 + 5.
-      if(inp && inp.matches && inp.matches('.ak8-pbase,.ak8-gpb')) uttryck = false;
-      bygg = expr;
-    }
-    if(uttryck){ till['+'] = 1; till['·'] = 1; till['/'] = 1; till['('] = 1; till[')'] = 1; }
-    // MELLANLEDSRUTAN (data-form): rättaren jämför skriven form och godtar uttryck. Vilka tecken
-    // den godtar står i rutans egen accept-lista — tänd exakt dem, varken mer eller mindre.
-    // Ett tecken keypaden erbjuder men rättaren underkänner är en fälla, inte en hjälp.
-    var form = inp && inp.dataset && inp.dataset.form;
-    if(form != null){
-      var accept = '';
-      try { accept = decodeURIComponent(form); } catch(e){ accept = String(form); }
-      if(accept.indexOf('+') >= 0) till['+'] = 1;
-      if(/[·*×]/.test(accept)) till['\u00b7'] = 1;
-      if(accept.indexOf('/') >= 0) till['/'] = 1;
-      if(accept.indexOf('(') >= 0){ till['('] = 1; till[')'] = 1; }
-      // − ligger redan i bassetet (negativa tal skrivs överallt).
-    }
-    var vars = inp && inp.dataset && inp.dataset.vars;   // data-vars="xy" → just de variablerna aktiva (algebra); saknas → alla grå
-    if(vars) ('' + vars).split('').forEach(function(v){ if(VARIABLER.indexOf(v) > -1) till[v] = 1; });
-    if(bygg){ till['frac'] = 1; till['pot'] = 1; }   // EN bråkknapp (order 2026-09-21): komplexbråket byggs med samma knapp inne i täljare/nämnare
-    // LIKHETSTECKNET tänds bara i en ruta som bär en KEDJA — hela ledet i en ruta
-    // ("x + 3x + x + 3x = 8x"). I en vanlig svarsruta är = inget eleven ska skriva.
-    var kedja = !!(inp && inp.matches && inp.matches('.ovn-kedja,[data-kedja]'))
-             || (m ? /kedja/.test(m) : false);
-    if(kedja) till['='] = 1;
-    // data-bygg="frac" (eller "frac pot"): rutan säger VILKA byggare den kan bära. Utan attributet
-    // gäller kontexten ovan. En ruta som bara kan bära bråk ska inte tända potensknappen.
-    var byggLista = inp && inp.dataset && inp.dataset.bygg;
-    if(byggLista != null){
-      delete till['frac']; delete till['pot'];
-      ('' + byggLista).split(/[\s,]+/).forEach(function(b){ if(b === 'frac' || b === 'pot') till[b] = 1; });
-    }
-    return till;
-  }
-  function graderaKeypad(kp, inp){
-    if(!kp) return;
-    var till = tillatnaTecken(inp);
-    kp.querySelectorAll('.kp-key').forEach(function(b){
-      var inaktiv = !till[b.dataset.key];
-      b.classList.toggle('kp-inactive', inaktiv);
-      if(inaktiv){ b.setAttribute('aria-disabled', 'true'); b.setAttribute('tabindex', '-1'); }
-      else { b.removeAttribute('aria-disabled'); b.removeAttribute('tabindex'); }
-    });
-  }
+  /* HÄR LÅG KONTEXT-GRÅNINGEN (tillatnaTecken + graderaKeypad), borttagen 2026-10-03.
+     Keypaden är numera ALLTID HELT UPPLÅST — alla tecken tända, på varje yta med inmatning,
+     som en miniräknare (doc/KONVENTIONER.md §3). Eleven får välja fel operation; att välja
+     räknesätt är elevens ansvar, inte gränssnittets, och rättaren säger efteråt om valet var
+     rätt. En grå knapp talade om vilket räknesätt uppgiften ville ha och tog bort själva valet
+     som skulle övas.
+     Mätt före borttagningen: 100 av 103 ytor hade låsta knappar, 0 ytor helt tända.
+     Vaktas av verktyg/keypad-grind.js, som fäller på varje låst knapp. Återinför inte. */
 
   // ── KEYPAD ──  opts: { ops:[...], builders:bool }
   var VARIABLER = ['x', 'y', 'a', 'b', 'c', 'n'];   // samma uppsättning som algebra-rättaren (alg-brak.js VARS)
@@ -479,7 +423,7 @@
   // Staplat komplex-bråk: två små bråk-glyfer kring ett tjockt streck (delad byggsten).
   var KBRAK_ICON = '<span class="kp-kbrak"><span class="kp-kbrak-f"></span><span class="kp-kbrak-l"></span><span class="kp-kbrak-f"></span></span>';
   // FAST LAYOUT (Joachim): keypaden ser ALLTID likadan ut, oavsett kapitel/uppgiftstyp. Knappar som
-  // inte gäller renderas grå + inaktiva (.kp-inactive → pointer-events:none). Tre block:
+  // Alla knappar renderas TÄNDA (ingen .kp-inactive) — keypaden är en miniräknare. Tre block:
   //   siffror (3 kol, ⌫ ensam bredvid 0 på 0-raden, avskild från tecknen) · operatorer (2 kol:
   //   + − · / ( ) √ π) · byggare (1 smal kol: bråk över potens). Inget = (står i uppgiften).
   // FAS 1: nya knapparna ( ) √ π är grå (ingen rättare accepterar dem ännu — parenteser bara i
@@ -495,23 +439,25 @@
     // Operatorer (2 kol). Parenteser + √ + π är NYA → grå tills rättare/band aktiverar dem (FAS 2).
     html += '<div class="keypad-ops">';
     ['+', '−', '·', '/'].forEach(function(o){ html += k(o, o, 'op'); });
-    html += k('(', '(', 'op kp-inactive') + k(')', ')', 'op kp-inactive');
-    html += k('√', '√', 'op kp-inactive') + k('π', 'π', 'op kp-inactive');
+    html += k('(', '(', 'op') + k(')', ')', 'op');
+    html += k('√', '√', 'op') + k('π', 'π', 'op');
     html += '</div>';
     // Variabler (2 kol × 3 rader — lägre än sifferblocket → keypadens HÖJD oförändrad). Algebra kräver
     // bokstäver; en elev på surfplatta kunde annars inte skriva ett algebraiskt svar alls. Grå tills rutan
     // säger vilka som gäller (data-vars), samma princip som ( ) √ π.
     var aktivaVars = ('' + (opts.vars || '')).split('');
     html += '<div class="keypad-vars">';
-    VARIABLER.forEach(function(v){ html += k(v, v, 'varkey' + (aktivaVars.indexOf(v) > -1 ? '' : ' kp-inactive')); });
+    // Alla sex variabler tända: vilken bokstav uppgiften använder är elevens att läsa ur
+    // uppgiften, inte något keypaden ska avslöja genom att släcka de andra.
+    VARIABLER.forEach(function(v){ html += k(v, v, 'varkey'); });
     html += '</div>';
     // Byggar-kolumnen (1 smal kol): bråk, potens och likhetstecken. Grå tills rutan säger att de
     // gäller. = ligger HÄR och inte bland operatorerna: ops-blocket är fullt på 2 kolumner, och en
     // tredje kolumn hade gjort keypaden bredare på en telefon där den redan spiller över. Den här
     // kolumnen har oanvänd höjd — tecknet kostar noll pixlar.
-    var bi = opts.builders ? '' : ' kp-inactive';
+    var bi = '';   // byggar-knapparna (bråk, potens) är alltid tända
     html += '<div class="keypad-build">'
-      + k('=', '=', 'op kp-inactive')
+      + k('=', '=', 'op')
       + '<button type="button" class="kp-key op kp-fracbtn' + bi + '" data-key="frac" title="Bygg stående bråk"' + (bi ? ' aria-disabled="true" tabindex="-1"' : '') + '>' + FRAC_ICON + '</button>'
       + '<button type="button" class="kp-key op kp-potbtn' + bi + '" data-key="pot" title="Bygg potens: bas och exponent"' + (bi ? ' aria-disabled="true" tabindex="-1"' : '') + '>' + POT_ICON + '</button>'
       // (komplexbråks-knappen borttagen 2026-09-21 — Joachim: en knapp som gör rätt sak där markören står; opts.komplex ignoreras)
@@ -559,7 +505,6 @@
       if(e.target.tagName !== 'INPUT') return;
       active = e.target;
       var dolj = arOrdruta(active, doljSel); if(kpEl) kpEl.classList.toggle('keypad-hidden', dolj);
-      if(kpEl && !dolj) graderaKeypad(kpEl, active);   // FAS 2: gråa knappar rättaren ej accepterar
       if(!dolj && active !== sisteFram) skrollaFram(kpEl, active);
       sisteFram = active;
     });
@@ -585,7 +530,6 @@
         active.focus();
       });
     });
-    if(kpEl && !arOrdruta(active, doljSel)) graderaKeypad(kpEl, active);   // FAS 2: initialt läge före första fokus
     // grow + clear-on-edit + auto-mellanslag
     pa('input', function(e){
       var t = e.target; if(!t.classList || !t.classList.contains('ak8-in')) return;
@@ -647,7 +591,6 @@
       if(e.target.tagName !== 'INPUT') return;
       active = e.target;
       var dolj = arOrdruta(active, doljSel); if(kp) kp.classList.toggle('keypad-hidden', dolj);
-      if(kp && !dolj) graderaKeypad(kp, active);   // FAS 2: gråa knappar rättaren ej accepterar
       if(!dolj && active !== sisteFram) skrollaFram(kp, active);
       sisteFram = active;
     });
@@ -668,7 +611,6 @@
         active.focus({ preventScroll:true });
       });
     });
-    if(kp && !arOrdruta(active, doljSel)) graderaKeypad(kp, active);   // FAS 2: initialt läge
     mount.addEventListener('keydown', function(e){
       if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
       e.preventDefault();
