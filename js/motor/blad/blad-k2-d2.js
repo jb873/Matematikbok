@@ -164,11 +164,18 @@ function bladHTML(blad){
     ;   // ingen intro-rad i öva (order 2026-09-23)
 
   if(blad.tvaNivaer){
-    var l2 = !blad.niva2Upplast;
-    html += '<div class="niva-rad">'
-      + '<button type="button" class="niva-btn' + (blad.niva===1?' is-active':'') + '" data-niva="1">Nivå 1</button>'
-      + '<button type="button" class="niva-btn' + (blad.niva===2?' is-active':'') + (l2?' is-locked':'') + '" data-niva="2"' + (l2?' disabled':'') + '>Nivå 2' + (l2?' 🔒':'') + '</button>'
-      + '</div>';
+    /* REGEL (Joachim 2026-10-03): är det bara TVÅ nivåer är ingen låst — nivå 1 och 2 är
+       alltid klickbara, och en duktig elev hoppar fritt uppåt. Låset hör till ett TREDJE steg
+       och uppåt. Antalet nivåer kommer ur bladets data, så ett tredje steg är data, inte kod. */
+    var nivaAntal = blad.nivaAntal || 2;
+    html += '<div class="niva-rad">';
+    for(var nv = 1; nv <= nivaAntal; nv++){
+      var nvLast = (nv >= 3) && !blad['niva' + nv + 'Upplast'];
+      html += '<button type="button" class="niva-btn' + (blad.niva === nv ? ' is-active' : '')
+        + (nvLast ? ' is-locked' : '') + '" data-niva="' + nv + '"' + (nvLast ? ' disabled' : '')
+        + '>Nivå ' + nv + (nvLast ? ' \ud83d\udd12' : '') + '</button>';
+    }
+    html += '</div>';
   }
 
   // .brak-hint borttagen (order 2026-09-23): inga hjälptexter i öva
@@ -489,13 +496,18 @@ function bygg_blad(rotEl, blad){
     }
 
     // Nivå 1 -> nivå 2 låses upp vid högst 2 fel
-    if(blad.tvaNivaer && blad.niva === 1 && (totalt - ratt) <= 2 && totalt > 0){
-      lsSet('brak2_naddNiva2_' + blad.tabId, '1');
+    /* Nästa steg låses upp vid högst två fel. Generaliserat från "nivå 1 → nivå 2" till
+       "niva → niva+1": för ett tvånivåblad blir nyckeln exakt naddNiva2 som förr, och en
+       framtida nivå 3 får sin nyckel skriven i stället för att vara permanent låst. */
+    if(blad.tvaNivaer && blad.niva < (blad.nivaAntal || 2) && (totalt - ratt) <= 2 && totalt > 0){
+      var nastaNiva = blad.niva + 1;
+      lsSet('brak2_naddNiva' + nastaNiva + '_' + blad.tabId, '1');
       var rad2 = document.createElement('div'); rad2.className = 'niva-vidare';
       var knapp2 = document.createElement('button');
       knapp2.type = 'button'; knapp2.className = 'ovn-kontroll';
-      knapp2.textContent = (ratt === totalt) ? 'Snyggt! Gå vidare till nivå 2 →' : 'Bra jobbat — du får gå vidare till nivå 2 →';
-      knapp2.addEventListener('click', function(){ byggNiva(blad.tabId, 2); });
+      // Ordalydelsen oförändrad; bara siffran följer nivån, som i nivåknapparnas etiketter.
+      knapp2.textContent = (ratt === totalt) ? 'Snyggt! Gå vidare till nivå ' + nastaNiva + ' →' : 'Bra jobbat — du får gå vidare till nivå ' + nastaNiva + ' →';
+      knapp2.addEventListener('click', function(){ byggNiva(blad.tabId, nastaNiva); });
       rad2.appendChild(knapp2);
       sam.appendChild(rad2);
     }
@@ -1059,6 +1071,7 @@ function byggSheet(sheetId, forstaBesoket, niva){
     else { blad = ld.gen(); }
     blad.niva = n;
     blad.tvaNivaer = true;
+    blad.nivaAntal = Object.keys(def.nivaer).length;   // antalet steg är DATA, inte två hårdkodade knappar
     blad.niva2Upplast = devLas() || (lsGet('brak2_naddNiva2_' + sheetId) === '1') || (n === 2);
   } else {
     if(forstaBesoket && !harBesokt(sheetId)){ blad = def.grund(); markeraBesokt(sheetId); }

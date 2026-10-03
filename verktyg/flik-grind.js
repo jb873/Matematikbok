@@ -5,8 +5,11 @@
  *     Grå är fel. Undantaget är den tomma platsen: ett blad utan uppgifter leder in i tomrum, och
  *     då syns platsen men öppnas inte (`is-kommer`). Grinden skiljer de två på INNEHÅLL, inte på
  *     flaggan: den räknar svarsrutor i flikens blad.
- *   · Nivåerna under den högsta är alltid klickbara. En duktig elev hoppar fritt uppåt.
- *   · Den HÖGSTA nivån är villkorad: öppen om och endast om nivån under är gjord.
+ *   · Nivå 1 och 2 är ALLTID klickbara. Är det bara två nivåer är alltså ingen låst — eleven
+ *     hoppar fritt. (Regeln spikad av Joachim 2026-10-03; vakten vaktade först "den högsta
+ *     nivån är villkorad", vilket med två nivåer kräver det MOTSATTA.)
+ *   · Nivå 3 och uppåt är villkorad: öppen om och endast om nivån under är gjord. Inget blad
+ *     har tre steg i dag, så det benet skriver ut en GRÄNS i stället för att tiga.
  *
  * VARFÖR GRINDEN FINNS. tonad-svep och synlig-grind vaktar att TOMMA platser inte är klickbara.
  * Ingen vaktade motsatsen — att FYLLDA flikar verkligen är klickbara. En elev som möter en grå
@@ -23,10 +26,11 @@
  *
  * NY SORTS MÄTNING: grinden SIMULERAR ELEVEN. Nivålåset läser ett sparat tillstånd, så det går
  * inte att mäta strukturellt — tre tillstånd ställs in och mäts i tur och ordning:
- *     tom lagring       → högsta nivån LÅST
- *     nivån under gjord → högsta nivån ÖPPEN
+ *     tom lagring       → nivå 1–2 öppna; nivå 3+ LÅST
+ *     nivån under gjord → nivå 3+ ÖPPEN
  *     tom igen          → LÅST igen (inte "en gång upplåst, alltid upplåst")
  * Den fäller åt BÅDA håll: låst trots att villkoret är uppfyllt, OCH öppen utan att det är det.
+ * Nivå 1–2 mäts i alla tre lägena — de ska vara öppna oavsett vad som står i lagringen.
  *
  * NYCKELN LETAS UPP, GISSAS INTE (V9). Upplåsningen läser `<prefix>_naddNiva2_<bladId>` ur
  * localStorage, och prefixet skiljer sig per motorfil. Grinden läser prefixen ur motorfilernas
@@ -44,8 +48,8 @@
  *
  * KÖR:  node verktyg/flik-grind.js [--sida <delsträng>] [--lista]
  *       --sabba flik        spärrar en fylld flik i sidan      → BEN 1 måste fälla
- *       --sabba niva-oppen  öppnar högsta nivån utan villkor   → BEN 3 måste fälla
- *       --sabba niva-last   låser högsta nivån trots villkoret → BEN 3 måste fälla
+ *       --sabba niva-last   låser nivå 2                        → BEN 2 måste fälla i tre lägen
+ *       --sabba niva-oppen  öppnar nivå 3+ utan villkor         → BEN 3 (ingen data i dag)
  * Exit 1 vid brott. */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
@@ -67,11 +71,18 @@ function nyckelPrefix(){
   fs.readdirSync(dir).filter(f => f.endsWith('.js')).forEach(f => {
     const s = fs.readFileSync(path.join(dir, f), 'utf8');
     if(/niva2Upplast/.test(s)) harLas[f] = true;
-    let m, r = /lsGet\('([A-Za-z0-9_]+)_naddNiva2_'/g;
+    /* Siffran ar INTE med i monstret. Motorn skriver nyckeln generaliserat
+       (lsSet('<prefix>_naddNiva' + nastaNiva + '_')), och ett monster med en hardkodad 2 slutade
+       da matcha - varpa pariteskontrollen nedan dog tyst. Utan siffran haller bada aven for
+       niva 3 och uppat. */
+    let m, r = /lsGet\('([A-Za-z0-9_]+)_naddNiva/g;
     while((m = r.exec(s))) (las[f] = las[f] || []).push(m[1]);
-    r = /lsSet\('([A-Za-z0-9_]+)_naddNiva2_'/g;
+    r = /lsSet\('([A-Za-z0-9_]+)_naddNiva/g;
     while((m = r.exec(s))) (skriv[f] = skriv[f] || []).push(m[1]);
   });
+  // Dedup per fil: flera trafar pa samma prefix ar normalt (las + skriv pa flera stallen).
+  Object.keys(las).forEach(function(f){ las[f] = Array.from(new Set(las[f])); });
+  Object.keys(skriv).forEach(function(f){ skriv[f] = Array.from(new Set(skriv[f])); });
   return { las, skriv, harLas };
 }
 const NYCK = nyckelPrefix();
@@ -177,7 +188,19 @@ const PROBE = `(function(){
   }
   var blad = Array.prototype.map.call(document.querySelectorAll('[id^="sheet-"]'),
     function(s){ return s.id.replace('sheet-', ''); });
-  function bygg(niva){ blad.forEach(function(id){ try { byggSheet(id, false, niva); } catch(e){} }); }
+  /* Varje tillstandsbyte bygger om bladet, vilket suddar en DOM-sabotering. Darfor applicerar
+     bygg() om den efterat - annars kan --sabba bara falla i det FORSTA laget, och ett prov som
+     bara kan falla pa ett av tre stallen bevisar inte att de tre mats. */
+  function sabotera(){
+    if(SABBA !== 'niva-last') return;
+    document.querySelectorAll('.niva-btn[data-niva="2"]').forEach(function(b){
+      b.disabled = true; b.setAttribute('aria-disabled', 'true');
+    });
+  }
+  function bygg(niva){
+    blad.forEach(function(id){ try { byggSheet(id, false, niva); } catch(e){} });
+    sabotera();
+  }
   function sattGjord(){
     blad.forEach(function(id){ PREFIX.forEach(function(p){
       try { localStorage.setItem(p + '_naddNiva2_' + id, '1'); } catch(e){} }); });
@@ -191,40 +214,52 @@ const PROBE = `(function(){
     var A = nivaknappar();
     if(A.length){
       var toppen = Math.max.apply(null, A.map(function(k){ return k.niva; }));
-      // BEN 2 - varje niva UNDER toppen ska vara klickbar.
-      A.filter(function(k){ return k.niva < toppen; }).forEach(function(k){
-        if(k.last.length) ut.brott.push('NIVA ' + k.niva + ' GRA (tom lagring): nivaer under den '
-          + 'hogsta ska alltid vara klickbara - ' + k.last.join(', '));
-      });
-      // BEN 3 - toppen, tillstandsdrivet, i tre lagen.
-      var toppA = A.filter(function(k){ return k.niva === toppen; });
-      var lastA = toppA.every(function(k){ return k.last.length > 0; });
-      if(SABBA === 'niva-oppen'){
-        document.querySelectorAll('.niva-btn[data-niva="' + toppen + '"]').forEach(function(b){
-          b.disabled = false; b.removeAttribute('aria-disabled');
-          b.classList.remove('is-locked'); b.style.opacity = '1';
-        });
-        lastA = false; ut.noter.push('SABBA: oppnade niva ' + toppen + ' utan villkor');
-      }
-      if(!lastA) ut.brott.push('NIVA ' + toppen + ' OPPEN UTAN VILLKOR: med tom lagring ska den vara last - laset lacker');
+      var fria = [1, 2];   // alltid klickbara, oavsett lagring
 
-      sattGjord(); bygg(1);
-      var B = nivaknappar().filter(function(k){ return k.niva === toppen; });
-      var oppenB = B.length > 0 && B.every(function(k){ return k.last.length === 0; });
-      if(SABBA === 'niva-last'){
-        document.querySelectorAll('.niva-btn[data-niva="' + toppen + '"]').forEach(function(b){
-          b.disabled = true; b.setAttribute('aria-disabled', 'true');
-        });
-        oppenB = false; ut.noter.push('SABBA: laste niva ' + toppen + ' trots uppfyllt villkor');
-        B = nivaknappar().filter(function(k){ return k.niva === toppen; });   // skalet ska beskriva det SABOTERADE laget
+      /* BEN 2 - niva 1 och 2 ska vara oppna i ALLA TRE lagringslagen. Darfor mats de i varje
+         lage, inte bara i det forsta: ett las som slar till forst nar nagot sparats hade annars
+         sluppit igenom. */
+      function fria_oppna(lage){
+        nivaknappar().filter(function(k){ return fria.indexOf(k.niva) >= 0 && k.last.length; })
+          .forEach(function(k){
+            ut.brott.push('NIVA ' + k.niva + ' GRA (' + lage + '): niva 1 och 2 ar alltid '
+              + 'klickbara - ar det bara tva nivaer ar ingen last - ' + k.last.join(', '));
+          });
       }
-      if(!oppenB) ut.brott.push('NIVA ' + toppen + ' LAST TROTS VILLKORET: nivan under ar gjord men knappen ar '
-        + (B.length ? B[0].last.join(', ') : 'borta'));
+      if(SABBA === 'niva-last'){ sabotera(); ut.noter.push('SABBA: laste niva 2 (ateranvands efter varje ombyggnad)'); }
+      fria_oppna('tom lagring');
 
-      tom(); bygg(1);
-      var C = nivaknappar().filter(function(k){ return k.niva === toppen; });
-      if(!(C.length && C.every(function(k){ return k.last.length > 0; })))
-        ut.brott.push('NIVA ' + toppen + ' FORBLEV OPPEN: lagringen tomd, men laset slar inte till igen');
+      /* BEN 3 - niva 3 och uppat ar villkorad, och mats tillstandsdrivet. Finns ingen sadan niva
+         har benet inget att mata, och det ar en GRANS som skrivs ut - inte ett tyst godkannande
+         (V11/V14). Far ett blad ett tredje steg borjar benet mata av sig sjalvt. */
+      if(toppen < 3){
+        ut.nivaGrans = 'ingen nivarad har tre steg an (toppen ar ' + toppen
+          + ') - det tillstandsdrivna benet har inget att mata har';
+        sattGjord(); bygg(1); fria_oppna('nivan under gjord');
+        tom(); bygg(1); fria_oppna('tom igen');
+      } else {
+        var toppA = nivaknappar().filter(function(k){ return k.niva === toppen; });
+        var lastA = toppA.length > 0 && toppA.every(function(k){ return k.last.length > 0; });
+        if(SABBA === 'niva-oppen'){
+          document.querySelectorAll('.niva-btn[data-niva="' + toppen + '"]').forEach(function(b){
+            b.disabled = false; b.removeAttribute('aria-disabled');
+            b.classList.remove('is-locked'); b.style.opacity = '1';
+          });
+          lastA = false; ut.noter.push('SABBA: oppnade niva ' + toppen + ' utan villkor');
+        }
+        if(!lastA) ut.brott.push('NIVA ' + toppen + ' OPPEN UTAN VILLKOR: med tom lagring ska den vara last - laset lacker');
+
+        sattGjord(); bygg(1); fria_oppna('nivan under gjord');
+        var B = nivaknappar().filter(function(k){ return k.niva === toppen; });
+        var oppenB = B.length > 0 && B.every(function(k){ return k.last.length === 0; });
+        if(!oppenB) ut.brott.push('NIVA ' + toppen + ' LAST TROTS VILLKORET: nivan under ar gjord men knappen ar '
+          + (B.length ? B[0].last.join(', ') : 'borta'));
+
+        tom(); bygg(1); fria_oppna('tom igen');
+        var C = nivaknappar().filter(function(k){ return k.niva === toppen; });
+        if(!(C.length && C.every(function(k){ return k.last.length > 0; })))
+          ut.brott.push('NIVA ' + toppen + ' FORBLEV OPPEN: lagringen tomd, men laset slar inte till igen');
+      }
 
       ut.nivaer.push({ toppen: toppen, antal: A.length, blad: blad.length });
     }
