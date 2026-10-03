@@ -9,7 +9,11 @@
 
    KONTROLLERAS MEKANISKT
      KEYPAD      en yta med rutor har en keypad monterad
-     TECKEN      en uttrycksruta säger vilka tecken (data-kp) och bokstäver (data-vars) som gäller
+     TECKEN      de tecken och bokstäver en uttrycksrutas facit KRÄVER är tända på keypaden.
+                 Benet prövar bara att det nödvändiga är tänt — att inget är SLÄCKT vaktas av
+                 verktyg/keypad-grind.js, som kräver att allt är tänt (keypaden är alltid helt
+                 upplåst). Det omvända benet, "räknetecken tända i talrutan", vaktade den
+                 avskaffade gråningsregeln och togs bort 2026-10-03.
      AUTOSPACE   "3+4" skrivet tecken för tecken blir "3 + 4" i en uttrycksruta
      GROW        rutan växer med innehållet
      BRÅK        bråkknappen finns när en ruta ska kunna bära bråk, och bygger i den
@@ -38,9 +42,18 @@ const MP = require('./matpunkt').skapa('yt-kontrakt.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
+// --lasupp: låser upp keypaden i sidan före mätningen. För negativ verifiering av att det
+// borttagna gråningsbenet verkligen är borta: med allt tänt ska kontraktet vara GRÖNT, precis
+// som keypad-grinden. Samma sorts krok som keypad-grind --lasupp och slump-fuzz --sabba.
+const LASUPP = args.includes('--lasupp');
+// --las: omvändningen. Låser ALLA tecken i sidan, så att TECKEN-benet måste fälla. Finns för
+// att kunna visa att kontraktets övriga ben fortfarande fäller efter att gråningsbenet togs
+// bort — ett prov som bara visar grönt visar inte att grinden kan bli röd.
+const LAS = args.includes('--las');
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
 const PROBE = `(function(){
+  var LASUPP = ${LASUPP}, LAS = ${LAS};
   var ut = { onerr: window.__onerr || null, ytor: [] };
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles: true })); }
   function synlig(el){ return !!el.offsetParent; }
@@ -55,7 +68,8 @@ const PROBE = `(function(){
     return i.matches('[data-uttryck],[data-forenkla],[data-omkrets],[data-oppet],[data-sida],[data-vars],[data-mellan],'
                    + '.ak8-mel,.ak8-exprtxt,.ak8-in-oms,.ak8-pexp,.ak8-gpe,.seg-text');
   }
-  function talruta(i){ return !uttrycksruta(i) && !i.matches('[data-nokeypad],[data-text]'); }
+  // (Hjälparen talruta togs bort 2026-10-03 med det ben som vaktade den avskaffade
+  //  gråningsregeln — den hade ingen annan användare. uttrycksruta används av TECKEN-benet.)
 
   // Den keypad eleven ser: den som ritas (höjd > 0) och inte är undanställd. En sida kan ha flera
   // (widget-keypads inuti uppställningar) — den första i DOM-ordning är inte nödvändigtvis rätt.
@@ -91,6 +105,11 @@ const PROBE = `(function(){
     }
     function lage(inp){
       inp.focus(); ev(inp, 'focusin');
+      // Upplåsningen MÅSTE ske efter fokus: bindKeypad gråar om vid varje focusin, så en
+      // upplåsning före detta anrop hade varit utsuddad när tecknen lästes. Kontrollförsöket
+      // (benet tillfälligt återinfört) avslöjade det genom att inte fälla.
+      if(LAS){ var kL = synligKeypad(); if(kL) Array.prototype.forEach.call(kL.querySelectorAll('.kp-key'), function(b){ b.classList.add('kp-inactive'); b.setAttribute('aria-disabled', 'true'); }); }
+      if(LASUPP){ var k0 = synligKeypad(); if(k0) Array.prototype.forEach.call(k0.querySelectorAll('.kp-key'), function(b){ b.classList.remove('kp-inactive'); b.removeAttribute('aria-disabled'); b.disabled = false; }); }
       return { plus: tand('+'), minus: tand('\u2212'), gang: tand('\u00b7'), del: tand('/') };
     }
     // TECKEN — VARJE uttrycksruta, inte bara ytans första. En ruta längre ned kan bära ett annat
@@ -146,11 +165,15 @@ const PROBE = `(function(){
         p0.value = fore0; ev(p0, 'input');
       }
     }
-    var talrutor = alla.filter(talruta);
-    if(talrutor.length && kp){
-      var T = lage(talrutor[0]);
-      if(T.plus && T.gang && T.del) y.brott.push('TECKEN: räknetecken tända i talrutan ' + adress(talrutor[0]));
-    }
+    /* HÄR LÅG BENET "räknetecken tända i talrutan", borttaget 2026-10-03.
+       Det vaktade regeln "bara det rättaren accepterar är tänt", som är AVSKAFFAD: keypaden är
+       numera alltid helt upplåst (doc/KONVENTIONER.md §3), och att välja räknesätt är elevens
+       ansvar. Benet var inte bara dött utan FIENTLIGT — mätt i sidan: med keypaden låst som i
+       dag föll det inte, men med keypaden upplåst som den nya regeln kräver blev villkoret sant
+       på en talruta med 43 rutor. Alltså hade varje sida blivit röd i samma stund regeln
+       följdes, och ingen sida kunnat vara grön hos både det här kontraktet och keypad-grinden.
+       Keypadens tändning vaktas nu av verktyg/keypad-grind.js, som kräver det MOTSATTA: att
+       varje tecken är tänt. Återinför inte det här benet. */
 
     // AUTOSPACE + GROW på den första uttrycksrutan
     var p = uttr[0];
