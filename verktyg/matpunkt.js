@@ -186,10 +186,18 @@ function skapa(verktyg){
         }
       }
 
-      // En etikett som inte längre behövs döljer nästa riktiga nolla, precis som ett dött skäl.
+      /* En etikett som inte längre behövs döljer nästa riktiga nolla, precis som ett dött skäl.
+         Men ETIKETT-listan är DELAD mellan grindarna, och en enda körning kan inte bevisa att en
+         etikett är död: att DEN HÄR grinden mäter något på sidan säger inget om de andra. Mätt
+         2026-10-03: flik-grind ger 1 mätpunkt på tal-och-berakna-ova.html (5 svarsrutor, inga
+         flikar) medan nians nolla står kvar i tre andra grindar — etiketten blev ett brott fast
+         den behövs. Ett brott som är fel lär oss att strunta i röda rader, vilket är värre än
+         inget brott. Beskedet står därför kvar med sin begränsning utskriven, men räknas inte.
+         Vill man göra det till ett brott måste etiketten bära vilka grindar den gäller för, eller
+         mätningen samlas över alla grindar i en körning. De verkliga nollorna är brott som förr. */
       ETIKETT.filter(e => forsokta.indexOf(e.sida) >= 0 && (matt[e.sida] || 0) > 0).forEach(function(e){
-        brott++;
-        console.log('  ✗ etiketten för ' + e.sida + ' behövs inte längre — sidan ger ' + matt[e.sida] + ' mätpunkter');
+        console.log('  · etiketten för ' + e.sida + ' behövs inte för DEN HÄR grinden — sidan ger '
+          + matt[e.sida] + ' mätpunkter här. Delad lista: pröva de andra grindarna före du tar bort den.');
       });
       return brott;
     }
