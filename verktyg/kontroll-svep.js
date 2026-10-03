@@ -42,7 +42,7 @@ const PROBE = `(function(){
   }
 
   var ut = { onerr: null, blad: [] };
-  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn'));
+  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   (nav.length ? nav : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
     var mount = Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]

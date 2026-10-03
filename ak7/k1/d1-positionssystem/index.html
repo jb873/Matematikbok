@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="../../../js/motor/blad/ak8-blad-ui.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
 <style>
 /* Sidspecifika + isärdrivna regler (kvar efter css-flytten 2026-09-19). Det delade ligger i ak7-delkapitel-kanon.css + ak7-k1blad-kanon.css, länkade ovan. */
 :root{
@@ -185,56 +186,70 @@
 </header>
 
 <!-- FLIKRAD (val-rad) -->
-<div class="tab-row" id="tab-row">
+<!-- GAMLA FLIKRADEN: gömd, men KVAR i DOM:en. blad-k1-d1.js läser #tab-row och använder
+     resultatet direkt — tas den bort kastar motorfilen vid laddning och sidan blir tom.
+     Navigeringen sker nu i navram.js:s vänsterspalt. -->
+<div class="tab-row" id="tab-row" hidden aria-hidden="true">
   <button class="tab-btn" data-tab="forelasningar">Föreläsning</button>
   <button class="tab-btn is-active" data-tab="ova">Öva</button>
   <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
   <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
-<!-- PANEL: FÖRELÄSNING -->
-<section class="tab-panel" data-panel="forelasningar">
-  <div class="lecture-list" id="lecture-list"></div>
-  <div class="lecture-player" id="lecture-player">
-    <div class="lecture-frame" id="lecture-frame"></div>
-    <a class="lecture-yt-link" id="lecture-yt-link" href="#" target="_blank" rel="noopener">
-      Filmen startar inte? Öppna den på YouTube ↗
-    </a>
+<!-- NAVIGATIONSRAMEN ritas hit (lagerväxlare + två spalter) -->
+<div id="navram"></div>
+
+<!-- SCENER: sidans VERKLIGA innehåll, oförändrat, flyttat in i ramens arbetsyta.
+     Alla id:n är kvar precis som motorn förväntar dem. navram visar en scen i taget. -->
+<div id="scener" hidden>
+
+  <!-- UPPGIFTER: de fyra bladen. Monteringspunkterna oförändrade. -->
+  <div class="nr-scen" id="scen-uppgifter">
+    <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad" hidden></div>
+    <div id="blad-tiosystemet" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-tiosystemet"></div></div>
+    <div id="blad-storlek" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-storlek"></div></div>
+    <div id="blad-positionsrakning" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-positionsrakning"></div></div>
+    <div id="blad-egenskaper" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-egenskaper"></div></div>
   </div>
-</section>
 
-<!-- PANEL: ÖVA (default) — blad-nav + ett helt arbetsblad i taget (författad ordning) -->
-<section class="tab-panel is-active" data-panel="ova">
-  <!-- Blad-navigering: delkapitlets fyra blad, numrerade i lektionsordning. Skalet fyller raden. -->
-  <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
-
-  <!-- Blad-mounts (utan A/B, utan stegare): skalet renderar hela arbetsbladet hit; blad-nav visar ett i taget -->
-  <div id="blad-tiosystemet" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-tiosystemet"></div></div>
-  <div id="blad-storlek" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-storlek"></div></div>
-  <div id="blad-positionsrakning" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-positionsrakning"></div></div>
-  <div id="blad-egenskaper" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-egenskaper"></div></div>
-</section>
-
-<!-- PANEL: FÄRDIGHETSTRÄNING -->
-<section class="tab-panel" data-panel="fardighet">
-  <div class="fard-layout">
-    <!-- 15 färdigheter i 6 kunskapsområden. Klick → drillen laddas i iframen bredvid. -->
-    <div class="fard-lista" id="fardighet-lista" role="tablist" aria-label="Färdigheter"></div>
+  <!-- METODTRÄNING: EN träning, delad. Drillen laddas i ramens iframe, precis som förr.
+       Ingen kopia byggs här — det vore A1-överträdelsen. -->
+  <div class="nr-scen" id="scen-metod">
     <div class="fard-scen" id="fard-scen">
-      <div class="fard-tom" id="fard-tom"><p>Välj en färdighet till vänster</p></div>
+      <div class="fard-tom" id="fard-tom"><p>Välj en metod i listan till vänster</p></div>
       <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
     </div>
+    <div class="fard-lista" id="fardighet-lista" hidden aria-hidden="true"></div>
   </div>
-</section>
 
-<!-- PANEL: TEST -->
-<section class="tab-panel" data-panel="test">
-  <div class="test-note">
-    <h3>Delens test byggs</h3>
-    <p>Det här delkapitlet har ännu inget eget prov. Testa dig via kapitlets provbyggare, eller träna riktat i Färdighetsträningen så länge.</p>
-    <a href="../../../ak7-k1-ram.html?view=test-config&del=d1">Till kapitlets provbyggare →</a>
+  <!-- FÖRELÄSNING: video-registret. Spelaren flyttas av motorn in under det klickade kortet,
+       så korten måste vara synliga — därför ligger listan kvar i arbetsytan. -->
+  <div class="nr-scen" id="scen-forelasning">
+    <div class="lecture-list" id="lecture-list"></div>
+    <div class="lecture-player" id="lecture-player">
+      <div class="lecture-frame" id="lecture-frame"></div>
+      <a class="lecture-yt-link" id="lecture-yt-link" href="#" target="_blank" rel="noopener">
+        Filmen startar inte? Öppna den på YouTube ↗
+      </a>
+    </div>
   </div>
-</section>
+
+  <!-- MINA KUNSKAPER: Kunskapsläget är den BEFINTLIGA kartan, inbäddad. De tre andra byggs
+       i egna spår; här står bara en rad om vad de ska bli. -->
+  <div class="nr-mview is-on" id="mv-kunskapslage">
+    <iframe class="nr-karta-frame" id="karta-frame" title="Kunskapsläge" loading="lazy"
+            src="../kunskapslage/index.html?embed=1"></iframe>
+  </div>
+  <div class="nr-mview" id="mv-sjalvskattning">
+    <div class="nr-ph">Självskattning — Kan / Osäker / Kan ej, grupperat bredvid bevisen. (vy att bygga)</div>
+  </div>
+  <div class="nr-mview" id="mv-test">
+    <div class="nr-ph">Test — korta, varierade pass som täcker alla delar. (vy att bygga)</div>
+  </div>
+  <div class="nr-mview" id="mv-dagens">
+    <div class="nr-ph">Dagens träning — systemet väljer vad du bör plocka fram idag. (det adaptiva navet — eget spår)</div>
+  </div>
+</div>
 
 <footer>
   <div>Digitalt läromedel i matematik</div>
@@ -250,26 +265,78 @@
 <script src="../../../js/data/k1-taxonomi.js"></script>
 <script src="../../../js/data/k1-fardiga-test.js"></script>
 
-<!-- SKAL: val-rad + utbudslista (utbudslistan läses ur taxonomi-noderna) -->
+<!-- NAVIGATIONSRAMEN: delad nivårad + ramens motor (config-driven, inget hårdkodat i sidan) -->
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+
+<!-- SKAL: navigationsramen. Innehållet är sidans eget; ramen är den delade navram.js. -->
 <script>
 (function(){
-  var DEL = {
-    // ÖVA = dagens fyra arbetsblad i LEKTIONSORDNING. Öppna → hela bladet i författad ordning
-    // (interleaving bevaras — ingen omgruppering, inga A/B, ingen avsnitts-stegare).
-    ova:[
-      {titel:'Tiosystemet',                 desc:'Siffrans värde, bygga tal, utvecklad form och decimaltal.',          blad:'tiosystemet',      data:'TIO_A'},
-      {titel:'Storlek och ordning',         desc:'Tallinjer, tiohopp, tiondelar, talföljder och storleksordning.',     blad:'storlek',          data:'STORLEK_A'},
-      {titel:'Räkna i positionssystemet',   desc:'Huvudräkning med positionsvärde, intervall och mittemellan.',        blad:'positionsrakning', data:'POSRAK_A'},
-      {titel:'Tals egenskaper',             desc:'Jämnt/udda, delbarhet, faktorisering och primtal.',                  blad:'egenskaper',       data:'EGEN_A'}
-    ],
-    // FÄRDIGHETSTRÄNING byggs nu ur taxonomin (window.K1_TAXONOMI, utbudslista 'd1') i stället
-    // för hårdkodat – se fardighetUrTaxonomi() nedan. En källa, alla vyer.
-  };
   var RAM = '../../../ak7-k1-ram.html';
 
-  // Bygg Färdighetsträningens grupper/rader ur taxonomi-noderna (window.K1_TAXONOMI).
-  // Lövnoder med visning för denna utbudslista grupperas på visning.grupp (rubrik+ordning);
-  // varje rad = titel, förmåge-etikett, koId (=parent) + formagaKey/niva för deeplinken.
+  /* ── UPPGIFTER: delkapitlets fyra blad. Varje blad är en områdesgrupp, och bladets
+     A/B-stenciler är dess varianter — de fanns redan i motorns data (TIO_VARIANTER,
+     STORLEK_A/B, POSRAK_VARIANTER, EGEN_VARIANTER) men hade ingen knapp att nås med.
+     Nu hängs de i dragspelet. Ingen uppgift är ny; inget innehåll är omskrivet. ── */
+  var BLAD = [
+    { titel:'Tiosystemet',               blad:'tiosystemet',      reg:'TIO_VARIANTER' },
+    { titel:'Storlek och ordning',       blad:'storlek',          reg:'STORLEK_VARIANTER' },
+    { titel:'Räkna i positionssystemet', blad:'positionsrakning', reg:'POSRAK_VARIANTER' },
+    { titel:'Tals egenskaper',           blad:'egenskaper',       reg:'EGEN_VARIANTER' }
+  ];
+  /* Stencil-registret för Storlek finns som två separata objekt i motorn, inte som ett register.
+     Det byggs här av de befintliga objekten — en referens, ingen kopia av innehållet. */
+  if(!window.STORLEK_VARIANTER && window.STORLEK_A){
+    window.STORLEK_VARIANTER = { A: window.STORLEK_A, B: window.STORLEK_B };
+  }
+
+  var scener = {
+    uppgifter:   document.getElementById('scen-uppgifter'),
+    metod:       document.getElementById('scen-metod'),
+    forelasning: document.getElementById('scen-forelasning')
+  };
+  function visaScen(namn){
+    Object.keys(scener).forEach(function(k){
+      if(scener[k]) scener[k].classList.toggle('is-on', k === namn);
+    });
+  }
+  function visaBlad(bladId){
+    BLAD.forEach(function(b){
+      var m = document.getElementById('blad-' + b.blad);
+      if(m) m.hidden = (b.blad !== bladId);
+    });
+  }
+
+  /* Ett blad renderas med motorns egen bygg_blad. onResultat neutraliseras som förr — den
+     gamla stencil-upplåsningen pekar på knappar som inte finns, och den hör inte hit. */
+  function byggVariant(b, nyckel) {
+    var reg = window[b.reg] || {};
+    var data = reg[nyckel];
+    var sheet = document.getElementById('sheet-' + b.blad);
+    if(data && sheet && typeof window.bygg_blad === 'function'){
+      window.bygg_blad(sheet, Object.assign({}, data, {
+        stegvis:false, titel:(data.titel || b.titel), onResultat:function(){}
+      }));
+    }
+    visaScen('uppgifter');
+    visaBlad(b.blad);
+  }
+
+  var uppgifterGrupper = BLAD.map(function(b){
+    var reg = window[b.reg] || {};
+    var nycklar = Object.keys(reg);
+    return {
+      rubrik: b.titel,
+      varianter: nycklar.map(function(k){
+        // Ett blad med flera stenciler visar dem som varianter; ett med en visar bladets namn.
+        return { titel: (nycklar.length > 1 ? 'Stencil ' + k : b.titel),
+                 valj: function(){ byggVariant(b, k); } };
+      })
+    };
+  });
+
+  /* ── METODTRÄNING: EN träning, delad. Listan kommer ur taxonomin (en källa, alla vyer) och
+     klicket laddar drillen i samma iframe som förr. Ingen kopia byggs under kartan. ── */
   function fardighetUrTaxonomi(utbudslistaId){
     var t = window.K1_TAXONOMI, noder = (t && t.noder) || [];
     var rader = noder.filter(function(n){
@@ -292,65 +359,67 @@
         }) };
       });
   }
-
-  // ── ÖVA: blad-nav (numrerad rad) + ett helt arbetsblad i taget ──
-  // Motorns egen bygg_blad ritar hela bladet (stegvis:false = ingen avsnitts-stegare).
-  // Renderingen sker MEDAN #sheet-X sitter kvar i dokumentet (getElementById hittar bara
-  // element i trädet) — mounts flyttas inte, blad-nav visar/döljer dem. onResultat
-  // neutraliseras så A/B-upplåsningen (som hör till Färdighetsträning) inte triggas.
-  var navEl = document.getElementById('blad-nav');
-  if(navEl){
-    var bladMounts = [], bladKnappar = [];
-    function visaBlad(i){
-      DEL.ova.forEach(function(p, j){
-        if(bladMounts[j]) bladMounts[j].hidden = (j !== i);
-        if(bladKnappar[j]){ var on = (j===i); bladKnappar[j].classList.toggle('is-active', on); bladKnappar[j].setAttribute('aria-selected', on ? 'true' : 'false'); }
-      });
-    }
-    DEL.ova.forEach(function(p, i){
-      var data = window[p.data], sheet = document.getElementById('sheet-'+p.blad);
-      if(data && sheet && typeof window.bygg_blad === 'function'){
-        window.bygg_blad(sheet, Object.assign({}, data, {stegvis:false, titel:p.titel, onResultat:function(){}}));
-      }
-      bladMounts[i] = document.getElementById('blad-'+p.blad);
-      var btn = document.createElement('button'); btn.type='button'; btn.className='blad-nav-btn';
-      btn.setAttribute('role','tab'); btn.title = p.titel;
-      btn.innerHTML = '<span class="blad-nav-nr">'+(i+1)+'</span>'+p.titel;
-      btn.onclick = function(){ visaBlad(i); };
-      navEl.appendChild(btn); bladKnappar[i] = btn;
-    });
-    visaBlad(0);   // starta alltid på blad 1
-  }
-
-  // ── FÄRDIGHETSTRÄNING: grupperad lista (6 KO), klick laddar drillen i iframen (embed) ──
-  // Metod-vyns mekanik återanvänds oförändrad via ram-B; nivån klättrar men sjunker aldrig.
-  var fardEl = document.getElementById('fardighet-lista');
   var frame = document.getElementById('fard-frame');
   var scen = document.getElementById('fard-scen');
-  if(fardEl){
-    var fardKnappar = [];
-    function oppnaFardighet(btn, p){
-      fardKnappar.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected','false'); });
-      btn.classList.add('is-active'); btn.setAttribute('aria-selected','true');
-      var fKey = p.formagaKey || p.formaga;
-      var url = RAM+'?ko='+encodeURIComponent(p.ko)+'&formaga='+encodeURIComponent(fKey)+'&embed=1';
-      if(p.niva && p.niva < 3) url += '&maxniva='+p.niva;   // enkel-/tvånivå-färdighet: rätt antal stegsegment
-      if(frame) frame.src = url;
-      if(scen) scen.classList.add('har-drill');            // visa iframen I rutan, dölj platshållaren (CSS)
-    }
-    fardighetUrTaxonomi('d1').forEach(function(g){
-      var gr=document.createElement('div'); gr.className='fard-grupp';
-      var rub=document.createElement('div'); rub.className='fard-ko'; rub.textContent=g.ko; gr.appendChild(rub);
-      g.drills.forEach(function(p){
-        var b=document.createElement('button'); b.type='button'; b.className='fard-skill'; b.setAttribute('role','tab');
-        if(p.kommer){ b.classList.add('is-kommer'); b.disabled=true; b.setAttribute('aria-disabled','true'); }   // visning.kommer: platsen syns, men leder inte in i tomrum
-        b.innerHTML='<span class="fard-skill-titel">'+p.titel+'</span>'
-          +'<span class="fard-skill-formaga">'+p.formaga+'</span>';
-        b.onclick=function(){ oppnaFardighet(b, p); };
-        gr.appendChild(b); fardKnappar.push(b);
-      });
-      fardEl.appendChild(gr);
+  function oppnaFardighet(p){
+    var fKey = p.formagaKey || p.formaga;
+    var url = RAM + '?ko=' + encodeURIComponent(p.ko) + '&formaga=' + encodeURIComponent(fKey) + '&embed=1';
+    if(p.niva && p.niva < 3) url += '&maxniva=' + p.niva;
+    if(frame) frame.src = url;
+    if(scen) scen.classList.add('har-drill');
+    visaScen('metod');
+  }
+  var metodGrupper = fardighetUrTaxonomi('d1').map(function(g){
+    return { rubrik: g.ko, varianter: g.drills.map(function(p){
+      return { titel: p.titel, etikett: p.formaga, kommer: p.kommer,
+               valj: function(){ oppnaFardighet(p); } };
+    }) };
+  });
+
+  /* ── FÖRELÄSNING: video-registret. Klicket går till motorns EGET kort, så spelarlogiken
+     (YouTube-inbäddningen, origin-hanteringen, stäng-vid-andra-klicket) återanvänds oförändrad.
+     Att skriva om embed-koden här vore en kopia. ── */
+  var filmer = (window.FORELASNINGAR || []).map(function(f, i){
+    return { titel: f.titel, etikett: f.tag, valj: function(){
+      visaScen('forelasning');
+      var lista = document.getElementById('lecture-list');
+      var kort = lista ? lista.children[i] : null;
+      if(kort) kort.click();
+    } };
+  });
+
+  var arbeta = [
+    { rubrik:'Uppgifter',    grupper: uppgifterGrupper },
+    { rubrik:'Metodträning', grupper: metodGrupper },
+    { rubrik:'Föreläsning',  grupper: [{ rubrik:'Filmer', varianter: filmer }] }
+  ];
+
+  var mina = [
+    { titel:'Kunskapsläge',    sub:'var står jag — färgad av bevis', vy:'mv-kunskapslage' },
+    { titel:'Självskattning',  sub:'din egen bild mot bevisen',      vy:'mv-sjalvskattning' },
+    { titel:'Test',            sub:'korta, varierade — framplockning', vy:'mv-test' },
+    { titel:'Dagens träning',  sub:'vad du bör plocka fram idag',    vy:'mv-dagens' }
+  ];
+
+  /* NIVÅRADEN läser VERKLIGT tillstånd via den delade NivaRad-modulen. d1 har ännu bara ett steg
+     i sin data, så raden ritas inte — mekanismen är på plats och raden dyker upp av sig själv när
+     bladens data får fler steg. Ingen nivå hittas på. */
+  var ram = window.NavRam.montera({
+    vard: document.getElementById('navram'),
+    arbeta: arbeta,
+    mina: mina,
+    niva: { prefix:'k1d1', bladId:'d1', antal:1, aktuell:1, valj:function(){} }
+  });
+
+  // Scenerna flyttas in i ramens arbetsytor. Elementen behåller sina id:n — motorn hittar dem.
+  if(ram){
+    ['scen-uppgifter','scen-metod','scen-forelasning'].forEach(function(id){
+      var e = document.getElementById(id); if(e) ram.ytaArbeta.appendChild(e);
     });
+    ['mv-kunskapslage','mv-sjalvskattning','mv-test','mv-dagens'].forEach(function(id){
+      var e = document.getElementById(id); if(e) ram.ytaMina.appendChild(e);
+    });
+    var hall = document.getElementById('scener'); if(hall) hall.remove();
   }
 })();
 </script>

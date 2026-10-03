@@ -103,7 +103,7 @@ const PROBE = `(function(){
     });
   }
 
-  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn'));
+  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   if(nav.length){
     nav.forEach(function(k){
       if(k.disabled) return;

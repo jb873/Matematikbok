@@ -328,7 +328,7 @@ const PROBE = `(function(){
      BÅDA nivåerna hamnar proben i en annan vy när underflikarna ligger i samma svep.
      Rätt lösning är en NÄSTLAD genomgång: klicka flik, läs om underflikarna, klicka var och en.
      Det är en egen ändring, inte en selektor-rad. Kontroll-svepet mäter plugg-sidorna redan. */
-  var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn, .blad-nav-btn'));
+  var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn, .blad-nav-btn, .nr-rad'));
   if(nav.length){
     nav.forEach(function(k){
       if(k.disabled) return;                      // tom plats — inget innehåll att mäta

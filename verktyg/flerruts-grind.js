@@ -58,7 +58,7 @@ const PROBE_D5 = `(function(){
     return brutna;
   }
   function bladen(){
-    var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn'));
+    var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn, .nr-rad'));
     var B = ['ProbBlad', 'ProbBlad2', 'ProbBlad3', 'ProbBlad4', 'ProbBlad5']
               .map(function(n){ return window[n] && window[n].BLAD; }).filter(Boolean);
     return nav.map(function(k, i){ return { knapp: k, data: B[i] }; }).filter(function(x){ return !!x.data; });
@@ -94,7 +94,7 @@ const PROBE8 = `(function(){
   var ut = { onerr: window.__onerr, blad: [] };
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
   function tal(s){ return (String(s).match(/-?\\d+(?:,\\d+)?/g) || []); }
-  var knappar = Array.from(document.querySelectorAll('.blad-nav-btn'));
+  var knappar = Array.from(document.querySelectorAll('.blad-nav-btn, .nr-rad'));
 
   // ── KEDJERADER (fri och fast): samma ledruta, .ak8-cell > .ak8-expr ──
   function skrivLed(cell, txt){

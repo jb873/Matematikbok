@@ -1,0 +1,129 @@
+/* navram.css — NAVIGATIONSRAMEN (order 2026-10-03, pilot på ak7/k1/d1).
+ *
+ * Formspråket är portat ur den klickbara prototypen (matematik-navigation-prototyp.html) och
+ * använder sidornas EGNA tokens — inga nya färger, inga nya typsnitt. Prototypens --muted och
+ * --gron finns inte i boken; de är mappade till --ink-faint och --green.
+ *
+ * EN fil, delad. Ligger inte inline i sidan: sjuans sidor bar förr 16 000 rader inline-CSS som
+ * drev isär, och den skulden ska inte växa med en ny yta. Propagering = länka filen.
+ *
+ * Höjden är det som styr formen. En Chromebook har ont om vertikal plats, och därför är regeln
+ * EN huvudrubrik öppen och EN grupp öppen — inte en stilistisk smak utan det som gör att
+ * vänsterspalten aldrig växer ur skärmen.
+ */
+
+/* ── LAGERVÄXLAREN (alltid närvarande; den är också tillbaka-vägen) ── */
+.nr-lager{
+  display:flex;justify-content:center;
+  background:var(--paper-dk);border-bottom:1px solid var(--paper-dk);
+}
+.nr-lager button{
+  font-family:var(--serif);font-size:18px;font-weight:500;
+  padding:11px 32px;border:none;background:none;color:var(--ink-faint);
+  cursor:pointer;border-bottom:3px solid transparent;
+}
+.nr-lager button:hover{color:var(--ink);}
+.nr-lager button.is-on{color:var(--ink);background:var(--paper);border-bottom-color:var(--gold);}
+.nr-lager .nr-mini{
+  display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.03em;
+  color:var(--ink-faint);font-weight:400;margin-top:1px;text-transform:none;
+}
+.nr-lager button.is-on .nr-mini{color:var(--ink-soft);}
+
+/* ── TVÅ SPALTER: navigering vänster, ren arbetsyta höger ── */
+.nr-wrap{display:flex;gap:24px;max-width:1180px;margin:0 auto;padding:20px 26px 42px;}
+.nr-spalt{width:300px;flex-shrink:0;}
+.nr-yta{flex:1;min-width:0;}
+.nr-panel{display:none;}
+.nr-panel.is-on{display:flex;gap:24px;width:100%;}
+
+/* ── HUVUDRUBRIK (Uppgifter · Metodträning · Föreläsning) ── */
+.nr-huvud{margin-bottom:9px;}
+.nr-huvud-h{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 16px;border-radius:9px;cursor:pointer;
+  font-family:var(--cinzel);font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  background:var(--paper-lt);color:var(--ink-soft);border:1px solid var(--paper-dk);
+  transition:background .12s,color .12s,border-color .12s;
+}
+.nr-huvud-h:hover{border-color:var(--gold-lt);}
+.nr-huvud.is-open .nr-huvud-h{background:var(--navy);color:var(--paper);border-color:var(--navy);}
+.nr-huvud-h .nr-chev{font-size:12px;opacity:.7;}
+.nr-huvud-body{display:none;padding:8px 0 2px 12px;border-left:2px solid var(--paper-dk);margin:6px 0 0 10px;}
+.nr-huvud.is-open .nr-huvud-body{display:block;}
+
+/* ── OMRÅDESGRUPP (dragspel, en öppen i taget) ── */
+.nr-grp{margin-bottom:5px;border:1px solid var(--paper-dk);border-radius:7px;overflow:hidden;background:var(--paper-lt);}
+.nr-grp-h{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 13px;cursor:pointer;
+  font-family:var(--cinzel);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);
+}
+.nr-grp.is-open .nr-grp-h{background:var(--paper-dk);color:var(--ink);}
+.nr-grp-h .nr-chev{color:var(--ink-faint);font-size:11px;}
+.nr-grp-body{display:none;padding:3px 7px 7px;}
+.nr-grp.is-open .nr-grp-body{display:block;}
+
+/* ── VARIANT (klick laddar den i arbetsytan) ── */
+.nr-rad{
+  display:block;width:100%;text-align:left;
+  background:#fff;border:1px solid var(--paper-dk);border-radius:6px;
+  padding:8px 11px;margin:4px 0;cursor:pointer;font:inherit;color:inherit;
+}
+.nr-rad:hover{border-color:var(--gold-lt);}
+.nr-rad.is-on{border-color:var(--blue);box-shadow:0 0 0 2px rgba(27,75,138,.12);}
+.nr-rad .nr-t{font-family:var(--serif);font-size:15px;line-height:1.15;}
+.nr-rad .nr-fm{
+  font-family:var(--cinzel);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-faint);margin-top:2px;
+}
+/* Tom plats: syns, men leder inte in i tomrum (samma regel som is-kommer i flikarna) */
+.nr-rad.is-kommer{opacity:.45;cursor:not-allowed;}
+.nr-rad.is-kommer:hover{border-color:var(--paper-dk);}
+
+/* ── NIVÅRADEN (ovanför arbetsytan; max fyra, det fjärde heter Fördjupning) ── */
+.niva-rad{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.niva-btn{
+  font-family:var(--cinzel);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:7px 16px;border-radius:20px;
+  border:1px solid var(--paper-dk);background:var(--paper-lt);color:var(--ink-soft);cursor:pointer;
+}
+.niva-btn:hover{border-color:var(--gold-lt);}
+.niva-btn.is-active{background:var(--navy);color:var(--paper);border-color:var(--navy);}
+.niva-btn.is-locked{color:var(--ink-faint);background:transparent;cursor:not-allowed;opacity:.55;}
+.niva-btn.is-locked:hover{border-color:var(--paper-dk);}
+.nr-nivmsg{font-size:12px;color:var(--ink-faint);font-style:italic;margin-bottom:10px;min-height:16px;}
+
+/* ── MINA KUNSKAPER: fyra vyer, växlas (inget nästlat djup) ── */
+.nr-mrad{
+  display:block;width:100%;text-align:left;
+  padding:13px 15px;border-radius:9px;margin-bottom:8px;cursor:pointer;
+  font-family:var(--cinzel);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--paper-lt);color:var(--ink-soft);border:1px solid var(--paper-dk);
+}
+.nr-mrad:hover{border-color:var(--gold-lt);}
+.nr-mrad.is-on{background:var(--navy);color:var(--paper);border-color:var(--navy);}
+.nr-mrad .nr-sub{
+  display:block;font-family:var(--body);font-size:9px;letter-spacing:.02em;text-transform:none;
+  opacity:.75;margin-top:2px;font-weight:400;
+}
+.nr-mview{display:none;}
+.nr-mview.is-on{display:block;}
+/* Kunskapsläget är den BEFINTLIGA kartan, inbäddad — inte en ny karta. */
+.nr-karta-frame{width:100%;min-height:620px;border:1px solid var(--paper-dk);border-radius:10px;background:var(--paper-lt);}
+/* Platshållare för vyer som byggs i egna spår. Säger vad de ska bli, inget mer. */
+.nr-ph{
+  padding:40px;text-align:center;color:var(--ink-faint);font-style:italic;
+  background:var(--paper-lt);border:1px dashed var(--paper-dk);border-radius:10px;
+}
+
+/* ── ARBETSYTANS SCENER (ett innehåll i taget) ── */
+.nr-scen{display:none;}
+.nr-scen.is-on{display:block;}
+
+/* ── Chromebook och telefon: spalten läggs över arbetsytan ── */
+@media (max-width:900px){
+  .nr-wrap{padding:14px 16px 32px;}
+  .nr-panel.is-on{flex-direction:column;gap:14px;}
+  .nr-spalt{width:100%;}
+}

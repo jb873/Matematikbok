@@ -179,6 +179,52 @@ const PROBE = `(function(){
     ut.flikar.push(f);
   });
 
+  /* -- BEN 1b: NAVIGATIONSRAMENS VARIANTER (.nr-rad) ---------------------------------------
+     Samma regel, ny yta. En gra variant maste bara taxonomins .is-kommer; grå utan flagga ar
+     ett brott. Parning mot blad gors INTE: ramen har manga varianter mot fa blad, och bladet
+     byggs om vid klick. Det som avgor saken ar VARFOR platsen ar gra. */
+  /* Dragspelet GAS IGENOM: en rubrik oppen och en grupp oppen ar sjalva regeln, sa bara ett
+     fatal rader ar synliga i startlaget. Grinden oppnar varje rubrik och varje grupp och maler
+     varianterna dar - annars mater den startlaget, inte ytan. */
+  var varianter = [];
+  Array.prototype.forEach.call(document.querySelectorAll('.nr-huvud'), function(h){
+    var hh = h.querySelector('.nr-huvud-h');
+    if(hh && !h.classList.contains('is-open')) hh.click();
+    Array.prototype.forEach.call(h.querySelectorAll('.nr-grp'), function(g){
+      var gh = g.querySelector('.nr-grp-h');
+      if(gh && !g.classList.contains('is-open')) gh.click();
+      Array.prototype.forEach.call(g.querySelectorAll('.nr-rad'), function(v){
+        if(synlig(v) && varianter.indexOf(v) < 0) varianter.push(v);
+      });
+    });
+  });
+  if(SABBA === 'flik' && varianter.length){
+    // Gra den forsta varianten som INTE bar is-kommer -> BEN 1b maste falla och namna den.
+    for(var w = 0; w < varianter.length; w++){
+      if(!varianter[w].classList.contains('is-kommer')){
+        varianter[w].disabled = true; varianter[w].setAttribute('aria-disabled', 'true');
+        ut.noter.push('SABBA: graade varianten "'
+          + varianter[w].textContent.replace(/\\s+/g, ' ').trim().slice(0, 34) + '"');
+        break;
+      }
+    }
+  }
+  varianter.forEach(function(v){
+    var titel = v.textContent.replace(/\\s+/g, ' ').trim().slice(0, 40);
+    var skal = last(v);
+    var kommer = v.classList.contains('is-kommer');
+    var f = { titel: titel, variant: true, last: skal, kommer: kommer };
+    if(!skal.length){ f.klickbar = true; }
+    else if(!kommer){
+      ut.brott.push('VARIANT GRA UTAN SKAL: "' + titel + '" ar sparrad (' + skal.join(', ')
+        + ') men bar inte .is-kommer - en gra plats maste ha ett dokumenterat skal i datan');
+    } else { f.tomOchStangd = true; }
+    ut.flikar.push(f);
+  });
+  // Ramen finns men utan en enda variant = navigeringen renderade inte.
+  if(document.querySelector('.nr-lager') && !varianter.length)
+    ut.brott.push('NAVRAMEN TOM: .nr-lager finns men noll varianter - vanster-spalten renderade inte');
+
   // -- BEN 2+3: nivaraden ---------------------------------------------------------------
   function nivaknappar(){
     return Array.prototype.filter.call(document.querySelectorAll('.niva-btn'), synlig).map(function(b){
@@ -270,7 +316,7 @@ const PROBE = `(function(){
      (alltsa laddat klart) och sakna bade flikknappar och nivaknappar. Da ar "inga flikar" ett
      MATT resultat. Renderade den inget alls lamnas noll matpunkter med flit - da ar sidan tom
      eller obyggd, och det agarskapet hor hos V14:s egen lista, inte hos ett eget brott harifran. */
-  if(!btns.length && !ut.nivaer.length){
+  if(!btns.length && !ut.nivaer.length && !document.querySelector('.nr-lager')){
     var r = document.querySelectorAll('input, select, textarea').length;
     if(r) ut.enkelSida = { rutor: r, flikknappar: 0, nivaknappar: 0 };
   }
@@ -311,7 +357,9 @@ Sidor.blad().forEach(sida => {
   (u.flikar || []).forEach(f => {
     flikar++;
     if(f.klickbar){ klickbara++; MP.varde(sida, 'flik:' + f.titel, { klickbar: 1 }); return; }
-    MP.varde(sida, 'flik:' + f.titel, { rutor: f.rutor === null ? -1 : f.rutor, last: f.last.length });
+    // En VARIANT mats pa skalet i datan, en FLIK pa innehallet i bladet. Anmal det som matts.
+    if(f.variant) MP.varde(sida, 'variant:' + f.titel, { last: f.last.length, kommer: f.kommer ? 1 : 0 });
+    else MP.varde(sida, 'flik:' + f.titel, { rutor: f.rutor === null ? -1 : f.rutor, last: f.last.length });
     if(f.tomOchStangd){ graTomma++;
       console.log('· ' + kort + ' · "' + f.titel + '" grå och TOM (0 svarsrutor) — platsen syns, '
         + 'men leder inte in i tomrum. Blir den fylld ska flaggan bort.'); }

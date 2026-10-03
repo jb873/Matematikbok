@@ -92,7 +92,7 @@ const PROBE = `(function(){
     });
   }
 
-  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .plugg-dok'));
+  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .plugg-dok, .nr-rad'));
   (nav.length ? nav : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
     mat(b ? b.textContent.replace(/\\s+/g, ' ').trim().slice(0, 26) : '(enda)');

@@ -17,6 +17,19 @@
 </style>
 </head>
 <body>
+<!-- EMBED-LÄGE: sidan bäddas in i navigationsramens "Kunskapsläge". Då döljs sidans egen
+     rubrik och tillbaka-länk — ramen säger redan var man är, och tillbaka-vägen är den
+     alltid närvarande lagerväxlaren. Själva kartan rörs INTE; den återanvänds som den är. -->
+<script>
+  try { if(/[?&]embed=1\b/.test(location.search)) document.body.classList.add('embed'); } catch(e){}
+</script>
+<style>
+  body.embed .kl-tillbaka,
+  body.embed .eyebrow,
+  body.embed h1,
+  body.embed .lede { display:none; }
+  body.embed .wrap { padding-top:14px; }
+</style>
 <div class="wrap">
   <a class="kl-tillbaka" href="../../../ak7-k1.html">← Tillbaka till kapitlet</a>
   <p class="eyebrow">Kapitel 1 · Plugg till prov</p>

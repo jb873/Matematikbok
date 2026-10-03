@@ -44,7 +44,7 @@ const VILLKOR_NAMN = {
   // En bladsida är mätbar när svarsrutor, valrutnät ELLER bladnavigering finns. Navigeringen
   // räknas med därför att proberna själva klickar fram bladen (plugg-sidorna renderar inget
   // före ett dokumentval).
-  blad: "document.querySelector('input.ovn-in, input.ak8-in, input.seg-text, .ovn-val-grid, .blad-nav-btn, .blad-subnav-btn, .plugg-dok')",
+  blad: "document.querySelector('input.ovn-in, input.ak8-in, input.seg-text, .ovn-val-grid, .blad-nav-btn, .blad-subnav-btn, .plugg-dok, .nr-rad')",
   // Sidor som mäts i sin helhet (CSS, bredd, tonade kort) — klara när dokumentet är laddat.
   laddad: "document.readyState === 'complete'",
   // Provbyggar-ramarna: generatorerna är fångade när --pre-fällan satt window.__GENS.

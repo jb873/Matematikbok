@@ -26,7 +26,7 @@ const PRE = seed => `(function(){ var s = ${seed}; Math.random = function(){ s |
 const PROBE8_SAMLA = `(function(){
   var ut = { onerr: window.__onerr, blad: [] };
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
-  var knappar = Array.from(document.querySelectorAll('.blad-nav-btn'));
+  var knappar = Array.from(document.querySelectorAll('.blad-nav-btn, .nr-rad'));
   function mat(namn){
     var mount = document.querySelector('[id^="sheet-"]') || document.querySelector('.ovn-sheet'); if(!mount) return;
     var kn = mount.querySelector('[data-kontroll]'); if(!kn) return;
@@ -57,7 +57,7 @@ const PROBE8_FYLL = `(function(){
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
   function synlig(el){ return !!(el.offsetParent) && getComputedStyle(el).visibility !== 'hidden'; }
   function tal(s){ return (String(s).replace(/\\u2212/g, '-').match(/-?\\d+(?:,\\d+)?/g) || []); }
-  var knappar = Array.from(document.querySelectorAll('.blad-nav-btn'));
+  var knappar = Array.from(document.querySelectorAll('.blad-nav-btn, .nr-rad'));
   function mat(namn, bi){
     var mount = document.querySelector('[id^="sheet-"]') || document.querySelector('.ovn-sheet'); if(!mount) return;
     var kn = mount.querySelector('[data-kontroll]'); if(!kn) return;
@@ -206,9 +206,22 @@ const PROBE7 = `(function(){
     ut.blad.push(b);
   }
   window.confirm = function(){ return true; };
-  function visaSheet(sh){ if(synlig(sh)) return true; var tabs = Array.from(document.querySelectorAll('.tab-btn')), navs = Array.from(document.querySelectorAll('.blad-nav-btn'));
-    for(var a = 0; a < tabs.length; a++){ tabs[a].click(); if(synlig(sh)) return true; for(var c = 0; c < navs.length; c++){ navs[c].click(); if(synlig(sh)) return true; } } return false; }
-  Array.from(document.querySelectorAll('.ovn-sheet')).forEach(function(sh, i){ var h = sh.querySelector('h2'); var namn = (h ? h.textContent.trim() : 'blad ' + (i + 1)).slice(0, 28); if(!visaSheet(sh)){ ut.blad.push({ blad: namn, onabar: true }); return; } mat(namn, sh.parentElement); });
+  /* Navigeringen visar ett blad i taget. Argumentet är BEHÅLLAREN (.ovn-wrap#sheet-*), inte
+     bladet: navigationsramen bygger om bladet vid variantklick, och en hållen .ovn-sheet-nod blir
+     då detached — synlig() svarar false för alltid och bladet rapporteras ONÅBAR fast det finns.
+     Behållaren skriver bygg_blad IN i, men ersätter aldrig. */
+  function visaSheet(vard){ if(synlig(vard)) return true; var tabs = Array.from(document.querySelectorAll('.tab-btn')), navs = Array.from(document.querySelectorAll('.blad-nav-btn, .nr-rad'));
+    for(var a = 0; a < tabs.length; a++){ tabs[a].click(); if(synlig(vard)) return true; for(var c = 0; c < navs.length; c++){ navs[c].click(); if(synlig(vard)) return true; } } return false; }
+  var vardar = Array.from(document.querySelectorAll('.ovn-sheet')).map(function(sh){ return sh.parentElement; })
+    .filter(function(v, i, a){ return v && a.indexOf(v) === i; });
+  vardar.forEach(function(vard, i){
+    var nabar = visaSheet(vard);
+    // Namnet läses FÄRSKT: efter navigeringen kan behållaren bära en annan variant än vid starten.
+    var sh = vard.querySelector('.ovn-sheet'), h = sh && sh.querySelector('h2');
+    var namn = (h ? h.textContent.trim() : 'blad ' + (i + 1)).slice(0, 28);
+    if(!nabar || !sh){ ut.blad.push({ blad: namn, onabar: true }); return; }
+    mat(namn, vard);
+  });
   // Plugg till prov (k1/d10, k3/d7): dokumenten renderas först vid klick → öppna varje grupp + dokument och mät bladet som skapas
   Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var sh = akt && akt.querySelector('.ovn-sheet'); var namn = ('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 28); if(!sh){ ut.blad.push({ blad: namn, ingenKnapp: true }); return; } mat(namn, sh.parentElement); }); });
   return ut;
@@ -257,7 +270,7 @@ const PROBE_D5 = `(function(){
     return brutna;
   }
   function bladen(){
-    var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn'));
+    var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn, .nr-rad'));
     var B = ['ProbBlad', 'ProbBlad2', 'ProbBlad3', 'ProbBlad4', 'ProbBlad5']
               .map(function(n){ return window[n] && window[n].BLAD; }).filter(Boolean);
     return nav.map(function(k, i){ return { knapp: k, data: B[i] }; }).filter(function(x){ return !!x.data; });
