@@ -12,6 +12,19 @@
  * vänsterspalten aldrig växer ur skärmen.
  */
 
+/* ── GÖMD, MEN KVAR I DOM:EN ──
+   Motorerna läser element som ramen har ersatt — blad-k1-d1.js gör getElementById('tab-row') och
+   använder resultatet direkt, och samma gäller lecture-listan. Tas de bort kastar motorfilen vid
+   laddning och sidan blir vit. De ska alltså finnas men inte synas.
+
+   hidden-attributet duger INTE: UA-stilens [hidden]{display:none} förlorar mot sidornas egna
+   .tab-row{display:flex}, och den regeln står efter den här filen i dokumentet. Mätt 2026-10-03:
+   #tab-row renderade 74 px och #blad-nav 26 px med hidden satt — hundra pixlar gammal navigering
+   ovanpå den nya. Därför en egen klass, och därför !important: det här är en ren döljning, inte
+   en formgivning som något annat ska kunna justera. (Förbudet mot !important gäller BREDD, där
+   det slår ut både växten och mätningen.) */
+.nr-dold{ display:none !important; }
+
 /* ── LAGERVÄXLAREN (alltid närvarande; den är också tillbaka-vägen) ── */
 .nr-lager{
   display:flex;justify-content:center;
@@ -113,9 +126,17 @@
 .nr-karta-frame{width:100%;min-height:620px;border:1px solid var(--paper-dk);border-radius:10px;background:var(--paper-lt);}
 /* Platshållare för vyer som byggs i egna spår. Säger vad de ska bli, inget mer. */
 .nr-ph{
-  padding:40px;text-align:center;color:var(--ink-faint);font-style:italic;
+  padding:34px 40px;text-align:center;
   background:var(--paper-lt);border:1px dashed var(--paper-dk);border-radius:10px;
 }
+/* Märket säger rakt ut att vyn inte är byggd än. En blank yta ser trasig ut; en märkt ruta
+   är ärlig — samma princip som is-kommer på en tom flik: platsen syns, men lovar inget. */
+.nr-ph-mark{
+  display:inline-block;margin-bottom:12px;padding:3px 12px;border-radius:20px;
+  background:var(--paper-dk);color:var(--ink-soft);
+  font-family:var(--cinzel);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+}
+.nr-ph p{color:var(--ink-faint);font-style:italic;font-size:13px;max-width:46ch;margin:0 auto;}
 
 /* ── ARBETSYTANS SCENER (ett innehåll i taget) ── */
 .nr-scen{display:none;}

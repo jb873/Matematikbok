@@ -189,7 +189,7 @@
 <!-- GAMLA FLIKRADEN: gömd, men KVAR i DOM:en. blad-k1-d1.js läser #tab-row och använder
      resultatet direkt — tas den bort kastar motorfilen vid laddning och sidan blir tom.
      Navigeringen sker nu i navram.js:s vänsterspalt. -->
-<div class="tab-row" id="tab-row" hidden aria-hidden="true">
+<div class="tab-row nr-dold" id="tab-row" hidden aria-hidden="true">
   <button class="tab-btn" data-tab="forelasningar">Föreläsning</button>
   <button class="tab-btn is-active" data-tab="ova">Öva</button>
   <button class="tab-btn" data-tab="fardighet">Färdighetsträning</button>
@@ -205,7 +205,7 @@
 
   <!-- UPPGIFTER: de fyra bladen. Monteringspunkterna oförändrade. -->
   <div class="nr-scen" id="scen-uppgifter">
-    <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad" hidden></div>
+    <div class="blad-nav nr-dold" id="blad-nav" role="tablist" aria-label="Delkapitlets blad" hidden></div>
     <div id="blad-tiosystemet" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-tiosystemet"></div></div>
     <div id="blad-storlek" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-storlek"></div></div>
     <div id="blad-positionsrakning" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-positionsrakning"></div></div>
@@ -219,7 +219,7 @@
       <div class="fard-tom" id="fard-tom"><p>Välj en metod i listan till vänster</p></div>
       <iframe class="fard-frame" id="fard-frame" title="Färdighetsdrill" loading="lazy"></iframe>
     </div>
-    <div class="fard-lista" id="fardighet-lista" hidden aria-hidden="true"></div>
+    <div class="fard-lista nr-dold" id="fardighet-lista" hidden aria-hidden="true"></div>
   </div>
 
   <!-- FÖRELÄSNING: video-registret. Spelaren flyttas av motorn in under det klickade kortet,
@@ -241,13 +241,22 @@
             src="../kunskapslage/index.html?embed=1"></iframe>
   </div>
   <div class="nr-mview" id="mv-sjalvskattning">
-    <div class="nr-ph">Självskattning — Kan / Osäker / Kan ej, grupperat bredvid bevisen. (vy att bygga)</div>
+    <div class="nr-ph">
+      <div class="nr-ph-mark">Byggs senare</div>
+      <p>Din egen bild av vad du kan, ställd vid sidan av bevisen i Kunskapsläget — Kan / Osäker / Kan ej, grupperat per område.</p>
+    </div>
   </div>
   <div class="nr-mview" id="mv-test">
-    <div class="nr-ph">Test — korta, varierade pass som täcker alla delar. (vy att bygga)</div>
+    <div class="nr-ph">
+      <div class="nr-ph-mark">Byggs senare</div>
+      <p>Korta, varierade pass som täcker delkapitlets alla delar — framplockning, inte förhör.</p>
+    </div>
   </div>
   <div class="nr-mview" id="mv-dagens">
-    <div class="nr-ph">Dagens träning — systemet väljer vad du bör plocka fram idag. (det adaptiva navet — eget spår)</div>
+    <div class="nr-ph">
+      <div class="nr-ph-mark">Byggs senare</div>
+      <p>Systemet väljer vad du bör plocka fram i dag, utifrån vad bevisen visar — det adaptiva navet.</p>
+    </div>
   </div>
 </div>
 
