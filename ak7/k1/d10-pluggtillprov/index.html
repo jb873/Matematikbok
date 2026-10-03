@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
 <!-- Keypadens formgivning: DELAD fil. Låg förr som en ordagrann kopia här. -->
 <link rel="stylesheet" href="../../../js/motor/keypad.css">
 <style>
@@ -125,6 +126,12 @@
 </header>
 
 <!-- GRUPPRAD -->
+<!-- NAVIGATIONSRAMEN ritas hit. Plugg-sidan har EN sorts innehåll — uppgifter — och får
+     därför bara Uppgifter-rubriken: samma regel som gör att sidor utan filmregister inte får
+     någon Föreläsning-rubrik. Områdesraden och doklistan nedan göms av receptet men står KVAR —
+     blad-k1-d10.js läser dem och skriver i dem. -->
+<div id="navram"></div>
+
 <div class="plugg-grupprad" id="plugg-grupprad"></div>
 
 <!-- DOKUMENTLISTA (i vald grupp) -->
@@ -142,6 +149,11 @@
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/blad/blad-k1-d10.js"></script>
 
+<!-- NAVIGATIONSRAMEN: delad nivårad + ram + delkapitel-receptet -->
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/navram/navram-delkapitel.js"></script>
+
 <!-- Städa bort den redundanta "Självskattning"-gruppen ur plugg-menyn: den innehöll bara ett
      klar:false-dokument (Självskattningsmatris), och den RIKTIGA självskattningen bor i kunskaps-
      lägesvyn (hero-länken ovan → ?tab=sjalv). Att peka om hade skapat en dubbel väg dit; borttagning
@@ -155,6 +167,13 @@
   if(typeof renderGruppRad === 'function') renderGruppRad();
   if(typeof renderDoklista === 'function') renderDoklista();
 })();
+</script>
+
+<script>
+  /* Monteras SIST: receptet speglar områdesknapparna och doklistan, så de måste vara byggda
+     först. Sidans egen logik är oförändrad — varje variant delegerar klicket till
+     originalknapparna (område + dokument), uppletade på id vid varje klick. */
+  if(window.NavRamDelkapitel) window.NavRamDelkapitel.montera({ nivaPrefix: 'k1d10' });
 </script>
 
 <script src="../../../js/motor/keypad-clearance.js"></script>

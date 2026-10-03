@@ -22,6 +22,12 @@
  *     fristående sidan behåller sina flikar.
  *  5. Grindarna navigerar via .nr-rad. Varianterna ÄR därför riktiga knappar i DOM:en.
  *
+ * MONTERA SIST — sist av allt som RÖR NAVIGERINGEN, inte bara efter motorfilen. Receptet
+ * SPEGLAR knappar, så varje skript som bygger om dem måste ha kört först. Belagt på d10: sidan
+ * filtrerar bort en grupp page-side och kallar renderGruppRad() i ett senare skript — med
+ * anropet före det speglade ramen 6 grupper i stället för 5, och den sjätte variantens knapp
+ * fanns inte längre i DOM:en.
+ *
  * KONFIGURATION — allt annat upptäcks i sidan:
  *   montera({
  *     nivaPrefix: 'k1d2',          // localStorage: <prefix>_naddNiva<n>_<bladId>
@@ -32,7 +38,9 @@
 (function(){
   'use strict';
 
-  var DOLJ = ['tab-row', 'blad-nav', 'fardighet-lista'];
+  /* Det ramen ersätter som NAVIGERING. #plugg-aktivt står INTE här — det är arbetsytan, inte
+     navigering, och flyttas in i ramen i stället för att gömmas. */
+  var DOLJ = ['tab-row', 'blad-nav', 'fardighet-lista', 'plugg-grupprad', 'plugg-doklista'];
 
   function el(tagg, klass, html){
     var e = document.createElement(tagg);
@@ -69,6 +77,38 @@
     });
 
     // ── 2. UPPGIFTER: spegla #blad-nav. Klicket delegeras till originalknappen. ─────────────
+    /* ── PLUGG-SIDOR ──
+       Områdena är grupper, dokumenten är varianter. Doklistan byggs OM när ett område väljs, så
+       speglingen måste gå igenom områdena en gång för att se alla dokument — och klicket måste
+       delegeras på ID, inte på en hållen nod, som blir detached vid ombyggnaden. */
+    var pluggRad = document.getElementById('plugg-grupprad');
+    var pluggLista = document.getElementById('plugg-doklista');
+    function valjPlugg(gruppId, dokId){
+      var g = pluggRad.querySelector('[data-grupp="' + gruppId + '"]'); if(g) g.click();
+      var d = pluggLista.querySelector('[data-dok="' + dokId + '"]'); if(d) d.click();
+    }
+    function pluggUppgifter(){
+      if(!pluggRad || !pluggLista) return null;
+      var gKnappar = Array.prototype.slice.call(pluggRad.querySelectorAll('[data-grupp]'));
+      if(!gKnappar.length) return null;
+      var start = (pluggRad.querySelector('[data-grupp].is-active') || { dataset: {} }).dataset.grupp;
+      var grupper = gKnappar.map(function(gb){
+        var gid = gb.dataset.grupp, namn = txt(gb);
+        gb.click();   // doklistan ritas om till det här området
+        return { rubrik: namn, varianter:
+          Array.prototype.map.call(pluggLista.querySelectorAll('[data-dok]'), function(db){
+            var did = db.dataset.dok;
+            var nr = txt(db.querySelector('.plugg-dok-nr'));
+            var dnamn = txt(db.querySelector('.plugg-dok-namn')) || txt(db);
+            return { titel: (nr ? nr + '. ' : '') + dnamn,
+                     valj: function(){ valjPlugg(gid, did); } };
+          }) };
+      });
+      // Ställ tillbaka det område sidan startade på.
+      if(start){ var s0 = pluggRad.querySelector('[data-grupp="' + start + '"]'); if(s0) s0.click(); }
+      return grupper;
+    }
+
     /* ALLA bladnav-rader speglas. d3 har två: delkapitlets blad och fördjupningsbladen. */
     var navRader = Array.prototype.filter.call(document.querySelectorAll('.blad-nav'), function(r){
       return r.querySelectorAll('.blad-nav-btn').length > 0;
@@ -77,7 +117,7 @@
       return { titel: txt(b).replace(/^\d+/, ''), kommer: b.disabled,
                valj: function(){ visaPanel('ova'); b.click(); } };
     }
-    var uppgifter = cfg.uppgifter || null;
+    var uppgifter = cfg.uppgifter || pluggUppgifter();
     if(!uppgifter){
       /* EN rad → en rubriklös (platt) grupp: bladen är platta på de flesta sidorna, och en grupp
          per blad med EN variant vore två klick för ett blad.
@@ -162,6 +202,10 @@
     Array.prototype.slice.call(document.querySelectorAll('.tab-panel')).forEach(function(p){
       ram.ytaArbeta.appendChild(p);
     });
+    /* Plugg-sidan har inga .tab-panel — dess arbetsyta är #plugg-aktivt. Den FLYTTAS in (aldrig
+       kopieras) och behåller sitt id, för motorn skriver dokumentet dit. */
+    var pAktivt = document.getElementById('plugg-aktivt');
+    if(pAktivt) ram.ytaArbeta.appendChild(pAktivt);
     minaVyer.forEach(function(v){ ram.ytaMina.appendChild(v); });
 
     return ram;
