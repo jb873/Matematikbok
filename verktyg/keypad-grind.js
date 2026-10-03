@@ -55,29 +55,55 @@ const PROBE = `(function(){
     return skal;
   }
 
+  /* En ruttyps adress: samma sorts signatur som yt-kontraktet använder. Mätningen görs PER
+     RUTTYP, inte på ytans första ruta — keypaden följer fokus, och olika rutor på samma yta kan
+     ge olika keypad. Första versionen mätte bara rutor[0] och rapporterade därför "INGEN KEYPAD"
+     på tre ytor vars FÖRSTA ruta råkade vara en ordruta, fast keypaden fanns för varje talruta
+     på samma yta (mätt 2026-10-03: 189 px för talrutorna, 0 för ordrutorna). Samma felklass som
+     yt-kontraktets gamla "mätte bara uttr[0]". */
+  function adress(i){
+    return (i.className || '').trim() + '[' + Array.prototype.map.call(i.attributes, function(a){ return a.name; })
+      .filter(function(n){ return n.indexOf('data-') === 0; }).sort().join(',') + ']';
+  }
+  // ORDRUTA: keypaden ska vara dold. Det är plattformens egen regel — en bokstavsruta har inget
+  // att hämta i en sifferkeypad, och den döljs för att inte skymma uppgiften. Alltså inget brott.
+  function ordruta(i){ return i.matches('[data-nokeypad], [data-text]'); }
+
   function mat(namn){
     var rutor = Array.prototype.filter.call(
       document.querySelectorAll('input.ovn-in, input.ak8-in, input.seg-text, input.ak8-exprtxt'), synlig);
     if(!rutor.length) return;
-    var y = { yta: namn, rutor: rutor.length, knappar: 0, lasta: [] };
+    var y = { yta: namn, rutor: rutor.length, knappar: 0, lasta: [], ordrutor: 0, provade: 0 };
 
-    // Keypaden följer fokus, så den mäts med en ruta fokuserad — det är elevens läge.
-    rutor[0].focus();
-    rutor[0].dispatchEvent(new Event('focusin', { bubbles: true }));
-
-    var kps = keypads();
-    if(!kps.length){ y.ingenKeypad = true; ut.ytor.push(y); return; }
-    var kp = kps[kps.length - 1];
-    if(LASUPP) Array.prototype.forEach.call(kp.querySelectorAll('.kp-key'), function(b){
-      b.classList.remove('kp-inactive'); b.removeAttribute('aria-disabled'); b.disabled = false;
-      b.style.pointerEvents = 'auto'; b.style.opacity = '1';
+    var sett = {}, kp = null;
+    rutor.forEach(function(inp){
+      var typ = adress(inp);
+      if(sett[typ]) return;
+      sett[typ] = 1;
+      if(ordruta(inp)){ y.ordrutor++; return; }      // dold keypad är rätt här
+      y.provade++;
+      inp.focus();
+      inp.dispatchEvent(new Event('focusin', { bubbles: true }));
+      var kps = keypads();
+      if(!kps.length){ y.utanKeypad = (y.utanKeypad || []); y.utanKeypad.push(typ); return; }
+      kp = kps[kps.length - 1];
+      if(LASUPP) Array.prototype.forEach.call(kp.querySelectorAll('.kp-key'), function(b){
+        b.classList.remove('kp-inactive'); b.removeAttribute('aria-disabled'); b.disabled = false;
+        b.style.pointerEvents = 'auto'; b.style.opacity = '1';
+      });
+      var knappar = Array.prototype.filter.call(kp.querySelectorAll('.kp-key'), synlig);
+      y.knappar = knappar.length;
+      knappar.forEach(function(b){
+        var skal = last(b);
+        if(skal.length){
+          var nyckel = (b.getAttribute('data-key') || b.textContent.trim() || '?') + ' [' + skal.join(', ') + ']';
+          if(y.lasta.indexOf(nyckel) < 0) y.lasta.push(nyckel);
+        }
+      });
     });
-    var knappar = Array.prototype.filter.call(kp.querySelectorAll('.kp-key'), synlig);
-    y.knappar = knappar.length;
-    knappar.forEach(function(b){
-      var skal = last(b);
-      if(skal.length) y.lasta.push((b.getAttribute('data-key') || b.textContent.trim() || '?') + ' [' + skal.join(', ') + ']');
-    });
+    // Ingen talruta alls på ytan (bara ordrutor) → inget keypad-krav, och inget att mäta.
+    if(!y.provade){ y.baraOrdrutor = true; ut.ytor.push(y); return; }
+    if(y.utanKeypad && y.utanKeypad.length){ y.ingenKeypad = true; ut.ytor.push(y); return; }
     ut.ytor.push(y);
   }
 
@@ -109,14 +135,20 @@ Sidor.blad().forEach(sida => {
   (u.ytor || []).forEach(y => {
     ytor++; knappar += y.knappar;
     MP.varde(sida, y.yta, { rutor: y.rutor, knappar: y.knappar, lasta: y.lasta.length });
+    if(y.baraOrdrutor){
+      console.log('· ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.ordrutor
+        + ' ordruttyper, inga talrutor — keypaden ska vara dold här)');
+      return;
+    }
     if(y.ingenKeypad){
       fel++;
-      console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ': INGEN KEYPAD på en yta med '
-        + y.rutor + ' rutor — inget att mäta, och tystnad vore ett falskt godkännande');
+      console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ': INGEN KEYPAD för talruttypen '
+        + (y.utanKeypad || []).slice(0, 2).join(' · ') + ' — en yta med inmatning ska ha keypad');
       return;
     }
     if(!y.lasta.length){
-      console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.knappar + ' knappar, alla tända)');
+      console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.knappar + ' knappar, alla tända · '
+        + y.provade + ' talruttyper' + (y.ordrutor ? ' · ' + y.ordrutor + ' ordruttyper med dold keypad' : '') + ')');
       return;
     }
     fel += y.lasta.length;
