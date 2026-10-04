@@ -149,7 +149,11 @@ function fardighet(tax, utbudslistaId, ram){
     knappar.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
     btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
     var url = ram + '?ko=' + encodeURIComponent(p.ko) + '&formaga=' + encodeURIComponent(p.formagaKey || p.formaga) + '&embed=1';
-    if(p.niva && p.niva < 3) url += '&maxniva=' + p.niva;
+    /* Antalet steg kommer ur DATAN, inte ur ramens default. Villkoret < 3 stod här förr och gjorde
+       att en färdighet med tre nivåer inte fick något maxniva — stegen blev tre för att ramen
+       råkar defaulta till tre, och fyra steg hade ritats som tre. Mätt när det togs bort: av bokens
+       noder med ett nivåantal hade alla 1 eller 2 utom d3:s nya, så ingen befintlig sida påverkas. */
+    if(p.niva) url += '&maxniva=' + p.niva;
     if(frame) frame.src = url;
     if(scen) scen.classList.add('har-drill');
   }

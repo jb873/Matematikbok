@@ -174,15 +174,39 @@ window.K3_TAXONOMI = {
     },
     {
       "id": "alg-forenkla-parentes", "namn": "Förenkla med parentes", "parent": "alg-forenkla", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "fordjupning" }, "roll": "fordjupning", "formaga": null, "generator": null,
-      "begrepp": "Multiplicera in i parentes och förenkla (tecken och siffra före parentes). Fördjupning.",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Ta bort parentesen och förenkla. Står det minus framför parentesen byter termerna inuti tecken. Fördjupning i sjuan, mål i åttan (delkapitel 3).",
       "visning": null
     },
     {
-      "id": "alg-forenkla-parentes:resonera", "namn": "Förenkla med parentes", "parent": "alg-forenkla-parentes", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "fordjupning" }, "nivamodell": "nytt", "roll": "fordjupning", "formaga": "RESONERA", "generator": null,
-      "begrepp": "Lös upp parentes (tecken/siffra före) och förenkla. Fördjupning – ingen drill ännu.",
-      "visning": null
+      "id": "alg-forenkla-parentes:resonera", "namn": "Resonera om parenteser", "parent": "alg-forenkla-parentes", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RESONERA", "generator": null,
+      "begrepp": "Öppna uppgifter där eleven själv väljer tal mot ett villkor, och talpyramider där varje ruta är summan av de två under.",
+      "loggarEj": "förståelseträning: eleven skapar egna tal mot ett villkor, färdigheten mäts inte här",
+      "visning": { "utbudslista": ["ak8k2d3"], "grupp": "Uttryck med parentes", "gruppordning": 3, "radordning": 3,
+                   "titel": "Resonera om parenteser", "etikett": "resonera", "formagaKey": "resonera", "niva": null, "drillKommer": true }
+    },
+    {
+      "id": "alg-forenkla-parentes:rakna", "namn": "Ta bort parentes och förenkla", "parent": "alg-forenkla-parentes", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Ta bort parentesen, byt tecken där det står minus framför, och samla lika termer. Tre nivåer enligt band-ak8-alg3.",
+      "visning": { "utbudslista": ["ak8k2d3"], "grupp": "Uttryck med parentes", "gruppordning": 0, "radordning": 0,
+                   "titel": "Ta bort parentes och förenkla", "etikett": "räkna", "formagaKey": "rakna", "niva": 3, "drillKommer": true }
+    },
+    {
+      "id": "alg-forenkla-parentes:begrepp", "namn": "Välja och para ihop uttryck", "parent": "alg-forenkla-parentes", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "BEGREPP", "generator": null,
+      "begrepp": "Avgöra vilket uttryck som stämmer, och para ihop ett uttryck med parentes mot samma uttryck utan.",
+      "loggarEj": "förståelseträning: eleven väljer mellan givna uttryck i stället för att räkna, färdigheten mäts inte här",
+      "visning": { "utbudslista": ["ak8k2d3"], "grupp": "Uttryck med parentes", "gruppordning": 1, "radordning": 1,
+                   "titel": "Välja och para ihop uttryck", "etikett": "begrepp", "formagaKey": "begrepp", "niva": 1, "drillKommer": true }
+    },
+    {
+      "id": "alg-forenkla-parentes:problem", "namn": "Problem med parentes", "parent": "alg-forenkla-parentes", "niva": "lovnod",
+      "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEMLOSNING", "generator": null,
+      "begrepp": "Ställa upp ett uttryck ur en text där något dras bort, och förenkla det.",
+      "visning": { "utbudslista": ["ak8k2d3"], "grupp": "Uttryck med parentes", "gruppordning": 2, "radordning": 2,
+                   "titel": "Problem med parentes", "etikett": "problemlösning", "formagaKey": "problemlosning", "niva": 2, "drillKommer": true }
     },
 
     /* ═══════════════ Del 4 · Ekvationer (öppet) ═══════════════
