@@ -294,6 +294,31 @@
           skriv: '40 - (x + 3) - (2x - 1)', svar: '38 - 3x' }
       ]},
 
+      // 8 ── likbent triangel, öppen uppgift ──────────────────────────────────────────────
+      // Många svar är riktiga: det som prövas är likheten 2 · ben + bas = 8x + 14, inte ett facit.
+      { rubrik: 'Uttrycket för en likbent triangels omkrets är 8x + 14', logg: NOD_PROBLEM, rader: [
+        { typ: 'likbent', vars: 'x', omkrets: '8x + 14',
+          fraga: 'Ge exempel på hur långa sidorna kan vara',
+          exempelBen: '2x + 4', exempelBas: '4x + 6' }
+      ]},
+
+      // 9 ── Maja och Noa (Joachims struktur, talen mitt förslag) ─────────────────────────
+      // a) en ruta — inget förenklas. b) och c) skriva + förenkla; c) får mellanled, eftersom en
+      // skillnad mellan två uttryck ger minus framför parentes (regel 7).
+      { rubrik: 'Maja köper x kg äpplen och y kg päron. Noa köper y kg äpplen och x kg päron.',
+        mellanled:'kravt', logg: NOD_PROBLEM, rader: [
+        { typ: 'svgfigur', svg: F ? F.prislappar({ varor: [{ namn: 'Äpplen', pris: '24 kr/kg' },
+                                                           { namn: 'Päron', pris: '18 kr/kg' }] }) : '' },
+        { typ: 'forenkla', vars: 'xy', fraga: 'Skriv ett uttryck för hur mycket Maja ska betala.',
+          svar: '24x + 18y', mellanled: 'nej' },   // inget att förenkla: uttrycket ÄR svaret
+        { typ: 'skrivforenkla', vars: 'xy',
+          fraga: 'Skriv ett uttryck för hur mycket Maja och Noa ska betala sammanlagt och förenkla det.',
+          skriv: '(24x + 18y) + (24y + 18x)', svar: '42x + 42y' },
+        { typ: 'skrivforenkla', vars: 'xy',
+          fraga: 'Skriv ett uttryck för skillnaden mellan hur mycket Maja och Noa ska betala och förenkla det.',
+          skriv: '(24x + 18y) - (24y + 18x)', svar: '6x - 6y' }
+      ]},
+
       // 8 ── hur mycket större omkrets (Joachims tal) ─────────────────────────────────────
       // Rektangel (4x + 2) × x: omkrets 10x + 4. Liksidig triangel med sidan 2x + 3: 6x + 9.
       // Skillnad (10x + 4) - (6x + 9) = 4x - 5. Uppställningen visas inte (R2); båda skrivsätten
@@ -312,5 +337,78 @@
     ]
   };
 
-  window.AK8_PARENTES = { niva1: NIVA1, niva2: NIVA2 };
+
+  // ══════════════════════════ NIVÅ 3 ══════════════════════════
+  // Parentes nivå 3.docx (md5 7aabd7a6…). Nytt mot nivå 2: ett uttryck som är ett BRÅK av två
+  // parenteser, insättning av TVÅ variabler, och uppgifter där svaret är ett annat uttryck.
+  var NIVA3 = {
+    titel: 'Uttryck med minus eller plus framför parentes – nivå 3',
+    grupper: [
+
+      // 1 ── minus framför två parenteser, den andra med negativ term ─────────────────────
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('2x - 9 - (3x + 6) - (-2x + 8)', 'x - 23'),
+        // Bråk av två parenteser: steget är att förenkla täljare och nämnare var för sig, och
+        // mellanledsregeln (samma termer, parenteserna borttagna) beskriver inte det.
+        { typ: 'parentes', vars: 'x', mellanled: 'nej',
+          uttryck: '((7x - 10) - (x - 10))/((x + 20) - (-2x + 20))',
+          uttryckHtml: '<span class="ovn-brak"><span class="ovn-brak-taljare">(7x \u2212 10) \u2212 (x \u2212 10)</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">(x + 20) \u2212 (\u22122x + 20)</span></span>',
+          svar: '2' }
+      ]},
+
+      // 2 ── förenkla och sätt in två variabler ───────────────────────────────────────────
+      { rubrik: 'Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 4 och y = −2',
+        mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('4y + (3 - y + x) - (y - 8 + 3x)', '2y - 2x + 11',
+          { vars: 'xy', varde: { etikett: 'Beräkna', x: { x: 4, y: -2 }, svar: -1 } })
+      ]},
+
+      // 3 ── bråk och decimaler i samma grupp ─────────────────────────────────────────────
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('(x/3 + 9y + 3/4) - (9y + 1/2 - x)', '4x/3 + 1/4', { vars: 'xy', brak: true }),
+        p('(5,9a - 3) + (-5 - 0,8a) - (0,06a + 0,4)', '5,04a - 8,4', { vars: 'a' })
+      ]},
+
+      // 4 ── summan av två uttryck ────────────────────────────────────────────────────────
+      { rubrik: 'Summan av två uttryck är 5x − 3b + 14. Det ena uttrycket är 7x + 2b − 4.',
+        mellanled:'kravt', logg: NOD_PROBLEM, rader: [
+        { typ: 'skrivforenkla', vars: 'xb',
+          fraga: 'Vilket är det andra uttrycket? Visa lösningen med ett uttryck och förenkla uttrycket.',
+          skriv: '(5x - 3b + 14) - (7x + 2b - 4)', svar: '-2x - 5b + 18' }
+      ]},
+
+      // 5 ── summan av två uttryck, med bråk (Joachims ordalydelse, tre rutor) ────────────
+      { rubrik: 'Summan av två uttryck är x + y. Det ena uttrycket är x/8 − y/6.',
+        mellanled:'kravt', logg: NOD_PROBLEM, rader: [
+        { typ: 'skrivforenkla', vars: 'xy', brak: true,
+          fraga: 'Vilket är det andra uttrycket? Visa lösningen med ett uttryck och förenkla uttrycket.',
+          skriv: '(x + y) - (x/8 - y/6)', svar: '7x/8 + 7y/6' }
+      ]},
+
+      // 6 ── L-figurens omkrets ───────────────────────────────────────────────────────────
+      // Sidorna i figurens egen ordning: topp, höger, urtag in, urtag ner, botten, vänster.
+      // Omkretsen är den omslutande rektangelns: 2(3a + b) + 2(2a) = 10a + 2b.
+      { rubrik: 'Skriv ett uttryck för den färgade figurens omkrets och förenkla det',
+        logg: NOD_RAKNA, rader: [
+        { typ: 'skrivforenkla', vars: 'ab', fraga: 'Omkrets',
+          svg: F ? F.lfigur({ sidor: ['3a + b', 'a', 'a + b', 'a', '2a', '2a'], enhet: 'cm' }) : '',
+          sidor: ['3a + b', 'a', 'a + b', 'a', '2a', '2a'], svar: '10a + 2b' }
+      ]},
+
+      // 7 ── hur mycket större omkrets, två rektanglar (Joachims tal) ─────────────────────
+      // Stor x × (x + 4): omkrets 4x + 8. Liten (x - 12) × x: omkrets 4x - 24. Skillnad 32.
+      { rubrik: 'Figuren visar två rektanglar', mellanled:'kravt', logg: NOD_PROBLEM, rader: [
+        { typ: 'skrivforenkla', vars: 'x',
+          fraga: 'Skriv ett uttryck för hur mycket större omkrets den stora rektangeln har och förenkla det',
+          svg: F ? ('<span style="display:inline-flex;gap:18px;flex-wrap:wrap;">'
+            + F.rektangel({ bredd: 'x', hojd: 'x + 4', enhet: 'cm' })
+            + F.rektangel({ bredd: 'x - 12', hojd: 'x', enhet: 'cm' }) + '</span>') : '',
+          sidorA: ['x', 'x + 4', 'x', 'x + 4'],
+          sidorB: ['x - 12', 'x', 'x - 12', 'x'],
+          svar: '32' }
+      ]}
+    ]
+  };
+
+  window.AK8_PARENTES = { niva1: NIVA1, niva2: NIVA2, niva3: NIVA3 };
 })();

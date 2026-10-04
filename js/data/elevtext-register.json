@@ -1957,6 +1957,8 @@
   "titel | Uttryck med minus eller plus framför parentes – nivå 1"
  ],
  "js/motor/blad/blad-karna-b.js": [
+  "etikett | Bas",
+  "etikett | Ben",
   "hint | Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.",
   "titel | + led",
   "titel | − led"

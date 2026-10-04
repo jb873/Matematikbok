@@ -233,13 +233,24 @@ var SKRIV_FORENKLAT = 'underkanns';   // Joachims beslut 2026-10-04
 // fält så elevtext-låset ser den, och den är densamma på båda ytorna med flit.
 var LED_TEXT = { mer: { titel: '+ led' }, mindre: { titel: '− led' } };
 
+// Likbenta triangelns rutor. Orden NAMNGER sidorna (som "Omkrets"), de instruerar inte.
+var LIKBENT_TEXT = { ben: { etikett: 'Ben' }, bas: { etikett: 'Bas' } };
+
 // ERSÄTTNINGSLEDETS FACIT, byggt mekaniskt ur det förenklade uttrycket och x-värdet:
 // "9x + 7" med x = 3 blir "9 · 3 + 7", "1 - 4x" blir "1 − 4 · 3". En koefficient framför variabeln
 // blir en multiplikation; en ensam variabel blir bara talet.
 function insattningsFacit(uttryck, varde){
-  var v = String(varde);
-  if(Number(varde) < 0) v = '(' + v + ')';          // -2 i en produkt måste ha parentes
+  /* varde är ETT tal (x = 3) eller en KARTA ({ x: 4, y: -2 }). Kartan behövs i nivå 3, där två
+     variabler sätts in samtidigt — med ett enda tal fick y samma värde som x. */
+  function tal(bokstav){
+    var v = (varde && typeof varde === 'object') ? varde[String(bokstav).toLowerCase()] : varde;
+    if(v === undefined || v === null) return null;
+    var t = String(v);
+    return Number(v) < 0 ? '(' + t + ')' : t;        // -2 i en produkt måste ha parentes
+  }
   return minusUt(String(uttryck).replace(/(\d*)\s*([a-z])/gi, function(m, k, bok){
+    var v = tal(bok);
+    if(v === null) return m;                         // okänd variabel: rör den inte
     return k && k !== '1' ? k + ' · ' + v : v;
   }));
 }
@@ -436,7 +447,8 @@ function bladHTML(blad){
       var bokstav = _delar <= 1 ? '' : String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
       // (radtyper ur k1-d10/k3-d7 — plugg till prov — flyttade till kärnan 2026-09-19; kolliderande namn omdöpta)
       if(rad.typ === 'faktor'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '"'
+        + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '') + '>';
         html += lbl(bokstav);
         html += '<span class="ovn-text ovn-num">' + rad.tal + ' =</span>';
         html += '<input class="ovn-in bred" data-faktor="' + rad.tal + '" data-antal="' + rad.antal
@@ -485,7 +497,8 @@ function bladHTML(blad){
       }
       // INTERVALL: öppet svar – vilket tal som helst inom intervallet godtas
       if(rad.typ === 'intervallEn'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '"'
+        + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '') + '>';
         html += lbl(bokstav);
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         html += '<input class="ovn-in bred" data-intmin="' + rad.min + '" data-intmax="' + rad.max
@@ -509,7 +522,8 @@ function bladHTML(blad){
       }
       // TEXT: en fråga, ett textsvar (ord eller uttryck)
       if(rad.typ === 'fragaText'){
-        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '"'
+        + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '') + '>';
         html += lbl(bokstav);
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         var accept = (rad.accept || [rad.svar]).join('|');
@@ -752,7 +766,8 @@ function bladHTML(blad){
         return;
       }
       // räkna om bokstav per grupp
-      html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+      html += '<div class="ovn-rad" data-rad="' + radNummer + '"'
+        + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '') + '>';
       html += lbl(bokstav);
       if(rad.typ === 'enkel'){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
@@ -795,11 +810,19 @@ function bladHTML(blad){
         var _pk = rad.mellanled || grupp.mellanled
           || (window.MellanledRattare ? window.MellanledRattare.kravAv(rad.uttryck) : null) || 'kravt';
         var _pv = rad.vars || 'xy';
-        html += '<span class="ovn-text ovn-num">' + minusUt(rad.uttryck) + '</span>';
+        /* uttryckHtml: uppgiften VISAS med staplat bråk, medan uttryck (ren text) matar rättaren.
+           Boken visar bråket stående, och ett bråk skrivet på en rad är en annan uppgift att läsa. */
+        html += '<span class="ovn-text ovn-num">' + (rad.uttryckHtml || minusUt(rad.uttryck)) + '</span>';
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
-        html += '<input class="ovn-in bred" data-parentesmellan="' + encodeURIComponent(rad.uttryck)
-          + '" data-krav="' + _pk + '" data-kp="uttryck" data-vars="' + _pv + '" inputmode="text" autocomplete="off">';
-        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        /* mellanled:'nej' = raden har MEDVETET inget mellanled, och då ritas ingen ruta. Nivå 3:s
+           bråkuppgift är fallet: uttrycket är ett bråk av två parenteser, och mellanledsregeln —
+           samma termer, parenteserna borttagna — beskriver inte det steget. Att rita en ruta som
+           ingen regel kan rätta vore att be eleven om något som inte går att bedöma. */
+        if(_pk !== 'nej'){
+          html += '<input class="ovn-in bred" data-parentesmellan="' + encodeURIComponent(rad.uttryck)
+            + '" data-krav="' + _pk + '" data-kp="uttryck" data-vars="' + _pv + '" inputmode="text" autocomplete="off">';
+          html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        }
         /* data-visa: facitraden läser den för en forenkla-ruta. Utan den stod det
            "rätt svar: undefined" för varje fel svar på raden. */
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
@@ -832,6 +855,19 @@ function bladHTML(blad){
           html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
           html += '</div>';
         }
+      } else if(rad.typ === 'likbent'){
+        /* LIKBENT TRIANGEL, öppen uppgift: eleven ger ETT exempel på sidor. Rättas på likheten
+           2 · ben + bas = omkretsen, inte mot ett facit — många svar är riktiga. */
+        var _lv = rad.vars || 'x';
+        if(rad.fraga) html += '<span class="ovn-text">' + rad.fraga + '</span>';
+        html += '<span class="ovn-text">' + LIKBENT_TEXT.ben.etikett + '</span>';
+        html += '<input class="ovn-in bred" data-likben="' + encodeURIComponent(rad.omkrets)
+          + '" data-kp="uttryck" data-vars="' + _lv + '" data-visa="' + minusUt(rad.exempelBen || '')
+          + '" inputmode="text" autocomplete="off">';
+        html += '<span class="ovn-text">' + LIKBENT_TEXT.bas.etikett + '</span>';
+        html += '<input class="ovn-in bred" data-likbas="' + encodeURIComponent(rad.omkrets)
+          + '" data-kp="uttryck" data-vars="' + _lv + '" data-visa="' + minusUt(rad.exempelBas || '')
+          + '" inputmode="text" autocomplete="off">';
       } else if(rad.typ === 'skrivforenkla'){
         /* SKRIVA = FÖRENKLA: två rutor i stället för en. Eleven SKRIVER uppställningen i den
            första och FÖRENKLAR i den andra; står det minus framför en parentes kommer
@@ -1187,7 +1223,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1301,6 +1337,25 @@ function bygg_blad(rotEl, blad){
         // TILLAGT LED: ett steg på vägen, alltså samma värde som svaret.
         var _mv = evalUttryck(inp.value);
         ok = !isNaN(_mv) && Math.abs(_mv - parseFloat(inp.dataset.mellanvarde)) < 1e-9;
+      } else if(inp.dataset.likben !== undefined || inp.dataset.likbas !== undefined){
+        /* LIKBENT: rutorna rättas TILLSAMMANS — 2 · ben + bas ska vara värt omkretsen. Båda
+           rutorna får samma dom, för det är likheten som är svaret, inte den enskilda sidan. */
+        var _lo = decodeURIComponent(inp.dataset.likben || inp.dataset.likbas);
+        var _lr = inp.closest('.ovn-rad');
+        var _lben = _lr && _lr.querySelector('[data-likben]');
+        var _lbas = _lr && _lr.querySelector('[data-likbas]');
+        var _bv = _lben ? String(_lben.value).trim() : '';
+        var _sv = _lbas ? String(_lbas.value).trim() : '';
+        var _LA = window.AlgBrak;
+        ok = false;
+        if(_LA && _bv && _sv){
+          try {
+            var _noll = _LA.parse('0');
+            var _benP = _LA.parse(_bv), _basP = _LA.parse(_sv);
+            ok = !_LA.pointEqual(_benP, _noll) && !_LA.pointEqual(_basP, _noll)
+              && _LA.pointEqual(_LA.parse('2 * (' + _bv + ') + (' + _sv + ')'), _LA.parse(_lo));
+          } catch(e){ ok = false; }
+        }
       } else if(inp.dataset.skriv !== undefined){
         /* UPPSTÄLLNINGEN, inte värdet ännu: med figurens sidor i datan måste elevens uttryck ha
            SAMMA TERMER som sidorna (AlgBrak.sammaTermer, samma funktion som omkretskedjan
@@ -1500,6 +1555,7 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
         else if(inp.dataset.omkrets !== undefined) facit = inp.dataset.visa;   // "3x + 5x + 4x = 12x"
         else if(inp.dataset.skriv !== undefined) facit = inp.dataset.visa;    // uppställningen
+        else if(inp.dataset.likben !== undefined || inp.dataset.likbas !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.insatt !== undefined) facit = inp.dataset.visa;      // ersättningsledet
         else if(inp.dataset.mellanvarde !== undefined) facit = inp.dataset.visa; // tillagt led
         else if(inp.dataset.parentesmellan !== undefined){

@@ -148,11 +148,12 @@
 <!-- PANEL: FÖRELÄSNING — panelen ägs av föreläsningsregistret -->
 <section class="tab-panel" data-panel="forelasningar"></section>
 
-<!-- PANEL: ÖVA — en flik per nivå. Nivå 3 byggs efter granskningen av nivå 2. -->
+<!-- PANEL: ÖVA — en flik per nivå. -->
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
   <div id="blad-niva1" class="blad-mount" hidden></div>
   <div id="blad-niva2" class="blad-mount" hidden></div>
+  <div id="blad-niva3" class="blad-mount" hidden></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -198,7 +199,8 @@
 DelkapitelSkal.montera({
   ova: [
     { titel: 'Nivå 1', mount: 'niva1', blad: [{ titel: 'Nivå 1', id: 'niva1', data: AK8_PARENTES.niva1 }] },
-    { titel: 'Nivå 2', mount: 'niva2', blad: [{ titel: 'Nivå 2', id: 'niva2', data: AK8_PARENTES.niva2 }] }
+    { titel: 'Nivå 2', mount: 'niva2', blad: [{ titel: 'Nivå 2', id: 'niva2', data: AK8_PARENTES.niva2 }] },
+    { titel: 'Nivå 3', mount: 'niva3', blad: [{ titel: 'Nivå 3', id: 'niva3', data: AK8_PARENTES.niva3 }] }
   ],
   taxonomi:    function(){ return window.K3_TAXONOMI; },
   utbudslista: 'ak8k2d3',

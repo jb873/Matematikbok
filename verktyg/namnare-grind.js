@@ -144,6 +144,9 @@ const PROBE7 = `(function(){
       v = dec(d.sidor || '').split('|').filter(Boolean).join(' + ') + ' = ' + dec(d.omkrets);
     // BERÄKNA-KEDJAN (K-B): ersättningsledet bär sitt facit mekaniskt byggt i kärnan, det tillagda
     // ledet har samma värde som svaret. Utan de här två räknades kedjans rutor som ej täckta.
+    // LIKBENT (öppen uppgift): rutorna har inget facit att jämföra mot, bara en likhet. Ett
+    // giltigt exempel ligger i data-visa, och det är vad provet fyller.
+    else if(d.likben !== undefined || d.likbas !== undefined) v = d.visa || null;
     else if(d.insatt !== undefined) v = dec(d.insatt);
     else if(d.mellanvarde !== undefined) v = String(d.mellanvarde).replace('.', ',');
     else if(d.skriv !== undefined)                                                  // uppställningsrutan i två-rute-raden

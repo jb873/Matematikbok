@@ -98,6 +98,10 @@ const PROBE = `(function(){
       if(!rader.length) rader = [g];
       var utan = [];
       rader.forEach(function(r, ri){
+        // MEDVETET UTAN: raden säger själv att den inte har något mellanled, eller bär inget
+        // svar alls (figurrad). Ingen av dem KAN ha plats — och båda är beslut, inte luckor.
+        if(r.dataset && r.dataset.mellanledNej) return;
+        if(!r.querySelector("input, .valruta-grid, .ovn-val-grid, .ovn-flerval-grid")) return;
         var p = harPlats(r);
         if(!p.ok) utan.push('rad ' + (ri + 1) + ' (' + p.rutor + ' ruta)');
       });
