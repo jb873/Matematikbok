@@ -22,7 +22,20 @@
   'use strict';
   var FYLL = 'af-yta', KANT = 'af-kant', TXT = 'af-matt';
 
-  function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  // MINUSTECKEN I ETIKETTERNA: figurens text är matematik, och "4x - 9" ska visas "4x − 9"
+  // precis som i uppgiftstexten. Kopplingen ligger i esc(), som SAMTLIGA etiketter går igenom
+  // (sidmått, hörnbokstäver, enheter, prislappar, sträckor) — inte per etikett, så att en ny
+  // figur får tecknet utan att någon behöver minnas det.
+  //
+  // Kärnans funktion används när den finns; modulen laddas också utan bladkärnan
+  // (provbyggaren), och då gäller samma regel lokalt.
+  function minusUt(s){
+    if(window.BLAD_MINUS_UT) return window.BLAD_MINUS_UT(s);
+    if(s == null) return s;
+    return String(s).replace(/(^|[\s(=])[-\u2013](?=\d|\()/g, "$1\u2212")
+                    .replace(/(\S)\s[-\u2013]\s(?=\S)/g, "$1 \u2212 ");
+  }
+  function esc(s){ return minusUt(String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function svgStart(w, h, alt){ return '<svg class="af-svg" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + esc(alt) + '">'; }
   function poly(punkter){ return '<polygon class="' + FYLL + ' ' + KANT + '" points="' + punkter.map(function(p){ return p[0] + ',' + p[1]; }).join(' ') + '"/>'; }
   // Etikett på sidan mellan p och q, förskjuten UTÅT från figurens mitt.

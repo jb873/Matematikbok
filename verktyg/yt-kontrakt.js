@@ -16,6 +16,9 @@
                  avskaffade gråningsregeln och togs bort 2026-10-03.
      AUTOSPACE   "3+4" skrivet tecken för tecken blir "3 + 4" i en uttrycksruta
      GROW        rutan växer med innehållet
+     TAK         en UTTRYCKSRUTA som ska växa slutar inte växa medan raden har plats kvar. Taket var
+                 en konstant (340 px) och klippte ett riktigt svar mitt i; GROW-benet nådde
+                 aldrig dit, för dess provsträng slutar vid rutans tomma mått
      BRÅK        bråkknappen finns när en ruta ska kunna bära bråk, och bygger i den
      MINUS       keypadens − och tangentbordets - ger samma värde (pNum)
      TUSENTAL    "1 400" och "1400" är samma tal. Tusentalsmellanslag får inte ändra värdet,
@@ -62,6 +65,20 @@ const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 const PROBE = `(function(){
   var LASUPP = ${LASUPP}, LAS = ${LAS}, SABBA = ${JSON.stringify(SABBA)};
   // Saboteringen läggs FÖRE all mätning, på den delade modulen själv — där felet satt.
+  // SABBA tak: lägg tillbaka det gamla taket (340 px) i sidan, så TAK-benet måste fälla.
+  // Växten går via AK8_UI.vaxMedGolv i sjuans kärnor och via AK8_UI.grow för åttans blad; båda
+  // kläms här. Åttans bladmotor kallar sin INTERNA grow och nås inte av den här kroken — TAK-benet
+  // negativt verifieras därför på en yta som växer via namnrymden (d3).
+  if(SABBA === 'tak' && window.AK8_UI){
+    ['grow', 'vaxMedGolv'].forEach(function(namn){
+      var f = AK8_UI[namn];
+      if(typeof f !== 'function') return;
+      AK8_UI[namn] = function(inp, opts){
+        f(inp, opts);
+        if(inp && parseFloat(inp.style.width) > 340) inp.style.width = '340px';
+      };
+    });
+  }
   if(SABBA === 'tusental' && window.AK8_UI && AK8_UI.pNum){
     var _oN = AK8_UI.pNum, _oI = AK8_UI.pInt, _tu = /\\d[\\s\\u00a0\\u202f]\\d/;
     AK8_UI.pNum = function(x){ return _tu.test(String(x)) ? NaN : _oN(x); };
@@ -288,6 +305,36 @@ const PROBE = `(function(){
         if(behovs > Math.round(inre) + 1)
           y.brott.push('GROW: "' + inp.value + '" behöver ' + behovs + ' px men rutan ger '
                      + Math.round(inre) + ' — ' + adress(inp));
+
+        // TAK — en ruta som ska växa måste växa så länge RADEN har plats.
+        // Strängen ovan slutar vid rutans TOMMA mått (~156 px för en svarsruta), alltså långt under
+        // ett tak på 340 px. Därför såg benet aldrig gränsen det skulle vakta, och ett riktigt svar
+        // klipptes mitt i med 246 px kvar på raden. Här fylls rutan vidare, förbi varje rimligt tak.
+        //
+        // HÅLLAREN SÖKS FRÅN FÖRÄLDERN: closest() matchar elementet självt, och svarsrutan bär
+        // .ovn-kedja — en sökning från rutan ger rutan tillbaka och "platsen kvar" blir alltid noll.
+        // BARA UTTRYCKSRUTOR: en talruta, en ordna-ruta eller en tabellcell har en FORM, och
+        // en 520 px-sträng i den prövar ingenting som står där. Ett uttryck kan bli långt av
+        // legitima skäl — fyra sidor i en omkrets, en mellanledskedja — och där gäller taket.
+        if(skaVaxa && uttrycksruta(inp)){
+          var langt = txt;
+          while(c.measureText(langt).width < 520 && langt.length < 170) langt += enhet;
+          inp.value = ''; ev(inp, 'input');
+          langt.split('').forEach(function(ch){ inp.value += ch; ev(inp, 'input'); });
+          var cs2 = getComputedStyle(inp);
+          var inre2 = Math.round(inp.getBoundingClientRect().width
+                    - parseFloat(cs2.paddingLeft || 0) - parseFloat(cs2.paddingRight || 0)
+                    - parseFloat(cs2.borderLeftWidth || 0) - parseFloat(cs2.borderRightWidth || 0));
+          var behov2 = Math.ceil(c.measureText(inp.value).width);
+          var par = inp.parentElement;
+          var holl = par && (par.closest('.ovn-rad, .ak8-rad, .ovn-grupp') || par);
+          var kvar = holl ? Math.round(holl.getBoundingClientRect().right
+                    - (parseFloat(getComputedStyle(holl).paddingRight) || 0)
+                    - inp.getBoundingClientRect().right) : 0;
+          if(behov2 > inre2 + 1 && kvar > 24)
+            y.brott.push('TAK: rutan slutade växa vid ' + inre2 + ' px fast raden hade ' + kvar
+                       + ' px kvar (texten behöver ' + behov2 + ' px) — ' + adress(inp));
+        }
         inp.value = gammalt; ev(inp, 'input');
       });
     })();

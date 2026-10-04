@@ -156,6 +156,27 @@
     }
     return Number(inp.dataset.golv || 0);
   }
+  // TAKET MÄTS, det är ingen konstant. Förr stannade varje ruta på 340 px oavsett hur mycket plats
+  // raden hade. MÄTT på åttans d3, uppgift 3b: rutans eget facit (40 tecken, 334 px) rymdes med sex
+  // pixlars marginal — men en längre text stannade på exakt 340 px fast raden slutade 246 px längre
+  // höger, och efter ändringen växer samma ruta till 557 px. Ett tak på en pixel från att klippa är
+  // inget tak, det är en slump.
+  //
+  // 340 är GOLV för taket, aldrig tak: finns inte så mycket plats — telefonvy, ruta i en tabellcell
+  // — gäller 340 precis som förut, så ingen ruta i boken krymper av det här.
+  function takFor(inp){
+    // HÅLLAREN SÖKS FRÅN FÖRÄLDERN. closest() matchar elementet självt, och svarsrutan bär
+    // .ovn-kedja — en sökning från rutan gav rutan tillbaka, mätte dess plats mot dess egen
+    // högerkant (alltid noll) och föll tillbaka på golvet 340. Mätt: lång text stannade på exakt
+    // 340 px fast raden slutade 246 px längre höger.
+    var p = inp.parentElement;
+    var holl = p && (p.closest('.ovn-rad, .ak8-rad, .ovn-grupp') || p);
+    if(!holl) return 340;
+    var h = holl.getBoundingClientRect(), r = inp.getBoundingClientRect();
+    if(!h.width || !r.width) return 340;                 // omätbar (dold flik): behåll det gamla
+    var pad = parseFloat(getComputedStyle(holl).paddingRight) || 0;
+    return Math.max(340, Math.floor(h.right - pad - r.left - 8));
+  }
   function grow(inp, opts){
     if(!inp) return;
     // Stående bråk-ruta (fr-ruta): KOMPAKT – storlek efter täljare/nämnare, INTE utdragen till textbredd.
@@ -168,7 +189,7 @@
         // än formen klipptes tyst. Samma felklass som exponentrutan: ett mått utan koppling.
         var golvB = egetMatt(inp);
         inp.style.width = '1ch';
-        inp.style.width = Math.max(golvB, Math.min(inp.scrollWidth + 6, 340)) + 'px';
+        inp.style.width = Math.max(golvB, Math.min(inp.scrollWidth + 6, takFor(inp))) + 'px';
         return;
       }
       inp.style.width = '1ch';
@@ -185,7 +206,7 @@
       if(ex && !ex.querySelector('.ovn-brak, .ak8-pot') && ex.querySelectorAll('.ak8-exprtxt').length === 1) min = 74;
     }
     inp.style.width = '1ch';
-    inp.style.width = Math.max(min, Math.min(inp.scrollWidth + 6, 340)) + 'px';
+    inp.style.width = Math.max(min, Math.min(inp.scrollWidth + 6, takFor(inp))) + 'px';
   }
 
   // VÄXT MED RUTANS EGET MÅTT SOM GOLV — för kärnor utanför åttans blad (sjuans bråk-släkt), där

@@ -201,6 +201,27 @@ function jamforForm(a, godkanda){
   return godkanda.some(function(g){return norm(g)===na;});
 }
 // (hjälpare ur k1-d3, flyttade till kärnan 2026-09-19)
+// MINUSTECKEN I MATEMATISK TEXT: − (U+2212), inte bindestreck (-) och inte tankstreck (–).
+// Eleven skriver − i rutan (autoSpace byter tecknet), så uppgiftstexten måste visa samma tecken
+// — annars står två olika minus på samma rad. Omvandlingen görs HÄR, i renderingen, så att
+// DATAN kan fortsätta vara ASCII för rättarna: en omskriven datasträng hade tvingat varje
+// rättare att känna tecknet.
+//
+// Regeln byter minus mellan två led (med mellanrum) och framför ett tal eller en parentes —
+// aldrig inuti ett ord: "x-axeln" och "tre-vägs" behåller sitt bindestreck, för där står
+// tecknet utan mellanrum.
+function minusUt(s){
+  if(s == null) return s;
+  return String(s)
+    .replace(/(^|[\s(=])[-\u2013](?=\d|\()/g, "$1\u2212")      // unärt: −5, −(x + 1)
+    .replace(/(\S)\s[-\u2013]\s(?=\S)/g, "$1 \u2212 ");        // mellan två led: 4x − 9
+}
+window.BLAD_MINUS_UT = minusUt;   // figurmodulen och minus-grinden använder samma funktion
+
+// DELUPPGIFTENS BOKSTAV. Tom bokstav = ingen etikett: gruppen har bara en uppgift, och då finns
+// inget att skilja den från. Funktionen finns för att regeln ska gälla varje radtyp, också de som
+// skrivs i morgon — förr stod utskriften på tjugo ställen.
+function lbl(b){ return b ? '<span class="ovn-label">' + b + ')</span>' : ''; }
 // Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
 function visaTal(t){
   var s = String(t).replace('.', ',');
@@ -350,15 +371,19 @@ function bladHTML(blad){
          här. En omformulerad rubrik ändrar då ingenting. */
       + (grupp.mellanled ? ' data-mellanled="' + grupp.mellanled + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
+    // EN DELUPPGIFT = INGEN BOKSTAV. "a)" finns för att man ska kunna säga "tal 4 b"; har gruppen
+    // bara en uppgift finns inget att skilja, och bokstaven blir en etikett utan funktion
+    // (Joachims granskning 2026-10-04). Figurrader bär inget svar och räknas inte med.
+    var _delar = grupp.rader.filter(function(r){ return r.typ !== 'figur' && r.typ !== 'svgfigur'; }).length;
     grupp.rader.forEach(function(rad){
       // En figurrad bär inget svar — den hör till uppgiften och ska inte ta en bokstav, annars
       // hoppar deluppgifterna över a) varje gång en figur står först.
       if(rad.typ !== 'figur') radNummer++;
-      var bokstav = String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
+      var bokstav = _delar <= 1 ? '' : String.fromCharCode(96 + ((radNummer - 1) % 26) + 1); // a, b, c...
       // (radtyper ur k1-d10/k3-d7 — plugg till prov — flyttade till kärnan 2026-09-19; kolliderande namn omdöpta)
       if(rad.typ === 'faktor'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span class="ovn-text ovn-num">' + rad.tal + ' =</span>';
         html += '<input class="ovn-in bred" data-faktor="' + rad.tal + '" data-antal="' + rad.antal
           + '" inputmode="text" autocomplete="off">';   // platshållare: ledning, ej exempel (facit-läcka borttagen)
@@ -376,7 +401,7 @@ function bladHTML(blad){
       // BRAKTEXT: visa bråk grafiskt (ev. med heltal framför), elev skriver decimalform
       if(rad.typ === 'brakText'){
         html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         if(rad.heltal){
           html += '<span class="ovn-text ovn-num" style="font-size:22px;margin-right:2px;">' + rad.heltal + '</span>';
         }
@@ -395,7 +420,7 @@ function bladHTML(blad){
       // FLERVAL: välj flera tal ur en lista (t.ex. "vilka är delbara med 3")
       if(rad.typ === 'flerval'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         var ratta = rad.ratt.map(function(x){ return String(x); }).join(',');
         html += '<div class="ovn-flerval-grid" data-ratt="' + ratta + '">';
         rad.tal.forEach(function(t){
@@ -407,7 +432,7 @@ function bladHTML(blad){
       // INTERVALL: öppet svar – vilket tal som helst inom intervallet godtas
       if(rad.typ === 'intervallEn'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         html += '<input class="ovn-in bred" data-intmin="' + rad.min + '" data-intmax="' + rad.max
           + '" data-exkl="' + (rad.exkl ? '1' : '0') + '" inputmode="decimal" autocomplete="off">';
@@ -417,7 +442,7 @@ function bladHTML(blad){
       // FÖLJD: talföljd – givna tal visas, eleven fyller i de tre nästa
       if(rad.typ === 'foljd'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span class="ovn-text ovn-num" style="font-size:19px;">'
           + rad.givna.join('   ') + '   …</span>';
         html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:6px;">';
@@ -431,7 +456,7 @@ function bladHTML(blad){
       // TEXT: en fråga, ett textsvar (ord eller uttryck)
       if(rad.typ === 'fragaText'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
         var accept = (rad.accept || [rad.svar]).join('|');
         html += '<input class="ovn-in bred" data-fritext="' + encodeURIComponent(accept)
@@ -442,7 +467,7 @@ function bladHTML(blad){
       // ORDNA: tal som ska sorteras – eleven skriver i ordning i fält
       if(rad.typ === 'ordningsfoljd'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span class="ovn-text" style="width:100%;font-size:16px;color:var(--ink-faint);">Talen: '
           + rad.tal.join('  ·  ') + '</span>';
         html += '<div style="display:flex;gap:8px;flex-wrap:wrap;width:100%;margin-top:6px;">';
@@ -457,7 +482,7 @@ function bladHTML(blad){
       // VAL: flervalsfråga – knappar, en är rätt
       if(rad.typ === 'val'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         /* VALFRI FRAGETEXT (additiv): para-ihop-uppgifter behover visa VILKET uttryck som ska
            matchas. Utan fraga ritas raden precis som forut. */
         if(rad.fraga) html += '<span class="ovn-text" style="min-width:150px;">' + rad.fraga + '</span>';
@@ -474,7 +499,7 @@ function bladHTML(blad){
         // Problem med tidssvar: timmar + minuter i två fält
         html += '<div class="prob-rad" data-rad="' + radNummer + '">';
         html += '<div class="prob-fraga">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span>' + rad.fraga + '</span>';
         html += '</div>';
         html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
@@ -496,7 +521,7 @@ function bladHTML(blad){
         // Problem har egen layout: fråga + kladdruta + svar/enhet
         html += '<div class="prob-rad" data-rad="' + radNummer + '">';
         html += '<div class="prob-fraga">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span>' + rad.fraga + '</span>';
         html += '</div>';
         html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
@@ -517,7 +542,7 @@ function bladHTML(blad){
       // Bråk-uppgifter: täljare/nämnare visas som riktigt bråk
       if(rad.typ === 'brak' || rad.typ === 'brakLucka'){
         html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         // Bråk-blocket
         html += '<span class="ovn-brak">';
         if(rad.typ === 'brakLucka' && rad.luckaPos === 'taljare'){
@@ -559,7 +584,7 @@ function bladHTML(blad){
       if(rad.typ === 'ordna'){
         var sorterat = rad.tal.slice().sort(function(a,b){ return rad.fallande ? b-a : a-b; });
         html += '<div class="ovn-rad ovn-ordna-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span class="ovn-ordna-prompt">' + (rad.fraga || (rad.fallande ? 'Störst till minst:' : 'Minst till störst:')) + '</span>';
         html += '<span class="ovn-ordna-set">{ ' + rad.tal.map(function(t){ return visaTal(t); }).join(', ') + ' }</span>';
         html += '<span class="ovn-ordna-svar">';
@@ -591,7 +616,7 @@ function bladHTML(blad){
       // loggas av kärnans slinga, så tabellen behöver ingen egen rättning.
       if(rad.typ === 'tabell'){
         html += '<div class="ovn-rad ovn-tabellrad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<table class="monster-tabell"><tbody>';
         html += '<tr><th>' + rad.etiketter[0] + '</th>'
               + rad.huvud.map(function(h){ return '<td>' + h + '</td>'; }).join('') + '</tr>';
@@ -610,7 +635,7 @@ function bladHTML(blad){
         html += '<div class="ovn-rad ovn-oppenfoljd" data-rad="' + radNummer + '"'
               + ' data-villkor="' + encodeURIComponent(JSON.stringify(rad.villkor)) + '"'
               + ' data-rutor="' + rad.rutor + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         for(var oi = 0; oi < rad.rutor; oi++){
           if(oi > 0) html += '<span class="ovn-foljd-komma">,</span>';
           html += '<input class="ovn-in ovn-oppen-in" inputmode="text" autocomplete="off">';
@@ -621,7 +646,7 @@ function bladHTML(blad){
 
       if(rad.typ === 'talfoljd'){
         html += '<div class="ovn-rad ovn-foljd-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += '<span class="ovn-foljd-led">';
         rad.termer.forEach(function(t, k){
           if(k>0) html += '<span class="ovn-foljd-komma">,</span>';
@@ -640,7 +665,7 @@ function bladHTML(blad){
       // Tallinje: SVG med pilar A/B/C, eleven skriver vad varje pil pekar på
       if(rad.typ === 'tallinje'){
         html += '<div class="ovn-rad ovn-tallinje-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:flex-start;gap:10px;">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         // bygg SVG
         var W=620, H=70, x0=30, x1=590, mn=rad.min, mx=rad.max;
         function px(v){ return x0 + (v-mn)/(mx-mn)*(x1-x0); }
@@ -674,7 +699,7 @@ function bladHTML(blad){
       }
       // räkna om bokstav per grupp
       html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-      html += '<span class="ovn-label">' + bokstav + ')</span>';
+      html += lbl(bokstav);
       if(rad.typ === 'enkel'){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         // FAS2: subtraktion av negativt tal → omskrivningscell (värde-rättad) före svaret. Klassen
@@ -716,19 +741,50 @@ function bladHTML(blad){
         var _pk = rad.mellanled || grupp.mellanled
           || (window.MellanledRattare ? window.MellanledRattare.kravAv(rad.uttryck) : null) || 'kravt';
         var _pv = rad.vars || 'xy';
-        html += '<span class="ovn-text ovn-num">' + rad.uttryck + '</span>';
+        html += '<span class="ovn-text ovn-num">' + minusUt(rad.uttryck) + '</span>';
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
         html += '<input class="ovn-in bred" data-parentesmellan="' + encodeURIComponent(rad.uttryck)
           + '" data-krav="' + _pk + '" data-kp="uttryck" data-vars="' + _pv + '" inputmode="text" autocomplete="off">';
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        /* data-visa: facitraden läser den för en forenkla-ruta. Utan den stod det
+           "rätt svar: undefined" för varje fel svar på raden. */
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
-          + '" data-kp="uttryck" data-vars="' + _pv + '" inputmode="text" autocomplete="off">';
+          + '" data-kp="uttryck" data-vars="' + _pv + '" data-visa="' + minusUt(rad.svar)
+          + '" inputmode="text" autocomplete="off">';
         /* VALFRI VARDERUTA: uppgiften kan bade be om forenkling och om vardet for ett givet x.
            Dokumentets egen form ar EN uppgift, sa den ritas som en rad och inte som tva. */
         if(rad.varde){
           html += '<span class="ovn-text" style="margin:0 6px;">' + rad.varde.insatt + '</span>';
           html += '<input class="ovn-in" data-svar="' + rad.varde.svar + '" inputmode="decimal" autocomplete="off">';
         }
+      } else if(rad.typ === 'skrivforenkla'){
+        /* SKRIVA = FÖRENKLA: två rutor i stället för en. Eleven SKRIVER uppställningen i den
+           första och FÖRENKLAR i den andra; står det minus framför en parentes kommer
+           mellanledsrutan emellan. Figuren och frågetexten är valfria — en omkrets har figur, ett
+           problem har text, och båda använder samma rad. */
+        var _kv = rad.vars || varsAv(rad);
+        var _ku = rad.skriv || (rad.sidor ? rad.sidor.join(' + ') : '');
+        var _km = rad.mellanled || grupp.mellanled
+          || (rad.skriv && window.MellanledRattare ? window.MellanledRattare.kravAv(rad.skriv) : null);
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
+        if(rad.fraga) html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + rad.fraga + '</span>';
+        html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html += '<input class="ovn-in bred" data-skriv="' + encodeURIComponent(_ku) + '"'
+          + (rad.sidor ? ' data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '"' : '')
+          + ' data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(_ku)
+          + '" inputmode="text" autocomplete="off">';
+        if(_km && rad.skriv){
+          html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+          html += '<input class="ovn-in bred" data-parentesmellan="' + encodeURIComponent(rad.skriv)
+            + '" data-krav="' + _km + '" data-kp="uttryck" data-vars="' + _kv
+            + '" inputmode="text" autocomplete="off">';
+        }
+        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
+          + '" data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(rad.svar)
+          + '" inputmode="text" autocomplete="off">';
+        html += '</div></div>';
       } else if(rad.typ === 'forenkla'){
         // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
         // Rättas av AlgBrak.gradePoly — värde + skriven form, två åtskilda besked. data-vars öppnar
@@ -967,9 +1023,9 @@ function bygg_blad(rotEl, blad){
   // Räkna om radbokstäver så att varje grupp börjar om från 'a'
   rotEl.querySelectorAll('.ovn-grupp').forEach(function(g){
     var bok = 96;
-    g.querySelectorAll('.ovn-label').forEach(function(lbl){
+    g.querySelectorAll('.ovn-label').forEach(function(etikett){
       bok++;
-      lbl.textContent = String.fromCharCode(bok) + ')';
+      etikett.textContent = String.fromCharCode(bok) + ')';
     });
   });
 
@@ -1041,7 +1097,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1116,6 +1172,17 @@ function bygg_blad(rotEl, blad){
           : { status: 'fel' };
         ok = _rm.status === 'ratt';
         if(_rm.besked) _besked = _rm.besked;
+      } else if(inp.dataset.skriv !== undefined){
+        /* UPPSTÄLLNINGEN, inte värdet ännu: med figurens sidor i datan måste elevens uttryck ha
+           SAMMA TERMER som sidorna (AlgBrak.sammaTermer, samma funktion som omkretskedjan
+           använder). I ett problem finns inga sidor — där räcker värdelikhet, eftersom flera
+           skrivsätt är lika riktiga ("x + x + 55 + 2x" och "x + (x + 55) + 2x"). */
+        var _AB = window.AlgBrak;
+        var _ks = decodeURIComponent(inp.dataset.skriv);
+        var _kd = inp.dataset.sidor ? decodeURIComponent(inp.dataset.sidor).split('|').filter(Boolean) : null;
+        if(!_AB) ok = false;
+        else if(_kd && _kd.length) ok = _AB.sammaTermer(inp.value, _kd);
+        else { try { ok = _AB.pointEqual(_AB.parse(inp.value), _AB.parse(_ks)); } catch(e){ ok = false; } }
       } else if(inp.dataset.forenkla !== undefined){
         // FÖRENKLA: värde + skriven form (AlgBrak.gradePoly). 'form' = rätt värde men inte förenklat
         // → räknas som fel, men beskedet talar om VAD som är kvar att göra (samma två lägen som bråken).
@@ -1261,12 +1328,24 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.faktor !== undefined) facit = 'produkt = ' + parseInt(inp.dataset.faktor, 10) + ', ' + parseInt(inp.dataset.antal, 10) + ' faktorer (minst 2 var)';
         else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
         else if(inp.dataset.omkrets !== undefined) facit = inp.dataset.visa;   // "3x + 5x + 4x = 12x"
+        else if(inp.dataset.skriv !== undefined) facit = inp.dataset.visa;    // uppställningen
+        else if(inp.dataset.parentesmellan !== undefined){
+          /* Mellanledet: facitet byggs ur uttrycket av rättarens egen funktion. Grenen behövs
+             även när beskedet räcker — utan den föll raden igenom till dataset.svar, som inte
+             finns på den här rutan. */
+          var _mt = window.MellanledRattare
+            ? window.MellanledRattare.facitTermer(decodeURIComponent(inp.dataset.parentesmellan)) : null;
+          facit = _mt ? _mt.map(function(x, k){
+            return k === 0 ? x : (String(x)[0] === '-' ? ' - ' + String(x).slice(1) : ' + ' + x);
+          }).join('') : '';
+        }
         else if(inp.dataset.forenkla !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.oppet !== undefined) facit = 'ett eget uttryck med ' + inp.dataset.termer + ' termer som förenklas till ' + inp.dataset.visa;
         else facit = inp.dataset.svar.replace('.', ',');
         var f = document.createElement('span');
         f.className = 'ovn-fasit';
-        f.textContent = _besked ? _besked : ('rätt svar: ' + facit);   // 'form'-läget: beskedet i stället för facit (eleven har rätt värde)
+        // minusUt på facitet: här passerar VARJE facit, oavsett vilket data-attribut det kom ur
+      f.textContent = _besked ? _besked : ('rätt svar: ' + minusUt(facit));   // 'form'-läget: beskedet i stället för facit (eleven har rätt värde)
         inp.insertAdjacentElement('afterend', mark);
         mark.insertAdjacentElement('afterend', f);
       }

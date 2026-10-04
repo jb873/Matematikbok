@@ -51,27 +51,32 @@
 
       // 3 ── figur: triangel och rektangel. Sidorna är datan; facit är deras summa. ─────────
       { rubrik: 'Skriv ett uttryck för figurens omkrets och förenkla det', logg: NOD_RAKNA, rader: [
-        { typ: 'omkrets', svg: F ? F.sidtriangel({ sidor: ['7', '4x - 9', '5'], enhet: 'cm' }) : '',
+        /* TVÅ RUTOR: uppställningen i den första, förenklingen i den andra. Förr låg båda i samma
+           ruta, och då syntes inte vilket av stegen som brast — dessutom klipptes raden i en smal
+           vy, eftersom fyra sidor adderade blir 326 px text i en ruta som får 275 px. */
+        { typ: 'skrivforenkla', fraga: 'Omkrets',
+          svg: F ? F.sidtriangel({ sidor: ['7', '4x - 9', '5'], enhet: 'cm' }) : '',
           sidor: ['7', '4x - 9', '5'], svar: '4x + 3', vars: 'x' },
-        { typ: 'omkrets', svg: F ? F.rektangel({ bredd: '3x + 4', hojd: 'x - 2', enhet: 'cm' }) : '',
+        { typ: 'skrivforenkla', fraga: 'Omkrets',
+          svg: F ? F.rektangel({ bredd: '3x + 4', hojd: 'x - 2', enhet: 'cm' }) : '',
           sidor: ['3x + 4', 'x - 2', '3x + 4', 'x - 2'], svar: '8x + 4', vars: 'x' }
       ]},
 
       // 4 ── förståelseträning: eleven väljer, räknar inte. Loggas inte. ───────────────────
-      { rubrik: 'Utgå från det förenklade uttrycket 3x – 2y. Vilket eller vilka av uttrycken stämmer?',
+      { rubrik: 'Utgå från det förenklade uttrycket 3x − 2y. Vilket eller vilka av uttrycken stämmer?',
         loggarEj: 'förståelseträning: eleven väljer mellan givna uttryck i stället för att räkna, färdigheten mäts inte här',
         rader: [
           { typ: 'val', fraga: 'Vilket uttryck stämmer?',
-            alternativ: ['(5x – y) – (7y – 2y)', '(4x – 2y) – (7y – x)',
-                         '(5x – 2x) – (3y – y)', '(5x – y) + (3y – 2x)'],
-            svar: '(5x – 2x) – (3y – y)' }
+            alternativ: ['(5x − y) − (7y − 2y)', '(4x − 2y) − (7y − x)',
+                         '(5x − 2x) − (3y − y)', '(5x − y) + (3y − 2x)'],
+            svar: '(5x − 2x) − (3y − y)' }
         ]},
 
       // 5 ── figur, flerval. Räknas som figur och loggas (Joachims besked). ────────────────
       { rubrik: 'Vilket uttryck stämmer för rektangelns omkrets?', logg: NOD_RAKNA, rader: [
         { typ: 'svgfigur', svg: F ? F.rektangel({ bredd: '3x - 4', hojd: 'x + 5', enhet: 'cm' }) : '' },
         { typ: 'val', fraga: 'Rektangelns omkrets är',
-          alternativ: ['8x – 2', '8x + 2', '6x + 2', '4x + 1'], svar: '8x + 2' }
+          alternativ: ['8x − 2', '8x + 2', '6x + 2', '4x + 1'], svar: '8x + 2' }
       ]},
 
       // 6 ── förenkla och sätt in x = 3 ────────────────────────────────────────────────────
@@ -107,27 +112,29 @@
       { rubrik: 'Para ihop uttrycket med samma uttryck utan parentes',
         loggarEj: 'förståelseträning: eleven matchar givna uttryck i stället för att räkna, färdigheten mäts inte här',
         rader: [
-          { typ: 'val', fraga: '9x + (4x – 2)',
-            alternativ: ['9x + 4x + 2', '9x – 4x + 2', '9x – 4x – 2', '9x + 4x – 2'], svar: '9x + 4x – 2' },
-          { typ: 'val', fraga: '9x – (4x + 2)',
-            alternativ: ['9x + 4x + 2', '9x – 4x + 2', '9x – 4x – 2', '9x + 4x – 2'], svar: '9x – 4x – 2' },
-          { typ: 'val', fraga: '9x – (4x – 2)',
-            alternativ: ['9x + 4x + 2', '9x – 4x + 2', '9x – 4x – 2', '9x + 4x – 2'], svar: '9x – 4x + 2' },
+          { typ: 'val', fraga: '9x + (4x − 2)',
+            alternativ: ['9x + 4x + 2', '9x − 4x + 2', '9x − 4x − 2', '9x + 4x − 2'], svar: '9x + 4x − 2' },
+          { typ: 'val', fraga: '9x − (4x + 2)',
+            alternativ: ['9x + 4x + 2', '9x − 4x + 2', '9x − 4x − 2', '9x + 4x − 2'], svar: '9x − 4x − 2' },
+          { typ: 'val', fraga: '9x − (4x − 2)',
+            alternativ: ['9x + 4x + 2', '9x − 4x + 2', '9x − 4x − 2', '9x + 4x − 2'], svar: '9x − 4x + 2' },
           { typ: 'val', fraga: '9x + (4x + 2)',
-            alternativ: ['9x + 4x + 2', '9x – 4x + 2', '9x – 4x – 2', '9x + 4x – 2'], svar: '9x + 4x + 2' }
+            alternativ: ['9x + 4x + 2', '9x − 4x + 2', '9x − 4x − 2', '9x + 4x − 2'], svar: '9x + 4x + 2' }
         ]},
 
       // 11 ── vad saknas i parentesen ──────────────────────────────────────────────────────
       { rubrik: 'Vad saknas för att likheten ska gälla?', logg: NOD_RAKNA, rader: [
-        { typ: 'lucka', text: '5 – (x + __ ) = 2 – x', svar: 3 },
-        { typ: 'lucka', text: '6 – (2x – __ ) = 11 – 2x', svar: 5 }
+        { typ: 'lucka', text: '5 − (x + __ ) = 2 − x', svar: 3 },
+        { typ: 'lucka', text: '6 − (2x − __ ) = 11 − 2x', svar: 5 }
       ]},
 
       // 12 ── problem ──────────────────────────────────────────────────────────────────────
       { rubrik: 'Skriv ett uttryck och förenkla det', logg: NOD_PROBLEM, rader: [
-        { typ: 'forenkla', vars: 'x',
-          fraga: 'Sven har x kronor. Anna har 55 kr mer än Sven. Harald har dubbelt så mycket som Sven. Hur mycket har de tillsammans?',
-          svar: '4x + 55' }
+        /* EN deluppgift — ingen "a)". Uppställningen rättas på värde: "x + x + 55 + 2x" och
+           "x + (x + 55) + 2x" är lika riktiga sätt att skriva samma sak. */
+        { typ: 'skrivforenkla', vars: 'x',
+          fraga: 'Sven har x kronor. Anna har 55 kr mer än Sven. Harald har dubbelt så mycket som Sven. Skriv ett uttryck för hur mycket pengar de har tillsammans och förenkla sedan uttrycket.',
+          skriv: 'x + x + 55 + 2x', svar: '4x + 55' }
       ]},
 
       // 13 ── Vilgot, med prislappar i stället för bokens foto ─────────────────────────────
@@ -136,8 +143,12 @@
           { typ: 'svgfigur', svg: F ? F.prislappar({ varor: [{ namn: 'Smörgås', pris: 'x kr' },
                                                          { namn: 'Banan', pris: '6 kr' }] }) : '' },
           { typ: 'forenkla', vars: 'x', fraga: 'Hur mycket ska Vilgot betala?', svar: '2x + 6' },
-          p('546 - (2x + 6)', '540 - 2x',
-            { fraga: 'Hur mycket har han kvar när han har betalat?' })
+          /* Uttrycket står INTE i texten längre: förr skrevs "546 - (2x + 6)" ut, och då var
+             svaret på a) redan givet. Eleven skriver det själv i första rutan, och
+             mellanledsrutan kommer emellan av sig själv — det står minus framför parentesen. */
+          { typ: 'skrivforenkla', vars: 'x',
+            fraga: 'Hur mycket har han kvar när han har betalat?',
+            skriv: '546 - (2x + 6)', svar: '540 - 2x' }
         ]},
 
       // 14 ── förenkla och sätt in x = 7 ───────────────────────────────────────────────────

@@ -137,7 +137,20 @@ const PROBE7 = `(function(){
     else if(d.tvatal !== undefined){ var par = Array.from(inp.closest('.ovn-rad, .ovn-grupp').querySelectorAll('.ovn-in[data-tvatal]')); v = String(d.tvatal.split(',')[par.indexOf(inp) % 2] || d.tvatal.split(',')[0]).replace('.', ','); }
     else if(d.min !== undefined){ var lo = parseFloat(d.min), hi = parseFloat(d.max), p2 = Array.from(inp.closest('.ovn-grupp, .ovn-rad').querySelectorAll('.ovn-intervall[data-par="' + d.par + '"]')); v = String(lo + (hi - lo) * (p2.indexOf(inp) === 1 ? 0.6 : 0.4)).replace('.', ','); }
     else if(d.summa !== undefined){ var s = parseFloat(d.summa), grp = Array.from(inp.closest('.ovn-rad, .ovn-grupp').querySelectorAll('.ovn-in[data-summa]')); var k = grp.indexOf(inp), n = grp.length; v = String(k === n - 1 ? s - (n - 1) : 1); }
-    else if(d.forenkla !== undefined) v = d.visa;                                   // k3 d3: förenklat uttryck (facit i data-visa)
+    else if(d.forenkla !== undefined) v = d.visa || dec(d.forenkla);                 // förenklat uttryck — data-visa, annars attributet självt
+    // Tre ruttyper som förr räknades som "ej täckta" — facitet byggs ur DATAN (ASCII), inte ur
+    // data-visa, som sedan minusUt bär minustecken.
+    else if(d.omkrets !== undefined)                                                // omkretskedja: sidorna adderade = förenklingen
+      v = dec(d.sidor || '').split('|').filter(Boolean).join(' + ') + ' = ' + dec(d.omkrets);
+    else if(d.skriv !== undefined)                                                  // uppställningsrutan i två-rute-raden
+      v = (d.sidor ? dec(d.sidor).split('|').filter(Boolean).join(' + ') : dec(d.skriv));
+    else if(d.parentesmellan !== undefined){                                        // mellanledet: facit ur rättarens egen funktion
+      var MR = window.MellanledRattare;
+      if(MR){
+        var _t = MR.facitTermer(dec(d.parentesmellan));
+        v = _t.map(function(x, k){ return k === 0 ? x : (String(x)[0] === '-' ? ' - ' + String(x).slice(1) : ' + ' + x); }).join('');
+      }
+    }
     else if(d.oppet !== undefined){                                                 // eget uttryck med n termer som förenklas till målet
       var mm = dec(d.oppet).replace(/\\u2212/g, '-').replace(/\\s+/g, '').match(/^(-?\\d*)([a-z])([+-]\\d+)$/);
       if(mm){ var kk = mm[1] === '' ? 1 : (mm[1] === '-' ? -1 : parseInt(mm[1], 10)), kn = parseInt(mm[3], 10);
@@ -152,7 +165,9 @@ const PROBE7 = `(function(){
     else if(d.mellan !== undefined) v = d.mellan;
     else if(d.enhet !== undefined) v = d.enhet;
     else if(d.rund !== undefined) v = d.rund.split('|')[0];
-    if(v === null){ b.ejTackta++; return; }
+    // == null, inte === null: ett undefined skrevs förr in i rutan som strängen "undefined"
+    // och dömdes som fel svar, i stället för att räknas som ej täckt. Samma felklass som V11.
+    if(v == null){ b.ejTackta++; return; }
     inp.value = v; ev(inp, 'input');
   }
   function mat(namn, root){
