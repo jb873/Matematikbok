@@ -227,7 +227,7 @@ window.BLAD_MINUS_UT = minusUt;   // figurmodulen och minus-grinden använder sa
 //
 // Växeln står här, på ETT ställe, därför att svaret är Joachims och ändringen ska vara ett ord.
 // 'underkanns' kräver dessutom ett besked, och besked är elevtext.
-var SKRIV_FORENKLAT = 'godtas';
+var SKRIV_FORENKLAT = 'underkanns';   // Joachims beslut 2026-10-04
 
 // Kedjans knappar. Samma ordalydelse som åttans fria kedja (ak8-blad-ui) — texten står i ett
 // fält så elevtext-låset ser den, och den är densamma på båda ytorna med flit.

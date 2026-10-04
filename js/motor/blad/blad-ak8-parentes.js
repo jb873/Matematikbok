@@ -15,7 +15,25 @@
    datan. Uppgift 5 räknas som figur och loggas.
 
    FIGURERNA ritas ur den delade SvgAlgebraFigur med samma sidlista som facit — figuren och
-   rättaren kan inte driva isär. Bokens inskannade bilder används inte. */
+   rättaren kan inte driva isär. Bokens inskannade bilder används inte.
+
+   ── JOACHIMS BESLUT OM NIVÅ 2 OCH 3 (fattade 2026-10-04, innan nivåerna byggs) ──
+
+   LINUS (nivå 2, dokumentets §18). Frågetexten är:
+     "Skriv ett uttryck för hur många bilder han har kvar och förenkla det."
+   Uppgiften ger (13x + 3) - (4x - 5): minus framför parentes, alltså mellanled (regel 7), och
+   två rutor enligt K-C. Uttrycket skrivs INTE ut i uppgiftstexten (R2).
+
+   SUMMA-UPPGIFTEN MED BRÅK (nivå 3, dokumentets §14). TRE rutor: skriva, ta bort parenteserna,
+   förenkla. Frågetexten är:
+     "Summan av två uttryck är x + y. Det ena uttrycket är x/8 - y/6. Vilket är det andra
+      uttrycket? Visa lösningen med ett uttryck och förenkla uttrycket."
+   (Bråken skrivs staplat i bladet, som allt annat i boken.)
+
+   GENVÄGEN I SKRIVA-RUTAN är stängd: SKRIV_FORENKLAT = 'underkanns' i blad-karna-b. Eleven ska
+   först skriva ett korrekt uttryck och sedan förenkla; ett redan förenklat uttryck i första
+   rutan är fel, även om värdet stämmer. Ett annat RIKTIGT skrivsätt godtas fortfarande
+   (mätt: "x + (x + 55) + 2x" godkänns i Svens uppgift). */
 (function(){
   'use strict';
   var F = window.SvgAlgebraFigur;
