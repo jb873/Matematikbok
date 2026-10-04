@@ -101,6 +101,68 @@
     return figur(pts, o.sidor, o, w, h, 'Femhörning med sidorna ' + o.sidor.join(', '));
   }
 
+  /* ── L-FIGUR (urtag i nedre högra hörnet) ──────────────────────────────────────────────────
+     SEX sidor, uppräknade medurs från övre vänstra hörnet:
+       0 topp · 1 höger · 2 urtagets överkant · 3 urtagets sida · 4 botten · 5 vänster
+     Sidorna ÄR datan — samma lista som går till AlgBrak.gradeOmkrets, så figuren och facit kan
+     inte skilja sig åt. Urtagets mått står utsatta med flit (Joachim 2026-10-04): utan dem går
+     figuren inte att räkna på term för term, även om omkretsen råkar bli 2·(bredd + höjd).
+
+     SAMMANHANGET SOM MÅSTE HÅLLA, och som bladets fuzz prövar:
+       sida 0 = sida 4 + sida 2    (toppen är botten plus urtagets bredd)
+       sida 5 = sida 1 + sida 3    (vänstra sidan är högra plus urtagets höjd)
+     En sidlista som bryter mot det ritar en figur som inte går ihop. */
+  function lfigur(o){
+    var sidor = o.sidor || [];
+    var w = 300, h = 190, x0 = 54, y0 = 30, bw = 190, bh = 120, uw = 78, uh = 48;
+    var pts = [[x0, y0], [x0 + bw, y0], [x0 + bw, y0 + bh - uh],
+               [x0 + bw - uw, y0 + bh - uh], [x0 + bw - uw, y0 + bh], [x0, y0 + bh]];
+    return figur(pts, sidor, o, w, h,
+      o.alt || ('L-formad figur med sidorna ' + sidor.filter(Boolean).join(', ')));
+  }
+
+  /* ── STRÄCKFIGUR — "hur lång är den röda sträckan?" ────────────────────────────────────────
+     HELHETEN står alltid utsatt ovanför (Joachim 2026-10-04) — utan den går uppgiften inte att
+     lösa. Delarna står under; den del som saknar text är den sökta och ritas i avvikande färg.
+     Delarnas bredd i bilden är schematisk: talen står i etiketterna, och figuren ska inte gå att
+     mäta med linjal i stället för att räknas ut. */
+  function strackfigur(o){
+    var delar = o.delar || [], n = delar.length;
+    var w = 320, h = 104, x0 = 26, xs = w - 26, y = 62, bredd = (xs - x0) / Math.max(n, 1);
+    var s2 = svgStart(w, h, o.alt || ('Str\u00e4cka ' + o.helhet + ' delad i ' + n + ' delar'));
+    s2 += '<line class="af-matt" x1="' + x0 + '" y1="28" x2="' + xs + '" y2="28"/>'
+       +  '<line class="af-matt" x1="' + x0 + '" y1="22" x2="' + x0 + '" y2="34"/>'
+       +  '<line class="af-matt" x1="' + xs + '" y1="22" x2="' + xs + '" y2="34"/>'
+       +  '<text class="' + TXT + '" x="' + ((x0 + xs) / 2) + '" y="18" text-anchor="middle">' + esc(o.helhet) + '</text>';
+    delar.forEach(function(d, i){
+      var a = x0 + i * bredd, b = a + bredd, sokt = !d.text;
+      s2 += '<line class="af-del' + (sokt ? ' af-sokt' : '') + '" x1="' + a + '" y1="' + y + '" x2="' + b + '" y2="' + y + '"/>'
+         +  '<line class="af-matt" x1="' + a + '" y1="' + (y - 6) + '" x2="' + a + '" y2="' + (y + 6) + '"/>'
+         +  '<line class="af-matt" x1="' + b + '" y1="' + (y - 6) + '" x2="' + b + '" y2="' + (y + 6) + '"/>'
+         +  '<text class="' + TXT + (sokt ? ' af-sokt-txt' : '') + '" x="' + ((a + b) / 2) + '" y="' + (y + 22) + '" text-anchor="middle">'
+         +  esc(d.text || '?') + '</text>';
+    });
+    return s2 + undertext(o, w, h) + '</svg>';
+  }
+
+  /* ── PRISLAPP — varan och dess pris ────────────────────────────────────────────────────────
+     Bokens prisbilder är fotografier, och skannade bilder kommer inte in på sidan. Här ritas en
+     lapp per vara i stället. Ett uttryck (x kr) är ett pris lika gärna som ett tal — det är hela
+     poängen med uppgiften. */
+  function prislappar(o){
+    var varor = o.varor || [], n = varor.length;
+    var bw = 118, mellan = 18, w = n * bw + (n - 1) * mellan + 20, h = 86;
+    var s2 = svgStart(w, h, o.alt || ('Prislappar: ' + varor.map(function(v){ return v.namn + ' ' + v.pris; }).join(', ')));
+    varor.forEach(function(v, i){
+      var x = 10 + i * (bw + mellan);
+      s2 += '<rect class="af-lapp" x="' + x + '" y="14" width="' + bw + '" height="54" rx="7"/>'
+         +  '<text class="' + TXT + ' af-lapp-namn" x="' + (x + bw / 2) + '" y="36" text-anchor="middle">' + esc(v.namn) + '</text>'
+         +  '<text class="' + TXT + ' af-lapp-pris" x="' + (x + bw / 2) + '" y="58" text-anchor="middle">' + esc(v.pris) + '</text>';
+    });
+    return s2 + undertext(o, w, h) + '</svg>';
+  }
+
   window.SvgAlgebraFigur = { rektangel: rektangel, fyrhorning: fyrhorning, triangel: triangel, femhorning: femhorning,
-                             vinkeltriangel: vinkeltriangel, sidtriangel: sidtriangel };
+                             vinkeltriangel: vinkeltriangel, sidtriangel: sidtriangel,
+                             lfigur: lfigur, strackfigur: strackfigur, prislappar: prislappar };
 })();

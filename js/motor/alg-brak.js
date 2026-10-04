@@ -251,7 +251,13 @@
   }
   function sammaTermer(uttryck, sidor){
     var a = termerAv(uttryck).sort();
-    var b = (sidor || []).map(function(x){ return String(x).replace(/\s+/g, '').replace(/[·*]/g, '').toLowerCase(); }).sort();
+    /* Sidorna PLATTAS UT med samma funktion som elevens uttryck. En sida kan vara flertermig
+       (2a + b i L-figuren, x + 5 i en rektangel), och jämförelsen gäller TERMERNA: eleven skriver
+       sidorna adderade på en rad utan parenteser, så 2a + b blir två termer där. För entermiga
+       sidor är utplattningen identitet — alltså oförändrat beteende för allt som fanns förut. */
+    var b = [];
+    (sidor || []).forEach(function(x){ b = b.concat(termerAv(x)); });
+    b = b.sort();
     if(a.length !== b.length) return false;
     for(var i = 0; i < a.length; i++) if(a[i] !== b[i]) return false;
     return true;
