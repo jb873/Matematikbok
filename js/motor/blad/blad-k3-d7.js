@@ -67,12 +67,12 @@ var PLUGG_DOKUMENT = {
         {typ:'enkel', vansterText:'(−4) + (−2) =', svar:-6},
         {typ:'enkel', vansterText:'6 + (−13) =', svar:-7}
       ]},
-      {rubrik:'Beräkna – visa mellanled', rader:[
+      {rubrik:'Beräkna – visa mellanled', mellanled:'kravt', rader:[
         {typ:'overslag', vansterText:'3 − (−5)', mellan:'3+5', svar:8},
         {typ:'overslag', vansterText:'(−6) − (−2)', mellan:'-6+2', svar:-4},
         {typ:'overslag', vansterText:'−15 − (−11)', mellan:'-15+11', svar:-4}
       ]},
-      {rubrik:'Beräkna – visa mellanled', rader:[
+      {rubrik:'Beräkna – visa mellanled', mellanled:'kravt', rader:[
         {typ:'overslag', vansterText:'(−8) + (−2) + 5', mellan:'-8-2+5', svar:-5},
         {typ:'overslag', vansterText:'9 + (−6) − (−2)', mellan:'9-6+2', svar:5},
         {typ:'overslag', vansterText:'(−4) − 5 + (−1) − (−7)', mellan:'-4-5-1+7', svar:-3}

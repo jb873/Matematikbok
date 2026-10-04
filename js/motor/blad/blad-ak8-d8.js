@@ -52,6 +52,9 @@
   // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
 
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
+  /* GM = grupp som KRÄVER mellanled. Kravet står i DATAN, vid gruppen, inte i rubriktexten:
+     en omformulerad rubrik ändrar ingenting, och verktyg/mellanled-grind.js läser flaggan. */
+  function GM(){ var g = G.apply(null, arguments); g.mellanled = 'kravt'; return g; }
 
   // ══════════════════════════ DATA — EN KÄLLA FÖR ÖVA OCH TEST (order 2026-09-21, FAS 5) ══════════════════════════
   // Talen som tupler. Raderna nedan OCH testets banker (talBank(nod) → ak8-k1-ram) byggs ur samma tupler, så
@@ -95,16 +98,16 @@
     G('Invertera följande tal (skriv det inverterade talet)', DATA.reciprok.map(function(x){ return INV(x[0], x[1]); })),
     G('Beräkna', DATA.hbStam.map(function(x){ return radHB(x, 'kan'); })),
     G('Beräkna', DATA.bhStam.map(radBH)),
-    G('Beräkna med metoden förlänga – visa mellanledet som staplat bråk, svara i enklaste form', DATA.forlanga.map(function(p){ return radBB(p, 'forlanga'); })),
-    G('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', DATA.invertera.map(function(p){ return radBB(p, 'eq'); }))
+    GM('Beräkna med metoden förlänga – visa mellanledet som staplat bråk, svara i enklaste form', DATA.forlanga.map(function(p){ return radBB(p, 'forlanga'); })),
+    GM('Beräkna med metoden invertera – visa mellanled, svara i enklaste form', DATA.invertera.map(function(p){ return radBB(p, 'eq'); }))
   ] };
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
   var BLAD2 = { key: 'B2', titel: 'Division med bråk – blad 2', uppg: [
-    G('Beräkna – visa mellanled (två varianter går bra)', DATA.hb.map(function(x){ return radHB(x, 'eq'); })),
+    GM('Beräkna – visa mellanled (två varianter går bra)', DATA.hb.map(function(x){ return radHB(x, 'eq'); })),
     G('Beräkna', DATA.bh.map(radBH)),
-    G('Beräkna – visa mellanled, förkorta innan beräkning', DATA.forkorta.map(function(p){ return radBB(p, 'eq'); })),
-    G('Beräkna – visa mellanled, svara i enklaste form', DATA.blandad.map(radBlandad)),
+    GM('Beräkna – visa mellanled, förkorta innan beräkning', DATA.forkorta.map(function(p){ return radBB(p, 'eq'); })),
+    GM('Beräkna – visa mellanled, svara i enklaste form', DATA.blandad.map(radBlandad)),
     G('Beräkna – blandade räknesätt', DATA.prio.map(radPrio))
   ] };
 
@@ -167,7 +170,7 @@
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
-    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
+    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp"' + AK8_UI.gruppAttr(g) + '>' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
       + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';

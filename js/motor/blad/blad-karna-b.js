@@ -1325,7 +1325,10 @@ function bygg_blad(rotEl, blad){
         var ov = evalUttryck(inp.value);
         ok = !isNaN(ov) && Math.abs(ov - parseFloat(inp.dataset.oms)) < 1e-9;
       } else if(inp.dataset.mellan){
-        ok = jamforMellan(inp.value, inp.dataset.mellan);
+        // FLERA GODTAGBARA MELLANLED: facit får vara en |-lista. "Talsorterna var för sig" kan
+        // skrivas som talsorternas summor (500 + 100 + 10) eller utskrivet (200 + 300 + 30 + 70 + 2 + 8),
+        // och båda visar metoden. Ett ensamt facit fungerar som förut.
+        ok = String(inp.dataset.mellan).split('|').some(function(f){ return jamforMellan(inp.value, f); });
       } else if(inp.dataset.enhet){
         ok = jamforEnhet(inp.value, inp.dataset.enhet);
       } else if(inp.dataset.term !== undefined){

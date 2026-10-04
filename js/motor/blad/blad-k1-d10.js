@@ -290,10 +290,10 @@ var PLUGG_DOKUMENT = {
         {typ:'enkel', vansterText:'296,7 + 371,8 =', svar:668.5},
         {typ:'enkel', vansterText:'13,67 + 48,4 =', svar:62.07}
       ]},
-      {rubrik:'Beräkna med talsorterna var för sig', rader:[
-        {typ:'enkel', vansterText:'232 + 378 =', svar:610},
-        {typ:'enkel', vansterText:'956 + 356 =', svar:1312},
-        {typ:'enkel', vansterText:'748 + 252 =', svar:1000}
+      {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[
+        {typ:'mellan', vansterText:'232 + 378 =', mellan:'500 + 100 + 10|200 + 300 + 30 + 70 + 2 + 8', svar:610},
+        {typ:'mellan', vansterText:'956 + 356 =', mellan:'1200 + 100 + 12|900 + 300 + 50 + 50 + 6 + 6', svar:1312},
+        {typ:'mellan', vansterText:'748 + 252 =', mellan:'900 + 90 + 10|700 + 200 + 40 + 50 + 8 + 2', svar:1000}
       ]},
       {rubrik:'Beräkna med metoden flytta över', rader:[
         {typ:'enkel', vansterText:'864 + 298 =', svar:1162},
@@ -310,10 +310,10 @@ var PLUGG_DOKUMENT = {
         {typ:'enkel', vansterText:'367 · 6 =', svar:2202},
         {typ:'enkel', vansterText:'26,45 · 4 =', svar:105.8}
       ]},
-      {rubrik:'Beräkna med talsorterna var för sig', rader:[
-        {typ:'enkel', vansterText:'7 · 64 =', svar:448},
-        {typ:'enkel', vansterText:'6 · 643 =', svar:3858},
-        {typ:'enkel', vansterText:'4 · 2 816 =', svar:11264}
+      {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[
+        {typ:'mellan', vansterText:'7 · 64 =', mellan:'420 + 28|7 · 60 + 7 · 4', svar:448},
+        {typ:'mellan', vansterText:'6 · 643 =', mellan:'3600 + 240 + 18|6 · 600 + 6 · 40 + 6 · 3', svar:3858},
+        {typ:'mellan', vansterText:'4 · 2 816 =', mellan:'8000 + 3200 + 40 + 24|4 · 2000 + 4 · 800 + 4 · 10 + 4 · 6', svar:11264}
       ]},
       {rubrik:'Beräkna med kort division', rader:[
         {typ:'enkel', vansterText:'462 / 3 =', svar:154},

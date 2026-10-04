@@ -36,6 +36,8 @@ const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 // --sabba: för negativ verifiering. Behandlar en VANLIG grupp som om den bar markören, så att
 // en enkel ruta måste fälla. Samma sorts krok som slump-fuzz --sabba.
 const SABBA = args.includes('--sabba');
+// --sabba drift: motprov för drift-benet (kravet i rubriken men inte i datan).
+const SABBA_DRIFT = args.includes('drift');
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
 /* LEGACY-VOKABULÄREN. Metodnamn som BÄR signalen utan att ha markören.
@@ -54,9 +56,10 @@ const VOKABULAR = [
 
 const PROBE = `(function(){
   var SABBA = ${SABBA};
+  var SABBA_DRIFT = ${SABBA_DRIFT};
   var VOK = ${JSON.stringify(VOKABULAR.map(v => v.nyckel))};
   function synlig(el){ return !!el.offsetParent; }
-  var ut = { grupper: [], onerr: window.__onerr || null };
+  var ut = { grupper: [], onerr: window.__onerr || null , drift: [] };
 
   // En rad har PLATS för mellanled om den har två svarsrutor, eller bär en kedje-/mellanledsstruktur.
   function harPlats(rad){
@@ -74,11 +77,22 @@ const PROBE = `(function(){
       var txt = rub ? (rub.textContent || '').replace(/\\s+/g, ' ').trim() : '';
       if(!txt) return;
       var lag = txt.toLowerCase();
+      // KRAVET LIGGER I DATAN. Rubriken läses bara för att upptäcka DRIFT: säger den "visa
+      // mellanled" medan datan är tyst har kravet tappats bort på vägen.
+      var flagga = g.dataset.mellanled || '';
       var markor = /visa\\s+mellanled/.test(lag);
       var legacy = VOK.filter(function(v){ return lag.indexOf(v) >= 0; });
-      // --sabba: låt FÖRSTA gruppen på ytan räknas som markör-bärande, så en enkel ruta måste fälla.
-      if(SABBA && gi === 0 && !markor && !legacy.length){ markor = true; txt = txt + '  [SABBA: behandlas som markör]'; }
-      if(!markor && !legacy.length) return;
+      // --sabba: låt FÖRSTA gruppen på ytan räknas som kravbärande, så en enkel ruta måste fälla.
+      if(SABBA && gi === 0 && !flagga){ flagga = 'kravt'; txt = txt + '  [SABBA: behandlas som kravt]'; }
+      // --sabba drift: ta BORT flaggan från en grupp som har den. Rubriken säger fortfarande
+      // "visa mellanled", och då ska drift-benet fälla — det är regressionen migreringen stänger.
+      if(SABBA_DRIFT && flagga){ flagga = ''; }
+      if(!flagga && (markor || legacy.length)){
+        ut.drift.push({ yta: yta, rubrik: txt.slice(0, 60),
+          varfor: markor ? 'rubriken s\\u00e4ger "visa mellanled"' : 'metodnamnet "' + legacy[0] + '"' });
+        return;
+      }
+      if(!flagga) return;
 
       var rader = Array.prototype.filter.call(g.querySelectorAll('.ovn-rad, .ak8-rad'), synlig);
       if(!rader.length) rader = [g];
@@ -87,7 +101,7 @@ const PROBE = `(function(){
         var p = harPlats(r);
         if(!p.ok) utan.push('rad ' + (ri + 1) + ' (' + p.rutor + ' ruta)');
       });
-      ut.grupper.push({ yta: yta, rubrik: txt.slice(0, 60), signal: markor ? 'markör' : 'legacy:' + legacy[0],
+      ut.grupper.push({ yta: yta, rubrik: txt.slice(0, 60), signal: 'data:' + flagga,
                         rader: rader.length, utanPlats: utan });
     });
   }
@@ -103,7 +117,7 @@ const PROBE = `(function(){
 const TMP = path.join(os.tmpdir(), 'mellanledgrind-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);
 
-let fel = 0, grupper = 0, markorGrupper = 0, legacyGrupper = 0;
+let fel = 0, grupper = 0, markorGrupper = 0, legacyGrupper = 0, drift = 0;
 const sedda = {};          // vilka vokabulär-poster som faktiskt träffade en rubrik
 console.log('MELLANLED-GRIND — en uppgift som begär mellanled måste ha plats för det\n');
 
@@ -118,9 +132,17 @@ Sidor.blad().forEach(sida => {
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + u.onerr.slice(0, 2).join(' | ')); }
   MP.rakna(sida, (u.grupper || []).length);
 
+  // DRIFT: rubriken begär mellanled men datan är tyst. Det är kravet som tappats bort på vägen,
+  // och den enda vägen tillbaka till läget före omläggningen.
+  (u.drift || []).forEach(d => {
+    drift++; fel++;
+    sedda[(d.varfor.match(/metodnamnet "(.*)"/) || [])[1] || ''] = 1;
+    console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + d.yta + ' · "' + d.rubrik
+      + '": ' + d.varfor + ', men gruppen saknar mellanled i datan');
+  });
   (u.grupper || []).forEach(g => {
     grupper++;
-    if(g.signal === 'markör') markorGrupper++; else { legacyGrupper++; sedda[g.signal.replace('legacy:', '')] = 1; }
+    markorGrupper++;   // alla flaggade grupper räknas lika: kravet står i datan
     MP.varde(sida, g.rubrik, { rader: g.rader, utanPlats: g.utanPlats.length });
     const adress = sida.replace(/\/index\.html$/, '') + ' · ' + g.yta + ' · "' + g.rubrik + '"';
     if(!g.utanPlats.length){ console.log('✓ ' + adress + ' [' + g.signal + '] ' + g.rader + ' rader, alla med plats'); return; }
@@ -134,12 +156,15 @@ try { fs.unlinkSync(TMP); } catch(e){}
 // Vokabulären är bevis-prövad: en post som inte träffar någon rubrik är gammal och ska bort.
 console.log('\nLEGACY-VOKABULÄR (' + VOKABULAR.length + ' poster — mål: noll)');
 VOKABULAR.forEach(v => {
+  // Posten är befogad så länge NÅGON grupp bär metodnamnet utan flagga. Bär alla flaggan är
+  // posten gammal — listan har gjort sitt och ska krympa.
   const traff = !!sedda[v.nyckel];
-  if(!traff && !BARA){ fel++; console.log('  ✗ "' + v.nyckel + '" matchar ingen renderad rubrik längre — posten är gammal, ta bort den'); }
-  else console.log('  ' + (traff ? '·' : '?') + ' "' + v.nyckel + '" — ' + v.skal);
+  if(traff) console.log('  · "' + v.nyckel + '" — drift kvar: ' + v.skal);
+  else console.log('  ✓ "' + v.nyckel + '" — alla s\u00e5dana grupper b\u00e4r nu flaggan; posten kan tas bort');
 });
 
 fel += MP.granska();
-console.log('\n' + grupper + ' grupper med mellanledssignal (' + markorGrupper + ' markör · ' + legacyGrupper + ' legacy)');
+console.log('\n' + grupper + ' grupper med mellanledskrav i DATAN'
+  + (drift ? ' · ' + drift + ' med kravet bara i rubriken (drift)' : ' · ingen drift'));
 console.log(fel ? '✗ MELLANLED-GRIND RÖD (' + fel + ')' : '✓ MELLANLED-GRIND GRÖN');
 process.exit(fel ? 1 : 0);

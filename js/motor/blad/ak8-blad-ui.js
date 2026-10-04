@@ -636,24 +636,16 @@
     var pr = mount.querySelector('[data-print]'); if(pr) pr.onclick = function(){ window.print(); };
   }
 
-  // ── K-A: EN DELUPPGIFT = INGEN BOKSTAV ──
-  // Bokstaven skiljer deluppgifter åt; har gruppen bara en finns inget att skilja. Regeln mäts i
-  // den FÄRDIGA sidan, i samma termer som verktyg/uppgift-grind.js, därför att de nio renderare
-  // som skriver bokstaven räknar deluppgifter på nio olika sätt. Idempotent.
-  //
-  // .ovn-label bär två saker i boken: deluppgiftens bokstav ("a)") och, i två k2-kopior, gruppens
-  // nummer ("1."). Bara bokstaven rörs.
-  function enDeluppgiftUtanBokstav(rot){
-    (rot || document).querySelectorAll('.ovn-grupp').forEach(function(g){
-      var bok = [].filter.call(g.querySelectorAll('.ovn-label'), function(e){
-        return /^[a-z\u00e5\u00e4\u00f6]\s*\)$/i.test((e.textContent || '').trim());
-      });
-      if(!bok.length) return;
-      var barande = [].filter.call(g.querySelectorAll('.ovn-rad'), function(r){
-        return r.querySelector('input, .valruta-grid, .ovn-val-grid, .ovn-flerval-grid');
-      });
-      if(Math.max(barande.length, bok.length) <= 1) bok.forEach(function(e){ e.remove(); });
-    });
+  // ── GRUPPENS ATTRIBUT UR DATAN ──
+  // Tio filer byggde gruppomslaget själva, och ingen av dem bar mellanledsflaggan vidare när
+  // kravet flyttades till datan. Attributen skrivs här, på ETT ställe: data-logg (mastery),
+  // data-loggar-ej (medvetet ologgad grupp, skälet i markupen) och data-mellanled (kravet).
+  function gruppAttr(g){
+    if(!g) return '';
+    return (g.logg ? ' data-logg="' + g.logg + '"' : '')
+         + (g.loggStore ? ' data-logg-store="' + g.loggStore + '"' : '')
+         + (g.loggarEj ? ' data-loggar-ej="' + g.loggarEj + '"' : '')
+         + (g.mellanled ? ' data-mellanled="' + g.mellanled + '"' : '');
   }
 
   // ── K-A: EN DELUPPGIFT = INGEN BOKSTAV ──
@@ -735,7 +727,9 @@
     opts = opts || {};
     var html = '<div class="ovn-sheet"><h2>' + titel + '</h2>';
     grupper.forEach(function(g, gi){
-      html += '<div class="ovn-grupp"' + (g.logg ? ' data-logg="' + g.logg + '"' : '') + '>' + renderGrupp(g, gi + 1, renderRad) + '</div>';
+      // data-mellanled: kravet står i DATAN (GM-hjälparen i bladens datafiler) och bärs hit, så
+      // att verktyg/mellanled-grind.js läser en flagga i stället för att tolka rubriktexten.
+      html += '<div class="ovn-grupp"' + gruppAttr(g) + '>' + renderGrupp(g, gi + 1, renderRad) + '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button>'
       + '<button type="button" class="ovn-aterstall" data-reset>' + (opts.resetLabel || 'Återställ') + '</button>';
@@ -753,7 +747,7 @@
 
   window.AK8_UI = {
     enDeluppgiftUtanBokstav: enDeluppgiftUtanBokstav,
-    enDeluppgiftUtanBokstav: enDeluppgiftUtanBokstav,
+    gruppAttr: gruppAttr,
     pNum: pNum, pInt: pInt, avTusental: avTusental, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
     grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,

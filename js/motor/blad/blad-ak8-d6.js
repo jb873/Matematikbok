@@ -33,6 +33,9 @@
   // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
 
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
+  /* GM = grupp som KRÄVER mellanled. Kravet står i DATAN, vid gruppen, inte i rubriktexten:
+     en omformulerad rubrik ändrar ingenting, och verktyg/mellanled-grind.js läser flaggan. */
+  function GM(){ var g = G.apply(null, arguments); g.mellanled = 'kravt'; return g; }
 
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Addition och subtraktion med bråk', uppg: [
@@ -46,19 +49,19 @@
       R('2 − ' + fr(4,9), [14,9], null, 0, MI(1,5,9)),
       R('5 − ' + mx(2,3,11), [30,11], null, 0, MI(2,8,11))
     ]),
-    G('Beräkna – visa mellanled, svara i enklaste form', [
+    GM('Beräkna – visa mellanled, svara i enklaste form', [
       R(fr(4,5) + ' + ' + fr(3,5), [7,5], null, 1, MI(1,2,5)),
       R(fr(6,7) + ' − ' + fr(2,7), [4,7], null, 0, BR(4,7)),
       R(fr(3,4) + ' + ' + fr(5,8), [11,8], 'fix', 1, MI(1,3,8)),
       R(fr(7,12) + ' − ' + fr(1,6), [5,12], 'fix', 0, BR(5,12))
     ]),
-    G('Beräkna med bråktal – visa mellanled och svara i enklaste form', [
+    GM('Beräkna med bråktal – visa mellanled och svara i enklaste form', [
       R(fr(2,3) + ' + ' + fr(3,5), [19,15], 'toggle', 1, MI(1,4,15)),
       R(fr(3,4) + ' − ' + fr(1,6), [7,12], 'toggle', 0, BR(7,12)),
       R(fr(2,5) + ' + ' + fr(7,8), [51,40], 'toggle', 1, MI(1,11,40)),
       R(fr(3,5) + ' − ' + fr(1,4), [7,20], 'toggle', 0, BR(7,20))
     ]),
-    G('Beräkna med blandad form – visa mellanled, svara i enklaste form', [
+    GM('Beräkna med blandad form – visa mellanled, svara i enklaste form', [
       R(mx(1,1,2) + ' + ' + mx(2,3,7), [55,14], 'toggle', 0, MI(3,13,14)),
       R(mx(2,3,4) + ' − ' + mx(1,5,8), [9,8], 'toggle', 0, MI(1,1,8)),
       R(mx(3,4,9) + ' + ' + mx(2,5,6), [113,18], 'toggle', 1, MI(6,5,18)),
@@ -72,26 +75,26 @@
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
   var BLAD2 = { key: 'B2', titel: 'Addition och subtraktion med bråk – blad 2', uppg: [
-    G('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
+    GM('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
       R(mx(2,4,5) + ' + ' + mx(3,1,4), [121,20], 'toggle', 1, MI(6,1,20)),
       L(mx(5,1,3) + ' − ' + mx(2,3,4), [31,12], MI(2,7,12)),
       R(mx(6,5,9) + ' + ' + mx(3,5,6), [187,18], 'toggle', 1, MI(10,7,18))
     ]),
-    G('Beräkna – visa mellanled och svara i enklaste form', [
+    GM('Beräkna – visa mellanled och svara i enklaste form', [
       R(fr(1,2) + ' + ' + fr(1,3) + ' + ' + fr(1,4), [13,12], 'toggle', 1, MI(1,1,12)),
       R(fr(2,5) + ' + ' + fr(3,4) + ' + ' + fr(9,10), [41,20], 'toggle', 1, MI(2,1,20)),
       R(fr(6,8) + ' + ' + fr(3,5) + ' − ' + fr(17,20), [1,2], 'toggle', 1, BR(1,2))
     ]),
-    G('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
+    GM('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
       R(mx(7,3,4) + ' + ' + mx(2,5,6) + ' + ' + mx(3,5,8), [341,24], 'toggle', 1, MI(14,5,24)),
       R(mx(4,1,5) + ' − ' + mx(6,2,3) + ' + ' + mx(3,1,2), [31,30], 'toggle', 0, MI(1,1,30)),
       R(mx(3,3,5) + ' − ' + mx(8,5,6) + ' + ' + mx(4,2,3), [-17,30], 'toggle', 1, BR(-17,30))
     ]),
-    G('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
+    GM('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
       L(mx(4,1,6) + ' − ' + mx(1,3,8), [67,24], MI(2,19,24)),
       L(mx(5,2,7) + ' − ' + mx(3,5,6), [61,42], MI(1,19,42))
     ]),
-    G('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
+    GM('Beräkna – visa mellanled (behöver inte visa förlängning) och svara i enklaste form', [
       R(mx(6,3,4) + ' + ' + mx(1,7,15) + ' − ' + mx(4,2,3) + ' + ' + mx(3,5,6) + ' − ' + mx(2,11,12), [67,15], 'toggle', 1, MI(4,7,15)),
       R(mx(9,5,12) + ' − ' + mx(2,5,18) + ' + ' + mx(1,11,20) + ' − ' + mx(2,37,45), [88,15], 'toggle', 2, MI(5,13,15))
     ])
@@ -119,7 +122,7 @@
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
-    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
+    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp"' + AK8_UI.gruppAttr(g) + '>' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
       + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';

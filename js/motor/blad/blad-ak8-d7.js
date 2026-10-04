@@ -31,6 +31,9 @@
   // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
 
   function G(rubrik, rader, hint, opts){ var sf = opts && opts.svarform; if(sf) rader.forEach(function(r){ r.svarform = sf; }); return { rubrik: rubrik, rader: rader, hint: hint, svarform: sf || 'enklaste' }; }
+  /* GM = grupp som KRÄVER mellanled. Kravet står i DATAN, vid gruppen, inte i rubriktexten:
+     en omformulerad rubrik ändrar ingenting, och verktyg/mellanled-grind.js läser flaggan. */
+  function GM(){ var g = G.apply(null, arguments); g.mellanled = 'kravt'; return g; }
   var FRI = { fri: true };
 
   // ══════════════════════════ DATA — EN KÄLLA FÖR ÖVA OCH TEST (order 2026-09-21, FAS 3) ══════════════════════════
@@ -67,7 +70,7 @@
   // ══════════════════════════ BLAD 1 ══════════════════════════
   var BLAD1 = { key: 'B1', titel: 'Multiplikation med bråk', uppg: [
     G('Beräkna – visa ett mellanled, svara i blandad form', DATA.hb.map(radHB), null, { svarform: 'blandad' }),   // "svara i blandad form" — 15/4 ger 'form', inte rätt (Joachim 2026-09-15)
-    G('Beräkna – visa mellanled och svara i enklaste form', DATA.bb.map(radBB)),
+    GM('Beräkna – visa mellanled och svara i enklaste form', DATA.bb.map(radBB)),
     G('Förkorta och beräkna', DATA.produkt.map(radProdukt)),
     G('Beräkna – ta bort ett mellanled, räkna i huvudet, svara i enklaste form', DATA.huvud.map(radHuvud)),
     G('Beräkna – svara i enklaste form', DATA.hm.map(radHM)),
@@ -76,9 +79,9 @@
 
   // ══════════════════════════ BLAD 2 ══════════════════════════
   var BLAD2 = { key: 'B2', titel: 'Multiplikation med bråk – blad 2', uppg: [
-    G('Beräkna – visa mellanled och förenkla innan beräkning, svara i enklaste form', DATA.mm.map(radMM)),
+    GM('Beräkna – visa mellanled och förenkla innan beräkning, svara i enklaste form', DATA.mm.map(radMM)),
     G('Förkorta och beräkna', DATA.tre.map(radTre)),
-    G('Beräkna – visa mellanled, förenkla innan beräkning, svara i enklaste form', DATA.mm2.map(radMM))
+    GM('Beräkna – visa mellanled, förenkla innan beräkning, svara i enklaste form', DATA.mm2.map(radMM))
   ] };
 
   // talBank(nod) — TESTETS talkälla: samma tupler som raderna ovan.
@@ -115,7 +118,7 @@
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
-    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
+    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp"' + AK8_UI.gruppAttr(g) + '>' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
       + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';

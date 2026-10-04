@@ -189,7 +189,8 @@ function bladHTML(blad){
   // bladmotorerna, så regeln inte kan glömmas bort i en radtyp.
   function lbl(bok){ return bok ? '<span class="ovn-label">' + bok + ')</span>' : ''; }
   blad.grupper.forEach(function(grupp, gi){
-    html += '<div class="ovn-grupp">';
+    // data-mellanled: kravet står i DATAN, inte i rubriktexten (se mellanled-grind).
+    html += '<div class="ovn-grupp"' + (grupp.mellanled ? ' data-mellanled="' + grupp.mellanled + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     var radNummer = 0;
     /* K-A: en deluppgift får ingen bokstav. Bokstaven skiljer deluppgifter åt, och har gruppen

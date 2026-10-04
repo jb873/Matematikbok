@@ -31,6 +31,9 @@
   // facit = full kedja ur transkriptionen (visas vid Kontrollera).
   function K(vanster, svar, facit){ return { typ:'kedja', vanster:vanster, svar:svar, facit:facit }; }
   function G(rubrik, rader){ return { rubrik:rubrik, rader:rader }; }
+  /* GM = grupp som KRÄVER mellanled. Kravet står i DATAN, vid gruppen, inte i rubriktexten:
+     en omformulerad rubrik ändrar ingenting, och verktyg/mellanled-grind.js läser flaggan. */
+  function GM(){ var g = G.apply(null, arguments); g.mellanled = 'kravt'; return g; }
 
   // ─────────── BLAD 1 · ×÷ med 10, 100 och 1000 ───────────
   var BLAD_1 = { nr:1, titel:'Multiplikation och division med 10, 100 och 1000', nod:'mult-rakna:pow10', uppg:[
@@ -43,13 +46,13 @@
   // ─────────── BLAD 2 · Små tal ───────────
   var BLAD_2 = { nr:2, titel:'Multiplicera och dividera med små tal', nod:'div-rakna:sma', uppg:[
     G('Beräkna', [ T('6 · 0,5 =', 3), T('12 · 0,25 =', 3), T('5 · 0,2 =', 1), T('11 · 0,2 =', 2.2) ]),
-    G('Beräkna – visa mellanled', [
+    GM('Beräkna – visa mellanled', [
       K(frac(8,'0,1'), 80, '8/0,1 = 8·10 / 0,1·10 = 80/1 = 80'),
       K(frac(6,'0,5'), 12, '6/0,5 = 6·2 / 0,5·2 = 12/1 = 12'),
       K(frac(7,'0,2'), 35, '7/0,2 = 7·5 / 0,2·5 = 35/1 = 35'),
       K(frac(5,'0,25'), 20, '5/0,25 = 5·4 / 0,25·4 = 20/1 = 20') ]),
     G('Beräkna', [ T('0,4 · 0,3 =', 0.12), T('0,7 · 0,7 =', 0.49), T('0,05 · 0,9 =', 0.045), T('0,04 · 0,08 =', 0.0032) ]),
-    G('Beräkna – visa mellanled', [
+    GM('Beräkna – visa mellanled', [
       K(frac(32,'0,4'), 80, '32/0,4 = 32·10 / 0,4·10 = 320/4 = 80'),
       K(frac('5,4','0,3'), 18, '5,4/0,3 = 5,4·10 / 0,3·10 = 54/3 = 18'),
       K(frac(93,'0,03'), 3100, '93/0,03 = 93·100 / 0,03·100 = 9300/3 = 3100'),
@@ -66,19 +69,19 @@
 
   // ─────────── BLAD 4 · Stora och små tal ───────────
   var BLAD_4 = { nr:4, titel:'Multiplicera och dividera med stora och små tal', nod:'div-rakna:storasma', uppg:[
-    G('Beräkna – visa mellanled', [
+    GM('Beräkna – visa mellanled', [
       K('900 · 0,2', 180, '900·0,2 = 90·2 = 180'),
       K('30000 · 0,04', 1200, '30000·0,04 = 300·4 = 1200'),
       K('4000000 · 0,007', 28000, '4000000·0,007 = 4000·7 = 28000') ]),
-    G('Beräkna – visa mellanled', [
+    GM('Beräkna – visa mellanled', [
       K(frac(132,300), 0.44, '132/300 = 132 / 3·100 = 1,32/3 = 0,44'),
       K(frac(78,200), 0.39, '78/200 = 78 / 2·100 = 0,78/2 = 0,39'),
       K(frac(12000000,'0,003'), 4000000000, '12000000/0,003 = 12000000·1000 / 0,003·1000 = 12000000000/3 = 4000000000') ]),
-    G('Beräkna – visa mellanled', [
+    GM('Beräkna – visa mellanled', [
       K('1200000 · 0,06', 72000, '1200000·0,06 = 12000·6 = 72000'),
       K('14000 · 0,003', 42, '14000·0,003 = 14·3 = 42'),
       K('22000000 · 0,0006', 13200, '22000000·0,0006 = 2200·6 = 13200') ]),
-    G('Beräkna – visa mellanled', [
+    GM('Beräkna – visa mellanled', [
       K(frac('0,08 · 0,6','0,3'), 0.16, '(0,08·0,6)/0,3 = 0,048/0,3 = 0,48/3 = 0,16'),
       K(frac('40000 · 0,08','0,04 · 5'), 16000, '(40000·0,08)/(0,04·5) = 3200/0,2 = 32000/2 = 16000'),
       K(frac('50 · 0,3','0,05'), 300, '(50·0,3)/0,05 = (5·3)/0,05 = 1500/5 = 300') ])
@@ -109,7 +112,7 @@
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
-    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
+    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp"' + AK8_UI.gruppAttr(g) + '>' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
     html += AK8_UI.keypadHTML({ ops:[',', '·', '/', '−'], builders:true });
     mount.innerHTML = html;

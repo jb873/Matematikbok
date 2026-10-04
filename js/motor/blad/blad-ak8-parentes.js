@@ -17,6 +17,34 @@
    FIGURERNA ritas ur den delade SvgAlgebraFigur med samma sidlista som facit — figuren och
    rättaren kan inte driva isär. Bokens inskannade bilder används inte.
 
+   ── DE ELVA GODKÄNDA FÖRSLAGEN (bokens bildfigurer ersatta — läs aldrig en bokfigur igen) ──
+
+   Varje uppgift som var en inskannad bild i Joachims dokument har ersatts av ett förslag han
+   godkänt. Talen nedan ÄR uppgiften. Nivå 1:s sju är byggda; nivå 2:s och 3:s fyra väntar.
+
+   NIVÅ 1 (byggda, talen hämtade ur datan nedan)
+     3 a  triangel 7 · 4x - 9 · 5                               facit  4x + 3
+     3 b  rektangel 3x + 4 och x - 2                            facit  8x + 4
+     5    rektangel 3x - 4 och x + 5, flerval                   facit  8x + 2
+     7    rektangel 4x och 2x + 3                               facit  12x + 6
+     8    triangel ABC, AB = 4x - 5, BC = 6x + 9, omkrets 14x   facit  4x - 4   (sidan AC)
+     10   para ihop  9x ± (4x ± 2)                              fyra par
+     13   Vilgot: smörgås x kr, banan 6 kr, konto 546 kr        facit  2x + 6 och 540 - 2x
+
+   NIVÅ 2 OCH 3 (ej byggda — Joachims beslut 2026-10-04, facit kontrollräknade)
+     2:14 a  sträcka, helhet 12, vänster del 2x + 1             facit  11 - 2x
+     2:14 b  sträcka, helhet 40, vänster x + 3, höger 2x - 1    facit  38 - 3x
+     2:3019  rektangel (4x + 2) × x mot liksidig triangel
+             med sidan 2x + 3 — hur mycket större omkrets       facit  4x - 5
+     3:3030  rektanglarna x × (x + 4) och (x - 12) × x
+             — hur mycket större omkrets                        facit  32
+
+   UTAN GODKÄNDA TAL ÄNNU (bilduppgifter vars siffror fortfarande är bokens):
+     2:57    Maja och Noa — kilopriserna och mängderna
+     3:15    L-figuren — sidorna
+     3:20    uttryckspyramiden — uttrycken i rutorna
+   De tre ska ha egna tal innan de byggs, av samma skäl som de elva ovan.
+
    ── JOACHIMS BESLUT OM NIVÅ 2 OCH 3 (fattade 2026-10-04, innan nivåerna byggs) ──
 
    LINUS (nivå 2, dokumentets §18). Frågetexten är:
@@ -66,7 +94,7 @@
     grupper: [
 
       // 1 ──────────────────────────────────────────────────────────────────────────────────
-      { rubrik: 'Förenkla uttrycket – visa mellanled', logg: NOD_RAKNA, rader: [
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
         p('9x + (2x + 6)',  '11x + 6'),
         p('7x + (5x - 7)',  '12x - 7'),
         p('5x - (x + 5)',   '4x - 5'),
@@ -74,7 +102,7 @@
       ]},
 
       // 2 ──────────────────────────────────────────────────────────────────────────────────
-      { rubrik: 'Förenkla uttrycket – visa mellanled', logg: NOD_RAKNA, rader: [
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
         p('7x + 9 + (5x + 6)',   '12x + 15'),
         p('7x - (4x - 5y) + 2y', '3x + 7y'),
         p('(15y + 4) - (6y + 7)','9y - 3'),
@@ -112,7 +140,7 @@
       ]},
 
       // 6 ── förenkla och sätt in x = 3 ────────────────────────────────────────────────────
-      { rubrik: 'Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 3', logg: NOD_RAKNA, rader: [
+      { rubrik: 'Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 3', mellanled:'kravt', logg: NOD_RAKNA, rader: [
         p('6x + (3x + 7)',    '9x + 7', { varde: { etikett: 'Beräkna', x: 3, svar: 34 } }),
         p('9 - (4x + 8)',     '1 - 4x', { varde: { etikett: 'Beräkna', x: 3, svar: -11 } }),
         p('(5x + 6) - (2x - 3)', '3x + 9', { varde: { etikett: 'Beräkna', x: 3, svar: 18 } })
@@ -141,7 +169,7 @@
       ]},
 
       // 9 ──────────────────────────────────────────────────────────────────────────────────
-      { rubrik: 'Förenkla uttrycket – visa mellanled', logg: NOD_RAKNA, rader: [
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
         p('8x - (6x + 12)',          '2x - 12'),
         p('5x - (4 - 3x)',           '8x - 4'),
         p('2x + (3x + 4) - (x + 3)', '4x + 1'),
@@ -194,7 +222,7 @@
         ]},
 
       // 14 ── förenkla och sätt in x = 7 ───────────────────────────────────────────────────
-      { rubrik: 'Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 7', logg: NOD_RAKNA, rader: [
+      { rubrik: 'Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 7', mellanled:'kravt', logg: NOD_RAKNA, rader: [
         p('18x - (9 + 11x) - 7', '7x - 16', { varde: { etikett: 'Beräkna', x: 7, svar: 33 } })
       ]}
     ]

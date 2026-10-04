@@ -402,7 +402,8 @@
     var h='<div class="ovn-sheet"><h2>'+blad.titel+'</h2>';
     h+='<div class="ovn-exempel" style="font-size:13px;">Visa <strong>mellanledet</strong> för metoden och skriv svaret. Alla korrekta mellanled godtas.</div>';
     (blad.grupper||[]).forEach(function(grupp,gi){
-      h+='<div class="ovn-grupp"><div class="ovn-grupp-rubrik">'+(gi+1)+'. '+grupp.rubrik+'</div>';
+      // data-mellanled: kravet står i DATAN, inte i rubriktexten (verktyg/mellanled-grind.js).
+      h+='<div class="ovn-grupp"'+(grupp.mellanled?' data-mellanled="'+grupp.mellanled+'"':'')+'><div class="ovn-grupp-rubrik">'+(gi+1)+'. '+grupp.rubrik+'</div>';
       var bok=96;
       (grupp.rader||[]).forEach(function(rad){
         bok++; var L=String.fromCharCode(bok)+')';
@@ -605,7 +606,7 @@
     return [
       {rubrik:'Beräkna', rader:[txtDiff(), txtSum()]},
       {rubrik:'Vilka tal?', rader:[delaupp(2), tvatal(), delaupp(3)]},
-      {rubrik:'Beräkna med talsorterna var för sig', rader:[talsort(), talsort(), talsort()]},
+      {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[talsort(), talsort(), talsort()]},
       {rubrik:'Vilket tal saknas?', rader:[saknasHelA(), saknasHelB()]},
       {rubrik:'Beräkna med metoden flytta över', rader:[flyttaHel(), flyttaStor(), flyttaDec()]},
       {rubrik:'Vilket tal saknas?', rader:[saknasDecA(), saknasDecB()]},

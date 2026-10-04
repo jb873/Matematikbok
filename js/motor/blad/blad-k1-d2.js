@@ -125,10 +125,10 @@ var BLAD_ADDSUB = {
       {typ:'enkel', vansterText:'45,4 + 184,19 =', svar:229.59},
       {typ:'enkel', vansterText:'6,7 − 3,62 =', svar:3.08}
     ]},
-    {rubrik:'Beräkna med talsorterna var för sig', rader:[
-      {typ:'enkel', vansterText:'245 + 378 =', svar:623},
-      {typ:'enkel', vansterText:'568 + 79 =', svar:647},
-      {typ:'enkel', vansterText:'14,5 + 3,9 =', svar:18.4}
+    {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[
+      {typ:'mellan', vansterText:'245 + 378 =', mellan:'500 + 110 + 13|200 + 300 + 40 + 70 + 5 + 8', svar:623},
+      {typ:'mellan', vansterText:'568 + 79 =', mellan:'500 + 130 + 17|500 + 60 + 70 + 8 + 9', svar:647},
+      {typ:'mellan', vansterText:'14,5 + 3,9 =', mellan:'17 + 1,4|14 + 3 + 0,5 + 0,9', svar:18.4}
     ]},
     {rubrik:'Beräkna med metoden flytta över', rader:[
       {typ:'enkel', vansterText:'59 + 35 =', svar:94},
@@ -177,13 +177,13 @@ var BLAD_MULT = {
       {typ:'enkel', vansterText:'348 · 52 =', svar:18096},
       {typ:'enkel', vansterText:'582 · 28 =', svar:16296}
     ]},
-    {rubrik:'Beräkna med talsorterna var för sig', rader:[
-      {typ:'enkel', vansterText:'67 · 5 =', svar:335},
-      {typ:'enkel', vansterText:'346 · 4 =', svar:1384},
-      {typ:'enkel', vansterText:'872 · 3 =', svar:2616},
-      {typ:'enkel', vansterText:'2 842 · 6 =', svar:17052}
+    {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[
+      {typ:'mellan', vansterText:'67 · 5 =', mellan:'300 + 35|60 · 5 + 7 · 5', svar:335},
+      {typ:'mellan', vansterText:'346 · 4 =', mellan:'1200 + 160 + 24|300 · 4 + 40 · 4 + 6 · 4', svar:1384},
+      {typ:'mellan', vansterText:'872 · 3 =', mellan:'2400 + 210 + 6|800 · 3 + 70 · 3 + 2 · 3', svar:2616},
+      {typ:'mellan', vansterText:'2 842 · 6 =', mellan:'12000 + 4800 + 240 + 12|2000 · 6 + 800 · 6 + 40 · 6 + 2 · 6', svar:17052}
     ]},
-    {rubrik:'Beräkna med dubbla och halvera', rader:[
+    {rubrik:'Beräkna med dubbla och halvera', mellanled:'kravt', rader:[
       {typ:'mellan', vansterText:'3 · 16 =', mellan:'6·8', svar:48},
       {typ:'mellan', vansterText:'5 · 28 =', mellan:'10·14', svar:140},
       {typ:'mellan', vansterText:'4 · 18 =', mellan:'8·9', svar:72},
@@ -234,19 +234,19 @@ var BLAD_PRIO = {
   titel:'Prioriteringsregeln',
   intro:'Visa mellanled och skriv svaret. Parenteser först, sedan · och /, sist + och −. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'Beräkna – visa mellanled', rader:[
+    {rubrik:'Beräkna – visa mellanled', mellanled:'kravt', rader:[
       {typ:'mellan', vansterText:'2 + 5 · 6 =',          mellan:'2+30',   svar:32},
       {typ:'mellan', vansterText:'(12 + 8) · 4 − 3 =',   mellan:'80-3',   svar:77},
       {typ:'mellan', vansterText:'7 · 3 + 4 · 2 =',      mellan:'21+8',   svar:29},
       {typ:'mellan', vansterText:'27 / 3 − 3 · 2 =',     mellan:'9-6',    svar:3}
     ]},
-    {rubrik:'Beräkna – visa mellanled', rader:[
+    {rubrik:'Beräkna – visa mellanled', mellanled:'kravt', rader:[
       {typ:'mellan', vansterText:'12 − 2 · 3 + 8 / 2 =', mellan:'12-6+4', svar:10},
       {typ:'mellan', vansterText:'(32 − 8) / (4 + 6) =', mellan:'24/10',  svar:2.4},
       {typ:'mellan', vansterText:'32 − 8 / 4 + 6 =',     mellan:'32-2+6', svar:36},
       {typ:'mellan', vansterText:'(9 − 4) / 2 + 7 =',    mellan:'2,5+7',  svar:9.5}
     ]},
-    {rubrik:'Beräkna – visa mellanled', rader:[
+    {rubrik:'Beräkna – visa mellanled', mellanled:'kravt', rader:[
       {typ:'mellan', vansterText:'20 + 8,3 · 100 =',      mellan:'20+830',   svar:850},
       {typ:'mellan', vansterText:'100 − 270 / 9 =',       mellan:'100-30',   svar:70},
       {typ:'mellan', vansterText:'5 · 8 + 10 · 2,1 =',   mellan:'40+21',    svar:61},

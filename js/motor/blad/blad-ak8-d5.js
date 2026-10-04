@@ -38,6 +38,9 @@
   // HJÄLPTEXTER BORT (order 2026-09-21): inga instruktioner under rubrikerna i öva — färdighetsträningen visar hur, i öva tänker eleven själv.
 
   function G(rubrik, rader, hint){ return { rubrik:rubrik, rader:rader, hint:hint }; }
+  /* GM = grupp som KRÄVER mellanled. Kravet står i DATAN, vid gruppen, inte i rubriktexten:
+     en omformulerad rubrik ändrar ingenting, och verktyg/mellanled-grind.js läser flaggan. */
+  function GM(){ var g = G.apply(null, arguments); g.mellanled = 'kravt'; return g; }
 
   // ══════════════════════════════════════════════════════════════════════════════════════
   // BLAD — Räkna med bråk (grunder)
@@ -61,7 +64,7 @@
     G('Förkorta till enklaste form', [
       BR(frac(16, 24) + ' =', 2, 3, { enklast:true }), BR(frac(21, 36) + ' =', 7, 12, { enklast:true }), BR(frac(15, 35) + ' =', 3, 7, { enklast:true }), BR(frac(24, 42) + ' =', 4, 7, { enklast:true })
     ]),
-    G('Förläng — visa mellanled', [
+    GM('Förläng — visa mellanled', [
       FL(4, 5, 3, 12, 15), FL(3, 8, 5, 15, 40), FL(5, 3, 9, 45, 27), FL(7, 9, 6, 42, 54)
     ]),
     G('Skriv som timmar i decimalform', [
@@ -175,7 +178,7 @@
 
   function renderBlad(mount, blad){
     var html = '<div class="ovn-sheet"><h2>' + blad.titel + '</h2>';
-    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp">' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
+    blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp"' + AK8_UI.gruppAttr(g) + '>' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
       + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';

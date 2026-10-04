@@ -166,7 +166,9 @@ const PROBE7 = `(function(){
     }
     else if(d.oms !== undefined) v = String(d.oms).replace('.', ',');
     else if(d.text !== undefined) v = d.visa || dec(d.text).split('|')[0];
-    else if(d.mellan !== undefined) v = d.mellan;
+    // FLERA GODTAGBARA MELLANLED: facit får vara en |-lista (talsorternas summor ELLER det
+    // utskrivna ledet). Provet fyller med den FÖRSTA formen — hela strängen är inget svar.
+    else if(d.mellan !== undefined) v = String(d.mellan).split('|')[0];
     else if(d.enhet !== undefined) v = d.enhet;
     else if(d.rund !== undefined) v = d.rund.split('|')[0];
     // == null, inte === null: ett undefined skrevs förr in i rutan som strängen "undefined"
