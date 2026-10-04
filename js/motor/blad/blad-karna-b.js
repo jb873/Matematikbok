@@ -345,7 +345,10 @@ function bladHTML(blad){
     // Utan data-logg loggas ingenting (opt-in) — de fyra äldre bladen rörs inte.
     // loggarEj: gruppen loggar INTE, och skälet står i markupen. En frånvaro säger inget —
     // den som läser ska se att det är ett beslut, inte något någon glömt (Joachim 2026-09-30).
-    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + (grupp.loggStore ? ' data-logg-store="' + grupp.loggStore + '"' : '') + (grupp.loggarEj ? ' data-loggar-ej="' + grupp.loggarEj + '"' : '') + '>';
+    html += '<div class="ovn-grupp"' + (grupp.logg ? ' data-logg="' + grupp.logg + '"' : '') + (grupp.loggStore ? ' data-logg-store="' + grupp.loggStore + '"' : '') + (grupp.loggarEj ? ' data-loggar-ej="' + grupp.loggarEj + '"' : '')
+      /* Mellanledskravet ur DATAN, inte ur rubriktexten: verktyg/mellanled-grind.js läser det
+         här. En omformulerad rubrik ändrar då ingenting. */
+      + (grupp.mellanled ? ' data-mellanled="' + grupp.mellanled + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     grupp.rader.forEach(function(rad){
       // En figurrad bär inget svar — den hör till uppgiften och ska inte ta en bokstav, annars
@@ -455,6 +458,9 @@ function bladHTML(blad){
       if(rad.typ === 'val'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
         html += '<span class="ovn-label">' + bokstav + ')</span>';
+        /* VALFRI FRAGETEXT (additiv): para-ihop-uppgifter behover visa VILKET uttryck som ska
+           matchas. Utan fraga ritas raden precis som forut. */
+        if(rad.fraga) html += '<span class="ovn-text" style="min-width:150px;">' + rad.fraga + '</span>';
         html += '<div class="ovn-val-grid" data-valsvar="' + rad.svar.replace(/,/g,'.') + '">';
         rad.alternativ.forEach(function(alt){
           html += '<button type="button" class="ovn-val-btn" data-val="' + alt.replace(/,/g,'.')
@@ -567,6 +573,13 @@ function bladHTML(blad){
       }
       // Talföljd: vissa termer givna, andra (null) är ifyllnadsrutor
       // FIGUR: mönstrets tre första figurer, ritade ur regeln (SvgMonster). Inget svar.
+      if(rad.typ === 'svgfigur'){
+        /* REN FIGURRAD: bara en SVG, ingen svarsruta. 'bild' ritar en figur OCH en svarsruta,
+           och gav data-svar=undefined nar raden bara skulle visa figuren. Additiv, oberoende av
+           figurmodul — anroparen skickar fardig SVG. */
+        html += '<div class="ovn-rad ovn-figurrad"><div class="alg-bild">' + (rad.svg || '') + '</div></div>';
+        return;
+      }
       if(rad.typ === 'figur'){
         html += '<div class="ovn-rad ovn-figurrad">'
           + (window.SvgMonster ? window.SvgMonster.treForsta(rad.familj, { alt: rad.alt || '' }) : '')
@@ -695,6 +708,27 @@ function bladHTML(blad){
         html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(acceptU)
           + '" data-kp="uttryck" data-vars="' + varsAv(rad)
           + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
+      } else if(rad.typ === 'parentes'){
+        /* PARENTES: uttrycket = mellanled = svar. Mellanledet rättas mot UTTRYCKET av
+           MellanledRattare (samma termer, parenteserna borttagna, tecknen bytta efter minus),
+           slutsvaret av AlgBrak.gradePoly via data-forenkla — alltså ärvd värde+form-rättning.
+           Kravet kommer ur raden eller gruppen, annars räknas det fram ur uttrycket (regel 7). */
+        var _pk = rad.mellanled || grupp.mellanled
+          || (window.MellanledRattare ? window.MellanledRattare.kravAv(rad.uttryck) : null) || 'kravt';
+        var _pv = rad.vars || 'xy';
+        html += '<span class="ovn-text ovn-num">' + rad.uttryck + '</span>';
+        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        html += '<input class="ovn-in bred" data-parentesmellan="' + encodeURIComponent(rad.uttryck)
+          + '" data-krav="' + _pk + '" data-kp="uttryck" data-vars="' + _pv + '" inputmode="text" autocomplete="off">';
+        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
+          + '" data-kp="uttryck" data-vars="' + _pv + '" inputmode="text" autocomplete="off">';
+        /* VALFRI VARDERUTA: uppgiften kan bade be om forenkling och om vardet for ett givet x.
+           Dokumentets egen form ar EN uppgift, sa den ritas som en rad och inte som tva. */
+        if(rad.varde){
+          html += '<span class="ovn-text" style="margin:0 6px;">' + rad.varde.insatt + '</span>';
+          html += '<input class="ovn-in" data-svar="' + rad.varde.svar + '" inputmode="decimal" autocomplete="off">';
+        }
       } else if(rad.typ === 'forenkla'){
         // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
         // Rättas av AlgBrak.gradePoly — värde + skriven form, två åtskilda besked. data-vars öppnar
@@ -1007,7 +1041,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1069,9 +1103,20 @@ function bygg_blad(rotEl, blad){
       // OBESVARAD RUTA RÄTTAS INTE. Den räknas i nämnaren (uppgiften finns kvar att göra) men får
       // varken markering, kryss, facit eller loggning. Samma regel som sid-paren redan hade.
       // Utan den gav ett enda Kontrollera bort hela bladets facit.
+      /* FRIVILLIGT MELLANLED: en tom rad är varken fel eller räknad i nämnaren (Joachim
+         2026-10-04). Måste ligga FÖRE den vanliga tom-ruta-regeln, som räknar tomma i nämnaren. */
+      if(inp.dataset.krav === 'frivilligt' && String(inp.value).trim() === '') return;
       if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok, _besked = null;
-      if(inp.dataset.forenkla !== undefined){
+      if(inp.dataset.parentesmellan !== undefined){
+        /* MELLANLEDET: termvis mot uttrycket, aldrig på värde — ett värdeprov hade godkänt
+           slutsvaret skrivet här, och då är kravet tomt. Beskedet säger VAD som är fel. */
+        var _rm = window.MellanledRattare
+          ? window.MellanledRattare.grade(inp.value, decodeURIComponent(inp.dataset.parentesmellan), inp.dataset.krav)
+          : { status: 'fel' };
+        ok = _rm.status === 'ratt';
+        if(_rm.besked) _besked = _rm.besked;
+      } else if(inp.dataset.forenkla !== undefined){
         // FÖRENKLA: värde + skriven form (AlgBrak.gradePoly). 'form' = rätt värde men inte förenklat
         // → räknas som fel, men beskedet talar om VAD som är kvar att göra (samma två lägen som bråken).
         var _rf = window.AlgBrak ? window.AlgBrak.gradePoly(inp.value, decodeURIComponent(inp.dataset.forenkla)) : { status: 'fel' };
