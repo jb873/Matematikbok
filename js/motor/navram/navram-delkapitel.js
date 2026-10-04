@@ -49,6 +49,10 @@
     return e;
   }
   function txt(e){ return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  /* Synlig = ritad i layouten. Underflikarna finns i DOM:en även för blad som inte är valda, så
+     speglingen måste skilja på "finns" och "syns" — annars samlas tio underblad under det första
+     bladet. (Saknades först, och gjorde hela ramen tom på d2: ReferenceError i monteringen.) */
+  function synlig(e){ return !!(e && e.offsetParent); }
 
   /* Panelväxling: sidans fyra .tab-panel har redan CSS för .is-active. Ramen sätter den direkt i
      stället för att klicka den gömda flikknappen — klicket skulle också scrolla till toppen
@@ -65,16 +69,23 @@
     if(!vard || !window.NavRam) return null;
 
     // ── 1. GÖM det ramen ersätter. Kvar i DOM — motorn läser det. ───────────────────────────
-    DOLJ.forEach(function(id){
-      var e = document.getElementById(id);
-      if(e){ e.classList.add('nr-dold'); e.setAttribute('aria-hidden', 'true'); }
-    });
-    /* Och ALLA bladnav-rader, inte bara den med id="blad-nav": d3 har en andra rad
-       (#fordj-nav, fördjupningsbladen). En dold rad vars knappar ingen speglar är innehåll
-       eleven inte kan nå — mätt: två blad försvann ur kontroll-svepet. */
-    document.querySelectorAll('.blad-nav').forEach(function(e){
-      e.classList.add('nr-dold'); e.setAttribute('aria-hidden', 'true');
-    });
+    /* Gömningen körs FÖRST EFTER speglingen — gom() kallas direkt före NavRam.montera. Nästlade
+       underflikar hittas på SYNLIGHET (de finns i DOM:en även för ovalda blad), och det går inte
+       att mäta på en rad som redan är display:none. Mätt på ak8/k2/d1: med gömningen först hittade
+       upptäckten noll underflikar och föll tillbaka på den platta speglingen — 1 grupp / 4
+       varianter i stället för 4 grupper / 10 varianter. GÖM ALDRIG DET DU SKA MÄTA INNAN DU MÄTT DET. */
+    function gom(){
+      DOLJ.forEach(function(id){
+        var e = document.getElementById(id);
+        if(e){ e.classList.add('nr-dold'); e.setAttribute('aria-hidden', 'true'); }
+      });
+      /* ALLA bladnav-rader, inte bara den med id="blad-nav": d3 har en andra rad (#fordj-nav,
+         fördjupningsbladen) och åttans algebra en .blad-subnav per blad. En dold rad vars knappar
+         ingen speglar är innehåll eleven inte kan nå — mätt: två blad försvann ur kontroll-svepet. */
+      document.querySelectorAll('.blad-nav, .blad-subnav').forEach(function(e){
+        e.classList.add('nr-dold'); e.setAttribute('aria-hidden', 'true');
+      });
+    }
 
     // ── 2. UPPGIFTER: spegla #blad-nav. Klicket delegeras till originalknappen. ─────────────
     /* ── PLUGG-SIDOR ──
@@ -117,13 +128,50 @@
       return { titel: txt(b).replace(/^\d+/, ''), kommer: b.disabled,
                valj: function(){ visaPanel('ova'); b.click(); } };
     }
+    /* NÄSTLAD NAVIGERING: har ett blad underflikar (.blad-subnav-btn) är BLADET gruppen och
+       underbladen varianterna. Underflikarna syns först när bladet är valt, så speglingen måste
+       klicka igenom bladen för att se dem — och delegera på PLATS i den synliga raden, eftersom
+       raden byggs om vid bladbyte och en hållen nod då blir detached. */
+    function synligaSub(){
+      return Array.prototype.filter.call(document.querySelectorAll('.blad-subnav-btn'), synlig);
+    }
+    function nastladeGrupper(rad){
+      var knappar = Array.prototype.slice.call(rad.querySelectorAll('.blad-nav-btn'));
+      var nagonHarSub = false;
+      var grupper = knappar.map(function(b, bi){
+        b.click();
+        var subs = synligaSub();
+        if(!subs.length) return { blad: b, bi: bi, subs: null };
+        nagonHarSub = true;
+        return { blad: b, bi: bi, subs: subs.map(function(sb){ return txt(sb); }) };
+      });
+      if(!nagonHarSub) return null;            // platt sida — låt den vanliga vägen gälla
+      return grupper.map(function(g){
+        if(!g.subs){
+          // Blad utan underflikar i en sida som annars har dem: egen grupp med en variant.
+          return { rubrik: txt(g.blad).replace(/^\d+/, ''), varianter: [variantAv(g.blad)] };
+        }
+        return { rubrik: txt(g.blad).replace(/^\d+/, ''),
+          varianter: g.subs.map(function(namn, si){
+            return { titel: namn.replace(/^\d+/, ''), valj: function(){
+              visaPanel('ova');
+              g.blad.click();                       // underflikraden ritas om till det här bladet
+              var nu = synligaSub();
+              if(nu[si]) nu[si].click();
+            } };
+          }) };
+      });
+    }
     var uppgifter = cfg.uppgifter || pluggUppgifter();
     if(!uppgifter){
       /* EN rad → en rubriklös (platt) grupp: bladen är platta på de flesta sidorna, och en grupp
          per blad med EN variant vore två klick för ett blad.
          FLERA rader → en grupp per rad, med radens egen aria-label som rubrik (sidans ord, inte
          påhittade). Sidor med A/B-varianter skickar en egen gruppering via cfg.uppgifter. */
-      if(navRader.length <= 1){
+      var nastlat = navRader.length === 1 ? nastladeGrupper(navRader[0]) : null;
+      if(nastlat){
+        uppgifter = nastlat;
+      } else if(navRader.length <= 1){
         var ett = navRader[0];
         uppgifter = [{ rubrik: null, varianter: ett
           ? Array.prototype.map.call(ett.querySelectorAll('.blad-nav-btn'), variantAv) : [] }];
@@ -176,7 +224,13 @@
     var minaVyer = MINA.map(function(m, i){
       var v = el('div', 'nr-mview' + (i === 0 ? ' is-on' : ''));
       v.id = m.vy;
-      if(m.vy === 'mv-kunskapslage'){
+      /* kunskapslage:false — kapitlet har ingen karta än. Då blir vyn en ärlig "Byggs senare"-
+         ruta; att bädda in ett ANNAT kapitels karta hade visat fel innehåll. */
+      if(m.vy === 'mv-kunskapslage' && cfg.kunskapslage === false){
+        v.appendChild(el('div', 'nr-ph', '<div class="nr-ph-mark">Byggs senare</div><p>'
+          + 'Kartan för det här kapitlet — färgad av vad du faktiskt övat. Den finns än bara för '
+          + 'taluppfattning; algebrans karta byggs när kapitlets taxonomi är på plats.</p>'));
+      } else if(m.vy === 'mv-kunskapslage'){
         var f = el('iframe', 'nr-karta-frame');
         f.id = 'karta-frame'; f.title = 'Kunskapsläge'; f.loading = 'lazy';
         f.src = (cfg.kunskapslage || '../kunskapslage/index.html') + '?embed=1';
@@ -187,6 +241,8 @@
       }
       return v;
     });
+
+    gom();   // speglingen ar klar - nu far den gamla navigeringen forsvinna
 
     var ram = window.NavRam.montera({
       vard: vard, arbeta: arbeta, mina: MINA,

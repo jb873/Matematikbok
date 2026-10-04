@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
 <!-- Keypadens formgivning: DELAD fil. Låg förr som en ordagrann kopia här. -->
 <link rel="stylesheet" href="../../../js/motor/keypad.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
 <style>
 /* Sidspecifika + isärdrivna regler (kvar efter css-flytten 2026-09-19). Det delade ligger i ak7-delkapitel-kanon.css + ak7-k1blad-kanon.css, länkade ovan. */
 :root{
@@ -140,6 +141,10 @@
   <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
+<!-- NAVIGATIONSRAMEN ritas hit. Flikraden ovan och bladnavigeringen göms av receptet
+     men står KVAR i DOM:en — motorn och delkapitel-skalet läser dem. -->
+<div id="navram"></div>
+
 <!-- PANEL: FÖRELÄSNING — panelen ägs av föreläsningsregistret (js/data/forelasningar.js) -->
 <section class="tab-panel" data-panel="forelasningar"></section>
 
@@ -207,5 +212,18 @@ DelkapitelSkal.montera({
 
 <script src="../../../js/motor/keypad-clearance.js"></script>
 <script src="../../../js/elevfeedback.js" defer></script>
+<!-- NAVIGATIONSRAMEN: delad nivårad + ram + delkapitel-receptet -->
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/navram/navram-delkapitel.js"></script>
+<script>
+  /* Monteras SIST — efter ALLT som rör navigeringen. Receptet speglar flikraden,
+     bladnavigeringen OCH underflikarna, och delkapitel-skalet bygger dem. På den här sidan är
+     bladen grupper och underbladen varianter (4 blad, 10 underblad). */
+  if(window.NavRamDelkapitel) window.NavRamDelkapitel.montera({
+    nivaPrefix: 'ak8k2d1',
+    kunskapslage: false   // ak8/k2 har ingen egen karta än; se receptets kommentar
+  });
+</script>
 </body>
 </html>
