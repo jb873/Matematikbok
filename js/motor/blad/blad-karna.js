@@ -185,13 +185,21 @@ function bladHTML(blad){
   // utan egen text fylldes det med en standardinstruktion — bladet fick en hjälptext ingen skrivit.
   // Rättarens besked efter svar rörs inte; det är återkoppling, inte instruktion.
 
+  // DELUPPGIFTENS BOKSTAV. Tom bokstav = ingen etikett (K-A). Samma funktion som i de andra
+  // bladmotorerna, så regeln inte kan glömmas bort i en radtyp.
+  function lbl(bok){ return bok ? '<span class="ovn-label">' + bok + ')</span>' : ''; }
   blad.grupper.forEach(function(grupp, gi){
     html += '<div class="ovn-grupp">';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     var radNummer = 0;
+    /* K-A: en deluppgift får ingen bokstav. Bokstaven skiljer deluppgifter åt, och har gruppen
+       bara en finns inget att skilja. Figurrader bär inget svar och räknas inte med. */
+    var _delar = grupp.rader.filter(function(r){
+      return r.typ !== 'figur' && r.typ !== 'svgfigur' && r.typ !== 'bild';
+    }).length;
     grupp.rader.forEach(function(rad){
       radNummer++;
-      var bokstav = String.fromCharCode(96 + radNummer);
+      var bokstav = _delar <= 1 ? '' : String.fromCharCode(96 + radNummer);
 
       if(rad.typ === 'brakSvar'){
         var kladd = blad.mellanled
@@ -199,7 +207,7 @@ function bladHTML(blad){
           : '';
         if(rad.fraga){
           html += '<div class="brak-fragerad" data-rad="' + radNummer + '">';
-          html += '<span class="ovn-label">' + bokstav + ')</span>';
+          html += lbl(bokstav);
           html += '<span class="brak-fragetext">' + rad.vanster + '</span>';
           if(blad.mellanled){
             html += '<span class="brak-svarlabel">Uträkning:</span>' + kladd;
@@ -209,7 +217,7 @@ function bladHTML(blad){
           html += '</div>';
         } else {
           html += '<div class="ovn-brak-rad brak-svar-rad" data-rad="' + radNummer + '">';
-          html += '<span class="ovn-label">' + bokstav + ')</span>';
+          html += lbl(bokstav);
           html += rad.vanster;
           html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
           if(blad.mellanled){
@@ -223,7 +231,7 @@ function bladHTML(blad){
 
       if(rad.typ === 'brakTillDec'){
         html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += fracSpan(rad.taljare, rad.namnare);
         var tecken = (rad.not === '≈') ? '≈' : '=';
         html += '<span class="ovn-text" style="margin:0 6px;font-size:20px;">' + tecken + '</span>';
@@ -234,7 +242,7 @@ function bladHTML(blad){
 
       if(rad.typ === 'rakna'){
         html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += rad.vansterHTML;
         var teckenR = (rad.not === '≈') ? '≈' : '=';
         html += '<span class="ovn-text" style="margin:0 6px;font-size:20px;">' + teckenR + '</span>';
@@ -251,7 +259,7 @@ function bladHTML(blad){
           + ' data-hel="' + k.hel + '" data-t="' + k.t + '" data-n="' + k.n + '"'
           + ' data-facit-dec="' + decStr + '"'
           + ' data-facit-brak="' + mixedText(k) + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += fracSpan(rad.taljare, rad.namnare);
         html += '<span class="ovn-text" style="margin:0 8px;">=</span>';
         html += '<span class="bl-fall"><span class="bl-etikett">decimal</span>'
@@ -266,7 +274,7 @@ function bladHTML(blad){
         html += '<div class="ovn-brak-rad brak-forlang-rad" data-rad="' + radNummer + '"'
           + ' data-hundra="' + rad.hundra + '" data-dec="' + rad.decSvar + '"'
           + ' data-facit-dec="' + String(rad.decSvar).replace('.', ',') + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         html += fracSpan(rad.taljare, rad.namnare);
         html += '<span class="ovn-text" style="margin:0 8px;">=</span>';
         html += '<span class="bl-fall"><span class="bl-etikett">hundradelar</span>'
@@ -283,7 +291,7 @@ function bladHTML(blad){
 
       if(rad.typ === 'brakSaknad'){
         html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
+        html += lbl(bokstav);
         var inp = '<input class="ovn-in lucka" data-svar="' + rad.svar
           + '" inputmode="numeric" autocomplete="off" style="width:56px;height:34px;font-size:17px;">';
         html += rad.html.replace('@IN@', inp);
@@ -305,7 +313,7 @@ function bladHTML(blad){
 
       // enkla rader (reserv)
       html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
-      html += '<span class="ovn-label">' + bokstav + ')</span>';
+      html += lbl(bokstav);
       if(rad.typ === 'enkel'){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
@@ -343,6 +351,9 @@ function bladHTML(blad){
 // ============================================================
 function bygg_blad(rotEl, blad){
   rotEl.innerHTML = bladHTML(blad);
+  // K-A: bort med bokstaven där gruppen bara har EN deluppgift. Mäts i den färdiga sidan, i
+  // samma termer som vakten — kärnornas egna räkningar av "deluppgift" går isär.
+  if(window.AK8_UI && AK8_UI.enDeluppgiftUtanBokstav) AK8_UI.enDeluppgiftUtanBokstav(rotEl);
 
   // bokstäver om per grupp
   rotEl.querySelectorAll('.ovn-grupp').forEach(function(g){

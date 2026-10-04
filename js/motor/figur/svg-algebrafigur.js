@@ -53,8 +53,15 @@
     return o.under ? '<text class="' + TXT + ' af-under" x="' + (w / 2) + '" y="' + (h - 4) + '" text-anchor="middle">' + esc(o.under) + '</text>' : '';
   }
   function figur(pts, matt, opts, w, h, alt){
-    var m = mitten(pts), s = svgStart(w, h, opts.alt || alt) + poly(pts);
+    var m = mitten(pts);
+    // HÖRNEN (valfria): en uppgift som talar om "sidan AC" måste visa var A och C sitter.
+    // Modulen kunde rita hörnbokstäver sedan tidigare, men bara i vinkeltriangel — som i sin tur
+    // saknar sidetiketter. Nu bär figur() båda, så varje figurtyp kan ha hörn.
+    var hornNamn = (opts.horn || []).filter(Boolean).join('');
+    var etikett = opts.alt || (alt + (hornNamn ? ' och hörnen ' + hornNamn.split('').join(', ') : ''));
+    var s = svgStart(w, h, etikett) + poly(pts);
     pts.forEach(function(p, i){ var q = pts[(i + 1) % pts.length]; if(matt[i]) s += sidEtikett(p, q, m, matt[i], opts.avstand); });
+    if(opts.horn) pts.forEach(function(p, i){ s += hornEtikett(p, m, opts.horn[i], null); });
     return s + enhetTxt(opts, w) + undertext(opts, w, h) + '</svg>';
   }
 

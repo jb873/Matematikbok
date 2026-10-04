@@ -1926,5 +1926,38 @@
  "ak7/k3/d2-monster/index.html": [
   "titel | Nivå 1",
   "titel | Nivå 2"
+ ],
+ "js/motor/blad/blad-ak8-parentes.js": [
+  "etikett | Beräkna",
+  "fraga | 9x + (4x + 2)",
+  "fraga | 9x + (4x − 2)",
+  "fraga | 9x − (4x + 2)",
+  "fraga | 9x − (4x − 2)",
+  "fraga | Omkrets",
+  "fraga | Rektangelns omkrets är",
+  "fraga | Skriv ett uttryck för hur mycket Vilgot ska betala.",
+  "fraga | Skriv ett uttryck för hur mycket han har kvar när han har betalat, förenkla uttrycket.",
+  "fraga | Skriv ett uttryck för sidan AC och förenkla det",
+  "fraga | Sven har x kronor. Anna har 55 kr mer än Sven. Harald har dubbelt så mycket som Sven. Skriv ett uttryck för hur mycket pengar de har tillsammans och förenkla sedan uttrycket.",
+  "fraga | Vilket uttryck stämmer?",
+  "namn | Banan",
+  "namn | Smörgås",
+  "rubrik | Förenkla uttrycket – visa mellanled",
+  "rubrik | Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 3",
+  "rubrik | Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 7",
+  "rubrik | Para ihop uttrycket med samma uttryck utan parentes",
+  "rubrik | Skriv ett uttryck för figurens omkrets och förenkla det",
+  "rubrik | Skriv ett uttryck för rektangelns omkrets och förenkla det",
+  "rubrik | Skriv ett uttryck och förenkla det",
+  "rubrik | Triangelns omkrets är 14x",
+  "rubrik | Utgå från det förenklade uttrycket 3x − 2y. Vilket eller vilka av uttrycken stämmer?",
+  "rubrik | Vad saknas för att likheten ska gälla?",
+  "rubrik | Vilgot köper två smörgåsar och en banan. På sitt konto har han 546 kr.",
+  "rubrik | Vilket uttryck stämmer för rektangelns omkrets?",
+  "titel | Uttryck med minus eller plus framför parentes – nivå 1"
+ ],
+ "js/motor/blad/blad-karna-b.js": [
+  "titel | + led",
+  "titel | − led"
  ]
 }

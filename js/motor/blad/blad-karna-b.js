@@ -218,6 +218,33 @@ function minusUt(s){
 }
 window.BLAD_MINUS_UT = minusUt;   // figurmodulen och minus-grinden använder samma funktion
 
+// GENVÄGEN I SKRIVA-RUTAN. Ska ett redan förenklat uttryck godtas där uppställningen var uppgiften?
+// 'godtas' = dagens läge, varje uttryck med rätt värde godkänns. 'underkanns' = ett uttryck med
+// lika få termer som facitet är slutsvaret, inte uppställningen, och faller.
+//
+// Gäller BARA uppgifter där eleven ställer upp själv (data-skriv utan figursidor). Med sidor i
+// datan rättas rutan mot sidorna, och ett förenklat svar faller redan.
+//
+// Växeln står här, på ETT ställe, därför att svaret är Joachims och ändringen ska vara ett ord.
+// 'underkanns' kräver dessutom ett besked, och besked är elevtext.
+var SKRIV_FORENKLAT = 'godtas';
+
+// Kedjans knappar. Samma ordalydelse som åttans fria kedja (ak8-blad-ui) — texten står i ett
+// fält så elevtext-låset ser den, och den är densamma på båda ytorna med flit.
+var LED_TEXT = { mer: { titel: '+ led' }, mindre: { titel: '− led' } };
+
+// ERSÄTTNINGSLEDETS FACIT, byggt mekaniskt ur det förenklade uttrycket och x-värdet:
+// "9x + 7" med x = 3 blir "9 · 3 + 7", "1 - 4x" blir "1 − 4 · 3". En koefficient framför variabeln
+// blir en multiplikation; en ensam variabel blir bara talet.
+function insattningsFacit(uttryck, varde){
+  var v = String(varde);
+  if(Number(varde) < 0) v = '(' + v + ')';          // -2 i en produkt måste ha parentes
+  return minusUt(String(uttryck).replace(/(\d*)\s*([a-z])/gi, function(m, k, bok){
+    return k && k !== '1' ? k + ' · ' + v : v;
+  }));
+}
+window.BLAD_SKRIV_FORENKLAT = SKRIV_FORENKLAT;   // grindarna läser regeln i stället för att gissa
+
 // DELUPPGIFTENS BOKSTAV. Tom bokstav = ingen etikett: gruppen har bara en uppgift, och då finns
 // inget att skilja den från. Funktionen finns för att regeln ska gälla varje radtyp, också de som
 // skrivs i morgon — förr stod utskriften på tjugo ställen.
@@ -754,8 +781,28 @@ function bladHTML(blad){
         /* VALFRI VARDERUTA: uppgiften kan bade be om forenkling och om vardet for ett givet x.
            Dokumentets egen form ar EN uppgift, sa den ritas som en rad och inte som tva. */
         if(rad.varde){
-          html += '<span class="ovn-text" style="margin:0 6px;">' + rad.varde.insatt + '</span>';
-          html += '<input class="ovn-in" data-svar="' + rad.varde.svar + '" inputmode="decimal" autocomplete="off">';
+          /* K-B: beräkningen är en KEDJA i tre led — skriv av det förenklade uttrycket, ersätt
+             variabeln med siffror, genomför beräkningen. Varje ruta bär sitt eget facit, så att
+             grindarna kan fylla dem; "+ led" lägger till ett steg när beräkningen kräver det. */
+          var _bv = rad.varde, _bx = _bv.x;
+          var _bins = insattningsFacit(rad.svar, _bx);
+          html += '<div class="ovn-berakna">';
+          html += '<span class="ovn-text">' + _bv.etikett + '</span>';
+          html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
+            + '" data-kp="uttryck" data-vars="' + (rad.vars || 'x') + '" data-visa="' + minusUt(rad.svar)
+            + '" inputmode="text" autocomplete="off">';
+          html += '<span class="ovn-text">=</span>';
+          html += '<input class="ovn-in bred" data-insatt="' + encodeURIComponent(_bins)
+            + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + _bv.svar
+            + '" data-kp="uttryck" data-visa="' + _bins + '" inputmode="text" autocomplete="off">';
+          html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
+          html += '<input class="ovn-in bred ovn-led-extra" data-mellanvarde="' + _bv.svar
+            + '" data-kp="uttryck" data-visa="' + _bv.svar + '" inputmode="text" autocomplete="off" hidden>';
+          html += '<span class="ovn-text">=</span>';
+          html += '<input class="ovn-in" data-svar="' + _bv.svar + '" inputmode="decimal" autocomplete="off">';
+          html += '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>';
+          html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
+          html += '</div>';
         }
       } else if(rad.typ === 'skrivforenkla'){
         /* SKRIVA = FÖRENKLA: två rutor i stället för en. Eleven SKRIVER uppställningen i den
@@ -1020,6 +1067,12 @@ function bladHTML(blad){
 function bygg_blad(rotEl, blad){
   rotEl.innerHTML = bladHTML(blad);
 
+  // K-A: bort med bokstaven där gruppen bara har EN deluppgift. Mäts i den färdiga sidan, i
+  // samma termer som vakten — kärnornas egna räkningar av "deluppgift" går isär.
+  if(window.AK8_UI && AK8_UI.enDeluppgiftUtanBokstav) AK8_UI.enDeluppgiftUtanBokstav(rotEl);
+  // K-A: bort med bokstaven där gruppen bara har EN deluppgift. Mäts i den färdiga sidan, i
+  // samma termer som vakten — kärnornas egna räkningar av "deluppgift" går isär.
+  if(window.AK8_UI && AK8_UI.enDeluppgiftUtanBokstav) AK8_UI.enDeluppgiftUtanBokstav(rotEl);
   // Räkna om radbokstäver så att varje grupp börjar om från 'a'
   rotEl.querySelectorAll('.ovn-grupp').forEach(function(g){
     var bok = 96;
@@ -1097,7 +1150,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1110,6 +1163,24 @@ function bygg_blad(rotEl, blad){
     if(!inp || !window.AK8_UI || !AK8_UI.vaxMedGolv) return;
     AK8_UI.vaxMedGolv(inp);
   }
+  // KEDJANS LED: "+ led" visar nästa dolda steg, "− led" gömmer och tömmer det senaste.
+  // Svarsrutan och de två obligatoriska leden rörs aldrig — minimum är K-B:s tre steg.
+  rotEl.querySelectorAll('.ovn-berakna').forEach(function(kedja){
+    var extra = Array.prototype.slice.call(kedja.querySelectorAll('.ovn-led-extra'));
+    var mer = kedja.querySelector('[data-mer]'), mindre = kedja.querySelector('[data-mindre]');
+    function stall(visa){
+      extra.forEach(function(e){ e.hidden = !visa; });
+      if(mer) mer.hidden = visa;
+      if(mindre) mindre.hidden = !visa;
+      if(visa) extra.forEach(function(e){ if(e.tagName === 'INPUT') vaxRuta(e); });
+    }
+    if(mer) mer.addEventListener('click', function(){ stall(true); });
+    if(mindre) mindre.addEventListener('click', function(){
+      extra.forEach(function(e){ if(e.tagName === 'INPUT'){ e.value = ''; e.classList.remove('correct', 'wrong'); } });
+      stall(false);
+    });
+  });
+
   // MELLANRUM KRING TECKEN (AK8_UI.autoSpace — samma funktion som åttans blad och k3:s d4/d5):
   // eleven skriver 3+4 och rutan visar 3 + 4, utan att markören flyttar sig. Uttrycksrutor bara;
   // en ruta med ett rent tal ska inte få mellanrum.
@@ -1161,6 +1232,10 @@ function bygg_blad(rotEl, blad){
       // Utan den gav ett enda Kontrollera bort hela bladets facit.
       /* FRIVILLIGT MELLANLED: en tom rad är varken fel eller räknad i nämnaren (Joachim
          2026-10-04). Måste ligga FÖRE den vanliga tom-ruta-regeln, som räknar tomma i nämnaren. */
+      /* EN DOLD RUTA ÄR INGEN SVARSENHET. Kedjans extra led är gömda tills eleven trycker
+         "+ led", och nämnaren ska räkna det hon ser. Utan den här raden gav ett tomt blad
+         63 av 71 i stället för 63 av 63. */
+      if(inp.hidden || inp.closest('[hidden]')) return;
       if(inp.dataset.krav === 'frivilligt' && String(inp.value).trim() === '') return;
       if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok, _besked = null;
@@ -1172,6 +1247,23 @@ function bygg_blad(rotEl, blad){
           : { status: 'fel' };
         ok = _rm.status === 'ratt';
         if(_rm.besked) _besked = _rm.besked;
+      } else if(inp.dataset.insatt !== undefined){
+        /* ERSÄTTNINGSLEDET: eleven har bytt variabeln mot ett tal, men ännu inte räknat.
+           Tre krav, alla mekaniska: inget variabeltecken kvar, rätt värde, och LIKA MÅNGA TERMER
+           som uttrycket — annars är det slutsvaret som står här, och steget är överhoppat. */
+        var _iv = evalUttryck(inp.value);
+        var _imal = parseFloat(inp.dataset.insattVarde);
+        var _ivars = new RegExp('[' + (inp.dataset.insattVars || 'x') + ']', 'i');
+        var _iled = decodeURIComponent(inp.dataset.insatt);
+        ok = !_ivars.test(inp.value) && !isNaN(_iv) && Math.abs(_iv - _imal) < 1e-9;
+        if(ok && window.AlgBrak && window.AlgBrak.termAntal){
+          try { ok = window.AlgBrak.termAntal(inp.value) === window.AlgBrak.termAntal(_iled); }
+          catch(e){ /* otolkbart led: värdet har redan avgjort */ }
+        }
+      } else if(inp.dataset.mellanvarde !== undefined){
+        // TILLAGT LED: ett steg på vägen, alltså samma värde som svaret.
+        var _mv = evalUttryck(inp.value);
+        ok = !isNaN(_mv) && Math.abs(_mv - parseFloat(inp.dataset.mellanvarde)) < 1e-9;
       } else if(inp.dataset.skriv !== undefined){
         /* UPPSTÄLLNINGEN, inte värdet ännu: med figurens sidor i datan måste elevens uttryck ha
            SAMMA TERMER som sidorna (AlgBrak.sammaTermer, samma funktion som omkretskedjan
@@ -1182,7 +1274,18 @@ function bygg_blad(rotEl, blad){
         var _kd = inp.dataset.sidor ? decodeURIComponent(inp.dataset.sidor).split('|').filter(Boolean) : null;
         if(!_AB) ok = false;
         else if(_kd && _kd.length) ok = _AB.sammaTermer(inp.value, _kd);
-        else { try { ok = _AB.pointEqual(_AB.parse(inp.value), _AB.parse(_ks)); } catch(e){ ok = false; } }
+        else {
+          try {
+            ok = _AB.pointEqual(_AB.parse(inp.value), _AB.parse(_ks));
+            // GENVÄGEN: se SKRIV_FORENKLAT högst upp i filen. I 'godtas'-läget gör raden ingenting.
+            if(ok && SKRIV_FORENKLAT === 'underkanns' && _AB.termAntal){
+              var _fs = inp.closest('.ovn-rad');
+              var _slut = _fs ? _fs.querySelector('.ovn-in[data-forenkla]') : null;
+              var _mal = _slut ? decodeURIComponent(_slut.dataset.forenkla) : null;
+              if(_mal && _AB.termAntal(inp.value) <= _AB.termAntal(_mal)) ok = false;
+            }
+          } catch(e){ ok = false; }
+        }
       } else if(inp.dataset.forenkla !== undefined){
         // FÖRENKLA: värde + skriven form (AlgBrak.gradePoly). 'form' = rätt värde men inte förenklat
         // → räknas som fel, men beskedet talar om VAD som är kvar att göra (samma två lägen som bråken).
@@ -1329,6 +1432,8 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
         else if(inp.dataset.omkrets !== undefined) facit = inp.dataset.visa;   // "3x + 5x + 4x = 12x"
         else if(inp.dataset.skriv !== undefined) facit = inp.dataset.visa;    // uppställningen
+        else if(inp.dataset.insatt !== undefined) facit = inp.dataset.visa;      // ersättningsledet
+        else if(inp.dataset.mellanvarde !== undefined) facit = inp.dataset.visa; // tillagt led
         else if(inp.dataset.parentesmellan !== undefined){
           /* Mellanledet: facitet byggs ur uttrycket av rättarens egen funktion. Grenen behövs
              även när beskedet räcker — utan den föll raden igenom till dataset.svar, som inte

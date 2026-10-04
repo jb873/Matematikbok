@@ -44,7 +44,8 @@ const VERKTYG = [
   { fil: 'flik-grind.js',     vad: 'en byggd flik är klickbar, och nivålåset släpper när det ska' },
   { fil: 'navram-beteende.js', vad: 'varje variant byter yta, och nivåraden speglar datan' },
   { fil: 'figur-grind.js',    vad: 'en figur utan formgivning är inte oformad, den är svart' },
-  { fil: 'minus-grind.js',    vad: 'minus skrivs med minustecken, inte bindestreck' }
+  { fil: 'minus-grind.js',    vad: 'minus skrivs med minustecken, inte bindestreck' },
+  { fil: 'uppgift-grind.js',  vad: 'uppgiftens form: bokstav, beräkna-kedja, två rutor (K-A/B/C)' }
 ];
 
 /* Nians fyra öva-sidor står utanför nämnar- och flerruts-grindens listor. Proberna läser

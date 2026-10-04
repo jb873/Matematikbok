@@ -15,6 +15,8 @@
                  upplåst). Det omvända benet, "räknetecken tända i talrutan", vaktade den
                  avskaffade gråningsregeln och togs bort 2026-10-03.
      AUTOSPACE   "3+4" skrivet tecken för tecken blir "3 + 4" i en uttrycksruta
+     FACITLÄCKA  uttrycket eleven ska ställa upp (data-skriv) står inte i uppgiftstexten.
+                 Är uppställningen uppgiften, skriver eleven den själv (Joachims R2)
      GROW        rutan växer med innehållet
      TAK         en UTTRYCKSRUTA som ska växa slutar inte växa medan raden har plats kvar. Taket var
                  en konstant (340 px) och klippte ett riktigt svar mitt i; GROW-benet nådde
@@ -69,6 +71,15 @@ const PROBE = `(function(){
   // Växten går via AK8_UI.vaxMedGolv i sjuans kärnor och via AK8_UI.grow för åttans blad; båda
   // kläms här. Åttans bladmotor kallar sin INTERNA grow och nås inte av den här kroken — TAK-benet
   // negativt verifieras därför på en yta som växer via namnrymden (d3).
+  // SABBA r2: skriv in uppställningens uttryck i uppgiftstexten — exakt det fel benet finns för.
+  if(SABBA === 'r2'){
+    var _s0 = document.querySelector('[data-skriv]:not([data-sidor])');
+    if(_s0){
+      var _rad = _s0.closest('.ovn-rad') || _s0.parentElement;
+      var _txt = _rad && _rad.querySelector('.ovn-text');
+      if(_txt) _txt.textContent += ' ' + decodeURIComponent(_s0.dataset.skriv);
+    }
+  }
   if(SABBA === 'tak' && window.AK8_UI){
     ['grow', 'vaxMedGolv'].forEach(function(namn){
       var f = AK8_UI[namn];
@@ -336,6 +347,33 @@ const PROBE = `(function(){
                        + ' px kvar (texten behöver ' + behov2 + ' px) — ' + adress(inp));
         }
         inp.value = gammalt; ev(inp, 'input');
+      });
+    })();
+
+    // FACITLÄCKA (R2) — uttrycket eleven ska ställa upp får inte stå på sidan.
+    // Är uppställningen uppgiften, skriver eleven den själv; står uttrycket i texten är uppgiften
+    // redan gjord åt henne. Hittat två gånger för hand (Vilgots b, triangeln AC) innan det blev
+    // ett ben — en regel som upptäcks för hand upptäcks inte alls nästa gång.
+    (function(){
+      function norm(x){ return String(x).replace(/[\u2212\u2013]/g, '-').replace(/\s+/g, '').toLowerCase(); }
+      var rot = root || document.body, txt = '';
+      var g = document.createTreeWalker(rot, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(n){
+          var p = n.parentElement;
+          // facitraden visas först efter ett fel svar; keypaden är inte uppgiftstext
+          if(!p || p.closest('.ovn-fasit, .ak8-fasit, .keypad')) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      var n; while((n = g.nextNode())) txt += ' ' + n.nodeValue;
+      var nt = norm(txt);
+      rot.querySelectorAll('[data-skriv]').forEach(function(i){
+        // med figurens sidor i datan står sidorna i figuren med flit — det är deras uppgift
+        if(i.dataset.sidor) return;
+        var u = decodeURIComponent(i.dataset.skriv);
+        if(nt.indexOf(norm(u)) >= 0)
+          y.brott.push('FACITLÄCKA: uppställningen "' + u + '" står i uppgiftstexten \u2014 '
+                     + 'eleven ska skriva den själv');
       });
     })();
 

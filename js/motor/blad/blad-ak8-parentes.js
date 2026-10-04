@@ -81,23 +81,31 @@
 
       // 6 ── förenkla och sätt in x = 3 ────────────────────────────────────────────────────
       { rubrik: 'Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 3', logg: NOD_RAKNA, rader: [
-        p('6x + (3x + 7)',    '9x + 7', { varde: { insatt: 'x = 3 ger', svar: 34 } }),
-        p('9 - (4x + 8)',     '1 - 4x', { varde: { insatt: 'x = 3 ger', svar: -11 } }),
-        p('(5x + 6) - (2x - 3)', '3x + 9', { varde: { insatt: 'x = 3 ger', svar: 18 } })
+        p('6x + (3x + 7)',    '9x + 7', { varde: { etikett: 'Beräkna', x: 3, svar: 34 } }),
+        p('9 - (4x + 8)',     '1 - 4x', { varde: { etikett: 'Beräkna', x: 3, svar: -11 } }),
+        p('(5x + 6) - (2x - 3)', '3x + 9', { varde: { etikett: 'Beräkna', x: 3, svar: 18 } })
       ]},
 
       // 7 ── rektangelns omkrets, Joachims tal ─────────────────────────────────────────────
       { rubrik: 'Skriv ett uttryck för rektangelns omkrets och förenkla det', logg: NOD_RAKNA, rader: [
-        { typ: 'omkrets', svg: F ? F.rektangel({ bredd: '4x', hojd: '2x + 3', enhet: 'cm' }) : '',
+        { typ: 'skrivforenkla', fraga: 'Omkrets',
+          svg: F ? F.rektangel({ bredd: '4x', hojd: '2x + 3', enhet: 'cm' }) : '',
           sidor: ['4x', '2x + 3', '4x', '2x + 3'], svar: '12x + 6', vars: 'x' }
       ]},
 
       // 8 ── triangelns tredje sida ur omkretsen ───────────────────────────────────────────
       { rubrik: 'Triangelns omkrets är 14x', logg: NOD_RAKNA, rader: [
-        { typ: 'svgfigur', svg: F ? F.sidtriangel({ sidor: ['4x - 5', '6x + 9', ''], enhet: 'cm',
-            undertext: 'Sidan AC är inte utsatt.' }) : '' },
-        p('14x - (4x - 5) - (6x + 9)', '4x - 4',
-          { fraga: 'Skriv ett uttryck för sidan AC och förenkla det' })
+        /* R2: uttrycket "14x - (4x - 5) - (6x + 9)" stod förr i uppgiftstexten — det ÄR
+           uppställningen, alltså svaret på det eleven ska göra. Nu skriver hon det själv, och
+           mellanledsrutan kommer emellan eftersom det står minus framför parentesen.
+           HÖRNEN A, B, C är utsatta: uppgiften talar om sidan AC, och utan hörn går den inte att
+           peka ut. Sidorna ligger i ordningen A→B (botten), B→C (höger), C→A (vänster) — och den
+           sista är omärkt med flit, för den är uppgiften. */
+        { typ: 'skrivforenkla', vars: 'x',
+          fraga: 'Skriv ett uttryck för sidan AC och förenkla det',
+          svg: F ? F.sidtriangel({ sidor: ['4x - 5', '6x + 9', ''], horn: ['A', 'B', 'C'],
+            enhet: 'cm' }) : '',
+          skriv: '14x - (4x - 5) - (6x + 9)', svar: '4x - 4' }
       ]},
 
       // 9 ──────────────────────────────────────────────────────────────────────────────────
@@ -142,18 +150,20 @@
         logg: NOD_PROBLEM, rader: [
           { typ: 'svgfigur', svg: F ? F.prislappar({ varor: [{ namn: 'Smörgås', pris: 'x kr' },
                                                          { namn: 'Banan', pris: '6 kr' }] }) : '' },
-          { typ: 'forenkla', vars: 'x', fraga: 'Hur mycket ska Vilgot betala?', svar: '2x + 6' },
+          /* En ruta: ingenting ska förenklas, uttrycket ÄR svaret. */
+          { typ: 'forenkla', vars: 'x', fraga: 'Skriv ett uttryck för hur mycket Vilgot ska betala.',
+            svar: '2x + 6' },
           /* Uttrycket står INTE i texten längre: förr skrevs "546 - (2x + 6)" ut, och då var
              svaret på a) redan givet. Eleven skriver det själv i första rutan, och
              mellanledsrutan kommer emellan av sig själv — det står minus framför parentesen. */
           { typ: 'skrivforenkla', vars: 'x',
-            fraga: 'Hur mycket har han kvar när han har betalat?',
+            fraga: 'Skriv ett uttryck för hur mycket han har kvar när han har betalat, förenkla uttrycket.',
             skriv: '546 - (2x + 6)', svar: '540 - 2x' }
         ]},
 
       // 14 ── förenkla och sätt in x = 7 ───────────────────────────────────────────────────
       { rubrik: 'Förenkla uttrycket – visa mellanled – och beräkna värdet när x = 7', logg: NOD_RAKNA, rader: [
-        p('18x - (9 + 11x) - 7', '7x - 16', { varde: { insatt: 'x = 7 ger', svar: 33 } })
+        p('18x - (9 + 11x) - 7', '7x - 16', { varde: { etikett: 'Beräkna', x: 7, svar: 33 } })
       ]}
     ]
   };

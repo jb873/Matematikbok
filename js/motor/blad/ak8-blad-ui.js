@@ -61,7 +61,20 @@
   // Renderar en grupps rader med bokstavs-numrering (reset per grupp). renderRad: (rad)->html.
   function renderGrupp(grupp, nr, renderRad){
     var html = gruppRubrik(nr, grupp.rubrik, grupp.hint), bokN = 0;
-    grupp.rader.forEach(function(r){ var h = renderRad(r); var lb = injLabelN(h, bokN); html += lb.html; bokN += lb.antal; });
+    /* K-A: en deluppgift får ingen bokstav. Deluppgifterna räknas i den RENDERADE raden — en rad
+       med egna linje-etiketter (flera tallinjer i samma rad) bär så många deluppgifter den har,
+       en vanlig rad med en svarsruta bär en, och en ren figurrad bär ingen. */
+    var bitar = grupp.rader.map(renderRad);
+    function delarI(h){
+      var m = h.match(/class="ak8-linje-nr"/g);
+      if(m) return m.length;
+      return /<input/.test(h) ? 1 : 0;
+    }
+    var delar = bitar.reduce(function(a, h){ return a + delarI(h); }, 0);
+    bitar.forEach(function(h){
+      if(delar <= 1){ html += h; return; }               // en deluppgift: ingen bokstav
+      var lb = injLabelN(h, bokN); html += lb.html; bokN += lb.antal;
+    });
     return html;
   }
   // ── PER-RUTA-MARKERING (order 2026-09-21): i en rad med flera rutor visar VARJE ruta sin egen status
@@ -534,6 +547,10 @@
   // ── BIND (efter mount.innerHTML): keypad + grow + fokus + enter + clear-on-edit + skriv-ut ──
   function bindSheet(mount, opts){
     opts = opts || {};
+    // K-A: en deluppgift = ingen bokstav. Här passerar varje åttan-blad efter render, och det är
+    // den enda punkt alla åttans ytor delar — kärnornas egna krokar nådde inte sidor som bygger
+    // sin yta på annat sätt (mätt: ak8/k1 gav 23 bokstäver, varav 5 på ensamma deluppgifter).
+    enDeluppgiftUtanBokstav(mount);
     // Åter-bind (Återställ → renderBlad → bindSheet på SAMMA mount): ta bort förra bindningens mount-lyssnare
     // först. Förr staplades de → efter tre återställningar avslöjade ett "+ led"-klick flera led, och
     // focusin/keydown kördes flera gånger. Keypad-knapparna är nya element per render och binds om ändå.
@@ -619,12 +636,55 @@
     var pr = mount.querySelector('[data-print]'); if(pr) pr.onclick = function(){ window.print(); };
   }
 
+  // ── K-A: EN DELUPPGIFT = INGEN BOKSTAV ──
+  // Bokstaven skiljer deluppgifter åt; har gruppen bara en finns inget att skilja. Regeln mäts i
+  // den FÄRDIGA sidan, i samma termer som verktyg/uppgift-grind.js, därför att de nio renderare
+  // som skriver bokstaven räknar deluppgifter på nio olika sätt. Idempotent.
+  //
+  // .ovn-label bär två saker i boken: deluppgiftens bokstav ("a)") och, i två k2-kopior, gruppens
+  // nummer ("1."). Bara bokstaven rörs.
+  function enDeluppgiftUtanBokstav(rot){
+    (rot || document).querySelectorAll('.ovn-grupp').forEach(function(g){
+      var bok = [].filter.call(g.querySelectorAll('.ovn-label'), function(e){
+        return /^[a-z\u00e5\u00e4\u00f6]\s*\)$/i.test((e.textContent || '').trim());
+      });
+      if(!bok.length) return;
+      var barande = [].filter.call(g.querySelectorAll('.ovn-rad'), function(r){
+        return r.querySelector('input, .valruta-grid, .ovn-val-grid, .ovn-flerval-grid');
+      });
+      if(Math.max(barande.length, bok.length) <= 1) bok.forEach(function(e){ e.remove(); });
+    });
+  }
+
+  // ── K-A: EN DELUPPGIFT = INGEN BOKSTAV ──
+  // Bokstaven skiljer deluppgifter åt; har gruppen bara en finns inget att skilja. Regeln mäts i
+  // den FÄRDIGA sidan, i samma termer som verktyg/uppgift-grind.js, därför att de nio renderare
+  // som skriver bokstaven räknar deluppgifter på nio olika sätt. Idempotent.
+  //
+  // .ovn-label bär två saker i boken: deluppgiftens bokstav ("a)") och, i två k2-kopior, gruppens
+  // nummer ("1."). Bara bokstaven rörs.
+  function enDeluppgiftUtanBokstav(rot){
+    (rot || document).querySelectorAll('.ovn-grupp').forEach(function(g){
+      var bok = [].filter.call(g.querySelectorAll('.ovn-label'), function(e){
+        return /^[a-z\u00e5\u00e4\u00f6]\s*\)$/i.test((e.textContent || '').trim());
+      });
+      if(!bok.length) return;
+      var barande = [].filter.call(g.querySelectorAll('.ovn-rad'), function(r){
+        return r.querySelector('input, .valruta-grid, .ovn-val-grid, .ovn-flerval-grid');
+      });
+      if(Math.max(barande.length, bok.length) <= 1) bok.forEach(function(e){ e.remove(); });
+    });
+  }
+
   // ── UNIVERSELL KEYPAD-BINDNING ──  för ytor UTAN ak8-widgets (öva-blad, prov, drillar, ovamer).
   // keypadHTML(...) monteras i mount; denna binder EN keypad som följer fokus, döljer sig för
   // ordsvars-rutor (data-nokeypad) och scrollar fram den aktiva rutan så den aldrig hamnar bakom
   // keypaden. Ingen egen keypad ska skrivas — alla ytor mäter mot den här. opts: { hideFor, ops }.
   function bindKeypad(mount, opts){
     opts = opts || {};
+    // K-A även här: de sex k2-kopiorna bygger sina blad var för sig, men alla binder keypaden
+    // genom den här funktionen. Det är den enda punkt de delar, och regeln är idempotent.
+    enDeluppgiftUtanBokstav(mount);
     var doljSel = opts.hideFor || '[data-nokeypad]';
     var kp = mount.querySelector('.keypad') || document.querySelector('.keypad');
     var active = mount.querySelector('input:not([disabled])'), sisteFram = null;
@@ -692,6 +752,8 @@
   }
 
   window.AK8_UI = {
+    enDeluppgiftUtanBokstav: enDeluppgiftUtanBokstav,
+    enDeluppgiftUtanBokstav: enDeluppgiftUtanBokstav,
     pNum: pNum, pInt: pInt, avTusental: avTusental, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
     grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,

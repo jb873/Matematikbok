@@ -142,6 +142,10 @@ const PROBE7 = `(function(){
     // data-visa, som sedan minusUt bär minustecken.
     else if(d.omkrets !== undefined)                                                // omkretskedja: sidorna adderade = förenklingen
       v = dec(d.sidor || '').split('|').filter(Boolean).join(' + ') + ' = ' + dec(d.omkrets);
+    // BERÄKNA-KEDJAN (K-B): ersättningsledet bär sitt facit mekaniskt byggt i kärnan, det tillagda
+    // ledet har samma värde som svaret. Utan de här två räknades kedjans rutor som ej täckta.
+    else if(d.insatt !== undefined) v = dec(d.insatt);
+    else if(d.mellanvarde !== undefined) v = String(d.mellanvarde).replace('.', ',');
     else if(d.skriv !== undefined)                                                  // uppställningsrutan i två-rute-raden
       v = (d.sidor ? dec(d.sidor).split('|').filter(Boolean).join(' + ') : dec(d.skriv));
     else if(d.parentesmellan !== undefined){                                        // mellanledet: facit ur rättarens egen funktion
@@ -173,7 +177,17 @@ const PROBE7 = `(function(){
   function mat(namn, root){
     var b = { blad: namn, synligIn: 0, doldIn: 0, synligGrid: 0, doldGrid: 0, ejTackta: 0 };
     var ins = Array.from(root.querySelectorAll('.ovn-in'));
-    ins.forEach(function(i){ if(synlig(i)) b.synligIn++; else b.doldIn++; });
+    // NÅBAR, inte synlig just nu: en dold ruta är ett brott bara om eleven inte kan nå den.
+    // Beräkna-kedjans extra led (K-B) ligger dolt bakom en SYNLIG "+ led"-knapp — det är ett steg
+    // hon lägger till, inte en ruta som tappats bort. Kravet är kontrollen, inte en lista över
+    // tillåtna fall: en ny sorts utfällbar ruta måste visa samma sak för att slippa undan.
+    function naBar(i){
+      var k = i.closest('.ovn-berakna, .ak8-rad-kedja');
+      if(!k) return false;
+      var knapp = k.querySelector('[data-mer]');
+      return !!(knapp && knapp.getClientRects().length > 0);
+    }
+    ins.forEach(function(i){ if(synlig(i)) b.synligIn++; else if(!naBar(i)) b.doldIn++; });
     // k2-kopiornas egna radtyper: raden är EN svarsenhet (som i modulens egen räkning), och rutorna
     // inuti den ska då inte räknas var för sig.
     var RADSEL = '.brak-svar-rad, .brak-fragerad, .brak-forlang-rad, .val-rad, .stam-rad';

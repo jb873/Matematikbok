@@ -194,6 +194,21 @@
 /* ── PRISLAPPAR (af-lapp) ──
    En vara och dess pris. Utan de här reglerna ritas rect:en SVART, för det är SVG:s default — och
    texten blir då oläslig. Samma tokens som figurernas ytor och kanter. */
+/* ── BERÄKNA-KEDJAN (K-B) ──
+   Tre led på en egen rad under uppgiften: det förenklade uttrycket, ersättningen, svaret.
+   Leden bryter när bredden tar slut i stället för att tränga ihop sig.
+   "+ led" och "− led" är tonade småknappar: de är ett verktyg, inte ett svar. */
+.ovn-berakna{display:flex;align-items:center;flex-wrap:wrap;gap:8px;width:100%;margin-top:8px;}
+.ovn-berakna > .ovn-text{margin:0;}
+.ovn-led-knapp{
+  font-family:var(--cinzel,'Cinzel',serif);font-size:11px;letter-spacing:.06em;line-height:1;
+  padding:7px 11px;margin-left:4px;
+  color:var(--ink-faint,#7a6e65);background:transparent;
+  border:1px solid var(--ink-faint,#7a6e65);border-radius:999px;cursor:pointer;
+}
+.ovn-led-knapp:hover{background:var(--paper-lt,#faf7f1);color:var(--navy,#0f1e2e);}
+.ovn-led-knapp[hidden]{display:none;}
+
 .af-lapp{fill:var(--paper-lt,#faf7f1);stroke:var(--navy,#0f1e2e);stroke-width:1.5;}
 .af-lapp-namn{font-size:13px;font-style:normal;fill:var(--ink,#12110f);}
 .af-lapp-pris{font-size:16px;font-style:normal;font-weight:600;fill:var(--navy,#0f1e2e);}
