@@ -245,6 +245,9 @@ function insattningsFacit(uttryck, varde){
 }
 window.BLAD_SKRIV_FORENKLAT = SKRIV_FORENKLAT;   // grindarna läser regeln i stället för att gissa
 
+// Beskedet när genvägen tas. Elevtext i ett FALT-fält, Joachims ordalydelse.
+var SKRIV_BESKED = { genvag: { hint: 'Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.' } };
+
 // DELUPPGIFTENS BOKSTAV. Tom bokstav = ingen etikett: gruppen har bara en uppgift, och då finns
 // inget att skilja den från. Funktionen finns för att regeln ska gälla varje radtyp, också de som
 // skrivs i morgon — förr stod utskriften på tjugo ställen.
@@ -1282,7 +1285,10 @@ function bygg_blad(rotEl, blad){
               var _fs = inp.closest('.ovn-rad');
               var _slut = _fs ? _fs.querySelector('.ovn-in[data-forenkla]') : null;
               var _mal = _slut ? decodeURIComponent(_slut.dataset.forenkla) : null;
-              if(_mal && _AB.termAntal(inp.value) <= _AB.termAntal(_mal)) ok = false;
+              if(_mal && _AB.termAntal(inp.value) <= _AB.termAntal(_mal)){
+                ok = false;
+                _besked = SKRIV_BESKED.genvag.hint;   // säger VAD som brast, i stället för att visa facit
+              }
             }
           } catch(e){ ok = false; }
         }

@@ -30,7 +30,21 @@
       uttrycket? Visa lösningen med ett uttryck och förenkla uttrycket."
    (Bråken skrivs staplat i bladet, som allt annat i boken.)
 
-   GENVÄGEN I SKRIVA-RUTAN är stängd: SKRIV_FORENKLAT = 'underkanns' i blad-karna-b. Eleven ska
+   MAJA OCH NOA (nivå 2, bokens uppgift 57 — två personer som köper lök och potatis till olika
+   kilopris). Tre deluppgifter: a) EN ruta (inget förenklas), b) sammanlagt och c) skillnaden får
+   båda skriva + förenkla. c) får dessutom MELLANLED: en skillnad mellan två uttryck ger minus
+   framför parentes, och då gäller regel 7.
+
+   L-FIGUREN (nivå 3, bokens uppgift 15 — omkretsen av den färgade figuren): TVÅ rutor, skriva och
+   förenkla, som omkretsuppgifterna i nivå 1. Figuren finns redan i SvgAlgebraFigur (lfigur).
+
+   TRIANGELN AC (nivå 1, uppgift 8) står kvar som EN uppgift med tre rutor. Bokens a/b-indelning
+   behövs inte: eleven skriver uttrycket själv, och det är hela poängen med uppdelningen.
+
+   BERÄKNA-KEDJAN kräver MINST TVÅ LED efter avskriften av det förenklade uttrycket. Har eleven
+   skrivit av uttrycket räcker "1 - 4 · 3 = -11"; fler led är tillåtna via "+ led". Mätt i sidan.
+
+      GENVÄGEN I SKRIVA-RUTAN är stängd: SKRIV_FORENKLAT = 'underkanns' i blad-karna-b. Eleven ska
    först skriva ett korrekt uttryck och sedan förenkla; ett redan förenklat uttryck i första
    rutan är fel, även om värdet stämmer. Ett annat RIKTIGT skrivsätt godtas fortfarande
    (mätt: "x + (x + 55) + 2x" godkänns i Svens uppgift). */
