@@ -88,7 +88,12 @@
   function facitTermer(uttryck){
     var ab = AB(), ut = [];
     grupper(uttryck).forEach(function(g){
-      var inre = ab ? ab.termerAv(g.text) : [g.text];
+      // UTAN AlgBrak GÅR DET INTE ATT RÄTTA. Modulen föll förr tyst tillbaka på hela gruppen som
+      // EN term, och gav då ett mellanled som varken är elevens eller matematikens — ett fel som
+      // syns först i elevens ruta. Mätt: i node (där window saknas) godkändes ett teckenfel och
+      // det riktiga mellanledet underkändes. Fel rättning får inte vara tyst.
+      if(!ab) throw new Error("MellanledRattare: AlgBrak saknas — mellanledet kan inte rättas");
+      var inre = ab.termerAv(g.text);
       inre.forEach(function(t){
         var n = normTerm(t);
         if(n === '') return;

@@ -228,5 +228,89 @@
     ]
   };
 
-  window.AK8_PARENTES = { niva1: NIVA1 };
+
+  // ══════════════════════════ NIVÅ 2 ══════════════════════════
+  // Parentes Nivå 2.docx (md5 a115a4ac…). Nytt mot nivå 1: negativa tal inuti parentesen,
+  // decimaltal och bråk. Regel 7 gäller rakt av — kravet kommer ur uttrycket.
+  var NIVA2 = {
+    titel: 'Uttryck med minus eller plus framför parentes – nivå 2',
+    grupper: [
+
+      // 1 ── negativa tal inuti parentesen ────────────────────────────────────────────────
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('11x - (-5 - 9x)',            '20x + 5'),
+        p('5y - (-8y - 9)',             '13y + 9',   { vars: 'y' }),
+        p('(5x + 5) - (8 - 2x)',        '7x - 3'),
+        p('(3x - 0,3y) - (0,4x - 0,1y)', '2,6x - 0,2y', { vars: 'xy' })
+      ]},
+
+      // 2 ── tre parenteser, flera variabler ──────────────────────────────────────────────
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('7x - (4x + 11) + (2x + 7)',   '5x - 4'),
+        p('6a - (3a + 2) - (5a + 7)',    '-2a - 9',  { vars: 'a' }),
+        p('13x - (5x - 3y) + (2y - 3x)', '5x + 5y',  { vars: 'xy' }),
+        p('(5a - 2b) - (3a - 3b) - (8b + 2a)', '-7b', { vars: 'ab' })
+      ]},
+
+      // 3 ── bråk i uttrycket ─────────────────────────────────────────────────────────────
+      { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('(2 + 4b) + 5 - (3b + 6)',     'b + 1',    { vars: 'b' }),
+        p('18x/3 - (3x - 6) + (4x + 2)', '7x + 8'),
+        p('(4x - 4) - (3x + 9) - (2x + 3)', '-x - 16')
+      ]},
+
+      // 4 ── Linus (Joachims ordalydelse) ─────────────────────────────────────────────────
+      // Uttrycket (13x + 3) - (4x - 5) står INTE i texten: uppställningen är uppgiften (R2).
+      { rubrik: 'Linus har (13x + 3) hockeybilder. Han ger bort (4x − 5) bilder.',
+        mellanled:'kravt', logg: NOD_PROBLEM, rader: [
+        { typ: 'skrivforenkla', vars: 'x',
+          fraga: 'Skriv ett uttryck för hur många bilder han har kvar och förenkla det.',
+          skriv: '(13x + 3) - (4x - 5)', svar: '9x + 8' }
+      ]},
+
+      // 5 ── decimaler och bråk ───────────────────────────────────────────────────────────
+      { rubrik: 'Förenkla uttrycket', mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('7x - (2x + 5) + 8',           '5x + 3'),
+        p('0,32x - (11 - 0,25x) + 2,3',  '0,57x - 8,7'),
+        // brak: svaret ÄR ett bråk — inget att räkna ut, så gradePoly får tillatBrak.
+        p('4/3 - (6b/5 + 1/3) + 2b/5',   '1 - 4b/5', { vars: 'b', brak: true })
+      ]},
+
+      // 6 ── parenteser som tar ut varandra ───────────────────────────────────────────────
+      { rubrik: 'Förenkla uttrycket', mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        p('(5x + 8) - (6x - 7) + 15x',   '14x + 15'),
+        p('(8x + 3) + (8x - 3) - (8x - 3)', '8x + 3')
+      ]},
+
+      // 7 ── röda sträckan (Joachims tal) ─────────────────────────────────────────────────
+      // a) 12 - (2x + 1) = 11 - 2x   b) 40 - (x + 3) - (2x - 1) = 38 - 3x
+      { rubrik: 'Skriv ett uttryck för längden av den röda sträckan och förenkla det',
+        mellanled:'kravt', logg: NOD_RAKNA, rader: [
+        { typ: 'skrivforenkla', vars: 'x', fraga: 'Röda sträckan',
+          svg: F ? F.strackfigur({ helhet: '12', delar: [{ text: '2x + 1' }, {}] }) : '',
+          skriv: '12 - (2x + 1)', svar: '11 - 2x' },
+        { typ: 'skrivforenkla', vars: 'x', fraga: 'Röda sträckan',
+          svg: F ? F.strackfigur({ helhet: '40', delar: [{ text: 'x + 3' }, {}, { text: '2x - 1' }] }) : '',
+          skriv: '40 - (x + 3) - (2x - 1)', svar: '38 - 3x' }
+      ]},
+
+      // 8 ── hur mycket större omkrets (Joachims tal) ─────────────────────────────────────
+      // Rektangel (4x + 2) × x: omkrets 10x + 4. Liksidig triangel med sidan 2x + 3: 6x + 9.
+      // Skillnad (10x + 4) - (6x + 9) = 4x - 5. Uppställningen visas inte (R2); båda skrivsätten
+      // godtas — sidorna utskrivna eller omkretsarna uträknade först.
+      { rubrik: 'Bilden visar en rektangel och en liksidig triangel',
+        mellanled:'kravt', logg: NOD_PROBLEM, rader: [
+        { typ: 'skrivforenkla', vars: 'x',
+          fraga: 'Skriv ett uttryck för hur mycket större omkrets rektangeln har och förenkla det',
+          svg: F ? ('<span style="display:inline-flex;gap:18px;flex-wrap:wrap;">'
+            + F.rektangel({ bredd: '4x + 2', hojd: 'x', enhet: 'cm' })
+            + F.triangel({ ben: '2x + 3', bas: '2x + 3', enhet: 'cm' }) + '</span>') : '',
+          sidorA: ['4x + 2', 'x', '4x + 2', 'x'],
+          sidorB: ['2x + 3', '2x + 3', '2x + 3'],
+          svar: '4x - 5' }
+      ]}
+    ]
+  };
+
+  window.AK8_PARENTES = { niva1: NIVA1, niva2: NIVA2 };
 })();

@@ -56,7 +56,15 @@ const PROBE = `(function(){
     return b.width > 0 && b.height > 0;
   }
 
-  var rotar = Array.prototype.filter.call(document.querySelectorAll(ROTAR), synlig);
+  // EN FLIK I TAGET: varje nivå har sin egen text, och bara en syns åt gången.
+  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
+  var rotar = [];
+  (nav.length ? nav : [null]).forEach(function(b){
+    if(b){ if(b.disabled) return; b.click(); }
+    Array.prototype.filter.call(document.querySelectorAll(ROTAR), synlig).forEach(function(r){
+      if(rotar.indexOf(r) < 0) rotar.push(r);
+    });
+  });
   if(!rotar.length) rotar = [document.body];
 
   if(SABBA){

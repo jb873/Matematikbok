@@ -44,8 +44,24 @@ const PROBE = `(function(){
   function synlig(e){ return !e.hidden && !e.closest('[hidden]') && e.getClientRects().length > 0; }
   function kort(t){ return String(t).replace(/\\s+/g, ' ').trim().slice(0, 52); }
 
-  var grupper = Array.prototype.filter.call(document.querySelectorAll('.ovn-grupp'), synlig);
-  if(!grupper.length) return ut;
+  // EN FLIK I TAGET. Sidan kan ha flera nivåer, och bara en syns åt gången — en grind som mäter
+  // "sidan" mäter i själva verket den flik som råkar vara framme.
+  // MÄTNINGEN SKER MEDAN FLIKEN ÄR FRAMME. Att samla grupperna per flik och mäta dem efteråt gav
+  // falska brott: nivå 1:s beräkna-kedjor var dolda när mätningen kördes, och synlig() sade då att
+  // kedjan inte fanns. En dold grupp går inte att mäta — den måste mätas i sitt eget ögonblick.
+  var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
+  var sedda = [];
+  (nav.length ? nav : [null]).forEach(function(b){
+    if(b){ if(b.disabled) return; b.click(); }
+    Array.prototype.filter.call(document.querySelectorAll('.ovn-grupp'), synlig).forEach(function(g){
+      if(sedda.indexOf(g) >= 0) return;
+      sedda.push(g);
+      matGrupp(g, sedda.length - 1);
+    });
+  });
+  return ut;
+
+  function matGrupp(g, gi){
 
   // SABBA återskapar de tre fel reglerna finns för.
   if(SABBA === 'bokstav'){
@@ -73,7 +89,6 @@ const PROBE = `(function(){
     }
   }
 
-  grupper.forEach(function(g, gi){
     ut.grupper++;
     var rubrik = (g.querySelector('.ovn-grupp-rubrik') || {}).textContent || '';
     var rader = Array.prototype.filter.call(g.querySelectorAll('.ovn-rad'), synlig);
@@ -150,8 +165,7 @@ const PROBE = `(function(){
           + 'f\\u00f6renkla" har ' + svarsrutor.length + ' svarsruta \\u2014 tv\\u00e5 steg kr\\u00e4ver tv\\u00e5 rutor');
       }
     });
-  });
-  return ut;
+  }
 })()`;
 
 const TMP = path.join(os.tmpdir(), 'uppgiftgrind-' + process.pid + '.js');

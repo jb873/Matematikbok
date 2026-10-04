@@ -248,6 +248,30 @@ window.BLAD_SKRIV_FORENKLAT = SKRIV_FORENKLAT;   // grindarna läser regeln i st
 // Beskedet när genvägen tas. Elevtext i ett FALT-fält, Joachims ordalydelse.
 var SKRIV_BESKED = { genvag: { hint: 'Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.' } };
 
+// SKILLNADEN MELLAN TVÅ OMKRETSAR. Delar elevens uttryck vid det FÖRSTA minustecknet på toppnivå
+// (utanför alla parenteser) och prövar delarnas värden mot de två figurernas omkretsar.
+//
+// Att dela vid TOPPNIVÅN är det som skiljer uppställningen från mellanledet: "A - (B + C)" delas i
+// två, medan "A - B - C" (parenteserna redan borttagna) ger en högerdel som inte är B:s omkrets.
+// Det är rätt: då står mellanledet i fel ruta.
+function delaVidMinus(uttryck){
+  var t = String(uttryck), djup = 0;
+  // Loopen börjar på 0, inte 1: en INLEDANDE PARENTES måste räknas. Förr startade den på 1 för
+  // att hoppa över ett unärt minus, och då missades "(" i "(A) - (B)" — djupet blev negativt och
+  // minustecknet hittades aldrig. Det unära minuset hanteras i stället av villkoret i > 0.
+  for(var i = 0; i < t.length; i++){
+    var c = t[i];
+    if(c === '(') djup++;
+    else if(c === ')') djup--;
+    else if(i > 0 && djup === 0 && (c === '-' || c === '\u2212')) return [t.slice(0, i), t.slice(i + 1)];
+  }
+  return null;
+}
+// Sidlistan som ETT uttryck: ['4x + 2','x'] → '(4x + 2) + (x)'
+function sidSumma(sidor){
+  return (sidor || []).map(function(x){ return '(' + x + ')'; }).join(' + ');
+}
+
 // DELUPPGIFTENS BOKSTAV. Tom bokstav = ingen etikett: gruppen har bara en uppgift, och då finns
 // inget att skilja den från. Funktionen finns för att regeln ska gälla varje radtyp, också de som
 // skrivs i morgon — förr stod utskriften på tjugo ställen.
@@ -780,6 +804,7 @@ function bladHTML(blad){
            "rätt svar: undefined" för varje fel svar på raden. */
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
           + '" data-kp="uttryck" data-vars="' + _pv + '" data-visa="' + minusUt(rad.svar)
+          + (rad.brak ? '" data-tillat-brak="1' : '')
           + '" inputmode="text" autocomplete="off">';
         /* VALFRI VARDERUTA: uppgiften kan bade be om forenkling och om vardet for ett givet x.
            Dokumentets egen form ar EN uppgift, sa den ritas som en rad och inte som tva. */
@@ -813,7 +838,13 @@ function bladHTML(blad){
            mellanledsrutan emellan. Figuren och frågetexten är valfria — en omkrets har figur, ett
            problem har text, och båda använder samma rad. */
         var _kv = rad.vars || varsAv(rad);
-        var _ku = rad.skriv || (rad.sidor ? rad.sidor.join(' + ') : '');
+        /* SKILLNAD mellan två figurers omkretsar: uppställningen är "(A:s sidor) - (B:s sidor)".
+           Den skrivs aldrig ut på sidan (R2) — den är facit och underlag för mellanledet, som får
+           sitt krav automatiskt eftersom det står minus framför en parentes. */
+        var _kskillnad = !!(rad.sidorA && rad.sidorB);
+        var _ku = rad.skriv || (_kskillnad
+                 ? '(' + rad.sidorA.join(' + ') + ') - (' + rad.sidorB.join(' + ') + ')'
+                 : (rad.sidor ? rad.sidor.join(' + ') : ''));
         var _km = rad.mellanled || grupp.mellanled
           || (rad.skriv && window.MellanledRattare ? window.MellanledRattare.kravAv(rad.skriv) : null);
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
@@ -822,6 +853,8 @@ function bladHTML(blad){
         html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
         html += '<input class="ovn-in bred" data-skriv="' + encodeURIComponent(_ku) + '"'
           + (rad.sidor ? ' data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '"' : '')
+          + (_kskillnad ? ' data-sidor-a="' + encodeURIComponent(rad.sidorA.join('|'))
+             + '" data-sidor-b="' + encodeURIComponent(rad.sidorB.join('|')) + '"' : '')
           + ' data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(_ku)
           + '" inputmode="text" autocomplete="off">';
         if(_km && rad.skriv){
@@ -833,6 +866,7 @@ function bladHTML(blad){
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
           + '" data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(rad.svar)
+          + (rad.brak ? '" data-tillat-brak="1' : '')
           + '" inputmode="text" autocomplete="off">';
         html += '</div></div>';
       } else if(rad.typ === 'forenkla'){
@@ -1275,7 +1309,29 @@ function bygg_blad(rotEl, blad){
         var _AB = window.AlgBrak;
         var _ks = decodeURIComponent(inp.dataset.skriv);
         var _kd = inp.dataset.sidor ? decodeURIComponent(inp.dataset.sidor).split('|').filter(Boolean) : null;
+        var _dA = inp.dataset.sidorA ? decodeURIComponent(inp.dataset.sidorA).split('|').filter(Boolean) : null;
+        var _dB = inp.dataset.sidorB ? decodeURIComponent(inp.dataset.sidorB).split('|').filter(Boolean) : null;
         if(!_AB) ok = false;
+        else if(_dA && _dB){
+          /* SKILLNAD: elevens uttryck ska vara en subtraktion där vänsterdelen är värd A:s
+             omkrets och högerdelen B:s. Båda skrivsätten godtas — sidorna utskrivna, eller
+             omkretsarna uträknade först (Joachims beslut). */
+          var _dl = delaVidMinus(inp.value);
+          ok = false;
+          if(_dl){
+            try {
+              ok = _AB.pointEqual(_AB.parse(_dl[0]), _AB.parse(sidSumma(_dA)))
+                && _AB.pointEqual(_AB.parse(_dl[1]), _AB.parse(sidSumma(_dB)));
+            } catch(e){ ok = false; }
+          }
+          if(ok && SKRIV_FORENKLAT === 'underkanns' && _AB.termAntal){
+            var _sl = inp.closest('.ovn-rad');
+            var _m2 = _sl ? _sl.querySelector('.ovn-in[data-forenkla]') : null;
+            var _f2 = _m2 ? decodeURIComponent(_m2.dataset.forenkla) : null;
+            try { if(_f2 && _AB.termAntal(inp.value) <= _AB.termAntal(_f2)){ ok = false; _besked = SKRIV_BESKED.genvag.hint; } }
+            catch(e){ /* otolkbart: värdeprovet har redan avgjort */ }
+          }
+        }
         else if(_kd && _kd.length) ok = _AB.sammaTermer(inp.value, _kd);
         else {
           try {
@@ -1295,7 +1351,10 @@ function bygg_blad(rotEl, blad){
       } else if(inp.dataset.forenkla !== undefined){
         // FÖRENKLA: värde + skriven form (AlgBrak.gradePoly). 'form' = rätt värde men inte förenklat
         // → räknas som fel, men beskedet talar om VAD som är kvar att göra (samma två lägen som bråken).
-        var _rf = window.AlgBrak ? window.AlgBrak.gradePoly(inp.value, decodeURIComponent(inp.dataset.forenkla)) : { status: 'fel' };
+        /* data-tillat-brak: svaret FÅR innehålla ett bråk. "1 − 4b/5" är ett färdigt uttryck, inte
+           en orörd division — regeln "räkna ut divisionen" gäller 28x/2, inte 4b/5. */
+        var _rfo = inp.dataset.tillatBrak ? { tillatBrak: true } : undefined;
+        var _rf = window.AlgBrak ? window.AlgBrak.gradePoly(inp.value, decodeURIComponent(inp.dataset.forenkla), _rfo) : { status: 'fel' };
         ok = _rf.status === 'ratt';
         if(_rf.status === 'form') _besked = _rf.besked;
         else if(_rf.parsefel) _besked = _rf.besked;
