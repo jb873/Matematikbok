@@ -210,6 +210,16 @@
       spaltM.appendChild(btn);
     });
 
+    /* ANMÄLAN TILL BETEENDEVAKTEN: nivåantalet ramen FICK ur sidans data.
+       verktyg/navram-beteende.js jämför det med antalet RITADE nivåknappar — raden måste spegla
+       datan, aldrig ett fast tal. 0 eller 1 nivå betyder ingen rad alls: en ensam knapp är ingen
+       navigering, bara brus. Anmälan ligger HÄR och inte i delkapitel-receptet, eftersom sidor
+       med egen wiring (ak7/k1/d1) också passerar ramen — en vakt som är blind på en sida är
+       ingen vakt. */
+    var nivaAntal = (cfg.niva && cfg.niva.antal) || 1;
+    window.__NAVRAM = { nivaAntal: nivaAntal,
+                        forvantadeNivaknappar: nivaAntal >= 2 ? nivaAntal : 0 };
+
     vard.appendChild(lager);
     vard.appendChild(wrap);
     ritaNiva();

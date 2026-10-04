@@ -41,7 +41,8 @@ const VERKTYG = [
   { fil: 'tonad-svep.js',     vad: 'inget tonat som ska vara läsbart' },
   { fil: 'keypad-grind.js',   vad: 'keypaden är alltid helt upplåst' },
   { fil: 'mellanled-grind.js', vad: 'en uppgift som begär mellanled har plats för det' },
-  { fil: 'flik-grind.js',     vad: 'en byggd flik är klickbar, och nivålåset släpper när det ska' }
+  { fil: 'flik-grind.js',     vad: 'en byggd flik är klickbar, och nivålåset släpper när det ska' },
+  { fil: 'navram-beteende.js', vad: 'varje variant byter yta, och nivåraden speglar datan' }
 ];
 
 /* Nians fyra öva-sidor står utanför nämnar- och flerruts-grindens listor. Proberna läser

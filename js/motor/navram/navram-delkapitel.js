@@ -125,40 +125,48 @@
       return r.querySelectorAll('.blad-nav-btn').length > 0;
     });
     function variantAv(b){
+      var panel = panelFor(b);
       return { titel: txt(b).replace(/^\d+/, ''), kommer: b.disabled,
-               valj: function(){ visaPanel('ova'); b.click(); } };
+               valj: function(){ visaPanel(panel); b.click(); } };
     }
     /* NÄSTLAD NAVIGERING: har ett blad underflikar (.blad-subnav-btn) är BLADET gruppen och
        underbladen varianterna. Underflikarna syns först när bladet är valt, så speglingen måste
        klicka igenom bladen för att se dem — och delegera på PLATS i den synliga raden, eftersom
        raden byggs om vid bladbyte och en hållen nod då blir detached. */
-    function synligaSub(){
-      return Array.prototype.filter.call(document.querySelectorAll('.blad-subnav-btn'), synlig);
+    /* Underflikraderna finns SAMTIDIGT, en inuti varje blad-mount, och byggs aldrig om — bara
+       mounten visas eller göms. Raden för blad nr i är därför .blad-subnav nr i, och knapparna i
+       den går att hålla direkt. Ingen synlighetsmätning behövs, vilket också gör delegeringen
+       oförstörbar av gom(). */
+    function subRad(i){ return document.querySelectorAll('.blad-subnav')[i] || null; }
+    /* Vilken .tab-panel hör knappen till? d3 har en femte flik ("Fördjupning") med EGEN panel,
+       och dess blad ligger där — inte i 'ova'. Hårdkodad panel gör att klicket stänger panelen
+       som bär arket. Härled den i stället. */
+    function panelFor(e){
+      var p = e && e.closest ? e.closest('.tab-panel') : null;
+      return (p && p.dataset && p.dataset.panel) ? p.dataset.panel : 'ova';
     }
     function nastladeGrupper(rad){
       var knappar = Array.prototype.slice.call(rad.querySelectorAll('.blad-nav-btn'));
-      var nagonHarSub = false;
+      var nagot = false;
       var grupper = knappar.map(function(b, bi){
-        b.click();
-        var subs = synligaSub();
-        if(!subs.length) return { blad: b, bi: bi, subs: null };
-        nagonHarSub = true;
-        return { blad: b, bi: bi, subs: subs.map(function(sb){ return txt(sb); }) };
+        var sr = subRad(bi);
+        var subs = sr ? Array.prototype.slice.call(sr.querySelectorAll('.blad-subnav-btn')) : [];
+        if(subs.length) nagot = true;
+        return { blad: b, subs: subs };
       });
-      if(!nagonHarSub) return null;            // platt sida — låt den vanliga vägen gälla
+      if(!nagot) return null;            // platt sida — låt den vanliga vägen gälla
       return grupper.map(function(g){
-        if(!g.subs){
+        if(!g.subs.length){
           // Blad utan underflikar i en sida som annars har dem: egen grupp med en variant.
           return { rubrik: txt(g.blad).replace(/^\d+/, ''), varianter: [variantAv(g.blad)] };
         }
         return { rubrik: txt(g.blad).replace(/^\d+/, ''),
-          varianter: g.subs.map(function(namn, si){
-            return { titel: namn.replace(/^\d+/, ''), valj: function(){
-              visaPanel('ova');
-              g.blad.click();                       // underflikraden ritas om till det här bladet
-              var nu = synligaSub();
-              if(nu[si]) nu[si].click();
-            } };
+          varianter: g.subs.map(function(sb){
+            /* Bladknappen först (visar rätt mount och återställer till underblad 1), sedan
+               underfliken — direkt referens, oförändrad av att raden är gömd. */
+            var panel = panelFor(g.blad);
+            return { titel: txt(sb).replace(/^\d+/, ''), kommer: sb.disabled,
+                     valj: function(){ visaPanel(panel); g.blad.click(); sb.click(); } };
           }) };
       });
     }
