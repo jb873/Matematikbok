@@ -271,6 +271,20 @@ function insattningsFacit(uttryck, varde){
 }
 window.BLAD_SKRIV_FORENKLAT = SKRIV_FORENKLAT;   // grindarna läser regeln i stället för att gissa
 
+// ETT LED SOM REDAN ÄR SLUTSVARET ÄR INGET LED (Joachim 2026-10-05). Samma prov som genvägen i
+// skriv-rutan: ledet ska ha FLER TERMER än svaret. Ett led ÄR värt samma som svaret — det är
+// formen som skiljer dem, inte värdet. Gäller båda kedjorna och alla led i dem.
+// Otolkbart (parenteser, tomt) → termAntal ger undefined, jämförelsen blir falsk och ledet står
+// kvar: "40 − (3x + 2)" är ett steg på vägen, inte ett svar.
+function ledUtanGenvag(elev, svar){
+  var AB = window.AlgBrak;
+  if(!AB || !AB.termAntal) return true;
+  try {
+    var e = AB.termAntal(elev), f = AB.termAntal(svar);
+    return !(e <= f);
+  } catch(err){ return true; }
+}
+
 // Beskedet när genvägen tas. Elevtext i ett FALT-fält, Joachims ordalydelse.
 var SKRIV_BESKED = { genvag: { hint: 'Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.' } };
 
@@ -1436,12 +1450,15 @@ function bygg_blad(rotEl, blad){
         /* TILLAGT LED I EN UTTRYCKSKEDJA: ett steg på vägen, alltså värt samma som svaret. Till
            skillnad från Beräkna-kedjans led är det här ett UTTRYCK — AlgBrak avgör, inte evalUttryck. */
         var _mu = window.AlgBrak;
-        try { ok = !!_mu && _mu.pointEqual(_mu.parse(inp.value), _mu.parse(decodeURIComponent(inp.dataset.mellanuttryck))); }
+        var _mf = decodeURIComponent(inp.dataset.mellanuttryck);
+        try { ok = !!_mu && _mu.pointEqual(_mu.parse(inp.value), _mu.parse(_mf)); }
         catch(e){ ok = false; }
+        if(ok && !ledUtanGenvag(inp.value, _mf)){ ok = false; _besked = SKRIV_BESKED.genvag.hint; }
       } else if(inp.dataset.mellanvarde !== undefined){
         // TILLAGT LED: ett steg på vägen, alltså samma värde som svaret.
         var _mv = evalUttryck(inp.value);
         ok = !isNaN(_mv) && Math.abs(_mv - parseFloat(inp.dataset.mellanvarde)) < 1e-9;
+        if(ok && !ledUtanGenvag(inp.value, inp.dataset.mellanvarde)){ ok = false; _besked = SKRIV_BESKED.genvag.hint; }
       } else if(inp.dataset.likben !== undefined || inp.dataset.likbas !== undefined){
         /* LIKBENT: rutorna rättas TILLSAMMANS — 2 · ben + bas ska vara värt omkretsen. Båda
            rutorna får samma dom, för det är likheten som är svaret, inte den enskilda sidan. */
