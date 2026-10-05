@@ -40,9 +40,8 @@
              — hur mycket större omkrets                        facit  32
 
    UTAN GODKÄNDA TAL ÄNNU (bilduppgifter vars siffror fortfarande är bokens):
-     2:57    Maja och Noa — kilopriserna och mängderna
-     3:15    L-figuren — sidorna
-     3:20    uttryckspyramiden — uttrycken i rutorna
+     3:20    uttryckspyramiden — uttrycken i rutorna (FAS 2:s tal saknas i min anteckning)
+
    De tre ska ha egna tal innan de byggs, av samma skäl som de elva ovan.
 
    ── JOACHIMS BESLUT OM NIVÅ 2 OCH 3 (fattade 2026-10-04, innan nivåerna byggs) ──
@@ -307,16 +306,16 @@
       // skillnad mellan två uttryck ger minus framför parentes (regel 7).
       { rubrik: 'Maja köper x kg äpplen och y kg päron. Noa köper y kg äpplen och x kg päron.',
         mellanled:'kravt', logg: NOD_PROBLEM, rader: [
-        { typ: 'svgfigur', svg: F ? F.prislappar({ varor: [{ namn: 'Äpplen', pris: '24 kr/kg' },
-                                                           { namn: 'Päron', pris: '18 kr/kg' }] }) : '' },
+        { typ: 'svgfigur', svg: F ? F.prislappar({ varor: [{ namn: 'Äpplen', pris: '18 kr/kg' },
+                                                           { namn: 'Päron', pris: '24 kr/kg' }] }) : '' },
         { typ: 'forenkla', vars: 'xy', fraga: 'Skriv ett uttryck för hur mycket Maja ska betala.',
-          svar: '24x + 18y', mellanled: 'nej' },   // inget att förenkla: uttrycket ÄR svaret
+          svar: '18x + 24y', mellanled: 'nej' },   // inget att förenkla: uttrycket ÄR svaret
         { typ: 'skrivforenkla', vars: 'xy',
           fraga: 'Skriv ett uttryck för hur mycket Maja och Noa ska betala sammanlagt och förenkla det.',
-          skriv: '(24x + 18y) + (24y + 18x)', svar: '42x + 42y' },
+          skriv: '(18x + 24y) + (24x + 18y)', svar: '42x + 42y' },
         { typ: 'skrivforenkla', vars: 'xy',
           fraga: 'Skriv ett uttryck för skillnaden mellan hur mycket Maja och Noa ska betala och förenkla det.',
-          skriv: '(24x + 18y) - (24y + 18x)', svar: '6x - 6y' }
+          skriv: '(18x + 24y) - (24x + 18y)', svar: '6y - 6x' }
       ]},
 
       // 8 ── hur mycket större omkrets (Joachims tal) ─────────────────────────────────────
@@ -348,9 +347,9 @@
       // 1 ── minus framför två parenteser, den andra med negativ term ─────────────────────
       { rubrik: 'Förenkla uttrycket – visa mellanled', mellanled:'kravt', logg: NOD_RAKNA, rader: [
         p('2x - 9 - (3x + 6) - (-2x + 8)', 'x - 23'),
-        // Bråk av två parenteser: steget är att förenkla täljare och nämnare var för sig, och
-        // mellanledsregeln (samma termer, parenteserna borttagna) beskriver inte det.
-        { typ: 'parentes', vars: 'x', mellanled: 'nej',
+        // Joachims beslut: bråkuppgiften SKA ha mellanled, som de andra. Steget är parenteserna
+        // borttagna i täljare och nämnare var för sig — två rutor, staplade.
+        { typ: 'parentes', vars: 'x',
           uttryck: '((7x - 10) - (x - 10))/((x + 20) - (-2x + 20))',
           uttryckHtml: '<span class="ovn-brak"><span class="ovn-brak-taljare">(7x \u2212 10) \u2212 (x \u2212 10)</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">(x + 20) \u2212 (\u22122x + 20)</span></span>',
           svar: '2' }
@@ -386,13 +385,14 @@
       ]},
 
       // 6 ── L-figurens omkrets ───────────────────────────────────────────────────────────
-      // Sidorna i figurens egen ordning: topp, höger, urtag in, urtag ner, botten, vänster.
-      // Omkretsen är den omslutande rektangelns: 2(3a + b) + 2(2a) = 10a + 2b.
+      // JOACHIMS GODKÄNDA TAL: yttre bredd 2a + b, höjd a + 2b → omkrets 6a + 6b. Urtaget är a
+      // brett och b högt. Sidorna i figurens egen ordning: topp, höger, urtag in, urtag ner,
+      // botten, vänster. Omkretsen är den omslutande rektangelns: 2(2a + b) + 2(a + 2b) = 6a + 6b.
       { rubrik: 'Skriv ett uttryck för den färgade figurens omkrets och förenkla det',
         logg: NOD_RAKNA, rader: [
         { typ: 'skrivforenkla', vars: 'ab', fraga: 'Omkrets',
-          svg: F ? F.lfigur({ sidor: ['3a + b', 'a', 'a + b', 'a', '2a', '2a'], enhet: 'cm' }) : '',
-          sidor: ['3a + b', 'a', 'a + b', 'a', '2a', '2a'], svar: '10a + 2b' }
+          svg: F ? F.lfigur({ sidor: ['2a + b', 'a + b', 'a', 'b', 'a + b', 'a + 2b'], enhet: 'cm' }) : '',
+          sidor: ['2a + b', 'a + b', 'a', 'b', 'a + b', 'a + 2b'], svar: '6a + 6b' }
       ]},
 
       // 7 ── hur mycket större omkrets, två rektanglar (Joachims tal) ─────────────────────

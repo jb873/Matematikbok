@@ -20,8 +20,13 @@
  * Gränsen är teckenomgivningen, inte raden: en RUBRIK kan innehålla matematik, och gör det.
  * Elevens egna inmatningar läses inte — de är inte bokens text.
  *
+ * BRÅK-BENET: ett snedstreck mellan två termer är ett bråk som inte staplats. Samma princip,
+ * samma grind — båda handlar om vilket TECKEN som står i elevsynlig matematik. "kr/kg" är en
+ * enhet och rörs inte.
+ *
  * KÖR:  node verktyg/minus-grind.js [--sida <delsträng>] [--lista]
  *       --sabba   byter ett minustecken mot bindestreck i sidan → grinden MÅSTE fälla
+ *       --sabba brak  skriver in ett platt bråk i en uppgiftstext → BRÅK-benet måste fälla
  * Exit 1 vid brott. Ingen nätväg, ingen fil ändras. */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
@@ -32,10 +37,13 @@ const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.blad())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const SABBA = args.includes('--sabba');
+// --sabba brak: motprov för BRÅK-benet (platt bråk i elevsynlig matematik).
+const SABBA_BRAK = args.includes('brak');
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
 const PROBE = `(function(){
   var SABBA = ${SABBA};
+  var SABBA_BRAK = ${SABBA_BRAK};
   var ut = { onerr: window.__onerr || null, texter: 0, brott: [], noter: [] };
 
   // En ensam variabel räknas som matteterm; ett ord gör det inte. Därför kräver bokstavsledet att
@@ -67,6 +75,15 @@ const PROBE = `(function(){
   });
   if(!rotar.length) rotar = [document.body];
 
+  if(SABBA_BRAK){
+    // Skriv in ett PLATT bråk i en uppgiftstext — exakt det fel benet finns för.
+    var b0 = null;
+    rotar.forEach(function(rot){
+      if(b0) return;
+      b0 = rot.querySelector('.ovn-num, .ovn-text');
+    });
+    if(b0){ b0.textContent += ' 3x/4'; ut.noter.push('SABBA: skrev in ett platt br\\u00e5k "3x/4" i en uppgiftstext'); }
+  }
   if(SABBA){
     // Byt ETT minustecken mot bindestreck i en uppgiftstext — exakt det fel grinden finns för.
     var m0 = null;
@@ -97,6 +114,21 @@ const PROBE = `(function(){
     while((n = gang.nextNode())){
       var txt = String(n.nodeValue).replace(/\\s+/g, ' ').trim();
       ut.texter++;
+      // BRÅK-BENET: ett snedstreck mellan två TERMER är ett bråk som inte staplats. "kr/kg" rörs
+      // inte — båda sidor är två bokstäver utan siffra, alltså en enhet.
+      // ORDGRÄNSER: utan dem fångas "r/k" ur "kr/kg" och enheten räknas som ett bråk. Snedstrecket
+      // räknas bara när hela termen står på var sida — "4b/5" ja, "kr/kg" nej.
+      var _br = txt.match(/(^|[^\\w])(\\d*[a-zA-Z]?)\\s*\\/\\s*(\\d*[a-zA-Z]?)(?![\\w])/g) || [];
+      _br.forEach(function(bit){
+        var d2 = bit.split('/');
+        var t2 = (d2[0] || '').trim(), n2 = (d2[1] || '').trim();
+        if(!t2 || !n2) return;
+        if(!/\\d/.test(t2) && !/\\d/.test(n2) && t2.length > 1 && n2.length > 1) return;   // enhet
+        var p2 = n.parentElement;
+        var a2 = p2.tagName.toLowerCase() + (p2.getAttribute('class') ? '.' + p2.getAttribute('class').split(/\\s+/).join('.') : '');
+        var ny = 'BR\\u00c5K: "' + bit.trim() + '" i "' + txt.slice(0, 50) + '" (' + a2 + ') \\u2014 br\\u00e5k st\\u00e5r staplade';
+        if(ut.brott.indexOf(ny) < 0) ut.brott.push(ny);
+      });
       if(!/[-\\u2013]/.test(txt)) continue;
       // INTERVALL UNDANTAS: ett streck mellan tv\u00e5 rena tal utan mellanrum \u00e4r "2\u20134", inte "2 \u2212 4".
       // Bokens matematik skriver alltid r\u00e4knetecknet med mellanrum, och autoSpace l\u00e4gger till dem
@@ -110,7 +142,7 @@ const PROBE = `(function(){
       var nyckel = adress + '|' + txt;
       if(sedda[nyckel]) continue;
       sedda[nyckel] = 1;
-      ut.brott.push('"' + txt.slice(0, 70) + '"  (' + adress + ')');
+      ut.brott.push('MINUS: "' + txt.slice(0, 70) + '"  (' + adress + ')');
     }
   });
   return ut;

@@ -38,13 +38,35 @@
   function esc(s){ return minusUt(String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function svgStart(w, h, alt){ return '<svg class="af-svg" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + esc(alt) + '">'; }
   function poly(punkter){ return '<polygon class="' + FYLL + ' ' + KANT + '" points="' + punkter.map(function(p){ return p[0] + ',' + p[1]; }).join(' ') + '"/>'; }
-  // Etikett på sidan mellan p och q, förskjuten UTÅT från figurens mitt.
-  function sidEtikett(p, q, mitt, text, avst){
+  // Ligger punkten inuti polygonen? (stråle åt höger, räkna korsningar)
+  function inuti(x, y, pts){
+    var inne = false;
+    for(var i = 0, j = pts.length - 1; i < pts.length; j = i++){
+      var xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+      if(((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-9) + xi)) inne = !inne;
+    }
+    return inne;
+  }
+  /* ETIKETT PÅ SIDAN mellan p och q, förskjuten VINKELRÄTT UT från sidan.
+     Förr förskjöts den i riktningen från figurens tyngdpunkt. För en konvex figur pekar den ut,
+     men en L-figur är inte konvex: urtagets sidor fick då en riktning LÄNGS linjen, och etiketten
+     hamnade på hörnet ovanpå den. Nu bär varje sida sin egen normal, och av de två väljs den som
+     inte pekar in i figuren. Konvexa figurer ser likadana ut som förut. */
+  function sidEtikett(p, q, mitt, text, avst, pts){
     var mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
-    var dx = mx - mitt[0], dy = my - mitt[1], len = Math.sqrt(dx * dx + dy * dy) || 1;
-    var d = avst || 16, x = mx + dx / len * d, y = my + dy / len * d;
-    var anchor = Math.abs(dx) / len > 0.5 ? (dx > 0 ? 'start' : 'end') : 'middle';
-    return '<text class="' + TXT + '" x="' + x.toFixed(1) + '" y="' + (y + 5).toFixed(1) + '" text-anchor="' + anchor + '">' + esc(text) + '</text>';
+    var ex = q[0] - p[0], ey = q[1] - p[1], len = Math.sqrt(ex * ex + ey * ey) || 1;
+    var nx = -ey / len, ny = ex / len;                       // normal
+    if(pts && inuti(mx + nx * 4, my + ny * 4, pts)){ nx = -nx; ny = -ny; }
+    else if(!pts){                                            // utan punktlista: som förut
+      var dx = mx - mitt[0], dy = my - mitt[1], dl = Math.sqrt(dx * dx + dy * dy) || 1;
+      nx = dx / dl; ny = dy / dl;
+    }
+    var d = avst || 16, x = mx + nx * d, y = my + ny * d;
+    var anchor = Math.abs(nx) > 0.5 ? (nx > 0 ? 'start' : 'end') : 'middle';
+    /* Baslinjen: en etikett ovanför sidan ska lyfta hela sin höjd, en under bara sin baslinje.
+       Utan det hänger texten ner i linjen den just flyttats bort från. */
+    var dy2 = ny < -0.5 ? 0 : (ny > 0.5 ? 12 : 5);
+    return '<text class="' + TXT + '" x="' + x.toFixed(1) + '" y="' + (y + dy2).toFixed(1) + '" text-anchor="' + anchor + '">' + esc(text) + '</text>';
   }
   function mitten(pts){ var sx = 0, sy = 0; pts.forEach(function(p){ sx += p[0]; sy += p[1]; }); return [sx / pts.length, sy / pts.length]; }
   function enhetTxt(o, w){ return o.enhet ? '<text class="' + TXT + ' af-enhet" x="' + (w - 4) + '" y="14" text-anchor="end">(' + esc(o.enhet) + ')</text>' : ''; }
@@ -60,7 +82,7 @@
     var hornNamn = (opts.horn || []).filter(Boolean).join('');
     var etikett = opts.alt || (alt + (hornNamn ? ' och hörnen ' + hornNamn.split('').join(', ') : ''));
     var s = svgStart(w, h, etikett) + poly(pts);
-    pts.forEach(function(p, i){ var q = pts[(i + 1) % pts.length]; if(matt[i]) s += sidEtikett(p, q, m, matt[i], opts.avstand); });
+    pts.forEach(function(p, i){ var q = pts[(i + 1) % pts.length]; if(matt[i]) s += sidEtikett(p, q, m, matt[i], opts.avstand, pts); });
     if(opts.horn) pts.forEach(function(p, i){ s += hornEtikett(p, m, opts.horn[i], null); });
     return s + enhetTxt(opts, w) + undertext(opts, w, h) + '</svg>';
   }

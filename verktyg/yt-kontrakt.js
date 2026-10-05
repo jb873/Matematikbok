@@ -327,7 +327,10 @@ const PROBE = `(function(){
         // BARA UTTRYCKSRUTOR: en talruta, en ordna-ruta eller en tabellcell har en FORM, och
         // en 520 px-sträng i den prövar ingenting som står där. Ett uttryck kan bli långt av
         // legitima skäl — fyra sidor i en omkrets, en mellanledskedja — och där gäller taket.
-        if(skaVaxa && uttrycksruta(inp)){
+        // EN RUTA I ETT STAPLAT BRÅK har en FORM, inte en radbredd: täljaren och nämnaren står i
+        // bråkets kolumn, och att dra ut dem till radens kant skulle bryta stapeln. Samma slag av
+        // undantag som talrutorna — måttet är formgivet, inte ett tak som glömts.
+        if(skaVaxa && uttrycksruta(inp) && !inp.closest('.ovn-brak')){
           var langt = txt;
           while(c.measureText(langt).width < 520 && langt.length < 170) langt += enhet;
           inp.value = ''; ev(inp, 'input');
