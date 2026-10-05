@@ -942,7 +942,8 @@ function bladHTML(blad){
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
         if(rad.fraga) html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
-        html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html += _kskillnad ? '<div class="ovn-berakna">'
+                 : '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
         html += '<input class="ovn-in bred" data-skriv="' + encodeURIComponent(_ku) + '"'
           + (rad.sidor ? ' data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '"' : '')
           + (_kskillnad ? ' data-sidor-a="' + encodeURIComponent(rad.sidorA.join('|'))
@@ -955,11 +956,25 @@ function bladHTML(blad){
             + '" data-krav="' + _km + '" data-kp="uttryck" data-vars="' + _kv
             + '" inputmode="text" autocomplete="off">';
         }
+        /* SKILLNADSUPPGIFTEN får den FRIA KEDJAN i stället för ett fast mellanled: vägen från
+           "(A) − (B)" till svaret kan gå över ett eller två steg beroende på hur eleven räknar.
+           Ledet är ett UTTRYCK och ska vara värt samma som svaret (data-mellanuttryck). */
+        if(_kskillnad){
+          // Dolt tills eleven trycker "+ led" — samma som Beräkna-kedjans extra steg.
+          html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
+          html += '<input class="ovn-in bred ovn-led-extra" data-mellanuttryck="' + encodeURIComponent(rad.svar)
+            + '" data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(rad.svar)
+            + '" inputmode="text" autocomplete="off" hidden>';
+        }
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
           + '" data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(rad.svar)
           + (rad.brak ? '" data-tillat-brak="1' : '')
           + '" inputmode="text" autocomplete="off">';
+        if(_kskillnad){
+          html += '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>';
+          html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
+        }
         html += '</div></div>';
       } else if(rad.typ === 'forenkla'){
         // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
@@ -1003,10 +1018,11 @@ function bladHTML(blad){
         rad.rader.forEach(function(r){
           html += '<div class="alg-pyr-rad">';
           r.forEach(function(c){
+            /* Rutan är elevsynlig text: minustecknet formateras här, inte i datan. */
             html += (c.fast !== undefined)
-              ? '<span class="alg-ruta alg-ruta-fast">' + c.fast + '</span>'
+              ? '<span class="alg-ruta alg-ruta-fast">' + minusUt(c.fast) + '</span>'
               : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
-                + '" data-visa="' + c.svar + '" inputmode="text" autocomplete="off">';
+                + '" data-visa="' + minusUt(c.svar) + '" inputmode="text" autocomplete="off">';
           });
           html += '</div>';
         });
@@ -1020,9 +1036,9 @@ function bladHTML(blad){
         html += '<div class="alg-magisk">';
         rad.rutor.forEach(function(c){
           html += (c.fast !== undefined)
-            ? '<span class="alg-ruta alg-ruta-fast">' + c.fast + '</span>'
+            ? '<span class="alg-ruta alg-ruta-fast">' + minusUt(c.fast) + '</span>'
             : '<input class="ovn-in alg-ruta" data-forenkla="' + encodeURIComponent(c.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
-              + '" data-visa="' + c.svar + '" inputmode="text" autocomplete="off">';
+              + '" data-visa="' + minusUt(c.svar) + '" inputmode="text" autocomplete="off">';
         });
         html += '</div></div>';
       } else if(rad.typ === 'sidor'){
@@ -1279,7 +1295,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-mellanuttryck],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1389,6 +1405,12 @@ function bygg_blad(rotEl, blad){
           try { ok = window.AlgBrak.termAntal(inp.value) === window.AlgBrak.termAntal(_iled); }
           catch(e){ /* otolkbart led: värdet har redan avgjort */ }
         }
+      } else if(inp.dataset.mellanuttryck !== undefined){
+        /* TILLAGT LED I EN UTTRYCKSKEDJA: ett steg på vägen, alltså värt samma som svaret. Till
+           skillnad från Beräkna-kedjans led är det här ett UTTRYCK — AlgBrak avgör, inte evalUttryck. */
+        var _mu = window.AlgBrak;
+        try { ok = !!_mu && _mu.pointEqual(_mu.parse(inp.value), _mu.parse(decodeURIComponent(inp.dataset.mellanuttryck))); }
+        catch(e){ ok = false; }
       } else if(inp.dataset.mellanvarde !== undefined){
         // TILLAGT LED: ett steg på vägen, alltså samma värde som svaret.
         var _mv = evalUttryck(inp.value);
@@ -1619,6 +1641,7 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.likben !== undefined || inp.dataset.likbas !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.insatt !== undefined) facit = inp.dataset.visa;      // ersättningsledet
         else if(inp.dataset.mellanvarde !== undefined) facit = inp.dataset.visa; // tillagt led
+        else if(inp.dataset.mellanuttryck !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.parentesmellan !== undefined){
           /* Mellanledet: facitet byggs ur uttrycket av rättarens egen funktion. Grenen behövs
              även när beskedet räcker — utan den föll raden igenom till dataset.svar, som inte

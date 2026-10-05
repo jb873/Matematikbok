@@ -222,7 +222,7 @@
 .af-sokt-txt{fill:var(--rod,#b14536);font-weight:600;}
 .af-enhet{font-style:normal;font-size:13px;fill:var(--ink-faint,#7a6e65);}
 .alg-pyramid{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;padding:8px 0;}
-.alg-pyr-rad{display:flex;gap:6px;justify-content:center;}
+.alg-pyr-rad{display:flex;gap:6px;justify-content:center;width:100%;}
 .alg-magisk-wrap{display:flex;justify-content:center;width:100%;padding:8px 0;}
 .alg-magisk{display:grid;grid-template-columns:repeat(3,116px);gap:6px;}
 .alg-ruta{min-width:84px;height:42px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
@@ -234,7 +234,13 @@ input.alg-ruta{width:100%;}
 .alg-magisk-summa{font-family:'Source Serif 4',Georgia,serif;font-size:15px;color:var(--ink-soft,#3d3630);}
 .alg-magisk-summa em{font-style:italic;color:var(--ink,#2b2620);}
 .alg-sidor{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.alg-pyramid .alg-ruta{width:124px;min-width:124px;}   /* lika breda rutor → radernas antal ger pyramidformen */
+/* Lika breda rutor → radernas antal ger pyramidformen. 124 px är utgångsbredden, inte ett tak:
+   i en smal vy krymper alla rutor i raden lika mycket (min-width:0 släpper flexboxens golv), och
+   pyramiden håller sig inom bladets spalt i stället för att dra ut sidan i sidled. */
+.alg-pyramid .alg-ruta{flex:0 1 124px;width:124px;min-width:0;}
+/* Telefon: tre rutor på en rad ryms bara om stilen krymper med dem. Mätt vid 360 px — "3x + 1"
+   tog 63 px i en ruta med 59 px innanmäte. */
+@media(max-width:430px){ .alg-pyramid .alg-ruta{font-size:14px;padding:0 3px;} }
 
 /* ── MÖNSTER (k3 d2) ────────────────────────────────────────────────────────────────────────
    Figurraden, tabellen och den öppna talföljden. Figurerna ritas av js/motor/figur/svg-monster.js;

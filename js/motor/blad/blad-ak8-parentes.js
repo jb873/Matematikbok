@@ -1,5 +1,5 @@
 /* blad-ak8-parentes.js — ÅTTANS DELKAPITEL 3: "Uttryck med minus eller plus framför parentes".
-   Order 2026-10-04. NIVÅ 1 (pilot). Nivå 2 och 3 byggs efter Joachims granskning.
+   Order 2026-10-04. Alla tre nivåerna byggda; nivå 2 och 3 efter Joachims granskning 2026-10-05.
 
    KÄLLA: Parentes nivå 1.docx, md5 56f8f7e32b4a03f83f0d64f2ed58a76d — fjorton uppgifter,
    transkriberade i dokumentets egen numrering. Uppgifterna är Joachims; talen i de uppgifter som
@@ -17,32 +17,57 @@
    FIGURERNA ritas ur den delade SvgAlgebraFigur med samma sidlista som facit — figuren och
    rättaren kan inte driva isär. Bokens inskannade bilder används inte.
 
-   ── DE ELVA GODKÄNDA FÖRSLAGEN (bokens bildfigurer ersatta — läs aldrig en bokfigur igen) ──
+   ── DE GODKÄNDA TALEN (bokens bildfigurer ersatta — läs aldrig en bokfigur igen) ─────────
 
    Varje uppgift som var en inskannad bild i Joachims dokument har ersatts av ett förslag han
-   godkänt. Talen nedan ÄR uppgiften. Nivå 1:s sju är byggda; nivå 2:s och 3:s fyra väntar.
+   godkänt. TALEN NEDAN ÄR UPPGIFTEN, och de står i datan längre ner med samma värden. Facit är
+   kontrollräknade mot AlgBrak, pyramiderna ruta för ruta.
 
-   NIVÅ 1 (byggda, talen hämtade ur datan nedan)
+   NIVÅ 1 (godkända 2026-10-04)
      3 a  triangel 7 · 4x - 9 · 5                               facit  4x + 3
      3 b  rektangel 3x + 4 och x - 2                            facit  8x + 4
      5    rektangel 3x - 4 och x + 5, flerval                   facit  8x + 2
+          distraktorer 8x - 2 · 6x + 2 · 4x + 1
      7    rektangel 4x och 2x + 3                               facit  12x + 6
      8    triangel ABC, AB = 4x - 5, BC = 6x + 9, omkrets 14x   facit  4x - 4   (sidan AC)
-     10   para ihop  9x ± (4x ± 2)                              fyra par
+     10   para ihop: a) 9x + (4x - 2)  b) 9x - (4x + 2)
+          c) 9x - (4x - 2)  d) 9x + (4x + 2)
+          rutor  A 9x + 4x + 2 · B 9x - 4x + 2 · C 9x - 4x - 2 · D 9x + 4x - 2
+          facit  a = D · b = C · c = B · d = A
      13   Vilgot: smörgås x kr, banan 6 kr, konto 546 kr        facit  2x + 6 och 540 - 2x
 
-   NIVÅ 2 OCH 3 (ej byggda — Joachims beslut 2026-10-04, facit kontrollräknade)
-     2:14 a  sträcka, helhet 12, vänster del 2x + 1             facit  11 - 2x
-     2:14 b  sträcka, helhet 40, vänster x + 3, höger 2x - 1    facit  38 - 3x
-     2:3019  rektangel (4x + 2) × x mot liksidig triangel
-             med sidan 2x + 3 — hur mycket större omkrets       facit  4x - 5
-     3:3030  rektanglarna x × (x + 4) och (x - 12) × x
-             — hur mycket större omkrets                        facit  32
+   NIVÅ 2 (godkända 2026-10-04, röda sträckans uppställning 2026-10-05)
+     7 a  röda sträckan, helhet 12, vänster del 2x + 1          facit  11 - 2x
+          kedjan  12 - (2x + 1) = 12 - 2x - 1 = 11 - 2x
+     7 b  röda sträckan, helhet 40, delarna x + 3 och 2x - 1    facit  38 - 3x
+          kedjan  40 - (x + 3 + 2x - 1) = 40 - (3x + 2) = 40 - 3x - 2 = 38 - 3x
+          UPPSTÄLLNINGEN: helheten minus SUMMAN AV DELARNA, i EN parentes (Joachim 2026-10-05).
+          DATAN BÄR ÄNNU DEN GAMLA FORMEN, 40 - (x + 3) - (2x - 1): den nya kräver ett led till i
+          rättaren ("förenkla inuti parentesen") och byggs när Joachim godkänt det förslaget.
+     9    Maja och Noa: äpplen 18 kr/kg, päron 24 kr/kg.
+          Maja köper x kg äpplen och y kg päron, Noa tvärtom.
+          a) Majas kostnad                                      facit  18x + 24y
+          b) sammanlagt   (18x + 24y) + (24x + 18y)             facit  42x + 42y
+          c) skillnaden   (18x + 24y) - (24x + 18y)             facit  6y - 6x
+     10   rektangel (4x + 2) × x mot liksidig triangel
+          med sidan 2x + 3 — hur mycket större omkrets          facit  4x - 5
+          (10x + 4) - (6x + 9) = 4x - 5
 
-   UTAN GODKÄNDA TAL ÄNNU (bilduppgifter vars siffror fortfarande är bokens):
-     3:20    uttryckspyramiden — uttrycken i rutorna (FAS 2:s tal saknas i min anteckning)
-
-   De tre ska ha egna tal innan de byggs, av samma skäl som de elva ovan.
+   NIVÅ 3 (godkända 2026-10-04 och 2026-10-05)
+     6    L-figuren: yttre bredd 2a + b, höjd a + 2b            facit  6a + 6b
+          URTAGET är a brett och b högt (Joachim efterfrågade måtten 2026-10-05). Sidorna i
+          figurens egen ordning: 2a + b (topp) · a + b (höger) · a (urtaget in) · b (urtaget ner) ·
+          a + b (botten) · a + 2b (vänster). Urtaget ändrar INTE omkretsen: den är den omslutande
+          rektangelns, 2(2a + b) + 2(a + 2b) = 6a + 6b, oavsett hur stort urtaget är.
+     7    talpyramiden, två stycken. Varje ruta = summan av de två under.
+          a) nedre raden 3a · 2a - 4b · a + b
+             mitten 5a - 4b och 3a - 3b                         toppen 8a - 7b
+          b) nedre raden ? · 2x · 3x - 2, mitten vänster 5x + 1 given
+             nedre vänster 3x + 1, mitten höger 5x - 2          toppen 10x - 1
+             (luckan ligger i NEDRE raden: eleven måste räkna baklänges, 5x + 1 - 2x.)
+     8    rektanglarna x × (x + 4) och (x - 12) × x
+          — hur mycket större omkrets                           facit  32
+          (4x + 8) - (4x - 24) = 32
 
    ── JOACHIMS BESLUT OM NIVÅ 2 OCH 3 (fattade 2026-10-04, innan nivåerna byggs) ──
 
@@ -301,7 +326,7 @@
           exempelBen: '2x + 4', exempelBas: '4x + 6' }
       ]},
 
-      // 9 ── Maja och Noa (Joachims struktur, talen mitt förslag) ─────────────────────────
+      // 9 ── Maja och Noa (Joachims tal och ordalydelse, godkända 2026-10-05) ────────────
       // a) en ruta — inget förenklas. b) och c) skriva + förenkla; c) får mellanled, eftersom en
       // skillnad mellan två uttryck ger minus framför parentes (regel 7).
       { rubrik: 'Maja köper x kg äpplen och y kg päron. Noa köper y kg äpplen och x kg päron.',
@@ -318,7 +343,7 @@
           skriv: '(18x + 24y) - (24x + 18y)', svar: '6y - 6x' }
       ]},
 
-      // 8 ── hur mycket större omkrets (Joachims tal) ─────────────────────────────────────
+      // 10 ── hur mycket större omkrets (Joachims tal) ────────────────────────────────────
       // Rektangel (4x + 2) × x: omkrets 10x + 4. Liksidig triangel med sidan 2x + 3: 6x + 9.
       // Skillnad (10x + 4) - (6x + 9) = 4x - 5. Uppställningen visas inte (R2); båda skrivsätten
       // godtas — sidorna utskrivna eller omkretsarna uträknade först.
@@ -395,7 +420,27 @@
           sidor: ['2a + b', 'a + b', 'a', 'b', 'a + b', 'a + 2b'], svar: '6a + 6b' }
       ]},
 
-      // 7 ── hur mycket större omkrets, två rektanglar (Joachims tal) ─────────────────────
+      // 7 ── talpyramiden (Joachims tal) ───────────────────────────────────────────────────
+      // Varje ruta är summan av de två under. Kontrollräknat:
+      //   a)  3a + (2a - 4b) = 5a - 4b · (2a - 4b) + (a + b) = 3a - 3b · summan = 8a - 7b
+      //   b)  ? + 2x = 5x + 1 → ? = 3x + 1 · 2x + (3x - 2) = 5x - 2 · summan = 10x - 1
+      // b) har luckan i NEDRE raden med flit: då måste eleven räkna baklänges (5x + 1 - 2x) och
+      // kan inte bara addera uppåt. Rubriken är sjuans redan godkända ordalydelse, ordagrant.
+      { rubrik: 'Fyll i de tomma rutorna. Varje ruta är summan av de två rutorna under.',
+        logg: NOD_RAKNA, rader: [
+        { typ: 'pyramid', vars: 'ab', rader: [
+          [{ svar: '8a - 7b' }],
+          [{ svar: '5a - 4b' }, { svar: '3a - 3b' }],
+          [{ fast: '3a' }, { fast: '2a - 4b' }, { fast: 'a + b' }]
+        ] },
+        { typ: 'pyramid', vars: 'x', rader: [
+          [{ svar: '10x - 1' }],
+          [{ fast: '5x + 1' }, { svar: '5x - 2' }],
+          [{ svar: '3x + 1' }, { fast: '2x' }, { fast: '3x - 2' }]
+        ] }
+      ]},
+
+      // 8 ── hur mycket större omkrets, två rektanglar (Joachims tal) ─────────────────────
       // Stor x × (x + 4): omkrets 4x + 8. Liten (x - 12) × x: omkrets 4x - 24. Skillnad 32.
       { rubrik: 'Figuren visar två rektanglar', mellanled:'kravt', logg: NOD_PROBLEM, rader: [
         { typ: 'skrivforenkla', vars: 'x',

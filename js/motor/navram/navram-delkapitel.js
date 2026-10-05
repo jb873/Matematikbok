@@ -151,14 +151,18 @@
       var grupper = knappar.map(function(b, bi){
         var sr = subRad(bi);
         var subs = sr ? Array.prototype.slice.call(sr.querySelectorAll('.blad-subnav-btn')) : [];
-        if(subs.length) nagot = true;
-        return { blad: b, subs: subs };
+        /* EN underflik är ingen gruppering: bladet ÄR varianten. Räknas den som en grupp måste
+           eleven fälla ut den innan hon kan byta — två klick för ett byte — och den utfällda
+           gruppen ser ut som en markering utan att vara det. Mätt på d3, som har tre sådana. */
+        if(subs.length > 1) nagot = true;
+        return { blad: b, subs: subs.length > 1 ? subs : [] };
       });
       if(!nagot) return null;            // platt sida — låt den vanliga vägen gälla
       return grupper.map(function(g){
         if(!g.subs.length){
-          // Blad utan underflikar i en sida som annars har dem: egen grupp med en variant.
-          return { rubrik: txt(g.blad).replace(/^\d+/, ''), varianter: [variantAv(g.blad)] };
+          /* Blad utan (eller med EN) underflik: ingen rubrik, bara varianten. Med en rubrik hade
+             raden blivit en grupp att fälla ut igen — samma fel i ny förpackning. */
+          return { rubrik: null, varianter: [variantAv(g.blad)] };
         }
         return { rubrik: txt(g.blad).replace(/^\d+/, ''),
           varianter: g.subs.map(function(sb){

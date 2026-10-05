@@ -303,7 +303,21 @@ const PROBE7 = `(function(){
     });
     ut.blad.push(b);
   }
-  Array.from(document.querySelectorAll('.ovn-sheet')).forEach(function(sh, i){ var h = sh.querySelector('h2'); mat((h ? h.textContent.trim() : 'blad ' + (i + 1)).slice(0, 30), sh); });
+  // EN FLIK I TAGET, och mätningen MEDAN fliken är framme: ett dolt blad kan fyllas i men inte
+  // rättas — motorn sätter inga markeringar på det — och en grind som ändå mäter det rapporterar
+  // brott som bara handlar om ögonblicket den valde.
+  function kortNamn(t){ t = String(t).replace(/\s+/g, ' ').trim(); return t.length > 30 ? '…' + t.slice(-29) : t; }
+  var nav = Array.from(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
+  var seddaBlad = [];
+  (nav.length ? nav : [null]).forEach(function(b){
+    if(b){ if(b.disabled) return; b.click(); }
+    Array.from(document.querySelectorAll('.ovn-sheet')).forEach(function(sh){
+      if(seddaBlad.indexOf(sh) >= 0 || !sh.getClientRects().length) return;
+      seddaBlad.push(sh);
+      var h = sh.querySelector('h2');
+      mat(kortNamn(h ? h.textContent : 'blad ' + seddaBlad.length), sh);
+    });
+  });
   // Plugg till prov (k1/d10, k3/d7): dokumenten renderas vid klick → öppna varje grupp + dokument
   Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var sh = akt && akt.querySelector('.ovn-sheet'); if(sh) mat(('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 30), sh); }); });
   return ut;

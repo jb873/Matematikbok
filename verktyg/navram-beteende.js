@@ -17,12 +17,16 @@
  *          samma yta är precis felet ovan — och det är det enda sättet att se det, eftersom båda
  *          klicken "lyckas" strukturellt. (Rutantal duger INTE som identitet: Beräkna blad 1 och
  *          blad 2 har båda 18 rutor, och på det byggde jag först ett falskt bevis.)
+ *   BEN D  Varje variant är nåbar med ETT klick: ingen ligger gömd i en hopfälld grupp.
+ *   BEN E  Efter klicket sitter markeringen (is-on) på den klickade varianten och ingen annan.
  *   BEN C  Antalet ritade .niva-btn = det antal ramen fick ur datan (window.__NAVRAM), där 0 och
  *          1 betyder ingen rad alls.
  *
  * KÖR:  node verktyg/navram-beteende.js [--sida <delsträng>] [--lista]
  *       --sabba delegering  låter varje variant peka på FÖRSTA ytan → BEN B måste fälla
  *       --sabba nivarad     ritar en extra nivåknapp → BEN C måste fälla
+ *       --sabba tvaklick    fäller ihop en grupp → BEN D måste fälla
+ *       --sabba markering   flyttar markeringen till en annan rad → BEN E måste fälla
  * Exit 1 vid brott. Ingen nätväg, ingen fil ändras. */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
@@ -93,6 +97,41 @@ const PROBE = `(function(){
   })[0];
   if(!uppg){ ut.brott.push('INGEN UPPGIFTER-RUBRIK att prova'); aterstall(); return ut; }
 
+  /* BEN D — ETT KLICK RÄCKER. Mäts FÖRE någon grupprubrik klickats: är varianten gömd i en
+     hopfälld grupp måste eleven fälla ut den först, och då är ett byte två klick. */
+  var allaRader = Array.prototype.slice.call(uppg.querySelectorAll('.nr-rad'));
+  if(SABBA === 'tvaklick'){
+    /* Sabotaget SKAPAR felet i st\u00e4llet f\u00f6r att leta upp det: efter r\u00e4ttelsen finns ingen
+       en-variantgrupp kvar att f\u00e4lla ihop, och ett motprov som inte kan f\u00e4lla bevisar ingenting.
+       H\u00e4r byggs precis det som var fel \u2014 en grupp med EN variant, hopf\u00e4lld. */
+    var v0 = uppg.querySelector('.nr-rad:not([disabled])');
+    if(v0){
+      var ny = document.createElement('div'); ny.className = 'nr-grp';
+      var h0 = document.createElement('div'); h0.className = 'nr-grp-h'; h0.textContent = 'Sabbad grupp';
+      var kropp = document.createElement('div'); kropp.className = 'nr-grp-body'; kropp.hidden = true;
+      /* SYSKON till den yttersta gruppen, aldrig inuti den: .nr-grp.is-open .nr-grp-body är
+         en ättlingsregel och hade satt display:block även på en nästlad hopfälld kropp. */
+      var topp = v0.closest('.nr-grp') || v0;
+      topp.parentNode.insertBefore(ny, topp);
+      kropp.appendChild(v0); ny.appendChild(h0); ny.appendChild(kropp);
+      ut.noter.push('SABBA: la en variant i en hopf\u00e4lld grupp med EN variant');
+    }
+  }
+  /* GÄLLER GRUPPEN MED EN VARIANT. Har gruppen FLERA varianter är dragspelet avsikten: öppna
+     området, välj dokument. Joachims krav gällde den grupp som bara har ETT blad — där finns inget
+     att välja mellan, och utfällningen är ett steg utan innehåll. Mätt: utan den här gränsen fällde
+     benet 27 äkta flervariantgrupper på fyra sidor. */
+  allaRader.forEach(function(v){
+    if(v.disabled) return;
+    var grp = v.closest('.nr-grp');
+    var syskon = grp ? grp.querySelectorAll('.nr-rad').length : 1;
+    if(syskon > 1) return;
+    if(!synlig(v)){
+      ut.brott.push('KRAVER TVA KLICK: "' + v.textContent.replace(/\s+/g, ' ').trim().slice(0, 28)
+        + '" ligger gomd i en hopfalld grupp — ett byte ska kosta ETT klick');
+    }
+  });
+
   var gr = Array.prototype.slice.call(uppg.querySelectorAll('.nr-grp'));
   gr.forEach(function(g, gi){
     var gh = g.querySelector('.nr-grp-h');
@@ -117,6 +156,22 @@ const PROBE = `(function(){
       if(ytor.length !== 1){
         ut.brott.push('EJ EXAKT EN YTA: "' + namn + ' / ' + titel + '" visar ' + ytor.length
           + ' arbetsytor' + (ytor.length > 1 ? ' samtidigt (' + ytor.slice(0, 3).join(' + ') + ')' : ''));
+      }
+      /* BEN E — MARKERINGEN FÖLJER BLADET. Efter klicket ska is-on sitta på den klickade
+         varianten och ingen annan. En markering som pekar på något annat än det som visas är
+         värre än ingen alls: den säger att eleven är någon annanstans än hon är. */
+      if(SABBA === 'markering' && vi === 0 && varianter.length > 1){
+        v.classList.remove('is-on'); varianter[1].classList.add('is-on');
+        ut.noter.push('SABBA: flyttade markeringen till en annan rad');
+      }
+      if(SABBA !== 'delegering'){
+        var markerade = Array.prototype.slice.call(uppg.querySelectorAll('.nr-rad.is-on'));
+        if(markerade.length !== 1 || markerade[0] !== v){
+          ut.brott.push('MARKERINGEN FOLJER INTE BLADET: efter klick pa "' + titel + '" ar '
+            + (markerade.length === 0 ? 'ingen rad markerad'
+               : markerade.length > 1 ? markerade.length + ' rader markerade'
+               : '"' + markerade[0].textContent.replace(/\s+/g, ' ').trim().slice(0, 28) + '" markerad'));
+        }
       }
       var nyckel = ytor[0] || '(ingen)';
       if(sedda[nyckel] !== undefined){
