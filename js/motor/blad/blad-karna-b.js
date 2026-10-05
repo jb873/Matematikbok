@@ -274,6 +274,19 @@ window.BLAD_SKRIV_FORENKLAT = SKRIV_FORENKLAT;   // grindarna läser regeln i st
 // Beskedet när genvägen tas. Elevtext i ett FALT-fält, Joachims ordalydelse.
 var SKRIV_BESKED = { genvag: { hint: 'Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.' } };
 
+// PARENTESGRUPPERNA PÅ TOPPNIVÅ, i den ordning de står: "40 - (x + 3) - (2x - 1)" ger
+// ["x + 3", "2x - 1"], "40 - (x + 3 + 2x - 1)" ger ["x + 3 + 2x - 1"]. Nästlade parenteser räknas
+// som en del av sin yttre grupp — det är den yttersta som visar att en DEL står i parentes.
+function parentesGrupper(uttryck){
+  var t = String(uttryck || ''), ut = [], djup = 0, start = -1;
+  for(var i = 0; i < t.length; i++){
+    if(t[i] === '('){ if(djup === 0) start = i + 1; djup++; }
+    else if(t[i] === ')'){ djup--; if(djup === 0 && start >= 0){ ut.push(t.slice(start, i)); start = -1; }
+      if(djup < 0) return ut; }
+  }
+  return ut;
+}
+
 // SKILLNADEN MELLAN TVÅ OMKRETSAR. Delar elevens uttryck vid det FÖRSTA minustecknet på toppnivå
 // (utanför alla parenteser) och prövar delarnas värden mot de två figurernas omkretsar.
 //
@@ -934,6 +947,10 @@ function bladHTML(blad){
            Den skrivs aldrig ut på sidan (R2) — den är facit och underlag för mellanledet, som får
            sitt krav automatiskt eftersom det står minus framför en parentes. */
         var _kskillnad = !!(rad.sidorA && rad.sidorB);
+        /* FRI KEDJA: skillnadsuppgiften har den alltid, och raden kan be om den själv
+           (rad.frikedja). Vägen från uppställningen till svaret kan gå över ett eller två steg
+           beroende på hur eleven räknar — antalet led ska följa räkningen, inte tvärtom. */
+        var _kfri = !!rad.frikedja || _kskillnad;
         var _ku = rad.skriv || (_kskillnad
                  ? '(' + rad.sidorA.join(' + ') + ') - (' + rad.sidorB.join(' + ') + ')'
                  : (rad.sidor ? rad.sidor.join(' + ') : ''));
@@ -942,15 +959,25 @@ function bladHTML(blad){
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
         if(rad.fraga) html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
-        html += _kskillnad ? '<div class="ovn-berakna">'
+        html += _kfri ? '<div class="ovn-berakna">'
                  : '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
         html += '<input class="ovn-in bred" data-skriv="' + encodeURIComponent(_ku) + '"'
           + (rad.sidor ? ' data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '"' : '')
           + (_kskillnad ? ' data-sidor-a="' + encodeURIComponent(rad.sidorA.join('|'))
              + '" data-sidor-b="' + encodeURIComponent(rad.sidorB.join('|')) + '"' : '')
+          + (rad.delar ? ' data-delar="' + encodeURIComponent(rad.delar.join('|')) + '"' : '')
           + ' data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(_ku)
           + '" inputmode="text" autocomplete="off">';
-        if(_km && rad.skriv){
+        /* Det FÖRSTA ledet i en fri kedja är obligatoriskt när regel 7 gäller: det ritas synligt
+           och ingår i nämnaren. Utan det hade den fria kedjan tagit bort mellanledskravet — och
+           kravet är uppgiftens, inte knappens. */
+        if(_kfri && _km && rad.skriv){
+          html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+          html += '<input class="ovn-in bred" data-mellanuttryck="' + encodeURIComponent(rad.svar)
+            + '" data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(rad.svar)
+            + '" inputmode="text" autocomplete="off">';
+        }
+        if(_km && rad.skriv && !_kfri){
           html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
           html += '<input class="ovn-in bred" data-parentesmellan="' + encodeURIComponent(rad.skriv)
             + '" data-krav="' + _km + '" data-kp="uttryck" data-vars="' + _kv
@@ -959,7 +986,7 @@ function bladHTML(blad){
         /* SKILLNADSUPPGIFTEN får den FRIA KEDJAN i stället för ett fast mellanled: vägen från
            "(A) − (B)" till svaret kan gå över ett eller två steg beroende på hur eleven räknar.
            Ledet är ett UTTRYCK och ska vara värt samma som svaret (data-mellanuttryck). */
-        if(_kskillnad){
+        if(_kfri){
           // Dolt tills eleven trycker "+ led" — samma som Beräkna-kedjans extra steg.
           html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
           html += '<input class="ovn-in bred ovn-led-extra" data-mellanuttryck="' + encodeURIComponent(rad.svar)
@@ -971,7 +998,7 @@ function bladHTML(blad){
           + '" data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(rad.svar)
           + (rad.brak ? '" data-tillat-brak="1' : '')
           + '" inputmode="text" autocomplete="off">';
-        if(_kskillnad){
+        if(_kfri){
           html += '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>';
           html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
         }
@@ -1484,6 +1511,18 @@ function bygg_blad(rotEl, blad){
                 _besked = SKRIV_BESKED.genvag.hint;   // säger VAD som brast, i stället för att visa facit
               }
             }
+          } catch(e){ ok = false; }
+        }
+        /* DELARNA SKA STÅ I PARENTES (Joachim 2026-10-05). Parentesen visar att delarna är egna
+           uttryck; utan den är uppställningen redan ett mellanled. Prövas på VÄRDET av det som
+           står i parentes, inte på hur många parenteser eleven valt: en grupp eller två, båda
+           rätt, så länge de tillsammans är värda delarnas summa. */
+        if(ok && inp.dataset.delar !== undefined && _AB){
+          var _dd = decodeURIComponent(inp.dataset.delar).split('|').filter(Boolean);
+          var _gr = parentesGrupper(inp.value);
+          try {
+            ok = _gr.length > 0
+              && _AB.pointEqual(_AB.parse(_gr.join(' + ')), _AB.parse(_dd.join(' + ')));
           } catch(e){ ok = false; }
         }
       } else if(inp.dataset.forenkla !== undefined){

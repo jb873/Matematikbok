@@ -41,9 +41,10 @@
           kedjan  12 - (2x + 1) = 12 - 2x - 1 = 11 - 2x
      7 b  röda sträckan, helhet 40, delarna x + 3 och 2x - 1    facit  38 - 3x
           kedjan  40 - (x + 3 + 2x - 1) = 40 - (3x + 2) = 40 - 3x - 2 = 38 - 3x
-          UPPSTÄLLNINGEN: helheten minus SUMMAN AV DELARNA, i EN parentes (Joachim 2026-10-05).
-          DATAN BÄR ÄNNU DEN GAMLA FORMEN, 40 - (x + 3) - (2x - 1): den nya kräver ett led till i
-          rättaren ("förenkla inuti parentesen") och byggs när Joachim godkänt det förslaget.
+          UPPSTÄLLNINGEN: helheten minus SUMMAN AV DELARNA, i parentes (Joachim 2026-10-05).
+          Rättas med FRI KEDJA: första ledet obligatoriskt, "+ led" ger fler. Både 40 - (3x + 2)
+          och 40 - 3x - 2 godtas som led, i valfri ordning. Parentesen är ett KRAV i
+          uppställningen (data: delar) — en eller två, men delarna ska stå i parentes.
      9    Maja och Noa: äpplen 18 kr/kg, päron 24 kr/kg.
           Maja köper x kg äpplen och y kg päron, Noa tvärtom.
           a) Majas kostnad                                      facit  18x + 24y
@@ -55,7 +56,7 @@
 
    NIVÅ 3 (godkända 2026-10-04 och 2026-10-05)
      6    L-figuren: yttre bredd 2a + b, höjd a + 2b            facit  6a + 6b
-          URTAGET är a brett och b högt (Joachim efterfrågade måtten 2026-10-05). Sidorna i
+          URTAGET är a brett och b högt — måtten godkända av Joachim 2026-10-05. Sidorna i
           figurens egen ordning: 2a + b (topp) · a + b (höger) · a (urtaget in) · b (urtaget ner) ·
           a + b (botten) · a + 2b (vänster). Urtaget ändrar INTE omkretsen: den är den omslutande
           rektangelns, 2(2a + b) + 2(a + 2b) = 6a + 6b, oavsett hur stort urtaget är.
@@ -306,16 +307,20 @@
         p('(8x + 3) + (8x - 3) - (8x - 3)', '8x + 3')
       ]},
 
-      // 7 ── röda sträckan (Joachims tal) ─────────────────────────────────────────────────
-      // a) 12 - (2x + 1) = 11 - 2x   b) 40 - (x + 3) - (2x - 1) = 38 - 3x
+      // 7 ── röda sträckan (Joachims tal och uppställning) ────────────────────────────────
+      // a) 12 - (2x + 1) = 12 - 2x - 1 = 11 - 2x
+      // b) 40 - (x + 3 + 2x - 1) = 40 - (3x + 2) = 40 - 3x - 2 = 38 - 3x
+      // UPPSTÄLLNINGEN = helheten minus delarnas summa, i parentes. FRI KEDJA: första ledet är
+      // obligatoriskt (regel 7), "+ led" ger ett till — ordningen och antalet följer räkningen.
+      // delar: [...] gör parentesen till ett KRAV; utan den är uppställningen redan ett mellanled.
       { rubrik: 'Skriv ett uttryck för längden av den röda sträckan och förenkla det',
         mellanled:'kravt', logg: NOD_RAKNA, rader: [
-        { typ: 'skrivforenkla', vars: 'x', fraga: 'Röda sträckan',
+        { typ: 'skrivforenkla', vars: 'x', fraga: 'Röda sträckan', frikedja: true,
           svg: F ? F.strackfigur({ helhet: '12', delar: [{ text: '2x + 1' }, {}] }) : '',
-          skriv: '12 - (2x + 1)', svar: '11 - 2x' },
-        { typ: 'skrivforenkla', vars: 'x', fraga: 'Röda sträckan',
+          skriv: '12 - (2x + 1)', delar: ['2x + 1'], svar: '11 - 2x' },
+        { typ: 'skrivforenkla', vars: 'x', fraga: 'Röda sträckan', frikedja: true,
           svg: F ? F.strackfigur({ helhet: '40', delar: [{ text: 'x + 3' }, {}, { text: '2x - 1' }] }) : '',
-          skriv: '40 - (x + 3) - (2x - 1)', svar: '38 - 3x' }
+          skriv: '40 - (x + 3 + 2x - 1)', delar: ['x + 3', '2x - 1'], svar: '38 - 3x' }
       ]},
 
       // 8 ── likbent triangel, öppen uppgift ──────────────────────────────────────────────
