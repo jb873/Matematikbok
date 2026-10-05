@@ -13,12 +13,19 @@
 .ovn-wrap{ max-width:920px; margin:0 auto; padding:16px 24px 40px; }
 .ovn-sheet{ background:var(--paper-lt); border:1px solid var(--paper-dk); border-radius:8px; padding:26px 30px; }
 .ovn-sheet h2{ font-family:var(--serif); font-size:25px; font-weight:500; margin-bottom:10px; }
+/* K-F: strecket ovanför huvuduppgiften, aldrig under deluppgiftsraden. */
 .ak8-grupp{ font-family:var(--cinzel); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:26px 0 4px; }
+.ak8-grupp ~ .ak8-grupp{ border-top:1.5px solid rgba(122,110,101,.55); padding-top:18px; }
+
+/* K-F: åttans k1-sidor bär .ovn-grupp i markupen (inte .ak8-grupp) — strecket måste finnas för
+   BÅDA, annars står regeln i filen utan att nå sidorna. */
 .ovn-grupp{ margin-top:18px; }
+.ovn-grupp ~ .ovn-grupp{ border-top:1.5px solid rgba(122,110,101,.55); padding-top:18px; }
+/* K-D: "=" och rutan efter det bryter som en enhet. */
+.ovn-led-par{ display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
 .ovn-grupp:first-of-type{ margin-top:8px; }
 .ovn-grupp-rubrik{ font-size:18px; font-weight:600; margin-bottom:8px; }
-.ak8-rad{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 0; border-bottom:1px dotted var(--paper-dk); }
-.ak8-rad:last-child{ border-bottom:none; }
+.ak8-rad{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 0; }
 .ak8-q{ font-size:19px; font-family:var(--serif); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; }
 .ak8-svar{ display:inline-flex; align-items:center; gap:2px; flex-wrap:wrap; }   /* wrap: långa kedjor (bråk/gp) bryter rad i st f att svämma över — PASS 1, in i kanon */
 .ak8-in{ width:74px; height:36px; text-align:center; font-family:var(--serif); font-size:18px; border:1.5px solid var(--paper-dk); border-radius:6px; background:#fff; }

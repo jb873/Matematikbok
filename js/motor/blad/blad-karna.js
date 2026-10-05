@@ -357,6 +357,10 @@ function bygg_blad(rotEl, blad){
   if(window.AK8_UI && AK8_UI.enDeluppgiftUtanBokstav) AK8_UI.enDeluppgiftUtanBokstav(rotEl);
 
   // bokstäver om per grupp
+  // K-D och K-E — samma delade funktioner som åttans ytor och heltalskärnan använder.
+  if(window.AK8_UI && AK8_UI.ledPar) AK8_UI.ledPar(rotEl);
+  if(window.AK8_UI && AK8_UI.smalaRutor) AK8_UI.smalaRutor(rotEl);
+
   rotEl.querySelectorAll('.ovn-grupp').forEach(function(g){
     var bok = 96;
     g.querySelectorAll('.ovn-label').forEach(function(lbl){ bok++; lbl.textContent = String.fromCharCode(bok) + ')'; });

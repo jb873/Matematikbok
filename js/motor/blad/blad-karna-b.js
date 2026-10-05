@@ -1370,6 +1370,11 @@ function bygg_blad(rotEl, blad){
   // MELLANRUM KRING TECKEN (AK8_UI.autoSpace — samma funktion som åttans blad och k3:s d4/d5):
   // eleven skriver 3+4 och rutan visar 3 + 4, utan att markören flyttar sig. Uttrycksrutor bara;
   // en ruta med ett rent tal ska inte få mellanrum.
+  /* K-D och K-E bor i AK8_UI: samma funktioner som åttans ytor och sjuans bråkblad använder.
+     En layoutregel som skrivs om i varje kärna blir tre regler som glider isär. */
+  if(window.AK8_UI && AK8_UI.ledPar) AK8_UI.ledPar(rotEl);
+  if(window.AK8_UI && AK8_UI.smalaRutor) AK8_UI.smalaRutor(rotEl);
+
   rotEl.querySelectorAll(VAXER).forEach(function(inp){
     // mellanledet är ett uttryck (3 + 4 · 2 − 8) även utan data-vars — det ska ha mellanrum
     var uttrycksruta = inp.matches('[data-vars],[data-mellan],[data-oms]');

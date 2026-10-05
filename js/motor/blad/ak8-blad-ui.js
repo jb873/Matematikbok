@@ -188,7 +188,13 @@
     var h = holl.getBoundingClientRect(), r = inp.getBoundingClientRect();
     if(!h.width || !r.width) return 340;                 // omätbar (dold flik): behåll det gamla
     var pad = parseFloat(getComputedStyle(holl).paddingRight) || 0;
-    return Math.max(340, Math.floor(h.right - pad - r.left - 8));
+    /* TVÅ MÅTT, DET STÖRRE GÄLLER. grow mäter med rutan hoptryckt till 1ch, och då får allt plats
+       på en rad — rutan ligger långt ut till höger och "platsen kvar" blir mindre än golvet. Men
+       en ruta som växer bryter till en EGEN rad, och där har den hela radens bredd. Mätt: rutan
+       låstes vid 340 px fast raden var 674 bred och texten behövde 614. */
+    var kvarPaRaden = h.right - pad - r.left - 8;
+    var helRad = h.width - pad - 40;        // 40 px: etikett/tecken som följer med på den egna raden
+    return Math.max(340, Math.floor(Math.max(kvarPaRaden, helRad)));
   }
   function grow(inp, opts){
     if(!inp) return;
@@ -545,12 +551,76 @@
   }
 
   // ── BIND (efter mount.innerHTML): keypad + grow + fokus + enter + clear-on-edit + skriv-ut ──
+  /* K-D: BREDA MELLANLED BRYTS STRUKTURERAT. Raden bryter mellan sina flex-barn, och "=" och
+     rutan efter det är två barn — därför kunde en rad sluta med ett ensamt likhetstecken medan
+     rutan klämdes in på nästa. Paret binds ihop efter renderingen: tecknet och det första element
+     som BÄR en ruta (en input, eller ett staplat bråk med rutor inuti) bryter som en enhet.
+     Markering och facit skjuts in efter rutan och hamnar inuti paret; nextElementSibling är
+     oförändrad, så grindarna som letar efter bocken ser samma sak som förut. */
+  function ledPar(rot){
+    if(!rot) return;
+    rot.querySelectorAll('.ovn-rad, .ovn-brak-rad, .ovn-berakna, .ak8-rad').forEach(function(rad){
+      Array.prototype.slice.call(rad.children).forEach(function(el){
+        if(el.tagName === 'INPUT' || el.classList.contains('ovn-led-par')) return;
+        if((el.textContent || '').trim() !== '=') return;
+        /* Tecknet hör ihop med det som står EFTER det, vare sig det är en ruta, ett staplat bråk
+           med rutor inuti eller ett givet tal ("12/36 = ▢/4" har ett givet bråk där). Undantaget
+           är ett block (DIV) — det är en egen rad i sig och ska inte dras upp bredvid tecknet. */
+        var ruta = el.nextElementSibling;
+        if(!ruta || ruta.tagName === 'DIV') return;
+        if((ruta.textContent || '').trim() === '=') return;
+        var par = document.createElement('span');
+        par.className = 'ovn-led-par' + (el.classList.contains('ovn-led-extra') ? ' ovn-led-extra' : '');
+        if(el.hidden) par.hidden = true;
+        rad.insertBefore(par, el);
+        par.appendChild(el); par.appendChild(ruta);
+      });
+    });
+  }
+
+  /* K-E: KORTA SVAR FÅR KORTA RUTOR SOM VÄXER. Klassen .bred startar på 160 px och satt på nästan
+     varje uttrycksruta — "2" fick lika mycket plats som "2,6x − 0,2y". Breda rutor från start är
+     det som bryter raderna fult (K-D), så valet görs här, på ETT ställe, och läser FACITET.
+     GOLVET mäts på en egen ruta i layouten: rutan på raden kan ligga i en dold flik, och en
+     osynlig ruta är 0 px bred — mäts den, ser varje facit för långt ut och ingen ruta blir smal. */
+  function smalaRutor(rot){
+    if(!rot) return;
+    var prov = document.createElement('input');
+    prov.className = 'ovn-in';
+    prov.style.cssText = 'position:absolute;left:-9999px;top:0;';
+    document.body.appendChild(prov);
+    var ps = getComputedStyle(prov);
+    var golv = prov.getBoundingClientRect().width
+      - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight)
+      - parseFloat(ps.borderLeftWidth) - parseFloat(ps.borderRightWidth);
+    prov.remove();
+    if(!(golv > 0)) return;
+    var matare = document.createElement('span');
+    matare.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;left:-9999px;top:0;';
+    document.body.appendChild(matare);
+    rot.querySelectorAll('input.ovn-in.bred').forEach(function(inp){
+      var d = inp.dataset;
+      var f = d.visa ? d.visa
+            : d.svar !== undefined ? String(d.svar)
+            : d.forenkla !== undefined ? decodeURIComponent(d.forenkla) : null;
+      if(!f) return;
+      var st = getComputedStyle(inp);
+      matare.style.font = st.font || (st.fontSize + ' ' + st.fontFamily);
+      matare.textContent = f;
+      if(matare.getBoundingClientRect().width <= golv) inp.classList.remove('bred');
+    });
+    matare.remove();
+  }
+
   function bindSheet(mount, opts){
     opts = opts || {};
     // K-A: en deluppgift = ingen bokstav. Här passerar varje åttan-blad efter render, och det är
     // den enda punkt alla åttans ytor delar — kärnornas egna krokar nådde inte sidor som bygger
     // sin yta på annat sätt (mätt: ak8/k1 gav 23 bokstäver, varav 5 på ensamma deluppgifter).
     enDeluppgiftUtanBokstav(mount);
+    // K-D och K-E: samma punkt, samma skäl — det är här alla åttans ytor passerar.
+    ledPar(mount);
+    smalaRutor(mount);
     // Åter-bind (Återställ → renderBlad → bindSheet på SAMMA mount): ta bort förra bindningens mount-lyssnare
     // först. Förr staplades de → efter tre återställningar avslöjade ett "+ led"-klick flera led, och
     // focusin/keydown kördes flera gånger. Keypad-knapparna är nya element per render och binds om ändå.
@@ -677,6 +747,9 @@
     // K-A även här: de sex k2-kopiorna bygger sina blad var för sig, men alla binder keypaden
     // genom den här funktionen. Det är den enda punkt de delar, och regeln är idempotent.
     enDeluppgiftUtanBokstav(mount);
+    // K-D och K-E: samma punkt, samma skäl — det är här alla åttans ytor passerar.
+    ledPar(mount);
+    smalaRutor(mount);
     var doljSel = opts.hideFor || '[data-nokeypad]';
     var kp = mount.querySelector('.keypad') || document.querySelector('.keypad');
     var active = mount.querySelector('input:not([disabled])'), sisteFram = null;
@@ -752,6 +825,7 @@
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
     grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
+    ledPar: ledPar, smalaRutor: smalaRutor,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
     markera: markera, rensaRad: rensaRad, besvarad: besvarad

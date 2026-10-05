@@ -87,7 +87,12 @@ const ETIKETT = [
   { sida: 'ak9/k1/rakna-med-brak-akr9-ova.html',    etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
   { sida: 'ak9/k1/rakna-med-brak-fordjupning.html', etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
   { sida: 'ak9/k1/rakna-med-brak-ova.html',         etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
-  { sida: 'ak9/k1/tal-och-berakna-ova.html',        etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' }
+  { sida: 'ak9/k1/tal-och-berakna-ova.html',        etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
+  /* d4 och d5 bygger uppgiftsytan som rutnät (eq-grid, prob-uppg) med .seg-text-rutor — mätt
+     2026-10-05: noll .ovn-sheet, noll .ovn-rad, noll .ovn-in på båda sidorna. K-D och K-E har
+     ingen motsvarighet där; K-F har det, och om strecket ska gälla rutnäten är Joachims beslut. */
+  { sida: 'ak7/k3/d4-ekvationer/index.html',        etikett: 'väntar beslut', skal: 'egen rutnätsyta (eq-grid) utan .ovn-sheet — K-F på rutnäten väntar på besked' },
+  { sida: 'ak7/k3/d5-problemlosning/index.html',    etikett: 'väntar beslut', skal: 'egen rutnätsyta (prob-uppg) utan .ovn-sheet — K-F på rutnäten väntar på besked' }
 ];
 
 /* Räckvidden, utskriven i stället för tyst utelämnad. V14 gäller grindar vars mätenhet är
