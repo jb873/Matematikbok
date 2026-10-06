@@ -578,6 +578,98 @@
     });
   }
 
+  /* MATEMATISK NOTATION — K-G, K-H och K-I på EN delad punkt (KONVENTIONER.md §3).
+     Principen: mellanrum betyder operation, tätt ihop betyder delar som hör samman. */
+  var TERM_F = '0-9xyabcn\\)';          // det som får stå FÖRE ett binärt tecken
+  var TERM_E = '0-9xyabcn\\(';          // och EFTER
+  function brakMarkup(t, n){
+    return '<span class="ovn-brak"><span class="ovn-brak-taljare">' + t + '</span>'
+         + '<span class="ovn-brak-strecket"></span>'
+         + '<span class="ovn-brak-namnare">' + n + '</span></span>';
+  }
+  /* ENHET ELLER BRÅK: har ingen sida en siffra är det en enhet ("kr/kg", "km/h", "m/s") — men två
+     ensamma bokstäver är ett bråk ("x/y"), så minst en sida måste vara längre än ett tecken.
+     Samma gräns som minus-grindens bråkben mäter — en regel, ett ställe. */
+  /* Eget namn: keypadens VARIABLER ligger högre upp i filen, och en andra deklaration med samma
+     namn skrev över listan (sidan kastade "VARIABLER.forEach is not a function"). */
+  var VARIABEL_BOKSTAV = /^[xyabcn]$/;        // bokens sex variabler (KONVENTIONER.md)
+  function arEnhet(t, n){
+    if(/[0-9]/.test(t) || /[0-9]/.test(n)) return false;          // en siffra ⇒ bråk
+    if(VARIABEL_BOKSTAV.test(t) && VARIABEL_BOKSTAV.test(n)) return false;      // "x/y" är ett bråk
+    return true;                                                  // "kr/kg", "km/h", "m/s"
+  }
+  /* En yttre parentes kring täljaren eller nämnaren behövs inte när bråket står staplat. */
+  function skalaParentes(d){ return /^\([^()]*\)$/.test(d) ? d.slice(1, -1).trim() : d; }
+
+  function mattextUt(rot){
+    if(!rot) return;
+    var noder = [], gang = document.createTreeWalker(rot, NodeFilter.SHOW_TEXT, null), n;
+    while((n = gang.nextNode())) noder.push(n);
+    noder.forEach(function(nod){
+      var mor = nod.parentElement;
+      if(!mor || mor.tagName === 'INPUT') return;
+      if(mor.closest('.ovn-brak, .brak, .pot, sup, .keypad, .nr-lager, .blad-nav, .blad-subnav, .ovn-fasit')) return;
+      var t = nod.nodeValue, fore = t;
+      if(!/[0-9xyabcn]/.test(t)) return;
+
+      // K-I: heltalet tätt mot det staplade bråket (datans hårda mellanslag bort).
+      var efter = nod.nextSibling;
+      if(efter && efter.nodeType === 1 && efter.classList
+         && (efter.classList.contains('ovn-brak') || efter.classList.contains('brak'))){
+      // Datan skriver blandad form med både hårt och vanligt mellanslag — båda är mellanrum.
+        t = t.replace(/([0-9])[\s\u00a0]+$/, '$1');
+      }
+
+      // K-G: luft kring binära tecken, ingen luft vid förtecken eller runt parentesen.
+      /* LOOKAHEAD, inte konsumtion: i "5·5·5·5" äter en vanlig matchning tecknet efter och
+         hoppar därför över varannan operator — resultatet blev "5 · 5·5 · 5". */
+      t = t.replace(new RegExp('([' + TERM_F + '])([+\\u2212\\u00b7\\u00d7=])(?=[' + TERM_E + '])', 'g'), '$1 $2 ');
+      t = t.replace(/\(\s+(?=[0-9xyabcn\u2212])/g, '(');
+      t = t.replace(new RegExp('([' + TERM_F + '])\\s+\\)', 'g'), '$1)');
+      t = t.replace(/([+\u00b7\u00d7=,(])\s*\u2212\s+([0-9xyabcn])/g, function(h, tecken, tal){
+        return tecken === '(' ? '(\u2212' + tal : tecken + ' \u2212' + tal;
+      });
+      /* ORDGRÄNS: en variabel står ensam. Utan den läses sista bokstaven i ett ord som koefficient,
+         och "Beräkna (9 − 4)" drogs ihop till "Beräkna(9 − 4)". */
+      t = t.replace(new RegExp('(^|[^0-9a-zA-ZåäöÅÄÖ])([0-9xyabcn])\\s+\\(([^)]*[0-9xyabcn][^)]*)\\)', 'g'), function(h, fore, f, inne){
+        return /^[\s0-9xyabcn+\u2212\u00b7\u00d7\/,.]+$/.test(inne) ? fore + f + '(' + inne + ')' : h;
+      });
+
+      // K-H: platt bråk mellan tal eller variabler staplas. Enheter rörs inte.
+      var traff = false;
+      /* Täljare och nämnare: ett tal, en variabel ELLER en parentes. Med parentes gör
+         bråkstrecket grupperingen, så den yttre parentesen faller bort när bråket staplas. */
+      /* En DEL av ett bråk: ett tal (med tusentalsgrupper och eventuella decimaler), en
+         variabel eller en parentes. Tusentalsmellanrummet hör till talet — utan det klipptes
+         "90 000 / 300" till täljaren "000". */
+      /* Första siffergruppen får vara hur lång som helst: "1000" och "7005" skrivs utan
+         tusentalsmellanrum, och ett mönster som krävde högst tre siffror lämnade dem platta. */
+      var DEL = '(\\([^()]*\\)|[0-9]+(?:[ \\u00a0][0-9]{3})*(?:,[0-9]+)?[a-zA-Z]?|[a-zA-Z])';
+      var re = new RegExp('(^|[^\\w)])' + DEL + '\\s*\\/\\s*' + DEL + '(?![\\w])', 'g');
+      var m, sist = 0, ut = [];
+      while((m = re.exec(t))){
+        var taljare = skalaParentes((m[2] || '').trim()), namnare = skalaParentes((m[3] || '').trim());
+        if(!taljare || !namnare || arEnhet(taljare, namnare)) continue;
+        traff = true;
+        ut.push({ text: t.slice(sist, m.index + m[1].length) });
+        ut.push({ brak: [taljare, namnare] });
+        sist = m.index + m[0].length;
+      }
+      if(traff){
+        ut.push({ text: t.slice(sist) });
+        var frag = document.createDocumentFragment();
+        ut.forEach(function(bit){
+          if(bit.text !== undefined){ if(bit.text) frag.appendChild(document.createTextNode(bit.text)); }
+          else { var sp = document.createElement('span'); sp.innerHTML = brakMarkup(bit.brak[0], bit.brak[1]);
+                 frag.appendChild(sp.firstChild); }
+        });
+        nod.parentNode.replaceChild(frag, nod);
+        return;
+      }
+      if(t !== fore) nod.nodeValue = t;
+    });
+  }
+
   /* K-E: KORTA SVAR FÅR KORTA RUTOR SOM VÄXER. Klassen .bred startar på 160 px och satt på nästan
      varje uttrycksruta — "2" fick lika mycket plats som "2,6x − 0,2y". Breda rutor från start är
      det som bryter raderna fult (K-D), så valet görs här, på ETT ställe, och läser FACITET.
@@ -619,6 +711,7 @@
     // sin yta på annat sätt (mätt: ak8/k1 gav 23 bokstäver, varav 5 på ensamma deluppgifter).
     enDeluppgiftUtanBokstav(mount);
     // K-D och K-E: samma punkt, samma skäl — det är här alla åttans ytor passerar.
+    mattextUt(mount);
     ledPar(mount);
     smalaRutor(mount);
     // Åter-bind (Återställ → renderBlad → bindSheet på SAMMA mount): ta bort förra bindningens mount-lyssnare
@@ -748,6 +841,7 @@
     // genom den här funktionen. Det är den enda punkt de delar, och regeln är idempotent.
     enDeluppgiftUtanBokstav(mount);
     // K-D och K-E: samma punkt, samma skäl — det är här alla åttans ytor passerar.
+    mattextUt(mount);
     ledPar(mount);
     smalaRutor(mount);
     var doljSel = opts.hideFor || '[data-nokeypad]';
@@ -825,7 +919,7 @@
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
     grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
-    ledPar: ledPar, smalaRutor: smalaRutor,
+    ledPar: ledPar, smalaRutor: smalaRutor, mattextUt: mattextUt,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
     markera: markera, rensaRad: rensaRad, besvarad: besvarad
