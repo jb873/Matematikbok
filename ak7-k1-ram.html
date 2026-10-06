@@ -2076,7 +2076,10 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
    varken att se eller rulla fram) · och i en smal kolumn krymper kolumnmåtten så att den vanliga
    uppställningen får plats utan rullning. */
 .mult-upp-box,.uppstallning-interaktiv,.div-kort-box{ flex-shrink:0; min-width:max-content; }
-@media(max-width:430px){
+/* Gränsen går vid 520 px, inte 430: mätt behöver uppställningen med minnesruta 356 px, och
+   drillkolumnen ger kortets bredd minus 84 px vaddering — alltså rullade den ända upp till 500 px
+   kolumnbredd. Med smalare kolumner ryms den från 390 px. */
+@media(max-width:520px){
   .mult-upp-row .cell,.mult-upp-carry .cell{ width:32px; }
   .mult-upp-row .opcell{ width:22px; }
   .mult-upp-ans{ width:32px; }
