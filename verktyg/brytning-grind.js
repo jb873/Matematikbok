@@ -24,7 +24,7 @@
           utan tecken skrivs "Svar:" och rutans högerkant ligger vid radens. Luckor (.lucka) är
           delar av uttrycket, inte svar, och en flerrutsrad har inget enskilt svar att högerställa.
 
-   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats]
+   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar]
          --sabba återskapar felet regeln finns för → benet MÅSTE fälla. Ett motprov som inte kan
          fälla bevisar ingenting.
 
@@ -55,6 +55,13 @@ const PROBE = `(function(){
 
   function synlig(e){ return e.getClientRects().length > 0; }
   function kort(t){ return String(t).replace(/\\s+/g, ' ').trim(); }
+  /* RADBOXARNA i en text: ett block har EN klientrektangel hur många rader det än bryter över,
+     så antalet rader måste läsas ur en Range över innehållet. */
+  function radrektanglar(el){
+    var r = document.createRange(); r.selectNodeContents(el);
+    return Array.prototype.slice.call(r.getClientRects());
+  }
+  function radantal(el){ return el ? radrektanglar(el).length : 0; }
 
   /* KONTRAST med alfa inräknad: en linje med alpha .55 är inte sin egen färg, den är sin färg
      BLANDAD med bakgrunden. Utan blandningen mäter provet en linje som inte finns på skärmen. */
@@ -148,6 +155,21 @@ const PROBE = `(function(){
     if(SABBA === 'svarsetikett'){
       var e9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-svar-etikett'), synlig)[0];
       if(e9){ e9.remove(); ut.noter.push('SABBA: tog bort "Svar:"-etiketten'); }
+    }
+    if(SABBA === 'dubbeletikett'){
+      var d9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-svarsrad'), synlig)[0];
+      if(d9){ var extra = document.createElement('span'); extra.className = 'ovn-svar-etikett';
+        extra.textContent = 'Omkrets'; d9.insertBefore(extra, d9.firstChild);
+        ut.noter.push('SABBA: satte dit en andra etikett i svarsparet'); }
+    }
+    if(SABBA === 'flerradsvar'){
+      var f9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-svarsrad-egen'), synlig)[0];
+      /* Flytta in paret I fragans text: det ar sa felet ser ut nar svaret klams in i slutet av
+         en flerradig fraga. Att bara ta bort klassen racker inte — raden kan anda brytas sa att
+         paret hamnar under, och da bevisar motprovet ingenting. */
+      if(f9){ var fr9 = f9.previousElementSibling;
+        if(fr9 && !fr9.querySelector('input')){ f9.classList.remove('ovn-svarsrad-egen'); fr9.appendChild(f9);
+          ut.noter.push('SABBA: klamde in det flerradiga svaret i fragans sista rad'); } }
     }
     if(SABBA === 'svarsplats'){
       var p9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-svarsrad'), synlig)[0];
@@ -262,10 +284,40 @@ const PROBE = `(function(){
         b.brott.push('K-K FRITT SVAR UTAN "Svar:": "' + txt.slice(0, 34) + '"');
         return;
       }
-      var rr = rad.getBoundingClientRect(), ir = ruta.getBoundingClientRect();
+      /* SVARETS högerkant, inte rutans: en enhet efter rutan ("dm²") hör till svaret och ligger
+         i samma par. Mäter man rutan ser ett svar med enhet alltid ut att ha luft kvar. */
+      var rr = rad.getBoundingClientRect(), ir = par2.getBoundingClientRect();
       if(rr.right - ir.right > 24)
         b.brott.push('K-K FRITT SVAR EJ HOGERSTALLT: "' + txt.slice(0, 28) + '" har '
           + Math.round(rr.right - ir.right) + ' px luft till radens hogerkant');
+
+      /* FLERRADIG FRÅGA: svaret ska ligga på EGEN rad under frågan. Mätt på frågans klient-
+         rektanglar (en text som bryter över flera rader har flera) och på att svarsparet börjar
+         UNDER frågans sista rad — inte inklämt i slutet av den. */
+      /* Ligger svaret INUTI frågans text är det inklämt per definition — ingen geometri behövs. */
+      var inneIFraga = par2.closest('.ovn-text, .ak8-tal');
+      if(inneIFraga && radantal(inneIFraga) > 1)
+        b.brott.push('K-K FLERRADIG FRAGA MED SVARET PA FRAGERADEN: "' + txt.slice(0, 28)
+          + '" — svaret star inuti fragans text');
+      var fragaEl = par2.previousElementSibling
+        || (par2.parentElement && par2.parentElement.querySelector('.ovn-text, .ak8-tal'));
+      if(fragaEl && radantal(fragaEl) > 1){
+        var rutor9 = radrektanglar(fragaEl);
+        var fr = rutor9[rutor9.length - 1];
+        if(ir.top < fr.bottom - 2)
+          b.brott.push('K-K FLERRADIG FRAGA MED SVARET PA FRAGERADEN: "' + txt.slice(0, 28)
+            + '" — svaret hor hemma pa egen rad under fragan');
+      }
+
+      /* DUBBEL ETIKETT: ett svar har en etikett, inte två. "Omkrets Svar: ▢" är det fel regeln
+         finns för — står en etikett redan där ska den användas, inte kompletteras. */
+      var etiketter = par2.querySelectorAll('.ovn-svar-etikett').length;
+      var foreEl = par2.previousElementSibling;
+      var foreOrd = foreEl && !foreEl.querySelector('input')
+        && /^[A-ZÅÄÖ][a-zåäöA-ZÅÄÖ]{3,}:?$/.test(kort(foreEl.textContent)) ? 1 : 0;
+      if(etiketter + foreOrd > 1)
+        b.brott.push('K-K DUBBEL ETIKETT: "' + kort(par2.textContent).slice(0, 24)
+          + '" har ' + (etiketter + foreOrd) + ' etiketter');
     });
 
     // ── K-F b: streck ovanfor varje huvuduppgift utom den forsta ──────────────────────────

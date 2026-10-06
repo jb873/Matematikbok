@@ -411,6 +411,9 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
 /* K-K: fritt svar. margin-left:auto skjuter paret till radens högra kant — rutan växer då vänsterut
    och svarets högerkant står still, oavsett hur långt svaret blir. */
 .ovn-svarsrad{display:inline-flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;}
+/* K-K, flerradig fråga: svaret på EGEN rad under frågan, högerställt — högerkanten står
+   still och etiketten backar, samma princip som på en rad. */
+.ovn-svarsrad-egen{display:flex;width:100%;justify-content:flex-end;margin-left:0;margin-top:6px;}
 .ovn-svar-etikett{font-family:'Source Serif 4',Georgia,serif;font-size:16px;color:var(--ink-soft);}
 /* Bråk-visning: täljare över streck, nämnare under */.ovn-brak{
   display:inline-flex;flex-direction:column;align-items:center;

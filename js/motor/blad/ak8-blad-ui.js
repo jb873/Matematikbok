@@ -585,32 +585,86 @@
      GRÄNSER: exakt EN svarsruta, inget likhetstecken, ingen lucka (.lucka är en del av uttrycket,
      inte ett svar) och ingen ruta inuti ett rutnät eller ett staplat bråk. */
   var SVAR_TEXT = { etikett: 'Svar:' };     // Joachims ordalydelse ur KONVENTIONER.md §3 (K-K)
+  /* ANTALET RADER en text bryter över. Ett block har EN klientrektangel hur många rader det än
+     har; en Range över innehållet ger en rektangel per radbox, oavsett display. */
+  function radantal(el){
+    if(!el) return 0;
+    var r = document.createRange(); r.selectNodeContents(el);
+    return r.getClientRects().length;
+  }
   function svarsPlats(rot){
     if(!rot) return;
+    function svarsrutor(rad){
+      return Array.prototype.slice.call(rad.querySelectorAll('input.ovn-in, input.ak8-in'))
+        .filter(function(i){
+          return !i.classList.contains('lucka')
+            && !i.closest('.ovn-brak, .brak, .alg-pyramid, .alg-magisk, .ovn-val-grid, .valruta-grid, .ovn-led-par');
+        });
+    }
+    /* RITAT STRECK → RUTANS PLATS. Strecket är pappersnotation; rutan hör hemma där det står.
+       Bara när raden har EN ruta och EN streckplats: två streck med en enda ruta ("skriv båda")
+       betyder att rutan bär båda platserna, och då ändrar en flytt vad som rättas. */
+    rot.querySelectorAll('.ovn-rad, .ak8-rad').forEach(function(rad){
+      var rutor = svarsrutor(rad);
+      if(rutor.length !== 1) return;
+      var ruta = rutor[0];
+      var noder = [], g = document.createTreeWalker(rad, NodeFilter.SHOW_TEXT, null), n;
+      while((n = g.nextNode())) if(/_{2,}/.test(n.nodeValue)) noder.push(n);
+      if(noder.length !== 1) return;
+      var nod = noder[0];
+      if((nod.nodeValue.match(/_{2,}/g) || []).length !== 1) return;   // två platser, en ruta
+      var m = nod.nodeValue.match(/_{2,}/);
+      var efter = nod.splitText(m.index);
+      efter.nodeValue = efter.nodeValue.slice(m[0].length);
+      nod.nodeValue = nod.nodeValue.replace(/\s+$/, ' ');
+      efter.parentNode.insertBefore(ruta, efter);
+    });
+
     rot.querySelectorAll('.ovn-rad, .ak8-rad').forEach(function(rad){
       if(rad.querySelector('.ovn-svarsrad')) return;                       // redan gjord
       if((rad.textContent || '').indexOf('=') >= 0) return;                // har likhetstecken
-      /* INGEN SYNLIGHETSFILTRERING: bladet binds medan andra flikar ligger dolda, och en ruta i en
-         dold flik är lika mycket radens svar som en synlig. Med filtret hoppades 33 rader av 133
-         över på en enda sida — de råkade höra till den flik som inte var framme. */
-      var rutor = Array.prototype.slice.call(rad.querySelectorAll('input.ovn-in, input.ak8-in'));
+      var rutor = svarsrutor(rad);
       if(rutor.length !== 1) return;                                       // inget enskilt svar
       var ruta = rutor[0];
-      if(ruta.classList.contains('lucka')) return;                         // lucka i uttrycket
-      if(ruta.closest('.ovn-brak, .brak, .alg-pyramid, .alg-magisk, .ovn-val-grid, .valruta-grid, .ovn-led-par')) return;
-      /* Rutan behöver inte vara radens direkta barn: åttans svar ligger i en egen cell och sjuans
-         prislappsrader i ett eget block. Flytta den YTTERSTA omslutning som bara bär rutan. */
+      /* Rutan tar med sig det som hör ihop med den: en enhet efter rutan ("dm²") är en del av
+         svaret, inte av frågan. Gå upp så länge omslutningen bär just den här rutan och inget
+         annat svarsfält. */
       var flytt = ruta;
       while(flytt.parentElement && flytt.parentElement !== rad
-            && flytt.parentElement.children.length === 1) flytt = flytt.parentElement;
-      if(flytt.parentElement !== rad) return;                              // delar plats med annat innehåll
+            && flytt.parentElement.querySelectorAll('input').length === 1) flytt = flytt.parentElement;
+      var mor = flytt.parentElement;
+      if(!mor) return;
+
+      /* ETIKETT: står redan ett kort ord före rutan ("Omkrets", "Area") är det svarets etikett.
+         Två etiketter är värre än ingen. */
+      var fore = flytt.previousElementSibling;
+      var foreText = fore ? (fore.textContent || '').replace(/\s+/g, ' ').trim() : '';
+      /* En ETIKETT är ett ORD, inte ett kort frågetal: "74" och "67" är frågan, "Omkrets" är
+         etiketten. Utan den gränsen användes frågan som etikett och "Svar:" uteblev. */
+      var ORD = /^[A-ZÅÄÖ][a-zåäöA-ZÅÄÖ]{3,}:?$/;         // "Omkrets", "Area", "Svar:"
+      var befintlig = (fore && !fore.querySelector('input') && ORD.test(foreText)) ? fore : null;
+
+      /* FLERRADIG FRÅGA: svaret på egen rad under frågan, högerställt. En text som bryter över
+         flera rader har flera klientrektanglar — det är mätningen, inte en gissning. */
+      var fraga = befintlig ? null : (fore || mor.querySelector('.ovn-text, .ak8-tal'));
+      /* Bladet binds medan andra flikar ligger DOLDA, och ett dolt element har inga radboxar —
+         mätningen kan alltså inte avgöra ensam. Därför två kriterier: radbrytning när den går att
+         mäta, annars frågans längd. En fråga på mer än 24 tecken bryter på telefon, och det är där
+         svaret ska ligga på egen rad. */
+      var fragaText = fraga ? (fraga.textContent || '').replace(/s+/g, ' ').trim() : '';
+      var flerradig = radantal(fraga) > 1 || fragaText.length > 24;
+
       var par = document.createElement('span');
-      par.className = 'ovn-svarsrad';
-      var txt = document.createElement('span');
-      txt.className = 'ovn-svar-etikett';
-      txt.textContent = SVAR_TEXT.etikett;
-      rad.insertBefore(par, flytt);
-      par.appendChild(txt); par.appendChild(flytt);
+      par.className = 'ovn-svarsrad' + (flerradig ? ' ovn-svarsrad-egen' : '');
+      mor.insertBefore(par, flytt);
+      if(befintlig) par.appendChild(befintlig);
+      else {
+        var txt = document.createElement('span');
+        txt.className = 'ovn-svar-etikett';
+        txt.textContent = SVAR_TEXT.etikett;
+        par.appendChild(txt);
+      }
+      par.appendChild(flytt);
     });
   }
 
