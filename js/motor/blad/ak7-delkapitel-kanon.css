@@ -690,6 +690,10 @@ footer span{font-family:var(--cinzel);font-size:11px;letter-spacing:.1em}
   .blad-nav{padding:16px 16px 4px;}
 }
 /* ── FÄRDIGHETSTRÄNING ── */.fard-layout{max-width:920px;margin:0 auto;padding:18px 28px 44px;display:grid;grid-template-columns:288px 1fr;gap:22px;align-items:start;}
+/* MIGRERAD SIDA: navramen speglar in färdighetslistan i sin egen spalt och döljer den här
+   (.nr-dold). Då ska listans spalt inte stå kvar och ta 288 px av drillens bredd — mätt: scenen
+   fick 494 px i stället för hela innehållsspaltens 804 px, med en tom spalt till vänster. */
+.fard-layout:has(> .fard-lista.nr-dold){ grid-template-columns:1fr; }
 .fard-lista{display:flex;flex-direction:column;gap:2px;}
 .fard-grupp{margin-bottom:10px;}
 .fard-ko{font-family:var(--cinzel,'Cinzel');font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold,#9a7228);margin:6px 0 7px;display:flex;align-items:center;gap:10px;}
