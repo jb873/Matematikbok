@@ -1373,6 +1373,7 @@ function bygg_blad(rotEl, blad){
   /* K-D och K-E bor i AK8_UI: samma funktioner som åttans ytor och sjuans bråkblad använder.
      En layoutregel som skrivs om i varje kärna blir tre regler som glider isär. */
   if(window.AK8_UI && AK8_UI.mattextUt) AK8_UI.mattextUt(rotEl);   // K-G/K-H/K-I
+  if(window.AK8_UI && AK8_UI.svarsPlats) AK8_UI.svarsPlats(rotEl);  // K-K
   if(window.AK8_UI && AK8_UI.ledPar) AK8_UI.ledPar(rotEl);
   if(window.AK8_UI && AK8_UI.smalaRutor) AK8_UI.smalaRutor(rotEl);
 

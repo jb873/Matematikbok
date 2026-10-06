@@ -16,7 +16,15 @@
           mot arkets botten mäts, med alfa inräknad, och måste nå 2,0. De gamla deluppgiftsstrecken
           låg på 1,16 och var osynliga; en regel som bara kräver "en linje" hade godkänt dem.
 
-   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par]
+     K-J  Deluppgiftsbokstaven hör till bokens typografi: samma familj som radens text, minst 60 %
+          av dess storlek och nära den i ljushet. Mäts RELATIVT radens egen text, aldrig mot en
+          konstant — annars vaktar grinden en smak i stället för en relation.
+
+     K-K  Svarets plats följer uppgiftens form: med likhetstecken står rutan direkt efter tecknet,
+          utan tecken skrivs "Svar:" och rutans högerkant ligger vid radens. Luckor (.lucka) är
+          delar av uttrycket, inte svar, och en flerrutsrad har inget enskilt svar att högerställa.
+
+   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats]
          --sabba återskapar felet regeln finns för → benet MÅSTE fälla. Ett motprov som inte kan
          fälla bevisar ingenting.
 
@@ -112,7 +120,7 @@ const PROBE = `(function(){
   }
 
   function matSheet(namn, sh){
-    var b = { blad: namn, rader: 0, grupper: 0, rutor: 0, brott: [] };
+    var b = { blad: namn, rader: 0, grupper: 0, rutor: 0, bokstaver: 0, svarMedLikhet: 0, svarFritt: 0, brott: [] };
     var bak = bakgrund(sh);
 
     /* SABOTAGEN återskapar precis de tre fel reglerna finns för. */
@@ -131,6 +139,20 @@ const PROBE = `(function(){
         var f = facitAv(i); return synlig(i) && f && !i.classList.contains('bred') && textbredd(i, f) <= golvInnanmate; })[0];
       if(sm){ sm.classList.add('bred');
         ut.noter.push('SABBA: gav ett kort svar en fast bred ruta'); }
+    }
+    if(SABBA === 'bokstavsstil'){
+      var l9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-label, .ak8-label'), synlig)[0];
+      if(l9){ l9.style.fontFamily = 'Cinzel, serif'; l9.style.fontSize = '11px'; l9.style.color = 'rgb(122,110,101)';
+        ut.noter.push('SABBA: gav bokstaven ett eget typsnitt och liten gra ton'); }
+    }
+    if(SABBA === 'svarsetikett'){
+      var e9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-svar-etikett'), synlig)[0];
+      if(e9){ e9.remove(); ut.noter.push('SABBA: tog bort "Svar:"-etiketten'); }
+    }
+    if(SABBA === 'svarsplats'){
+      var p9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-svarsrad'), synlig)[0];
+      if(p9){ p9.style.marginLeft = '0'; p9.style.marginRight = 'auto';
+        ut.noter.push('SABBA: flyttade det fria svaret till radens vanstra kant'); }
     }
     if(SABBA === 'par'){
       var par = sh.querySelector('.ovn-led-par');
@@ -172,6 +194,78 @@ const PROBE = `(function(){
           b.brott.push('K-D RADEN SLUTAR MED ETT ENSAMT "=": "' + kort(r.textContent).slice(0, 22)
             + '" bryter sa att tecknet blir kvar och rutan kalms in pa nasta rad');
       });
+    });
+
+    // ── K-J: deluppgiftsbokstaven i bokens typografi ──────────────────────────────────────
+    var radtext = Array.prototype.filter.call(sh.querySelectorAll('.ovn-text, .ak8-tal'), synlig)[0];
+    if(radtext){
+      var rs = getComputedStyle(radtext);
+      var rFamilj = rs.fontFamily.split(',')[0].replace(/["']/g, '').trim();
+      var rStorlek = parseFloat(rs.fontSize);
+      var rLjus = lum(blanda(rs.color, bak));
+      Array.prototype.forEach.call(sh.querySelectorAll('.ovn-label, .ak8-label'), function(lbl){
+        if(!synlig(lbl)) return;
+        b.bokstaver++;
+        var ls = getComputedStyle(lbl);
+        var lFamilj = ls.fontFamily.split(',')[0].replace(/["']/g, '').trim();
+        var lStorlek = parseFloat(ls.fontSize);
+        var lLjus = lum(blanda(ls.color, bak));
+        if(lFamilj !== rFamilj)
+          b.brott.push('K-J ANNAT TYPSNITT: bokstaven "' + kort(lbl.textContent) + '" ar ' + lFamilj
+            + ' medan raden ar ' + rFamilj);
+        else if(lStorlek < rStorlek * 0.6)
+          b.brott.push('K-J FOR LITEN: bokstaven ar ' + Math.round(lStorlek) + ' px mot radens '
+            + Math.round(rStorlek) + ' px (' + Math.round(100 * lStorlek / rStorlek) + ' %, kravs 60)');
+        else if(Math.abs(lLjus - rLjus) > 0.10)
+          b.brott.push('K-J FOR LJUS: bokstavens ton ligger ' + (Math.round(100 * (lLjus - rLjus)) / 100)
+            + ' fran radens i ljushet (kravs 0,10)');
+      });
+    }
+
+    // ── K-K: svarets plats foljer uppgiftens form ─────────────────────────────────────────
+    Array.prototype.forEach.call(sh.querySelectorAll('.ovn-rad, .ak8-rad'), function(rad){
+      if(!synlig(rad)) return;
+      var rutor = Array.prototype.filter.call(rad.querySelectorAll('input.ovn-in, input.ak8-in'), synlig)
+        .filter(function(i){ return !i.classList.contains('lucka')
+          && !i.closest('.ovn-brak, .brak, .alg-pyramid, .alg-magisk, .ovn-val-grid, .valruta-grid'); });
+      if(!rutor.length) return;
+      var txt = kort(rad.textContent);
+      /* FRÅGAN FÖRE RUTAN avgör, inte raden. "Omkrets ▢ = ▢" är en kedja: första rutan svarar på
+         frågan, resten är led (K-B/K-D). Ett likhetstecken FÖRE rutan gör uppgiften till en
+         likhet, och då ska rutan följa tecknet. */
+      var harLikhetFore = false;
+      rutor.forEach(function(i){
+        var fore = '';
+        var n = i.previousSibling;
+        while(n){ fore = (n.nodeType === 3 ? n.nodeValue : n.textContent || '') + fore; n = n.previousSibling; }
+        if(fore.indexOf('=') < 0) return;                    // rutan svarar på frågan
+        harLikhetFore = true;
+        /* PROSA MED LIKHETSTECKEN är ingen likhet: "om a = 12 och b = 5" är ett villkor i frågan.
+           Det regeln siktar på är det RITADE STRECKET som står där rutan borde stå. */
+        if(!/_{2,}/.test(fore)) return;
+        var par = i.closest('.ovn-led-par');
+        if(par && kort(par.textContent).indexOf('=') === 0) return;
+        var f = i.previousSibling;
+        while(f && f.nodeType === 3 && !f.nodeValue.trim()) f = f.previousSibling;
+        var intill = f ? (f.nodeType === 3 ? f.nodeValue : f.textContent) : '';
+        if(/=\s*$/.test(intill || '')) return;
+        b.brott.push('K-K RITAT STRECK I STALLET FOR RUTA: "' + txt.slice(0, 34) + '" — likheten pekar pa strecket, men rutan star efter meningen');
+      });
+      if(harLikhetFore || txt.indexOf('=') >= 0){
+        b.svarMedLikhet++;
+        return;
+      }
+      if(rutor.length !== 1) return;                      // flerrutsrad: inget enskilt svar
+      b.svarFritt++;
+      var ruta = rutor[0], par2 = ruta.closest('.ovn-svarsrad');
+      if(!par2 || !par2.querySelector('.ovn-svar-etikett')){
+        b.brott.push('K-K FRITT SVAR UTAN "Svar:": "' + txt.slice(0, 34) + '"');
+        return;
+      }
+      var rr = rad.getBoundingClientRect(), ir = ruta.getBoundingClientRect();
+      if(rr.right - ir.right > 24)
+        b.brott.push('K-K FRITT SVAR EJ HOGERSTALLT: "' + txt.slice(0, 28) + '" har '
+          + Math.round(rr.right - ir.right) + ' px luft till radens hogerkant');
     });
 
     // ── K-F b: streck ovanfor varje huvuduppgift utom den forsta ──────────────────────────
@@ -244,10 +338,12 @@ Sidor.alla().forEach(sida => {
   MP.rakna(sida, (ut.blad || []).length);
   (ut.blad || []).forEach(b => {
     matta++; rader += b.rader; grupper += b.grupper; rutor += b.rutor;
-    MP.varde(sida, b.blad, { rader: b.rader, grupper: b.grupper, rutor: b.rutor });
+    MP.varde(sida, b.blad, { rader: b.rader, grupper: b.grupper, rutor: b.rutor,
+      bokstaver: b.bokstaver, svarMedLikhet: b.svarMedLikhet, svarFritt: b.svarFritt });
     fel += b.brott.length;
     console.log((b.brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad
-      + ': ' + b.rader + ' rader, ' + b.grupper + ' uppgifter, ' + b.rutor + ' rutor'
+      + ': ' + b.rader + ' rader, ' + b.grupper + ' uppgifter, ' + b.rutor + ' rutor, '
+      + b.bokstaver + ' bokstäver, ' + b.svarMedLikhet + '=/' + b.svarFritt + ' fria svar'
       + (b.brott.length ? '\n     ' + b.brott.slice(0, 4).join('\n     ')
          + (b.brott.length > 4 ? '\n     … och ' + (b.brott.length - 4) + ' till' : '') : ''));
   });

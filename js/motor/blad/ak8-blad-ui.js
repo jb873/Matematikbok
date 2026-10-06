@@ -578,6 +578,42 @@
     });
   }
 
+  /* K-K: SVARETS PLATS FÖLJER UPPGIFTENS FORM. Har raden ett likhetstecken står rutan direkt
+     efter det (K-D band ihop paret). Saknas tecknet är svaret fritt: då får raden "Svar:" före
+     rutan, och paret skjuts till radens högra kant så att rutan växer VÄNSTERUT och svarets
+     högerkant står still — som i högermarginalen på papper.
+     GRÄNSER: exakt EN svarsruta, inget likhetstecken, ingen lucka (.lucka är en del av uttrycket,
+     inte ett svar) och ingen ruta inuti ett rutnät eller ett staplat bråk. */
+  var SVAR_TEXT = { etikett: 'Svar:' };     // Joachims ordalydelse ur KONVENTIONER.md §3 (K-K)
+  function svarsPlats(rot){
+    if(!rot) return;
+    rot.querySelectorAll('.ovn-rad, .ak8-rad').forEach(function(rad){
+      if(rad.querySelector('.ovn-svarsrad')) return;                       // redan gjord
+      if((rad.textContent || '').indexOf('=') >= 0) return;                // har likhetstecken
+      /* INGEN SYNLIGHETSFILTRERING: bladet binds medan andra flikar ligger dolda, och en ruta i en
+         dold flik är lika mycket radens svar som en synlig. Med filtret hoppades 33 rader av 133
+         över på en enda sida — de råkade höra till den flik som inte var framme. */
+      var rutor = Array.prototype.slice.call(rad.querySelectorAll('input.ovn-in, input.ak8-in'));
+      if(rutor.length !== 1) return;                                       // inget enskilt svar
+      var ruta = rutor[0];
+      if(ruta.classList.contains('lucka')) return;                         // lucka i uttrycket
+      if(ruta.closest('.ovn-brak, .brak, .alg-pyramid, .alg-magisk, .ovn-val-grid, .valruta-grid, .ovn-led-par')) return;
+      /* Rutan behöver inte vara radens direkta barn: åttans svar ligger i en egen cell och sjuans
+         prislappsrader i ett eget block. Flytta den YTTERSTA omslutning som bara bär rutan. */
+      var flytt = ruta;
+      while(flytt.parentElement && flytt.parentElement !== rad
+            && flytt.parentElement.children.length === 1) flytt = flytt.parentElement;
+      if(flytt.parentElement !== rad) return;                              // delar plats med annat innehåll
+      var par = document.createElement('span');
+      par.className = 'ovn-svarsrad';
+      var txt = document.createElement('span');
+      txt.className = 'ovn-svar-etikett';
+      txt.textContent = SVAR_TEXT.etikett;
+      rad.insertBefore(par, flytt);
+      par.appendChild(txt); par.appendChild(flytt);
+    });
+  }
+
   /* MATEMATISK NOTATION — K-G, K-H och K-I på EN delad punkt (KONVENTIONER.md §3).
      Principen: mellanrum betyder operation, tätt ihop betyder delar som hör samman. */
   var TERM_F = '0-9xyabcn\\)';          // det som får stå FÖRE ett binärt tecken
@@ -699,7 +735,11 @@
       var st = getComputedStyle(inp);
       matare.style.font = st.font || (st.fontSize + ' ' + st.fontFamily);
       matare.textContent = f;
-      if(matare.getBoundingClientRect().width <= golv) inp.classList.remove('bred');
+      /* TIO PIXLARS MARGINAL: bredden mäts vid bindningen, då webbtypsnittet kan vara utbytt mot
+         reservtypsnittet, och ett facit som ligger på gränsen hamnade olika i bygget och i
+         grinden ("12x + 8y": 71 px mot golvets 74). En ruta som får växa förlorar inget på att
+         starta smal — regeln säger att behovet styr tillväxten, inte startbredden. */
+      if(matare.getBoundingClientRect().width <= golv + 10) inp.classList.remove('bred');
     });
     matare.remove();
   }
@@ -712,6 +752,7 @@
     enDeluppgiftUtanBokstav(mount);
     // K-D och K-E: samma punkt, samma skäl — det är här alla åttans ytor passerar.
     mattextUt(mount);
+    svarsPlats(mount);
     ledPar(mount);
     smalaRutor(mount);
     // Åter-bind (Återställ → renderBlad → bindSheet på SAMMA mount): ta bort förra bindningens mount-lyssnare
@@ -842,6 +883,7 @@
     enDeluppgiftUtanBokstav(mount);
     // K-D och K-E: samma punkt, samma skäl — det är här alla åttans ytor passerar.
     mattextUt(mount);
+    svarsPlats(mount);
     ledPar(mount);
     smalaRutor(mount);
     var doljSel = opts.hideFor || '[data-nokeypad]';
@@ -919,7 +961,7 @@
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
     grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
-    ledPar: ledPar, smalaRutor: smalaRutor, mattextUt: mattextUt,
+    ledPar: ledPar, smalaRutor: smalaRutor, mattextUt: mattextUt, svarsPlats: svarsPlats,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
     keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
     markera: markera, rensaRad: rensaRad, besvarad: besvarad

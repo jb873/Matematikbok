@@ -1,5 +1,9 @@
 {
- "js/motor/blad/ak8-blad-ui.js": [],
+ "js/motor/blad/ak8-blad-ui.js": [
+  "etikett | Svar:",
+  "titel | + led",
+  "titel | − led"
+ ],
  "js/motor/blad/blad-ak8-d1.js": [
   "titel | Multiplicera och dividera med små tal",
   "titel | Multiplicera och dividera med stora och små tal",

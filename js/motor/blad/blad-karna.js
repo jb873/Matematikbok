@@ -359,6 +359,7 @@ function bygg_blad(rotEl, blad){
   // bokstäver om per grupp
   // K-D och K-E — samma delade funktioner som åttans ytor och heltalskärnan använder.
   if(window.AK8_UI && AK8_UI.mattextUt) AK8_UI.mattextUt(rotEl);   // K-G/K-H/K-I
+  if(window.AK8_UI && AK8_UI.svarsPlats) AK8_UI.svarsPlats(rotEl);  // K-K
   if(window.AK8_UI && AK8_UI.ledPar) AK8_UI.ledPar(rotEl);
   if(window.AK8_UI && AK8_UI.smalaRutor) AK8_UI.smalaRutor(rotEl);
 
