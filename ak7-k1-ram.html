@@ -2065,6 +2065,28 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
   background:var(--bg-soft);color:var(--error);outline:none;padding:0;
 }
 .mult-upp-carrin:focus{border-color:var(--error);background:var(--error-bg)}
+/* UPPSTÄLLNINGEN KRYMPS ALDRIG UNDER SITT INNEHÅLL — och hamnar aldrig utanför åt vänster.
+   MÄTT (metodträning → multiplikation → uppställning): vid 340 px kolumnbredd låg raderna,
+   strecket och svarsrutorna 41 px till VÄNSTER om kortet, vid 300 px 81 px och vid 260 px 113 px
+   — avskurna av kortkanten och omöjliga att rulla fram. Orsaken är inte en flytt utan en
+   krympning: lådan är inline-flex med högerställt innehåll, så när behållaren blir smalare än
+   innehållet lägger sig överskottet utanför lådans VÄNSTERKANT.
+   Tre delar: lådan krymper inte under sitt innehåll · behållaren rullar och centrerar "safe" (ett
+   centrerat flexbarn som är för brett svämmar annars över åt båda håll, och vänstersidan går
+   varken att se eller rulla fram) · och i en smal kolumn krymper kolumnmåtten så att den vanliga
+   uppställningen får plats utan rullning. */
+.mult-upp-box,.uppstallning-interaktiv,.div-kort-box{ flex-shrink:0; min-width:max-content; }
+@media(max-width:430px){
+  .mult-upp-row .cell,.mult-upp-carry .cell{ width:32px; }
+  .mult-upp-row .opcell{ width:22px; }
+  .mult-upp-ans{ width:32px; }
+  .mult-upp-box{ padding:12px 12px; }
+  .upp-i-cell,.upp-i-digit{ width:32px; }
+  .uppstallning-interaktiv{ padding:12px 12px; }
+  .div-kort-box{ padding:12px 12px; }
+  .div-kort-box .cell,.div-kort-box .kort-cell{ width:32px; }
+}
+
 .mult-demo-steg{
   background:var(--bg-warm);border-radius:var(--radius-sm);padding:10px 14px;
   font-size:13px;line-height:1.6;color:var(--ink);margin-top:12px;min-height:20px;

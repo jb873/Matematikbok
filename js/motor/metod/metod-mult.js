@@ -865,7 +865,7 @@ function renderUppstallningMult(body, backFn, cfg){
       + '<div class="metod-explain-card">'
         + '<h3 class="metod-step-title">Så här fungerar det</h3>'
         + '<p class="metod-step-desc">Vi beräknar <strong>' + EXEMPEL_MULT + '</strong>. Klicka dig genom stegen.</p>'
-        + '<div style="display:flex;justify-content:center;"><div class="mult-upp-box" id="demo-box"></div></div>'
+        + '<div style="display:flex;justify-content:safe center;overflow-x:auto;"><div class="mult-upp-box" id="demo-box"></div></div>'
         + '<div class="mult-demo-steg" id="demo-text"></div>'
         + '<div class="metod-demo-nav">'
           + '<button class="btn" id="demo-prev" disabled>← Föregående</button>'
@@ -985,7 +985,7 @@ function renderUppstallningMult(body, backFn, cfg){
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.mDisplay + ' · ' + (task.dDisplay || task.d) + '</strong></p>'
         + '<p style="font-size:13px;margin:0 0 12px;color:var(--ink-soft);">' + infoHTML + '</p>'
-        + '<div style="display:flex;justify-content:center;">' + boxHTML + '</div>'
+        + '<div style="display:flex;justify-content:safe center;overflow-x:auto;">' + boxHTML + '</div>'
         + '<div class="rakna-uppdela-feedback" id="upp-fb"></div>'
         + keypadHTML([])
         + '<div style="margin-top:16px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
