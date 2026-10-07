@@ -136,6 +136,26 @@ const PROBE = `(function(){
     var bak = bakgrund(sh);
 
     /* SABOTAGEN återskapar precis de tre fel reglerna finns för. */
+    /* --sabba bilduppgift: lagg bilden och rutan i en svarsrad med "Svar:" forst — precis
+       det K-K gjorde live. BENET MASTE FALLA. */
+    if(SABBA === 'bilduppgift'){
+      var bRad = Array.prototype.filter.call(sh.querySelectorAll('.ovn-rad, .ak8-rad'), function(r){
+        return synlig(r) && r.querySelector('.emoji-bild, .alg-figur, .fig-wrap, svg, img')
+            && r.querySelector('input');
+      })[0];
+      if(bRad && !bRad.querySelector('.ovn-svarsrad')){
+        var parS = document.createElement('span');
+        parS.className = 'ovn-svarsrad';
+        var etS = document.createElement('span');
+        etS.className = 'ovn-svar-etikett'; etS.textContent = 'Svar:';
+        parS.appendChild(etS);
+        var kvar = Array.prototype.slice.call(bRad.children).filter(function(c){
+          return !c.classList.contains('ovn-label'); });
+        bRad.appendChild(parS);
+        kvar.forEach(function(c){ parS.appendChild(c); });
+        ut.noter.push('SABBA: la bilden och rutan i en svarsrad med "Svar:" forst');
+      }
+    }
     if(SABBA === 'streck'){
       var r0 = sh.querySelector('.ovn-rad, .ak8-rad');
       if(r0){ r0.style.borderBottom = '1px dotted rgb(237,230,214)';
@@ -285,6 +305,27 @@ const PROBE = `(function(){
       if(rutor.length !== 1) return;                      // flerrutsrad: inget enskilt svar
       b.svarFritt++;
       var ruta = rutor[0], par2 = ruta.closest('.ovn-svarsrad');
+
+      /* BILD-UPPGIFT: egen placering. Rutan star dar datan satte den, inne i bilden, och
+         K-K:s hogerstallda "Svar:" galler inte. Det som falls ar ISARSLITNINGEN. */
+      var bildEl = rad.querySelector('.emoji-bild, .alg-figur, .fig-wrap, svg, img');
+      if(bildEl){
+        b.svarBild = (b.svarBild || 0) + 1;
+        if(par2 && par2.querySelector('.emoji-bild, .alg-figur, .fig-wrap, svg, img')){
+          b.brott.push('K-K BILDUPPGIFT ISARSLITEN: "' + txt.slice(0, 30) + '" — svarsraden bar '
+            + 'bilden, sa "Svar:" hamnar fore bilden och rutan slits fran etiketten');
+        } else if(par2){
+          var etB = par2.querySelector('.ovn-svar-etikett');
+          if(etB){
+            var erB = etB.getBoundingClientRect(), urB = ruta.getBoundingClientRect();
+            if(Math.abs(erB.top - urB.top) > 12 || (urB.left - erB.right) > 90)
+              b.brott.push('K-K BILDUPPGIFT ISARSLITEN: "' + txt.slice(0, 30) + '" — etiketten och '
+                + 'rutan ligger ' + Math.round(urB.left - erB.right) + ' px isar, '
+                + Math.round(Math.abs(erB.top - urB.top)) + ' px i hojd');
+          }
+        }
+        return;                                          // ovriga K-K-ben galler inte har
+      }
       if(!par2 || !par2.querySelector('.ovn-svar-etikett')){
         b.brott.push('K-K FRITT SVAR UTAN "Svar:": "' + txt.slice(0, 34) + '"');
         return;
@@ -416,7 +457,7 @@ Sidor.alla().forEach(sida => {
     fel += b.brott.length;
     console.log((b.brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad
       + ': ' + b.rader + ' rader, ' + b.grupper + ' uppgifter, ' + b.rutor + ' rutor, '
-      + b.bokstaver + ' bokstäver, ' + b.svarMedLikhet + '=/' + b.svarFritt + ' fria svar'
+      + b.bokstaver + ' bokstäver, ' + b.svarMedLikhet + '=/' + b.svarFritt + ' fria svar' + (b.svarBild ? ' · ' + b.svarBild + ' bild-uppgifter' : '')
       + (b.brott.length ? '\n     ' + b.brott.slice(0, 4).join('\n     ')
          + (b.brott.length > 4 ? '\n     … och ' + (b.brott.length - 4) + ' till' : '') : ''));
   });

@@ -623,6 +623,12 @@
     rot.querySelectorAll('.ovn-rad, .ak8-rad').forEach(function(rad){
       if(rad.querySelector('.ovn-svarsrad')) return;                       // redan gjord
       if((rad.textContent || '').indexOf('=') >= 0) return;                // har likhetstecken
+      /* BILD-UPPGIFT: egen placering. Rutan bor inne i bildens omslutning, efter frågetexten,
+         och där ska den stå — så såg sidan ut före K-K (810655b). Klättringen nedan steg upp
+         till hela omslutningen, eftersom den bar precis en ruta, och svarsraden svalde bilden:
+         "Svar:" hamnade före bilden och rutan slets 631 px från etiketten, utanför skärmen.
+         Samma avgränsning som K-E gör mot uppställningens kolumnrutor. */
+      if(rad.querySelector('.emoji-bild, .alg-figur, .fig-wrap, svg, img')) return;
       var rutor = svarsrutor(rad);
       if(rutor.length !== 1) return;                                       // inget enskilt svar
       var ruta = rutor[0];

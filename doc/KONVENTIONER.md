@@ -65,6 +65,8 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 
 **K-K:s fyra fall** är samma princip i fyra lägen: likhet → rutan efter tecknet · ritat streck → rutan på strecket · fritt svar på en rad → `Svar:` högerställt · fritt svar med flerradig fråga → samma par på egen rad under frågan. Etiketten är en, aldrig två.
 
+**K-K fall 3 och 4 gäller inte en rad som bär en bildruta eller figur.** Där bor rutan inne i bildens omslutning, efter frågetexten, och den placeringen är uppgiftens egen. Ett `Svar:` framför bilden slet isär uppgiften live (prislappsuppgifterna i åttans algebra): etiketten hamnade före bilden och rutan 631 px bort, utanför en 390 px skärm. Referensen för rätt placering är commit 810655b, före K-K. Avgränsningen är densamma som K-E gör mot uppställningens kolumnrutor — **en regel som är rätt för de flesta fall undantas där ytan är annorlunda** — och den vaktas av `brytning-grind.js` (`--sabba bilduppgift`), som fäller en bild-uppgift vars svarsrad bär bilden.
+
 **K-K vilar på K-E.** En liten enhetlig ruta som växer, placerad efter uppgiftens form: intill likhetstecknet när det finns ett, annars `Svar:` högerställt. Behovet styr aldrig startstorleken, bara tillväxten.
 
 **K-G, K-H och K-I är EN princip: mellanrum betyder operation, tätt ihop betyder delar som hör samman.** De är inte tre godtyckliga regler utan samma princip tillämpad på tecken, bråk och blandad form — en vakt som är osäker i ett gränsfall faller tillbaka på den meningen. Notationen renderas på EN delad punkt som all visad matematik går igenom, aldrig per renderare: K-A:s nio renderare och K-D:s 412 brott på arton sidor är vad det kostar att lägga samma regel på flera ställen.
