@@ -167,6 +167,10 @@ const PROBE7 = `(function(){
       var box = inp.closest('.alg-sidor'), halva = box ? dec(box.dataset.halva) : '';
       v = d.sida === '1' ? '1' : (halva ? halva + ' - 1' : null);
     }
+    // FÖRLÄNGNINGEN (d7): led 1 är delen utskriven gånger faktorn, led 2 är det förlängda talet.
+    // Båda byggs ur DATAN — faktorn och delen står i rutan själv.
+    else if(d.forlled !== undefined) v = dec(d.forlled) + ' · ' + d.forlfaktor;
+    else if(d.forlbrak !== undefined) v = String(d.forlbrak).replace('.', ',');
     else if(d.oms !== undefined) v = String(d.oms).replace('.', ',');
     else if(d.text !== undefined) v = d.visa || dec(d.text).split('|')[0];
     // FLERA GODTAGBARA MELLANLED: facit får vara en |-lista (talsorternas summor ELLER det

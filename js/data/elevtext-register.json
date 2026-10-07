@@ -496,19 +496,19 @@
   "titel | Problemuppgifter"
  ],
  "js/motor/blad/blad-k1-d7.js": [
-  "exempel | <strong>Exempel:</strong> 21 / 0,2 = (21 · 5) / (0,2 · 5) = 105 / 1 = 105. Vi förlänger med ett tal som gör nämnaren till 1.",
+  "exempel | <strong>Exempel:</strong> {}4,2 · 10{}0,6 · 10{} = {}42{}6{} = 7",
   "fraga | Algot har plockat 9 liter lingon. Han vill lägga bären i påsar som rymmer 0,5 liter. Hur många påsar behöver Algot? <em>Svara i antal påsar.</em>",
   "fraga | Du cyklar fram och tillbaka till en sjö som ligger 6,4 km från ditt hem. Under en månad besöker du sjön 10 gånger. Hur långt cyklar du totalt? <em>Svara i kilometer (km).</em>",
   "fraga | Ett kort på gymmet kostar 570 kronor i månaden. Under två månader tränar du 30 gånger. Vad blir kostnaden per träningspass? <em>Svara i kronor (kr).</em>",
   "fraga | Hur lång tid tar det att fylla en pool på 35 000 liter om den fylls med 100 liter per minut? <em>Svara i timmar och minuter.</em>",
   "fraga | Josefine ska hälla upp 18 liter saft i flaskor som rymmer 0,3 liter. Hur många flaskor behöver hon? <em>Svara i antal flaskor.</em>",
   "fraga | Kristoffer fyller år. Han köper 10 chokladbitar för 6,50 kr/st och 100 kolor för 1,50 kr/st. Hur mycket ska han betala? <em>Svara i kronor (kr).</em>",
+  "intro | Förläng bråket så att nämnaren blir ett heltal. Multiplicera täljaren och nämnaren med samma tal, 10, 100 eller 1000.",
   "intro | Läs uppgiften och visa din beräkning i rutan. Skriv sedan svaret med rätt enhet. När du är klar, tryck på Kontrollera.",
   "intro | Räkna ut talen. När du är klar, tryck på Kontrollera.",
-  "intro | Skriv mellanled och svar. Exemplet visar metoden – förläng både täljare och nämnare så nämnaren blir 1.",
   "rubrik | Beräkna",
+  "rubrik | Beräkna med förlängning",
   "rubrik | Beräkna – vilket tal saknas?",
-  "rubrik | Lägg in övningar här när texten är bekräftad",
   "rubrik | Lös problemet",
   "titel | Division med 10, 100 och 1000",
   "titel | Division med små tal",
@@ -1986,9 +1986,11 @@
   "titel | Uttryck med minus eller plus framför parentes – nivå 3"
  ],
  "js/motor/blad/blad-karna-b.js": [
-  "etikett | Bas",
-  "etikett | Ben",
   "hint | Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.",
+  "hint | Förläng med det minsta talet som gör nämnaren till ett heltal.",
+  "hint | Multiplicera täljaren och nämnaren med samma tal — det minsta av 10, 100 och 1000 som gör nämnaren till ett heltal.",
+  "hint | Räkna ut multiplikationen i täljaren och i nämnaren.",
+  "hint | Skriv täljaren och nämnaren som de är, multiplicerade med samma tal.",
   "titel | + led",
   "titel | − led"
  ]

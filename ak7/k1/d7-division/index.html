@@ -198,6 +198,10 @@
 <!-- TAXONOMI: delad nodstruktur (en källa, alla vyer) -->
 <script src="../../../js/data/k1-taxonomi.js"></script>
 <script src="../../../js/data/k1-fardiga-test.js"></script>
+<!-- MASTERY-store (k1): förlängningsbladets grupper loggar div-rakna:sma. Utan storen är
+     data-logg inert — gruppen bar noden men ingenting skrevs. -->
+<script src="../../../js/mastery-karna.js"></script>
+<script src="../../../js/mastery.js"></script>
 
 <!-- SKAL: blad-nav (Öva) + Färdighetsträning ur taxonomin. Körs efter blad-filen. Motorn orörd. -->
 <!-- NAVIGATIONSRAMEN: delad nivårad + ram + delkapitel-receptet -->
@@ -220,7 +224,7 @@
   var OVA=[
     {titel:'Stora tal', mount:'stora'},
     {titel:'Små tal', mount:'sma'},
-    {titel:'Med förlängning', mount:'smaforl', kommer:true},   // GRUND_BLAD_SMAFORL har inga rader än (blad-k1-d7.js) → oklickbar tills innehåll finns
+    {titel:'Med förlängning', mount:'smaforl'},   // nivå 1 byggd 2026-10-06 (GRUND_BLAD_SMAFORL)
     {titel:'Lästal', mount:'lastal'}
   ];
   var navEl=document.getElementById('blad-nav');

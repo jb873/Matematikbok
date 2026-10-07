@@ -123,6 +123,9 @@ const PROBE = `(function(){
     if(d.visa) return d.visa;
     if(d.svar !== undefined) return String(d.svar);
     if(d.forenkla !== undefined) return decodeURIComponent(d.forenkla);
+    // förlängningens led (d7): facitet står i rutan, led 1 som del + faktor, led 2 som talet
+    if(d.forlled !== undefined) return decodeURIComponent(d.forlled) + ' · ' + d.forlfaktor;
+    if(d.forlbrak !== undefined) return String(d.forlbrak);
     return null;
   }
 

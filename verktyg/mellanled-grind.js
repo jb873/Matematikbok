@@ -94,7 +94,7 @@ const PROBE = `(function(){
       }
       if(!flagga) return;
 
-      var rader = Array.prototype.filter.call(g.querySelectorAll('.ovn-rad, .ak8-rad'), synlig);
+      var rader = Array.prototype.filter.call(g.querySelectorAll('.ovn-rad, .ovn-brak-rad, .ak8-rad'), synlig);
       if(!rader.length) rader = [g];
       var utan = [];
       rader.forEach(function(r, ri){

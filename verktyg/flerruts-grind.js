@@ -271,14 +271,26 @@ const PROBE7 = `(function(){
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
   function mat(namn, root){
     var b = { blad: namn, rader: 0, gronFastFel: [], perRutaSaknas: [], provade: 0 };
-    var SEL = '.ovn-in[data-svar], .ovn-in[data-forenkla]';   // uttrycksrutor (pyramid/magisk kvadrat, k3 d3) räknas med
-    var rader = Array.from(root.querySelectorAll('.ovn-rad')).filter(function(r){ return r.querySelectorAll(SEL).length >= 2; });
+    // Förlängningens led (d7) räknas med: en rad är fem rutor, och rätt svar i den sista får inte
+    // göra hela raden grön. Radklassen är .ovn-brak-rad — bråkrader fanns aldrig i mängden förut.
+    var SEL = '.ovn-in[data-svar], .ovn-in[data-forenkla], .ovn-in[data-forlled], .ovn-in[data-forlbrak]';
+    // .ovn-brak-rad tas med BARA för förlängningens rader. Övriga bråkrader i k2 (brak-femled,
+    // förläng-båda) rättar per ruta med klasser men sätter inga ✓/✗-element, och mark-benet nedan
+    // mäter då fel sak — den luckan är en egen mätning, inte den här orderns.
+    var rader = Array.from(root.querySelectorAll('.ovn-rad, .ovn-brak-rad[data-rad]:has(.ovn-in[data-forlled])')).filter(function(r){ return r.querySelectorAll(SEL).length >= 2; });
     // k2: bråkrader vars facit står på RADEN (data-hel/t/n) och vars rutor är .brak-cell
     var brakRader = Array.from(root.querySelectorAll('.brak-svar-rad, .brak-fragerad')).filter(function(r){ return r.querySelectorAll('.brak-hel, .brak-t, .brak-n').length >= 2; });
     b.rader = rader.length + brakRader.length; if(!b.rader){ ut.blad.push(b); return; }
+    function plus1(v){ return String(parseFloat(String(v).replace(',', '.')) + 1).replace('.', ','); }
     rader.forEach(function(r){ var ins = Array.from(r.querySelectorAll(SEL)); ins.forEach(function(inp, i){
-      var uttryck = inp.dataset.forenkla !== undefined, ratt = uttryck ? inp.dataset.visa : inp.dataset.svar;
-      inp.value = i === ins.length - 1 ? ratt : (uttryck ? ratt + ' + 1' : String(parseFloat(String(ratt).replace(',', '.')) + 1).replace('.', ','));   // fel värde i alla utom sista
+      var d = inp.dataset, sist = i === ins.length - 1, ratt, felv;
+      if(d.forlled !== undefined){
+        ratt = decodeURIComponent(d.forlled) + ' · ' + d.forlfaktor;
+        felv = decodeURIComponent(d.forlled) + ' · ' + (Number(d.forlfaktor) * 10);   // fel faktor
+      } else if(d.forlbrak !== undefined){ ratt = d.forlbrak; felv = plus1(ratt); }
+      else if(d.forenkla !== undefined){ ratt = d.visa; felv = ratt + ' + 1'; }
+      else { ratt = d.svar; felv = plus1(ratt); }
+      inp.value = sist ? ratt : felv;   // fel värde i alla utom sista
       ev(inp, 'input'); }); });
     // k2-bråkrader: sista rutan rätt, övriga fel (facit ur radens data)
     brakRader.forEach(function(r){
@@ -298,8 +310,16 @@ const PROBE7 = `(function(){
       var st = ins.map(function(i){ return i.classList.contains('correct') ? 'ok' : i.classList.contains('wrong') ? 'fel' : '-'; });
       var alla = Array.from(r.querySelectorAll('.ovn-mark')).map(function(m){ return m.textContent; });
       if(alla.length && alla.every(function(m){ return m === '✓'; })) b.gronFastFel.push('[' + st.join(',') + ']');
-      var per = marks[marks.length - 1] === '✓' && marks.slice(0, -1).every(function(m){ return m === '✗'; });
-      if(!per) b.perRutaSaknas.push('[' + marks.join('') + ' / ' + st.join(',') + ']');
+      /* TRAPPRADEN (förlängningen i d7) har ett ANNAT godkänt beteende: rutorna efter radens
+         första fel är tysta — varken bock, kryss eller facit — tills ledet före är rätt
+         (Joachims regel 2026-10-07). Provet fyller sista rutan rätt och resten fel, så den
+         FÖRSTA rutan ska bära krysset och allt efter den vara omarkerat. Det grundläggande
+         kravet är detsamma: raden får inte bli grön medan rutor är fel. */
+      var trappa = !!r.querySelector('.ovn-in[data-forlled]');
+      var per = trappa
+        ? (marks[0] === '✗' && marks.slice(1).every(function(m){ return m === '-'; }))
+        : (marks[marks.length - 1] === '✓' && marks.slice(0, -1).every(function(m){ return m === '✗'; }));
+      if(!per) b.perRutaSaknas.push((trappa ? 'trappa ' : '') + '[' + marks.join('') + ' / ' + st.join(',') + ']');
     });
     ut.blad.push(b);
   }

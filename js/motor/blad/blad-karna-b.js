@@ -285,6 +285,21 @@ function ledUtanGenvag(elev, svar){
   } catch(err){ return true; }
 }
 
+/* FÖRLÄNGNINGENS BESKED. Elevtext i FALT-fält; beskedet pekar ut FÖRSTA felet i ordningen,
+   eftersom rutorna rättas i den ordning eleven skriver dem. */
+var FORL_BESKED = {
+  faktor:  { hint: 'Multiplicera täljaren och nämnaren med samma tal — det minsta av 10, 100 och 1000 som gör nämnaren till ett heltal.' },
+  utskriven:{ hint: 'Skriv täljaren och nämnaren som de är, multiplicerade med samma tal.' },
+  rakna:   { hint: 'Räkna ut multiplikationen i täljaren och i nämnaren.' },
+  storre:  { hint: 'Förläng med det minsta talet som gör nämnaren till ett heltal.' }
+};
+
+/* Svenskt talformat utan flyttalsskräp: 2,268 · 100 är 226,8 och inget annat. */
+function talUt(v){
+  var r = Math.round(v * 1e10) / 1e10;
+  return String(r).replace('.', ',');
+}
+
 // Beskedet när genvägen tas. Elevtext i ett FALT-fält, Joachims ordalydelse.
 var SKRIV_BESKED = { genvag: { hint: 'Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.' } };
 
@@ -674,6 +689,37 @@ function bladHTML(blad){
       }
       // (radtyper ur k1-d7/d8, flyttade till kärnan 2026-09-19)
       // Bråk-uppgifter: täljare/nämnare visas som riktigt bråk
+      /* FÖRLÄNGNING I TVÅ LED (d7, division med små tal). Uppgiften står staplad, sedan skriver
+         eleven förlängningen utskriven, sedan det förlängda bråket, sedan svaret. */
+      if(rad.typ === 'brakForl'){
+        var fT = evalUttryck(rad.taljare) * rad.faktor;
+        var fN = evalUttryck(rad.namnare) * rad.faktor;
+        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
+        html += lbl(bokstav);
+        html += '<span class="ovn-brak"><span class="ovn-brak-taljare">' + minusUt(rad.taljare) + '</span>'
+             + '<span class="ovn-brak-strecket"></span>'
+             + '<span class="ovn-brak-namnare">' + minusUt(rad.namnare) + '</span></span>';
+        html += '<span class="ovn-text">=</span>';
+        // LED 1: utskriven förlängning, en ruta i täljaren och en i nämnaren
+        html += '<span class="ovn-brak">'
+          + '<span class="ovn-brak-taljare"><input class="ovn-in" data-forlled="' + encodeURIComponent(rad.taljare)
+          + '" data-forlfaktor="' + rad.faktor + '" inputmode="text" autocomplete="off"></span>'
+          + '<span class="ovn-brak-strecket"></span>'
+          + '<span class="ovn-brak-namnare"><input class="ovn-in" data-forlled="' + encodeURIComponent(rad.namnare)
+          + '" data-forlfaktor="' + rad.faktor + '" inputmode="text" autocomplete="off"></span></span>';
+        html += '<span class="ovn-text">=</span>';
+        // LED 2: det förlängda bråket, staplat och strikt
+        html += '<span class="ovn-brak">'
+          + '<span class="ovn-brak-taljare"><input class="ovn-in" data-forlbrak="' + talUt(fT)
+          + '" inputmode="decimal" autocomplete="off"></span>'
+          + '<span class="ovn-brak-strecket"></span>'
+          + '<span class="ovn-brak-namnare"><input class="ovn-in" data-forlbrak="' + talUt(fN)
+          + '" inputmode="decimal" autocomplete="off"></span></span>';
+        html += '<span class="ovn-text">=</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+        html += '</div>';
+        return;
+      }
       if(rad.typ === 'brak' || rad.typ === 'brakLucka'){
         html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
         html += lbl(bokstav);
@@ -1336,7 +1382,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-mellanuttryck],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-mellanuttryck],.ovn-in[data-forlled],.ovn-in[data-forlbrak],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1415,6 +1461,11 @@ function bygg_blad(rotEl, blad){
     // Den öppna talföljden rättas som EN enhet mot villkoret, i egen loop nedan — rutorna har
     // inget data-svar och skulle annars räknas som obesvarade fel.
     aktivaInputs = aktivaInputs.filter(function(inp){ return !inp.classList.contains('ovn-oppen-in'); });
+    /* TRAPPAN (Joachims regel 2026-10-07): i förlängningens rad är rutorna EFTER radens första
+       fel tysta — varken markering eller facitrad — tills ledet före är rätt. Bara den första
+       felande rutan får sitt besked. Listan håller de rader som redan fått sitt fel och
+       nollställs per Kontrollera-tryck, eftersom den bor i passet. */
+    var _forlFelRad = [];
     aktivaInputs.forEach(function(inp){
       var rad = inp.parentElement;
       // Ta bort rutans EGNA tidigare fasit + markering (inte grannarnas — se egnaMarken)
@@ -1461,6 +1512,34 @@ function bygg_blad(rotEl, blad){
         try { ok = !!_mu && _mu.pointEqual(_mu.parse(inp.value), _mu.parse(_mf)); }
         catch(e){ ok = false; }
         if(ok && !ledUtanGenvag(inp.value, _mf)){ ok = false; _besked = SKRIV_BESKED.genvag.hint; }
+      } else if(inp.dataset.forlled !== undefined){
+        /* LED 1: delen multiplicerad med faktorn, utskrivet. Faktorn är datans — den minsta
+           tiopotens som gör nämnaren till ett heltal — så "samma tal i täljare och nämnare" följer
+           av att båda rutorna prövas mot den. */
+        var _fd = evalUttryck(decodeURIComponent(inp.dataset.forlled));
+        var _ff = Number(inp.dataset.forlfaktor);
+        var _delar = String(inp.value).split(/[·*x×]/);
+        ok = false;
+        if(_delar.length === 2){
+          var _a = evalUttryck(_delar[0]), _b = evalUttryck(_delar[1]);
+          var narA = Math.abs(_a - _fd) < 1e-9, narB = Math.abs(_b - _ff) < 1e-9;
+          var narA2 = Math.abs(_a - _ff) < 1e-9, narB2 = Math.abs(_b - _fd) < 1e-9;
+          ok = (narA && narB) || (narA2 && narB2);
+          if(!ok){
+            var harDelen = narA || narB2;
+            _besked = harDelen ? FORL_BESKED.faktor.hint : FORL_BESKED.utskriven.hint;
+          }
+        } else if(String(inp.value).trim() !== '') _besked = FORL_BESKED.utskriven.hint;
+      } else if(inp.dataset.forlbrak !== undefined){
+        /* LED 2: det förlängda talet, strikt. 552 godtas, 5520 inte — värdet ska vara uträknat,
+           inte förlängt en gång till. */
+        var _fv = evalUttryck(inp.value);
+        var _facit = evalUttryck(inp.dataset.forlbrak);
+        ok = !isNaN(_fv) && Math.abs(_fv - _facit) < 1e-9;
+        if(!ok && !isNaN(_fv)){
+          _besked = (_fv > _facit && Math.abs(_fv % _facit) < 1e-9)
+            ? FORL_BESKED.storre.hint : FORL_BESKED.rakna.hint;
+        }
       } else if(inp.dataset.mellanvarde !== undefined){
         // TILLAGT LED: ett steg på vägen, alltså samma värde som svaret.
         var _mv = evalUttryck(inp.value);
@@ -1656,6 +1735,14 @@ function bygg_blad(rotEl, blad){
       } else {
         ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
       }
+      /* TRAPPAN. En rad med förlängningsled rättas i DOM-ordning: täljare och nämnare i led 1,
+         sedan led 2, sedan svaret. Så fort en ruta är fel tystnar resten av raden — de räknas
+         kvar i nämnaren (uppgiften finns att göra) men får varken markering, facit eller
+         loggning, eftersom eleven inte fått besked om dem. */
+      var _trappa = inp.closest('.ovn-brak-rad');
+      if(_trappa && !_trappa.querySelector('.ovn-in[data-forlled]')) _trappa = null;
+      if(_trappa && _forlFelRad.indexOf(_trappa) >= 0){ totalt++; return; }
+      if(_trappa && !ok) _forlFelRad.push(_trappa);
       totalt++;
       // FAS 2 · loggning: bara grupper med data-logg matar mastery. En besvarad (ej tom) ruta
       // loggas som försök — FEL registreras som 'fel' (orange), rätt som 'ratt'. Grupp 4
@@ -1669,8 +1756,12 @@ function bygg_blad(rotEl, blad){
       // STORE-ROUTE: k1-taxonomin bor i window.Mastery, k3 (algebra) i window.MasteryK3. Utan route
       // hamnade algebra-evidensen i k1-storen. data-logg-store sätts av bladets data (grupp.loggStore).
       var _store = (_grEl && _grEl.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
-      // Omskrivningscellen (data-oms) loggas EJ separat — annars två evidens per uppgift; svarscellen bär loggen.
-      if(_loggNod && inp.dataset.oms === undefined && String(inp.value).trim() !== ''
+      // MELLANLED LOGGAR INTE. Omskrivningscellen (data-oms) och förlängningens två led
+      // (data-forlled, data-forlbrak) är steg i samma uppgift — svarsrutan bär loggen. Utan
+      // undantaget ger en förlängningsuppgift fem evidenspunkter i stället för en.
+      if(_loggNod && inp.dataset.oms === undefined
+         && inp.dataset.forlled === undefined && inp.dataset.forlbrak === undefined
+         && String(inp.value).trim() !== ''
          && window.AK8_UI && AK8_UI.loggaForstaForsoket){
         AK8_UI.loggaForstaForsoket(inp, _store, _loggNod, ok);
       }
@@ -1703,6 +1794,9 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.skriv !== undefined) facit = inp.dataset.visa;    // uppställningen
         else if(inp.dataset.likben !== undefined || inp.dataset.likbas !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.insatt !== undefined) facit = inp.dataset.visa;      // ersättningsledet
+        else if(inp.dataset.forlled !== undefined)
+          facit = minusUt(decodeURIComponent(inp.dataset.forlled)) + ' · ' + inp.dataset.forlfaktor;
+        else if(inp.dataset.forlbrak !== undefined) facit = minusUt(inp.dataset.forlbrak);
         else if(inp.dataset.mellanvarde !== undefined) facit = inp.dataset.visa; // tillagt led
         else if(inp.dataset.mellanuttryck !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.parentesmellan !== undefined){
@@ -1724,6 +1818,8 @@ function bygg_blad(rotEl, blad){
       /* BESKEDET är elevtext och sätts som text. FACIT är matematik och sätts som HTML, så att
          bråket står staplat även här (Joachims regel gäller facitraderna med). Innehållet kommer
          ur bokens egen data, inte ur elevens inmatning. */
+      /* Beskedet behöver ingen egen spärr: trappan ovan släpper bara radens första felande
+         ruta ända hit, så beskedet kan aldrig sättas två gånger på samma rad. */
       if(_besked) f.textContent = _besked;
       else f.innerHTML = 'rätt svar: ' + matteUt(facit);
         inp.insertAdjacentElement('afterend', mark);
