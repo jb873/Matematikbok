@@ -75,11 +75,37 @@ const PROBE = `(function(){
       r.appendChild(b);
       ut.noter.push('SABBA: la en extra niv\\u00e5knapp');
     }
+    /* Finns ingen ram-rad på sidan saboteras BLADETS rad i stället — annars kan provet bara
+       fälla på en av de två platserna, och då bevisar det inte att båda mäts. */
+    var ark = document.querySelector('[data-nivaer] .niva-rad');
+    if(ark){
+      var b2 = document.createElement('button');
+      b2.type = 'button'; b2.className = 'niva-btn'; b2.dataset.niva = '9';
+      b2.textContent = 'Niv\\u00e5 9';
+      ark.appendChild(b2);
+      ut.noter.push('SABBA: la en extra niv\\u00e5knapp i BLADETS rad');
+    }
   }
 
   // ── BEN C: nivåraden speglar datan ──────────────────────────────────────────────────────
   var anmalt = window.__NAVRAM || null;
-  var ritade = document.querySelectorAll('.niva-btn').length;
+  /* RAMENS rad mäts mot ramens data. Ett BLAD kan bära en egen rad ur sin egen data (stegen
+     hör till bladet — nyckeln är <prefix>_naddNiva<n>_<bladId>), och den hör inte hit: en
+     räkning av alla .niva-btn på sidan blandade ihop de två och fällde en korrekt sida. */
+  var ramVard = document.querySelector('.niva-rad-vard');
+  var ritade = ramVard ? ramVard.querySelectorAll('.niva-btn').length
+                       : document.querySelectorAll('.niva-btn').length;
+  /* BLADETS egen rad: antalet knappar ska vara exakt det antal steg bladet anmäler i
+     data-nivaer, och ett steg ritas aldrig som en ensam knapp. */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-nivaer]'), function(ark){
+    var vantat = parseInt(ark.getAttribute('data-nivaer'), 10);
+    var egna = ark.querySelectorAll('.niva-rad .niva-btn').length;
+    var bor = vantat >= 2 ? vantat : 0;
+    if(egna !== bor){
+      ut.brott.push('BLADETS NIVARAD SPEGLAR INTE DATAN: ' + egna + ' knappar ritade i bladet, '
+        + 'men datan ger ' + vantat + ' steg = ' + bor + ' knappar');
+    }
+  });
   ut.niva = { anmaltAntal: anmalt ? anmalt.nivaAntal : null,
               forvantade: anmalt ? anmalt.forvantadeNivaknappar : null, ritade: ritade };
   if(!anmalt){

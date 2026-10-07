@@ -33,6 +33,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
 const MP = require('./matpunkt').skapa('brytning-grind.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.alla())) process.exit(0);
@@ -126,6 +127,7 @@ const PROBE = `(function(){
     // förlängningens led (d7): facitet står i rutan, led 1 som del + faktor, led 2 som talet
     if(d.forlled !== undefined) return decodeURIComponent(d.forlled) + ' · ' + d.forlfaktor;
     if(d.forlbrak !== undefined) return String(d.forlbrak);
+    if(d.forlprod !== undefined) return String(d.forlprod);   // produktledet
     return null;
   }
 
@@ -358,6 +360,7 @@ const PROBE = `(function(){
   }
 
   // EN FLIK I TAGET, och matningen MEDAN fliken ar framme: ett dolt blad har inga matt.
+  ${LAS_UPP}
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   var sedda = [];
   (nav.length ? nav : [null]).forEach(function(knapp){
@@ -365,9 +368,24 @@ const PROBE = `(function(){
     Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet'), function(sh){
       if(sedda.indexOf(sh) >= 0 || !synlig(sh)) return;
       sedda.push(sh);
-      var h = sh.querySelector('h2');
-      var namn = h ? kort(h.textContent) : 'blad ' + sedda.length;
-      matSheet(namn.length > 30 ? '…' + namn.slice(-29) : namn, sh);
+      var vard = sh.parentElement || sh;
+      function stegKnappar(){ return vard.querySelectorAll('.niva-rad .niva-btn'); }
+      function namnNu(nr){
+        var el = vard.querySelector('.ovn-sheet') || sh, h2 = el.querySelector('h2');
+        var bas = h2 ? kort(h2.textContent) : 'blad ' + sedda.length;
+        if(bas.length > 30) bas = '…' + bas.slice(-29);
+        return nr ? bas.slice(0, 24) + ' niva ' + nr : bas;
+      }
+      var steg = stegKnappar().length;
+      if(steg < 2){ matSheet(namnNu(0), sh); return; }
+      /* Bladet byggs om vid nivåklick, så BÅDE knappen och arket letas upp på nytt per steg —
+         en hållen nod är ett löst element och har inga mått. */
+      for(var n = 0; n < steg; n++){
+        var nb = stegKnappar()[n]; if(!nb || nb.disabled) continue;
+        nb.click();
+        var nySh = vard.querySelector('.ovn-sheet') || sh;
+        matSheet(namnNu(n + 1), nySh);
+      }
     });
   });
   matare.remove();

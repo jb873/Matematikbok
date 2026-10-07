@@ -31,6 +31,7 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const MP = require('./matpunkt').skapa('uppgift-grind.js');
+const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.blad())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
@@ -49,14 +50,30 @@ const PROBE = `(function(){
   // MÄTNINGEN SKER MEDAN FLIKEN ÄR FRAMME. Att samla grupperna per flik och mäta dem efteråt gav
   // falska brott: nivå 1:s beräkna-kedjor var dolda när mätningen kördes, och synlig() sade då att
   // kedjan inte fanns. En dold grupp går inte att mäta — den måste mätas i sitt eget ögonblick.
+  ${LAS_UPP}
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   var sedda = [];
+  /* Nivåstegen är flikar: stegets grupper finns inte i DOM:en förrän steget visas. */
+  function stegVarv(gorNagot){
+    var rader = document.querySelectorAll('.niva-rad');
+    if(!rader.length){ gorNagot(); return; }
+    var antal = document.querySelectorAll('.niva-rad .niva-btn').length;
+    if(antal < 2){ gorNagot(); return; }
+    for(var n = 0; n < antal; n++){
+      var nb = document.querySelectorAll('.niva-rad .niva-btn')[n];
+      if(!nb || nb.disabled) continue;
+      nb.click();
+      gorNagot();
+    }
+  }
   (nav.length ? nav : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
+    stegVarv(function(){
     Array.prototype.filter.call(document.querySelectorAll('.ovn-grupp'), synlig).forEach(function(g){
       if(sedda.indexOf(g) >= 0) return;
       sedda.push(g);
       matGrupp(g, sedda.length - 1);
+    });
     });
   });
   return ut;

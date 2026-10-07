@@ -23,6 +23,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
 const MP = require('./matpunkt').skapa('notation-grind.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.alla())) process.exit(0);
@@ -124,7 +125,8 @@ const PROBE = `(function(){
     return null;
   }
 
-  // EN FLIK I TAGET, mätt medan fliken är framme.
+  // EN FLIK I TAGET, mätt medan fliken är framme. Nivåstegen räknas som flikar.
+  ${LAS_UPP}
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   var sedda = [];
   (nav.length ? nav : [null]).forEach(function(knapp){
@@ -132,9 +134,21 @@ const PROBE = `(function(){
     Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet'), function(sh){
       if(sedda.indexOf(sh) >= 0 || !synlig(sh)) return;
       sedda.push(sh);
-      var h = sh.querySelector('h2');
-      var namn = h ? String(h.textContent).replace(/\\s+/g, ' ').trim() : 'blad ' + sedda.length;
-      matSheet(namn.length > 30 ? '…' + namn.slice(-29) : namn, sh);
+      var vard = sh.parentElement || sh;
+      function stegKnappar(){ return vard.querySelectorAll('.niva-rad .niva-btn'); }
+      function namnNu(nr){
+        var el = vard.querySelector('.ovn-sheet') || sh, h2 = el.querySelector('h2');
+        var bas = h2 ? String(h2.textContent).replace(/\\s+/g, ' ').trim() : 'blad ' + sedda.length;
+        if(bas.length > 30) bas = '…' + bas.slice(-29);
+        return nr ? bas.slice(0, 24) + ' niva ' + nr : bas;
+      }
+      var steg = stegKnappar().length;
+      if(steg < 2){ matSheet(namnNu(0), sh); return; }
+      for(var n = 0; n < steg; n++){
+        var nb = stegKnappar()[n]; if(!nb || nb.disabled) continue;
+        nb.click();
+        matSheet(namnNu(n + 1), vard.querySelector('.ovn-sheet') || sh);
+      }
     });
   });
   return ut;

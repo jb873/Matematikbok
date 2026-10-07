@@ -46,6 +46,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
 const MP = require('./matpunkt').skapa('yt-kontrakt.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
@@ -416,14 +417,29 @@ const PROBE = `(function(){
      BÅDA nivåerna hamnar proben i en annan vy när underflikarna ligger i samma svep.
      Rätt lösning är en NÄSTLAD genomgång: klicka flik, läs om underflikarna, klicka var och en.
      Det är en egen ändring, inte en selektor-rad. Kontroll-svepet mäter plugg-sidorna redan. */
+  ${LAS_UPP}
+  /* NIVÅSTEGEN är egna ytor: bara det aktiva steget finns i DOM:en, så ett ostett steg har
+     inga rutor att mäta. Knapparna läses om per varv — bladet byggs om vid klick. */
+  function synligMount(){
+    return Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
+        || document.querySelector('.ovn-wrap') || document.body;
+  }
+  function stegKnappar(m){ return m.querySelectorAll('.niva-rad .niva-btn'); }
   var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn, .blad-nav-btn, .nr-rad'));
   if(nav.length){
     nav.forEach(function(k){
       if(k.disabled) return;                      // tom plats — inget innehåll att mäta
       k.click();
-      var m = Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
-           || document.querySelector('.ovn-wrap') || document.body;
-      mat(k.textContent.trim().slice(0, 26), m);
+      var namn = k.textContent.trim().slice(0, 26);
+      var m = synligMount();
+      var steg = stegKnappar(m).length;
+      if(steg < 2){ mat(namn, m); return; }
+      for(var n = 0; n < steg; n++){
+        var m2 = synligMount();
+        var nb = stegKnappar(m2)[n]; if(!nb || nb.disabled) continue;
+        nb.click();
+        mat(namn.slice(0, 20) + ' niva ' + (n + 1), synligMount());
+      }
     });
   } else {
     mat('(enda)', document.body);

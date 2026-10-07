@@ -29,6 +29,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
 const MP = require('./matpunkt').skapa('mellanled-grind.js');
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.blad())) process.exit(0);
@@ -57,6 +58,8 @@ const VOKABULAR = [
 const PROBE = `(function(){
   var SABBA = ${SABBA};
   var SABBA_DRIFT = ${SABBA_DRIFT};
+  /* Nivåstegen upplåsta innan mätningen — delad snutt (verktyg/niva-las-upp.js). */
+  ${LAS_UPP}
   var VOK = ${JSON.stringify(VOKABULAR.map(v => v.nyckel))};
   function synlig(el){ return !!el.offsetParent; }
   var ut = { grupper: [], onerr: window.__onerr || null , drift: [] };

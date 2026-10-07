@@ -75,6 +75,11 @@ function nyckelPrefix(){
        (lsSet('<prefix>_naddNiva' + nastaNiva + '_')), och ett monster med en hardkodad 2 slutade
        da matcha - varpa pariteskontrollen nedan dog tyst. Utan siffran haller bada aven for
        niva 3 och uppat. */
+    /* DEN DELADE MODULEN bygger nyckeln i en egen funktion och tar prefixet som argument, så
+       inget lsGet-anrop bär det. Prefixet står i bladets data (nivaPrefix:'k1d7') — letas
+       där, i stället för att skrivas av för hand. */
+    let d2, rd = /nivaPrefix\s*:\s*'([A-Za-z0-9_]+)'/g;
+    while((d2 = rd.exec(s))){ (las[f] = las[f] || []).push(d2[1]); (skriv[f] = skriv[f] || []).push(d2[1]); }
     let m, r = /lsGet\('([A-Za-z0-9_]+)_naddNiva/g;
     while((m = r.exec(s))) (las[f] = las[f] || []).push(m[1]);
     r = /lsSet\('([A-Za-z0-9_]+)_naddNiva/g;
@@ -226,7 +231,24 @@ const PROBE = `(function(){
     ut.brott.push('NAVRAMEN TOM: .nr-lager finns men noll varianter - vanster-spalten renderade inte');
 
   // -- BEN 2+3: nivaraden ---------------------------------------------------------------
+  /* Nivåraden hör till ETT blad, och ett dolt blad har inga synliga knappar. Innan raden läses
+     klickas bladet fram — annars mäter benet bara det blad som råkade vara startblad. */
+  function framBladMedNivarad(){
+    /* Finns ingen nivåknapp alls i dokumentet finns inget att leta fram, och då klickas
+       ingenting: klicken är en sidoeffekt, och en sida utan nivåer ska inte navigeras av
+       det här benet. */
+    if(!document.querySelector('.niva-btn')) return false;
+    if(Array.prototype.some.call(document.querySelectorAll('.niva-btn'), synlig)) return true;
+    var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
+    for(var i = 0; i < nav.length; i++){
+      if(nav[i].disabled) continue;
+      nav[i].click();
+      if(Array.prototype.some.call(document.querySelectorAll('.niva-btn'), synlig)) return true;
+    }
+    return false;
+  }
   function nivaknappar(){
+    framBladMedNivarad();
     return Array.prototype.filter.call(document.querySelectorAll('.niva-btn'), synlig).map(function(b){
       return { niva: parseInt(b.dataset.niva, 10), last: last(b),
                txt: b.textContent.replace(/\\s+/g, ' ').trim() };
@@ -243,19 +265,34 @@ const PROBE = `(function(){
       b.disabled = true; b.setAttribute('aria-disabled', 'true');
     });
   }
+  /* TVÅ MEKANISMER. De äldre motorerna tar nivån som tredje argument till byggSheet; den
+     DELADE nivåraden (nivarad.js) byts med ett klick på knappen och läser sitt tillstånd ur
+     localStorage. Fanns bara den första vägen anropades d7:s byggSheet(id, variant,
+     kanVaraGrundblad) med nivån som tredje argument — ett annat argument, tyst fel. */
+  function deladRad(){ return !!document.querySelector('.niva-rad .niva-btn'); }
   function bygg(niva){
+    if(deladRad()){
+      framBladMedNivarad();
+      var kn = document.querySelector('.niva-rad .niva-btn[data-niva="' + niva + '"]');
+      if(kn && !kn.disabled) kn.click();
+      sabotera();
+      return;
+    }
     blad.forEach(function(id){ try { byggSheet(id, false, niva); } catch(e){} });
     sabotera();
   }
-  function sattGjord(){
+  /* NIVÅN SOM SKA VARA NÅDD anges av anroparen. Nyckeln för nivå n betyder "n är nådd", och
+     den skrivs när n-1 är klarad — så för att pröva att TOPPEN öppnas skrivs toppens nyckel. */
+  function sattGjord(niva){
+    var n = niva || 2;
     blad.forEach(function(id){ PREFIX.forEach(function(p){
-      try { localStorage.setItem(p + '_naddNiva2_' + id, '1'); } catch(e){} }); });
+      try { localStorage.setItem(p + '_naddNiva' + n + '_' + id, '1'); } catch(e){} }); });
   }
 
-  if(nivaknappar().length && typeof byggSheet !== 'function'){
+  if(nivaknappar().length && typeof byggSheet !== 'function' && !deladRad()){
     ut.brott.push('NIVA: sidan har nivaknappar men byggSheet ar inte nabar - grinden kan inte stalla in tillstandet');
     ut.nivaGrans = 'byggSheet ej nabar';
-  } else if(typeof byggSheet === 'function'){
+  } else if(typeof byggSheet === 'function' || deladRad()){
     tom(); bygg(1);
     var A = nivaknappar();
     if(A.length){
@@ -295,7 +332,7 @@ const PROBE = `(function(){
         }
         if(!lastA) ut.brott.push('NIVA ' + toppen + ' OPPEN UTAN VILLKOR: med tom lagring ska den vara last - laset lacker');
 
-        sattGjord(); bygg(1); fria_oppna('nivan under gjord');
+        sattGjord(toppen); bygg(1); fria_oppna('nivan under gjord');
         var B = nivaknappar().filter(function(k){ return k.niva === toppen; });
         var oppenB = B.length > 0 && B.every(function(k){ return k.last.length === 0; });
         if(!oppenB) ut.brott.push('NIVA ' + toppen + ' LAST TROTS VILLKORET: nivan under ar gjord men knappen ar '

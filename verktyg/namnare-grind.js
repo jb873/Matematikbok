@@ -171,6 +171,7 @@ const PROBE7 = `(function(){
     // Båda byggs ur DATAN — faktorn och delen står i rutan själv.
     else if(d.forlled !== undefined) v = dec(d.forlled) + ' · ' + d.forlfaktor;
     else if(d.forlbrak !== undefined) v = String(d.forlbrak).replace('.', ',');
+    else if(d.forlprod !== undefined) v = String(d.forlprod).replace('.', ',');   // produktledet: ett tal
     else if(d.oms !== undefined) v = String(d.oms).replace('.', ',');
     else if(d.text !== undefined) v = d.visa || dec(d.text).split('|')[0];
     // FLERA GODTAGBARA MELLANLED: facit får vara en |-lista (talsorternas summor ELLER det
@@ -205,6 +206,10 @@ const PROBE7 = `(function(){
     b.oppna = Array.from(root.querySelectorAll('[data-oppen]')).filter(synlig).length;   // öppen uppgift (villkor, inget facit i DOM) → enhet men ej fyllbar
     b.ejTackta += b.oppna;
     b.valRader = Array.from(root.querySelectorAll('.val-rad')).filter(synlig).length;   // knapprad utan ruta
+    /* ORDNA MED KLICK: hela raden är EN svarsenhet och har inga rutor — utan den här raden
+       rapporterades nämnaren som större än antalet synliga enheter. */
+    b.ordnaRader = Array.from(root.querySelectorAll('.ovn-ordnaklick')).filter(synlig).length;
+    b.valRader += b.ordnaRader;
     b.paraSelar = selar.length;                                                          // <select> utan ruta
     b.radTyper = rader.length;
     var tomma = ins.filter(function(i){ var d = i.dataset; return (d.text !== undefined && dec(d.text) === '') || (d.svar !== undefined && d.svar === ''); }).length;
@@ -234,6 +239,14 @@ const PROBE7 = `(function(){
         var ar = perKnapp ? bt.dataset.ratt === '1' : ratta.indexOf(norm(dec(bt.dataset.val))) >= 0;
         if(ar !== bt.classList.contains('is-vald')) bt.click();
       });
+    });
+    /* Ordningen står på raden (data-ordning), räknad ur alternativen av kärnan. Grinden
+       klickar i den ordningen — samma väg som eleven. */
+    root.querySelectorAll('.ovn-ordnaklick').forEach(function(rad){
+      var ord = String(rad.dataset.ordning || '').split(',').filter(function(x){ return x !== ''; });
+      var alt = Array.from(rad.querySelectorAll('.ovn-ordnaklick-alt'));
+      if(!ord.length || !alt.length){ b.ejTackta++; return; }
+      ord.forEach(function(i){ if(alt[Number(i)]) alt[Number(i)].click(); });
     });
     root.querySelectorAll('.ovn-val-grid').forEach(function(g){ var bt = g.querySelector('.ovn-val-btn[data-val="' + g.dataset.valsvar + '"]'); if(bt) bt.click(); else b.ejTackta++; });
     root.querySelectorAll('.ovn-flerval-grid').forEach(function(g){ var r = g.dataset.ratt.split(','); g.querySelectorAll('.ovn-flerval-btn').forEach(function(bt){ var ar = r.indexOf(bt.dataset.tal) >= 0; if(ar !== bt.classList.contains('is-vald')) bt.click(); }); });

@@ -21,6 +21,7 @@
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
+const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
 const MP = require('./matpunkt').skapa('kontroll-svep.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
@@ -42,9 +43,35 @@ const PROBE = `(function(){
   }
 
   var ut = { onerr: null, blad: [] };
+  /* NIVÅRADEN: ett blad med steg visar bara det aktiva, och ett ostett steg är ett omätt
+     blad. Svepet lägger till ett jobb per extra steg och frågar om knapparna på nytt per
+     varv — bladet byggs om vid klick, så en hållen knapp är ett löst element. */
+  function synligMount(){
+    return Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
+        || Array.prototype.filter.call(document.querySelectorAll('.ovn-sheet'), function(e){ return !!e.offsetParent; })[0]
+        || document.body;
+  }
+  /* Bara den DELADE raden vandras: bladet anmäler sina steg i data-nivaer. Se filhuvudet för
+     mätningen bakom gränsen. */
+  function nivaKnappar(){
+    var m = synligMount();
+    var ark = m.querySelector('[data-nivaer]') || (m.matches && m.matches('[data-nivaer]') ? m : null);
+    return ark ? ark.querySelectorAll('.niva-rad .niva-btn') : [];
+  }
+  /* Stegen låses upp först — delad snutt, se verktyg/niva-las-upp.js. */
+  ${LAS_UPP}
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
-  (nav.length ? nav : [null]).forEach(function(b){
+  var jobb = (nav.length ? nav : [null]).map(function(b){ return { knapp: b, niva: null }; });
+  function kor(j){
+    var b = j.knapp;
+    var nivaNamn = j.niva === null ? '' : ' niv\u00e5 ' + (j.niva + 1);
     if(b){ if(b.disabled) return; b.click(); }
+    if(j.niva === null){
+      var steg = nivaKnappar().length;
+      for(var n = 1; n < steg; n++) jobb.push({ knapp: b, niva: n });
+    } else {
+      var nb = nivaKnappar()[j.niva]; if(!nb || nb.disabled) return; nb.click();
+    }
     var mount = Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
              || document.querySelector('.ovn-sheet') || document.body;
     var rutor = Array.prototype.filter.call(mount.querySelectorAll('input.ovn-in, input.ak8-in'), synlig)
@@ -69,7 +96,7 @@ const PROBE = `(function(){
       mal.dispatchEvent(new Event('input', { bubbles: true }));
     }
     var kn = kontrollKnapp();
-    if(!kn){ ut.blad.push({ blad: b ? b.textContent.trim() : '(enda)', fel: 'ingen Kontrollera-knapp' }); return; }
+    if(!kn){ ut.blad.push({ blad: (b ? b.textContent.trim() : '(enda)') + nivaNamn, fel: 'ingen Kontrollera-knapp' }); return; }
     var facitFore = facitEl(mount).length;
     kn.click();
 
@@ -87,7 +114,7 @@ const PROBE = `(function(){
     // än har.
     var valUtanVal = gridsUtanVal.filter(function(g){ return g.querySelector('.correct, .wrong'); });
     ut.blad.push({
-      blad: b ? b.textContent.trim() : '(enda)',
+      blad: (b ? b.textContent.trim() : '(enda)') + nivaNamn,
       rutor: rutor.length, tomma: tomma.length,
       markerade: markerade.length,
       facitPaTom: facitPaTom.length,
@@ -99,7 +126,9 @@ const PROBE = `(function(){
       svaradStatus: svarad ? status(svarad) : '(ingen ruta med facit)',
       exempel: facitPaTom.slice(0, 2).map(function(f){ return f.textContent.replace(/\\s+/g, ' ').trim().slice(0, 34); })
     });
-  });
+  }
+  /* length läses varje varv: nivåjobben läggs till medan listan betas av. */
+  for(var ji = 0; ji < jobb.length; ji++) kor(jobb[ji]);
   ut.onerr = window.__onerr || null;
   return ut;
 })()`;
