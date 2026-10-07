@@ -1008,7 +1008,67 @@
     return mount;
   }
 
+  /* ── KLICK-ORDNING (delad): alternativen numreras i den ordning eleven trycker ──────────
+     alt      : lista med INNEHÅLL (text eller HTML — ett staplat bråk går lika bra som ett tal)
+     opts     : { klass, altKlass, nrKlass, attr } — anroparens klassnamn och ev. extra attribut
+     Ordningen läses ur numren, inte ur DOM-ordningen: eleven kan ändra sig. */
+  function ordnaHTML(alt, opts){
+    var o = opts || {};
+    var knappar = alt.map(function(innehall, i){
+      return '<button type="button" class="' + (o.altKlass || 'ordna-alt') + '" data-i="' + i + '">'
+        + innehall + '</button>';
+    }).join('');
+    return '<span class="' + (o.klass || 'ordna-rad') + '"' + (o.attr || '') + '>' + knappar + '</span>';
+  }
+
+  /* Klicken. Binds på en rot och gäller varje ordna-rad under den. Numret bor i ett eget
+     element, så ordningen går att läsa utan att gissa ur stilar. */
+  function bindOrdna(rot, opts){
+    if(!rot) return;
+    var o = opts || {};
+    var klass = o.klass || 'ordna-rad', altKlass = o.altKlass || 'ordna-alt', nrKlass = o.nrKlass || 'ordna-nr';
+    rot.querySelectorAll('.' + klass).forEach(function(rad){
+      rad.querySelectorAll('.' + altKlass).forEach(function(b){
+        if(b.dataset.ordnaBunden === '1') return;      // en gång per knapp, även om roten binds igen
+        b.dataset.ordnaBunden = '1';
+        b.addEventListener('click', function(){
+          if(rad.dataset.ordnaLast === '1') return;    // rättad rad tar inga fler klick
+          var nr = b.querySelector('.' + nrKlass);
+          if(nr){
+            /* Avmarkering får inte lämna hål i numreringen: de som kom efter flyttas ned. */
+            var taget = parseInt(nr.textContent, 10);
+            nr.remove(); b.classList.remove('sel');
+            rad.querySelectorAll('.' + nrKlass).forEach(function(n2){
+              var v = parseInt(n2.textContent, 10);
+              if(v > taget) n2.textContent = String(v - 1);
+            });
+            return;
+          }
+          var n = rad.querySelectorAll('.' + nrKlass).length + 1;
+          b.classList.add('sel');
+          var sp = document.createElement('span');
+          sp.className = nrKlass; sp.textContent = String(n);
+          b.appendChild(sp);
+        });
+      });
+    });
+  }
+
+  /* Elevens ordning som index-lista. Tom lista = inget valt (obesvarat, inte fel). */
+  function ordnaVald(radEl, opts){
+    var o = opts || {};
+    var altKlass = o.altKlass || 'ordna-alt', nrKlass = o.nrKlass || 'ordna-nr';
+    var valda = Array.prototype.slice.call(radEl.querySelectorAll('.' + altKlass))
+      .filter(function(b){ return !!b.querySelector('.' + nrKlass); });
+    valda.sort(function(a, b){
+      return parseInt(a.querySelector('.' + nrKlass).textContent, 10)
+           - parseInt(b.querySelector('.' + nrKlass).textContent, 10);
+    });
+    return valda.map(function(b){ return parseInt(b.dataset.i, 10); });
+  }
+
   window.AK8_UI = {
+    ordnaHTML: ordnaHTML, bindOrdna: bindOrdna, ordnaVald: ordnaVald,
     enDeluppgiftUtanBokstav: enDeluppgiftUtanBokstav,
     gruppAttr: gruppAttr,
     pNum: pNum, pInt: pInt, avTusental: avTusental, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,

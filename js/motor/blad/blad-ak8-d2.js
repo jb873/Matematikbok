@@ -227,9 +227,17 @@
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga.replace('___', '<span class="ak8-svar ak8-teckenslot" data-idx="' + idx + '">' + chips + '</span>') + '</span></div>';
     }
     if(r.typ === 'ordna'){
-      CHECKS.push(function(el){ var sel = Array.prototype.slice.call(el.querySelectorAll('.ak8-tal.sel')); sel.sort(function(a, b){ var na = a.querySelector('.ak8-ordnr'), nb = b.querySelector('.ak8-ordnr'); return (na ? +na.textContent : 0) - (nb ? +nb.textContent : 0); }); var vald = sel.map(function(b){ return +b.dataset.i; }); return { ok: vald.length === r.tal.length && vald.every(function(i, p){ return i === r.ordning[p]; }), facit: r.ordning.map(function(i){ return fmt(r.tal[i]); }).join('  ') }; });
-      var tal = r.tal.map(function(v, i){ return '<button type="button" class="ak8-tal" data-i="' + i + '">' + fmt(v) + '</button>'; }).join('');
-      return '<div class="ak8-rad"><span class="ak8-svar ak8-ordna" data-idx="' + idx + '">' + tal + '</span></div>';
+      CHECKS.push(function(el){
+        var vald = AK8_UI.ordnaVald(el, { altKlass:'ak8-tal', nrKlass:'ak8-ordnr' });
+        return { ok: vald.length === r.tal.length && vald.every(function(i, p){ return i === r.ordning[p]; }),
+                 facit: r.ordning.map(function(i){ return fmt(r.tal[i]); }).join('  ') };
+      });
+      /* DELAD klick-ordning (AK8_UI.ordnaHTML): markupen är densamma som förr, klasserna är
+         åttans egna. Beteendet och ordningsläsningen bor i modulen. */
+      var ordnaOpt = { klass:'ak8-ordna', altKlass:'ak8-tal', nrKlass:'ak8-ordnr' };
+      var inre = AK8_UI.ordnaHTML(r.tal.map(function(v){ return fmt(v); }),
+        Object.assign({ attr:' data-idx="' + idx + '"' }, ordnaOpt));
+      return '<div class="ak8-rad">' + inre.replace('class="ak8-ordna"', 'class="ak8-svar ak8-ordna"') + '</div>';
     }
     if(r.typ === 'foljd'){
       CHECKS.push(function(el){ var ins = el.querySelectorAll('.ak8-in'), ok = true, per = []; r.facit.forEach(function(f, i){ var o = likhetOk(pNum(ins[i].value), f); per.push(o); if(!o) ok = false; }); return { ok: ok, per: per, facit: r.facit.map(fmt).join(', ') }; });
@@ -309,7 +317,9 @@
     mount.innerHTML = html;
     // interaktioner
     mount.querySelectorAll('.ak8-teckenslot .ak8-chip, .ak8-ekvslot .ak8-chip').forEach(function(ch){ ch.onclick = function(){ if(ch.className.indexOf('ratt') > -1 || ch.className.indexOf('fel') > -1) return; ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.remove('sel'); }); ch.classList.add('sel'); }; });
-    mount.querySelectorAll('.ak8-ordna').forEach(function(rad){ rad.querySelectorAll('.ak8-tal').forEach(function(b){ b.onclick = function(){ if(b.style.pointerEvents === 'none') return; if(b.classList.contains('sel')){ b.classList.remove('sel'); b.querySelector('.ak8-ordnr') && b.querySelector('.ak8-ordnr').remove(); } else { var n = rad.querySelectorAll('.ak8-tal.sel').length + 1; b.classList.add('sel'); var s = document.createElement('span'); s.className = 'ak8-ordnr'; s.textContent = n; b.appendChild(s); } }; }); });
+    /* DELAD bindning. Den egna kopian tog bort numret utan att flytta ned de följande, så en
+       avmarkering kunde lämna hål i numreringen (1, 3, 4). */
+    AK8_UI.bindOrdna(mount, { klass:'ak8-ordna', altKlass:'ak8-tal', nrKlass:'ak8-ordnr' });
     mount.querySelectorAll('.ak8-mark-wrap').forEach(function(wrap){
       var svg = wrap.querySelector('svg'), band = wrap.querySelector('.tl-clickband'), g = wrap.querySelector('.tl-markers');
       if(!band || !g) return;

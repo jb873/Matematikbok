@@ -511,6 +511,7 @@
   "rubrik | Beräkna – vilket tal saknas?",
   "rubrik | Hur mycket är x?",
   "rubrik | Lös problemet",
+  "rubrik | Talet x är större än 1. Ordna uttrycken i storleksordning, börja med det största.",
   "titel | Division med 10, 100 och 1000",
   "titel | Division med små tal",
   "titel | Division med små tal – med förlängning",
@@ -1991,6 +1992,7 @@
   "hint | Förläng med det minsta talet som gör nämnaren till ett heltal.",
   "hint | Multiplicera täljaren och nämnaren med samma tal — det minsta av 10, 100 och 1000 som gör nämnaren till ett heltal.",
   "hint | Räkna ut multiplikationen i täljaren och i nämnaren.",
+  "hint | Räkna ut produkten först.",
   "hint | Skriv täljaren och nämnaren som de är, multiplicerade med samma tal.",
   "titel | + led",
   "titel | − led"

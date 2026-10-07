@@ -434,6 +434,27 @@ var GRUND_BLAD_SMAFORL = {
           {typ:'brakForl', taljare:'90',   namnare:'0,15',  faktor:100,  svar:600}
         ]}
       ]
+    },
+    /* NIVÅ 3 — produkt i täljaren eller nämnaren. Står det en produkt räknas den ut i ett eget
+       led först (prod:true), och därefter är raden nivå 1. Ledet styrs av datan, inte av
+       rubriken: en uppgift utan produkt får inget sådant led. */
+    3:{
+      intro:'Förläng bråket så att nämnaren blir ett heltal. Multiplicera täljaren och nämnaren med samma tal, 10, 100 eller 1000.',
+      exempel:'<strong>Exempel:</strong> ' + brakHTML('4,2 · 10', '0,6 · 10') + ' = ' + brakHTML('42', '6') + ' = 7',
+      grupper:[
+        {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
+          {typ:'brakForl', prod:true, taljare:'900 · 0,4', namnare:'0,03',      faktor:100,  svar:12000},
+          {typ:'brakForl', prod:true, taljare:'0,04 · 0,4', namnare:'0,02',     faktor:100,  svar:0.8},
+          {typ:'brakForl', prod:true, taljare:'0,1 · 6,3',  namnare:'0,3 · 0,3', faktor:100,  svar:7},
+          {typ:'brakForl', prod:true, taljare:'0,0001',     namnare:'0,5 · 0,05', faktor:1000, svar:0.004}
+        ]},
+        {rubrik:'Talet x är större än 1. Ordna uttrycken i storleksordning, börja med det största.',
+         loggarEj:'eleven ordnar uttryck, hon räknar inte ut en kvot', rader:[
+          {typ:'ordnaKlick', storstForst:true, alt:[
+            {t:'x', n:'0,5'}, {t:'x', n:'10'}, {t:'x', n:'0,25'}, {t:'x', n:'0,02'}
+          ]}
+        ]}
+      ]
     }
   }
 };
