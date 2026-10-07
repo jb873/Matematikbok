@@ -1296,7 +1296,43 @@ function bladHTML(blad){
     return ut || 'x';
   }
 
+/* VALT STEG per blad i den här sidvisningen. Elevens FRAMSTEG bor i NivaRad:s egna
+   localStorage-nycklar; det här är bara vilken knapp som är intryckt just nu. */
+var NIVA_VAL = {};
+
 function bygg_blad(rotEl, blad){
+  /* NIVÅER I ETT BLAD — delad funktion, inte en kopia per motorfil (A1). Bär datan `nivaer`
+     ({1:{...}, 2:{...}}) väljer kärnan steget, ritar den delade NivaRad-raden under rubriken och
+     bygger om bladet vid klick. Stegets fält (titel, intro, exempel, grupper) vinner över
+     bladets. Ett blad utan `nivaer` går förbi orört — fjorton bladsidor delar den här kärnan. */
+  if(blad && blad.nivaer){
+    var _bid = String(rotEl.id || '').replace('sheet-', '');
+    var _antal = window.NivaRad ? NivaRad.antal(blad) : 1;
+    var _vald = NIVA_VAL[_bid] || 1;
+    if(!blad.nivaer[_vald]) _vald = 1;
+    var _steg = Object.assign({}, blad, blad.nivaer[_vald]);
+    delete _steg.nivaer;
+    _steg.niva = _vald;
+    _steg.nivaAntal = _antal;
+    bygg_blad(rotEl, _steg);
+    /* Antalet steg i DOM:en: grindarna ska kunna mäta att raden speglar datan utan att läsa
+       datafilen. Samma linje som data-logg och data-mellanled. */
+    var _ark = rotEl.querySelector('.ovn-sheet') || rotEl;
+    _ark.setAttribute('data-nivaer', _antal);
+    if(window.NivaRad){
+      var _hall = document.createElement('div');
+      _hall.innerHTML = NivaRad.html({ antal: _antal, niva: _vald,
+        prefix: blad.nivaPrefix || 'blad', bladId: _bid });
+      var _radEl = _hall.firstChild;
+      if(_radEl){
+        var _rub = rotEl.querySelector('h2');
+        if(_rub) _rub.insertAdjacentElement('afterend', _radEl);
+        else rotEl.insertAdjacentElement('afterbegin', _radEl);
+        NivaRad.bind(rotEl, function(n){ NIVA_VAL[_bid] = n; bygg_blad(rotEl, blad); });
+      }
+    }
+    return;
+  }
   rotEl.innerHTML = bladHTML(blad);
 
   // K-A: bort med bokstaven där gruppen bara har EN deluppgift. Mäts i den färdiga sidan, i
@@ -1963,6 +1999,13 @@ function bygg_blad(rotEl, blad){
       sam.textContent = 'Du fick ' + ratt + ' av ' + totalt + ' rätt. Titta på de rödmarkerade rutorna.';
     }
     sam.scrollIntoView({behavior:'smooth', block:'center'});
+
+    /* STEGET KLARAT → nästa steg nått. Nyckeln är NivaRad:s egen (prefix_naddNivaN_bladId),
+       den som flik-grinden letar upp i källan och mäter. Kravet (högst två fel) bor i modulen. */
+    if(blad.niva && window.NivaRad){
+      NivaRad.klarade(blad.nivaPrefix || 'blad', String(rotEl.id || '').replace('sheet-', ''),
+        blad.niva, blad.nivaAntal || 1, ratt, totalt);
+    }
 
     // Valfri callback (används bl.a. för att låsa upp Stencil B)
     if(typeof blad.onResultat === 'function'){ blad.onResultat(ratt, totalt); }

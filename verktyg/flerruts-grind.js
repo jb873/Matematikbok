@@ -334,8 +334,21 @@ const PROBE7 = `(function(){
     Array.from(document.querySelectorAll('.ovn-sheet')).forEach(function(sh){
       if(seddaBlad.indexOf(sh) >= 0 || !sh.getClientRects().length) return;
       seddaBlad.push(sh);
-      var h = sh.querySelector('h2');
-      mat(kortNamn(h ? h.textContent : 'blad ' + seddaBlad.length), sh);
+      var vard = sh.parentElement || sh;
+      function stegKnappar(){ return vard.querySelectorAll('.niva-rad .niva-btn'); }
+      function namnNu(nr){
+        var el = vard.querySelector('.ovn-sheet') || sh, h2 = el.querySelector('h2');
+        var bas = kortNamn(h2 ? h2.textContent : 'blad ' + seddaBlad.length);
+        return nr ? bas.slice(0, 24) + ' niv\u00e5 ' + nr : bas;
+      }
+      var steg = stegKnappar().length;
+      if(steg < 2){ mat(namnNu(0), sh); return; }
+      for(var n = 0; n < steg; n++){
+        var nb = stegKnappar()[n]; if(!nb || nb.disabled) continue;
+        nb.click();
+        var nySh = vard.querySelector('.ovn-sheet'); if(!nySh) continue;
+        mat(namnNu(n + 1), nySh);
+      }
     });
   });
   // Plugg till prov (k1/d10, k3/d7): dokumenten renderas vid klick → öppna varje grupp + dokument

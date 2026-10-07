@@ -191,6 +191,9 @@
   <span>Delkapitel 7</span>
 </footer>
 
+<!-- NIVÅRADEN före bladfilerna: bladen byggs vid inläsning, och modulen måste finnas då.
+     Låg den efter blev window.NivaRad undefined och nivå 2 gick inte att nå. -->
+<script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/blad/blad-k1-d7.js"></script>
@@ -205,7 +208,6 @@
 
 <!-- SKAL: blad-nav (Öva) + Färdighetsträning ur taxonomin. Körs efter blad-filen. Motorn orörd. -->
 <!-- NAVIGATIONSRAMEN: delad nivårad + ram + delkapitel-receptet -->
-<script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
 <script src="../../../js/motor/navram/navram-delkapitel.js"></script>
 

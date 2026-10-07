@@ -110,10 +110,24 @@ const PROBE = `(function(){
     });
   }
 
+  /* NIVÅRADEN är en flik till. Ett blad med steg visar bara det aktiva, så grinden klickar
+     igenom stegen också — och frågar om knapparna PÅ NYTT varje gång, eftersom bladet byggs
+     om vid klick och den gamla knappen då är ett löst element. */
+  function synligMount(){
+    return Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
+        || Array.prototype.filter.call(document.querySelectorAll('.ovn-sheet'), function(e){ return !!e.offsetParent; })[0]
+        || document.body;
+  }
+  function nivaKnappar(){ return synligMount().querySelectorAll('.niva-rad .niva-btn'); }
+  function klickaNiva(i){ var b = nivaKnappar()[i]; if(!b || b.disabled) return false; b.click(); return true; }
+
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .plugg-dok, .nr-rad'));
   (nav.length ? nav : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
-    mat(b ? b.textContent.replace(/\\s+/g, ' ').trim().slice(0, 26) : '(enda)');
+    var namn = b ? b.textContent.replace(/\\s+/g, ' ').trim().slice(0, 26) : '(enda)';
+    var steg = nivaKnappar().length;
+    if(steg < 2){ mat(namn); return; }
+    for(var n = 0; n < steg; n++){ if(klickaNiva(n)) mat(namn + ' niv\\u00e5 ' + (n + 1)); }
   });
   return ut;
 })()`;

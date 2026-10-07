@@ -383,32 +383,59 @@ function brakHTML(t, n){
 }
 var GRUND_BLAD_SMAFORL = {
   titel:'Division med små tal – med förlängning',
-  intro:'Förläng bråket så att nämnaren blir ett heltal. Multiplicera täljaren och nämnaren med samma tal, 10, 100 eller 1000.',
-  /* Bråken staplade även i exemplet: sidan laddar heltalskärnan, så markupen skrivs här
-     i stället för att låna fracSpan ur bråkkärnan (som den här sidan inte laddar). */
-  exempel:'<strong>Exempel:</strong> ' + brakHTML('4,2 · 10', '0,6 · 10') + ' = ' + brakHTML('42', '6') + ' = 7',
-  grupper:[
+  nivaPrefix:'k1d7',
+  nivaer:{
     /* NIVÅ 1 — tre grupper om fyra. Faktorn i datan är den minsta tiopotens som gör nämnaren till
        ett heltal; rättaren prövar båda leden mot den, och svaret på värde. */
-    {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
-      {typ:'brakForl', taljare:'55,2', namnare:'0,3',  faktor:10,  svar:184},
-      {typ:'brakForl', taljare:'328',  namnare:'0,4',  faktor:10,  svar:820},
-      {typ:'brakForl', taljare:'44,1', namnare:'0,03', faktor:100, svar:1470},
-      {typ:'brakForl', taljare:'52,4', namnare:'0,04', faktor:100, svar:1310}
-    ]},
-    {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
-      {typ:'brakForl', taljare:'8,75',  namnare:'0,7',  faktor:10,  svar:12.5},
-      {typ:'brakForl', taljare:'2,268', namnare:'0,09', faktor:100, svar:25.2},
-      {typ:'brakForl', taljare:'72,6',  namnare:'0,06', faktor:100, svar:1210},
-      {typ:'brakForl', taljare:'5,04',  namnare:'0,08', faktor:100, svar:63}
-    ]},
-    {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
-      {typ:'brakForl', taljare:'20',    namnare:'0,8',   faktor:10,   svar:25},
-      {typ:'brakForl', taljare:'24,56', namnare:'0,4',   faktor:10,   svar:61.4},
-      {typ:'brakForl', taljare:'3,15',  namnare:'0,003', faktor:1000, svar:1050},
-      {typ:'brakForl', taljare:'0,63',  namnare:'0,7',   faktor:10,   svar:0.9}
-    ]}
-  ]
+    1:{
+      intro:'Förläng bråket så att nämnaren blir ett heltal. Multiplicera täljaren och nämnaren med samma tal, 10, 100 eller 1000.',
+      /* Bråken staplade även i exemplet: sidan laddar heltalskärnan, så markupen skrivs här
+         i stället för att låna fracSpan ur bråkkärnan (som den här sidan inte laddar). */
+      exempel:'<strong>Exempel:</strong> ' + brakHTML('4,2 · 10', '0,6 · 10') + ' = ' + brakHTML('42', '6') + ' = 7',
+      grupper:[
+        {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
+          {typ:'brakForl', taljare:'55,2', namnare:'0,3',  faktor:10,  svar:184},
+          {typ:'brakForl', taljare:'328',  namnare:'0,4',  faktor:10,  svar:820},
+          {typ:'brakForl', taljare:'44,1', namnare:'0,03', faktor:100, svar:1470},
+          {typ:'brakForl', taljare:'52,4', namnare:'0,04', faktor:100, svar:1310}
+        ]},
+        {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
+          {typ:'brakForl', taljare:'8,75',  namnare:'0,7',  faktor:10,  svar:12.5},
+          {typ:'brakForl', taljare:'2,268', namnare:'0,09', faktor:100, svar:25.2},
+          {typ:'brakForl', taljare:'72,6',  namnare:'0,06', faktor:100, svar:1210},
+          {typ:'brakForl', taljare:'5,04',  namnare:'0,08', faktor:100, svar:63}
+        ]},
+        {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
+          {typ:'brakForl', taljare:'20',    namnare:'0,8',   faktor:10,   svar:25},
+          {typ:'brakForl', taljare:'24,56', namnare:'0,4',   faktor:10,   svar:61.4},
+          {typ:'brakForl', taljare:'3,15',  namnare:'0,003', faktor:1000, svar:1050},
+          {typ:'brakForl', taljare:'0,63',  namnare:'0,7',   faktor:10,   svar:0.9}
+        ]}
+      ]
+    },
+    /* NIVÅ 2 — två grupper. Grupp 1 vänder på frågan: bråket står med en lucka där x hör hemma,
+       värdet står till höger, och eleven fyller luckan. Ett svar per uppgift — docxen säger inte
+       "visa mellanled" här, och uppgiften handlar om att se vilket tal som ger kvoten.
+       Grupp 2 är förlängning som nivå 1, med tvåsiffriga nämnare (13, 16, 12, 15). */
+    2:{
+      intro:'Förläng bråket så att nämnaren blir ett heltal. Multiplicera täljaren och nämnaren med samma tal, 10, 100 eller 1000.',
+      exempel:'<strong>Exempel:</strong> ' + brakHTML('4,2 · 10', '0,6 · 10') + ' = ' + brakHTML('42', '6') + ' = 7',
+      grupper:[
+        {rubrik:'Hur mycket är x?', logg:'div-rakna:sma', rader:[
+          {typ:'brakLucka', luckaPos:'taljare', taljare:'__', namnare:'0,1', hoger:'19', svar:1.9},
+          {typ:'brakLucka', luckaPos:'taljare', taljare:'__', namnare:'0,5', hoger:'2',  svar:1},
+          {typ:'brakLucka', luckaPos:'namnare', taljare:'10', namnare:'__',  hoger:'50', svar:0.2},
+          {typ:'brakLucka', luckaPos:'taljare', taljare:'__', namnare:'0,3', hoger:'16', svar:4.8}
+        ]},
+        {rubrik:'Beräkna med förlängning', mellanled:'kravt', logg:'div-rakna:sma', rader:[
+          {typ:'brakForl', taljare:'3,90', namnare:'0,13',  faktor:100,  svar:30},
+          {typ:'brakForl', taljare:'0,64', namnare:'0,016', faktor:1000, svar:40},
+          {typ:'brakForl', taljare:'480',  namnare:'0,12',  faktor:100,  svar:4000},
+          {typ:'brakForl', taljare:'90',   namnare:'0,15',  faktor:100,  svar:600}
+        ]}
+      ]
+    }
+  }
 };
 
 var GRUND_BLAD_LASTAL = {

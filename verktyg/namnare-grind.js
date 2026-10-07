@@ -252,13 +252,22 @@ const PROBE7 = `(function(){
     for(var a = 0; a < tabs.length; a++){ tabs[a].click(); if(synlig(vard)) return true; for(var c = 0; c < navs.length; c++){ navs[c].click(); if(synlig(vard)) return true; } } return false; }
   var vardar = Array.from(document.querySelectorAll('.ovn-sheet')).map(function(sh){ return sh.parentElement; })
     .filter(function(v, i, a){ return v && a.indexOf(v) === i; });
+  /* NIVÅRADEN är en flik till: ett blad med steg visar bara det aktiva, och ett ostett steg
+     är ett omätt blad. Knapparna frågas om PÅ NYTT per varv — bladet byggs om vid klick. */
+  function nivaKnappar(vard){ return vard.querySelectorAll('.niva-rad .niva-btn'); }
   vardar.forEach(function(vard, i){
     var nabar = visaSheet(vard);
     // Namnet läses FÄRSKT: efter navigeringen kan behållaren bära en annan variant än vid starten.
     var sh = vard.querySelector('.ovn-sheet'), h = sh && sh.querySelector('h2');
     var namn = (h ? h.textContent.trim() : 'blad ' + (i + 1)).slice(0, 28);
     if(!nabar || !sh){ ut.blad.push({ blad: namn, onabar: true }); return; }
-    mat(namn, vard);
+    var steg = nivaKnappar(vard).length;
+    if(steg < 2){ mat(namn, vard); return; }
+    for(var n = 0; n < steg; n++){
+      var nb = nivaKnappar(vard)[n]; if(!nb || nb.disabled) continue;
+      nb.click();
+      mat(namn.slice(0, 24) + ' niv\u00e5 ' + (n + 1), vard);   // korta NAMNET, inte stegnumret
+    }
   });
   // Plugg till prov (k1/d10, k3/d7): dokumenten renderas först vid klick → öppna varje grupp + dokument och mät bladet som skapas
   Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var sh = akt && akt.querySelector('.ovn-sheet'); var namn = ('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 28); if(!sh){ ut.blad.push({ blad: namn, ingenKnapp: true }); return; } mat(namn, sh.parentElement); }); });
