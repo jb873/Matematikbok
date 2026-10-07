@@ -35,6 +35,12 @@
 .kp-key:hover{background:var(--paper-dk,#ede6d6);}
 .kp-key.op{color:var(--gold,#9a7228);font-weight:700;}
 .kp-key.util{background:var(--paper,#f6f1e8);color:var(--ink-faint,#7a6e65);font-size:15px;}
+/* RÄKNETECKNEN SYNLIGA (order 2026-10-07): + − · , och = är de tecken eleven väljer medvetet, men
+   ritades lika små som siffrorna och tunnare. Bara SYMBOLEN växer — knappen och rutnätet ligger
+   kvar. Tyngden kommer från en kontur i tecknets egen färg, inte från font-weight: Cormorant
+   Garamond finns bara upp till 600 här, så 700 ritades redan som 600 och högre vikt ger ingenting.
+   Valt ut DATA-KEY, inte .op: .op bär också / ( ) √ π och byggarna, som ska ligga kvar. */
+.kp-key[data-key="+"], .kp-key[data-key="−"], .kp-key[data-key="·"], .kp-key[data-key=","], .kp-key[data-key="="]{font-size:24px;-webkit-text-stroke:.4px currentColor;}
 .kp-key.span2{grid-column:span 2;}
 .kp-key.span3{grid-column:span 3;}
 .kp-fracbtn, .kp-potbtn{color:var(--navy,#0f1e2e);}
