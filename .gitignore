@@ -4,6 +4,10 @@ Arkiv/
 # Redundant arkiv-artefakt
 ak7.zip
 
+# Lokal förhandsvisning i Claude-appen – stannar på datorn
+.claude/serve.ps1
+.claude/launch.json
+
 # OS-skräp
 Thumbs.db
 .DS_Store
