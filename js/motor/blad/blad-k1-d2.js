@@ -163,19 +163,21 @@ var BLAD_ADDSUB = {
 
 var BLAD_MULT = {
   titel:'Multiplikation',
-  intro:'Räkna med angiven metod på papper och skriv svaret. Tryck sedan på Kontrollera.',
+  // Uppställningen räknas i datorn (radtyp 'uppstallning', Metodträningens yta) — inte på papper
+  // (order 2026-10-07). Introt ändrades först när det stämde; grupp 3–4 har mellanledsrutor sedan förut.
+  intro:'Räkna med angiven metod. Skriv uppställningen och mellanleden i rutorna. Tryck sedan på Kontrollera.',
   grupper:[
-    {rubrik:'Beräkna med uppställning', rader:[
-      {typ:'enkel', vansterText:'321 · 4 =', svar:1284},
-      {typ:'enkel', vansterText:'6,24 · 2 =', svar:12.48},
-      {typ:'enkel', vansterText:'1,91 · 7 =', svar:13.37},
-      {typ:'enkel', vansterText:'0,283 · 3 =', svar:0.849}
+    {rubrik:'Beräkna med uppställning', logg:'mult-metoder:uppstallning', rader:[
+      {typ:'uppstallning', metod:'mult', vansterText:'321 · 4 =', svar:1284},
+      {typ:'uppstallning', metod:'mult', vansterText:'6,24 · 2 =', svar:12.48},
+      {typ:'uppstallning', metod:'mult', vansterText:'1,91 · 7 =', svar:13.37},
+      {typ:'uppstallning', metod:'mult', vansterText:'0,283 · 3 =', svar:0.849}
     ]},
-    {rubrik:'Beräkna med uppställning', rader:[
-      {typ:'enkel', vansterText:'67 · 23 =', svar:1541},
-      {typ:'enkel', vansterText:'36 · 62 =', svar:2232},
-      {typ:'enkel', vansterText:'348 · 52 =', svar:18096},
-      {typ:'enkel', vansterText:'582 · 28 =', svar:16296}
+    {rubrik:'Beräkna med uppställning', logg:'mult-metoder:uppstallning-stora', rader:[
+      {typ:'uppstallning', metod:'mult', vansterText:'67 · 23 =', svar:1541},
+      {typ:'uppstallning', metod:'mult', vansterText:'36 · 62 =', svar:2232},
+      {typ:'uppstallning', metod:'mult', vansterText:'348 · 52 =', svar:18096},
+      {typ:'uppstallning', metod:'mult', vansterText:'582 · 28 =', svar:16296}
     ]},
     {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[
       {typ:'mellan', vansterText:'67 · 5 =', mellan:'300 + 35|60 · 5 + 7 · 5', svar:335},

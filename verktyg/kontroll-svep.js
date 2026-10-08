@@ -80,7 +80,11 @@ const PROBE = `(function(){
     // inte alls — det föll ur på raden nedan.
     var grids = Array.prototype.filter.call(
       mount.querySelectorAll('.ovn-val-grid, .tl-valgrid, .val-rad, .ovn-flerval-grid'), synlig);
-    if(!rutor.length && !grids.length) return;
+    // UPPSTÄLLNINGAR (radtyp 'uppstallning'): uppställningen är EN enhet, som mellanledet. En helt
+    // tom uppställning är obesvarad — ingen av dess rutor får markeras. Rutorna bär inte .ovn-in och
+    // står därför utanför listan ovan; utan det här mätte svepet runt raden.
+    var uppst = Array.prototype.filter.call(mount.querySelectorAll('.ovn-uppst'), synlig);
+    if(!rutor.length && !grids.length && !uppst.length) return;
     // Vilka rutnät är OBESVARADE när vi trycker? Dem får rättningen inte markera.
     var gridsUtanVal = grids.filter(function(g){ return !g.querySelector('.is-vald, .selected'); });
 
@@ -113,12 +117,20 @@ const PROBE = `(function(){
     // knapparna: ett rutnät med en grön knapp har gett bort sin uppgift, hur många knappar det
     // än har.
     var valUtanVal = gridsUtanVal.filter(function(g){ return g.querySelector('.correct, .wrong'); });
+    var uppstMarkerade = 0;
+    uppst.forEach(function(u){
+      var c = Array.prototype.slice.call(u.querySelectorAll('.mult-upp-ans'));
+      if(c.every(function(i){ return String(i.value).trim() === ''; }))
+        uppstMarkerade += c.filter(function(i){ return status(i) !== ''; }).length
+          + (u.nextElementSibling && u.nextElementSibling.classList.contains('ovn-mark') ? 1 : 0);
+    });
     ut.blad.push({
       blad: (b ? b.textContent.trim() : '(enda)') + nivaNamn,
       rutor: rutor.length, tomma: tomma.length,
       markerade: markerade.length,
       facitPaTom: facitPaTom.length,
       valRutnat: grids.length, valObesvarade: gridsUtanVal.length, valUtanVal: valUtanVal.length,
+      uppst: uppst.length, uppstMarkerade: uppstMarkerade,
       valExempel: valUtanVal.slice(0, 2).map(function(g){
         var k = g.querySelector('.correct');
         return (k ? k.textContent.trim().slice(0, 14) : '?') + ' markerad utan val';
@@ -165,17 +177,19 @@ sidor().forEach(sida => {
     if(x.fel){ console.log('? ' + sida + ' · ' + x.blad + ': ' + x.fel); return; }
     MP.varde(sida, x.blad, { rutor: x.rutor, tomma: x.tomma, markerade: x.markerade,
                              facitPaTom: x.facitPaTom, valRutnat: x.valRutnat, valUtanVal: x.valUtanVal });
-    const brott = x.markerade + x.facitPaTom + (x.valUtanVal || 0);
+    const brott = x.markerade + x.facitPaTom + (x.valUtanVal || 0) + (x.uppstMarkerade || 0);
     if(!brott){
       console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + x.blad
         + ' (' + x.rutor + ' rutor, ' + x.tomma + ' lämnades tomma'
-        + (x.valRutnat ? ', ' + x.valRutnat + ' valrutnät varav ' + x.valObesvarade + ' obesvarade' : '') + ')');
+        + (x.valRutnat ? ', ' + x.valRutnat + ' valrutnät varav ' + x.valObesvarade + ' obesvarade' : '')
+        + (x.uppst ? ', ' + x.uppst + ' obesvarade uppställningar' : '') + ')');
       return;
     }
     fel += brott; perArskurs[ar].trasiga++;
     console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + x.blad
       + ': ' + x.markerade + ' tomma rutor markerade, ' + x.facitPaTom + ' fick facit'
       + (x.valUtanVal ? ', ' + x.valUtanVal + ' obesvarade valrutnät markerade' : '')
+      + (x.uppstMarkerade ? ', ' + x.uppstMarkerade + ' markeringar i obesvarade uppställningar' : '')
       + (x.exempel.length ? '\n     ' + x.exempel.join(' | ') : '')
       + ((x.valExempel && x.valExempel.length) ? '\n     ' + x.valExempel.join(' | ') : ''));
   });

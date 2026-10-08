@@ -70,8 +70,10 @@ const PROBE = `(function(){
   function ordruta(i){ return i.matches('[data-nokeypad], [data-text]'); }
 
   function mat(namn){
+    // input.mult-upp-ans: uppställningens svarsruta (radtyp 'uppstallning', order 2026-10-07) — en
+    // talruta som ska få bladets delade keypad, fast den inte bär .ovn-in.
     var rutor = Array.prototype.filter.call(
-      document.querySelectorAll('input.ovn-in, input.ak8-in, input.seg-text, input.ak8-exprtxt'), synlig);
+      document.querySelectorAll('input.ovn-in, input.ak8-in, input.seg-text, input.ak8-exprtxt, input.mult-upp-ans'), synlig);
     if(!rutor.length) return;
     var y = { yta: namn, rutor: rutor.length, knappar: 0, lasta: [], ordrutor: 0, provade: 0 };
 

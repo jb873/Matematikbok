@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/navram/navram.css">
+<link rel="stylesheet" href="../../../js/motor/metod/uppstallning.css">
 <style>
 /* Sidspecifika + isärdrivna regler (kvar efter css-flytten 2026-09-19). Det delade ligger i ak7-delkapitel-kanon.css + ak7-k1blad-kanon.css, länkade ovan. */
 :root{
@@ -218,6 +219,13 @@
 </footer>
 
 <script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
+<!-- UPPSTÄLLNINGENS YTA (delad med Metodträningen): Multiplikation-bladets uppställningsrader
+     (radtyp 'uppstallning') ritas och rättas av den. Laddas före kärnan, som ritar raderna. -->
+<script src="../../../js/motor/metod/uppstallning-yta.js"></script>
+<!-- MASTERY-store (k1): uppställningsgrupperna loggar mult-metoder:uppstallning(-stora). Utan
+     storen är data-logg inert — gruppen bär noden men ingenting skrivs. -->
+<script src="../../../js/mastery-karna.js"></script>
+<script src="../../../js/mastery.js"></script>
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/blad/blad-k1-d2.js"></script>
 
