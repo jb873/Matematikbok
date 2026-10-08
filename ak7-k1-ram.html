@@ -9190,7 +9190,7 @@ function repSkippaPanel(){
     var mret = hs.match(/[?&]retur=([^&\s]+)/i), mrtx = hs.match(/[?&]retur_txt=([^&\s]+)/i);
     var retur = mret ? decodeURIComponent(mret[1]) : null, returTxt = mrtx ? decodeURIComponent(mrtx[1]) : null;
     renderKapitel();
-    if(ft){ PB.byggFardigt({ nodes: ft.nodes, antal: ft.antal, varianter: ft.varianter, seed: mseed ? parseInt(mseed[1], 10) : null, retur: retur, returTxt: returTxt, del: mfd ? mfd[1] : null, nr: mft ? parseInt(mft[1], 10) : 1 }); }
+    if(ft){ PB.byggFardigt({ nodes: ft.nodes, gens: ft.gens, antal: ft.antal, varianter: ft.varianter, seed: mseed ? parseInt(mseed[1], 10) : null, retur: retur, returTxt: returTxt, del: mfd ? mfd[1] : null, nr: mft ? parseInt(mft[1], 10) : 1 }); }
     else { PB.setDel(mfd ? mfd[1] : null); navTo('test-config'); }
     return;
   }

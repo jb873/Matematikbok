@@ -50,6 +50,238 @@
     'prio-prioritering:rakna': { struktur: ['parenteser','koefficient','brakstreck'], nivaer: [1,2,3] }  // nivåer = öva 3:s tre grupper (spridning)
   };
 
+  // ── TRÄNINGEN → TESTET (order 2026-10-08) ──────────────────────────────────────────────────────
+  // Testet SPEGLAR öva-bladen: (1) varje uppgiftstyp i träningen finns med i något test, (2) testets
+  // uppgifter står i träningens ordning (bladens följd, grupp för grupp — redan lätt → svårt), ingen slump.
+  // Varje öva-blad listas med ALLA sina grupper i bladets ordning: [rubrik, generator(er)] — eller
+  // [rubrik, null, 'skäl'] när ingen testgenerator finns (LUCKA, syns i vakten) / 'TOM' för platshållare.
+  // `test` = vilket kort test bladet hamnar i (angränsande blad kan dela test). En generator tas med där
+  // den FÖRST förekommer. Vakt: node verktyg/test-tacker-ova.js — läser de riktiga bladen; en grupp som
+  // läggs till/flyttas i öva utan att listan följer med fäller vakten.
+  // d1: varje stencil (A/B) är ett eget blad i registret (TIO_/STORLEK_/POSRAK_/EGEN_VARIANTER).
+  var TRANING = {
+    d1: [
+      { blad: 'Tiosystemet – Blad A', test: 'Tiosystemet', grupper: [
+        ['Vilket platsvärde har sjuan i talet?', 'platsvarde'],
+        ['Skriv det tal som består av', 'utvform-lasut'],
+        ['Använd siffrorna 4, 5, 6 och 7 och skriv', null, 'bilda största/minsta tal av givna siffror'],
+        ['Skriv följande tal med siffror', null, 'tal i ord → siffror'],
+        ['Skriv i utvecklad form', 'utvform-valj'],
+        ['Vilket platsvärde har trean?', 'platsvarde'],
+        ['Skriv det tal som består av', 'utvform-lasut'],
+        ['Vilket platsvärde har trean i talet?', 'platsvarde'],
+        ['Skriv som tal', null, 'växla: antal tiotal → tal (17 tiotal)'],
+        ['Vilket tal ska stå i rutan?', null, 'växla: tal → antal tiotal (160 = __ tiotal)'],
+        ['Skriv i utvecklad form', 'utvform-valj'] ] },
+      { blad: 'Tiosystemet – Blad B', test: 'Tiosystemet', grupper: [
+        ['Vilket platsvärde har femman i talet?', 'platsvarde'],
+        ['Skriv det tal som består av', 'utvform-lasut'],
+        ['Använd siffrorna 2, 4, 6 och 7 och skriv', null, 'bilda största/minsta tal av givna siffror'],
+        ['Skriv följande tal med siffror', null, 'tal i ord → siffror'],
+        ['Skriv i utvecklad form', 'utvform-valj'],
+        ['Vilket platsvärde har sexan?', 'platsvarde'],
+        ['Skriv det tal som består av', 'utvform-lasut'],
+        ['Vilket platsvärde har sexan i talet?', 'platsvarde'],
+        ['Skriv som tal', null, 'växla: antal tiotal → tal'],
+        ['Vilket tal ska stå i rutan?', null, 'växla: tal → antal tiotal'],
+        ['Skriv i utvecklad form', 'utvform-valj'] ] },
+      { blad: 'Storlek och ordning – Stencil A', test: 'Storlek och ordning', grupper: [
+        ['Gör tre 10-hopp framåt för varje tal', 'talfoljd'],
+        ['Gör tre 10-hopp bakåt för varje tal', 'talfoljd'],
+        ['Vilka tal pekar pilarna på?', null, 'tallinje: avläsa tal vid pilar'],
+        ['Skriv det tal som är en tiondel större än', 'oka-minska'],
+        ['Gör tre 0,4-hopp framåt för varje tal', 'talfoljd'],
+        ['Vilka tal pekar pilarna på?', null, 'tallinje: avläsa tal vid pilar'],
+        ['Gör tre 0,4-hopp bakåt för varje tal', 'talfoljd'],
+        ['Skriv de två talen som kommer i talföljden', 'talfoljd'],
+        ['Skriv talen i storleksordning, börja med det minsta', 'jamfor-tal'] ] },
+      { blad: 'Storlek och ordning – Stencil B', test: 'Storlek och ordning', grupper: [
+        ['Skriv talen i storleksordning, börja med det minsta', 'jamfor-tal'],
+        ['Vilket tal är en hundradel mindre än', 'oka-minska'],
+        ['Ordna talen i storleksordning, börja med det minsta', 'jamfor-tal'],
+        ['Vilket tal är en tusendel mindre än', 'oka-minska'],
+        ['Vilka tal pekar pilarna på?', null, 'tallinje: avläsa tal vid pilar'],
+        ['Ordna talen i storleksordning, börja med det minsta', 'jamfor-tal'],
+        ['Skriv ett tal som är', 'pos-intervall'] ] },
+      { blad: 'Räkna i positionssystemet – Blad A', test: 'Räkna i positionssystemet', grupper: [
+        ['Skriv två tal inom varje intervall', 'pos-intervall'],
+        ['Räkna med huvudräkning', 'add-huvud'],
+        ['Räkna med huvudräkning', 'oka-minska'],
+        ['Vilket tal ska stå i rutan?', 'sub-begr-r'],
+        ['Räkna med huvudräkning', 'oka-minska'],
+        ['Vilket tal är 7 tiondelar större än …', 'oka-minska'],
+        ['Vilket tal ska stå i rutan?', 'sub-begr-r'],
+        ['Vilket tal ligger mittemellan …', 'mittemellan'],
+        ['Räkna med huvudräkning', 'oka-minska'],
+        ['Räkna med huvudräkning', 'add-huvud'],
+        ['Vilket tal ligger mittemellan …', 'mittemellan'] ] },
+      { blad: 'Räkna i positionssystemet – Blad B', test: 'Räkna i positionssystemet', grupper: [
+        ['Skriv två tal inom varje intervall', 'pos-intervall'],
+        ['Räkna med huvudräkning', 'add-huvud'],
+        ['Räkna med huvudräkning', 'oka-minska'],
+        ['Vilket tal ska stå i rutan?', 'sub-begr-r'],
+        ['Räkna med huvudräkning', 'oka-minska'],
+        ['Vilket tal är 7 tiondelar större än …', 'oka-minska'],
+        ['Vilket tal ska stå i rutan?', 'sub-begr-r'],
+        ['Vilket tal ligger mittemellan …', 'mittemellan'],
+        ['Räkna med huvudräkning', 'oka-minska'],
+        ['Räkna med huvudräkning', 'add-huvud'],
+        ['Vilket tal ligger mittemellan …', 'mittemellan'] ] },
+      { blad: 'Tals egenskaper – Blad A', test: 'Tals egenskaper', grupper: [
+        ['Vilka tal är jämna?', 'udda-jamn'],
+        ['Vilka tal är sammansatta tal?', 'primtal-binary'],
+        ['Vilka tal är jämnt delbara med …', 'delbar-binary'],
+        ['Faktorisera talet i två faktorer', 'faktorer'],
+        ['Vilka primfaktorer saknas i faktoriseringen?', 'primfakt'],
+        ['Vilket tal har faktoriserats?', null, 'räkna ut talet ur en faktorisering (2 · 2 · 2 · 3)'],
+        ['Vilka tal är jämnt delbara med 4 och 5?', 'delbar-binary'],
+        ['Vilka tal är primtal?', 'primtal-binary'],
+        ['Vilka tal är jämnt delbara med 3 och 5?', 'delbar-binary'],
+        ['Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', 'primfakt'],
+        ['Skriv tre tal som är delbara med 2, 3, 4 och 5', null, 'konstruera tal delbara med flera tal'] ] },
+      { blad: 'Tals egenskaper – Blad B', test: 'Tals egenskaper', grupper: [
+        ['Vilka tal är jämna?', 'udda-jamn'],
+        ['Vilka tal är sammansatta tal?', 'primtal-binary'],
+        ['Vilka tal är jämnt delbara med …', 'delbar-binary'],
+        ['Faktorisera talet i två faktorer', 'faktorer'],
+        ['Vilka primfaktorer saknas i faktoriseringen?', 'primfakt'],
+        ['Vilket tal har faktoriserats?', null, 'räkna ut talet ur en faktorisering'],
+        ['Vilka tal är jämnt delbara med 4 och 5?', 'delbar-binary'],
+        ['Vilka tal är primtal?', 'primtal-binary'],
+        ['Vilka tal är jämnt delbara med 3 och 5?', 'delbar-binary'],
+        ['Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', 'primfakt'],
+        ['Skriv tre tal som är delbara med 2, 3, 4 och 5', null, 'konstruera tal delbara med flera tal'] ] }
+    ],
+    d2: [
+      { blad: 'Addition', grupper: [
+        ['Beräkna', 'add-begr-b'],
+        ['Vilka tal?', ['add-term', 'add-tvatal']],
+        ['Beräkna med talsorterna var för sig', 'add-uppst'],
+        ['Vilket tal saknas?', 'add-begr-r'],
+        ['Beräkna med metoden flytta över', 'add-huvud'],
+        ['Vilket tal saknas?', 'add-begr-r'],
+        ['Beräkna med metoden flytta över', 'add-huvud'] ] },
+      { blad: 'Subtraktion', grupper: [
+        ['Beräkna med uppställning', 'sub-uppst'],
+        ['Beräkna med metoden addition bakifrån', 'sub-huvud'],
+        ['Vilket tal saknas?', 'sub-begr-r'],
+        ['Beräkna med metoden öka och minska lika', 'sub-huvud'],
+        ['Vilket tal saknas?', 'sub-begr-r'] ] },
+      { blad: 'Multiplikation', grupper: [
+        ['Beräkna med uppställning', 'mult-uppst'],
+        ['Beräkna med uppställning', 'mult-uppst'],
+        ['Beräkna med talsorterna var för sig', 'mult-rakna-stora'],
+        ['Beräkna med dubbla och halvera', 'mult-rakna-stora'] ] },
+      { blad: 'Division', test: 'Division och prioriteringsregeln', grupper: [
+        ['Kort division', 'div-uppst'],
+        ['Kort division', 'div-uppst'],
+        ['Kort division', 'div-uppst'],
+        ['Beräkna med kort division', 'div-uppst'],
+        ['Beräkna med kort division', 'div-uppst'] ] },
+      { blad: 'Prioriteringsregeln', test: 'Division och prioriteringsregeln', grupper: [
+        ['Beräkna – visa mellanled', 'prio-uttryck'],
+        ['Beräkna – visa mellanled', 'prio-uttryck'],
+        ['Beräkna – visa mellanled', 'prio-uttryck'] ] },
+      { blad: 'Problemlösning – de fyra räknesätten', grupper: [
+        ['Blad 1', null, 'lästal (fyra räknesätten) — ingen testgenerator'],
+        ['Blad 2', null, 'lästal (fyra räknesätten) — ingen testgenerator'],
+        ['Blad 3', null, 'lästal (fyra räknesätten) — ingen testgenerator'],
+        ['Blad 4', null, 'lästal (fyra räknesätten) — ingen testgenerator'] ] }
+    ],
+    d3: [
+      { blad: 'Begrepp och förståelse', test: 'Begrepp', grupper: [
+        ['Skriv det motsatta talet', 'neg-begr'],
+        ['Storleksordna talen från minst till störst', null, 'storleksordna negativa tal'],
+        ['Skriv de två tal som saknas i talföljden', 'neg-fallande'],
+        ['Storleksordna talen från minst till störst', null, 'storleksordna negativa tal'],
+        ['Skriv de två tal som saknas i talföljden', 'neg-fallande'] ] },
+      { blad: 'Räkna med negativa tal', test: 'Räkna med negativa tal', grupper: [
+        ['Addition', 'neg-addsub'],
+        ['Subtraktion', 'neg-addsub'],
+        ['Blandat', 'neg-addsub'],
+        ['Vilket tal saknas?', 'neg-losut-as'] ] },
+      { blad: 'Räkna vidare', test: 'Räkna med negativa tal', grupper: [
+        ['Addition med negativa tal', 'neg-dubbel'],
+        ['Subtraktion med negativa tal', 'neg-dubbel'],
+        ['Blandat med större tal', 'neg-dubbel'],
+        ['Vilket tal saknas?', 'neg-losut-as'] ] }
+    ],
+    d4: [
+      { blad: 'Bråk ↔ decimal', grupper: [
+        ['Skriv bråket som decimaltal', 'bd-vaxla'],
+        ['Skriv som bråk i enklaste form', 'bd-tillbrak'] ] },
+      { blad: 'Tiondelar & hundradelar', grupper: [
+        ['Skriv decimaltalet i bråkform', 'bd-hundra'],
+        ['Förläng till hundradelar och skriv som decimaltal', 'bd-forlang'] ] }
+    ],
+    d5: [
+      { blad: 'Multiplikation med 10, 100 och 1000', test: 'Räkna med 10, 100 och 1000', grupper: [
+        ['Beräkna', 'mult-rakna-pow10'],
+        ['Beräkna', 'mult-rakna-pow10'],
+        ['Beräkna – vilket tal saknas?', 'mult-rakna-pow10'] ] },
+      { blad: 'Division med 10, 100 och 1000', test: 'Räkna med 10, 100 och 1000', grupper: [
+        ['Beräkna', 'div-rakna-pow10'],
+        ['Beräkna', 'div-rakna-pow10'],
+        ['Beräkna – vilket tal saknas?', 'div-rakna-pow10'],
+        ['Beräkna', 'div-rakna-pow10'] ] }
+    ],
+    d6: [
+      { blad: 'Multiplikation med stora tal', test: 'Multiplikation med stora och små tal', grupper: [
+        ['Beräkna', 'mult-rakna-stora'],
+        ['Beräkna', 'mult-rakna-stora'],
+        ['Beräkna – vilket tal saknas?', 'mult-rakna-stora'] ] },
+      { blad: 'Multiplikation med små tal', test: 'Multiplikation med stora och små tal', grupper: [
+        ['Beräkna', 'mult-rakna-sma'],
+        ['Beräkna', 'mult-sma-dec'],
+        ['Beräkna', 'mult-sma-dec'] ] },
+      { blad: 'Multiplikation med stora och små tal', test: 'Multiplikation med stora och små tal', grupper: [
+        ['Beräkna med mellanled', 'mult-rakna-storasma'],
+        ['Beräkna med mellanled', 'mult-rakna-storasma'] ] },
+      { blad: 'Problemuppgifter', test: 'Multiplikation med stora och små tal', grupper: [
+        ['Lös problemet', null, 'lästal (multiplikation) — ingen testgenerator'] ] }
+    ],
+    d7: [
+      { blad: 'Division med stora tal', test: 'Division med stora och små tal', grupper: [
+        ['Beräkna', 'div-rakna-stora'],
+        ['Beräkna', 'div-rakna-stora'],
+        ['Beräkna', 'div-sma-dec'] ] },
+      { blad: 'Division med små tal', test: 'Division med stora och små tal', grupper: [
+        ['Beräkna', 'div-sma-dec'],
+        ['Beräkna', 'div-sma-dec'],
+        ['Beräkna', 'div-sma-dec'],
+        ['Beräkna', 'div-sma-dec'] ] },
+      { blad: 'Division med små tal – med förlängning', test: 'Division med stora och små tal', grupper: [
+        ['Beräkna med förlängning', 'div-rakna-sma'],
+        ['Beräkna med förlängning', 'div-rakna-sma'],
+        ['Beräkna med förlängning', 'div-rakna-sma'] ] },
+      { blad: 'Lästal – division', test: 'Division med stora och små tal', grupper: [
+        ['Lös problemet', null, 'lästal (division) — ingen testgenerator'] ] }
+    ],
+    d8: [
+      { blad: 'Avrundning', test: 'Avrundning och överslagsräkning', grupper: [
+        ['Avrunda talet', 'avr-rakna'] ] },
+      { blad: 'Överslagsräkning', test: 'Avrundning och överslagsräkning', grupper: [
+        ['Gör ett överslag', 'avr-overslag'] ] },
+      { blad: 'Byggs snart', grupper: [
+        ['Kommer snart', null, 'TOM'] ] }
+    ]
+  };
+
+  // Test ur träningen: generatorer i bladens ordning (första förekomst), grupperade per `test`.
+  function testerUrTraning(del){
+    var sedda = {}, ut = [], cur = null;
+    TRANING[del].forEach(function(b){
+      var titel = b.test || b.blad;
+      if(!cur || cur.titel !== titel){ cur = { titel: titel, gens: [] }; ut.push(cur); }
+      b.grupper.forEach(function(g){
+        [].concat(g[1] || []).forEach(function(namn){ if(!sedda[namn]){ sedda[namn] = 1; cur.gens.push(namn); } });
+      });
+    });
+    return ut.filter(function(t){ return t.gens.length; }).map(function(t){
+      return { titel: t.titel, gens: t.gens, nodes: [], antal: Math.min(20, Math.max(10, t.gens.length * 3)) };
+    });
+  }
+
   // Byggbara noder i ett delkapitel: taxonomins noder med visning.utbudslista===del ∩ BYGGBARA (taxonomi-ordning).
   function byggbaraNoder(del){
     // Nians noder har EGNA ram-generatorer (decimal-mult/div, storasma) som medvetet INTE ligger i
@@ -74,6 +306,7 @@
     return (n && n.visning && n.visning.grupp) || 'Övrigt';
   }
   function tester(del){
+    if(TRANING[del]) return testerUrTraning(del);   // d1–d8: speglar öva (allt med, träningens ordning)
     var noder = byggbaraNoder(del); if(!noder.length) return [];
     var ordning = [], grupper = {};
     noder.forEach(function(n){ var g = gruppAv(n); if(!grupper[g]){ grupper[g] = []; ordning.push(g); } grupper[g].push(n); });
@@ -133,7 +366,7 @@
           + '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
         t.forEach(function(test, i){
           var deep = ramPath + '?view=test-fardigt&del=' + del + '&test=' + (i + 1) + '&embed=1' + retur;
-          html += '<a href="#" class="test-lank" data-deep="' + encodeURIComponent(deep) + '">' + test.titel + ' <span style="opacity:.7;">· täcker ' + test.nodes.length + (test.nodes.length === 1 ? ' färdighet' : ' färdigheter') + '</span></a>';   // FAS 4a: se ak8-fardiga-test.js
+          html += '<a href="#" class="test-lank" data-deep="' + encodeURIComponent(deep) + '">' + test.titel + ' <span style="opacity:.7;">· täcker ' + (test.gens || test.nodes).length + ((test.gens || test.nodes).length === 1 ? ' färdighet' : ' färdigheter') + '</span></a>';   // FAS 4a: se ak8-fardiga-test.js
         });
         html += '</div>';
       } else {
@@ -185,7 +418,7 @@
     return { titel: t[i].titel, nr: i + 1, antal: t[i].antal };
   }
 
-  window.K1_FARDIGA = { BYGGBARA: BYGGBARA, byggbaraNoder: byggbaraNoder, tester: tester, nastaTest: nastaTest, renderTestFlik: renderTestFlik };
+  window.K1_FARDIGA = { TRANING: TRANING, BYGGBARA: BYGGBARA, byggbaraNoder: byggbaraNoder, tester: tester, nastaTest: nastaTest, renderTestFlik: renderTestFlik };
 
   // Auto-init på delkapitel-sidor: finns en Test-flik-panel + del-id i URL → rendera Test-knapparna.
   // Ramen (ak7-k1-ram.html) saknar denna panel → hoppas; den wirar färdiga test via boot-deeplinken.

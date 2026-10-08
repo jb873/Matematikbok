@@ -1004,12 +1004,14 @@ function exempelFaktorer(target, antal){
     function updateTutorContext(){ if(config.nav.updateTutorContext) config.nav.updateTutorContext(); }
 
 const NOD_GENS = {};
+const GEN_NAMN = {};   // generatornamn → {gen, node} (snabb) — färdigt test i träningens ordning (config.gens)
 Object.keys(TEST_GENERATORS).forEach(function(ko){
   ['snabb','problem'].forEach(function(kind){
     (TEST_GENERATORS[ko][kind] || []).forEach(function(gen){
-      let node = null;
-      try { const probe = gen(new Set()); if(probe) node = GEN_NOD[probe.generator]; } catch(e){}
+      let node = null, namn = null;
+      try { const probe = gen(new Set()); if(probe){ namn = probe.generator; node = GEN_NOD[namn]; } } catch(e){}
       if(node){ (NOD_GENS[node] = NOD_GENS[node] || []).push({ko:ko, gen:gen, kind:kind}); }
+      if(node && kind === 'snabb' && !GEN_NAMN[namn]) GEN_NAMN[namn] = {gen:gen, node:node};
     });
   });
 });
@@ -1050,7 +1052,16 @@ function generateTest(config){
   //   Seedad före/efter: seed-fasens frågor är identiska (samma shuffle, samma gen-anrop i samma ordning);
   //   skillnaden är bara sammansättningen — fulla delfrågor, alla generatorer, inga återbesök.
   // Skapa-eget (coverage=false) → OFÖRÄNDRAD round-robin nedan (byte-identiskt).
-  if(config.coverage && snabbGens.length){
+  // TRÄNINGENS ORDNING (config.gens, order 2026-10-08): färdigt test som SPEGLAR öva — en fråga per
+  //   generator i exakt den följd generatorerna står i listan (= öva-bladens uppgiftsordning, lätt → svårt).
+  //   Ingen shuffle. Vaktas av verktyg/test-tacker-ova.js. Utan config.gens: oförändrat nedan.
+  if(config.coverage && config.gens && config.gens.length){
+    config.gens.forEach(function(namn){
+      const g = GEN_NAMN[namn]; if(!g) return;
+      const q = g.gen(seen, variantFor(g.node));
+      if(q && q.subs && q.subs.length){ q.kind = 'snabb'; questions.push(q); }
+    });
+  } else if(config.coverage && snabbGens.length){
     const pool = snabbGens.map(function(sg){ return { gen: sg.gen, node: sg.node, items: 0, dead: false }; });
     shuffle(pool.slice()).forEach(function(p){
       const q = p.gen(seen, variantFor(p.node));
@@ -1628,6 +1639,7 @@ function renderTestResult(){
       cfg.antal = o.antal || 12;
       cfg.typ = o.typ || 'snabb';
       cfg.coverage = true;   // färdigt test: seeda ALLA valda noders typer → speglar öva-bladet fullt
+      cfg.gens = o.gens ? o.gens.slice() : null;   // träningens ordning (generatornamn) — se generateTest
       if(o.varianter) cfg.varianter = o.varianter;
       // FAS 4 — seedad verifiering: seed → deterministisk generering (Math.random ersätts bara här,
       // återställs direkt). Verifierings-krok; utan seed exakt som förr. Seed:en stashas EJ → elevens
@@ -1638,7 +1650,7 @@ function renderTestResult(){
       // fardigt-params stashas på provet → resultat-vyns "Nytt test" genererar ett NYTT färdigt test
       // för SAMMA delkapitel (samma noder, nya tal), inte provbyggar-configen.
       state.test = { questions: questions, answers: {}, currentIdx: -1, startedAt: Date.now(),
-        fardigt: { nodes: cfg.nodes.slice(), antal: cfg.antal, typ: cfg.typ, varianter: o.varianter || null,
+        fardigt: { nodes: cfg.nodes.slice(), gens: cfg.gens, antal: cfg.antal, typ: cfg.typ, varianter: o.varianter || null,
           retur: o.retur || null, returTxt: o.returTxt || null,
           del: o.del || null, nr: o.nr || null } };   // FAS 2: delkapitel + testnummer → resultatvyns "Nästa test"
       navTo('test-take');
