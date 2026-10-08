@@ -2033,38 +2033,13 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
 .rakna-kat-exempel strong{color:var(--c-rakna)}
 .rakna-kat-exempel .ex-rad{font-family:var(--mono);color:var(--ink);font-size:14px}
 
-/* ==== DEL 3: UPPSTÄLLNING MULTIPLIKATION ==== */
-.mult-upp-box{
-  display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px;
-  font-family:var(--mono);padding:16px 22px;background:var(--bg-card);
-  border:1px solid var(--line);border-radius:var(--radius);min-width:160px;
-}
-.mult-upp-row{display:flex;gap:2px;justify-content:flex-end;align-items:center}
-.mult-upp-row .cell{
-  width:40px;height:44px;display:flex;align-items:center;justify-content:center;
-  font-size:26px;font-weight:500;color:var(--ink);
-}
-.mult-upp-row .opcell{width:30px;font-size:24px;font-weight:700;color:var(--c-metod)}
-.mult-upp-carry{display:flex;gap:2px;justify-content:flex-end;min-height:22px}
-.mult-upp-carry .cell{
-  width:40px;height:20px;display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:var(--error);font-weight:700;
-}
-.mult-upp-line{width:100%;height:2px;background:var(--ink);margin:5px 0}
-.mult-upp-ans{
-  width:40px;height:46px;font-family:var(--mono);font-size:24px;font-weight:600;
-  text-align:center;border:2px solid var(--c-metod);border-radius:var(--radius-sm);
-  background:var(--primary-bg);color:var(--ink);outline:none;padding:0;
-}
-.mult-upp-ans:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(180,83,9,.15)}
-.mult-upp-ans.correct{background:var(--success-bg);border-color:var(--success);color:var(--success)}
-.mult-upp-ans.wrong{background:var(--error-bg);border-color:var(--error);color:var(--error)}
-.mult-upp-carrin{
-  width:30px;height:24px;font-family:var(--mono);font-size:13px;font-weight:700;
-  text-align:center;border:1.5px dashed var(--line);border-radius:4px;
-  background:var(--bg-soft);color:var(--error);outline:none;padding:0;
-}
-.mult-upp-carrin:focus{border-color:var(--error);background:var(--error-bg)}
+/* ==== DEL 3: UPPSTÄLLNING MULTIPLIKATION ====
+   Uppställningens yta (.mult-upp-*, .mult-minne-panel/-ruta) bor i js/motor/metod/uppstallning.css,
+   delad med öva-bladen (order 2026-10-07). Stilblocket delas här så att filen hamnar på exakt den
+   plats i kaskaden där reglerna stod. */
+</style>
+<link rel="stylesheet" href="js/motor/metod/uppstallning.css">
+<style>
 /* UPPSTÄLLNINGEN KRYMPS ALDRIG UNDER SITT INNEHÅLL — och hamnar aldrig utanför åt vänster.
    MÄTT (metodträning → multiplikation → uppställning): vid 340 px kolumnbredd låg raderna,
    strecket och svarsrutorna 41 px till VÄNSTER om kortet, vid 300 px 81 px och vid 260 px 113 px
@@ -2095,30 +2070,9 @@ body.embed .layout{padding:16px 16px 32px;max-width:100%}
   font-size:13px;line-height:1.6;color:var(--ink);margin-top:12px;min-height:20px;
 }
 
-/* ==== UPPSTÄLLNING: LAYOUT MED MINNESSIFFROR TILL HÖGER ==== */
-.mult-upp-flex{display:flex;align-items:flex-start;gap:14px}
-.mult-upp-rows-wrap{display:flex}
-.mult-upp-rows{display:flex;flex-direction:column;gap:2px}
-.mult-minne-panel{
-  border:1px dashed var(--line);border-radius:var(--radius-sm);
-  padding:8px 10px;background:var(--bg-soft);max-width:140px;
-}
-.mult-minne-rubrik{
-  font-size:10px;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--ink-faint);margin-bottom:6px;text-align:center;
-}
-.mult-minne-rutor{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
-.mult-minne-ruta{
-  width:30px;height:30px;font-family:var(--mono);font-size:15px;font-weight:700;
-  text-align:center;border:1.5px dashed var(--line);border-radius:4px;
-  background:#fff;color:var(--error);outline:none;padding:0;cursor:pointer;
-}
-.mult-minne-ruta:focus{border-color:var(--error);background:var(--error-bg)}
-.mult-minne-ruta.struck{
-  position:relative;color:var(--ink-faint);
-  background:repeating-linear-gradient(135deg,transparent,transparent 9px,var(--error) 9px,var(--error) 11px);
-}
-.mult-minne-tips{font-size:10px;color:var(--ink-faint);margin-top:7px;line-height:1.4;text-align:center}
+/* ==== UPPSTÄLLNING: LAYOUT MED MINNESSIFFROR TILL HÖGER ====
+   Ytan (.mult-upp-flex/-rows, .mult-minne-panel/-ruta/-tips) bor i js/motor/metod/uppstallning.css.
+   Här står bara förklaringsdemots minnessiffra, som hör till ramens kort. */
 .mult-minne-demo-col{
   display:flex;align-items:center;min-width:34px;padding-top:44px;
 }
@@ -9291,6 +9245,7 @@ function repSkippaPanel(){
 <script src="js/motor/metod/metod-taluppfattning.js"></script>
 <script src="js/motor/metod/metod-addsub.js"></script>
 <script src="js/motor/metod/rekord.js"></script>
+<script src="js/motor/metod/uppstallning-yta.js"></script>  <!-- uppställningens yta, delad med öva-bladen -->
 <script src="js/motor/metod/metod-mult.js"></script>
 <script src="js/motor/metod/metod-div.js"></script>
 <script src="js/motor/metod/metod-prioritering.js"></script>

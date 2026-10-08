@@ -503,6 +503,31 @@ function visaKonfetti(){
   setTimeout(function(){ if(lager.parentNode) lager.remove(); }, 6000);
 }
 
+// ── RADTYP 'uppstallning' (order 2026-10-07 "Uppställningen i datorn, även i öva") ──────────────
+// En uppställning per deluppgift, ritad och rättad av Metodträningens yta
+// (js/motor/metod/uppstallning-yta.js) — samma funktioner som ramen använder, inte en kopia.
+// Kärnan bygger bara uppgiften ur radens data; ytan ritar och markerar varje svarsruta.
+//   {typ:'uppstallning', metod:'mult', vansterText:'6,24 · 2 =', svar:12.48}
+// Sidan laddar uppstallning-yta.js + uppstallning.css. Saknas ytan, eller går talen inte att
+// ställa upp (multiplikator med tre siffror), ritas raden som en vanlig 'enkel'.
+function uppstUppgift(rad){
+  if((rad.metod || 'mult') !== 'mult') return null;
+  var m = String(rad.vansterText).replace(/\s/g, '').replace(/=$/, '').match(/^(\d+(?:,\d+)?)[·*](\d+(?:,\d+)?)$/);
+  if(!m) return null;
+  function mant(s){ return parseInt(s.replace(',', ''), 10); }
+  function decs(s){ var i = s.indexOf(','); return i < 0 ? 0 : s.length - i - 1; }
+  var a = m[1], b = m[2], mm = mant(a), dm = mant(b), dec = decs(a), dDec = decs(b), ans = mm * dm;
+  if(dm >= 100) return null;
+  // Samma form som ramens genTask (metod-mult.js) — ytan ritar efter den.
+  if(dm < 10 && !dDec){
+    if(!dec) return { kind:'enkel', mDisplay:a, d:dm, answer:ans };
+    return { kind:'decimal', mDisplay:a, dec:dec, d:dm, answerIntStr:String(ans), answerValue:rad.svar };
+  }
+  return { kind:'tva', mDisplay:a, dDisplay:b, d:dm, ones:dm % 10, tens:Math.floor(dm / 10),
+           p1:mm * (dm % 10), p2:mm * Math.floor(dm / 10), answer:ans,
+           answerDisplay:(dec + dDec) ? String(rad.svar).replace('.', ',') : String(ans), answerValue:rad.svar };
+}
+
 function bladHTML(blad){
   var html = '<div class="ovn-sheet">'
     + '<h2>' + blad.titel + '</h2>'
@@ -930,7 +955,11 @@ function bladHTML(blad){
       html += '<div class="ovn-rad" data-rad="' + radNummer + '"'
         + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '') + '>';
       html += lbl(bokstav);
-      if(rad.typ === 'enkel'){
+      var _uppst = rad.typ === 'uppstallning' && window.UppstYta ? uppstUppgift(rad) : null;
+      if(_uppst){
+        html += '<div class="ovn-uppst" data-metod="mult" data-svar="' + rad.svar + '">'
+          + UppstYta.mult.html(_uppst, { tips:false }) + '</div>';
+      } else if(rad.typ === 'enkel' || rad.typ === 'uppstallning'){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         // FAS2: subtraktion av negativt tal → omskrivningscell (värde-rättad) före svaret. Klassen
         // ak8-in-oms ger uttrycks-läge på den delade keypaden (+ · ( ) aktiva); data-oms = rättvärdet.
@@ -1454,6 +1483,17 @@ function bygg_blad(rotEl, blad){
       _syn();
     }
   }
+
+  // Uppställningar: en ändrad ruta tappar sin markering (och uppställningens ✓/✗), som .ovn-in.
+  // Minnesrutorna stryks som i Metodträningen (ytans egen bindning).
+  rotEl.querySelectorAll('.ovn-uppst').forEach(function(box){
+    box.addEventListener('input', function(e){
+      if(!e.target.classList.contains('mult-upp-ans')) return;
+      e.target.classList.remove('correct', 'wrong');
+      var mk = box.nextElementSibling; if(mk && mk.classList.contains('ovn-mark')) mk.remove();
+    });
+  });
+  if(window.UppstYta && rotEl.querySelector('.ovn-uppst')) UppstYta.mult.bindMinne(rotEl);
 
   // Flervalsknappar – markera valt alternativ
   rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
@@ -2041,6 +2081,25 @@ function bygg_blad(rotEl, blad){
       if(_nod && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(box, _st, _nod, okS);
     });
 
+    // Rätta uppställningar (typ 'uppstallning'): EN uppställning = ETT svar i nämnaren, och varje
+    // svarsruta markeras för sig av ytan — samma rättning siffra för siffra som Metodträningen.
+    // Rutorna låses inte: eleven rättar de röda och trycker igen. Minnessiffrorna rättas inte.
+    rotEl.querySelectorAll('.ovn-uppst').forEach(function(box){
+      totalt++;
+      var rutor = Array.prototype.slice.call(box.querySelectorAll('.mult-upp-ans'));
+      rutor.forEach(function(i){ i.classList.remove('correct', 'wrong'); });
+      var gm = box.nextElementSibling; if(gm && gm.classList.contains('ovn-mark')) gm.remove();
+      if(rutor.every(function(i){ return !String(i.value).trim(); })) return;   // obesvarad: räknad, men inte rättad
+      var res = UppstYta.mult.ratta(box, { las:false });
+      var mk = document.createElement('span'); mk.className = 'ovn-mark ' + (res.ratt ? 'ok' : 'fel'); mk.textContent = res.ratt ? '✓' : '✗';
+      box.insertAdjacentElement('afterend', mk);
+      if(res.ratt) ratt++;
+      // Loggning ur bladets data (data-logg på raden eller gruppen), inte ur adressen.
+      var _gu = box.closest('[data-logg]') || box.closest('.ovn-grupp'), _nu = _gu && _gu.getAttribute('data-logg');
+      var _su = (_gu && _gu.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
+      if(_nu && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(box, _su, _nu, res.ratt);
+    });
+
     // Rätta flervalsfrågor
     rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){
       totalt++;
@@ -2155,6 +2214,7 @@ function bygg_blad(rotEl, blad){
       b.classList.remove('is-vald','correct','wrong','missad');
     });
     rotEl.querySelectorAll('.forklara-facit').forEach(function(f){ f.remove(); });
+    rotEl.querySelectorAll('.ovn-uppst input').forEach(function(i){ i.value = ''; i.classList.remove('correct', 'wrong', 'struck'); });
     rotEl.querySelectorAll('.ovn-ordnaklick').forEach(function(rad){
       rad.classList.remove('ovn-ordna-ok', 'ovn-ordna-fel');
       delete rad.dataset.ordnaLast;

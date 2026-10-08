@@ -810,53 +810,8 @@ function renderUppstallningMult(body, backFn, cfg){
             p1:t.m * ones, p2:t.m * tens, answer:t.answer, answerDisplay:d3DecStr(t.answer, totalDec), answerValue:t.answer / Math.pow(10, totalDec)};
   }
 
-  // En cell: digit (fast), comma (fast), input (svar), eller empty
-  function cellHTML(c){
-    if(c.t === 'fixed')  return '<div class="cell">' + c.v + '</div>';
-    if(c.t === 'comma')  return '<div class="cell" style="color:var(--c-metod);font-weight:700;">,</div>';
-    if(c.t === 'op')     return '<div class="cell opcell">' + c.v + '</div>';
-    if(c.t === 'input')  return '<div class="cell"><input type="text" class="mult-upp-ans" data-expect="' + c.v + '" inputmode="numeric" maxlength="1" autocomplete="off"></div>';
-    return '<div class="cell"></div>'; // empty
-  }
-  function rowHTML(opCell, cells, W){
-    let pad = [];
-    for(let i=0; i<W-cells.length; i++) pad.push({t:'empty'});
-    const all = pad.concat(cells);
-    let h = '<div class="mult-upp-row">' + cellHTML(opCell);
-    for(let i=0; i<all.length; i++) h += cellHTML(all[i]);
-    return h + '</div>';
-  }
-  // gör cellrad av en sträng: siffror -> input, komma -> comma
-  function strToInputCells(str){
-    return str.split('').map(function(ch){
-      return ch === ',' ? {t:'comma'} : {t:'input', v:ch};
-    });
-  }
-  function strToFixedCells(str){
-    return str.split('').map(function(ch){
-      return ch === ',' ? {t:'comma'} : {t:'fixed', v:ch};
-    });
-  }
-
-  function minnesPanel(antal, visaTips){
-    antal = antal || 2;
-    let h = '<div class="mult-minne-panel"><div class="mult-minne-rubrik">minnessiffror</div><div class="mult-minne-rutor">';
-    for(let i=0; i<antal; i++){
-      h += '<input type="text" class="mult-minne-ruta" inputmode="numeric" maxlength="1" autocomplete="off">';
-    }
-    h += '</div>' + (visaTips ? '<div class="mult-minne-tips">Klicka på en siffra för att stryka den när den är använd.</div>' : '') + '</div>';
-    return h;
-  }
-  function bindMinne(card){
-    card.querySelectorAll('.mult-minne-ruta').forEach(function(inp){
-      inp.addEventListener('click', function(){
-        if(inp.value.trim() !== '' && document.activeElement !== inp){
-          inp.classList.toggle('struck');
-        }
-      });
-      inp.addEventListener('dblclick', function(){ inp.classList.toggle('struck'); });
-    });
-  }
+  // Uppställningens yta (celler, rader, minnespanel, rättning per ruta) är utbruten till
+  // js/motor/metod/uppstallning-yta.js — delad med öva-bladen (order 2026-10-07).
 
   // ---------- FÖRKLARING / DEMO ----------
   function renderExplain(){
@@ -926,52 +881,14 @@ function renderUppstallningMult(body, backFn, cfg){
     uppgNr++;
     const task = genTask();
     const visaTips = uppgNr <= 2;
-    let boxHTML, infoHTML;
+    const boxHTML = UppstYta.mult.html(task, {tips: visaTips});
+    let infoHTML;
 
     if(task.kind === 'enkel' || task.kind === 'decimal'){
-      const ansStr = task.kind === 'enkel' ? String(task.answer)
-        : (function(){
-            const s = task.answerIntStr;
-            return s.slice(0, s.length-task.dec) + ',' + s.slice(s.length-task.dec);
-          })();
-      const ansCells = strToInputCells(ansStr);
-      const mCells = strToFixedCells(task.mDisplay);
-      const W = ansCells.length;
-      let rows = '';
-      rows += rowHTML({t:'op',v:''}, mCells, W);
-      rows += rowHTML({t:'op',v:'·'}, [{t:'fixed',v:String(task.d)}], W);
-      rows += '<div class="mult-upp-line"></div>';
-      rows += rowHTML({t:'op',v:''}, ansCells, W);
-      var minneN = String(task.mDisplay).replace(/[^0-9]/g,'').length;   // en ruta per talsiffra
-      boxHTML = '<div class="mult-upp-box"><div class="mult-upp-flex">'
-        + '<div class="mult-upp-rows-wrap"><div class="mult-upp-rows">' + rows + '</div></div>'
-        + minnesPanel(minneN, visaTips)
-      + "</div></div>";
       infoHTML = task.kind === 'decimal'
         ? 'Räkna som vanligt med siffrorna. <strong>Decimalkommat förs rakt ner</strong> i svaret – det står redan på plats.'
         : 'Multiplicera kolumn för kolumn från höger. Använd minnesrutorna till höger som stöd.';
     } else {
-      // tvåsiffrig multiplikator: två delprodukter + summa
-      const sumStr = task.answerDisplay || String(task.answer);
-      const W = sumStr.length;
-      const p1Cells = strToInputCells(String(task.p1));
-      // delprodukt 2 skiftas ett steg vänster: en tom cell längst till höger
-      const p2Cells = strToInputCells(String(task.p2)).concat([{t:'empty'}]);
-      const sumCells = strToInputCells(sumStr);
-      const mCells = strToFixedCells(task.mDisplay);
-      const dCells = strToFixedCells(task.dDisplay || String(task.d));
-      let rows = '';
-      rows += rowHTML({t:'op',v:''}, mCells, W);
-      rows += rowHTML({t:'op',v:'·'}, dCells, W);
-      rows += '<div class="mult-upp-line"></div>';
-      rows += rowHTML({t:'op',v:''}, p1Cells, W);
-      rows += rowHTML({t:'op',v:'+'}, p2Cells, W);
-      rows += '<div class="mult-upp-line"></div>';
-      rows += rowHTML({t:'op',v:''}, sumCells, W);
-      boxHTML = '<div class="mult-upp-box"><div class="mult-upp-flex">'
-        + '<div class="mult-upp-rows-wrap"><div class="mult-upp-rows">' + rows + '</div></div>'
-        + minnesPanel(3, visaTips)
-      + "</div></div>";
       const mDigits = task.mDisplay.replace(',', '');
       const harKomma = /,/.test(task.mDisplay) || /,/.test(task.dDisplay || '');
       infoHTML = 'Räkna <strong>' + mDigits + ' · ' + task.ones + '</strong> på första raden och '
@@ -997,7 +914,7 @@ function renderUppstallningMult(body, backFn, cfg){
 
     const card = body.querySelector('.exercise-card');
     bindKeypad(card);
-    bindMinne(card);
+    UppstYta.mult.bindMinne(card);
     const ansInputs = Array.from(card.querySelectorAll('.mult-upp-ans'));
     // Ingen ruta förvald (order 2026-09-20): var eleven börjar — höger eller vänster — hör till förståelsen av metoden.
     // (Förr: fokus på entalscellen efter 50 ms.)
@@ -1012,17 +929,7 @@ function renderUppstallningMult(body, backFn, cfg){
     });
 
     function check(){
-      let correct = true;
-      ansInputs.forEach(function(inp){
-        const exp = inp.dataset.expect;
-        inp.disabled = true;
-        if(inp.value.trim() === exp){
-          inp.classList.add('correct');
-        } else {
-          inp.classList.add('wrong');
-          correct = false;
-        }
-      });
+      const correct = UppstYta.mult.ratta(card).ratt;
       const fb = document.getElementById('upp-fb');
       fb.className = 'rakna-uppdela-feedback show';
       document.getElementById('upp-check').disabled = true;

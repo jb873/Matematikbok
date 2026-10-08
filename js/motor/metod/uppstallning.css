@@ -1,0 +1,92 @@
+/* uppstallning.css — UPPSTÄLLNINGENS YTA, formgivningen (order 2026-10-07 "Uppställningen i
+   datorn, även i öva"). Hör till js/motor/metod/uppstallning-yta.js.
+
+   Flyttad ordagrant ur ak7-k1-ram.html:s inline-<style> — ramen länkar filen på exakt den plats
+   blocket stod, så kaskadordningen är densamma som förut. Delas med öva-bladen.
+
+   Variablerna är ramens; reservvärdena är ramens egna värden, så att en sida utan ramens palett
+   (öva-bladen) ritar ytan likadant. I ramen gäller variablerna och reserven används aldrig.
+
+   Ramens regler för smal kolumn (min-width:max-content, @media 520px) och förklaringsdemot
+   (.mult-demo-steg, .mult-minne-demo*) står kvar i ramen: de delas med division och
+   addition/subtraktion, eller hör bara till ramens kort. */
+
+/* ==== DEL 3: UPPSTÄLLNING MULTIPLIKATION ==== */
+.mult-upp-box{
+  display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px;
+  font-family:var(--mono,'Source Serif 4',Georgia,serif);padding:16px 22px;background:var(--bg-card,#ffffff);
+  border:1px solid var(--line,#e5e0d8);border-radius:var(--radius,10px);min-width:160px;
+}
+.mult-upp-row{display:flex;gap:2px;justify-content:flex-end;align-items:center}
+.mult-upp-row .cell{
+  width:40px;height:44px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:500;color:var(--ink,#12110f);
+}
+.mult-upp-row .opcell{width:30px;font-size:24px;font-weight:700;color:var(--c-metod,#B45309)}
+.mult-upp-carry{display:flex;gap:2px;justify-content:flex-end;min-height:22px}
+.mult-upp-carry .cell{
+  width:40px;height:20px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--error,#dc2626);font-weight:700;
+}
+.mult-upp-line{width:100%;height:2px;background:var(--ink,#12110f);margin:5px 0}
+.mult-upp-ans{
+  width:40px;height:46px;font-family:var(--mono,'Source Serif 4',Georgia,serif);font-size:24px;font-weight:600;
+  text-align:center;border:2px solid var(--c-metod,#B45309);border-radius:var(--radius-sm,6px);
+  background:var(--primary-bg,#FFF7ED);color:var(--ink,#12110f);outline:none;padding:0;
+}
+.mult-upp-ans:focus{border-color:var(--primary,#B45309);background:#fff;box-shadow:0 0 0 3px rgba(180,83,9,.15)}
+.mult-upp-ans.correct{background:var(--success-bg,#dcfce7);border-color:var(--success,#16a34a);color:var(--success,#16a34a)}
+.mult-upp-ans.wrong{background:var(--error-bg,#fee2e2);border-color:var(--error,#dc2626);color:var(--error,#dc2626)}
+.mult-upp-carrin{
+  width:30px;height:24px;font-family:var(--mono,'Source Serif 4',Georgia,serif);font-size:13px;font-weight:700;
+  text-align:center;border:1.5px dashed var(--line,#e5e0d8);border-radius:4px;
+  background:var(--bg-soft,#f9f5f0);color:var(--error,#dc2626);outline:none;padding:0;
+}
+.mult-upp-carrin:focus{border-color:var(--error,#dc2626);background:var(--error-bg,#fee2e2)}
+
+/* ==== UPPSTÄLLNING: LAYOUT MED MINNESSIFFROR TILL HÖGER ==== */
+.mult-upp-flex{display:flex;align-items:flex-start;gap:14px}
+.mult-upp-rows-wrap{display:flex}
+.mult-upp-rows{display:flex;flex-direction:column;gap:2px}
+.mult-minne-panel{
+  border:1px dashed var(--line,#e5e0d8);border-radius:var(--radius-sm,6px);
+  padding:8px 10px;background:var(--bg-soft,#f9f5f0);max-width:140px;
+}
+.mult-minne-rubrik{
+  font-size:10px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--ink-faint,#7a6e65);margin-bottom:6px;text-align:center;
+}
+.mult-minne-rutor{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.mult-minne-ruta{
+  width:30px;height:30px;font-family:var(--mono,'Source Serif 4',Georgia,serif);font-size:15px;font-weight:700;
+  text-align:center;border:1.5px dashed var(--line,#e5e0d8);border-radius:4px;
+  background:#fff;color:var(--error,#dc2626);outline:none;padding:0;cursor:pointer;
+}
+.mult-minne-ruta:focus{border-color:var(--error,#dc2626);background:var(--error-bg,#fee2e2)}
+.mult-minne-ruta.struck{
+  position:relative;color:var(--ink-faint,#7a6e65);
+  background:repeating-linear-gradient(135deg,transparent,transparent 9px,var(--error,#dc2626) 9px,var(--error,#dc2626) 11px);
+}
+.mult-minne-tips{font-size:10px;color:var(--ink-faint,#7a6e65);margin-top:7px;line-height:1.4;text-align:center}
+
+/* ==== ÖVA-BLADETS RAD (radtyp 'uppstallning', blad-karna-b.js) ====
+   Bara inuti .ovn-uppst — finns inte i ramen, så ramens uppställning påverkas inte.
+   TELEFON (beslut 2026-10-07): kolumnerna krymper så att uppställningen ryms i spalten, ingen
+   sidledsrullning. Styrs av SPALTENS bredd (container query), inte skärmens: d2:s spalt är
+   198 px på en 360 px-skärm (bladets vadderingar i flera lager), så en skärmgräns hade slagit fel.
+   Minnespanelen läggs under uppställningen när den inte ryms bredvid. */
+.ovn-uppst{container-type:inline-size;flex:1 1 100%;min-width:0;max-width:100%}
+.ovn-uppst .mult-upp-box{box-sizing:border-box;max-width:100%}
+@container (max-width:400px){
+  .ovn-uppst .mult-upp-flex{flex-wrap:wrap;gap:8px}
+  .ovn-uppst .mult-minne-panel{max-width:none}
+  .ovn-uppst .mult-upp-row .cell,.ovn-uppst .mult-upp-ans{width:32px}
+  .ovn-uppst .mult-upp-row .opcell{width:20px}
+  .ovn-uppst .mult-upp-box{padding:12px 10px;min-width:0}
+}
+@container (max-width:240px){
+  .ovn-uppst .mult-upp-row .cell{width:26px;height:38px;font-size:22px}
+  .ovn-uppst .mult-upp-ans{width:26px;height:38px;font-size:20px}
+  .ovn-uppst .mult-upp-row .opcell{width:16px;font-size:20px}
+  .ovn-uppst .mult-upp-box{padding:10px 6px}
+}
