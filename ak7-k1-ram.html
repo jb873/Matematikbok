@@ -3675,6 +3675,23 @@ const TEST_GENERATORS = {
             };
           })
         };
+      },
+
+      // ÖVA-TÄCKNING d1 (Tals egenskaper "Vilket tal har faktoriserats?") → primtal:baklanges.
+      // Tre eller fyra primfaktorer i stigande ordning (2 · 2 · 5 · 5, 2 · 5 · 19); produkt ≤ 300.
+      function genFaktorProdukt(seen){
+        var subs = [], tries = 0;
+        while(subs.length < 3 && tries < 80){ tries++;
+          var f = (subs.length === 2)
+            ? [randPick([2, 3]), randPick([2, 3, 5]), randPick([11, 13, 17, 19])]                 // ett större primtal, som 2 · 5 · 19
+            : [0, 0, 0, 0].slice(0, rInt(3, 4)).map(function(){ return randPick([2, 2, 3, 3, 5, 7]); });
+          f.sort(function(a, b){ return a - b; });
+          var n = f.reduce(function(p, x){ return p * x; }, 1), key = 'fp-' + f.join('.');
+          if(n > 300 || seen.has(key)) continue; seen.add(key);
+          subs.push({ label: String.fromCharCode(97 + subs.length) + ')', type: 'numeric',
+            prompt: 'Vilket tal har faktoriserats?   ' + f.join(' · '), answer: n, explanation: f.join(' · ') + ' = ' + n + '.' });
+        }
+        return subs.length ? {generator:'faktor-produkt', title:'Vilket tal har faktoriserats?', omrade:'primtal', subs:subs} : null;
       }
     ],
 
@@ -3764,6 +3781,28 @@ const TEST_GENERATORS = {
             };
           })
         };
+      },
+
+      // ÖVA-TÄCKNING d1 (Tals egenskaper "Skriv tre tal som är delbara med 2, 3, 4 och 5") → delbarhet:konstruera.
+      // Öva godtar valfri multipel; här ger ett intervall EXAKT EN multipel → entydigt facit i numeric-rättningen.
+      // Delar-mängder med fälla (4 och 6 → 12, inte 24; 6 och 8 → 24) blandas med öva-mängden 2, 3, 4, 5.
+      function genKonstrueraDelbar(seen){
+        var MANGDER = [[2, 3, 4, 5], [2, 3, 4, 5], [3, 4], [4, 5], [2, 3, 5], [4, 6], [6, 8], [2, 9], [3, 5]];
+        var sgd = function(a, b){ return b ? sgd(b, a % b) : a; };
+        var subs = [], tries = 0;
+        while(subs.length < 3 && tries < 120){ tries++;
+          var D = randPick(MANGDER), L = D.reduce(function(a, b){ return a * b / sgd(a, b); }, 1), m = L * rInt(2, 9);
+          var lo = Math.floor(m / 10) * 10 - 10 * rInt(0, 2), hi = Math.ceil(m / 10) * 10 + 10 * rInt(0, 2);
+          if(lo >= m) lo -= 10; if(hi <= m) hi += 10;
+          var inne = 0; for(var x = lo + 1; x < hi; x++) if(x % L === 0) inne++;
+          if(inne !== 1 || lo % L === 0 || hi % L === 0 || lo < 1) continue;
+          var key = 'kd-' + D.join('.') + '-' + lo + '-' + hi; if(seen.has(key)) continue; seen.add(key);
+          var lista = D.slice(0, -1).join(', ') + ' och ' + D[D.length - 1];
+          subs.push({ label: String.fromCharCode(97 + subs.length) + ')', type: 'numeric',
+            prompt: 'Skriv ett tal mellan ' + lo + ' och ' + hi + ' som är delbart med ' + lista + '.', answer: m,
+            explanation: 'Delbart med ' + lista + ' = delbart med ' + L + '. Mellan ' + lo + ' och ' + hi + ' finns bara ' + m + '.' });
+        }
+        return subs.length ? {generator:'konstruera-delbar', title:'Konstruera ett tal', omrade:'delbarhet', subs:subs} : null;
       }
     ]
   },
@@ -3795,6 +3834,58 @@ const TEST_GENERATORS = {
           });
         }
         return subs.length ? {generator:'udda-jamn', title:'Vilka tal är udda eller jämna?', omrade:'siffror', subs:subs} : null;
+      },
+
+      // ÖVA-TÄCKNING d1 (Tiosystemet "Använd siffrorna 4, 5, 6 och 7 och skriv") → siffror:begrepp.
+      // Fyra olika siffror 1–9, varje siffra en gång: största / minsta / närmast X 000 / största udda.
+      // Facit räknas fram ur alla 24 ordningar; "närmast" med lika avstånd åt två håll kastas.
+      function genPosSiffror(seen){
+        var perm = function(a){ if(a.length < 2) return [a]; var ut = []; a.forEach(function(x, i){ perm(a.slice(0, i).concat(a.slice(i + 1))).forEach(function(p){ ut.push([x].concat(p)); }); }); return ut; };
+        var subs = [], tries = 0, typer = shuffle(['storst', 'minst', 'narmast', 'udda']);
+        while(subs.length < 3 && tries < 80){ tries++;
+          var s = []; while(s.length < 4){ var x = rInt(1, 9); if(s.indexOf(x) < 0) s.push(x); }
+          s.sort(function(a, b){ return a - b; });
+          var tal = perm(s).map(function(p){ return Number(p.join('')); });
+          var typ = typer[subs.length], fraga, svar, forkl;
+          if(typ === 'storst'){ svar = Math.max.apply(null, tal); fraga = 'det största talet du kan'; forkl = 'Största siffran först: ' + svar + '.'; }
+          else if(typ === 'minst'){ svar = Math.min.apply(null, tal); fraga = 'det minsta talet du kan'; forkl = 'Minsta siffran först: ' + svar + '.'; }
+          else if(typ === 'udda'){ var u = tal.filter(function(n){ return n % 2; }); if(!u.length) continue; svar = Math.max.apply(null, u); fraga = 'det största udda talet du kan'; forkl = 'Ett udda tal slutar på en udda siffra: ' + svar + '.'; }
+          else { var mal = rInt(s[0] + 1, s[3]) * 1000, avst = tal.map(function(n){ return Math.abs(n - mal); }), min = Math.min.apply(null, avst);
+            if(avst.filter(function(d){ return d === min; }).length > 1) continue;
+            svar = tal[avst.indexOf(min)]; fraga = 'det tal som ligger närmast ' + String(mal).replace(/(\d)(\d{3})$/, '$1 $2'); forkl = svar + ' ligger närmast (' + min + ' ifrån).'; }
+          var key = 'ps-' + s.join('') + '-' + typ; if(seen.has(key)) continue; seen.add(key);
+          subs.push({ label: String.fromCharCode(97 + subs.length) + ')', type: 'numeric',
+            prompt: 'Använd siffrorna ' + s.slice(0, 3).join(', ') + ' och ' + s[3] + ' (en gång var) och skriv ' + fraga + '.',
+            answer: svar, explanation: forkl });
+        }
+        return subs.length ? {generator:'pos-siffror', title:'Bilda tal av siffrorna', omrade:'siffror', subs:subs} : null;
+      },
+
+      // ÖVA-TÄCKNING d1 (Tiosystemet "Skriv följande tal med siffror") → siffror:namn. Tal 100–29 999 i ord,
+      // skrivna som öva: "fyrahundra tjugofem", "sexhundrafem", "femtusen sjuhundra nittio", "fjortontusen fem".
+      // Varannan uppgift har en nolla inuti (605, 14 005) — det är där felen sitter.
+      function genTalOrd(seen){
+        var EN = ['', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio', 'tio', 'elva', 'tolv', 'tretton', 'fjorton', 'femton', 'sexton', 'sjutton', 'arton', 'nitton'];
+        var TIO = ['', '', 'tjugo', 'trettio', 'fyrtio', 'femtio', 'sextio', 'sjuttio', 'åttio', 'nittio'];
+        var under100 = function(n){ return n < 20 ? EN[n] : TIO[Math.floor(n / 10)] + EN[n % 10]; };
+        var under1000 = function(n){ var h = Math.floor(n / 100), r = n % 100, d = [];
+          if(h) d.push(EN[h] + 'hundra' + (r && r < 10 ? EN[r] : ''));   // sexhundrafem: ental direkt på hundra
+          if(r >= 10 || (r && !h)) d.push(under100(r));
+          return d.join(' '); };
+        var ord = function(n){ var t = Math.floor(n / 1000), r = n % 1000, d = [];
+          if(t) d.push((t < 20 ? EN[t] : under100(t)) + 'tusen');
+          if(r) d.push(under1000(r));
+          return d.join(' ').replace(/ttt/g, 'tt'); };   // tjugoett + tusen = tjugoettusen (tre lika konsonanter → två)
+        var subs = [], tries = 0;
+        while(subs.length < 3 && tries < 80){ tries++;
+          var noll = subs.length % 2 === 1, t = randPick([0, rInt(2, 29)]), n;
+          if(noll) n = t ? t * 1000 + randPick([rInt(1, 9), rInt(1, 9) * 100 + rInt(1, 9), rInt(1, 9) * 100]) : rInt(1, 9) * 100 + rInt(1, 9);
+          else n = t * 1000 + rInt(1, 9) * 100 + rInt(11, 99);
+          var key = 'to-' + n; if(seen.has(key)) continue; seen.add(key);
+          subs.push({ label: String.fromCharCode(97 + subs.length) + ')', type: 'numeric',
+            prompt: 'Skriv med siffror:   ' + ord(n), answer: n, explanation: ord(n) + ' = ' + String(n).replace(/(\d)(\d{3})$/, '$1 $2') + '.' });
+        }
+        return subs.length ? {generator:'tal-ord', title:'Skriv talet med siffror', omrade:'siffror', subs:subs} : null;
       }
     ]
   },
@@ -3876,6 +3967,43 @@ const TEST_GENERATORS = {
           subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'intervall', prompt:prompt, min:lo, max:hi, incLow:!strikt, incHigh:!strikt, exempel:komma(ex), explanation:'t.ex. '+komma(ex)+'.' });
         }
         return subs.length ? {generator:'pos-intervall', title:'Skriv ett tal i intervallet', omrade:'position', subs:subs} : null;
+      },
+
+      // ÖVA-TÄCKNING d1 (Tiosystemet "Skriv som tal" / "Vilket tal ska stå i rutan?") → position:enhet.
+      // Räknas i HELTAL av tusendelar (exp −3 … 2) → inga flyttalsfel (19 hundradelar = 0,19, inte 0,18999…).
+      function genVaxlaTillTal(seen){
+        var E = [{n:'hundratal', e:2}, {n:'tiotal', e:1}, {n:'tiondelar', e:-1}, {n:'hundradelar', e:-2}];
+        var subs = [], tries = 0;
+        while(subs.length < 3 && tries < 80){ tries++;
+          var u = E[(subs.length + rInt(0, 3)) % 4], k = rInt(11, 49);
+          if(k % 10 === 0) continue;
+          var svar = avr(k * Math.pow(10, u.e + 3) / 1000, 3), key = 'vt-' + k + u.n;
+          if(seen.has(key)) continue; seen.add(key);
+          subs.push({ label: String.fromCharCode(97 + subs.length) + ')', type: 'numeric',
+            prompt: 'Skriv som tal:   ' + k + ' ' + u.n, answer: svar, explanation: k + ' ' + u.n + ' = ' + komma(svar) + '.' });
+        }
+        return subs.length ? {generator:'vaxla-till-tal', title:'Skriv som tal', omrade:'position', subs:subs} : null;
+      },
+      function genVaxlaAntal(seen){
+        var E = {tusental:3, hundratal:2, tiotal:1, ental:0, tiondelar:-1, hundradelar:-2, tusendelar:-3};
+        var subs = [], tries = 0;
+        while(subs.length < 3 && tries < 80){ tries++;
+          var prompt, svar, key, forkl;
+          if(subs.length !== 1){   // ett tal = ___ enheter (160 = ___ tiotal, 1,9 = ___ hundradelar)
+            var u = randPick(['tiotal', 'hundratal', 'tiondelar', 'hundradelar']), k = rInt(12, 99);
+            if(k % 10 === 0) continue;
+            var tal = avr(k * Math.pow(10, E[u] + 3) / 1000, 3);
+            prompt = 'Vilket tal ska stå i rutan?   ' + komma(tal) + ' = ___ ' + u; svar = k; key = 'va-' + tal + u; forkl = komma(tal) + ' = ' + k + ' ' + u + '.';
+          } else {                 // en enhet = ___ mindre enheter (3 ental = ___ tiondelar, 4 tiondelar = ___ tusendelar)
+            var namn = Object.keys(E), stor = randPick(['ental', 'tiotal', 'tiondelar', 'hundratal']), steg = rInt(1, 2);
+            var liten = namn.filter(function(x){ return E[x] === E[stor] - steg; })[0], a = rInt(2, 9);
+            if(!liten) continue;
+            svar = a * Math.pow(10, steg); prompt = 'Vilket tal ska stå i rutan?   ' + a + ' ' + stor + ' = ___ ' + liten; key = 'vb-' + a + stor + liten; forkl = a + ' ' + stor + ' = ' + svar + ' ' + liten + '.';
+          }
+          if(seen.has(key)) continue; seen.add(key);
+          subs.push({ label: String.fromCharCode(97 + subs.length) + ')', type: 'numeric', prompt: prompt, answer: svar, explanation: forkl });
+        }
+        return subs.length ? {generator:'vaxla-antal', title:'Vilket tal ska stå i rutan?', omrade:'position', subs:subs} : null;
       },
 
       // position:resonera — jämför decimaltal (flerval via binary)
@@ -4296,7 +4424,25 @@ const TEST_GENERATORS = {
           explanation:'Minskar med '+step+' varje steg → '+M(t[3])+', '+M(t[4])+'.'});
       }
       return subs.length? {generator:'neg-fallande', title:'Fallande talföljd', omrade:'neg-begrepp', subs:subs} : null;
-    }
+    },
+    // ÖVA-TÄCKNING d3: "Storleksordna talen från minst till störst" (fem tal, minst två negativa). Flerval
+    // mellan rader; distraktorerna är de typiska felen: ordnat efter avstånd från noll, de negativa i
+    // omvänd ordning (−1 < −3 < −8), störst först.
+    ProvbyggarMotor.gen.flerval('neg-ordna','Storleksordna negativa tal','neg-begrepp', function(){
+      var M=function(n){return(''+n).replace('-','−');}, rad=function(a){return a.map(M).join(',  ');};
+      var tal=[], antalNeg=rInt(2,3);
+      while(tal.length<5){ var x=(tal.length<antalNeg)?-rInt(1,12):rInt(0,12); if(tal.indexOf(x)<0) tal.push(x); }
+      var ratt=tal.slice().sort(function(a,b){return a-b;});
+      var avstand=tal.slice().sort(function(a,b){return (Math.abs(a)-Math.abs(b))||(a-b);});
+      var neg=ratt.filter(function(x){return x<0;}), ick=ratt.filter(function(x){return x>=0;});
+      var omvNeg=neg.slice().reverse().concat(ick), storstForst=ratt.slice().reverse();
+      var opts=[rad(ratt), rad(avstand), rad(omvNeg), rad(storstForst)];
+      if(opts.some(function(o, i){ return opts.indexOf(o)!==i; })) return null;   // distraktor = facit → nytt försök
+      var visad=shuffle(tal.slice());
+      var facit=opts[0];
+      return {key:ratt.join(','), prompt:'Talen '+rad(visad)+'. Vilken rad står från minst till störst?', options:shuffle(opts.slice()), answer:facit,
+        expl:'Minst till störst: '+rad(ratt)+'. Ett negativt tal är mindre ju längre från noll det ligger.'};
+    })
   ]},
   'neg-rakna': { snabb: [
     ProvbyggarMotor.gen.numeric('neg-addsub','Addition och subtraktion med negativa tal','neg-rakna', function(){
@@ -4493,6 +4639,12 @@ const GEN_NOD = {
   'add-tvatal':     'add-rakna:rakna', 'add-term':        'add-rakna:rakna',       // d2
   'neg-losut-as':   'neg-rakna:addsub', 'neg-dubbel':     'neg-rakna:addsub',      // d3
   'neg-fallande':   'neg-begrepp:begrepp',                                          // d3
+  'neg-ordna':      'neg-begrepp:begrepp',                                          // d3 storleksordna
+  'pos-siffror':    'siffror:begrepp',                                              // d1 bilda tal av siffror
+  'tal-ord':        'siffror:namn',                                                 // d1 tal i ord → siffror
+  'vaxla-till-tal': 'position:enhet', 'vaxla-antal': 'position:enhet',             // d1 växla enheter
+  'faktor-produkt': 'primtal:baklanges',                                            // d1 vilket tal har faktoriserats
+  'konstruera-delbar': 'delbarhet:konstruera',                                      // d1 konstruera tal delbara med flera
   'mittemellan':    'position:rakna', 'pos-intervall':    'position:rakna',        // d1
   // MAPPNINGS-FIX (spec-kontroll FAS 2.C): div-sma-dec (ren decimal-division, 12/0,1) låg fel under
   // :stora ("Stora tal") — hör till :sma. Remappad (åk7 d7:stora blir rent stora-tal). mult-sma-dec

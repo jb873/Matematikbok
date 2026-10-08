@@ -21,4 +21,10 @@ window.OVA_KOPPLING = {
   'utvform-lasut':  'blad:blad-k1-d1:Positionssystemet',       // utvecklad:rakna
   'mittemellan':    'blad:blad-k1-d1:Räkna i positionssystemet', // position:rakna
   'pos-intervall':  'blad:blad-k1-d1:Räkna i positionssystemet', // position:rakna
+  // test-täcker-öva (2026-10-08): generatorer byggda för d1-bladens grupper (Tiosystemet / Tals egenskaper)
+  'tal-ord':        'blad:blad-k1-d1:Tiosystemet',             // siffror:namn — "Skriv följande tal med siffror"
+  'vaxla-till-tal': 'blad:blad-k1-d1:Tiosystemet',             // position:enhet — "Skriv som tal"
+  'vaxla-antal':    'blad:blad-k1-d1:Tiosystemet',             // position:enhet — "Vilket tal ska stå i rutan?"
+  'faktor-produkt': 'blad:blad-k1-d1:Tals egenskaper',         // primtal:baklanges — "Vilket tal har faktoriserats?"
+  'konstruera-delbar': 'blad:blad-k1-d1:Tals egenskaper',      // delbarhet:konstruera — "Skriv tre tal som är delbara med …"
 };
