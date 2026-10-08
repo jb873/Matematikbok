@@ -75,7 +75,10 @@
     if(task.kind === 'enkel' || task.kind === 'decimal'){
       const ansStr = task.kind === 'enkel' ? String(task.answer)
         : (function(){
-            const s = task.answerIntStr;
+            // Svar under 1 (0,283 · 3 = 0,849): nollan före kommat fylls på och blir en egen
+            // svarsruta med facit — förr ritades ",849" och nollan rättades inte (beslut 2026-10-07).
+            let s = task.answerIntStr;
+            while(s.length <= task.dec) s = '0' + s;
             return s.slice(0, s.length-task.dec) + ',' + s.slice(s.length-task.dec);
           })();
       const ansCells = strToInputCells(ansStr);
