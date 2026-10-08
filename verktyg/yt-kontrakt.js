@@ -96,6 +96,13 @@ const PROBE = `(function(){
     AK8_UI.pNum = function(x){ return _tu.test(String(x)) ? NaN : _oN(x); };
     AK8_UI.pInt = function(x){ return _tu.test(String(x)) ? NaN : _oI(x); };
   }
+  // SABBA uppst-tryck / uppst-form / uppst-bredd: negativ verifiering av UPPSTÄLLNING-benen.
+  // tryck: keypadens knapptryck stoppas innan det når rutan · form: svarsrutan för smal för en
+  // siffra · bredd: kolumnerna så breda att uppställningen inte ryms i telefonspalten.
+  if(SABBA === 'uppst-tryck') document.addEventListener('mousedown', function(e){
+    if(e.target.closest && e.target.closest('.kp-key') && document.activeElement && document.activeElement.classList.contains('mult-upp-ans')) e.stopImmediatePropagation();
+  }, true);
+  if(SABBA === 'uppst-form'){ var _sf = document.createElement('style'); _sf.textContent = '.ovn-uppst .mult-upp-ans{width:8px !important}'; document.head.appendChild(_sf); }
   var ut = { onerr: window.__onerr || null, ytor: [] };
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles: true })); }
   function synlig(el){ return !!el.offsetParent; }
@@ -125,7 +132,8 @@ const PROBE = `(function(){
 
   function mat(namn, root){
     var alla = rutor(root);
-    if(!alla.length) return;
+    var uppstYta = Array.prototype.filter.call(root.querySelectorAll('.ovn-uppst'), synlig);
+    if(!alla.length && !uppstYta.length) return;
     var y = { yta: namn, rutor: alla.length, brott: [] };
 
     // KEYPAD
@@ -397,6 +405,41 @@ const PROBE = `(function(){
       }
     }
 
+    /* UPPSTÄLLNING (radtyp 'uppstallning', order 2026-10-07). Svarsrutorna bär inte .ovn-in och
+       står utanför benen ovan: de har en FORM — en siffra per ruta — och ska inte växa. GROW-benets
+       fyrsiffriga provsträng hade fällt varje ruta för något den aldrig ska bära. Tre egna ben:
+         TRYCK  keypadens 5 når fram till svarsrutan (bladets delade keypad, inte motorns egen)
+         FORM   en siffra ryms i rutan, mätt med canvas i rutans eget typsnitt
+         RYMS   uppställningen (Range över innehållet) sticker inte ut ur spalten — vid 360 px
+                mäts samma sak i BREDD-körningen nedan */
+    y.uppst = uppstYta.length;
+    uppstYta.forEach(function(u, ui){
+      var namnU = 'UPPSTÄLLNING ' + (ui + 1);
+      var cell = u.querySelector('.mult-upp-ans');
+      if(!cell){ y.brott.push(namnU + ': inga svarsrutor'); return; }
+      cell.focus(); ev(cell, 'focusin');
+      var kU = synligKeypad(), k5 = kU && kU.querySelector('.kp-key[data-key="5"]');
+      var fore = cell.value;
+      cell.value = '';
+      if(!k5) y.brott.push(namnU + ' TRYCK: ingen keypad för svarsrutan');
+      else {
+        k5.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        if(cell.value !== '5') y.brott.push(namnU + ' TRYCK: keypadens 5 når inte fram till svarsrutan (' + JSON.stringify(cell.value) + ')');
+      }
+      cell.value = fore; ev(cell, 'input');
+      var csU = getComputedStyle(cell), cU = document.createElement('canvas').getContext('2d');
+      cU.font = csU.fontStyle + ' ' + csU.fontWeight + ' ' + csU.fontSize + ' ' + csU.fontFamily;
+      var inreU = cell.getBoundingClientRect().width - parseFloat(csU.paddingLeft || 0) - parseFloat(csU.paddingRight || 0)
+                - parseFloat(csU.borderLeftWidth || 0) - parseFloat(csU.borderRightWidth || 0);
+      var siffra = Math.ceil(cU.measureText('8').width);
+      if(siffra > Math.round(inreU) + 1) y.brott.push(namnU + ' FORM: en siffra behöver ' + siffra + ' px men rutan ger ' + Math.round(inreU));
+      var gU = (u.closest('.ovn-grupp') || u.parentElement).getBoundingClientRect();
+      var rU = document.createRange(); rU.selectNodeContents(u.querySelector('.mult-upp-box') || u);
+      var rrU = rU.getBoundingClientRect();
+      var utanfor = Math.max(0, Math.round(rrU.right - gU.right)) + Math.max(0, Math.round(gU.left - rrU.left));
+      if(utanfor > 1) y.brott.push(namnU + ' RYMS: sticker ut ' + utanfor + ' px ur spalten (' + Math.round(rrU.width) + ' px i ' + Math.round(gU.width) + ')');
+    });
+
     // PLATSHÅLLARE i svarsrutor
     var ph = alla.filter(function(i){ return (i.placeholder || '').trim() !== ''; });
     if(ph.length) y.brott.push('PLATSHÅLLARE: ' + ph.length + ' rutor med text (' + ph.slice(0, 2).map(function(i){ return i.placeholder; }).join(' ; ') + ')');
@@ -452,7 +495,12 @@ const PROBE = `(function(){
 // Bredd-proben: vad som sticker ut, och vad som gör det. Utan adressen går brottet inte att
 // åtgärda — "sidan är för bred" säger inte vilket element som är för brett.
 const BREDD_PROBE = `(function(){
+  if(${JSON.stringify(SABBA)} === 'uppst-bredd'){ var _sb = document.createElement('style'); _sb.textContent = '.ovn-uppst .mult-upp-row .cell,.ovn-uppst .mult-upp-ans{width:60px !important}'; document.head.appendChild(_sb); }
   var d = document.documentElement, over = [];
+  // Dokumentets bredd läses VID LADDNING, före uppställningsbenets flikvandring nedan. Läses den i
+  // return mäter BREDD-benet plötsligt alla flikar — en tyst utökning av ett befintligt ben i samma
+  // steg som ett nytt läggs in (fångat 2026-10-08: k3/d5 blev röd av det).
+  var dokVidLaddning = d.scrollWidth;
   if(d.scrollWidth > window.innerWidth + 1){
     Array.prototype.forEach.call(document.querySelectorAll('*'), function(el){
       var r = el.getBoundingClientRect();
@@ -464,9 +512,38 @@ const BREDD_PROBE = `(function(){
       }
     });
   }
-  return { onerr: window.__onerr || null, vyport: window.innerWidth, dok: d.scrollWidth, over: over };
+  /* UPPSTÄLLNINGAR PÅ TELEFON: flikarna klickas fram — ett blad i en dold flik har ingen bredd,
+     och då hade en uppställning som sticker ut aldrig mätts här. Range över innehållet mot spalten,
+     och dokumentets bredd medan bladet syns. */
+  /* CHROMEBOOK FÖRST (Joachim 2026-10-08): skärmen som räknas är en 13" Chromebook, 1366 × 768 och
+     1536 × 864. Där ska uppställningens rutor ha FULL storlek — samma 40 px som i Metodträningen.
+     Krympningen får bara slå till i en smal spalt (telefonen). En krympt ruta på Chromebook är ett brott. */
+  var FULL = 40, chromebook = window.innerWidth >= 1200;
+  if(${JSON.stringify(SABBA)} === 'uppst-krymp'){ var _sk = document.createElement('style'); _sk.textContent = '.ovn-uppst .mult-upp-ans{width:26px !important}'; document.head.appendChild(_sk); }
+  var uppstOver = [], uppstMatta = 0;
+  var navB = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn'));
+  (navB.length ? navB : [null]).forEach(function(b){
+    if(b){ if(b.disabled) return; b.click(); }
+    Array.prototype.forEach.call(document.querySelectorAll('.ovn-uppst'), function(u){
+      if(!u.getClientRects().length) return;
+      uppstMatta++;
+      var g = (u.closest('.ovn-grupp') || u.parentElement).getBoundingClientRect();
+      var r = document.createRange(); r.selectNodeContents(u.querySelector('.mult-upp-box') || u);
+      var rr = r.getBoundingClientRect();
+      var ut = Math.max(0, Math.round(rr.right - g.right)) + Math.max(0, Math.round(g.left - rr.left));
+      var tal = Array.prototype.map.call(u.querySelectorAll('.mult-upp-row'), function(x){ return x.textContent.replace(/\\s+/g, ''); }).slice(0, 2).join(' ');
+      if(ut > 1 || d.scrollWidth > window.innerWidth + 1)
+        uppstOver.push(tal + ': ' + Math.round(rr.width) + ' px i spalt ' + Math.round(g.width) + ', ' + ut + ' px utanför, dokument ' + d.scrollWidth + ' px');
+      var cw = Math.round(u.querySelector('.mult-upp-ans').getBoundingClientRect().width);
+      if(chromebook && cw < FULL)
+        uppstOver.push(tal + ': KRYMPT — svarsrutan är ' + cw + ' px, full storlek är ' + FULL + ' px');
+    });
+  });
+  return { onerr: window.__onerr || null, vyport: window.innerWidth, dok: dokVidLaddning, over: over, uppstOver: uppstOver, uppstMatta: uppstMatta };
 })()`;
 const BREDD = 360;
+// Skärmen som räknas (Joachim 2026-10-08): 13" Chromebook. Uppställningarna mäts här i första hand.
+const CHROMEBOOK = ['1366x768', '1536x864'];
 
 // Sidmängden bor i verktyg/sidor.js — EN upptäckare för alla svep (V9). Här låg förut en
 // ordagrann kopia av samma readdir-funktion; fyra verktyg bar var sin.
@@ -502,12 +579,31 @@ sidor().forEach(sida => {
       + ' px på en ' + ub.vyport + ' px skärm — eleven kan scrolla sidled\n     '
       + (ub.over.length ? ub.over.join('\n     ') : '(hittade inget enskilt element)'));
   }
+  // UPPSTÄLLNINGAR: Chromebook-bredderna FÖRST (full storlek, ryms), sedan telefonen (ryms).
+  // Bara sidor som laddar uppställningens yta får de extra körningarna — en läsning av filen.
+  const harUppst = fs.readFileSync(path.join(ROOT, sida), 'utf8').indexOf('uppstallning-yta.js') >= 0;
+  const uppstKor = harUppst ? CHROMEBOOK.map(vp => {
+    const rc = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMPB,
+                                  '--vanta-pa', 'laddad', '--timeout', '40000', '--viewport', vp], { encoding: 'utf8', timeout: 90000 });
+    let uc = null; try { uc = JSON.parse((rc.stdout || '').trim().split('\n').pop()); } catch(e){}
+    return { vp, u: uc };
+  }).concat([{ vp: BREDD + 'x800', u: ub }]) : [];
+  uppstKor.forEach(k => {
+    if(!k.u){ fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · UPPSTÄLLNING ' + k.vp + ': inget svar'); return; }
+    if(k.u.uppstOver && k.u.uppstOver.length){
+      fel += k.u.uppstOver.length;
+      console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · UPPSTÄLLNING ' + k.vp + ':\n     ' + k.u.uppstOver.join('\n     '));
+    } else if(k.u.uppstMatta){
+      console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · UPPSTÄLLNING ' + k.vp + ': ' + k.u.uppstMatta + ' uppställningar ryms'
+        + (parseInt(k.vp, 10) >= 1200 ? ', full storlek' : ''));
+    } else { fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · UPPSTÄLLNING ' + k.vp + ': sidan laddar ytan men ingen uppställning mättes'); }
+  });
 
   MP.rakna(sida, (u.ytor || []).length);
   (u.ytor || []).forEach(y => {
     ytor++;
     MP.varde(sida, y.yta, { rutor: y.rutor, uttrycksrutor: y.uttrycksrutor });
-    if(!y.brott.length){ console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.rutor + ' rutor, ' + y.uttrycksrutor + ' uttryck)'); return; }
+    if(!y.brott.length){ console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ' (' + y.rutor + ' rutor, ' + y.uttrycksrutor + ' uttryck' + (y.uppst ? ', ' + y.uppst + ' uppställningar' : '') + ')'); return; }
     fel += y.brott.length;
     console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + '\n     ' + y.brott.join('\n     '));
   });

@@ -90,3 +90,10 @@
   .ovn-uppst .mult-upp-row .opcell{width:16px;font-size:20px}
   .ovn-uppst .mult-upp-box{padding:10px 6px}
 }
+
+/* ==== KOMMAT ÄR SMALT (Joachims granskning 2026-10-08) ====
+   Kommat tog en hel sifferkolumn: "1,91" stod som "1 , 9 1" och svarsrutorna delades av ett brett
+   glapp. Nu sitter det tätt mellan siffrorna, som när man skriver för hand. Rader utan komma bär en
+   lika smal tom cell på kommats plats (ytans "kommaluft"), så siffrorna står kvar i sina kolumner.
+   Står SIST med flit: den ska vinna över ramens och telefonspaltens kolumnbredder för .cell. */
+.mult-upp-row .cell.komma{width:10px;color:var(--c-metod,#B45309);font-weight:700}

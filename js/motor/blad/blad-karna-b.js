@@ -509,7 +509,7 @@ function visaKonfetti(){
 // Kärnan bygger bara uppgiften ur radens data; ytan ritar och markerar varje svarsruta.
 //   {typ:'uppstallning', metod:'mult', vansterText:'6,24 · 2 =', svar:12.48}
 // Sidan laddar uppstallning-yta.js + uppstallning.css. Saknas ytan, eller går talen inte att
-// ställa upp (multiplikator med tre siffror), ritas raden som en vanlig 'enkel'.
+// ställa upp (multiplikator med tre siffror), kastar bladHTML ett fel — ingen tyst återgång.
 function uppstUppgift(rad){
   if((rad.metod || 'mult') !== 'mult') return null;
   var m = String(rad.vansterText).replace(/\s/g, '').replace(/=$/, '').match(/^(\d+(?:,\d+)?)[·*](\d+(?:,\d+)?)$/);
@@ -955,11 +955,17 @@ function bladHTML(blad){
       html += '<div class="ovn-rad" data-rad="' + radNummer + '"'
         + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '') + '>';
       html += lbl(bokstav);
-      var _uppst = rad.typ === 'uppstallning' && window.UppstYta ? uppstUppgift(rad) : null;
-      if(_uppst){
+      if(rad.typ === 'uppstallning'){
+        // INGEN TYST ÅTERGÅNG (beslut 2026-10-08): kan raden inte ritas som uppställning ska det
+        // synas — ett fel, inte en vanlig svarsruta som ser riktig ut men saknar uppställningen.
+        // Grindarna fäller sidans JS-fel; namnare-grind namnger det här felet.
+        if(!window.UppstYta) throw new Error('UPPSTÄLLNING KAN INTE RITAS: sidan laddar inte js/motor/metod/uppstallning-yta.js ("' + rad.vansterText + '")');
+        var _uppst = uppstUppgift(rad);
+        if(!_uppst) throw new Error('UPPSTÄLLNING KAN INTE RITAS: "' + rad.vansterText + '" går inte att ställa upp med metoden '
+          + (rad.metod || 'mult') + ' (multiplikatorn har högst två siffror)');
         html += '<div class="ovn-uppst" data-metod="mult" data-svar="' + rad.svar + '">'
           + UppstYta.mult.html(_uppst, { tips:false }) + '</div>';
-      } else if(rad.typ === 'enkel' || rad.typ === 'uppstallning'){
+      } else if(rad.typ === 'enkel'){
         html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         // FAS2: subtraktion av negativt tal → omskrivningscell (värde-rättad) före svaret. Klassen
         // ak8-in-oms ger uttrycks-läge på den delade keypaden (+ · ( ) aktiva); data-oms = rättvärdet.

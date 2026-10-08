@@ -1996,5 +1996,8 @@
   "hint | Skriv täljaren och nämnaren som de är, multiplicerade med samma tal.",
   "titel | + led",
   "titel | − led"
+ ],
+ "js/motor/metod/uppstallning-yta.js": [
+  "rubrik | minnessiffror"
  ]
 }

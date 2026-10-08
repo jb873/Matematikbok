@@ -51,6 +51,8 @@ const PRE = `(function(){ var s = 0x2F6E2B1; Math.random = function(){ s |= 0; s
 
 const PROBE = `(function(){
   var SABBA = ${JSON.stringify(SABBA)};
+  // SABBA uppst-bryt: uppställningens rader tvingas brytas — K-U måste fälla.
+  if(SABBA === 'uppst-bryt'){ var _ub = document.createElement('style'); _ub.textContent = '.ovn-uppst .mult-upp-row{flex-wrap:wrap !important;max-width:90px !important}'; document.head.appendChild(_ub); }
   var ut = { onerr: window.__onerr || null, blad: [], noter: [] };
   var MIN_KONTRAST = 2.0;
 
@@ -397,6 +399,60 @@ const PROBE = `(function(){
             + ' px och ryms i den smala rutans golv (' + Math.round(golvInnanmate) + ' px)');
       });
     }
+
+    // ── K-U: uppställningen bryts aldrig (radtyp 'uppstallning', order 2026-10-07) ──────────
+    // En uppställning är ett rutnät: varje rad på EN linje, raderna i ordning uppifrån och ned, och
+    // kolumnerna rakt under varandra (radernas högerkanter lika). Bryts en rad hamnar siffrorna i
+    // fel kolumn — då är det inte längre en uppställning. Mäts vid Chromebook-bredderna först.
+    b.uppst = 0;
+    Array.prototype.forEach.call(sh.querySelectorAll('.ovn-uppst'), function(u){
+      if(!synlig(u)) return;
+      b.uppst++;
+      var rows = Array.prototype.filter.call(u.querySelectorAll('.mult-upp-row'), synlig);
+      var tal = rows.slice(0, 2).map(function(x){ return kort(x.textContent).replace(/\\s/g, ''); }).join(' ');
+      var hogra = [], forraBotten = -Infinity;
+      rows.forEach(function(row, ri){
+        var celler = Array.prototype.filter.call(row.children, synlig);
+        var tops = celler.map(function(c){ return Math.round(c.getBoundingClientRect().top); });
+        if(tops.length && Math.max.apply(null, tops) - Math.min.apply(null, tops) > 2)
+          b.brott.push('K-U RADEN BRYTS: rad ' + (ri + 1) + ' i "' + tal + '" ligger på flera linjer');
+        var rr = row.getBoundingClientRect();
+        if(rr.top < forraBotten - 1) b.brott.push('K-U RADERNA ÖVERLAPPAR: rad ' + (ri + 1) + ' i "' + tal + '"');
+        forraBotten = rr.bottom;
+        if(celler.length) hogra.push(Math.round(celler[celler.length - 1].getBoundingClientRect().right));
+      });
+      if(hogra.length && Math.max.apply(null, hogra) - Math.min.apply(null, hogra) > 2)
+        b.brott.push('K-U KOLUMNERNA GLIDER: radernas högerkanter i "' + tal + '" är ' + hogra.join('/') + ' px');
+      /* KOLUMN FÖR KOLUMN, och KOMMAT (Joachims granskning 2026-10-08: kommat smalt, tätt mellan
+         siffrorna, siffrorna kvar i sina kolumner). Kommat och kommaluften är inga kolumner: siffra
+         nummer k från höger ska ha samma högerkant i varje rad. Kommat ska vara smalt (högst halva
+         sifferkolumnen), ligga mellan sina grannar och stå efter lika många siffror från höger i
+         alla rader som bär det. */
+      // Kommat känns igen på INNEHÅLLET, inte bara på klassen: en layout som ritar kommat i en vanlig\n      // .cell ska fällas av bredden, inte slinka förbi som en sifferkolumn.\n      function arKomma(c){ return c.classList.contains('komma') || kort(c.textContent) === ','; }\n      var kolumner = {}, kommaPlats = {};
+      rows.forEach(function(row, ri){
+        var celler = Array.prototype.filter.call(row.children, function(c){ return synlig(c) && !c.classList.contains('opcell'); });
+        var siffror = celler.filter(function(c){ return !arKomma(c); });
+        siffror.slice().reverse().forEach(function(c, k){ (kolumner[k] = kolumner[k] || []).push(Math.round(c.getBoundingClientRect().right)); });
+        celler.forEach(function(c, ci){
+          if(!arKomma(c)) return;
+          var cr = c.getBoundingClientRect(), fore = celler[ci - 1], efter = celler[ci + 1];
+          var efterAntal = celler.slice(ci + 1).filter(function(x){ return !arKomma(x); }).length;
+          kommaPlats[efterAntal] = true;
+          var sifferBredd = siffror.length ? siffror[siffror.length - 1].getBoundingClientRect().width : 40;
+          if(kort(c.textContent) === ',' && cr.width > sifferBredd / 2 + 1)
+            b.brott.push('K-U KOMMAT ÄR BRETT: ' + Math.round(cr.width) + ' px mot sifferkolumnens ' + Math.round(sifferBredd) + ' i "' + tal + '"');
+          if((fore && fore.getBoundingClientRect().right > cr.left + 1) || (efter && efter.getBoundingClientRect().left < cr.right - 1))
+            b.brott.push('K-U KOMMAT ÖVERLAPPAR en siffra i rad ' + (ri + 1) + ' av "' + tal + '"');
+        });
+      });
+      Object.keys(kolumner).forEach(function(k){
+        var x = kolumner[k];
+        if(Math.max.apply(null, x) - Math.min.apply(null, x) > 2)
+          b.brott.push('K-U SIFFRORNA UR KOLUMN: siffra ' + (+k + 1) + ' från höger i "' + tal + '" står vid ' + x.join('/') + ' px');
+      });
+      if(Object.keys(kommaPlats).length > 1)
+        b.brott.push('K-U KOMMAT PÅ OLIKA PLATS: efter ' + Object.keys(kommaPlats).join(' resp. ') + ' siffror från höger i "' + tal + '"');
+    });
     ut.blad.push(b);
   }
 
@@ -461,6 +517,23 @@ Sidor.alla().forEach(sida => {
       + (b.brott.length ? '\n     ' + b.brott.slice(0, 4).join('\n     ')
          + (b.brott.length > 4 ? '\n     … och ' + (b.brott.length - 4) + ' till' : '') : ''));
   });
+  // K-U VID CHROMEBOOK (Joachim 2026-10-08: skärmen som räknas, 1366 × 768 och 1536 × 864). Bara
+  // sidor som laddar uppställningens yta — en läsning av filen — och bara K-U räknas här: övriga
+  // ben mäts i grindens egen vy ovan (K-D syns bara där raderna bryter).
+  if(fs.readFileSync(path.join(ROOT, sida), 'utf8').indexOf('uppstallning-yta.js') >= 0){
+    ['1366x768', '1536x864'].forEach(vy => {
+      const rc = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp,
+        '--pre', pre, '--vanta-pa', 'blad', '--viewport', vy, '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
+      let uc = null; try { uc = JSON.parse((rc.stdout || '').trim().split('\n').pop()); } catch(e){}
+      if(!uc){ fel++; console.log('✗ ' + sida + ' · K-U ' + vy + ': inget svar'); return; }
+      let antal = 0; const ku = [];
+      (uc.blad || []).forEach(b => { antal += b.uppst || 0; b.brott.filter(x => /^K-U/.test(x)).forEach(x => ku.push(b.blad + ': ' + x)); });
+      fel += ku.length;
+      if(!antal){ fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · K-U ' + vy + ': sidan laddar ytan men ingen uppställning mättes'); return; }
+      console.log((ku.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · K-U ' + vy + ': ' + antal + ' uppställningar'
+        + (ku.length ? '\n     ' + ku.slice(0, 4).join('\n     ') + (ku.length > 4 ? '\n     … och ' + (ku.length - 4) + ' till' : '') : ', hela'));
+    });
+  }
   try { fs.unlinkSync(tmp); fs.unlinkSync(pre); } catch(e){}
 });
 

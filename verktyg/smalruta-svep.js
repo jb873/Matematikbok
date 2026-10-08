@@ -26,9 +26,15 @@ const Sidor = require('./sidor');
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
+// --sabba uppst-klipp: uppställningens svarsruta görs för smal för en siffra — negativ verifiering.
+const SABBA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sabba'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
+// Skärmen som räknas (Joachim 2026-10-08): 13" Chromebook. Storlek mäts vid dess två bredder —
+// förr vid cdp-kors standardfönster (900 px), en bredd ingen elev har.
+const VYER = ['1366x768', '1536x864'];
 
 const PROBE = `(function(){
+  if(${JSON.stringify(SABBA)} === 'uppst-klipp'){ var _s = document.createElement('style'); _s.textContent = '.ovn-uppst .mult-upp-ans{width:12px !important}'; document.head.appendChild(_s); }
   var ut = { onerr: window.__onerr || null, typer: {} };
   function synlig(el){ return !!el.offsetParent; }
   function textbredd(inp, txt){
@@ -53,6 +59,7 @@ const PROBE = `(function(){
   }
   // Provsträngen ska vara innehåll rutan RIMLIGEN kan behöva bära — inte ett extremfall.
   function provtext(inp){
+    if(inp.matches('.mult-upp-ans')) return '8';   // uppställningens svarsruta: EN siffra (maxlength 1)
     if(inp.matches('.ak8-pexp,.ak8-gpe')) return '12 + 15';
     if(inp.matches('.ak8-pbase,.ak8-gpb,.ak8-gpk')) return '3,74';
     if(inp.matches('.fr-ruta,.ak8-frt,.ak8-frn,.ak8-bt,.ak8-bn')) return '144';
@@ -71,7 +78,8 @@ const PROBE = `(function(){
   }
 
   function mat(root){
-    var rutor = Array.prototype.filter.call(root.querySelectorAll('input.ak8-in, input.ovn-in'), synlig);
+    // input.mult-upp-ans: uppställningens svarsruta (radtyp 'uppstallning', order 2026-10-07).
+    var rutor = Array.prototype.filter.call(root.querySelectorAll('input.ak8-in, input.ovn-in, input.mult-upp-ans'), synlig);
     rutor.forEach(function(inp){
       if(inp.disabled || inp.readOnly) return;
       var typ = matType(inp), gammalt = inp.value;
@@ -126,15 +134,17 @@ function sidor(){ return Sidor.blad(); }
 const TMP = path.join(os.tmpdir(), 'smalruta-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);
 let fel = 0, typer = {}, sidorMatta = 0;
-console.log('SMALRUTE-SVEP — måttet ska vara ett golv, inte ett tak\n');
+console.log('SMALRUTE-SVEP — måttet ska vara ett golv, inte ett tak · mätt vid ' + VYER.join(' och ')
+  + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
 sidor().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
+  sidorMatta++;
+  VYER.forEach(vy => {
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
-                               '--vanta-pa', 'blad', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
+                               '--vanta-pa', 'blad', '--timeout', '60000', '--viewport', vy], { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
-  if(!u){ console.log('? ' + sida + ': inget svar'); return; }
-  sidorMatta++;
+  if(!u){ console.log('? ' + sida + ' (' + vy + '): inget svar'); return; }
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + u.onerr.join(' | ')); }
   Object.keys(u.typer || {}).forEach(typ => {
     const t = u.typer[typ];
@@ -143,9 +153,10 @@ sidor().forEach(sida => {
     const T = typer[typ];
     T.provade += t.provade; T.klipper += t.klipper; T.krymper += t.krymper; T.vaxer += t.vaxer;
     T.kravde += t.kravde;
-    t.exempel.forEach(e => { if(T.exempel.length < 3) T.exempel.push(e); });
+    t.exempel.forEach(e => { if(T.exempel.length < 3) T.exempel.push(vy + ': ' + e); });
     if(t.klipper && T.sidor.indexOf(sida) < 0) T.sidor.push(sida);
     if(t.krymper && T.krympsidor.indexOf(sida) < 0) T.krympsidor.push(sida);
+  });
   });
 });
 try { fs.unlinkSync(TMP); } catch(e){}

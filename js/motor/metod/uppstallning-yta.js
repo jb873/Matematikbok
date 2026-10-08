@@ -22,18 +22,31 @@
 (function(){
   'use strict';
 
-  // En cell: digit (fast), comma (fast), input (svar), eller empty
+  // ELEVTEXT i ett fält, så att elevtext-låset ser den (låset läser bara kända fält — en text i en
+  // html-sträng är osynlig för det). Rubriken över minnesrutorna, godkänd i Metodträningen och
+  // registrerad för bladen (beslut 2026-10-08).
+  var TEXT = { rubrik:'minnessiffror' };
+
+  // En cell: digit (fast), comma (fast), input (svar), eller empty.
+  // KOMMAT ÄR SMALT (Joachims granskning 2026-10-08): förr tog det en hel sifferkolumn, så "1,91"
+  // stod som "1 , 9 1" och svarsrutorna delades av ett brett glapp. Nu är det en smal cell tätt mellan
+  // siffrorna, som när man skriver för hand. En rad UTAN komma får en lika smal tom cell (kommaluft)
+  // där kommat står i de andra raderna — annars glider siffrorna till vänster om kommat ur kolumn.
   function cellHTML(c){
     if(c.t === 'fixed')  return '<div class="cell">' + c.v + '</div>';
-    if(c.t === 'comma')  return '<div class="cell" style="color:var(--c-metod);font-weight:700;">,</div>';
+    if(c.t === 'comma')  return '<div class="cell komma">,</div>';
+    if(c.t === 'kommaluft') return '<div class="cell komma"></div>';
     if(c.t === 'op')     return '<div class="cell opcell">' + c.v + '</div>';
     if(c.t === 'input')  return '<div class="cell"><input type="text" class="mult-upp-ans" data-expect="' + c.v + '" inputmode="numeric" maxlength="1" autocomplete="off"></div>';
     return '<div class="cell"></div>'; // empty
   }
-  function rowHTML(opCell, cells, W){
+  // kommaFranHoger: kommats plats i uppställningen, räknad i celler från höger (= antalet decimaler).
+  // En utfyllnadscell på den platsen blir kommaluft.
+  function rowHTML(opCell, cells, W, kommaFranHoger){
     let pad = [];
     for(let i=0; i<W-cells.length; i++) pad.push({t:'empty'});
     const all = pad.concat(cells);
+    if(kommaFranHoger != null) pad.forEach(function(p, i){ if(all.length - 1 - i === kommaFranHoger) all[i] = {t:'kommaluft'}; });
     let h = '<div class="mult-upp-row">' + cellHTML(opCell);
     for(let i=0; i<all.length; i++) h += cellHTML(all[i]);
     return h + '</div>';
@@ -52,7 +65,7 @@
 
   function minnesPanel(antal, visaTips){
     antal = antal || 2;
-    let h = '<div class="mult-minne-panel"><div class="mult-minne-rubrik">minnessiffror</div><div class="mult-minne-rutor">';
+    let h = '<div class="mult-minne-panel"><div class="mult-minne-rubrik">' + TEXT.rubrik + '</div><div class="mult-minne-rutor">';
     for(let i=0; i<antal; i++){
       h += '<input type="text" class="mult-minne-ruta" inputmode="numeric" maxlength="1" autocomplete="off">';
     }
@@ -84,11 +97,12 @@
       const ansCells = strToInputCells(ansStr);
       const mCells = strToFixedCells(task.mDisplay);
       const W = ansCells.length;
+      const K = task.kind === 'decimal' ? task.dec : null;   // kommats plats från höger
       let rows = '';
-      rows += rowHTML({t:'op',v:''}, mCells, W);
-      rows += rowHTML({t:'op',v:'·'}, [{t:'fixed',v:String(task.d)}], W);
+      rows += rowHTML({t:'op',v:''}, mCells, W, K);
+      rows += rowHTML({t:'op',v:'·'}, [{t:'fixed',v:String(task.d)}], W, K);
       rows += '<div class="mult-upp-line"></div>';
-      rows += rowHTML({t:'op',v:''}, ansCells, W);
+      rows += rowHTML({t:'op',v:''}, ansCells, W, K);
       var minneN = String(task.mDisplay).replace(/[^0-9]/g,'').length;   // en ruta per talsiffra
       return '<div class="mult-upp-box"><div class="mult-upp-flex">'
         + '<div class="mult-upp-rows-wrap"><div class="mult-upp-rows">' + rows + '</div></div>'
