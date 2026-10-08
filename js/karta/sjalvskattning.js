@@ -294,8 +294,52 @@
       return rollup == null ? '<span class="sj-dot sj-ev-dold" title="visas när du skattat raderna"></span>'
                             : '<span class="sj-dot" style="background:' + FARG[rollup] + '"></span>';
     }
+    // ── DATALÄGE (config.rader, order 2026-10-08): raderna kommer ur en författad lista per delkapitel
+    //    (Joachims kunskapsrader), inte ur taxonomins områden. Varje rad bär sin evidensnod (nod: id eller
+    //    lista → svagaste); delad:true = noden är grövre än raden → delad-evidens-regeln (ingen falsk
+    //    bekräftelse); utan nod = ren skattning. Delkapitel med grupper visas som dragspel, ett öppet i
+    //    taget. Utan config.rader: taxonomi-läget nedan, oförändrat. ──
+    var OPPEN = {};   // delkapitel → index på öppen grupp (dragspel)
+    function dataRad(r){
+      var ids = r.nod ? [].concat(r.nod) : [];
+      var ev = ids.length ? Math.min.apply(null, ids.map(evidensK2)) : null;
+      return { id:r.id, namn:r.text + (r.fordjupning ? ' <span class="sj-stjarna" title="fördjupning">★</span>' : ''),
+        evidens:ev, kalla:'data', vantar: !!(r.delad && ids.length) };
+    }
+    function renderData(){
+      var D = config.rader, html = '';
+      function sektion(titel, rader, extra, klass){
+        var rr = rader.map(dataRad);
+        html += '<section class="sj-grupp' + (klass || '') + '"><div class="sj-grupp-rubrik' + (klass ? ' sj-formaga-rubrik' : '') + '">' + gruppDot(rollupSkattad(rr))
+          + '<span class="sj-grupp-namn">' + titel + '</span>' + (extra || '') + '</div>';
+        rr.forEach(function(r){ html += radHtml(r, {}); });
+        html += '</section>';
+      }
+      (D.delkapitel || []).forEach(function(dk){
+        if(!dk.grupper){ sektion(dk.titel, dk.rader); return; }
+        var alla = []; dk.grupper.forEach(function(g){ alla = alla.concat(g.rader.map(dataRad)); });
+        html += '<section class="sj-grupp"><div class="sj-grupp-rubrik">' + gruppDot(rollupSkattad(alla))
+          + '<span class="sj-grupp-namn">' + dk.titel + '</span></div>';
+        dk.grupper.forEach(function(g, gi){
+          var rr = g.rader.map(dataRad), oppen = OPPEN[dk.del] === gi;
+          html += '<div class="sj-drag' + (oppen ? ' on' : '') + '"><button type="button" class="sj-drag-rubrik" data-del="' + dk.del + '" data-gi="' + gi + '" aria-expanded="' + oppen + '">'
+            + gruppDot(rollupSkattad(rr)) + '<span class="sj-drag-namn">' + g.titel + '</span><span class="sj-drag-antal">' + rr.length + '</span><span class="sj-drag-pil">' + (oppen ? '▾' : '▸') + '</span></button>';
+          if(oppen) rr.forEach(function(r){ html += radHtml(r, {}); });
+          html += '</div>';
+        });
+        html += '</section>';
+      });
+      if(D.tvargaende) sektion(D.tvargaende.titel, D.tvargaende.rader, '<span class="sj-formaga-flagga">förmågor · gäller allt du gör</span>', ' sj-formaga');
+      html += '<p class="sj-integritet" id="sj-integritet"></p>';
+      mount.innerHTML = html;
+      mount.querySelectorAll('.sj-drag-rubrik').forEach(function(btn){ btn.onclick = function(){
+        var gi = +btn.dataset.gi; OPPEN[btn.dataset.del] = (OPPEN[btn.dataset.del] === gi) ? null : gi; render();
+      }; });
+    }
+
     function render(){
       PREF = lasPref(); BELIEFS = lasBelief();
+      if(config.rader){ renderData(); kopplaBelief(); return; }
       var OMR = TAX.filter(function(n){ return n.niva === 'omrade' && n.implemented; });
       var html = '<div class="sj-topp"><span class="sj-visa-lbl">Visa:</span>'
         + '<span class="sj-seg" id="sj-seg"><button data-mal="godkant"' + (PREF.mal==='godkant'?' class="on"':'') + '>Godkänt (kärna)</button>'
@@ -328,6 +372,9 @@
       mount.querySelectorAll('#sj-seg button').forEach(function(btn){ btn.onclick = function(){
         var p = lasPref(); p.mal = btn.dataset.mal; try{ localStorage.setItem(config.prefKey, JSON.stringify({ mal:p.mal })); }catch(e){} render();
       }; });
+      kopplaBelief();
+    }
+    function kopplaBelief(){
       mount.querySelectorAll('.sj-b').forEach(function(btn){ btn.onclick = function(){
         var b = lasBelief(); if(b[btn.dataset.id] === btn.dataset.b) delete b[btn.dataset.id]; else b[btn.dataset.id] = btn.dataset.b; sparBelief(b); render();
       }; });

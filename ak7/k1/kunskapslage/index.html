@@ -80,11 +80,12 @@
 <script src="../../../js/mastery.js"></script>
 <script src="../../../js/karta/karta-motor.js"></script>
 <script src="../../../js/karta/sjalvskattning.js"></script>
+<script src="../../../js/data/k1-sjalvskattning.js"></script>
 <script>
   var K1CFG = { taxonomi: window.K1_TAXONOMI, arskurs:'ak7', malDefault:'godkant', minNiva:null,
     prefKey:'k1.taluppfattning.pref.v1', ramPath:'../../../ak7-k1-ram.html' };
   var karta = KartaMotor.montera(Object.assign({}, K1CFG, { mastery: window.Mastery, rotNamn:'Taluppfattning', orsakFramtid:'åk 8' }));
-  var sjalv = Sjalvskattning.montera(Object.assign({}, K1CFG, { mastery: window.Mastery, k1mastery: window.Mastery, beliefKey:'k1.taluppfattning.belief.v1', mountId:'sjalv-mount' }));
+  var sjalv = Sjalvskattning.montera(Object.assign({}, K1CFG, { mastery: window.Mastery, k1mastery: window.Mastery, beliefKey:'k1.taluppfattning.belief.v1', mountId:'sjalv-mount', rader: window.K1_SJALVSKATTNING }));   // rader: Joachims kunskapsrader per delkapitel
   try{ if(new URLSearchParams(location.search).get('tab') === 'sjalv'){
     document.querySelectorAll('#tabs .tab').forEach(function(t){ t.classList.toggle('on', t.dataset.panel==='sjalv'); });
     document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.dataset.panel==='sjalv'); });

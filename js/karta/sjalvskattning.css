@@ -45,4 +45,14 @@
 .sj-variant .sj-namn::before{content:'';position:absolute;left:3px;top:50%;width:7px;height:1px;background:var(--line);}
 .sj-vantar{font-family:"Cinzel",serif;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;background:#f0ece2;color:#8a8172;border:1px solid #ddd5c5;padding:2px 7px;border-radius:99px;margin-left:8px;vertical-align:middle;white-space:nowrap;}
 .sj-omrade{font-size:11.5px;color:var(--ink-faint);font-style:italic;margin-left:8px;}
+/* Dragspel inom ett delkapitel (dataläget, t.ex. d2:s räknesätt) — ett öppet i taget */
+.sj-drag{border-bottom:1px solid var(--line-soft);}
+.sj-drag:last-child{border-bottom:none;}
+.sj-drag-rubrik{display:flex;align-items:center;gap:11px;width:100%;padding:12px 18px;border:0;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:var(--ink);}
+.sj-drag-rubrik:hover{background:#F7F3EA;}
+.sj-drag.on > .sj-drag-rubrik{background:#F7F3EA;border-bottom:1px solid var(--line-soft);}
+.sj-drag-namn{font-size:16.5px;font-weight:600;}
+.sj-drag-antal{font-size:12px;color:var(--ink-soft);background:#EEE8DB;border-radius:99px;padding:1px 8px;}
+.sj-drag-pil{margin-left:auto;color:var(--ink-soft);font-size:14px;}
+.sj-drag .sj-rad{padding-left:30px;}
 @media(max-width:720px){ .sj-rad{grid-template-columns:1fr;gap:8px;} .sj-status{justify-content:flex-start;} .sj-formaga-flagga{margin-left:0;} }
