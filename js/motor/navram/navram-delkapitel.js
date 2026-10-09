@@ -247,6 +247,13 @@
         f.id = 'karta-frame'; f.title = 'Kunskapsläge'; f.loading = 'lazy';
         f.src = (cfg.kunskapslage || '../kunskapslage/index.html') + '?embed=1';
         v.appendChild(f);
+      } else if(m.vy === 'mv-sjalvskattning' && cfg.kunskapslage !== false){
+        /* Självskattningen bor i samma kunskapsläge-sida, egen flik (?tab=sjalv). Var förr en
+           "Byggs senare"-ruta här trots att vyn fanns → raden gick att klicka men öppnade inget. */
+        var sf = el('iframe', 'nr-karta-frame');
+        sf.id = 'sjalv-frame'; sf.title = 'Självskattning'; sf.loading = 'lazy';
+        sf.src = (cfg.kunskapslage || '../kunskapslage/index.html') + '?embed=1&tab=sjalv';
+        v.appendChild(sf);
       } else {
         v.appendChild(el('div', 'nr-ph',
           '<div class="nr-ph-mark">Byggs senare</div><p>' + PH[m.vy] + '</p>'));
@@ -275,6 +282,18 @@
     var pAktivt = document.getElementById('plugg-aktivt');
     if(pAktivt) ram.ytaArbeta.appendChild(pAktivt);
     minaVyer.forEach(function(v){ ram.ytaMina.appendChild(v); });
+
+    /* TEST — SIST: sidans egen Test-panel (fylld av kapitlets färdiga-test-fil vid laddning) FLYTTAS in i
+       Mina → Test och ersätter platshållaren. Låg förr i arbetsytan, där ingen variant leder → testen var
+       onåbara och Test-raden öppnade "Byggs senare". Display tvingas: visaPanel() växlar is-active på
+       ALLA .tab-panel, och testpanelen får aldrig släckas av ett variantbyte i Arbeta-lagret. */
+    // Tom panel (delkapitlet har inga test än, t.ex. ak8/k2/d3) → platshållaren står kvar: ärlig "Byggs senare", inte en tom yta.
+    var testPanel = document.querySelector('.tab-panel[data-panel="test"]'), testVy = document.getElementById('mv-test');
+    if(testPanel && testVy && (testPanel.children.length || testPanel.textContent.trim())){
+      testVy.innerHTML = '';
+      testVy.appendChild(testPanel);
+      testPanel.style.setProperty('display', 'block', 'important');
+    }
 
     return ram;
   }

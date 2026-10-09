@@ -161,6 +161,11 @@
 .steg-btn[data-steg="next"]:disabled{background:#fff;color:var(--ink-soft,#3d3630);}
 .steg-info{font-family:var(--cinzel,'Cinzel');font-size:12px;letter-spacing:.08em;color:var(--ink-faint,#7a6e65);text-transform:uppercase;}
 .ovn-grupp.steg-dold{display:none;}
+/* ── TEST (Mina kunskaper → Test): samma stil som delkapitel-sidornas Test-flik (k1-fardiga-test.js ritar) ── */
+.test-note{max-width:920px;margin:24px auto;padding:28px;background:var(--paper-lt,#faf7f1);border:1px solid var(--paper-dk,#ede6d6);border-left:4px solid var(--gold,#9a7228);border-radius:6px;text-align:center;color:var(--ink-soft,#3d3630);}
+.test-note h3{font-family:var(--serif,'Cormorant Garamond');font-size:22px;font-weight:500;color:var(--ink,#12110f);margin-bottom:8px;}
+.test-note p{font-size:14px;line-height:1.6;max-width:480px;margin:0 auto 16px;}
+.test-note a{display:inline-block;font-family:var(--cinzel,'Cinzel');font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--navy,#0f1e2e);padding:10px 20px;border-radius:5px;text-decoration:none;}
 </style>
 </head>
 <body>
@@ -430,6 +435,12 @@
     });
     var hall = document.getElementById('scener'); if(hall) hall.remove();
   }
+
+  /* TEST — monteras SIST, efter att ramen flyttat vyn till "Mina kunskaper": delkapitlets färdiga test
+     (k1-fardiga-test.js, samma lista som Test-fliken på d2–d8). Platshållaren ovan står kvar bara om
+     testdatan inte laddats. Ett klick öppnar testet inbäddat i vyn, med "← Testlista" tillbaka. */
+  var testVy = document.getElementById('mv-test');
+  if(testVy && window.K1_FARDIGA && K1_FARDIGA.renderTestFlik) K1_FARDIGA.renderTestFlik(testVy, 'd1', RAM);
 })();
 </script>
 
