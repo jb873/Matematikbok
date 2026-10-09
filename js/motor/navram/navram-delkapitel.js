@@ -185,8 +185,14 @@
         uppgifter = nastlat;
       } else if(navRader.length <= 1){
         var ett = navRader[0];
+        /* ENBLADSSIDA (ingen blad-nav, t.ex. ak7/k2 d1/d4/d7): EN variant som visar Öva-panelen, med
+           bladets EGEN titel. Utan den fick Uppgifter noll varianter — bladet syntes bara tills eleven
+           öppnat Metodträning, sedan fanns ingen väg tillbaka. */
+        var ovaPanel = document.querySelector('.tab-panel[data-panel="ova"]');
+        var ensamt = (!ett && ovaPanel) ? [{ titel: txt(ovaPanel.querySelector('.ovn-title, .ovn-sheet h2, .ovn-sheet h3')) || 'Övningsblad',
+                                            valj: function(){ visaPanel('ova'); } }] : [];
         uppgifter = [{ rubrik: null, varianter: ett
-          ? Array.prototype.map.call(ett.querySelectorAll('.blad-nav-btn'), variantAv) : [] }];
+          ? Array.prototype.map.call(ett.querySelectorAll('.blad-nav-btn'), variantAv) : ensamt }];
       } else {
         uppgifter = navRader.map(function(r){
           return { rubrik: r.getAttribute('aria-label') || 'Blad',

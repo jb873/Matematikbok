@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-brakblad-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
 <!-- Keypadens formgivning: DELAD fil. Låg förr som en ordagrann kopia här. -->
 <link rel="stylesheet" href="../../../js/motor/keypad.css">
 <style>
@@ -160,6 +161,10 @@
   <button class="tab-btn" data-tab="test">Test</button>
 </div>
 
+<!-- NAVIGATIONSRAMEN ritas hit (lagerväxlare + två spalter). Flikraden ovan
+     göms av navram-delkapitel.js men står KVAR — motorfilen läser #tab-row. -->
+<div id="navram"></div>
+
 <!-- PANEL: ÖVA — blad-nav + ett blad i taget (renderas av blad-k2-d3.js in i sheet-*) -->
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
@@ -199,6 +204,11 @@
 <!-- TAXONOMI: delad nodstruktur (en källa, alla vyer) -->
 <script src="../../../js/data/k2-taxonomi.js"></script>
 <script src="../../../js/data/k2-fardiga-test.js"></script>
+
+<!-- NAVIGATIONSRAMEN: delad nivårad + ram + delkapitel-receptet -->
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/navram/navram-delkapitel.js"></script>
 
 <!-- SKAL: blad-nav (Öva) + Färdighetsträning ur K2_TAXONOMI. Körs efter blad-filen. Motorn orörd. -->
 <script>
@@ -258,6 +268,11 @@
     if(e.source !== frame.contentWindow) return;
     frame.style.height = Math.max(320, Math.min(e.data.__fardHeight, 2200)) + 'px';
   });
+
+  /* NAVIGATIONSRAMEN monteras SIST: receptet speglar #blad-nav och #fardighet-lista, så de måste
+     vara byggda först. Sidans logik är oförändrad — varje variant i vänsterspalten delegerar
+     klicket till originalknappen. Kunskapsläget = k2:s egen karta (../kunskapslage, default). */
+  if(window.NavRamDelkapitel) window.NavRamDelkapitel.montera({ nivaPrefix: 'k2d3' });
 })();
 </script>
 

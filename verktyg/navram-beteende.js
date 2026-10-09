@@ -213,6 +213,15 @@ const PROBE = `(function(){
   return ut;
 })()`;
 
+/* MIGRERADE SIDOR — MÅSTE ha ramen. Utan listan var en migrerad sida som TAPPAT ramen bara "utan-ram"
+   (utanför grindens område) → grönt. Nu är frånvaro ett brott. Ny migrerad sida → en rad här. */
+const MASTE_HA_RAM = [
+  'ak7/k1/d1-positionssystem', 'ak7/k1/d2-fyraraknesatt', 'ak7/k1/d3-negativa-tal', 'ak7/k1/d4-brak-decimal',
+  'ak7/k1/d5-tiopotenser', 'ak7/k1/d6-multiplikation', 'ak7/k1/d7-division', 'ak7/k1/d8-avrundning',
+  'ak7/k1/d10-pluggtillprov', 'ak8/k2/d1-algebraiska-uttryck', 'ak8/k2/d3-parentes',
+  'ak7/k2/d2-byta-form', 'ak7/k2/d3-forlanga-forkorta', 'ak7/k2/d4-jamfora-brak', 'ak7/k2/d5-addsub-brak', 'ak7/k2/d6-multiplikation-brak', 'ak7/k2/d7-division-brak', 'ak7/k2/d1-andel-antal'   // bråk-migreringen 2026-10-09
+];
+
 const TMP = path.join(os.tmpdir(), 'navrambet-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);
 
@@ -232,7 +241,9 @@ Sidor.blad().forEach(sida => {
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + kort + ': JS-fel ' + u.onerr.slice(0, 2).join(' | ')); }
 
   // Sidor utan ramen är utanför grindens område — men frånvaron BEVISAS (V14).
-  if(!u.harRam){ MP.rakna(sida, 1); MP.varde(sida, 'utan-ram', { harRam: 0 }); return; }
+  if(!u.harRam){
+    if(MASTE_HA_RAM.indexOf(kort) >= 0){ fel++; console.log('✗ ' + kort + ': MIGRERAD SIDA UTAN RAM — ramen ritades inte (står i MASTE_HA_RAM)'); }
+    MP.rakna(sida, 1); MP.varde(sida, 'utan-ram', { harRam: 0 }); return; }
   sidorMedRam++;
 
   const antal = (u.grupper || []).reduce((a, g) => a + g.varianter.length, 0);
@@ -252,6 +263,8 @@ Sidor.blad().forEach(sida => {
   }
 });
 try { fs.unlinkSync(TMP); } catch(e){}
+// En listad sida som inte ens finns i sidlistan (omdöpt/borttagen) ska också synas.
+if(!BARA) MASTE_HA_RAM.forEach(k => { if(!Sidor.blad().some(s => s.replace(/\/index\.html$/, '') === k)){ fel++; console.log('✗ ' + k + ': står i MASTE_HA_RAM men finns inte bland bladsidorna'); } });
 
 fel += MP.granska();
 console.log('\n' + (fel ? '✗ NAVRAM-BETEENDE RÖD (' + fel + ')' : '✓ NAVRAM-BETEENDE GRÖN')
