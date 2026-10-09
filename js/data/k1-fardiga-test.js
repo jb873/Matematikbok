@@ -55,13 +55,14 @@
   // uppgifter står i träningens ordning (bladens följd, grupp för grupp — redan lätt → svårt), ingen slump.
   // Varje öva-blad listas med ALLA sina grupper i bladets ordning: [rubrik, generator(er)] — eller
   // [rubrik, null, 'skäl'] när ingen testgenerator finns (LUCKA, syns i vakten) / 'TOM' för platshållare.
-  // `test` = vilket kort test bladet hamnar i (angränsande blad kan dela test). En generator tas med där
+  // `test` = vilket kort test bladet hamnar i (angränsande blad kan dela test); `testFran: { N: 'titel' }` =
+  // från bladets grupp N börjar ett nytt test (delar ett långt blad, ordningen bevaras). En generator tas med där
   // den FÖRST förekommer. Vakt: node verktyg/test-tacker-ova.js — läser de riktiga bladen; en grupp som
   // läggs till/flyttas i öva utan att listan följer med fäller vakten.
   // d1: varje stencil (A/B) är ett eget blad i registret (TIO_/STORLEK_/POSRAK_/EGEN_VARIANTER).
   var TRANING = {
     d1: [
-      { blad: 'Tiosystemet – Blad A', test: 'Tiosystemet', grupper: [
+      { blad: 'Tiosystemet – Blad A', test: 'Tiosystemet – del 1', testFran: { 5: 'Tiosystemet – del 2' }, grupper: [
         ['Vilket platsvärde har sjuan i talet?', 'platsvarde'],
         ['Skriv det tal som består av', 'utvform-lasut'],
         ['Använd siffrorna 4, 5, 6 och 7 och skriv', 'pos-siffror'],
@@ -73,7 +74,7 @@
         ['Skriv som tal', 'vaxla-till-tal'],
         ['Vilket tal ska stå i rutan?', 'vaxla-antal'],
         ['Skriv i utvecklad form', 'utvform-valj'] ] },
-      { blad: 'Tiosystemet – Blad B', test: 'Tiosystemet', grupper: [
+      { blad: 'Tiosystemet – Blad B', test: 'Tiosystemet – del 2', grupper: [
         ['Vilket platsvärde har femman i talet?', 'platsvarde'],
         ['Skriv det tal som består av', 'utvform-lasut'],
         ['Använd siffrorna 2, 4, 6 och 7 och skriv', 'pos-siffror'],
@@ -127,7 +128,7 @@
         ['Räkna med huvudräkning', 'oka-minska'],
         ['Räkna med huvudräkning', 'add-huvud'],
         ['Vilket tal ligger mittemellan …', 'mittemellan'] ] },
-      { blad: 'Tals egenskaper – Blad A', test: 'Tals egenskaper', grupper: [
+      { blad: 'Tals egenskaper – Blad A', test: 'Tals egenskaper – del 1', testFran: { 4: 'Tals egenskaper – del 2' }, grupper: [
         ['Vilka tal är jämna?', 'udda-jamn'],
         ['Vilka tal är sammansatta tal?', 'primtal-binary'],
         ['Vilka tal är jämnt delbara med …', 'delbar-binary'],
@@ -138,8 +139,12 @@
         ['Vilka tal är primtal?', 'primtal-binary'],
         ['Vilka tal är jämnt delbara med 3 och 5?', 'delbar-binary'],
         ['Primtalsfaktorisera med faktorträd (skriv som produkt, t.ex. 2·2·3)', 'primfakt'],
+        // DIVERGENS ÖVA/TEST (beslut 2026-10-08, medvetet): öva ber om TRE valfria tal delbara med 2, 3, 4 och 5
+        // (öppet svar, alla multipler av 60 godtas). Testet (konstruera-delbar) ger i stället ett intervall med
+        // EXAKT ETT delbart tal → entydigt facit i befintlig numeric-rättning, ingen ny svarstyp. Prövar samma
+        // begrepp (delbarhet ⇔ delbar med minsta gemensamma multipel). Öppen svarstyp kan byggas senare.
         ['Skriv tre tal som är delbara med 2, 3, 4 och 5', 'konstruera-delbar'] ] },
-      { blad: 'Tals egenskaper – Blad B', test: 'Tals egenskaper', grupper: [
+      { blad: 'Tals egenskaper – Blad B', test: 'Tals egenskaper – del 2', grupper: [
         ['Vilka tal är jämna?', 'udda-jamn'],
         ['Vilka tal är sammansatta tal?', 'primtal-binary'],
         ['Vilka tal är jämnt delbara med …', 'delbar-binary'],
@@ -273,7 +278,9 @@
     TRANING[del].forEach(function(b){
       var titel = b.test || b.blad;
       if(!cur || cur.titel !== titel){ cur = { titel: titel, gens: [] }; ut.push(cur); }
-      b.grupper.forEach(function(g){
+      b.grupper.forEach(function(g, gi){
+        var nytt = b.testFran && b.testFran[gi + 1];   // delning mitt i ett blad (grupp-nummer, 1-baserat)
+        if(nytt && cur.titel !== nytt){ cur = { titel: nytt, gens: [] }; ut.push(cur); }
         [].concat(g[1] || []).forEach(function(namn){ if(!sedda[namn]){ sedda[namn] = 1; cur.gens.push(namn); } });
       });
     });
