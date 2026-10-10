@@ -165,3 +165,10 @@ body.embed .nr-dold-embed{ display:none !important; }
   .nr-panel.is-on{flex-direction:column;gap:14px;}
   .nr-spalt{width:100%;}
 }
+/* TELEFON: ramen ger redan sidmarginalen. Bladets egen behållare (.ovn-wrap) lade 28 px till på
+   var sida, och arket sina 36 — kvar blev 198 px innehåll, och k2 d1:s påståendekort (289 px, bråk
+   som inte kan brytas) gav sidledsrullning 370 px på en 360 px skärm (yt-kontrakt BREDD, 2026-10-09).
+   Utan ramen fanns de 32 px som saknades. Ramen tar därför bort behållarens sidluft på smal skärm. */
+@media (max-width:600px){
+  .nr-yta .ovn-wrap{padding-left:0;padding-right:0;}
+}

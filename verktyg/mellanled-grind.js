@@ -57,8 +57,7 @@ const VOKABULAR = [
 
 const PROBE = `(function(){
   var SABBA = ${SABBA};
-  var SABBA_DRIFT = ${SABBA_DRIFT};
-  /* Nivåstegen upplåsta innan mätningen — delad snutt (verktyg/niva-las-upp.js). */
+  var SABBA_DRIFT = ${SABBA_DRIFT};  /* Nivåstegen upplåsta innan mätningen — delad snutt (verktyg/niva-las-upp.js). */
   ${LAS_UPP}
   var VOK = ${JSON.stringify(VOKABULAR.map(v => v.nyckel))};
   function synlig(el){ return !!el.offsetParent; }
@@ -108,8 +107,37 @@ const PROBE = `(function(){
         var p = harPlats(r);
         if(!p.ok) utan.push('rad ' + (ri + 1) + ' (' + p.rutor + ' ruta)');
       });
+      /* GENVÄGEN (order 2026-10-09): ett mellanled som ÄR slutsvaret ska underkännas. Platsen räcker
+         inte — prioriteringsregelns led godtog svaret i ledets ruta, och grinden såg bara att rutan
+         fanns. Provet: skriv SLUTSVARET i radens mellanledsruta (och i svarsrutan), tryck Kontrollera;
+         blir mellanledsrutan grön är genvägen öppen. Rutorna töms efteråt. */
+      var genvag = [], provade = 0;
+      var MEL = 'input[data-prioled], input[data-mellan], input[data-vl], input[data-mellanvarde], input[data-oms]';
+      var satt = function(i, v){ i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
+      var prov = [];
+      rader.forEach(function(r, ri){
+        var mel = Array.prototype.filter.call(r.querySelectorAll(MEL), synlig)[0];
+        var sv = Array.prototype.filter.call(r.querySelectorAll('input[data-svar]'), synlig).pop();
+        if(!mel || !sv || mel === sv) return;
+        var varde = String(sv.dataset.svar).replace('.', ',');
+        satt(mel, varde); satt(sv, varde); prov.push({ mel: mel, sv: sv, rad: ri + 1, varde: varde });
+      });
+      if(prov.length){
+        // Kontrollera-knappen kan ligga utanför arket (bladets wrap) — gå uppåt tills en förfader bär den.
+        var kb = null; for(var anc = g; anc && !kb; anc = anc.parentElement){ kb = anc.querySelector && anc.querySelector('[data-action="kontroll"]'); }
+        if(!kb) genvag.push('genvägen kunde inte provas: ingen Kontrollera-knapp hittades (ett prov som inte körs är inget prov)');
+        if(kb){
+          kb.click();
+          prov.forEach(function(p){
+            provade++;
+            if(p.mel.classList.contains('correct')) genvag.push('rad ' + p.rad + ': mellanledet "' + p.varde + '" (= slutsvaret) godkändes');
+          });
+        }
+        prov.forEach(function(p){ [p.mel, p.sv].forEach(function(i){ satt(i, ''); i.classList.remove('correct', 'wrong'); delete i.dataset.loggat; });
+          Array.prototype.forEach.call(p.mel.parentElement.querySelectorAll('.ovn-mark, .ovn-fasit'), function(x){ x.remove(); }); });
+      }
       ut.grupper.push({ yta: yta, rubrik: txt.slice(0, 60), signal: 'data:' + flagga,
-                        rader: rader.length, utanPlats: utan });
+                        rader: rader.length, utanPlats: utan, genvag: genvag, genvagProvade: provade });
     });
   }
 
@@ -166,7 +194,11 @@ Sidor.blad().forEach(sida => {
     markorGrupper++;   // alla flaggade grupper räknas lika: kravet står i datan
     MP.varde(sida, g.rubrik, { rader: g.rader, utanPlats: g.utanPlats.length });
     const adress = sida.replace(/\/index\.html$/, '') + ' · ' + g.yta + ' · "' + g.rubrik + '"';
-    if(!g.utanPlats.length){ console.log('✓ ' + adress + ' [' + g.signal + '] ' + g.rader + ' rader, alla med plats'); return; }
+    if(g.genvag && g.genvag.length){
+      fel += g.genvag.length;
+      console.log('✗ ' + adress + ' [' + g.signal + ']: GENVÄGEN ÖPPEN — ' + g.genvag.length + ' mellanled godtog slutsvaret\n     ' + g.genvag.slice(0, 4).join(' · '));
+    }
+    if(!g.utanPlats.length){ if(!(g.genvag && g.genvag.length)) console.log('✓ ' + adress + ' [' + g.signal + '] ' + g.rader + ' rader, alla med plats' + (g.genvagProvade ? ' · genvägen stängd (' + g.genvagProvade + ' provade)' : '')); return; }
     fel += g.utanPlats.length;
     console.log('✗ ' + adress + ' [' + g.signal + ']: ' + g.utanPlats.length + ' av ' + g.rader
       + ' rader UTAN plats för mellanled\n     ' + g.utanPlats.slice(0, 6).join(' · '));

@@ -54,28 +54,28 @@ var PLUGG_FAKTORISERA = {
   titel:'',
   intro:'',
   grupper:[
-    {rubrik:'Faktorisera talet i två faktorer', rader:[
+    {rubrik:'Faktorisera talet i två faktorer', logg:'primtal:rakna', rader:[
       {typ:'faktor', tal:18, antal:2},
       {typ:'faktor', tal:25, antal:2},
       {typ:'faktor', tal:27, antal:2},
       {typ:'faktor', tal:42, antal:2}
     ]},
-    {rubrik:'Faktorisera talet i tre faktorer', rader:[
+    {rubrik:'Faktorisera talet i tre faktorer', logg:'primtal:rakna', rader:[
       {typ:'faktor', tal:36, antal:3},
       {typ:'faktor', tal:24, antal:3},
       {typ:'faktor', tal:12, antal:3},
       {typ:'faktor', tal:64, antal:3}
     ]},
-    {rubrik:'Vad menas med ett primtal? Ge tre exempel', rader:[
+    {rubrik:'Vad menas med ett primtal? Ge tre exempel', loggarEj:'förståelse – fritext som eleven jämför själv mot facit, ingen rättning', rader:[
       {typ:'forklara', facit:'Ett primtal är ett tal större än 1 som bara är delbart med 1 och sig självt. Exempel: 2, 3, 5, 7, 11, 13.'}
     ]},
-    {rubrik:'Vad menas med ett sammansatt tal? Ge tre exempel', rader:[
+    {rubrik:'Vad menas med ett sammansatt tal? Ge tre exempel', loggarEj:'förståelse – fritext som eleven jämför själv mot facit, ingen rättning', rader:[
       {typ:'forklara', facit:'Ett sammansatt tal är ett tal som är delbart med fler tal än 1 och sig självt – det kan delas upp i mindre faktorer. Exempel: 4, 6, 8, 9, 12.'}
     ]},
-    {rubrik:'Vilka av talen är primtal? (10–19, 31, 33, 35, 37, 39)', rader:[
+    {rubrik:'Vilka av talen är primtal?', logg:'primtal:begrepp', rader:[
       {typ:'flerval', tal:[10,11,12,13,14,15,16,17,18,19,31,33,35,37,39], ratt:[11,13,17,19,31,37]}
     ]},
-    {rubrik:'Vilka av talen är sammansatta tal?', rader:[
+    {rubrik:'Vilka av talen är sammansatta tal?', logg:'primtal:begrepp', rader:[
       {typ:'flerval', tal:[10,11,12,13,14,15,16,17,18,19,31,33,35,37,39], ratt:[10,12,14,15,16,18,33,35,39]}
     ]}
   ]
@@ -86,83 +86,88 @@ var PLUGG_DOKUMENT = {
     titel:'Lästal',
     intro:'Läs uppgiften och visa din beräkning i rutan. Skriv sedan svaret med rätt enhet. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Lös problemet', rader:[
-        {typ:'problem',
-         fraga:'Per köper 10 chokladbitar för 4,50 kr/st och 100 kolor för 0,50 kr/st. '
-           + 'Hur mycket ska han betala? <em>Svara i kronor (kr).</em>',
-         svar:95, enhet:'kr'},
-        {typ:'problem',
-         fraga:'En biobiljett kostar 135 kr/st. Om man köper ett paket med 10 stycken betalar man 1 190 kr. '
-           + 'Hur mycket tjänar man på varje biobiljett genom att köpa paketerbjudandet? <em>Svara i kronor (kr).</em>',
-         svar:16, enhet:'kr'},
-        {typ:'problem',
+      /* LÄSTALEN ÄR ÖVERSLAGSUPPGIFTER (Joachim 2026-10-09): facit är överslaget, och talen är valda så
+         att det exakta svaret ligger några procent därifrån. Ceasar är undantaget — en exakt uppgift.
+         exakt/overslag: uttrycken (JS-syntax) som regel 11-grinden räknar (verktyg/facit-grind.js).
+         kedja: "Min uträkning" rättas som Beräkna-kedjan; led = ett korrekt exempelled (visas som facit).
+         Ingen "Svara i …": den avslöjade enheten, som eleven själv ska ange i Enhet-rutan. */
+      {rubrik:'Lös problemet', logg:'avr-overslag:rakna', rader:[
+        {typ:'problem', kedja:true,
+         fraga:'Per köper 10 chokladbitar för 4,90 kr/st och 100 kolor för 0,48 kr/st. '
+           + 'Hur mycket ska han betala? <em>Använd överslagsräkning.</em>',
+         svar:100, enhet:'kr', led:'10 · 5 + 100 · 0,5', exakt:'10 * 4.9 + 100 * 0.48', overslag:'10 * 5 + 100 * 0.5'},
+        {typ:'problem', kedja:true,
+         fraga:'En biobiljett kostar 138 kr/st. Om man köper ett paket med 10 stycken betalar man 1 190 kr. '
+           + 'Hur mycket tjänar man på varje biobiljett genom att köpa paketerbjudandet? <em>Använd överslagsräkning.</em>',
+         svar:20, enhet:'kr', led:'140 − 120', exakt:'138 - 1190 / 10', overslag:'140 - 1200 / 10'},
+        {typ:'problem', kedja:true, logg:'add-problem:problem',
          fraga:'Yonko och Ceasar sprang 60 meter. Yonko sprang på tiden 8,83 sekunder. '
-           + 'Ceasar sprang två tiondelar långsammare. Vilken tid hade Ceasar? <em>Svara i sekunder (s).</em>',
-         svar:9.03, enhet:'s'},
-        {typ:'problem',
+           + 'Ceasar sprang två tiondelar långsammare. Vilken tid hade Ceasar?',
+         svar:9.03, enhet:'s', led:'8,83 + 0,2', exakt:'8.83 + 0.2'},
+        {typ:'problem', kedja:true,
          fraga:'Fem kompisar ska gå på bio och äta hamburgare efteråt. Det kostar 575 kr att gå på bio '
-           + 'och 440 kr att äta hamburgare. Hur mycket ska varje person betala? <em>Svara i kronor (kr).</em>',
-         svar:203, enhet:'kr'},
-        {typ:'problem',
+           + 'och 440 kr att äta hamburgare. Hur mycket ska varje person betala? <em>Använd överslagsräkning.</em>',
+         svar:200, enhet:'kr', led:'600 / 5 + 400 / 5', exakt:'(575 + 440) / 5', overslag:'(600 + 400) / 5'},
+        {typ:'problem', kedja:true,
          fraga:'Under en löpartävling behövdes 3 548 muggar till 6 vätskekontroller. '
            + 'Ungefär hur många muggar behövdes till varje vätskekontroll? '
-           + '<em>Använd överslagsräkning. Svara i antal muggar.</em>',
-         svar:600, enhet:'muggar'},
-        {typ:'problem',
-         fraga:'Filip ska beställa pennor till skolan. Pennorna ligger i askar med 12 pennor i varje ask. '
+           + '<em>Använd överslagsräkning.</em>',
+         svar:600, enhet:'muggar', led:'36 / 6 · 100', exakt:'3548 / 6', overslag:'3600 / 6'},
+        {typ:'problem', kedja:true,
+         fraga:'Filip ska beställa pennor till skolan. Pennorna ligger i askar med 11 pennor i varje ask. '
            + 'Varje elev behöver cirka 8 pennor och det går 528 elever på skolan. '
-           + 'Ungefär hur många askar ska han beställa? <em>Använd överslagsräkning. Svara i antal askar.</em>',
-         svar:400, enhet:'askar'},
-        {typ:'problem',
-         fraga:'En dag gick Elsa 8 000 steg. Hur långt gick hon om varje steg var 60 cm långt? '
-           + '<em>Svara i meter (m).</em>',
-         svar:4800, enhet:'m'},
-        {typ:'problem',
-         fraga:'Marias moped drar 0,3 liter bensin per mil. Hur långt kan hon köra med 9 liter? '
-           + '<em>Svara i mil.</em>',
-         svar:30, enhet:'mil'}
+           + 'Ungefär hur många askar ska han beställa? <em>Använd överslagsräkning.</em>',
+         svar:400, enhet:'askar', led:'500 · 8 / 10', exakt:'528 * 8 / 11', overslag:'500 * 8 / 10'},
+        {typ:'problem', kedja:true,
+         fraga:'En dag gick Elsa 7 850 steg. Hur långt gick hon om varje steg var 62 cm långt? '
+           + '<em>Använd överslagsräkning.</em>',
+         svar:4800, enhet:'m', led:'8 000 · 0,6', exakt:'7850 * 0.62', overslag:'8000 * 0.6'},
+        {typ:'problem', kedja:true,
+         fraga:'Marias moped drar 0,29 liter bensin per mil. Hur långt kan hon köra med 8,8 liter? '
+           + '<em>Använd överslagsräkning.</em>',
+         svar:30, enhet:'mil', led:'9 / 3 · 10', exakt:'8.8 / 0.29', overslag:'9 / 0.3'}
       ]}
     ]
   },
   'overslag': {
     titel:'Överslagsräkning',
-    intro:'Skriv först ditt överslag (de avrundade talen) i mellanledet, och sedan svaret.',
+    intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'567 + 743', tecken:'≈', mellan:'600+700', svar:1300},
         {typ:'overslag', vansterText:'139 + 279', tecken:'≈', mellan:'100+300', svar:400},
         {typ:'overslag', vansterText:'289 + 415 + 307', tecken:'≈', mellan:'300+400+300', svar:1000}
       ]},
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'82,5 + 39,2 + 58,6', tecken:'≈', mellan:'80+40+60', svar:180},
         {typ:'overslag', vansterText:'4,9 + 7,3 + 8,8 + 5,1', tecken:'≈', mellan:'5+7+9+5', svar:26}
       ]},
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'78 − 59', tecken:'≈', mellan:'80-60', svar:20},
         {typ:'overslag', vansterText:'891 − 586', tecken:'≈', mellan:'900-600', svar:300},
         {typ:'overslag', vansterText:'67,1 − 56,8', tecken:'≈', mellan:'70-60', svar:10}
       ]},
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'489,7 − 275,4', tecken:'≈', mellan:'490-280', svar:210},
         {typ:'overslag', vansterText:'132,8 − 41,7', tecken:'≈', mellan:'130-40', svar:90},
         {typ:'overslag', vansterText:'242 + 37 − 118', tecken:'≈', mellan:'240+40-120', svar:160}
       ]},
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'4,1 · 21', tecken:'≈', mellan:'4·20', svar:80},
         {typ:'overslag', vansterText:'32 · 18', tecken:'≈', mellan:'30·20', svar:600},
         {typ:'overslag', vansterText:'6,9 · 208', tecken:'≈', mellan:'7·200', svar:1400}
       ]},
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'42 · 58', tecken:'≈', mellan:'40·60', svar:2400},
         {typ:'overslag', vansterText:'690 · 32', tecken:'≈', mellan:'700·30', svar:21000},
         {typ:'overslag', vansterText:'395 · 5,1', tecken:'≈', mellan:'400·5', svar:2000}
       ]},
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'29 / 5', tecken:'≈', mellan:'30/5', svar:6},
         {typ:'overslag', vansterText:'43 / 9', tecken:'≈', mellan:'45/9', svar:5},
         {typ:'overslag', vansterText:'408 / 6', tecken:'≈', mellan:'420/6', svar:70}
       ]},
-      {rubrik:'Beräkna med överslagsräkning', rader:[
+      {rubrik:'Beräkna med överslagsräkning', mellanled:'kravt', logg:'avr-overslag:rakna', rader:[
         {typ:'overslag', vansterText:'23,8 / 5,9', tecken:'≈', mellan:'24/6', svar:4},
         {typ:'overslag', vansterText:'44,8 / 4,9', tecken:'≈', mellan:'45/5', svar:9},
         {typ:'overslag', vansterText:'139 / 19', tecken:'≈', mellan:'140/20', svar:7}
@@ -173,71 +178,74 @@ var PLUGG_DOKUMENT = {
     titel:'Delbarhet',
     intro:'Klicka på alla tal som är delbara med det angivna talet. Tryck sedan på Kontrollera.',
     grupper:[
-      {rubrik:'Vilka av talen är delbara med 2?', rader:[
+      {rubrik:'Vilka av talen är delbara med 2?', logg:'delbarhet:rakna', rader:[
         {typ:'flerval', tal:[7,212,18,25,111,6,788], ratt:[212,18,6,788]}
       ]},
-      {rubrik:'Vilka av talen är delbara med 3?', rader:[
+      {rubrik:'Vilka av talen är delbara med 3?', logg:'delbarhet:rakna', rader:[
         {typ:'flerval', tal:[21,32,51,81,39,46,1002], ratt:[21,51,81,39,1002]}
       ]},
-      {rubrik:'Vilka av talen är delbara med 5?', rader:[
+      {rubrik:'Vilka av talen är delbara med 5?', logg:'delbarhet:rakna', rader:[
         {typ:'flerval', tal:[15,72,100,255,91,60,480,5689], ratt:[15,100,255,60,480]}
       ]},
-      {rubrik:'Vilka av talen är delbara med 4?', rader:[
+      {rubrik:'Vilka av talen är delbara med 4?', logg:'delbarhet:rakna', rader:[
         {typ:'flerval', tal:[712,605,816,928,531,314], ratt:[712,816,928]}
       ]}
     ]
   },
   'brak': {
     titel:'Bråk och decimaltal',
-    intro:'Räkna ut talen. Skriv decimaltal med komma och bråk med täljare och nämnare. Tryck sedan på Kontrollera.',
+    intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Skriv talen i decimalform', rader:[
-        {typ:'brakText', taljare:'1', namnare:'2', svar:'0,5', accept:['0,5','0.5']},
+      {rubrik:'Skriv talen i decimalform – avrunda till två decimaler', logg:'bd-vaxla:rakna', rader:[
+        {typ:'brakText', taljare:'1', namnare:'2', svar:'0,5', accept:['0,5','0.5','0,50','0.50']},
         {typ:'brakText', taljare:'1', namnare:'3', svar:'0,33', accept:['0,33','0.33']},
         {typ:'brakText', taljare:'1', namnare:'4', svar:'0,25', accept:['0,25','0.25']},
-        {typ:'brakText', taljare:'1', namnare:'5', svar:'0,2', accept:['0,2','0.2']}
+        {typ:'brakText', taljare:'1', namnare:'5', svar:'0,2', accept:['0,2','0.2','0,20','0.20']}
       ]},
-      {rubrik:'Skriv talen i decimalform', rader:[
+      {rubrik:'Skriv talen i decimalform – avrunda till två decimaler', logg:'bd-vaxla:rakna', rader:[
         {typ:'brakText', taljare:'3', namnare:'4', svar:'0,75', accept:['0,75','0.75']},
-        {typ:'brakText', taljare:'2', namnare:'5', svar:'0,4', accept:['0,4','0.4']},
+        {typ:'brakText', taljare:'2', namnare:'5', svar:'0,4', accept:['0,4','0.4','0,40','0.40']},
         {typ:'brakText', taljare:'13', namnare:'100', svar:'0,13', accept:['0,13','0.13']},
         {typ:'brakText', taljare:'2', namnare:'3', svar:'0,67', accept:['0,67','0.67']}
       ]},
-      {rubrik:'Skriv talen i decimalform', rader:[
+      {rubrik:'Skriv talen i decimalform', logg:'bd-vaxla:rakna', rader:[
         {typ:'brakText', heltal:'1', taljare:'3', namnare:'100', svar:'1,03', accept:['1,03','1.03']},
         {typ:'brakText', heltal:'2', taljare:'1', namnare:'4', svar:'2,25', accept:['2,25','2.25']},
         {typ:'brakText', heltal:'4', taljare:'4', namnare:'5', svar:'4,8', accept:['4,8','4.8']},
         {typ:'brakText', heltal:'2', taljare:'7', namnare:'100', svar:'2,07', accept:['2,07','2.07']}
       ]},
-      {rubrik:'Skriv talen i bråkform', rader:[
-        {typ:'fragaText', fraga:'0,3', svar:'3/10', accept:['3/10']},
-        {typ:'fragaText', fraga:'0,13', svar:'13/100', accept:['13/100']},
-        {typ:'fragaText', fraga:'0,06', svar:'6/100', accept:['6/100','3/50']},
-        {typ:'fragaText', fraga:'1,3', svar:'13/10', accept:['13/10']}
+      {rubrik:'Skriv talen i bråkform', logg:'bd-tillbrak:rakna', rader:[
+        {typ:'brakSvarB', fraga:'0,3', svar:'3/10', accept:['3/10']},
+        {typ:'brakSvarB', fraga:'0,13', svar:'13/100', accept:['13/100']},
+        {typ:'brakSvarB', fraga:'0,06', svar:'6/100', accept:['6/100','3/50']},
+        {typ:'brakSvarB', fraga:'1,3', svar:'13/10', accept:['13/10']}
       ]},
-      {rubrik:'Beräkna – byt mellan bråk och decimalform', rader:[
-        {typ:'fragaText', fraga:'4/10 + 0,24', svar:'0,64', accept:['0,64','0.64']},
-        {typ:'fragaText', fraga:'0,5 − 1/4', svar:'0,25', accept:['0,25','0.25']},
-        {typ:'fragaText', fraga:'3/4 + 1,3', svar:'2,05', accept:['2,05','2.05']},
-        {typ:'fragaText', fraga:'1 2/5 − 0,7', svar:'0,7', accept:['0,7','0.7']}
+      {rubrik:'Beräkna – byt mellan bråk och decimalform', logg:'bd-vaxla:rakna', rader:[
+        {typ:'enkel', vansterText:'4/10 + 0,24 =', svar:0.64},
+        {typ:'enkel', vansterText:'0,5 − 1/4 =', svar:0.25},
+        {typ:'enkel', vansterText:'3/4 + 1,3 =', svar:2.05},
+        // Blandad form: bråket staplas redan i datan (kärnans brakUt), så att K-I-städningen i
+        // mattextUt ser heltalet FÖRE ett staplat bråk och tar bort mellanrummet. Som löptext blev
+        // "1 " kvar med luft — K-H staplade bråket först efter K-I-steget (notation-grind fällde).
+        {typ:'enkel', vansterText:(window.BLAD_BRAK_UT ? BLAD_BRAK_UT('1 2/5') : '1 2/5') + ' − 0,7 =', svar:0.7}
       ]}
     ]
   },
   'negativa': {
     titel:'Negativa tal',
-    intro:'Räkna ut talen. Använd minusknappen (−) för negativa tal. Tryck sedan på Kontrollera.',
+    intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Beräkna', rader:[
+      {rubrik:'Beräkna', logg:'neg-rakna:addsub', rader:[
         {typ:'enkel', vansterText:'6 − 8 =', svar:-2},
         {typ:'enkel', vansterText:'−7 + 9 =', svar:2},
         {typ:'enkel', vansterText:'−7 + 3 =', svar:-4}
       ]},
-      {rubrik:'Beräkna', rader:[
+      {rubrik:'Beräkna', logg:'neg-rakna:addsub', rader:[
         {typ:'enkel', vansterText:'−6 + (−4) =', svar:-10},
         {typ:'enkel', vansterText:'−6 + 2 + 7 =', svar:3},
         {typ:'enkel', vansterText:'−12 + 4 + 5 =', svar:-3}
       ]},
-      {rubrik:'Beräkna med prioriteringsregeln', rader:[
+      {rubrik:'Beräkna med prioriteringsregeln', logg:'neg-rakna:addsub', rader:[
         {typ:'enkel', vansterText:'−5 − 3 · 4 =', svar:-17},
         {typ:'enkel', vansterText:'4 − 5 · 2 =', svar:-6},
         {typ:'enkel', vansterText:'−8 − 3 · 3 =', svar:-17}
@@ -248,32 +256,32 @@ var PLUGG_DOKUMENT = {
     titel:'Avrundning',
     intro:'Avrunda talen enligt instruktionen. Tryck sedan på Kontrollera.',
     grupper:[
-      {rubrik:'Avrunda till ental', rader:[
+      {rubrik:'Avrunda till ental', logg:'avr-avrundning:begrepp', rader:[
         {typ:'enkel', vansterText:'4,82 ≈', svar:5},
         {typ:'enkel', vansterText:'3,265 ≈', svar:3},
         {typ:'enkel', vansterText:'9,5 ≈', svar:10}
       ]},
-      {rubrik:'Avrunda 68 325 till', rader:[
+      {rubrik:'Avrunda 68 325 till', logg:'avr-avrundning:begrepp', rader:[
         {typ:'fragaText', fraga:'tiotusental', svar:'70000', accept:['70000','70 000']},
         {typ:'fragaText', fraga:'tusental', svar:'68000', accept:['68000','68 000']},
         {typ:'fragaText', fraga:'hundratal', svar:'68300', accept:['68300','68 300']}
       ]},
-      {rubrik:'Avrunda 2 485 till', rader:[
+      {rubrik:'Avrunda 2 485 till', logg:'avr-avrundning:begrepp', rader:[
         {typ:'fragaText', fraga:'tusental', svar:'2000', accept:['2000','2 000']},
         {typ:'fragaText', fraga:'hundratal', svar:'2500', accept:['2500','2 500']},
         {typ:'fragaText', fraga:'tiotal', svar:'2490', accept:['2490','2 490']}
       ]},
-      {rubrik:'Avrunda till två decimaler', rader:[
+      {rubrik:'Avrunda till två decimaler', logg:'avr-avrundning:begrepp', rader:[
         {typ:'enkel', vansterText:'1,489 ≈', svar:1.49},
         {typ:'enkel', vansterText:'2,67389 ≈', svar:2.67},
         {typ:'enkel', vansterText:'156,02863 ≈', svar:156.03}
       ]},
-      {rubrik:'Avrunda till tiondel', rader:[
+      {rubrik:'Avrunda till tiondel', logg:'avr-avrundning:begrepp', rader:[
         {typ:'enkel', vansterText:'23,56 ≈', svar:23.6},
         {typ:'enkel', vansterText:'2,34 ≈', svar:2.3},
         {typ:'enkel', vansterText:'126,746 ≈', svar:126.7}
       ]},
-      {rubrik:'Avrunda 7 923,2896 till', rader:[
+      {rubrik:'Avrunda 7 923,2896 till', logg:'avr-avrundning:begrepp', rader:[
         {typ:'fragaText', fraga:'heltal', svar:'7923', accept:['7923','7 923']},
         {typ:'fragaText', fraga:'tiotal', svar:'7920', accept:['7920','7 920']},
         {typ:'fragaText', fraga:'tiondelar', svar:'7923,3', accept:['7923,3','7923.3','7 923,3']},
@@ -283,47 +291,47 @@ var PLUGG_DOKUMENT = {
   },
   'metoder': {
     titel:'Metoder i de fyra räknesätten',
-    intro:'Räkna ut talen med den metod som anges. Skriv svaret och tryck Kontrollera. (Du kan räkna på papper och bara skriva svaret här.)',
+    intro:'Räkna ut talen med den metod som anges. Skriv svaret och tryck Kontrollera.',   // "(Du kan räkna på papper …)" struken (Joachim 2026-10-09)
     grupper:[
-      {rubrik:'Beräkna med uppställning', rader:[
+      {rubrik:'Beräkna med uppställning', logg:'add-rakna:rakna', rader:[   // papper: bara svaret rättas → räknenoden
         {typ:'enkel', vansterText:'7 403 + 2 178 =', svar:9581},
         {typ:'enkel', vansterText:'296,7 + 371,8 =', svar:668.5},
         {typ:'enkel', vansterText:'13,67 + 48,4 =', svar:62.07}
       ]},
-      {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[
+      {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', logg:'add-metoder:talsorterna', rader:[
         {typ:'mellan', vansterText:'232 + 378 =', mellan:'500 + 100 + 10|200 + 300 + 30 + 70 + 2 + 8', svar:610},
         {typ:'mellan', vansterText:'956 + 356 =', mellan:'1200 + 100 + 12|900 + 300 + 50 + 50 + 6 + 6', svar:1312},
         {typ:'mellan', vansterText:'748 + 252 =', mellan:'900 + 90 + 10|700 + 200 + 40 + 50 + 8 + 2', svar:1000}
       ]},
-      {rubrik:'Beräkna med metoden flytta över', rader:[
+      {rubrik:'Beräkna med metoden flytta över', logg:'add-metoder:flytta-over', rader:[
         {typ:'enkel', vansterText:'864 + 298 =', svar:1162},
         {typ:'enkel', vansterText:'1 997 + 2 578 =', svar:4575},
         {typ:'enkel', vansterText:'7 406 + 197 =', svar:7603}
       ]},
-      {rubrik:'Beräkna med uppställning', rader:[
+      {rubrik:'Beräkna med uppställning', logg:'sub-rakna:rakna', rader:[   // papper: bara svaret rättas → räknenoden
         {typ:'enkel', vansterText:'468 − 273 =', svar:195},
         {typ:'enkel', vansterText:'3 788,7 − 169,9 =', svar:3618.8},
         {typ:'enkel', vansterText:'678,9 − 539,67 =', svar:139.23}
       ]},
-      {rubrik:'Beräkna med uppställning', rader:[
-        {typ:'enkel', vansterText:'164 · 8 =', svar:1312},
-        {typ:'enkel', vansterText:'367 · 6 =', svar:2202},
-        {typ:'enkel', vansterText:'26,45 · 4 =', svar:105.8}
+      {rubrik:'Beräkna med uppställning', logg:'mult-metoder:uppstallning', rader:[
+        {typ:'uppstallning', metod:'mult', vansterText:'164 · 8 =', svar:1312},
+        {typ:'uppstallning', metod:'mult', vansterText:'367 · 6 =', svar:2202},
+        {typ:'uppstallning', metod:'mult', vansterText:'26,45 · 4 =', svar:105.8}
       ]},
-      {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', rader:[
+      {rubrik:'Beräkna med talsorterna var för sig', mellanled:'kravt', logg:'mult-metoder:talsorterna', rader:[
         {typ:'mellan', vansterText:'7 · 64 =', mellan:'420 + 28|7 · 60 + 7 · 4', svar:448},
         {typ:'mellan', vansterText:'6 · 643 =', mellan:'3600 + 240 + 18|6 · 600 + 6 · 40 + 6 · 3', svar:3858},
         {typ:'mellan', vansterText:'4 · 2 816 =', mellan:'8000 + 3200 + 40 + 24|4 · 2000 + 4 · 800 + 4 · 10 + 4 · 6', svar:11264}
       ]},
-      {rubrik:'Beräkna med kort division', rader:[
+      {rubrik:'Beräkna med kort division', logg:'div-rakna:rakna', rader:[   // papper → divisionens räknenod
         {typ:'enkel', vansterText:'462 / 3 =', svar:154},
         {typ:'enkel', vansterText:'1 099 / 7 =', svar:157},
         {typ:'enkel', vansterText:'10,8 / 6 =', svar:1.8}
       ]},
-      {rubrik:'Beräkna med kort division', rader:[
+      {rubrik:'Beräkna med kort division', logg:'div-rakna:rakna', rader:[
         {typ:'enkel', vansterText:'312 / 5 =', svar:62.4},
         {typ:'enkel', vansterText:'145 / 4 =', svar:36.25},
-        {typ:'enkel', vansterText:'4,50 / 8 =', svar:0.5625}
+        {typ:'enkel', vansterText:'4,5 / 8 =', svar:0.5625}
       ]}
     ]
   },
@@ -331,22 +339,22 @@ var PLUGG_DOKUMENT = {
     titel:'Multiplikation och division med 10, 100 och 1000',
     intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Multiplikation med heltal', rader:[
+      {rubrik:'Multiplikation med heltal', logg:'mult-rakna:pow10', rader:[
         {typ:'enkel', vansterText:'10 · 65 =', svar:650},
         {typ:'enkel', vansterText:'189 · 100 =', svar:18900},
         {typ:'enkel', vansterText:'87 · 1 000 =', svar:87000}
       ]},
-      {rubrik:'Multiplikation med decimaltal', rader:[
+      {rubrik:'Multiplikation med decimaltal', logg:'mult-rakna:pow10', rader:[
         {typ:'enkel', vansterText:'100 · 4,25 =', svar:425},
         {typ:'enkel', vansterText:'10 · 0,75 =', svar:7.5},
         {typ:'enkel', vansterText:'6,07 · 1 000 =', svar:6070}
       ]},
-      {rubrik:'Division med heltal', rader:[
+      {rubrik:'Division med heltal', logg:'div-rakna:pow10', rader:[
         {typ:'enkel', vansterText:'459 / 10 =', svar:45.9},
         {typ:'enkel', vansterText:'709 / 100 =', svar:7.09},
         {typ:'enkel', vansterText:'12 / 1 000 =', svar:0.012}
       ]},
-      {rubrik:'Division med decimaltal', rader:[
+      {rubrik:'Division med decimaltal', logg:'div-rakna:pow10', rader:[
         {typ:'enkel', vansterText:'2,53 / 10 =', svar:0.253},
         {typ:'enkel', vansterText:'459,3 / 100 =', svar:4.593},
         {typ:'enkel', vansterText:'34,5 / 1 000 =', svar:0.0345}
@@ -357,37 +365,37 @@ var PLUGG_DOKUMENT = {
     titel:'Multiplikation och division med stora och små tal',
     intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Multiplikation med stora tal', rader:[
+      {rubrik:'Multiplikation med stora tal', logg:'mult-rakna:stora', rader:[
         {typ:'enkel', vansterText:'40 · 70 =', svar:2800},
         {typ:'enkel', vansterText:'30 · 400 =', svar:12000},
         {typ:'enkel', vansterText:'4 500 · 2 000 =', svar:9000000}
       ]},
-      {rubrik:'Multiplikation med små tal', rader:[
+      {rubrik:'Multiplikation med små tal', logg:'mult-rakna:sma', rader:[
         {typ:'enkel', vansterText:'5 · 0,5 =', svar:2.5},
         {typ:'enkel', vansterText:'6 · 0,4 =', svar:2.4},
         {typ:'enkel', vansterText:'0,2 · 7 =', svar:1.4}
       ]},
-      {rubrik:'Multiplikation med små tal', rader:[
+      {rubrik:'Multiplikation med små tal', logg:'mult-rakna:sma', rader:[
         {typ:'enkel', vansterText:'0,3 · 0,4 =', svar:0.12},
         {typ:'enkel', vansterText:'0,06 · 0,7 =', svar:0.042},
         {typ:'enkel', vansterText:'0,05 · 0,09 =', svar:0.0045}
       ]},
-      {rubrik:'Multiplikation med små och stora tal', rader:[
+      {rubrik:'Multiplikation med små och stora tal', logg:'mult-rakna:storasma', rader:[
         {typ:'enkel', vansterText:'800 · 0,2 =', svar:160},
         {typ:'enkel', vansterText:'0,02 · 700 =', svar:14},
         {typ:'enkel', vansterText:'0,06 · 4 000 =', svar:240}
       ]},
-      {rubrik:'Division med stora tal', rader:[
+      {rubrik:'Division med stora tal', logg:'div-rakna:stora', rader:[
         {typ:'enkel', vansterText:'45 000 / 9 000 =', svar:5},
         {typ:'enkel', vansterText:'3 600 / 40 =', svar:90},
         {typ:'enkel', vansterText:'2 400 / 80 =', svar:30}
       ]},
-      {rubrik:'Division med små tal', rader:[
+      {rubrik:'Division med små tal', logg:'div-rakna:sma', rader:[
         {typ:'enkel', vansterText:'8 / 0,5 =', svar:16},
         {typ:'enkel', vansterText:'6 / 0,2 =', svar:30},
         {typ:'enkel', vansterText:'5 / 0,25 =', svar:20}
       ]},
-      {rubrik:'Division med små tal', rader:[
+      {rubrik:'Division med små tal', logg:'div-rakna:sma', rader:[
         {typ:'enkel', vansterText:'2,8 / 0,4 =', svar:7},
         {typ:'enkel', vansterText:'2,4 / 0,04 =', svar:60},
         {typ:'enkel', vansterText:'2,45 / 0,7 =', svar:3.5}
@@ -396,21 +404,21 @@ var PLUGG_DOKUMENT = {
   },
   'prio': {
     titel:'Prioriteringsregeln',
-    intro:'Räkna nedåt och visa mellanledet. Skriv det förenklade ledet i rutan före likhetstecknet – med alla delar under varandra – och svaret i rutan efter. Parenteser först, sedan multiplikation och division, sist addition och subtraktion. Tryck på Kontrollera.',
+    intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Beräkna – tänk på ordningen', rader:[
-        {typ:'prio', vansterText:'2 + 3 · 4', steg:[{vlValue:14}], svar:14},
-        {typ:'prio', vansterText:'(2 + 5) · 6', steg:[{vlValue:42}], svar:42},
-        {typ:'prio', vansterText:'6 · 3 + 4 · 4', steg:[{vlValue:34}], svar:34}
+      {rubrik:'Beräkna', mellanled:'kravt', logg:'prio-prioritering:rakna', rader:[
+        {typ:'prioKedja', vansterText:'2 + 3 · 4', led:'2 + 12', svar:14},
+        {typ:'prioKedja', vansterText:'(2 + 5) · 6', led:'7 · 6', svar:42},
+        {typ:'prioKedja', vansterText:'6 · 3 + 4 · 4', led:'18 + 16', svar:34}
       ]},
-      {rubrik:'Beräkna – tänk på ordningen', rader:[
-        {typ:'prio', vansterText:'2 · 3 + 9 / 3', steg:[{vlValue:9}], svar:9},
-        {typ:'prio', vansterText:'3 · (4 + 5) · 2', steg:[{vlValue:54}], svar:54},
-        {typ:'prio', vansterText:'6 · 9 − 5 · 8', steg:[{vlValue:14}], svar:14}
+      {rubrik:'Beräkna', mellanled:'kravt', logg:'prio-prioritering:rakna', rader:[
+        {typ:'prioKedja', vansterText:'2 · 3 + 9 / 3', led:'6 + 3', svar:9},
+        {typ:'prioKedja', vansterText:'3 · (4 + 5) · 2', led:'3 · 9 · 2', svar:54},
+        {typ:'prioKedja', vansterText:'6 · 9 − 5 · 8', led:'54 − 40', svar:14}
       ]},
-      {rubrik:'Beräkna – tänk på ordningen', rader:[
-        {typ:'prio', vansterText:'4 · (23 − 3 · 6 / 2)', steg:[{vlValue:56}], svar:56},
-        {typ:'prio', vansterText:'32 − 8 / (4 + 6) · 2', steg:[{vlValue:30.4}], svar:30.4}
+      {rubrik:'Beräkna', mellanled:'kravt', logg:'prio-prioritering:rakna', rader:[
+        {typ:'prioKedja', vansterText:'4 · (23 − 3 · 6 / 2)', led:'4 · (23 − 9)', svar:56},
+        {typ:'prioKedja', vansterText:'32 − 8 / (4 + 6) · 2', led:'32 − 0,8 · 2', svar:30.4}
       ]}
     ]
   },
@@ -418,62 +426,62 @@ var PLUGG_DOKUMENT = {
     titel:'Talsystem – jobba med tal',
     intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Vilket tal är', rader:[
+      {rubrik:'Vilket tal är', logg:'rakneträning:rakna', rader:[
         {typ:'fragaText', fraga:'4 tiotal större än 3 080', svar:'3120'},
         {typ:'fragaText', fraga:'5 tiotal mindre än 3 249', svar:'3199'},
         {typ:'fragaText', fraga:'7 hundratal mindre än 4 576', svar:'3876'},
         {typ:'fragaText', fraga:'4 hundratal större än 5 875', svar:'6275'}
       ]},
-      {rubrik:'Vilka tre tal följer i talföljden?', rader:[
+      {rubrik:'Vilka tre tal följer i talföljden?', logg:'position:rakna', rader:[
         {typ:'foljd', givna:['9,2','9,4','9,6'],        nasta:['9,8','10,0','10,2']},
         {typ:'foljd', givna:['9,3','9,6','9,9'],        nasta:['10,2','10,5','10,8']},
         {typ:'foljd', givna:['9,92','9,94','9,96'],     nasta:['9,98','10,00','10,02']},
         {typ:'foljd', givna:['0,192','0,194','0,196'],  nasta:['0,198','0,200','0,202']},
         {typ:'foljd', givna:['2,488','2,491','2,494'],  nasta:['2,497','2,500','2,503']}
       ]},
-      {rubrik:'Vilket tal är störst? Skriv det större talet', rader:[
+      {rubrik:'Vilket tal är störst? Skriv det större talet', logg:'position:rakna', rader:[   // storleksordningens nod
         {typ:'fragaText', fraga:'9,1 eller 9,09', svar:'9,1', accept:['9,1','9.1']},
         {typ:'fragaText', fraga:'10,39 eller 10,4', svar:'10,4', accept:['10,4','10.4']}
       ]},
-      {rubrik:'Skriv ett tal som är', rader:[
+      {rubrik:'Skriv ett tal som är', logg:'position:rakna', rader:[
         {typ:'intervallEn', fraga:'större än 9,9 men mindre än 10', min:9.9, max:10, exkl:true},
         {typ:'intervallEn', fraga:'större än 10 men mindre än 10,01', min:10, max:10.01, exkl:true}
       ]},
-      {rubrik:'Skriv talen med siffror', rader:[
+      {rubrik:'Skriv talen med siffror', logg:'position:begrepp', rader:[
         {typ:'fragaText', fraga:'3 ental, 5 hundradelar och 7 tusendelar', svar:'3,057', accept:['3,057','3.057']},
         {typ:'fragaText', fraga:'2 tiotal och 5 hundradelar', svar:'20,05', accept:['20,05','20.05']},
         {typ:'fragaText', fraga:'4 hundratal, 9 ental och 8 tusendelar', svar:'409,008', accept:['409,008','409.008']}
       ]},
-      {rubrik:'Skriv talen med siffror', rader:[
+      {rubrik:'Skriv talen med siffror', logg:'position:enhet', rader:[
         {typ:'fragaText', fraga:'12 hundradelar', svar:'0,12', accept:['0,12','0.12']},
         {typ:'fragaText', fraga:'17 tusendelar', svar:'0,017', accept:['0,017','0.017']},
         {typ:'fragaText', fraga:'19 tiondelar', svar:'1,9', accept:['1,9','1.9']}
       ]},
-      {rubrik:'Skriv talet som är en tiondel större än', rader:[
+      {rubrik:'Skriv talet som är en tiondel större än', logg:'rakneträning:rakna', rader:[
         {typ:'fragaText', fraga:'6', svar:'6,1', accept:['6,1','6.1']},
         {typ:'fragaText', fraga:'4,58', svar:'4,68', accept:['4,68','4.68']},
         {typ:'fragaText', fraga:'8,04', svar:'8,14', accept:['8,14','8.14']},
         {typ:'fragaText', fraga:'7,98', svar:'8,08', accept:['8,08','8.08']}
       ]},
-      {rubrik:'Skriv talet som är en hundradel större än', rader:[
+      {rubrik:'Skriv talet som är en hundradel större än', logg:'rakneträning:rakna', rader:[
         {typ:'fragaText', fraga:'7,5', svar:'7,51', accept:['7,51','7.51']},
         {typ:'fragaText', fraga:'5,217', svar:'5,227', accept:['5,227','5.227']},
         {typ:'fragaText', fraga:'5,991', svar:'6,001', accept:['6,001','6.001']},
         {typ:'fragaText', fraga:'8,99', svar:'9,00', accept:['9,00','9.00','9','9,0','9.0']}
       ]},
-      {rubrik:'Beräkna med huvudräkning – ingen uppställning', rader:[
+      {rubrik:'Beräkna med huvudräkning – ingen uppställning', logg:'add-rakna:rakna', rader:[
         {typ:'enkel', vansterText:'0,8 + 0,03 =', svar:0.83},
         {typ:'enkel', vansterText:'0,8 + 0,3 =', svar:1.1},
         {typ:'enkel', vansterText:'3,9 + 0,1 =', svar:4.0},
         {typ:'enkel', vansterText:'3,98 + 0,1 =', svar:4.08}
       ]},
-      {rubrik:'Beräkna med huvudräkning – ingen uppställning', rader:[
+      {rubrik:'Beräkna med huvudräkning – ingen uppställning', logg:'sub-rakna:rakna', rader:[
         {typ:'enkel', vansterText:'2,83 − 0,02 =', svar:2.81},
         {typ:'enkel', vansterText:'5,13 − 0,2 =', svar:4.93},
         {typ:'enkel', vansterText:'3,06 − 0,1 =', svar:2.96},
         {typ:'enkel', vansterText:'7,56 − 1,6 =', svar:5.96}
       ]},
-      {rubrik:'Skriv talet som är', rader:[
+      {rubrik:'Skriv talet som är', logg:'rakneträning:rakna', rader:[
         {typ:'fragaText', fraga:'sex tiondelar mindre än 7,49', svar:'6,89', accept:['6,89','6.89']},
         {typ:'fragaText', fraga:'tolv tiondelar mindre än 7,16', svar:'5,96', accept:['5,96','5.96']}
       ]}
@@ -483,53 +491,53 @@ var PLUGG_DOKUMENT = {
     titel:'Talsystem – tiosystemet',
     intro:'Räkna ut talen. När du är klar, tryck på Kontrollera.',
     grupper:[
-      {rubrik:'Vilket platsvärde har siffran 2 i talet?', rader:[
+      {rubrik:'Vilket platsvärde har siffran 2 i talet?', logg:'position:begrepp', rader:[
         {typ:'fragaText', fraga:'4 523', svar:'tiotal', accept:['tiotal','tiotalet']},
         {typ:'fragaText', fraga:'13 234', svar:'hundratal', accept:['hundratal','hundratalet']},
         {typ:'fragaText', fraga:'6,21', svar:'tiondel', accept:['tiondel','tiondelar','tiondelen']}
       ]},
-      {rubrik:'Ordna talen i storleksordning, börja med det minsta', rader:[
+      {rubrik:'Ordna talen i storleksordning, börja med det minsta', logg:'position:rakna', rader:[
         {typ:'ordningsfoljd', tal:['0,1','2,5','0,5','3,0','0,4'], ordning:['0,1','0,4','0,5','2,5','3,0']}
       ]},
-      {rubrik:'Skriv talen i utvecklad form', rader:[
-        {typ:'fragaText', fraga:'176', svar:'1·100+7·10+6·1', accept:['1·100+7·10+6·1']},
-        {typ:'fragaText', fraga:'34,6', svar:'3·10+4·1+6·0,1', accept:['3·10+4·1+6·0,1','3·10+4·1+6·0.1']},
-        {typ:'fragaText', fraga:'8702', svar:'8·1000+7·100+2·1', accept:['8·1000+7·100+2·1']}
+      {rubrik:'Skriv talen i utvecklad form', logg:'utvecklad:metod', rader:[
+        {typ:'uttryck', likhet:true, fraga:'176', svar:'1·100+7·10+6·1', accept:['1·100+7·10+6·1']},
+        {typ:'uttryck', likhet:true, fraga:'34,6', svar:'3·10+4·1+6·0,1', accept:['3·10+4·1+6·0,1','3·10+4·1+6·0.1']},
+        {typ:'uttryck', likhet:true, fraga:'8702', svar:'8·1000+7·100+2·1', accept:['8·1000+7·100+2·1']}
       ]},
-      {rubrik:'Skriv talen på vanligt sätt', rader:[
+      {rubrik:'Skriv talen på vanligt sätt', logg:'utvecklad:rakna', rader:[
         {typ:'enkel', vansterText:'5 · 10 =', svar:50},
         {typ:'enkel', vansterText:'7 · 10 + 5 · 0,1 =', svar:70.5},
         {typ:'enkel', vansterText:'2 · 100 + 4 · 10 + 6 · 1 =', svar:246}
       ]},
-      {rubrik:'Ordna talen i storleksordning, börja med det minsta', rader:[
+      {rubrik:'Ordna talen i storleksordning, börja med det minsta', logg:'position:rakna', rader:[
         {typ:'ordningsfoljd', tal:['0,18','0,1','0,2','1,7','0,15','2'], ordning:['0,1','0,15','0,18','0,2','1,7','2']}
       ]},
-      {rubrik:'Vilket tal är närmast 2,8? Välj ett av talen', rader:[
+      {rubrik:'Vilket tal är närmast 2,8? Välj ett av talen', logg:'position:resonera', rader:[
         {typ:'val', alternativ:['2,9','0,3','2,69','0,25','2','3'], svar:'2,9'}
       ]},
-      {rubrik:'Vilket platsvärde har siffran 2 i talet?', rader:[
+      {rubrik:'Vilket platsvärde har siffran 2 i talet?', logg:'position:begrepp', rader:[
         {typ:'fragaText', fraga:'10,02', svar:'hundradel', accept:['hundradel','hundradelar','hundradelen']},
         {typ:'fragaText', fraga:'293 834', svar:'hundratusental', accept:['hundratusental','hundratusentalet','hundra tusental']},
         {typ:'fragaText', fraga:'19,0921', svar:'tusendel', accept:['tusendel','tusendelar','tusendelen']}
       ]},
-      {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
+      {rubrik:'Skriv talen i storleksordning, börja med det minsta', logg:'position:rakna', rader:[
         {typ:'ordningsfoljd', tal:['1,023','1,2','1,32','1,03'], ordning:['1,023','1,03','1,2','1,32']}
       ]},
-      {rubrik:'Skriv i utvecklad form', rader:[
-        {typ:'fragaText', fraga:'657', svar:'6·100+5·10+7·1', accept:['6·100+5·10+7·1']},
-        {typ:'fragaText', fraga:'23,4', svar:'2·10+3·1+4·0,1', accept:['2·10+3·1+4·0,1','2·10+3·1+4·0.1']},
-        {typ:'fragaText', fraga:'4,72', svar:'4·1+7·0,1+2·0,01', accept:['4·1+7·0,1+2·0,01','4·1+7·0.1+2·0.01']}
+      {rubrik:'Skriv i utvecklad form', logg:'utvecklad:metod', rader:[
+        {typ:'uttryck', likhet:true, fraga:'657', svar:'6·100+5·10+7·1', accept:['6·100+5·10+7·1']},
+        {typ:'uttryck', likhet:true, fraga:'23,4', svar:'2·10+3·1+4·0,1', accept:['2·10+3·1+4·0,1','2·10+3·1+4·0.1']},
+        {typ:'uttryck', likhet:true, fraga:'4,72', svar:'4·1+7·0,1+2·0,01', accept:['4·1+7·0,1+2·0,01','4·1+7·0.1+2·0.01']}
       ]},
-      {rubrik:'Använd siffrorna 7, 5, 8 och 4', rader:[
+      {rubrik:'Använd siffrorna 7, 5, 8 och 4', logg:'siffror:begrepp', rader:[
         {typ:'fragaText', fraga:'Skriv det största talet du kan', svar:'8754'},
         {typ:'fragaText', fraga:'Skriv det minsta talet du kan', svar:'4578'},
         {typ:'fragaText', fraga:'Skriv det största udda talet', svar:'8745'},
         {typ:'fragaText', fraga:'Skriv det minsta jämna talet', svar:'4578'}
       ]},
-      {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
+      {rubrik:'Skriv talen i storleksordning, börja med det minsta', logg:'position:rakna', rader:[
         {typ:'ordningsfoljd', tal:['0,52','0,423','0,3','0,42'], ordning:['0,3','0,42','0,423','0,52']}
       ]},
-      {rubrik:'Skriv talen i storleksordning, börja med det minsta', rader:[
+      {rubrik:'Skriv talen i storleksordning, börja med det minsta', logg:'position:rakna', rader:[
         {typ:'ordningsfoljd', tal:['0,52','0,523','0,5','0,059'], ordning:['0,059','0,5','0,52','0,523']}
       ]}
     ]
@@ -758,6 +766,12 @@ function ftBygg(container, startTal){
       node.children = [ftMakeNode(a), ftMakeNode(b)];
       delete pending[id];
     }
+    // EVIDENS (Plugg till prov matar kartan, 2026-10-09): ETT försök per träd, det första — en fel
+    // delning loggar 'fel', ett färdigt träd utan fel innan loggar 'rätt'. "Börja om" nollställer inte.
+    if(window.AK8_UI && AK8_UI.loggaForstaForsoket){
+      if(node.errorMsg) AK8_UI.loggaForstaForsoket(container, window.Mastery, 'primtal:metod', false);
+      else if(isKlar(root)) AK8_UI.loggaForstaForsoket(container, window.Mastery, 'primtal:metod', true);
+    }
     render();
   }
   function render(){
@@ -803,17 +817,17 @@ function renderFaktoriseraDok(){
   // Del 1: vanliga uppgifter via bladmotorn. Del 2: faktorträd.
   var html = '<div class="ovn-wrap"><div class="ovn-sheet">';
   html += '<h2>Faktorisera</h2>';
-  html += '<p class="ovn-intro">Arbeta med faktorer och primtal. Längst ned bygger du faktorträd – rita gärna på papper också.</p>';
+  html += '<p class="ovn-intro">Arbeta med faktorer och primtal. Längst ned bygger du faktorträd.</p>';
   html += '</div></div>';
   html += '<div class="ovn-wrap" id="faktorisera-blad"></div>';
   // Faktorträd-sektioner
   html += '<div class="ovn-wrap">';
-  html += '<div class="ftrad-uppg"><div class="ftrad-uppg-rubrik">6. Primtalsfaktorisera med faktorträd</div>'
+  html += '<div class="ftrad-uppg"><div class="ftrad-uppg-rubrik">7. Primtalsfaktorisera med faktorträd</div>'
     + '<div class="ftrad-uppg-instr">Skriv två faktorer och tryck Dela. Fortsätt tills alla bladnoder är gröna primtal.</div>';
   html += '<div style="display:flex;gap:40px;flex-wrap:wrap;justify-content:center;">';
   ['ft15','ft21','ft25'].forEach(function(id){ html += '<div id="'+id+'"></div>'; });
   html += '</div></div>';
-  html += '<div class="ftrad-uppg"><div class="ftrad-uppg-rubrik">7. Primtalsfaktorisera med faktorträd</div>'
+  html += '<div class="ftrad-uppg"><div class="ftrad-uppg-rubrik">8. Primtalsfaktorisera med faktorträd</div>'
     + '<div class="ftrad-uppg-instr">Skriv två faktorer och tryck Dela. Fortsätt tills alla bladnoder är gröna primtal.</div>';
   html += '<div style="display:flex;gap:40px;flex-wrap:wrap;justify-content:center;">';
   ['ft18','ft48','ft60'].forEach(function(id){ html += '<div id="'+id+'"></div>'; });
@@ -934,6 +948,8 @@ function renderTallinjeDok(){
       // rättades i 9e5772d, men just det här bladet nåddes aldrig av en grind.
       if(!String(inp.value).trim()) return;
       var ok = jamforTal(inp.value, parseFloat(inp.dataset.tlsvar));
+      // EVIDENS: tallinjen matar position:rakna (samma nod som öva-bladets tallinje). Första försöket.
+      if(window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(inp, window.Mastery, 'position:rakna', ok);
       var mark = document.createElement('span');
       mark.className = 'ovn-mark ' + (ok?'ok':'fel');
       mark.textContent = ok?'✓':'✗';
@@ -959,6 +975,7 @@ function renderTallinjeDok(){
         else if(b.dataset.val === valt) b.classList.add('wrong');
       });
       if(valt === rattSvar) ratt++;
+      if(window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(grid, window.Mastery, 'position:rakna', valt === rattSvar);
     });
     var sam = rot.querySelector('[data-tl-sammanf]');
     sam.style.display = 'block';

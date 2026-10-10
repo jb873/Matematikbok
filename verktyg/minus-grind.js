@@ -98,6 +98,32 @@ const PROBE = `(function(){
       + String(m0.textContent).slice(0, 40) + '"' : 'SABBA: hittade inget minustecken att byta');
   }
 
+  /* SVARETS BRÅK (order 2026-10-09): K-H gäller svaret också. En ruta vars facit är "3/10" ber
+     eleven SKRIVA snedstrecket — bråket ska i stället ha en staplad svarsruta (täljare över nämnare).
+     Benet läser rutans förväntade svar: data-visa, data-svar och alternativen i data-fritext/
+     data-uttryck. Enheter ("km/h") undantas med samma gräns som textbenet. */
+  var _sedda = {};
+  rotar.forEach(function(rot){
+    /* Inte synlig() här: rötterna samlas under flikvandringen, och Plugg till prov ERSÄTTER sitt
+       dokument vid varje klick — de samlade noderna är då lösa, och en lös nod mäter 0 × 0. Textbenet
+       läser lösa noder ändå; rutbenet gör detsamma och undantar bara rutor som är dolda i markupen. */
+    Array.prototype.filter.call(rot.querySelectorAll('input'), function(i){ return i.type !== 'hidden' && !i.hidden && !i.closest('[hidden]'); }).forEach(function(inp){
+      if(inp.dataset.brakdel !== undefined || inp.closest('.ovn-brak')) return;   // staplad ruta: snedstrecket står bara i facit-datan
+      var d = inp.dataset, kand = [d.visa, d.svar];
+      ['fritext', 'uttryck'].forEach(function(k){ if(d[k]){ try { kand = kand.concat(decodeURIComponent(d[k]).split('|')); } catch(e){} } });
+      /* SVARET ÄR ETT BRÅK — hela facit är ett bråk eller ett blandat tal ("3/10", "1 2/5"). Ett
+         UTTRYCK med division ("4x/3 + 1/4") skrivs med keypadens staplade bråkknapp och fälls inte här;
+         det är formen på hela svaret som avgör om eleven tvingas skriva snedstrecket. */
+      var platt = kand.filter(function(s){
+        return s != null && /^[\\u2212-]?(\\d+\\s+)?\\d+\\s*\\/\\s*\\d+$/.test(String(s).trim());
+      })[0];
+      if(!platt) return;
+      var g = inp.closest('.ovn-grupp'), rub = g && g.querySelector('.ovn-grupp-rubrik');
+      var ny = 'SVAR MED SNEDSTRECK: rutan v\\u00e4ntar sig "' + platt + '" (' + (rub ? rub.textContent.replace(/\\s+/g, ' ').trim().slice(0, 40) : 'utan grupp') + ') \\u2014 ett br\\u00e5ksvar ska ha staplad ruta';
+      if(!_sedda[ny]){ _sedda[ny] = 1; ut.brott.push(ny); }
+    });
+  });
+
   var sedda = {};
   rotar.forEach(function(rot){
     // Varje textnod för sig: då pekar brottet på den text som faktiskt står i sidan, och

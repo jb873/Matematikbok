@@ -179,6 +179,12 @@ const PROBE7 = `(function(){
     else if(d.mellan !== undefined) v = String(d.mellan).split('|')[0];
     else if(d.enhet !== undefined) v = d.enhet;
     else if(d.rund !== undefined) v = d.rund.split('|')[0];
+    // d10-typerna (order 2026-10-09): tallinjens rutor, det staplade bråksvaret (täljare/nämnare ur
+    // data-visa "3/10") och priokedjans led (ett korrekt led står i data-visa). Utan dem räknades de
+    // som ej täckta — och en enda ej täckt ruta stänger av "allt fyllt men X av Y"-kontrollen.
+    else if(d.tlsvar !== undefined) v = String(d.tlsvar).replace('.', ',');
+    else if(d.brakdel !== undefined) v = String(d.visa || '').split('/')[d.brakdel === 't' ? 0 : 1] || null;
+    else if(d.prioled !== undefined) v = d.visa || null;
     // == null, inte === null: ett undefined skrevs förr in i rutan som strängen "undefined"
     // och dömdes som fel svar, i stället för att räknas som ej täckt. Samma felklass som V11.
     if(v == null){ b.ejTackta++; return; }
@@ -216,7 +222,7 @@ const PROBE7 = `(function(){
     b.platshallare = ins.length > 0 && tomma === ins.length;   // byggar-platshållare (tomt facit i varje ruta) → rapporteras med ?, fälls ej
     root.querySelectorAll('.valruta-grid, .ovn-val-grid, .ovn-flerval-grid').forEach(function(g){ if(!synlig(g)) b.doldGrid++; else b.synligGrid++; });
     root.querySelectorAll('.brak-svar-rad, .brak-fragerad').forEach(function(row){ var h = row.querySelector('.brak-hel'), t = row.querySelector('.brak-t'), n = row.querySelector('.brak-n'); if(h && row.dataset.hel !== undefined){ h.value = row.dataset.hel; ev(h, 'input'); } if(t && row.dataset.t !== undefined){ t.value = row.dataset.t; ev(t, 'input'); } if(n && row.dataset.n !== undefined){ n.value = row.dataset.n; ev(n, 'input'); } });
-    ins.forEach(function(i){ if(i.closest('.brak-svar-rad, .brak-fragerad') && /brak-(hel|t|n)\\b/.test(i.className)) return; if(/brak-cell|brak-kladd|brak-bada-dec|forlang-tal|forlang-dec/.test(i.className)){ b.ejTackta++; return; } fyll(i, b); });
+    ins.forEach(function(i){ if(i.closest('.brak-svar-rad, .brak-fragerad') && /brak-(hel|t|n)\\b/.test(i.className)) return; if(i.dataset.brakdel === undefined && /brak-cell|brak-kladd|brak-bada-dec|forlang-tal|forlang-dec/.test(i.className)){ b.ejTackta++; return; } if(i.hidden || i.closest('[hidden]')) return; fyll(i, b); });
     // val-rad: klicka knappen vars data-val = radens data-ratt
     root.querySelectorAll('.val-rad').forEach(function(rad){
       var r = rad.dataset.ratt, bt = Array.from(rad.querySelectorAll('.val-knapp')).filter(function(k){ return k.dataset.val === r; })[0];
@@ -297,7 +303,16 @@ const PROBE7 = `(function(){
     }
   });
   // Plugg till prov (k1/d10, k3/d7): dokumenten renderas först vid klick → öppna varje grupp + dokument och mät bladet som skapas
-  Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var sh = akt && akt.querySelector('.ovn-sheet'); var namn = ('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 28); if(!sh){ ut.blad.push({ blad: namn, ingenKnapp: true }); return; } mat(namn, sh.parentElement); }); });
+  /* Ett dokument kan bestå av FLERA ark (Faktorisera: rubrikark + uppgiftsark + faktorträd). Mät
+     arket som BÄR Kontrollera — förr mättes det första arket (rubriken) och dokumentet rapporterades
+     "ingen Kontrollera-knapp" med ett frågetecken, alltså aldrig mätt. Finns svarsrutor men ingen
+     knapp i något ark är det ett brott (se rapporteringen). */
+  Array.from(document.querySelectorAll('.plugg-gruppbtn')).forEach(function(g){ g.click(); Array.from(document.querySelectorAll('.plugg-dok')).forEach(function(d){ d.click(); var akt = document.getElementById('plugg-aktivt'); var namn = ('plugg: ' + d.textContent.replace(/\\s+/g, ' ').trim()).slice(0, 28);
+    var ark = akt ? Array.from(akt.querySelectorAll('.ovn-sheet')) : [];
+    var medKnapp = ark.map(function(sh){ return sh.closest('.ovn-wrap') || sh.parentElement; }).filter(function(w, i, a){ return a.indexOf(w) === i && w.querySelector('[data-action="kontroll"]'); });
+    if(medKnapp.length){ medKnapp.forEach(function(w, i){ mat(namn + (medKnapp.length > 1 ? ' #' + (i + 1) : ''), w); }); return; }
+    var harRutor = akt && Array.from(akt.querySelectorAll('.ovn-in, .ovn-flerval-grid, .ovn-val-grid')).some(synlig);
+    ut.blad.push({ blad: namn, ingenKnapp: true, harRutor: !!harRutor }); }); });
   return ut;
 })()`;
 
@@ -449,7 +464,9 @@ SIDOR7.forEach(sida => {
   u.blad.forEach(b => {
     blad++;
     if(b.onabar){ console.log('? ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ONÅBAR (ingen flik/nav visar bladet)'); return; }
-    if(b.ingenKnapp){ console.log('? ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ingen Kontrollera-knapp'); return; }
+    // Svarsrutor UTAN Kontrollera går inte att rätta — det är ett brott, inte ett frågetecken.
+    if(b.ingenKnapp && (b.harRutor || b.synligIn || b.synligGrid)){ fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': svarsrutor men ingen Kontrollera-knapp — bladet kan inte rättas'); return; }
+    if(b.ingenKnapp){ console.log('? ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ingen Kontrollera-knapp (inga svarsrutor)'); return; }
     if(b.platshallare){ console.log('? ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': PLATSHÅLLARE (tomt facit i alla rutor — kan aldrig ge full pott)'); return; }
     const brott = [];
     // Enhet = en SYNLIG ifyllbar ruta, eller en svarsenhet UTAN ruta (knapprad, select, valgrid).

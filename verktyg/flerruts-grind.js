@@ -276,11 +276,14 @@ const PROBE7 = `(function(){
     var b = { blad: namn, rader: 0, gronFastFel: [], perRutaSaknas: [], provade: 0 };
     // Förlängningens led (d7) räknas med: en rad är fem rutor, och rätt svar i den sista får inte
     // göra hela raden grön. Radklassen är .ovn-brak-rad — bråkrader fanns aldrig i mängden förut.
-    var SEL = '.ovn-in[data-svar], .ovn-in[data-forenkla], .ovn-in[data-forlprod], .ovn-in[data-forlled], .ovn-in[data-forlbrak]';
+    /* d10:s flerruterader (order 2026-10-09): ordning/talföljd (data-ordna), mellanled + svar
+       (data-mellan), priokedjan (data-prioled), staplat bråksvar (data-brakdel) och tallinjen
+       (data-tlsvar, rad = .tl-svarsrad). Utan dem provades 0 rader på Plugg till prov. */
+    var SEL = '.ovn-in[data-svar], .ovn-in[data-forenkla], .ovn-in[data-forlprod], .ovn-in[data-forlled], .ovn-in[data-forlbrak], .ovn-in[data-ordna], .ovn-in[data-mellan], .ovn-in[data-prioled]:not([hidden]), .ovn-in[data-brakdel], .ovn-in[data-tlsvar]';
     // .ovn-brak-rad tas med BARA för förlängningens rader. Övriga bråkrader i k2 (brak-femled,
     // förläng-båda) rättar per ruta med klasser men sätter inga ✓/✗-element, och mark-benet nedan
     // mäter då fel sak — den luckan är en egen mätning, inte den här orderns.
-    var rader = Array.from(root.querySelectorAll('.ovn-rad, .ovn-brak-rad[data-rad]:has(.ovn-in[data-forlled]), .ovn-brak-rad[data-rad]:has(.ovn-in[data-forlprod])')).filter(function(r){ return r.querySelectorAll(SEL).length >= 2; });
+    var rader = Array.from(root.querySelectorAll('.ovn-rad, .ovn-brak-rad[data-rad]:has(.ovn-in[data-forlled]), .ovn-brak-rad[data-rad]:has(.ovn-in[data-forlprod]), .ovn-brak-rad[data-rad]:has(.ovn-in[data-brakdel]), .tl-svarsrad')).filter(function(r){ return r.querySelectorAll(SEL).length >= 2; });
     // k2: bråkrader vars facit står på RADEN (data-hel/t/n) och vars rutor är .brak-cell
     var brakRader = Array.from(root.querySelectorAll('.brak-svar-rad, .brak-fragerad')).filter(function(r){ return r.querySelectorAll('.brak-hel, .brak-t, .brak-n').length >= 2; });
     b.rader = rader.length + brakRader.length; if(!b.rader){ ut.blad.push(b); return; }
@@ -293,6 +296,11 @@ const PROBE7 = `(function(){
         felv = decodeURIComponent(d.forlled) + ' · ' + (Number(d.forlfaktor) * 10);   // fel faktor
       } else if(d.forlbrak !== undefined){ ratt = d.forlbrak; felv = plus1(ratt); }
       else if(d.forenkla !== undefined){ ratt = d.visa; felv = ratt + ' + 1'; }
+      else if(d.ordna !== undefined){ ratt = String(d.ordna).replace('.', ','); felv = plus1(ratt); }
+      else if(d.mellan !== undefined){ ratt = String(d.mellan).split('|')[0]; felv = ratt + ' + 1'; }
+      else if(d.prioled !== undefined){ ratt = d.visa; felv = ratt + ' + 1'; }
+      else if(d.brakdel !== undefined){ ratt = String(d.visa).split('/')[d.brakdel === 't' ? 0 : 1]; felv = plus1(ratt); }
+      else if(d.tlsvar !== undefined){ ratt = String(d.tlsvar).replace('.', ','); felv = plus1(ratt); }
       else { ratt = d.svar; felv = plus1(ratt); }
       inp.value = sist ? ratt : felv;   // fel värde i alla utom sista
       ev(inp, 'input'); }); });
@@ -330,7 +338,8 @@ const PROBE7 = `(function(){
   // EN FLIK I TAGET, och mätningen MEDAN fliken är framme: ett dolt blad kan fyllas i men inte
   // rättas — motorn sätter inga markeringar på det — och en grind som ändå mäter det rapporterar
   // brott som bara handlar om ögonblicket den valde.
-  function kortNamn(t){ t = String(t).replace(/\s+/g, ' ').trim(); return t.length > 30 ? '…' + t.slice(-29) : t; }
+  // \\s, inte \s: proben är en mallsträng, och \s blev "s" — namnen tappade varje s ("Tal y tem").
+  function kortNamn(t){ t = String(t).replace(/\\s+/g, ' ').trim(); return t.length > 30 ? '…' + t.slice(-29) : t; }
   var nav = Array.from(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   var seddaBlad = [];
   (nav.length ? nav : [null]).forEach(function(b){

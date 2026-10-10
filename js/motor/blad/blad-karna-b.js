@@ -318,6 +318,8 @@ function talUt(v){
 
 // Beskedet när genvägen tas. Elevtext i ett FALT-fält, Joachims ordalydelse.
 var SKRIV_BESKED = { genvag: { hint: 'Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.' } };
+// Priokedjans och lästalskedjans genväg (ett ensamt tal i ledets ruta). Joachims ordalydelse 2026-10-09.
+var PRIO_BESKED = { genvag: { hint: 'Det där är svaret. Skriv ett led där bara en del av räkningen är gjord.' } };
 
 // PARENTESGRUPPERNA PÅ TOPPNIVÅ, i den ordning de står: "40 - (x + 3) - (2x - 1)" ger
 // ["x + 3", "2x - 1"], "40 - (x + 3 + 2x - 1)" ger ["x + 3 + 2x - 1"]. Nästlade parenteser räknas
@@ -605,6 +607,45 @@ function bladHTML(blad){
         html += '</div>';
         return;
       }
+      // BRÅKSVAR (staplat): talet visas, eleven skriver bråket i en STAPLAD ruta — täljare över
+      // nämnare (K-H gäller svaret också, inte bara det som visas). Godkända former är datans:
+      // accept: ['6/100','3/50']. Varje ruta rättas för sig mot paren (flerruts-regeln).
+      // Order 2026-10-09 (k1 d10 Bråk 4). Radtypen ersätter fritext med snedstreck.
+      if(rad.typ === 'brakSvarB'){
+        var _bpar = (rad.accept || [rad.svar]).join('|');
+        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
+        html += lbl(bokstav);
+        html += '<span class="ovn-text ovn-num">' + rad.fraga + '</span>';
+        html += '<span class="ovn-text">=</span>';
+        html += '<span class="ovn-brak brak-svar-frak">'
+          + '<input class="ovn-in brak-cell" data-brakpar="' + encodeURIComponent(_bpar) + '" data-brakdel="t" data-visa="' + rad.svar + '" inputmode="numeric" autocomplete="off" aria-label="täljare">'
+          + '<span class="ovn-brak-strecket"></span>'
+          + '<input class="ovn-in brak-cell" data-brakpar="' + encodeURIComponent(_bpar) + '" data-brakdel="n" data-visa="' + rad.svar + '" inputmode="numeric" autocomplete="off" aria-label="nämnare">'
+          + '</span>';
+        html += '</div>';
+        return;
+      }
+      // PRIOKEDJA: fri kedja med "+ led" — samma maskineri som Beräkna-kedjan (.ovn-berakna).
+      // Varje led är ett steg i prioriteringsordningen och rättas på VÄRDE; ett led som redan är
+      // slutsvaret (ett ensamt tal, ingen räkneoperation kvar) underkänns — genvägsregeln.
+      // Det första ledet är obligatoriskt (mellanledskravet), fler läggs till med "+ led".
+      // rad.led = ett exempel på ett korrekt led (visas som facit vid fel). Order 2026-10-09 (k1 d10).
+      if(rad.typ === 'prioKedja'){
+        html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
+        html += lbl(bokstav);
+        html += '<div class="ovn-berakna">';
+        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        html += '<input class="ovn-in bred" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '" inputmode="text" autocomplete="off">';
+        html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
+        html += '<input class="ovn-in bred ovn-led-extra" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '" inputmode="text" autocomplete="off" hidden>';
+        html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+        html += '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>';
+        html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
+        html += '</div></div>';
+        return;
+      }
       // FLERVAL: välj flera tal ur en lista (t.ex. "vilka är delbara med 3")
       if(rad.typ === 'flerval'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '" style="flex-wrap:wrap;">';
@@ -709,14 +750,27 @@ function bladHTML(blad){
       }
       if(rad.typ === 'problem'){
         // Problem har egen layout: fråga + kladdruta + svar/enhet
-        html += '<div class="prob-rad" data-rad="' + radNummer + '">';
+        html += '<div class="prob-rad" data-rad="' + radNummer + '"' + (rad.logg ? ' data-logg="' + rad.logg + '"' : '') + '>';
         html += '<div class="prob-fraga">';
         html += lbl(bokstav);
         html += '<span>' + rad.fraga + '</span>';
         html += '</div>';
         html += '<div class="prob-kladd-rubrik">Min uträkning</div>';
+        if(rad.kedja){
+          /* UTRÄKNINGEN RÄTTAS (opt-in rad.kedja, k1 d10 2026-10-09): Beräkna-kedjan i stället för
+             kladdrutan — varje led rättas på VÄRDE mot svaret, ett ensamt tal är genvägen och
+             underkänns. Samma ledtyp som priokedjan (data-prioled). rad.led = ett korrekt exempelled. */
+          html += '<div class="ovn-berakna prob-kedja">';
+          html += '<input class="ovn-in bred" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '" inputmode="text" autocomplete="off">';
+          html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
+          html += '<input class="ovn-in bred ovn-led-extra" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '" inputmode="text" autocomplete="off" hidden>';
+          html += '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>';
+          html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
+          html += '</div>';
+        } else {
         html += '<textarea class="prob-kladd" rows="3" '
           + '></textarea>';
+        }
         html += '<div class="prob-svar-rad">';
         html += '<span class="prob-label">Svar:</span>';
         html += '<input class="ovn-in" data-svar="' + rad.svar + '" '
@@ -1529,7 +1583,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-mellanuttryck],.ovn-in[data-forlled],.ovn-in[data-forlbrak],.ovn-in[data-forlprod],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-prioled],.ovn-in[data-fritext],.ovn-in[data-mellanuttryck],.ovn-in[data-forlled],.ovn-in[data-forlbrak],.ovn-in[data-forlprod],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -1572,7 +1626,7 @@ function bygg_blad(rotEl, blad){
 
   rotEl.querySelectorAll(VAXER).forEach(function(inp){
     // mellanledet är ett uttryck (3 + 4 · 2 − 8) även utan data-vars — det ska ha mellanrum
-    var uttrycksruta = inp.matches('[data-vars],[data-mellan],[data-oms]');
+    var uttrycksruta = inp.matches('[data-vars],[data-mellan],[data-oms],[data-prioled]');
     vaxRuta(inp);
     inp.addEventListener('input', function(){
       if(uttrycksruta && window.AK8_UI && AK8_UI.autoSpace) AK8_UI.autoSpace(inp);
@@ -1887,6 +1941,27 @@ function bygg_blad(rotEl, blad){
         // Prioritering, vänsterled: rättas på värde
         var elevVarde = prioEval(inp.value);
         ok = elevVarde !== null && Math.abs(elevVarde - parseFloat(inp.dataset.vl)) < 1e-6;
+      } else if(inp.dataset.prioled !== undefined){
+        // PRIOKEDJANS LED: rätt VÄRDE, och fortfarande en räkning — ett ensamt tal är slutsvaret
+        // skrivet i ledets ruta (genvägsregeln). Ett negativt tal räknas som ensamt tal.
+        var _plv = prioEval(inp.value);
+        var _plUtanTecken = String(inp.value).replace(/\s/g, '').replace(/^[-−]/, '');
+        var _plVarde = _plv !== null && Math.abs(_plv - parseFloat(inp.dataset.prioled)) < 1e-6;
+        var _plRakning = /[+\-−·*x×\/:()]/.test(_plUtanTecken);
+        ok = _plVarde && _plRakning;
+        if(_plVarde && !_plRakning) _besked = PRIO_BESKED.genvag.hint;
+      } else if(inp.dataset.brakdel !== undefined){
+        // STAPLAT BRÅKSVAR: rutan rättas mot paren, med grannrutan som villkor när den är ifylld.
+        var _bp = decodeURIComponent(inp.dataset.brakpar).split('|').map(function(p){ return p.split('/'); });
+        var _bfr = inp.closest('.ovn-brak');
+        var _btv = String((_bfr.querySelector('[data-brakdel="t"]') || {}).value || '').trim();
+        var _bnv = String((_bfr.querySelector('[data-brakdel="n"]') || {}).value || '').trim();
+        var _bi = inp.dataset.brakdel === 't' ? 0 : 1, _bmin = _bi === 0 ? _btv : _bnv, _bann = _bi === 0 ? _bnv : _btv;
+        // Grannen är villkor bara när den hör till NÅGOT godkänt par: 4 över 10 (facit 3/10) ger
+        // täljaren fel och nämnaren rätt, varje ruta för sig. 6 över 50 (godkänt 6/100 och 3/50)
+        // ger båda fel — båda talen finns i par, men inte i samma.
+        var _bannIPar = _bann !== '' && _bp.some(function(p){ return p[1 - _bi] === _bann; });
+        ok = _bp.some(function(p){ return p[_bi] === _bmin && (!_bannIPar || p[1 - _bi] === _bann); });
       } else {
         ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
       }
@@ -1917,6 +1992,8 @@ function bygg_blad(rotEl, blad){
       if(_loggNod && inp.dataset.oms === undefined
          && inp.dataset.forlled === undefined && inp.dataset.forlbrak === undefined
          && inp.dataset.forlprod === undefined
+         && inp.dataset.prioled === undefined            // kedjans led är steg, svarsrutan loggar
+         && inp.dataset.brakdel !== 't'                  // staplat svar: EN evidens per bråk (nämnarrutan)
          && String(inp.value).trim() !== ''
          && window.AK8_UI && AK8_UI.loggaForstaForsoket){
         AK8_UI.loggaForstaForsoket(inp, _store, _loggNod, ok);
@@ -1946,6 +2023,8 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.intmin !== undefined) facit = 'ett tal mellan ' + String(parseFloat(inp.dataset.intmin)).replace('.', ',') + ' och ' + String(parseFloat(inp.dataset.intmax)).replace('.', ',');
         else if(inp.dataset.faktor !== undefined) facit = 'produkt = ' + parseInt(inp.dataset.faktor, 10) + ', ' + parseInt(inp.dataset.antal, 10) + ' faktorer (minst 2 var)';
         else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
+        else if(inp.dataset.prioled !== undefined) facit = inp.dataset.visa;   // ett korrekt led, t.ex. 2 + 12
+        else if(inp.dataset.brakdel !== undefined) facit = inp.dataset.visa;   // bråket, staplat av matteUt
         else if(inp.dataset.omkrets !== undefined) facit = inp.dataset.visa;   // "3x + 5x + 4x = 12x"
         else if(inp.dataset.skriv !== undefined) facit = inp.dataset.visa;    // uppställningen
         else if(inp.dataset.likben !== undefined || inp.dataset.likbas !== undefined) facit = inp.dataset.visa;
@@ -1985,6 +2064,14 @@ function bygg_blad(rotEl, blad){
       // Ta bort blink-klassen efter animationen
       setTimeout(function(){ inp.classList.remove('just-checked'); }, 500);
     });
+    /* KLICKRUTNÄTEN LOGGAR OCKSÅ (order 2026-10-09). Förr loggade bara rutorna i loopen ovan, så en
+       grupp med data-logg men bara valrutnät (delbarhet, primtal, "närmast 2,8") gav ingen evidens alls
+       — loggnings-grind.js fann det. Bara ett BESVARAT rutnät loggar, och bara första försöket. */
+    function loggaGrid(grid, ok){
+      var _gg = grid.closest('[data-logg]') || grid.closest('.ovn-grupp'), _ng = _gg && _gg.getAttribute('data-logg');
+      var _sg = (_gg && _gg.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
+      if(_ng && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(grid, _sg, _ng, ok);
+    }
     // Rätta valruta-grids (välj rätt uttryck, ev. flera rätta)
     rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
       if(blad.stegvis){ var gg = grid.closest('.ovn-grupp'); if(gg && gg.classList.contains('steg-dold')) return; }
@@ -2008,6 +2095,7 @@ function bygg_blad(rotEl, blad){
       var antalRatta = ratta.length;
       var ok = allaValdaRatt && (flera ? valda.length===antalRatta : valda.length===1);
       if(ok) ratt++;
+      if(valda.length) loggaGrid(grid, ok);
     });
     /* ORDNA MED KLICK: hela raden är ETT svar. Ingen vald ruta = obesvarad, och obesvarat är
        varken rätt eller fel — men räknas i nämnaren, uppgiften finns kvar att göra. */
@@ -2122,6 +2210,7 @@ function bygg_blad(rotEl, blad){
         else if(b.dataset.val === valt) b.classList.add('wrong');
       });
       if(valt === ratt_svar) ratt++;
+      loggaGrid(grid, valt === ratt_svar);
     });
     // Rätta multi-select (delbarhet): alla rätta valda, inga felaktiga
     rotEl.querySelectorAll('.ovn-flerval-grid').forEach(function(grid){
@@ -2137,6 +2226,7 @@ function bygg_blad(rotEl, blad){
         else if(!arVald && arRatt){ b.classList.add('missad'); alltRatt = false; }
       });
       if(alltRatt) ratt++;
+      if(grid.querySelector('.ovn-flerval-btn.is-vald')) loggaGrid(grid, alltRatt);
     });
     // Förklaringsfrågor – visa exempelfacit (rättas inte)
     rotEl.querySelectorAll('[data-forklara]').forEach(function(ta){

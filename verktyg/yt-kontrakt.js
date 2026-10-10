@@ -521,7 +521,9 @@ const BREDD_PROBE = `(function(){
   var FULL = 40, chromebook = window.innerWidth >= 1200;
   if(${JSON.stringify(SABBA)} === 'uppst-krymp'){ var _sk = document.createElement('style'); _sk.textContent = '.ovn-uppst .mult-upp-ans{width:26px !important}'; document.head.appendChild(_sk); }
   var uppstOver = [], uppstMatta = 0;
-  var navB = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn'));
+  /* .nr-rad: navramens varianter når ALLA dokument — även Plugg till provs, som inte har blad-nav
+     utan en dokumentlista per område. Utan den mättes d10:s uppställning (Metoder grupp 5) aldrig. */
+  var navB = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   (navB.length ? navB : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
     Array.prototype.forEach.call(document.querySelectorAll('.ovn-uppst'), function(u){

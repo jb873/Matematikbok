@@ -20,7 +20,13 @@
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
+// --sida är ett alias: de andra grindarna tar --sida, och en körning med --sida svepte här förr ALLA
+// filer utan att säga det — träffar ur andra filer lästes då som bladets (FAS 1, k1 d10).
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--fil'));
+// --sida dNN-namn (sidmappen) → bladfiler som slutar på -dNN.js. Kapitlet står inte i mappnamnet,
+// så flera kapitels dNN kan träffa — svepet skriver ut vilka filer det faktiskt läste.
+const SIDA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
+const SIDA_RE = SIDA && /(^|\/)d(\d+)-/.test(SIDA) ? new RegExp('-d' + SIDA.match(/(^|\/)d(\d+)-/)[2] + '\\.js$') : null;
 
 // Bladfiler med grupper: sjuans k1/k3-motorer och åttans d-blad.
 const FILER = fs.readdirSync(path.join(ROOT, 'js/motor/blad'))
@@ -107,15 +113,24 @@ function las(blk){
               intro: (blk.match(/intro\s*:\s*'([^']*)'/) || [])[1],
               exempel: (blk.match(/exempel\s*:\s*'([^']*)'/) || [])[1],
               rader: [] };
+  /* RADERNA LÄSES INNE I rader:[ … ], inte i hela gruppen. Mönstret tål en nivå nästling, och en
+     grupp vars rader saknar egna klamrar ÄR själv en nivå — då matchade hela gruppen som EN rad
+     med första radens fråga och svar, och resten av gruppen prövades aldrig (8 lästal → 1). */
+  const ri = blk.search(/rader\s*:\s*\[/);
+  const radDel = ri >= 0 ? blk.slice(blk.indexOf('[', ri) + 1) : blk;
   const re = /\{([^{}]|\{[^{}]*\})*\}/g; let m;
-  while((m = re.exec(blk)) !== null){
+  while((m = re.exec(radDel)) !== null){
     const r = m[0];
     if(!/svar\s*:|accept\s*:/.test(r)) continue;
+    // FRÅGAN KAN VARA SAMMANFOGAD ('…' + '…' + '…', som lästalen): hela kedjan läses, inte bara
+    // första biten — ledtråden ("Svara i kronor (kr)") stod i den sista och sågs aldrig.
+    const fk = r.match(/fraga\s*:\s*((?:'[^']*'\s*\+?\s*)+)/);
     g.rader.push({
       svar: (r.match(/svar\s*:\s*'([^']*)'/) || r.match(/svar\s*:\s*([-\d.]+)/) || [])[1],
       accept: (r.match(/accept\s*:\s*\[([^\]]*)\]/) || [])[1],
       svg: (r.match(/svg\s*:\s*'([^']*)'/) || [])[1],
-      fraga: (r.match(/fraga\s*:\s*'([^']*)'/) || [])[1],
+      fraga: fk ? (fk[1].match(/'([^']*)'/g) || []).map(s => s.slice(1, -1)).join('') : undefined,
+      enhet: (r.match(/enhet\s*:\s*'([^']*)'/) || [])[1],
       vansterText: (r.match(/vansterText\s*:\s*'([^']*)'/) || [])[1],
       text: (r.match(/text\s*:\s*'([^']*)'/) || [])[1]
     });
@@ -129,6 +144,7 @@ FILER.forEach(f => {
   const P = path.join(ROOT, 'js/motor/blad', f);
   const rel = path.relative(ROOT, P).replace(/\\/g, '/');
   if(BARA && rel.indexOf(BARA) < 0) return;
+  if(SIDA && (!SIDA_RE || !SIDA_RE.test(rel))) return;
   const kalla = fs.readFileSync(P, 'utf8');
   filer++;
   const rader = [];
@@ -139,7 +155,19 @@ FILER.forEach(f => {
     g.rader.forEach(r => {
       const svarTexter = [r.svar, r.accept].filter(Boolean);
       let basta = null;
+      /* ENHETEN SOM ETIKETT (order 2026-10-09): raden har en Enhet-ruta, och frågan säger vilken
+         enhet svaret ska ha — "Svara i kronor (kr)" — eller sätter den i en parentes. Då är enhetens
+         svar avskrift. Enheten i själva problemtexten ("4,50 kr/st") är däremot en del av problemet. */
+      if(r.enhet){
+        const LANG = { kr: 'kronor', s: 'sekunder', m: 'meter', cm: 'centimeter', km: 'kilometer', g: 'gram', kg: 'kilogram', l: 'liter', min: 'minuter', h: 'timmar' };
+        const e = r.enhet.toLowerCase(), t = txt(r.fraga).toLowerCase();
+        const namn = [e, LANG[e]].filter(Boolean).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        const instr = new RegExp('svara i[^.]*?(^|[^a-zåäö])(' + namn.join('|') + ')([^a-zåäö]|$)').test(t);
+        const parentes = new RegExp('\\(\\s*(' + namn.join('|') + ')\\s*\\)').test(t);
+        if(instr || parentes) basta = { grad: 'FACIT', delar: 'enheten "' + r.enhet + '" står i frågan (' + (instr ? '"Svara i …"' : 'parentes') + ') — Enhet-rutan blir avskrift' };
+      }
       svarTexter.forEach(sv => {
+        if(basta && basta.grad === 'FACIT') return;
         const t = traff(gt, sv) || talTraff(gt, sv);
         if(t && (!basta || t.grad === 'FACIT')) basta = t;
       });

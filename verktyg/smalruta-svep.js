@@ -70,7 +70,13 @@ const PROBE = `(function(){
     // brott, och rapporten blir oläslig. Samma lärdom som de tjugosex falska brotten i ytkontraktet.
     var uttryck = inp.closest('.ak8-expr')
       || inp.matches('.ak8-mel,.ak8-exprtxt,.ak8-in-oms,.ak8-mh,[data-vars],[data-mellan],[data-oms],[data-term]');
-    return uttryck ? '12 + 15' : '1234';
+    var standard = uttryck ? '12 + 15' : '1234';
+    /* RUTANS EGET FACIT (order 2026-10-09): det svar rutan SKA bära är det rimligaste innehållet av
+       alla. Utvecklad form på d10 (8 · 1000 + 7 · 100 + 2 · 1) klipptes i en fast 156 px-ruta medan
+       svepet provade "1234" och skrev grönt. Är facit längre än standardtexten provas facit. */
+    var facit = inp.getAttribute('data-visa') || inp.getAttribute('data-svar') || '';
+    facit = String(facit).replace(/\\./g, ',').replace(/·/g, ' · ').replace(/\\+/g, ' + ').replace(/\\s+/g, ' ').trim();
+    return facit.length > standard.length ? facit : standard;
   }
   function matType(inp){
     var k = (inp.className || '').split(/\\s+/).filter(function(c){ return c && c !== 'ak8-in' && c !== 'ovn-in'; });
