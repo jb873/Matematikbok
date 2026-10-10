@@ -268,6 +268,30 @@ const PROBE7 = `(function(){
         i.value = i.dataset.expect; ev(i, 'input');
       });
     });
+    /* FORMKEDJAN (k2 d2 "Räkna med former" nivå 2, 2026-10-10): raden är EN svarsenhet — mellanled och
+       svar rättas tillsammans (Likhetsrattare.provaFormled). Cellerna är åttans uttrycksceller (.ak8-in,
+       inte .ovn-in) och räknades därför inte alls: nämnaren 9 mot 0 synliga. Facit står i varje cells
+       data-visa (K-B); grinden bygger cellen som eleven gör — text, och ett staplat bråk där facit har a/b. */
+    function byggCell(e, v){
+      e.innerHTML = '';
+      function txt(s){ var i = document.createElement('input'); i.className = 'ak8-in ak8-exprtxt'; i.value = s; e.appendChild(i); ev(i, 'input'); }
+      function brak(t, n){ var sp = document.createElement('span'); sp.className = 'ovn-brak';
+        sp.innerHTML = '<span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn"></span>';
+        sp.querySelector('.ak8-frt').value = t; sp.querySelector('.ak8-frn').value = n; e.appendChild(sp); }
+      var re = /(\\d+)\\/(\\d+)/g, sist = 0, m;
+      while((m = re.exec(v))){ txt(v.slice(sist, m.index).trim()); brak(m[1], m[2]); sist = m.index + m[0].length; }
+      txt(v.slice(sist).trim());
+    }
+    var fk = Array.from(root.querySelectorAll('.form-kedja'));
+    b.formKedjor = fk.filter(synlig).length;
+    fk.forEach(function(rad){
+      if(!synlig(rad)){ b.doldIn++; return; }
+      rad.querySelectorAll('.ak8-cell').forEach(function(c){
+        var v = c.getAttribute('data-visa'), e = c.querySelector('.ak8-expr');
+        if(v == null || !e){ b.ejTackta++; return; }
+        byggCell(e, v);
+      });
+    });
     root.querySelectorAll('.ovn-val-grid').forEach(function(g){ var bt = g.querySelector('.ovn-val-btn[data-val="' + g.dataset.valsvar + '"]'); if(bt) bt.click(); else b.ejTackta++; });
     root.querySelectorAll('.ovn-flerval-grid').forEach(function(g){ var r = g.dataset.ratt.split(','); g.querySelectorAll('.ovn-flerval-btn').forEach(function(bt){ var ar = r.indexOf(bt.dataset.tal) >= 0; if(ar !== bt.classList.contains('is-vald')) bt.click(); }); });
     var kn = root.querySelector('[data-action="kontroll"]'); if(!kn){ b.ingenKnapp = true; ut.blad.push(b); return; }
@@ -472,13 +496,13 @@ SIDOR7.forEach(sida => {
     // Enhet = en SYNLIG ifyllbar ruta, eller en svarsenhet UTAN ruta (knapprad, select, valgrid).
     // Rader som består av rutor räknas alltså via sina rutor — modulerna räknar olika (d5/d6 räknar varje
     // stegruta), och invarianten är att nämnaren aldrig får vara STÖRRE än det eleven kan fylla i.
-    var enheter = b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0) + (b.oppna || 0) + (b.uppst || 0);
-    if(b.namnare > enheter) brott.push('NÄMNAREN ' + b.namnare + ' > synliga svarsenheter ' + enheter + ' (rutor ' + b.synligIn + ' + grids ' + b.synligGrid + ' + knapprader ' + (b.valRader || 0) + ' + val ' + (b.paraSelar || 0) + ' + uppställningar ' + (b.uppst || 0) + ')');
+    var enheter = b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0) + (b.oppna || 0) + (b.uppst || 0) + (b.formKedjor || 0);
+    if(b.namnare > enheter) brott.push('NÄMNAREN ' + b.namnare + ' > synliga svarsenheter ' + enheter + ' (rutor ' + b.synligIn + ' + grids ' + b.synligGrid + ' + knapprader ' + (b.valRader || 0) + ' + val ' + (b.paraSelar || 0) + ' + uppställningar ' + (b.uppst || 0) + ' + formkedjor ' + (b.formKedjor || 0) + ')');
     if(b.doldIn || b.doldGrid) brott.push('DOLDA i visat blad: rutor ' + b.doldIn + ', grids ' + b.doldGrid);
     if(!b.ejTackta && b.namnare > 0 && b.ratt !== b.namnare) brott.push('allt fyllt ur data men ' + b.ratt + ' av ' + b.namnare);
     fel += brott.length;
     MP.varde(sida, b.blad, { ratt: b.ratt, namnare: b.namnare });
-    console.log((brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + (b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0) + (b.uppst || 0)) + (b.uppst ? ' (varav ' + b.uppst + ' uppställningar)' : '') + (b.ejTackta ? ' · ej täckta ' + b.ejTackta : '') + (b.namnare === 0 ? ' · TOMT BLAD' : '') + (brott.length ? '\n     ' + brott.join('\n     ') : ''));
+    console.log((brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + (b.synligIn + b.synligGrid + (b.valRader || 0) + (b.paraSelar || 0) + (b.uppst || 0) + (b.formKedjor || 0)) + (b.uppst ? ' (varav ' + b.uppst + ' uppställningar)' : '') + (b.formKedjor ? ' (varav ' + b.formKedjor + ' formkedjor)' : '') + (b.ejTackta ? ' · ej täckta ' + b.ejTackta : '') + (b.namnare === 0 ? ' · TOMT BLAD' : '') + (brott.length ? '\n     ' + brott.join('\n     ') : ''));
   });
 });
 try { fs.unlinkSync(TMP + '-probe.js'); fs.unlinkSync(TMP + '-pre.js'); } catch(e){}

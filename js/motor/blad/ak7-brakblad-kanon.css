@@ -119,3 +119,19 @@
 .brak-steg-cell.correct{border-color:#16a34a;border-style:solid;background:rgba(22,163,74,.08);color:#15803d;}
 .brak-steg-cell.wrong{border-color:#dc2626;border-style:solid;background:rgba(220,38,38,.08);color:#b91c1c;}
 .brak-prodfrak .ovn-brak-taljare,.brak-prodfrak .ovn-brak-namnare{display:inline-flex;align-items:center;gap:2px;}
+/* ── Utskriftsraden när åttans ark också är laddat (k2 d2, formkedjan 2026-10-10) ──
+   ak8-blad-ui.css ramar in .ovn-skriv-ut, skrivet för åttans KNAPP med den klassen. Sjuans blad har en div
+   med klassen och knappen inuti, och diven fick då en ram runt knappen. Egenskaperna åttans ark sätter
+   återställs här till sjuans; knappen inuti är orörd. Utan åttans ark ändrar regeln ingenting. */
+div.ovn-skriv-ut{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;border-radius:0;padding:0;cursor:auto;}
+/* ── Formkedjan (k2 d2 "Räkna med former", nivå 2): åttans uttrycksceller i sjuans typografi ──
+   Cellerna kommer ur AK8_UI, men sjuans ark skiljer sig på två punkter. --serif är Cormorant här (Source Serif
+   på åttans sidor), och * { box-sizing:border-box } gör att grow(), som räknar med innehållets bredd, gav
+   bråkrutan 19 px innehåll för "10" — nämnaren klipptes (mätt 2026-10-10). Typsnittet följer sjuans egna
+   rutor (Source Serif 4, tabellsiffror) och rutan mäts som innehåll + luft, som på åttans sidor. Facit står i
+   sjuans röda ruta (.ovn-fasit); de staplade bråken i den följer rutans textstorlek. */
+.form-kedja .ak8-in{font-family:'Source Serif 4',Georgia,serif;font-feature-settings:'tnum';box-sizing:content-box;}
+.form-kedja .ovn-fasit .ovn-brak-taljare,.form-kedja .ovn-fasit .ovn-brak-namnare{font-size:15px;padding:1px 4px 0;}
+.form-kedja .ovn-fasit .ovn-text{font-size:inherit;}
+.form-kedja .form-facit{display:inline-flex;align-items:center;white-space:nowrap;vertical-align:middle;}
+.form-kedja .ovn-fasit .ovn-brak-strecket{min-width:18px;}

@@ -84,6 +84,19 @@ const PROBE = `(function(){
   }
 
   function mat(root){
+    /* BYGGDA BRÅK (2026-10-10): i en uttryckscell (.ak8-expr) finns täljar- och nämnarrutan först när
+       eleven trycker på bråkknappen — en tom cell har inga, och svepet mätte dem därför aldrig (k2 d2:s
+       formkedja klippte "10" i nämnaren medan svepet var grönt). Svepet bygger ett bråk i varje tom cell
+       som eleven gör: fokus i cellen, bråkknappen. Bygger sidan inget bråk återställs rutan. */
+    var fk = root.querySelector('.keypad .kp-key[data-key="frac"]');
+    if(fk) Array.prototype.forEach.call(root.querySelectorAll('.ak8-expr'), function(e){
+      if(e.querySelector('.ovn-brak') || !synlig(e)) return;
+      var t = e.querySelector('.ak8-exprtxt'); if(!t) return;
+      var fore = t.value;
+      t.focus(); t.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      fk.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+      if(!e.querySelector('.ovn-brak') && t.value !== fore){ t.value = fore; t.dispatchEvent(new Event('input', { bubbles: true })); }
+    });
     // input.mult-upp-ans: uppställningens svarsruta (radtyp 'uppstallning', order 2026-10-07).
     var rutor = Array.prototype.filter.call(root.querySelectorAll('input.ak8-in, input.ovn-in, input.mult-upp-ans'), synlig);
     rutor.forEach(function(inp){
@@ -125,6 +138,14 @@ const PROBE = `(function(){
       var m = Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
            || document.querySelector('[id^="sheet-"]') || document.body;
       mat(m);
+      /* NIVÅRADEN (2026-10-10): ett blad med steg visar bara det aktiva steget, och svepet mätte bara
+         det första — nivå 2 var omätt överallt. Knapparna frågas om per varv (bladet byggs om vid klick). */
+      var antal = m.querySelectorAll('.niva-rad .niva-btn').length;
+      for(var s = 1; s < antal; s++){
+        var nb = m.querySelectorAll('.niva-rad .niva-btn')[s];
+        if(!nb || nb.disabled) continue;
+        nb.click(); mat(m);
+      }
     });
   } else {
     mat(document.body);
