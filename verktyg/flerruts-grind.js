@@ -6,6 +6,8 @@
    Kör, per blad i riktig browser: fyll SISTA rutan rätt och övriga FEL i varje flerrutsrad → kräv att raden inte är ✓
    och att rutorna visar egen status (sista ok, övriga fel) för tallinje-/talföljds-/hopp-rader. Facit läses ur bladets
    egen facit-text efter en första rättning (åk8) resp. data-svar (åk7).
+   En rad som RÄKNAS men inte PROVAS (facit oläsligt, blir inte grön av rätt svar, en enda ruta …) fäller
+   grinden sedan 2026-10-10 — antalet oprovade rader står i utskriften.
    Kör:  node verktyg/flerruts-grind.js [--sida grunder]        Exit 1 vid fel. Noll nätväg, ingen fil ändras. */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
@@ -413,9 +415,14 @@ SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
   ut.blad.forEach(b => {
     if(!b.rader) return;
     provade += b.provade;
-    const bad = b.gronFastFel.length + b.perRutaSaknas.length; fel += bad;
+    /* RÄKNAD MEN INTE PROVAD FÄLLER (Joachim 2026-10-10). En rad grinden räknar men inte provar var
+       förr bara en upplysning, och grinden kunde skriva grönt om "0/9 provade" (k2 d2:s formkedja
+       innan raderna lärdes in). Varje oprovad rad är nu ett brott, och antalet står i utskriften. */
+    const oprovade = Math.max(0, b.rader - b.provade);
+    const bad = b.gronFastFel.length + b.perRutaSaknas.length + oprovade; fel += bad;
     MP.varde(sida, b.blad, { provade: b.provade, rader: b.rader });
     console.log((bad ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.provade + '/' + b.rader + ' flerrutsrader provade'
+      + (oprovade ? ' · OPROVADE ' + oprovade + ' rader (räknade men inte provade)' : '')
       + ((b.ejTackta && b.ejTackta.length) ? ' · ej täckta ' + b.ejTackta.length + ' (' + [...new Set(b.ejTackta)].slice(0, 3).join(' ; ') + ')' : '')
       + (b.gronFastFel.length ? ' · GRÖN FAST FEL: ' + b.gronFastFel.join(' ; ') : '') + (b.perRutaSaknas.length ? ' · status per ruta saknas: ' + b.perRutaSaknas.slice(0, 3).join(' ; ') : ''));
   });
