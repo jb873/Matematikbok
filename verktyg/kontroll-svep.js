@@ -53,9 +53,13 @@ const PROBE = `(function(){
   }
   /* Bara den DELADE raden vandras: bladet anmäler sina steg i data-nivaer. Se filhuvudet för
      mätningen bakom gränsen. */
+  /* EGEN NIVÅRAD (2026-10-10): sjuans k2-kopior ritar nivåraden själva, utan data-nivaer, och deras
+     nivå 2 mättes aldrig. Raden godtas därför också i en SYNLIG montering (.blad-mount) — aldrig i hela
+     dokumentet: gränsen ovan kom av att knappar i ett DOLT blad gav "Lästal nivå 2" (ce75253). */
   function nivaKnappar(){
     var m = synligMount();
-    var ark = m.querySelector('[data-nivaer]') || (m.matches && m.matches('[data-nivaer]') ? m : null);
+    var ark = m.querySelector('[data-nivaer]') || (m.matches && m.matches('[data-nivaer]') ? m : null)
+           || (m !== document.body && m.classList && m.classList.contains('blad-mount') && m.querySelector('.niva-rad') ? m : null);
     return ark ? ark.querySelectorAll('.niva-rad .niva-btn') : [];
   }
   /* Stegen låses upp först — delad snutt, se verktyg/niva-las-upp.js. */

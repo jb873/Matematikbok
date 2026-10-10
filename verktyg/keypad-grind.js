@@ -24,6 +24,8 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const MP = require('./matpunkt').skapa('keypad-grind.js');
+const LAS_UPP = require('./niva-las-upp').snutt;        // nivåstegen upplåsta innan mätning
+const STEG = require('./niva-las-upp').stegSnutt;       // och stegade: nivå 2 och 3 mäts
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.blad())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
@@ -109,10 +111,21 @@ const PROBE = `(function(){
     ut.ytor.push(y);
   }
 
+  /* NIVÅSTEGEN (2026-10-10): upplåsta och stegade med de DELADE snuttarna (verktyg/niva-las-upp.js).
+     Förr mättes bara flikens aktiva steg — nivå 2 och 3 hade aldrig fått sin keypad prövad. */
+  ${LAS_UPP}
+  ${STEG}
+  function synligMount(){
+    return Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
+        || Array.prototype.filter.call(document.querySelectorAll('.ovn-wrap'), function(e){ return !!e.offsetParent && e.querySelector('.niva-rad'); })[0]
+        || document.body;
+  }
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .plugg-dok, .nr-rad'));
   (nav.length ? nav : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
-    mat(b ? b.textContent.replace(/\\s+/g, ' ').trim().slice(0, 28) : '(enda)');
+    var namn = b ? b.textContent.replace(/\\s+/g, ' ').trim().slice(0, 28) : '(enda)';
+    mat(namn);
+    nivaVarv(synligMount(), function(niva){ mat(namn.slice(0, 22) + ' niv\\u00e5 ' + niva); });
   });
   return ut;
 })()`;

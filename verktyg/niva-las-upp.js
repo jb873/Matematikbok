@@ -34,4 +34,28 @@ const snutt = `
   });
 `;
 
-module.exports = { snutt: snutt };
+/* NIVÅVARVET (2026-10-10, arbetsorder v2 k2 "Räkna med former"): upplåsningen ovan gör stegen NÅBARA,
+ * men en grind som bara klickar flikarna mäter ändå bara det aktiva steget. Fem grindar (brytning,
+ * keypad, kontroll-svep, flerruts, yt-kontrakt) mätte därför nivå 1 och aldrig nivå 2 och 3 på blad med
+ * egen nivårad (sjuans k2-kopior ritar raden själva, utan data-nivaer). EN stegning för alla:
+ *
+ *     const STEG = require('./niva-las-upp').stegSnutt;
+ *     ... ${STEG} ... mat(namn); nivaVarv(mount, function(niva){ mat(namn + ' nivå ' + niva); });
+ *
+ * Knapparna frågas om per varv (bladet byggs om vid klick, en hållen knapp är ett löst element). Låsta
+ * steg hoppas över — upplåsningen ovan ska ha öppnat dem; ett steg som ändå är låst syns som ett omätt
+ * steg i grindens räkning. Efteråt klickas steg 1, så nästa flik börjar där eleven börjar. */
+const stegSnutt = `
+  function nivaVarv(mount, fn){
+    var antal = (mount && mount.querySelectorAll('.niva-rad .niva-btn').length) || 0;
+    for(var _s = 1; _s < antal; _s++){
+      var _nb = mount.querySelectorAll('.niva-rad .niva-btn')[_s];
+      if(!_nb || _nb.disabled || _nb.classList.contains('is-locked')) continue;
+      _nb.click(); fn(_s + 1);
+    }
+    var _forsta = antal > 1 && mount.querySelector('.niva-rad .niva-btn');
+    if(_forsta) _forsta.click();
+  }
+`;
+
+module.exports = { snutt: snutt, stegSnutt: stegSnutt };

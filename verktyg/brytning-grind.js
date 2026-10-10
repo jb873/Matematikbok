@@ -100,13 +100,14 @@ const PROBE = `(function(){
   /* GOLVET för en smal ruta mäts på en EGEN ruta i layouten (utanför bild). Rutan på raden kan
      ligga i en dold flik, och en osynlig ruta är 0 px bred — mäts den, ser varje facit för långt
      ut och benet blir tyst. */
-  var golvInnanmate = 0;
+  var golvInnanmate = 0, golvYtter = 0;
   (function(){
     var p = document.createElement('input');
     p.className = 'ovn-in';
     p.style.cssText = 'position:absolute;left:-9999px;top:0;';
     document.body.appendChild(p);
     var st = getComputedStyle(p);
+    golvYtter = p.getBoundingClientRect().width;      // den smala rutans hela bredd (uttryckscellerna nedan)
     golvInnanmate = p.getBoundingClientRect().width
       - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight)
       - parseFloat(st.borderLeftWidth) - parseFloat(st.borderRightWidth);
@@ -397,6 +398,21 @@ const PROBE = `(function(){
         if(tb <= golvInnanmate)
           b.brott.push('K-E FAST BRED RUTA FOR KORT SVAR: "' + f + '" tar ' + Math.round(tb)
             + ' px och ryms i den smala rutans golv (' + Math.round(golvInnanmate) + ' px)');
+      });
+      /* UTTRYCKSCELLER (åttans .ak8-cell med facit i data-visa, t.ex. k2 d2:s formkedja — 2026-10-10).
+         Rutorna ovan är .ovn-in; cellerna räknades aldrig ("0 rutor" på formkedjan). Cellen är rutan
+         eleven ser, så den mäts i sitt startläge (tom, inget byggt bråk): är den bredare än den smala
+         rutan fast facit ryms i den smala rutans golv är den en fast bred ruta — samma regel, mätt på
+         bredden i stället för på en klass. Celler bakom "+ led" som inte lagts till räknas inte. */
+      Array.prototype.forEach.call(sh.querySelectorAll('.ak8-cell[data-visa]'), function(c){
+        if(!synlig(c) || c.closest('.ak8-extra')) return;
+        var e = c.querySelector('.ak8-expr'), t = e && e.querySelector('.ak8-exprtxt');
+        if(!t || e.querySelector('.ovn-brak, .ak8-pot') || String(t.value).trim()) return;
+        b.rutor++;
+        var f = c.getAttribute('data-visa'), ew = e.getBoundingClientRect().width, tb = textbredd(t, f);
+        if(ew > golvYtter + 4 && tb <= golvInnanmate)
+          b.brott.push('K-E FAST BRED CELL FOR KORT SVAR: "' + f + '" tar ' + Math.round(tb) + ' px men den tomma cellen ar '
+            + Math.round(ew) + ' px (den smala rutan ' + Math.round(golvYtter) + ' px)');
       });
     }
 

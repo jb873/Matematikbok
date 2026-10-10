@@ -286,7 +286,25 @@ const PROBE7 = `(function(){
     var rader = Array.from(root.querySelectorAll('.ovn-rad, .ovn-brak-rad[data-rad]:has(.ovn-in[data-forlled]), .ovn-brak-rad[data-rad]:has(.ovn-in[data-forlprod]), .ovn-brak-rad[data-rad]:has(.ovn-in[data-brakdel]), .tl-svarsrad')).filter(function(r){ return r.querySelectorAll(SEL).length >= 2; });
     // k2: bråkrader vars facit står på RADEN (data-hel/t/n) och vars rutor är .brak-cell
     var brakRader = Array.from(root.querySelectorAll('.brak-svar-rad, .brak-fragerad')).filter(function(r){ return r.querySelectorAll('.brak-hel, .brak-t, .brak-n').length >= 2; });
-    b.rader = rader.length + brakRader.length; if(!b.rader){ ut.blad.push(b); return; }
+    /* FORMKEDJAN (k2 d2 "Räkna med former", 2026-10-10): mellanled + svar i åttans uttrycksceller, facit
+       i cellens data-visa (K-B). Raderna saknade .ovn-in och provades aldrig. Samma prov som för övriga
+       flerrutsrader: svaret (sista synliga cellen) rätt, ledet fel → raden får inte bli grön, och varje
+       cell visar sin egen status. Celler bakom "+ led" som inte lagts till räknas inte. */
+    function fkCeller(r){ return Array.from(r.querySelectorAll('.ak8-cell')).filter(function(x){ return !x.closest('.ak8-extra'); }); }
+    function byggCell(e, v){
+      e.innerHTML = '';
+      function txt(s){ var i = document.createElement('input'); i.className = 'ak8-in ak8-exprtxt'; i.value = s; e.appendChild(i); ev(i, 'input'); }
+      function brak(t, n){ var sp = document.createElement('span'); sp.className = 'ovn-brak';
+        sp.innerHTML = '<span class="ovn-brak-taljare"><input class="ak8-in fr-ruta ak8-frt"></span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare"><input class="ak8-in fr-ruta ak8-frn"></span>';
+        sp.querySelector('.ak8-frt').value = t; sp.querySelector('.ak8-frn').value = n; e.appendChild(sp); }
+      var re = /(\\d+)\\/(\\d+)/g, sist = 0, m;
+      while((m = re.exec(v))){ txt(v.slice(sist, m.index).trim()); brak(m[1], m[2]); sist = m.index + m[0].length; }
+      txt(v.slice(sist).trim());
+    }
+    var fkRader = Array.from(root.querySelectorAll('.form-kedja')).filter(function(r){ return fkCeller(r).length >= 2; });
+    b.rader = rader.length + brakRader.length + fkRader.length; if(!b.rader){ ut.blad.push(b); return; }
+    fkRader.forEach(function(r){ var c = fkCeller(r);
+      c.forEach(function(x, i){ var v = x.getAttribute('data-visa') || ''; byggCell(x.querySelector('.ak8-expr'), i === c.length - 1 ? v : v + ' + 1'); }); });
     function plus1(v){ return String(parseFloat(String(v).replace(',', '.')) + 1).replace('.', ','); }
     rader.forEach(function(r){ var ins = Array.from(r.querySelectorAll(SEL)); ins.forEach(function(inp, i){
       var d = inp.dataset, sist = i === ins.length - 1, ratt, felv;
@@ -316,6 +334,13 @@ const PROBE7 = `(function(){
       var cel = Array.from(r.querySelectorAll('.brak-hel, .brak-t, .brak-n'));
       var st = cel.map(function(i){ return i.classList.contains('correct') ? 'ok' : i.classList.contains('wrong') ? 'fel' : '-'; });
       if(marks.length && marks.every(function(m){ return m === '\u2713'; })) b.gronFastFel.push('bråkrad [' + st.join(',') + ']');
+    });
+    fkRader.forEach(function(r){
+      b.provade++;
+      var st = fkCeller(r).map(function(x){ return x.querySelector('.ak8-in.ak8-ok') ? 'ok' : x.querySelector('.ak8-in.ak8-fel') ? 'fel' : '-'; });
+      var mk = r.querySelector('.ovn-mark');
+      if(mk && mk.textContent.indexOf('\\u2713') >= 0) b.gronFastFel.push('formkedja [' + st.join(',') + ']');
+      if(st[st.length - 1] !== 'ok' || st.slice(0, -1).some(function(s){ return s !== 'fel'; })) b.perRutaSaknas.push('formkedja [' + st.join(',') + ']');
     });
     rader.forEach(function(r){ var ins = Array.from(r.querySelectorAll(SEL)); b.provade++;
       var marks = ins.map(function(i){ var n = i.nextElementSibling; return (n && n.classList.contains('ovn-mark')) ? n.textContent : '-'; });
