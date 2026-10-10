@@ -30,6 +30,8 @@
                                  TILLÄGG 2026-10-10 (sjuans k2 d2 "Räkna med former"): ETT mellanled där varje tal
                                  skrivits om för sig i samma form, och ett exakt svar i ledets form. En väg per
                                  uppgift (uppg.vag 'dec' | 'brak'). Se FORMLEDET nedan. Ingen befintlig funktion ändrad.
+     · provaFormledKedja(celler, uppg) → som ovan + mellanOk, cellStatus[] — "+ led": första ledet obligatoriskt,
+                                 tillagda led rättas på värdet, ett tillagt led som redan är slutsvaret underkänns.
      · formledDelar(exprEl), formledBesked(orsak), FORMLED_BESKED   — ledets termer; formledets elevtext.
    Laddas som klassiskt <script> FÖRE blad-ak8-dN.js / rut-motorn. Inget nätverk. */
 (function(){
@@ -273,54 +275,78 @@
     return isFinite(x) && !likhet(x, v) && Math.abs(x - v) <= 0.5 * Math.pow(10, -d) + 1e-12;
   }
 
-  function provaFormled(ledExpr, svarExpr, uppg){
-    var ledFylld = fylld(ledExpr), svarFylld = fylld(svarExpr);
-    if(!ledFylld && !svarFylld) return { status: 'tom', ok: false, ledOk: false, svarOk: false, orsak: null, besked: '' };
-    var v = uppg.varde.t / uppg.varde.n;
-    // LEDET
-    var led = { ok: false, orsak: ledFylld ? 'fel' : 'saknas' };
-    if(ledFylld){
-      var p = formledDelar(ledExpr), raVarde = likhet(mixedEval(ledExpr), v);
-      if(p.annat) led.orsak = raVarde ? 'varjeTal' : 'fel';
-      else if(p.termer.length === 1) led.orsak = raVarde ? 'genvag' : 'fel';
-      else if(p.termer.length !== uppg.termer.length || p.ops.join('') !== uppg.ops.join('')) led.orsak = raVarde ? 'varjeTal' : 'fel';
-      else {
-        var slag = p.termer.map(function(x){ return x.slag; });
-        var harDec = slag.indexOf('dec') >= 0, harHel = slag.indexOf('hel') >= 0;
-        var harBrak = slag.indexOf('brak') >= 0 || slag.indexOf('blandad') >= 0;
-        if(harDec && harBrak) led.orsak = 'olikaForm';
-        else if(uppg.vag === 'brak' && harHel && harBrak) led.orsak = 'olikaForm';     // heltalet ska skrivas som bråk
-        else if(uppg.vag === 'brak' && harDec) led.orsak = 'ejExakt';
-        else if(uppg.vag === 'dec' && harBrak) led.orsak = 'decimalVag';
-        else if(!p.termer.every(function(x, i){ return likhet(x.varde, uppg.termer[i].t / uppg.termer[i].n); })) led.orsak = raVarde ? 'varjeTal' : 'fel';
-        else if(uppg.vag === 'brak' && !p.termer.every(function(x){ return x.n === p.termer[0].n; })) led.orsak = 'sammaNamnare';
-        else led = { ok: true, orsak: null };
-      }
-    }
-    // SVARET
-    var svar = { ok: false, orsak: svarFylld ? 'fel' : 'saknas' };
-    if(svarFylld){
-      var ff = finalForm(svarExpr), heltal = likhet(v, Math.round(v));
-      if(!likhet(ff.num, v)) svar.orsak = (ff.kind === 'dec' && avrundatTal(svarExpr, v)) ? 'avrundatSvar' : 'fel';
-      else {
-        var st = (uppg.vag === 'dec' || (heltal && ff.kind === 'dec'))
-          ? finalStatus(ff, { k: 'dec', x: v }, 'decimal')
-          : finalStatus(ff, { k: 'br', t: uppg.varde.t, n: uppg.varde.n }, 'blandad');
-        svar = st.status === 'ratt' ? { ok: true, orsak: null } : { ok: false, orsak: st.orsak || 'fel' };
-      }
-    }
-    var ok = led.ok && svar.ok;
-    var medBesked = function(o){ return o && o !== 'fel' && o !== 'saknas'; };
-    var orsak = (!led.ok && medBesked(led.orsak)) ? led.orsak : ((!svar.ok && medBesked(svar.orsak)) ? svar.orsak : null);
-    return { status: ok ? 'ratt' : (orsak ? 'form' : 'fel'), ok: ok, ledOk: led.ok, svarOk: svar.ok,
-             ledOrsak: led.orsak, svarOrsak: svar.orsak, orsak: orsak, besked: orsak ? formledBesked(orsak) : '' };
+  // Det FÖRSTA ledet: varje tal omskrivet för sig, i radens form (se FORMLEDET ovan).
+  function provaForstaLed(ledExpr, uppg, v){
+    if(!fylld(ledExpr)) return { ok: false, orsak: 'saknas' };
+    var p = formledDelar(ledExpr), raVarde = likhet(mixedEval(ledExpr), v);
+    if(p.annat) return { ok: false, orsak: raVarde ? 'varjeTal' : 'fel' };
+    if(p.termer.length === 1) return { ok: false, orsak: raVarde ? 'genvag' : 'fel' };
+    if(p.termer.length !== uppg.termer.length || p.ops.join('') !== uppg.ops.join('')) return { ok: false, orsak: raVarde ? 'varjeTal' : 'fel' };
+    var slag = p.termer.map(function(x){ return x.slag; });
+    var harDec = slag.indexOf('dec') >= 0, harHel = slag.indexOf('hel') >= 0;
+    var harBrak = slag.indexOf('brak') >= 0 || slag.indexOf('blandad') >= 0;
+    if(harDec && harBrak) return { ok: false, orsak: 'olikaForm' };
+    if(uppg.vag === 'brak' && harHel && harBrak) return { ok: false, orsak: 'olikaForm' };     // heltalet ska skrivas som bråk
+    if(uppg.vag === 'brak' && harDec) return { ok: false, orsak: 'ejExakt' };
+    if(uppg.vag === 'dec' && harBrak) return { ok: false, orsak: 'decimalVag' };
+    if(!p.termer.every(function(x, i){ return likhet(x.varde, uppg.termer[i].t / uppg.termer[i].n); })) return { ok: false, orsak: raVarde ? 'varjeTal' : 'fel' };
+    if(uppg.vag === 'brak' && !p.termer.every(function(x){ return x.n === p.termer[0].n; })) return { ok: false, orsak: 'sammaNamnare' };
+    return { ok: true, orsak: null };
   }
+  // Svarets form, när värdet stämmer: decimalvägen → decimalform; bråkvägen → enklaste form, blandad > 1.
+  function formledSlutStatus(ff, uppg, v){
+    var heltal = likhet(v, Math.round(v));
+    return (uppg.vag === 'dec' || (heltal && ff.kind === 'dec'))
+      ? finalStatus(ff, { k: 'dec', x: v }, 'decimal')
+      : finalStatus(ff, { k: 'br', t: uppg.varde.t, n: uppg.varde.n }, 'blandad');
+  }
+  function provaFormledSvar(svarExpr, uppg, v){
+    if(!svarExpr || !fylld(svarExpr)) return { ok: false, orsak: 'saknas' };
+    var ff = finalForm(svarExpr);
+    if(!likhet(ff.num, v)) return { ok: false, orsak: (ff.kind === 'dec' && avrundatTal(svarExpr, v)) ? 'avrundatSvar' : 'fel' };
+    var st = formledSlutStatus(ff, uppg, v);
+    return st.status === 'ratt' ? { ok: true, orsak: null } : { ok: false, orsak: st.orsak || 'fel' };
+  }
+
+  /* "+ LED" (Joachims beslut efter piloten, 2026-10-10). Det FÖRSTA ledet är obligatoriskt — där skrivs
+     talen om. Eleven får lägga till fler led (9/3 − 1/3 = 8/3 = 2 2/3). Varje tillagt led rättas på
+     VÄRDET, och genvägsregeln gäller alla led: ett tillagt led som REDAN är slutsvaret (rätt värde i
+     svarets form) underkänns ('genvagLed'). 8/3 före 2 2/3 är ett steg; 1/30 före 1/30 är svaret två gånger.
+     celler = de synliga cellerna i ordning. Den sista ifyllda är svaret; tomma celler emellan räknas inte.
+     cellStatus[k] = 'ok' | 'fel' | null (tom cell — ingen markering). */
+  function provaFormledKedja(celler, uppg){
+    var cellStatus = celler.map(function(){ return null; });
+    var fyllda = celler.filter(fylld);
+    if(!fyllda.length) return { status: 'tom', ok: false, ledOk: false, svarOk: false, mellanOk: true, cellStatus: cellStatus, orsak: null, besked: '' };
+    var v = uppg.varde.t / uppg.varde.n, ledEl = celler[0], sista = fyllda[fyllda.length - 1];
+    var svarEl = sista !== ledEl ? sista : null;
+    var led = provaForstaLed(ledEl, uppg, v), svar = provaFormledSvar(svarEl, uppg, v), mellan = { ok: true, orsak: null };
+    fyllda.forEach(function(c){
+      if(c === ledEl || c === svarEl) return;
+      var ok = likhet(mixedEval(c), v), o = ok ? null : 'fel';
+      if(ok && formledSlutStatus(finalForm(c), uppg, v).status === 'ratt'){ ok = false; o = 'genvagLed'; }
+      cellStatus[celler.indexOf(c)] = ok ? 'ok' : 'fel';
+      if(!ok && mellan.ok) mellan = { ok: false, orsak: o };
+    });
+    if(fylld(ledEl)) cellStatus[0] = led.ok ? 'ok' : 'fel';
+    if(svarEl) cellStatus[celler.indexOf(svarEl)] = svar.ok ? 'ok' : 'fel';
+    var ok = led.ok && mellan.ok && svar.ok;
+    var medBesked = function(o){ return o && o !== 'fel' && o !== 'saknas'; };
+    var orsak = (!led.ok && medBesked(led.orsak)) ? led.orsak
+              : (!mellan.ok && medBesked(mellan.orsak)) ? mellan.orsak
+              : (!svar.ok && medBesked(svar.orsak)) ? svar.orsak : null;
+    return { status: ok ? 'ratt' : (orsak ? 'form' : 'fel'), ok: ok, ledOk: led.ok, svarOk: svar.ok, mellanOk: mellan.ok,
+             cellStatus: cellStatus, ledOrsak: led.orsak, svarOrsak: svar.orsak, mellanOrsak: mellan.orsak,
+             orsak: orsak, besked: orsak ? formledBesked(orsak) : '' };
+  }
+  // Två celler (mellanled + svar) — samma rättning som kedjan utan tillagda led.
+  function provaFormled(ledExpr, svarExpr, uppg){ return provaFormledKedja([ledExpr, svarExpr], uppg); }
 
   window.Likhetsrattare = {
     mixedEval: mixedEval, finalForm: finalForm, finalCheck: finalCheck, finalStatus: finalStatus, ffAv: ffAv,
     besked: besked, BESKED: BESKED, provaKedja: provaKedja,
     segvarden: segvarden, provaBerakning: provaBerakning,
     likhet: likhet, gcd: gcd, pNum: pNum, fylld: fylld,
-    provaFormled: provaFormled, formledDelar: formledDelar, formledBesked: formledBesked, FORMLED_BESKED: FORMLED_BESKED
+    provaFormled: provaFormled, provaFormledKedja: provaFormledKedja, formledDelar: formledDelar, formledBesked: formledBesked, FORMLED_BESKED: FORMLED_BESKED
   };
 })();

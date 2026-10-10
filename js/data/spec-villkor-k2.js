@@ -271,7 +271,21 @@
 
   };
 
-  var API = { VILLKOR: VILLKOR,
+  /* ── BLAD: villkor för ett BLADS egna talpooler (sjuans k2-blad), inte för öva-nodernas band ──────
+     Banden ovan gäller nodernas öva-generatorer. Här står villkor med bladet som nyckel, för uppgifter
+     som bladet bygger själv. Vaktas av verktyg/spec-fuzz-k2-blad.js (bladets generatorer ≥30 000 gånger
+     + hela poolen), som fäller varje uppgift utanför taket.
+       maxGemNamnare  bråkvägens MINSTA gemensamma nämnare (talen i förkortad form: 0,375 = 3/8) —
+                      gäller VARJE uppgift, även de som räknas med decimaltal. */
+  var BLAD = {
+    'k2d2:rakna-former': {   // d2 "Räkna med former", nivå 1 och 2 (formkedjan)
+      kalla: 'Joachim 2026-10-10 (arbetsorder v2): största gemensamma nämnare 30 — femtondelar ryms, fyrtiondelar och större tas bort, även i decimalvägens uppgifter',
+      tak: { maxGemNamnare: 30 },
+      kravs: { exakt: true, mellanled: 'kravt' }
+    }
+  };
+
+  var API = { VILLKOR: VILLKOR, BLAD: BLAD,
     // löser upp band för (nod, spar) → PROFIL eller { nivaer:[...] }
     band: function(nod, spar){ var n = VILLKOR[nod]; return n && n.spar ? n.spar[spar || 'E'] || null : null; }
   };

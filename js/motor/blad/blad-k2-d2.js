@@ -240,16 +240,17 @@ function bladHTML(blad){
       }
 
       if(rad.typ === 'formKedja'){
-        // FORMKEDJAN: uppgift = mellanled = svar i två uttrycksceller (AK8_UI: text + staplade bråk ur
-        // keypadens bråkknapp). Cellens data-visa är dess facit (K-B: varje ruta bär sitt facit).
-        var cellF = function(roll, visa){ return AK8_UI.ansCell(roll).replace('class="ak8-cell"', 'class="ak8-cell" data-visa="' + visa + '"'); };
-        html += '<div class="ovn-brak-rad ak8-rad form-kedja" data-rad="' + radNummer + '" data-logg="' + rad.logg + '"'
-          + ' data-formled="' + encodeURIComponent(JSON.stringify(rad.uppg)) + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += rad.vansterHTML;
-        html += '<span class="ak8-ledwrap"><span class="ovn-text ak8-eq">=</span>' + cellF('L0', rad.facitLed) + '</span>';
-        html += '<span class="ak8-ledwrap"><span class="ovn-text ak8-eq">=</span>' + cellF('L1', rad.facitSvar) + '</span>';
-        html += '</div>';
+        // FORMKEDJAN: uppgift = mellanled (+ tillagda led) = svar, i åttans DELADE fria kedja
+        // (AK8_UI.kedjaRadHTML): L0 + L1 synliga, L2/L3 bakom "+ led" (knapparna och deras text är
+        // kedjans egna). Raden får d2:s attribut, och varje cell sitt facit i data-visa (K-B): L0 ett
+        // korrekt led, de övriga svaret — den sista ifyllda cellen är svaret.
+        var kedja = AK8_UI.kedjaRadHTML(radNummer, '<span class="ovn-label">' + bokstav + ')</span>' + rad.vansterHTML)
+          .replace(/^<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="\d+">/,
+            '<div class="ovn-brak-rad ak8-rad ak8-rad-kedja ak8-lana form-kedja" data-rad="' + radNummer + '" data-logg="' + rad.logg + '"'
+            + ' data-formled="' + encodeURIComponent(JSON.stringify(rad.uppg)) + '">')
+          .replace('data-r="L0"', 'data-r="L0" data-visa="' + rad.facitLed + '"');
+        ['L1', 'L2', 'L3'].forEach(function(r){ kedja = kedja.replace('data-r="' + r + '"', 'data-r="' + r + '" data-visa="' + rad.facitSvar + '"'); });
+        html += kedja;
         return;
       }
 
@@ -497,18 +498,21 @@ function bygg_blad(rotEl, blad){
       }
     });
 
-    // 4) Formkedjor (Räkna med former, nivå 2): mellanled + svar rättas som EN enhet av den delade
-    //    Likhetsrattare.provaFormled. Beskedet säger vad som är fel; facit visar ett korrekt led och svaret.
+    // 4) Formkedjor (Räkna med former): mellanled, tillagda led och svar rättas som EN enhet av den
+    //    delade Likhetsrattare.provaFormledKedja. Beskedet säger vad som är fel; facit visar ett korrekt
+    //    led och svaret. Cellerna bakom "+ led" som inte lagts till räknas inte.
     var formRader = [];
     blad.grupper.forEach(function(g){ g.rader.forEach(function(r){ if(r.typ === 'formKedja') formRader.push(r); }); });
     rotEl.querySelectorAll('.form-kedja').forEach(function(row, i){
       AK8_UI.rensaRad(row);
       totalt++;
-      var celler = AK8_UI.kedjaCeller(row), uppg = JSON.parse(decodeURIComponent(row.dataset.formled));
-      var r = window.Likhetsrattare.provaFormled(celler[0], celler[1], uppg);
+      var celler = AK8_UI.kedjaCeller(row).filter(function(e){ return !e.closest('.ak8-extra'); });
+      var uppg = JSON.parse(decodeURIComponent(row.dataset.formled));
+      var r = window.Likhetsrattare.provaFormledKedja(celler, uppg);
       if(r.status === 'tom') return;                       // obesvarad: räknas i nämnaren, ingen markering
-      [[celler[0], r.ledOk], [celler[1], r.svarOk]].forEach(function(p){
-        p[0].querySelectorAll('.ak8-in').forEach(function(inp){ if(String(inp.value).trim() !== '') inp.classList.add(p[1] ? 'ak8-ok' : 'ak8-fel'); });
+      celler.forEach(function(c, k){
+        var st = r.cellStatus[k]; if(!st) return;          // tom cell: ingen markering
+        c.querySelectorAll('.ak8-in').forEach(function(inp){ if(String(inp.value).trim() !== '') inp.classList.add(st === 'ok' ? 'ak8-ok' : 'ak8-fel'); });
       });
       AK8_UI.markera(row, r.ok);
       if(r.ok) ratt++;
@@ -559,7 +563,8 @@ function bygg_blad(rotEl, blad){
   rotEl.querySelector('[data-action="reset"]').addEventListener('click', function(){
     inputs.forEach(function(inp){ inp.value = ''; inp.classList.remove('correct','wrong','just-checked'); });
     rotEl.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
-    // Formkedjans celler: byggda bråk bort, en tom textruta kvar (cellens startläge)
+    // Formkedjans celler: byggda bråk bort, en tom textruta kvar (cellens startläge); tillagda led
+    // göms igen och knapparna går tillbaka till startläget (ett led + svar).
     rotEl.querySelectorAll('.form-kedja').forEach(function(row){
       AK8_UI.rensaRad(row);
       row.querySelectorAll('.ak8-expr').forEach(function(e){
@@ -568,6 +573,10 @@ function bygg_blad(rotEl, blad){
         for(var k = 1; k < txt.length; k++) txt[k].remove();
         if(txt[0]){ txt[0].value = ''; AK8_UI.grow(txt[0]); }
       });
+      [].slice.call(row.querySelectorAll('.ak8-ledwrap')).forEach(function(w, k){ if(k >= 2) w.classList.add('ak8-extra'); });
+      var mer = row.querySelector('[data-mer]'), mindre = row.querySelector('[data-mindre]');
+      if(mer) mer.hidden = false;
+      if(mindre) mindre.hidden = true;
     });
     var sam = rotEl.querySelector('[data-sammanf]'); sam.style.display = 'none'; sam.textContent = '';
     if(inputs[0]) inputs[0].focus();
@@ -840,12 +849,14 @@ function radRakna(L, op, R){
   }
 }
 
-// ----- FORMKEDJAN (nivå 2, pilot — Joachims beslut 2026-10-10) -----
+// ----- FORMKEDJAN (båda nivåerna — Joachims beslut 2026-10-10, piloten + v2) -----
 // Uppgift = mellanled = svar. EN väg per uppgift, avgjord av talen: går båda talen att skriva exakt i
 // decimalform räknar eleven med decimaltal (heltalet står kvar, 3 − 0,8); annars skrivs båda om till
 // bråk med gemensam nämnare (vilken som helst; heltalet som bråk 9/3; blandad form godtas i ledet).
 // Svaret är exakt och i ledets form; bråksvar > 1 i blandad form. Inget avrundat, inget ≈.
-// Rättas av den delade Likhetsrattare.provaFormled. Raden loggar till räknesättets nod (brak-add/-sub).
+// "+ led": det första ledet är obligatoriskt, eleven får lägga till fler (9/3 − 1/3 = 8/3 = 2 2/3).
+// Rättas av den delade Likhetsrattare.provaFormledKedja. Raden loggar till räknesättets nod (brak-add/-sub).
+// Talpoolerna: bråkvägens minsta gemensamma nämnare högst 30 (rad.mgn; spec-fuzz-k2-blad.js vaktar).
 function rk_lcm(a, b){ return a / gcd(a, b) * b; }
 // 'brak' när något bråk (äkta, oäkta eller blandat) i förkortad form har en nämnare med andra faktorer än 2 och 5
 function rk_formVag(L, R){
@@ -863,6 +874,9 @@ function radFormKedja(L, op, R){
   var fL = rk_toFrac(L), fR = rk_toFrac(R), minus = (op === '−' || op === '-'), opTxt = minus ? '−' : '+';
   var ct = fL.t * fR.n + (minus ? -1 : 1) * fR.t * fL.n, cn = fL.n * fR.n, g = gcd(ct, cn);
   var varde = {t: ct / g, n: cn / g}, vag = rk_formVag(L, R);
+  // Bråkvägens MINSTA gemensamma nämnare: talen i förkortad form (0,375 = 3/8, inte 375/1000)
+  var rL = {t: fL.t / gcd(fL.t, fL.n), n: fL.n / gcd(fL.t, fL.n)}, rR = {t: fR.t / gcd(fR.t, fR.n), n: fR.n / gcd(fR.t, fR.n)};
+  var mgn = rk_lcm(rL.n, rR.n);
   var led, ledText, svar, svarText;
   if(vag === 'dec'){
     var dL = rk_decText(fL.t, fL.n), dR = rk_decText(fR.t, fR.n);
@@ -871,7 +885,7 @@ function radFormKedja(L, op, R){
     svarText = rk_decText(varde.t, varde.n);
     svar = '<span class="ovn-text ovn-num">' + svarText + '</span>';
   } else {
-    var N = rk_lcm(fL.n, fR.n), tL = fL.t * N / fL.n, tR = fR.t * N / fR.n;
+    var N = mgn, tL = rL.t * N / rL.n, tR = rR.t * N / rR.n;
     ledText = tL + '/' + N + ' ' + opTxt + ' ' + tR + '/' + N;
     led = fracSpan(tL, N) + opSpan(opTxt) + fracSpan(tR, N);
     svarText = rk_brakText(varde.t, varde.n);
@@ -885,7 +899,7 @@ function radFormKedja(L, op, R){
     if(rk_isFiniteDec(f.n / gg)) return false;
     ejExakt = {t: f.t / gg, n: f.n / gg}; return true;
   });
-  return {typ:'formKedja', vansterHTML: rk_uttryckHTML(L, op, R), logg: minus ? 'brak-sub:rakna' : 'brak-add:rakna',
+  return {typ:'formKedja', vansterHTML: rk_uttryckHTML(L, op, R), logg: minus ? 'brak-sub:rakna' : 'brak-add:rakna', mgn: mgn,
     uppg: {termer: [fL, fR], ops: [opTxt], vag: vag, varde: varde, ejExakt: ejExakt},
     // facit hålls ihop (K-D: ett uttryck bryts inte mitt i) — beskedet före får bryta, uttrycket inte
     facitLed: ledText, facitSvar: svarText, facitHTML: '<span class="form-facit">' + led + opSpan('=') + svar + '</span>'};
@@ -967,19 +981,19 @@ var RK_G1_N2 = [
   [['dec','1,2'], '−', ['frac',2,3]]
 ];
 
-// Nivå 2, Grupp 2: decimal ± exakt bråk (åtton- och femtondelar, alla positiva)
+// Nivå 2, Grupp 2: decimal ± exakt bråk (åtton- och femtedelar, alla positiva)
+// GEMENSAM NÄMNARE HÖGST 30 (Joachim 2026-10-10): bråkvägens minsta gemensamma nämnare får inte gå
+// över 30, även i decimalvägens uppgifter. Bort: 0,8 − 1/8, 0,9 − 3/8 och 0,6 + 1/8 (fyrtiondelar).
+// Vaktas av verktyg/spec-fuzz-k2-blad.js mot spec-villkor-k2.js (BLAD).
 var RK_G2_N2 = [
   [['dec','0,4'], '−', ['frac',1,5]],
-  [['dec','0,8'], '−', ['frac',1,8]],
   [['dec','0,5'], '−', ['frac',1,8]],
   [['dec','0,375'], '+', ['frac',1,4]],
   [['frac',3,8],  '+', ['dec','0,25']],
   [['dec','0,625'], '−', ['frac',1,4]],
   [['frac',5,8],  '−', ['dec','0,5']],
-  [['dec','0,9'], '−', ['frac',3,8]],
   [['frac',7,8],  '−', ['dec','0,5']],
   [['dec','0,75'], '−', ['frac',1,8]],
-  [['dec','0,6'], '+', ['frac',1,8]],
   [['frac',3,8],  '+', ['dec','0,5']],
   [['dec','0,7'], '−', ['frac',1,5]],
   [['frac',5,8],  '−', ['dec','0,25']]
@@ -1017,7 +1031,7 @@ function bladRakna(niva, forsta){
       c = [RK_G3_N1[0], RK_G3_N1[1], RK_G3_N1[2]];                    // 1 2/5−0,65, 8/5−1 1/4, 2 1/4−0,75
     } else {
       a = [RK_G1_N2[0], RK_G1_N2[1], RK_G1_N2[2]];                    // 1/3−0,1, 0,7−2/3, 0,5+1/3
-      b = [RK_G2_N2[0], RK_G2_N2[1], RK_G2_N2[2]];                    // 0,4−1/5, 0,8−1/8, 0,5−1/8
+      b = [RK_G2_N2[0], RK_G2_N2[1], RK_G2_N2[2]];                    // 0,4−1/5, 0,5−1/8, 0,375+1/4
       c = [RK_G3_N2[0], RK_G3_N2[1], RK_G3_N2[2]];                    // 3 3/4−1 3/8, 1 4/5−2 1/4, 3/4−7/5
     }
   } else {
@@ -1025,13 +1039,12 @@ function bladRakna(niva, forsta){
     b = gSample(p2, 3);
     c = gSample(p3, 3);
   }
-  // Nivå 2 = formkedjans pilot: mellanledet krävs (flaggan i datan, inte i rubriken), svaret är exakt
-  // och raderna loggar i k2-storen. Nivå 1 är orörd tills piloten granskats.
+  // BÅDA NIVÅERNA är formkedjan (nivå 1 flyttad efter piloten, Joachim 2026-10-10): mellanledet krävs
+  // (flaggan i datan, inte i rubriken), svaret är exakt, vägen följer talen, och raderna loggar i k2-storen.
   // Rubrikerna står som rubrik:-fält, så att elevtext-låset ser dem.
-  var rad = niva === 2 ? radFormKedja : radRakna;
   function grupp(g, tal){
-    g.rader = tal.map(function(t){ return rad(t[0], t[1], t[2]); });
-    if(niva === 2){ g.mellanled = 'kravt'; g.loggStore = 'k2'; }
+    g.rader = tal.map(function(t){ return radFormKedja(t[0], t[1], t[2]); });
+    g.mellanled = 'kravt'; g.loggStore = 'k2';
     return g;
   }
   return {
@@ -1040,7 +1053,7 @@ function bladRakna(niva, forsta){
     grupper: [
       grupp({rubrik: niva === 2 ? 'Bråk och decimaltal med tredjedelar'
                                 : 'Heltal och bråk'}, a),
-      grupp({rubrik: niva === 2 ? 'Decimaltal och bråk (åtton- och femtondelar)'
+      grupp({rubrik: niva === 2 ? 'Decimaltal och bråk (åtton- och femtedelar)'
                                 : 'Decimaltal och bråk'}, b),
       grupp({rubrik: niva === 2 ? 'Blandad form och oäkta bråk'
                                 : 'Blandad form och oäkta bråk'}, c)
