@@ -244,10 +244,12 @@ function bladHTML(blad){
         // (AK8_UI.kedjaRadHTML): L0 + L1 synliga, L2/L3 bakom "+ led" (knapparna och deras text är
         // kedjans egna). Raden får d2:s attribut, och varje cell sitt facit i data-visa (K-B): L0 ett
         // korrekt led, de övriga svaret — den sista ifyllda cellen är svaret.
-        var kedja = AK8_UI.kedjaRadHTML(radNummer, '<span class="ovn-label">' + bokstav + ')</span>' + rad.vansterHTML)
+        // Bokstaven står FÖRE kedjans frågefält (.ak8-q), som radens eget barn — som på d2:s övriga rader
+        // (mellanrum och placering ur sjuans .ovn-label). Inuti frågefältet låg den tätt mot talet ("b)0,7").
+        var kedja = AK8_UI.kedjaRadHTML(radNummer, rad.vansterHTML)
           .replace(/^<div class="ak8-rad ak8-rad-kedja ak8-lana" data-idx="\d+">/,
             '<div class="ovn-brak-rad ak8-rad ak8-rad-kedja ak8-lana form-kedja" data-rad="' + radNummer + '" data-logg="' + rad.logg + '"'
-            + ' data-formled="' + encodeURIComponent(JSON.stringify(rad.uppg)) + '">')
+            + ' data-formled="' + encodeURIComponent(JSON.stringify(rad.uppg)) + '"><span class="ovn-label">' + bokstav + ')</span>')
           .replace('data-r="L0"', 'data-r="L0" data-visa="' + rad.facitLed + '"');
         ['L1', 'L2', 'L3'].forEach(function(r){ kedja = kedja.replace('data-r="' + r + '"', 'data-r="' + r + '" data-visa="' + rad.facitSvar + '"'); });
         html += kedja;
