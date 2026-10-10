@@ -218,7 +218,9 @@
     avrundatSvar: { hint: 'Svaret ska vara exakt. Svara i samma form som ledet.' },
     varjeTal:     { hint: 'Skriv om varje tal för sig – vart och ett ska ha samma värde som i uppgiften.' },
     sammaNamnare: { hint: 'Skriv bråken med samma nämnare.' },
-    decimalVag:   { hint: 'Båda talen går att skriva exakt i decimalform. Räkna med decimaltal.' }
+    decimalVag:   { hint: 'Båda talen går att skriva exakt i decimalform. Räkna med decimaltal.' },
+    // "+ led": ett tillagt led som redan är slutsvaret (godkänd av Joachim 2026-10-10, v2-granskningen)
+    genvagLed:    { hint: 'Det där är svaret. Skriv det bara i sista rutan.' }
   };
   // Formledets egna besked först, sedan svarsformens (blandad, förkorta, decimal, klart) ur BESKED.
   function formledBesked(orsak){ return ((FORMLED_BESKED[orsak] || BESKED[orsak]) || {}).hint || ''; }

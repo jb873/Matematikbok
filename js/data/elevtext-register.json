@@ -867,6 +867,7 @@
  "js/motor/blad/blad-karna.js": [],
  "js/motor/blad/likhetsrattare.js": [
   "hint | Båda talen går att skriva exakt i decimalform. Räkna med decimaltal.",
+  "hint | Det där är svaret. Skriv det bara i sista rutan.",
   "hint | Det där är svaret. Skriv först om båda talen i samma form.",
   "hint | Rätt värde – förkorta svaret.",
   "hint | Rätt värde – räkna ut sista ledet.",
