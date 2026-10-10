@@ -10,6 +10,9 @@
      LIVE    varje dokument fylls med rätta svar och rättas; varje nod dokumentet anger ska få minst
              ett nytt försök i k1-storen (window.Mastery). Tallinjen och ett faktorträd provas också —
              de loggar i egen kod, utanför kärnan.
+             Och OMVÄNT (2026-10-10): evidens till en nod som dokumentet INTE anger är ett brott. Så syns
+             en loggarEj-grupp som ändå loggar (via en förälder med data-logg) — "loggar inte" ska betyda
+             att storen inte får något. Varje loggarEj skrivs ut med sitt skäl: beslutet står i rapporten.
 
    KÖR:  node verktyg/loggnings-grind.js
    Omfång: OMFANG (Plugg till prov k1 d10). Ny sida → en rad. Noll nätväg, ingen fil ändras
@@ -90,12 +93,15 @@ OMFANG.forEach(sida => {
     const vantade = [...(perDok[l.dok] || [])];
     const saknas = vantade.filter(n => !l.nya[n]);
     const okanda = Object.keys(l.nya).filter(n => !NODER.has(n));
+    const oangivna = Object.keys(l.nya).filter(n => NODER.has(n) && vantade.indexOf(n) < 0);
     if(saknas.length){ fel += saknas.length; console.log('✗ LIVE ' + l.dok + ': ingen evidens till ' + saknas.join(', ') + ' trots rättat dokument'); }
     if(okanda.length){ fel += okanda.length; console.log('✗ LIVE ' + l.dok + ': evidens till nod som inte finns: ' + okanda.join(', ')); }
+    if(oangivna.length){ fel += oangivna.length; console.log('✗ LIVE ' + l.dok + ': evidens till nod som dokumentet inte anger (läcker en loggarEj-grupp?): ' + oangivna.map(n => n + ' +' + l.nya[n]).join(', ')); }
     if(!vantade.length && !Object.keys(l.nya).length) console.log('  ' + l.dok + ': inga räknegrupper (bara loggarEj)');
-    else if(!saknas.length && !okanda.length) console.log('✓ ' + l.dok + ': ' + vantade.length + ' nod(er), ' + Object.keys(l.nya).map(n => n + ' +' + l.nya[n]).join(', '));
+    else if(!saknas.length && !okanda.length && !oangivna.length) console.log('✓ ' + l.dok + ': ' + vantade.length + ' nod(er), ' + Object.keys(l.nya).map(n => n + ' +' + l.nya[n]).join(', '));
   });
-  console.log('  ' + kort + ': ' + u.data.length + ' grupper i datan, ' + u.data.filter(g => g.loggarEj !== null).length + ' med loggarEj');
+  console.log('  ' + kort + ': ' + u.data.length + ' grupper i datan, ' + u.data.filter(g => g.loggarEj !== null).length + ' med loggarEj:');
+  u.data.filter(g => g.loggarEj !== null).forEach(g => console.log('    · ' + g.dok + ' · ' + g.grupp + ' — "' + g.loggarEj + '"'));
 });
 try { fs.unlinkSync(TMP); } catch(e){}
 console.log('\n' + (fel ? '✗ LOGGNINGS-GRIND RÖD (' + fel + ')' : '✓ LOGGNINGS-GRIND GRÖN'));

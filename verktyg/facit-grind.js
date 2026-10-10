@@ -19,7 +19,8 @@
                          "en tiondel/hundradel större än", störst av två, bygg tal av siffror
      problem (lästal)    exakt och overslag ur datan: svar = överslaget (eller exakt där överslag saknas),
                          och det exakta ligger NÄRA (0 < avstånd ≤ 10 %) — annars lär uppgiften inget om överslag;
-                         exempelledet i "Min uträkning" prövas som det visas, precis som kedjans
+                         exempelledet i "Min uträkning" prövas som det visas, precis som kedjans;
+                         ENHETSBYTE i sidan: annan riktig enhet med rätt värde godtas, fel par (4,8 m) fälls
      tallinjen           varje markering ligger på linjen; valrutans svar finns bland alternativen
    En rad som grinden inte kan räkna är ett BROTT ("ej räknad") — en grind som hoppar över det den inte
    förstår skriver grönt om ingenting.
@@ -127,6 +128,7 @@ const PROBE = `(function(){
       if(t === 'intervallEn' && !(r.min < r.max)) fel('intervallet är tomt'); return;   // villkorsrättade: inget facit att räkna
     }
     if(t === 'problem'){
+      if(!r.enhetsbyte) fel('lästal med enhetsruta utan enhetsbyte — varje riktig enhet med rätt värde ska godtas (Joachim 2026-10-10)');
       if(!r.exakt){ ut.ejRaknad.push(dok + ' · ' + rub + ' · ' + namn + ' lästal utan exakt-fält'); return; }
       var ex = ev(r.exakt);
       /* FÄLTET MOT TEXTEN: varje tal i exakt-uttrycket ska stå i frågan. Annars kan fältet glida isär
@@ -185,7 +187,55 @@ const PROBE = `(function(){
   if(window.PLUGG_FAKTORISERA) PLUGG_FAKTORISERA.grupper.forEach(function(g){ g.rader.forEach(function(r, ri){ radKoll('faktorisera', g.rubrik, r, ri); }); });
   (window.TALLINJE_AVLASNING || []).forEach(function(u){ u.mark.forEach(function(m){ ut.rader++; if(m.varde < u.cfg.start || m.varde > u.cfg.slut) brott('tallinjer', u.nr + '', m.bok, 'markeringen ' + m.varde + ' ligger utanför linjen'); }); });
   (window.TALLINJE_UPPSKATTNING || []).forEach(function(u){ u.mark.forEach(function(m){ ut.rader++; if(u.alternativ.indexOf(m.svar) < 0) brott('tallinjer', u.nr + '', m.bok, 'svaret ' + m.svar + ' finns inte bland alternativen'); if(!lika(tal(m.svar), m.varde, 1e-9)) brott('tallinjer', u.nr + '', m.bok, 'svaret ' + m.svar + ' ≠ markeringen ' + m.varde); }); });
-  return ut;
+
+  /* ENHETSBYTE (Joachims beslut 2026-10-10): i ett lästal godtas varje riktig enhet med rätt värde.
+     Prövas I SIDAN, per lästal, med grindens EGEN skaltabell (inte kärnans):
+       A  facitets tal och enhet                        → svar och enhet rätt
+       B  samma värde i en annan enhet ("4,8 km")       → båda rätt
+       C  B:s tal med facitets enhet ("4,8 m")          → svarsrutan FEL — annars godtas vad som helst
+     Antal (muggar, askar) har ingen annan enhet: A, och i B en främmande enhet (kr) som ska fällas. */
+  var SKALA = { m: ['längd', 1], km: ['längd', 1000], mil: ['längd', 10000], cm: ['längd', 0.01],
+                kr: ['pengar', 1], 'öre': ['pengar', 0.01], s: ['tid', 1], min: ['tid', 60] };
+  var BYT = { m: 'km', km: 'm', mil: 'km', cm: 'm', kr: 'öre', 'öre': 'kr', s: 'min', min: 's' };
+  function enhetsLeg(){
+    var vanta = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+    var satt = function(i, v){ i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
+    var komma = function(x){ return String(Math.round(x * 1e9) / 1e9).replace('.', ','); };
+    var kedja = Promise.resolve();
+    ut.enhetsFall = 0;
+    Object.keys(D).forEach(function(id){
+      var rader = []; D[id].grupper.forEach(function(g){ g.rader.forEach(function(r){ if(r.typ === 'problem') rader.push(r); }); });
+      if(!rader.length) return;
+      ['A', 'B', 'C'].forEach(function(fall){ kedja = kedja.then(function(){
+        oppnaDokument(id);
+        return vanta(500).then(function(){
+          var m = document.getElementById('plugg-aktivt'), dom = m.querySelectorAll('.prob-rad'), plan = [];
+          if(dom.length !== rader.length){ ut.brott.push(id + ' · ENHETSBYTE: ' + dom.length + ' lästal i sidan, ' + rader.length + ' i datan'); return; }
+          rader.forEach(function(r, i){
+            if(!r.enhetsbyte) return;
+            if(!dom[i].hasAttribute('data-enhetsbyte')){ if(fall === 'A') ut.brott.push(id + ' · ENHETSBYTE · ' + String.fromCharCode(97 + i) + '): enhetsbyte i datan men inte på raden'); return; }
+            var sk = SKALA[r.enhet], tal = r.svar, enh = r.enhet, vS = true, vE = true;
+            if(fall !== 'A'){
+              if(!sk){ if(fall === 'C') return; enh = 'kr'; vE = false; }
+              else { tal = r.svar * sk[1] / SKALA[BYT[r.enhet]][1]; if(fall === 'B') enh = BYT[r.enhet]; else vS = false; }
+            }
+            var s = dom[i].querySelector('[data-svar]'), e = dom[i].querySelector('[data-enhet]');
+            satt(s, komma(tal)); satt(e, enh);
+            plan.push({ i: i, s: s, e: e, txt: komma(tal) + ' ' + enh, vS: vS, vE: vE });
+          });
+          m.querySelector('[data-action="kontroll"]').click();
+          return vanta(300).then(function(){ plan.forEach(function(p){
+            var sOk = p.s.classList.contains('correct'), eOk = p.e.classList.contains('correct');
+            ut.enhetsFall++;
+            if(sOk !== p.vS || eOk !== p.vE) ut.brott.push(id + ' · ENHETSBYTE ' + fall + ' · ' + String.fromCharCode(97 + p.i) + ') "' + p.txt + '": svar '
+              + (sOk ? 'rätt' : 'fel') + ', enhet ' + (eOk ? 'rätt' : 'fel') + ' — väntat svar ' + (p.vS ? 'rätt' : 'fel') + ', enhet ' + (p.vE ? 'rätt' : 'fel'));
+          }); });
+        });
+      }); });
+    });
+    return kedja;
+  }
+  return enhetsLeg().then(function(){ return ut; }, function(e){ ut.brott.push('ENHETSBYTE: ' + e.message); return ut; });
 })()`;
 
 const TMP = path.join(os.tmpdir(), 'facitgrind-' + process.pid + '.js');
@@ -203,6 +253,8 @@ OMFANG.forEach(sida => {
   if(!u.rader){ fel++; console.log('✗ ' + sida + ': inga rader mätta'); }
   console.log((u.brott.length + u.ejRaknad.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + u.rader + ' rader räknade · '
     + Object.keys(u.perTyp).map(k => k + ' ' + u.perTyp[k]).join(', '));
+  if(u.perTyp.problem && !u.enhetsFall){ fel++; console.log('✗ ENHETSBYTE: lästal finns men inget fall prövades i sidan'); }
+  else if(u.enhetsFall) console.log('  enhetsbyte: ' + u.enhetsFall + ' fall prövade i sidan (facitets enhet · annan enhet · fel par)');
 });
 try { fs.unlinkSync(TMP); } catch(e){}
 console.log('\n' + (fel ? '✗ FACIT-GRIND RÖD (' + fel + ')' : '✓ FACIT-GRIND GRÖN'));

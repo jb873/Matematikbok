@@ -445,24 +445,26 @@ function prioEval(uttryck){
     return Math.round(v * 1e6) / 1e6;
   }catch(err){ return null; }
 }
+// UNIONEN av alla tio bladens tabeller (drift samlad 2026-09-19): nya synonymer läggs HÄR, inte per blad.
+// Utanför jamforEnhet sedan 2026-10-10 så att enhetsbytet (nedan) läser samma synonymer.
+var ENHET_ALIAS = {
+  'sek':'s', 'sekund':'s', 'sekunder':'s',
+  'kr':'kr', 'kronor':'kr', 'krona':'kr',
+  'meter':'m', 'metrar':'m',
+  'kilometer':'km',
+  'centimeter':'cm',
+  'pase':'påsar', 'påse':'påsar', 'pasar':'påsar', 'påsarna':'påsar',
+  'flaska':'flaskor', 'flaskorna':'flaskor',
+  'mugg':'muggar', 'muggarna':'muggar',
+  'ask':'askar', 'askarna':'askar',
+  'liter':'l',
+  'mil':'mil'
+};
 function jamforEnhet(a, b){
   // Enhet rättas flexibelt: utan mellanslag, gemener,
   // och med vanliga skrivvarianter (kr/sek osv. accepteras).
   if(a == null) return false;
-  // UNIONEN av alla tio bladens tabeller (drift samlad 2026-09-19): nya synonymer läggs HÄR, inte per blad.
-  var alias = {
-    'sek':'s', 'sekund':'s', 'sekunder':'s',
-    'kr':'kr', 'kronor':'kr', 'krona':'kr',
-    'meter':'m', 'metrar':'m',
-    'kilometer':'km',
-    'centimeter':'cm',
-    'pase':'påsar', 'påse':'påsar', 'pasar':'påsar', 'påsarna':'påsar',
-    'flaska':'flaskor', 'flaskorna':'flaskor',
-    'mugg':'muggar', 'muggarna':'muggar',
-    'ask':'askar', 'askarna':'askar',
-    'liter':'l',
-    'mil':'mil'
-  };
+  var alias = ENHET_ALIAS;
   function norm(x){
     var t = String(x).toLowerCase().replace(/\./g,'').replace(/\s/g,'');
     // ta bort eventuell punkt (m. -> m)
@@ -474,6 +476,33 @@ function jamforEnhet(a, b){
   if(alias[na] === nb) return true;
   if(alias[nb] === na) return true;
   return false;
+}
+/* ENHETSBYTE (k1 d10, Joachims beslut 2026-10-10). I ett lästal godtas varje riktig enhet med rätt
+   värde: Elsas 4 800 m och 4,8 km är samma svar. Svar och enhet rättas då som ETT PAR — talet räknat
+   om till facitets enhet ska ge facit. "4,8 m" fälls: talet stämmer inte med sin enhet. Bara storheter
+   med en känd skala byts; antal (muggar, askar) har ingen annan enhet och rättas som förut.
+   Opt-in per rad (rad.enhetsbyte → data-enhetsbyte på .prob-rad). */
+var ENHET_SKALA = {
+  'längd': { mm: 0.001, cm: 0.01, dm: 0.1, m: 1, km: 1000, mil: 10000 },
+  tid:     { s: 1, min: 60, h: 3600 },
+  pengar:  { 'öre': 0.01, kr: 1 },
+  volym:   { ml: 0.001, cl: 0.01, dl: 0.1, l: 1 },
+  massa:   { g: 0.001, hg: 0.1, kg: 1, ton: 1000 }
+};
+var ENHET_ALIAS_SKALA = { 'millimeter':'mm', 'decimeter':'dm', 'minut':'min', 'minuter':'min',
+  'timme':'h', 'timmar':'h', 'tim':'h', 'milliliter':'ml', 'centiliter':'cl', 'deciliter':'dl',
+  'gram':'g', 'hekto':'hg', 'kilo':'kg', 'kilogram':'kg' };
+function enhetSkala(e){
+  var n = String(e == null ? '' : e).toLowerCase().replace(/\./g, '').replace(/\s/g, '');
+  n = ENHET_ALIAS[n] || ENHET_ALIAS_SKALA[n] || n;
+  for(var st in ENHET_SKALA) if(ENHET_SKALA[st][n] !== undefined) return { storhet: st, skala: ENHET_SKALA[st][n] };
+  return null;
+}
+function enhetsPar(tal, enhet, facitTal, facitEnhet){
+  var a = enhetSkala(enhet), b = enhetSkala(facitEnhet), v = AK8_UI.pNum(tal);
+  if(!a || !b || a.storhet !== b.storhet || isNaN(v)) return false;
+  var mal = facitTal * b.skala;
+  return Math.abs(v * a.skala - mal) <= 1e-9 * Math.max(1, Math.abs(mal));
 }
 
 // ============================================================
@@ -750,7 +779,8 @@ function bladHTML(blad){
       }
       if(rad.typ === 'problem'){
         // Problem har egen layout: fråga + kladdruta + svar/enhet
-        html += '<div class="prob-rad" data-rad="' + radNummer + '"' + (rad.logg ? ' data-logg="' + rad.logg + '"' : '') + '>';
+        html += '<div class="prob-rad" data-rad="' + radNummer + '"' + (rad.logg ? ' data-logg="' + rad.logg + '"' : '')
+          + (rad.enhetsbyte ? ' data-enhetsbyte' : '') + '>';
         html += '<div class="prob-fraga">';
         html += lbl(bokstav);
         html += '<span>' + rad.fraga + '</span>';
@@ -1879,6 +1909,9 @@ function bygg_blad(rotEl, blad){
         ok = String(inp.dataset.mellan).split('|').some(function(f){ return jamforMellan(inp.value, f); });
       } else if(inp.dataset.enhet){
         ok = jamforEnhet(inp.value, inp.dataset.enhet);
+        // ENHETSBYTE: en annan enhet är rätt när paret (svarets tal, enheten) stämmer med facit
+        var _ebRad = !ok && inp.closest('[data-enhetsbyte]'), _ebSvar = _ebRad && _ebRad.querySelector('[data-svar]');
+        if(_ebSvar) ok = enhetsPar(_ebSvar.value, inp.value, parseFloat(_ebSvar.dataset.svar), inp.dataset.enhet);
       } else if(inp.dataset.term !== undefined){
         // dela upp i termer – godtar alla korrekta summor
         var malSumma = parseFloat(inp.dataset.term);
@@ -1964,6 +1997,9 @@ function bygg_blad(rotEl, blad){
         ok = _bp.some(function(p){ return p[_bi] === _bmin && (!_bannIPar || p[1 - _bi] === _bann); });
       } else {
         ok = jamforTal(inp.value, parseFloat(inp.dataset.svar));
+        // ENHETSBYTE: 4,8 är rätt när enhetsrutan säger km (facit 4 800 m) — och fel när den säger m
+        var _ebRad2 = !ok && inp.closest('[data-enhetsbyte]'), _ebEnh = _ebRad2 && _ebRad2.querySelector('[data-enhet]');
+        if(_ebEnh) ok = enhetsPar(inp.value, _ebEnh.value, parseFloat(inp.dataset.svar), _ebEnh.dataset.enhet);
       }
       /* TRAPPAN. En rad med förlängningsled rättas i DOM-ordning: täljare och nämnare i led 1,
          sedan led 2, sedan svaret. Så fort en ruta är fel tystnar resten av raden — de räknas

@@ -90,39 +90,41 @@ var PLUGG_DOKUMENT = {
          att det exakta svaret ligger några procent därifrån. Ceasar är undantaget — en exakt uppgift.
          exakt/overslag: uttrycken (JS-syntax) som regel 11-grinden räknar (verktyg/facit-grind.js).
          kedja: "Min uträkning" rättas som Beräkna-kedjan; led = ett korrekt exempelled (visas som facit).
-         Ingen "Svara i …": den avslöjade enheten, som eleven själv ska ange i Enhet-rutan. */
+         Ingen "Svara i …": den avslöjade enheten, som eleven själv ska ange i Enhet-rutan.
+         enhetsbyte (Joachim 2026-10-10): varje riktig enhet med rätt värde godtas — 4 800 m och 4,8 km;
+         4,8 m fälls. Kärnan rättar svar och enhet som ett par (enhetsPar i blad-karna-b.js). */
       {rubrik:'Lös problemet', logg:'avr-overslag:rakna', rader:[
-        {typ:'problem', kedja:true,
+        {typ:'problem', kedja:true, enhetsbyte:true,
          fraga:'Per köper 10 chokladbitar för 4,90 kr/st och 100 kolor för 0,48 kr/st. '
            + 'Hur mycket ska han betala? <em>Använd överslagsräkning.</em>',
          svar:100, enhet:'kr', led:'10 · 5 + 100 · 0,5', exakt:'10 * 4.9 + 100 * 0.48', overslag:'10 * 5 + 100 * 0.5'},
-        {typ:'problem', kedja:true,
+        {typ:'problem', kedja:true, enhetsbyte:true,
          fraga:'En biobiljett kostar 138 kr/st. Om man köper ett paket med 10 stycken betalar man 1 190 kr. '
            + 'Hur mycket tjänar man på varje biobiljett genom att köpa paketerbjudandet? <em>Använd överslagsräkning.</em>',
          svar:20, enhet:'kr', led:'140 − 120', exakt:'138 - 1190 / 10', overslag:'140 - 1200 / 10'},
-        {typ:'problem', kedja:true, logg:'add-problem:problem',
+        {typ:'problem', kedja:true, enhetsbyte:true, logg:'add-problem:problem',
          fraga:'Yonko och Ceasar sprang 60 meter. Yonko sprang på tiden 8,83 sekunder. '
            + 'Ceasar sprang två tiondelar långsammare. Vilken tid hade Ceasar?',
          svar:9.03, enhet:'s', led:'8,83 + 0,2', exakt:'8.83 + 0.2'},
-        {typ:'problem', kedja:true,
+        {typ:'problem', kedja:true, enhetsbyte:true,
          fraga:'Fem kompisar ska gå på bio och äta hamburgare efteråt. Det kostar 575 kr att gå på bio '
            + 'och 440 kr att äta hamburgare. Hur mycket ska varje person betala? <em>Använd överslagsräkning.</em>',
          svar:200, enhet:'kr', led:'600 / 5 + 400 / 5', exakt:'(575 + 440) / 5', overslag:'(600 + 400) / 5'},
-        {typ:'problem', kedja:true,
+        {typ:'problem', kedja:true, enhetsbyte:true,
          fraga:'Under en löpartävling behövdes 3 548 muggar till 6 vätskekontroller. '
            + 'Ungefär hur många muggar behövdes till varje vätskekontroll? '
            + '<em>Använd överslagsräkning.</em>',
          svar:600, enhet:'muggar', led:'36 / 6 · 100', exakt:'3548 / 6', overslag:'3600 / 6'},
-        {typ:'problem', kedja:true,
+        {typ:'problem', kedja:true, enhetsbyte:true,
          fraga:'Filip ska beställa pennor till skolan. Pennorna ligger i askar med 11 pennor i varje ask. '
            + 'Varje elev behöver cirka 8 pennor och det går 528 elever på skolan. '
            + 'Ungefär hur många askar ska han beställa? <em>Använd överslagsräkning.</em>',
          svar:400, enhet:'askar', led:'500 · 8 / 10', exakt:'528 * 8 / 11', overslag:'500 * 8 / 10'},
-        {typ:'problem', kedja:true,
+        {typ:'problem', kedja:true, enhetsbyte:true,
          fraga:'En dag gick Elsa 7 850 steg. Hur långt gick hon om varje steg var 62 cm långt? '
            + '<em>Använd överslagsräkning.</em>',
          svar:4800, enhet:'m', led:'8 000 · 0,6', exakt:'7850 * 0.62', overslag:'8000 * 0.6'},
-        {typ:'problem', kedja:true,
+        {typ:'problem', kedja:true, enhetsbyte:true,
          fraga:'Marias moped drar 0,29 liter bensin per mil. Hur långt kan hon köra med 8,8 liter? '
            + '<em>Använd överslagsräkning.</em>',
          svar:30, enhet:'mil', led:'9 / 3 · 10', exakt:'8.8 / 0.29', overslag:'9 / 0.3'}
@@ -323,12 +325,12 @@ var PLUGG_DOKUMENT = {
         {typ:'mellan', vansterText:'6 · 643 =', mellan:'3600 + 240 + 18|6 · 600 + 6 · 40 + 6 · 3', svar:3858},
         {typ:'mellan', vansterText:'4 · 2 816 =', mellan:'8000 + 3200 + 40 + 24|4 · 2000 + 4 · 800 + 4 · 10 + 4 · 6', svar:11264}
       ]},
-      {rubrik:'Beräkna med kort division', logg:'div-rakna:rakna', rader:[   // papper → divisionens räknenod
+      {rubrik:'Beräkna med kort division', loggarEj:'bara svaret rättas, uppställningen väntar på divisionsordern', rader:[   // Joachim 2026-10-10: dold nod = evidens eleven aldrig ser; divisionstabellen = falsk evidens
         {typ:'enkel', vansterText:'462 / 3 =', svar:154},
         {typ:'enkel', vansterText:'1 099 / 7 =', svar:157},
         {typ:'enkel', vansterText:'10,8 / 6 =', svar:1.8}
       ]},
-      {rubrik:'Beräkna med kort division', logg:'div-rakna:rakna', rader:[
+      {rubrik:'Beräkna med kort division', loggarEj:'bara svaret rättas, uppställningen väntar på divisionsordern', rader:[
         {typ:'enkel', vansterText:'312 / 5 =', svar:62.4},
         {typ:'enkel', vansterText:'145 / 4 =', svar:36.25},
         {typ:'enkel', vansterText:'4,5 / 8 =', svar:0.5625}
