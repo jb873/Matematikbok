@@ -16,7 +16,12 @@
    KRÄVT. Räknar eleven vidare direkt och hamnar på −8 = −2x är det en giltig väg; hon dividerar och
    skriver x = 4 sist. Rättaren godkänner den. Ledtråden hör till färdighetsträningen, inte hit.
 
-   Parsern ligger i ekv-parser.js (delad med problemlösningens rättare), laddas FÖRE denna fil. */
+   Parsern ligger i ekv-parser.js (delad med problemlösningens rättare), laddas FÖRE denna fil.
+
+   DELAD (order 2026-10-21): DOMEN fälls av ekv-rattare.js (flyttad dit ur kontrolleraUppg) och delas
+   med åttans Ekvationer steg 1. Den här filen läser raderna, markerar dem och ritar bladen. En sida som
+   sätter window.EKV_STEG före laddningen får SINA blad ritade i stället för sjuans STEG — med grupper,
+   läge och regler ur sin data (stegUrData). Utan EKV_STEG ritas och rättas sjuans blad som förut. */
 
 // ── Parsern: DELAD (js/motor/ekvationer-balans/ekv-parser.js) ──
 var _EP = (typeof window !== 'undefined' && window.EkvParser) || null;
@@ -92,30 +97,35 @@ function arLost(vl, hl){ return _EP ? _EP.arLost(vl, hl) : false; }
 // ── RÄTTNING ──────────────────────────────────────────────────────────────────────────────────
 // Raderna prövas mot uppgiftens ekvation och mot varandra; sista raden ska vara variabeln ensam i
 // vänsterledet. Antalet rader räknas med UPPGIFTENS rad (den står tryckt ovanför elevens rader).
+// DOMEN fälls av den delade rättaren (ekv-rattare.js). Här läses raderna och markeras; en rad som
+// rättaren inte nådde (efter brottet) rörs inte, precis som förut.
+var _ER = (typeof window !== 'undefined' && window.EkvRattare) || null;
+function beskedTextFor(nyckel, upp){
+  if(nyckel === 'forFa') return (upp.lage || LAGE) === 'kort' ? _ER.beskedText('forFaKort') : EKV_TEXT.forFa.hint;
+  return _ER.beskedText(nyckel, upp.vars);
+}
 function kontrolleraUppg(upp){
-  var forra = upp.startEkv, allaOk = true, nadde = false, hade = false, antal = 1;
-  for(var i = 0; i < upp.rader.length; i++){
-    var rad = upp.rader[i], vl = lasSida(rad.vlSida), hl = lasSida(rad.hlSida);
+  var lasOpts = (upp.regler && upp.regler.blandad) ? { blandad: true } : undefined;
+  var rader = upp.rader.map(function(r){
+    return { vl: K.las(r.vlSida, lasOpts), hl: K.las(r.hlSida, lasOpts), hlRa: upp.regler ? K.las(r.hlSida, { ra: true }) : null };
+  });
+  var d = _ER.domKedja({ vl: upp.vl, hl: upp.hl, variabel: upp.vars }, rader, { lage: upp.lage || LAGE, regler: upp.regler });
+  upp.rader.forEach(function(rad, i){
+    var s = d.status[i];
+    if(s === null) return;
     rensaFarg(rad);
-    if(vl === '' && hl === '') continue;
-    hade = true; antal++;
-    var e = parseEkvation(vl, hl);
-    if(!e || !sammaLosning(forra, e)){ K.markera(rad, false); allaOk = false; break; }
-    K.markera(rad, true);
-    forra = e;
-    if(harUnikLosning(e) && arLost(vl, hl)) nadde = true;
-  }
-  // Kravet på antal rader: läget avgör (utskrivet = två rader per operation).
-  var krav = _EP ? _EP.minstaAntalRader(upp.vl, upp.hl, { lage: LAGE }) : null;
-  var forFa = nadde && krav != null && antal < krav;
-  if(forFa){
-    var sistRad = upp.rader.filter(function(r){ return lasSida(r.vlSida) !== '' || lasSida(r.hlSida) !== ''; }).pop();
-    if(sistRad) K.markera(sistRad, false);
-  }
-  var klar = allaOk && nadde && !forFa;
-  upp.klarEl.classList.toggle('show', klar);
-  upp.forFaEl.classList.toggle('show', !!forFa);
-  return { ok: allaOk && !forFa, klar: klar, hade: hade, forFa: forFa, krav: krav };
+    if(s === 'ok') K.markera(rad, true);
+    else if(s === 'fel') K.markera(rad, false);
+  });
+  if(d.forFa && d.sistIfylld >= 0) K.markera(upp.rader[d.sistIfylld], false);
+  // Beskedraden bär "för få rader" som förut — och nu också de nya beskeden. Utan besked står
+  // radens ursprungliga text kvar, dold.
+  var text = d.besked ? beskedTextFor(d.besked, upp) : EKV_TEXT.forFa.hint;
+  if(upp.forFaEl.textContent !== text) upp.forFaEl.textContent = text;
+  upp.klarEl.classList.toggle('show', d.klar);
+  upp.forFaEl.classList.toggle('show', !!d.besked);
+  return { ok: d.ok, klar: d.klar, hade: d.hade, forFa: d.forFa, krav: d.krav, besked: d.besked, text: text,
+           kryss: d.forFa || d.status.indexOf('fel') >= 0 };
 }
 
 // ── RENDERING: ett steg per öva-blad ──────────────────────────────────────────────────────────
@@ -134,26 +144,67 @@ function visaSida(spec){
   return spec.replace(/BRAK:([^:\s]+):([^:\s]+)/g, function(m, t, n){ return brakHTML(t, n); });
 }
 
+// ── UPPGIFTER I DATANS SKRIVSÄTT (åttans Ekvationer steg 1): 'VL = HL' med staplade bråk som
+//    [täljare|nämnare]. Samma sträng ger parserns led och det som visas — de kan inte driva isär.
+var BRAK_RE = /\[([^\[\]|]*)\|([^\[\]|]*)\]/g;
+function tillParser(s){ return String(s).replace(BRAK_RE, '($1)/($2)').trim(); }
+function visaText(t){
+  return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/([a-zåäö])/gi, '<span class="x">$1</span>').replace(/[−-]/g, '&minus;');
+}
+function visaRa(s){
+  return String(s).trim().split(/(\[[^\[\]|]*\|[^\[\]|]*\])/).map(function(del){
+    var m = del.match(/^\[([^\[\]|]*)\|([^\[\]|]*)\]$/);
+    if(!m) return visaText(del);
+    return '<span class="seg-brak" style="font-size:19px;"><span>' + visaText(m[1]) +
+           '</span><span class="brak-streck" style="min-width:20px;"></span><span>' + visaText(m[2]) + '</span></span>';
+  }).join('');
+}
+function delaUppg(u){
+  var d = String(u.uppg).split('=');
+  return { vl: tillParser(d[0]), hl: tillParser(d[1]), visaVLhtml: visaRa(d[0]), visaHLhtml: visaRa(d[1]) };
+}
+// En sidas data ({ data, niva, mount }) → ett steg för renderSteg: grupperna, läget och reglerna ur datan.
+function stegUrData(c){
+  if(!c || !c.data) return c;
+  var n = c.data.nivaer[c.niva];
+  return { id: c.id || ('niva' + c.niva), mount: c.mount, titel: null, lage: n.lage, regler: c.data.regler,
+           loggning: c.loggning || 'forstaForsok',
+           grupper: n.grupper.map(function(g){ return { rubrik: g.rubrik, uppg: g.uppgifter }; }) };
+}
+
 function renderSteg(mount, steg){
   mount.innerHTML = '';
   var kort = document.createElement('div'); kort.className = 'eq-kort';
-  var rub = document.createElement('div'); rub.className = 'niva-rubrik'; rub.textContent = steg.titel;
-  kort.appendChild(rub);
+  if(steg.titel){
+    var rub = document.createElement('div'); rub.className = 'niva-rubrik'; rub.textContent = steg.titel;
+    kort.appendChild(rub);
+  }
 
-  steg.uppg.forEach(function(u, idx){
+  // Sjuans steg är EN grupp utan rubrik; åttans data har dokumentets grupper, numrerade 1., 2., 3.
+  var grupper = steg.grupper || [{ uppg: steg.uppg }];
+  grupper.forEach(function(g, gi){
+  if(g.rubrik){
+    var gr = document.createElement('div'); gr.className = 'ovn-grupp-rubrik eq-grupp-rubrik';
+    gr.textContent = (gi + 1) + '. ' + g.rubrik;
+    kort.appendChild(gr);
+  }
+  g.uppg.forEach(function(u, idx){
+    var ny = typeof u.uppg === 'string', d = ny ? delaUppg(u) : u;
     var block = document.createElement('div'); block.className = 'uppgift';
-    block.setAttribute('data-nod', steg.nod);
+    block.setAttribute('data-nod', u.nod || steg.nod);
     var et = document.createElement('div'); et.className = 'uppg-etikett'; et.textContent = String.fromCharCode(97 + idx) + ')';
     block.appendChild(et);
     var grid = document.createElement('div'); grid.className = 'eq-grid'; block.appendChild(grid);
-    var uvl = document.createElement('div'); uvl.className = 'eq-uppg-vl'; uvl.innerHTML = visaSida(u.visaVL);
+    var uvl = document.createElement('div'); uvl.className = 'eq-uppg-vl'; uvl.innerHTML = ny ? d.visaVLhtml : visaSida(u.visaVL);
     var ueq = document.createElement('div'); ueq.className = 'eq-uppg-eq'; ueq.textContent = '=';
-    var uhl = document.createElement('div'); uhl.className = 'eq-uppg-hl'; uhl.innerHTML = visaSida(u.visaHL);
+    var uhl = document.createElement('div'); uhl.className = 'eq-uppg-hl'; uhl.innerHTML = ny ? d.visaHLhtml : visaSida(u.visaHL);
     var usp = document.createElement('div');
     grid.appendChild(uvl); grid.appendChild(ueq); grid.appendChild(uhl); grid.appendChild(usp);
 
-    var upp = { grid: grid, startEkv: parseEkvation(u.vl, u.hl), vl: u.vl, hl: u.hl,
-                vars: u.variabel || 'x', rader: [], klarEl: null, forFaEl: null, steg: steg.id };
+    var upp = { grid: grid, startEkv: parseEkvation(d.vl, d.hl), vl: d.vl, hl: d.hl,
+                vars: u.variabel || 'x', rader: [], klarEl: null, forFaEl: null, steg: steg.id,
+                lage: steg.lage, regler: steg.regler, nod: u.nod || steg.nod, block: block };
     uppgifter.push(upp);
 
     var vt = document.createElement('div'); vt.className = 'uppg-verktyg';
@@ -175,6 +226,7 @@ function renderSteg(mount, steg){
     kort.appendChild(block);
     nyRad(upp);
   });
+  });
 
   var actions = document.createElement('div'); actions.className = 'actions';
   var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'btn primary'; kn.textContent = EKV_TEXT.kontroll.titel;
@@ -189,20 +241,31 @@ function renderSteg(mount, steg){
 
 function kontrollera(steg, hintEl){
   var mina = uppgifter.filter(function(u){ return u.steg === steg.id; });
-  var klar = 0, fel = 0, forFa = 0;
+  var klar = 0, fel = 0, forFa = 0, forstaBesked = null;
   mina.forEach(function(u){
     var r = kontrolleraUppg(u);
-    if(r.klar) klar++; else if(r.forFa) forFa++; else if(!r.ok) fel++;
+    // Ett fel med eget besked (upprepning, bokstav, svarets form) får sitt besked också i bladets
+    // rad — "inte samma värde" vore fel om just det. Utan besked räknas felet som förut.
+    if(r.klar) klar++;
+    else if(r.besked && r.besked !== 'forFa'){ if(!forstaBesked) forstaBesked = r.text; }
+    else if(r.forFa) forFa++; else if(!r.ok) fel++;
+    // ÅTTANS LOGGNING (sidan säger loggning: 'forstaForsok'): första Kontrollera där kedjan är klar
+    // eller har ett ✗ loggas för uppgiftens nod. Senare tryck ändrar vad eleven SER, inte vad som loggats.
+    if(steg.loggning === 'forstaForsok' && (r.klar || r.kryss) && window.AK8_UI && AK8_UI.loggaForstaForsoket)
+      AK8_UI.loggaForstaForsoket(u.block, window.MasteryK3, u.nod, r.klar);
   });
   if(fel){ hintEl.className = 'global-hint fel'; hintEl.textContent = EKV_TEXT.fel.hint; }
-  else if(forFa){ hintEl.className = 'global-hint fel'; hintEl.textContent = EKV_TEXT.forFa.hint; }
+  else if(forstaBesked){ hintEl.className = 'global-hint fel'; hintEl.textContent = forstaBesked; }
+  else if(forFa){ hintEl.className = 'global-hint fel'; hintEl.textContent = (steg.lage || LAGE) === 'kort' ? _ER.beskedText('forFaKort') : EKV_TEXT.forFa.hint; }
   else if(klar === mina.length){ hintEl.className = 'global-hint ok'; hintEl.textContent = EKV_TEXT.allaRatt.hint; }
   else { hintEl.className = 'global-hint ok'; hintEl.textContent = EKV_TEXT.pagang.hint; }
 }
 
 // ── MONTERING: ett steg per öva-blad (#sheet-steg1 …). Skalet äger flikar och bladnavigering. ──
+// En sida med egen data sätter window.EKV_STEG (t.ex. [{ data: AK8_EKV1, niva: 1, mount: 'niva1' }]).
 (function(){
-  STEG.forEach(function(steg){
+  var lista = (typeof window !== 'undefined' && window.EKV_STEG) ? window.EKV_STEG.map(stegUrData) : STEG;
+  lista.forEach(function(steg){
     var mount = document.getElementById('sheet-' + steg.mount);
     if(mount) renderSteg(mount, steg);
   });
@@ -219,4 +282,4 @@ function kontrollera(steg, hintEl){
   AK8_UI.bindKeypad(document.body, { byggare: K && K.byggare });
 })();
 
-if(typeof window !== 'undefined') window.EkvBlad = { STEG: STEG, renderSteg: renderSteg, uppgifter: function(){ return uppgifter; }, lage: function(l){ if(l) LAGE = l; return LAGE; } };
+if(typeof window !== 'undefined') window.EkvBlad = { STEG: STEG, renderSteg: renderSteg, stegUrData: stegUrData, uppgifter: function(){ return uppgifter; }, lage: function(l){ if(l) LAGE = l; return LAGE; } };

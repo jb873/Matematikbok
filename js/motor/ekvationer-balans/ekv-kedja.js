@@ -133,16 +133,34 @@ function markera(r, ok){
 }
 
 // Läser en sida: textsegment och bråksegment i ordning → "(t)/(n)" för bråken.
-function las(sidaEl){
+// opts (order 2026-10-21, åttans Ekvationer steg 1 — utan opts läses sidan exakt som förut):
+//   ra       bråken som [t|n] i stället för (t)/(n) — rättaren läser svarsformen ur den
+//   blandad  BLANDAD FORM är ETT tal: ett heltal direkt före ett staplat bråk med heltal (25 och 1/2),
+//            eller skrivet på raden (25 1/2), läses som 25 + 1/2 — inte som 25 · 1/2.
+function las(sidaEl, opts){
+  opts = opts || {};
   var bitar = [];
   Array.prototype.forEach.call(sidaEl.childNodes, function(node){
-    if(node.classList && node.classList.contains('seg-text')){ if(node.value.trim() !== '') bitar.push(node.value.trim()); }
+    if(node.classList && node.classList.contains('seg-text')){
+      if(node.value.trim() !== '') bitar.push(opts.blandad ? blandadPaRaden(node.value.trim()) : node.value.trim());
+    }
     else if(node.classList && node.classList.contains('seg-brak')){
       var t = node._tIn.value.trim(), n = node._nIn.value.trim();
-      if(t !== '' || n !== '') bitar.push('(' + (t || '0') + ')/(' + (n || '1') + ')');
+      if(t !== '' || n !== ''){
+        var forra = bitar.length ? bitar[bitar.length - 1] : '', hel = forra.match(/^(.*?(?:^|[^0-9,.)a-zåäö\s])\s*)(\d+)$/i) || forra.match(/^()(\d+)$/);
+        if(opts.ra) bitar.push('[' + (t || '0') + '|' + (n || '1') + ']');
+        else if(opts.blandad && hel && /^\d+$/.test(t) && /^\d+$/.test(n)){
+          bitar[bitar.length - 1] = hel[1] + '(' + hel[2] + '+(' + t + ')/(' + n + '))';
+        }
+        else bitar.push('(' + (t || '0') + ')/(' + (n || '1') + ')');
+      }
     }
   });
-  return bitar.join('');
+  return bitar.join(opts.ra ? ' ' : '');
+}
+// "25 1/2" skrivet på raden → (25+(1)/(2)). Bara heltal, mellanslag, heltal/heltal.
+function blandadPaRaden(s){
+  return s.replace(/(^|[^0-9,.\w])(\d+)\s+(\d+)\s*\/\s*(\d+)(?![0-9,.a-zåäö(])/gi, '$1($2+($3)/($4))');
 }
 function radPar(r){ return { vl: las(r.vlSida), hl: las(r.hlSida) }; }
 function tomRad(r){ var p = radPar(r); return p.vl === '' && p.hl === ''; }

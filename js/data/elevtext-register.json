@@ -1691,6 +1691,7 @@
   "hint | Leden i rutan är inte lika mycket värda.",
   "hint | Raden följer inte ur raden ovanför.",
   "hint | Raden gick inte att tolka.",
+  "hint | Raden är samma som raden före. Varje rad ska vara ett nytt steg.",
   "hint | Sista raden ska vara x = tal, med x i vänsterledet.",
   "hint | Talet är rätt – men enheten saknas.",
   "hint | Uttrycken stämmer inte med vad uppgiften säger om delarna.",
@@ -2016,5 +2017,14 @@
  ],
  "js/motor/metod/uppstallning-yta.js": [
   "rubrik | minnessiffror"
+ ],
+ "js/motor/ekvationer-balans/ekv-rattare.js": [
+  "hint | Raden är samma som raden före. Varje rad ska vara ett nytt steg.",
+  "hint | Rätt värde – förkorta svaret",
+  "hint | Rätt värde – räkna klart svaret.",
+  "hint | Rätt värde – skriv sista raden som {v} = …",
+  "hint | Rätt värde – skriv svaret i blandad form",
+  "hint | Skriv en ny rad för varje operation.",
+  "hint | Uppgiften använder {v} – skriv {v} i varje rad."
  ]
 }

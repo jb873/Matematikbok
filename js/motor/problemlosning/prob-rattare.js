@@ -41,6 +41,7 @@ var BESKED = {
   ingenLosning:   { hint: 'Ekvationen har ingen entydig lösning.' },
   radOlaslig:     { hint: 'Raden gick inte att tolka.' },
   radFoljerEj:    { hint: 'Raden följer inte ur raden ovanför.' },
+  upprepning:     { hint: 'Raden är samma som raden före. Varje rad ska vara ett nytt steg.' },
   forFaRader:     { hint: 'Visa ett steg i taget – det behövs fler rader innan x står ensamt.' },
   ejLost:         { hint: 'Sista raden ska vara x = tal, med x i vänsterledet.' },
   insattningFel:  { hint: 'Värdet stämmer inte med ditt eget uttryck.' },
@@ -121,6 +122,8 @@ function provaEkvation(u, gren, uttryck, rad1){
 // ── STEG 3 ────────────────────────────────────────────────────────────────────────────────────
 // Kedjan: varje rad följer ur den föregående, sista raden x = tal. Minsta antal rader räknas ur
 // elevens EGEN ekvation (en rad för ekvationen plus en per operation som krävs).
+// UPPREPNING (Joachim 2026-10-21, samma regel som balansmetodens kedja): en rad med samma termer i
+// samma led som raden före är ingen operation och fälls — annars kunde raderna fyllas ut till kravet.
 function provaKedja(u, rader){
   var opts = parOpts(u);
   var ifyllda = rader.filter(function(r){ return r && !tom(r.vl) && !tom(r.hl); });
@@ -129,6 +132,7 @@ function provaKedja(u, rader){
     var e = EP.parseEkvation(ifyllda[i].vl, ifyllda[i].hl, opts);
     if(!e) return { steg: 'balans', rad: i + 1, besked: BESKED.radOlaslig.hint };
     if(!EP.sammaLosning(forra, e)) return { steg: 'balans', rad: i + 1, besked: BESKED.radFoljerEj.hint };
+    if(EP.upprepar(ifyllda[i - 1], ifyllda[i])) return { steg: 'balans', rad: i + 1, besked: BESKED.upprepning.hint };
     forra = e;
   }
   var sista = ifyllda[ifyllda.length - 1];
