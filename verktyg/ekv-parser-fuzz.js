@@ -13,7 +13,9 @@
               och andragrad (x + 1/x = 2). Varje dragning ska ge samma lösningsmängd som oraklet.
      TERMER   upprepning och vändning (delas av kedjerättaren och problemlösningen): en tabell med
               fall som ska och inte ska slå till — negativ verifiering i samma körning.
-     RADKRAV  (kommer med datafilen) · FACIT (kommer med datafilen)
+     FACIT    datafilens 31 uppgifter (js/data/ak8-ekv1.js): oraklets exakta lösning = datans facit =
+              Joachims kontrollfacit = parserns lösning, för varje uppgift.
+     RADKRAV  minsta antal rader per uppgift med sidans regler = tabellen godkänd i FAS 2.
 
    Deterministisk slump. Noll nätväg. Exit 1 vid brott.
      node verktyg/ekv-parser-fuzz.js [--n 40000] */
@@ -205,6 +207,67 @@ if(unikaNamnare < 5000) fall('PARSER', 'för få dragningar med x i nämnaren oc
   const slaRtill = TAB.filter(t => t[2] || t[3]).length, inte = TAB.length - slaRtill;
   console.log('TERMER  ' + (fel ? '✗' : '✓') + ' ' + TAB.length + ' fall: ' + slaRtill + ' ska slå till, ' + inte + ' ska inte (negativ verifiering) · fel ' + fel);
   if(fel) fall('TERMER', fel + ' fall gav fel dom');
+})();
+
+// ── FACIT och RADKRAV: datafilens 31 uppgifter ──────────────────────────────────────────────────────
+// KONTROLL = Joachims kontrollfacit ur ordern 2026-10-21, ordagrant; 3·2 b är −9 sedan rättelsen av
+// dokumentet (FAS 1, godkänd). KRAV = radkravet per uppgift, godkänt i FAS 2 (rader inkl. uppgiften).
+const KONTROLL = { '1·1': ['9', '24', '25,5'], '1·2': ['35', '60', '108'], '1·3': ['3', '4', '-2'],
+  '2·1': ['18', '7,5', '24'], '2·2': ['4', '3', '5'], '2·3': ['-6', '40', '-15'],
+  '3·1': ['60', '-5/2', '2'], '3·2': ['30', '-9'], '3·3': ['16', '70', '1/10', '10'], '3·4': ['15/2', '5/4', '1', '-9/2'] };
+const KRAV = { '1·1': [5, 5, 5], '1·2': [5, 5, 5], '1·3': [7, 7, 7], '2·1': [3, 3, 3], '2·2': [4, 4, 4], '2·3': [3, 4, 4],
+  '3·1': [3, 4, 3], '3·2': [3, 3], '3·3': [3, 3, 3, 3], '3·4': [4, 4, 3, 4] };
+(function(){
+  // EKV1_DATA (miljövariabel) pekar om datafilen — för negativ verifiering mot en trasig kopia.
+  const DATA = require(process.env.EKV1_DATA ? path.resolve(process.env.EKV1_DATA) : path.join(ROOT, 'js/data/ak8-ekv1.js'));
+  const tillParser = s => s.replace(/\[([^\[\]|]*)\|([^\[\]|]*)\]/g, '($1)/($2)');
+  // Ett facit i datans skrivsätt som exakt bråk: "25,5" · "−2 [1|2]" · "[1|10]" · "−9"
+  function facitQ(s){
+    const t = s.replace(/−/g, '-').trim(), neg = t[0] === '-', u = neg ? t.slice(1).trim() : t;
+    let m = u.match(/^(\d+)\s*\[(\d+)\|(\d+)\]$/), r;
+    if(m) r = add(Q(BigInt(m[1])), Q(BigInt(m[2]), BigInt(m[3])));
+    else if((m = u.match(/^\[(\d+)\|(\d+)\]$/))) r = Q(BigInt(m[1]), BigInt(m[2]));
+    else if((m = u.match(/^(\d+)\/(\d+)$/))) r = Q(BigInt(m[1]), BigInt(m[2]));
+    else if(/^\d+(,\d+)?$/.test(u)) r = talQ(u);
+    else return null;
+    return neg ? Q(-r.p, r.q) : r;
+  }
+  const qText = r => (r.p < 0n ? '−' : '') + (r.p < 0n ? -r.p : r.p) + (r.q === 1n ? '' : '/' + r.q);
+  let antal = 0, felF = 0, felK = 0, rader = [];
+  Object.keys(DATA.nivaer).forEach(niva => {
+    const lage = DATA.nivaer[niva].lage;
+    DATA.nivaer[niva].grupper.forEach((g, gi) => {
+      const nyckel = niva + '·' + (gi + 1);
+      g.uppgifter.forEach((u, ui) => {
+        antal++;
+        const v = u.variabel || 'x', [vl, hl] = u.uppg.split('=').map(tillParser);
+        // oraklet: exakt lösning
+        const L = x => varde(vl, x, v), H = x => varde(hl, x, v), fL = form(L), fH = form(H);
+        let exakt = null;
+        if(fL && fH){
+          const A = sub(fL.a, fH.a), B = sub(fL.b, fH.b), C = sub(fL.c, fH.c);
+          if(arNoll(C) && !arNoll(A)) exakt = div(Q(-B.p, B.q), A);
+          else if(arNoll(A) && !arNoll(C) && !arNoll(B)) exakt = div(Q(-C.p, C.q), B);
+        }
+        const fq = facitQ(u.facit), kq = facitQ((KONTROLL[nyckel] || [])[ui] || '');
+        const p = EP.losningsmangd(vl, hl, { variabel: v });
+        const ok = exakt && fq && kq && lika(exakt, fq) && lika(exakt, kq) && p && typeof p === 'object' &&
+                   Math.abs(p.x - Number(exakt.p) / Number(exakt.q)) < 1e-9;
+        if(!ok){ felF++; rader.push(u.id + ' ' + u.uppg + ': orakel ' + (exakt ? qText(exakt) : '—') + ' · datans facit ' + u.facit
+          + ' · kontrollfacit ' + ((KONTROLL[nyckel] || [])[ui]) + ' · parser ' + JSON.stringify(p)); }
+        const krav = EP.minstaAntalRaderUtokad(vl, hl, Object.assign({ variabel: v, lage: lage }, DATA.regler));
+        const kravVant = (KRAV[nyckel] || [])[ui];
+        if(krav !== kravVant){ felK++; rader.push(u.id + ' radkrav ' + krav + ' (godkänt ' + kravVant + ')'); }
+      });
+    });
+  });
+  const kontrollAntal = Object.keys(KONTROLL).reduce((s, k) => s + KONTROLL[k].length, 0);
+  console.log('FACIT   ' + (felF || antal !== 31 || kontrollAntal !== 31 ? '✗' : '✓') + ' ' + antal + ' uppgifter: orakel = datans facit = kontrollfacit = parsern · fel ' + felF);
+  console.log('RADKRAV ' + (felK ? '✗' : '✓') + ' ' + antal + ' uppgifter mot den godkända tabellen · fel ' + felK);
+  rader.forEach(r => console.log('      ' + r));
+  if(felF) fall('FACIT', felF + ' uppgifter stämmer inte');
+  if(antal !== 31 || kontrollAntal !== 31) fall('FACIT', 'antalet uppgifter är ' + antal + ' (dokumentet har 31)');
+  if(felK) fall('RADKRAV', felK + ' uppgifter har ett annat radkrav än det godkända');
 })();
 
 console.log(brott ? '\nRÖD · ' + brott + ' brott' : '\nGRÖN');
