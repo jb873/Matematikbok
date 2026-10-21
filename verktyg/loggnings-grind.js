@@ -14,9 +14,20 @@
              en loggarEj-grupp som ändå loggar (via en förälder med data-logg) — "loggar inte" ska betyda
              att storen inte får något. Varje loggarEj skrivs ut med sitt skäl: beslutet står i rapporten.
 
-   KÖR:  node verktyg/loggnings-grind.js
-   Omfång: OMFANG (Plugg till prov k1 d10). Ny sida → en rad. Noll nätväg, ingen fil ändras
-   (proben skriver bara till den tillfälliga webbläsarens localStorage). */
+   KEDJAN (2026-10-21, Joachims beslut): balansmetodens kedjesidor loggar i k3-storen (window.MasteryK3),
+   inte i k1-storen — och utan det här benet var deras loggning mätt bara med en engångsprob.
+     · Sidorna HITTAS PÅ MOTORN: varje bladsida (verktyg/sidor.js) som laddar ekvationer-balans.js. Ingen
+       sökväg skrivs för hand; nästa sida med kedjan mäts av sig själv.
+     DATA    varje uppgift bär data-nod, och noden finns i k3-taxonomin.
+     LIVE    varje uppgift fylls med en kedja som rättaren godtar och rättas. Varje nod ska få EXAKT ett
+             nytt försök 'ratt' per löst uppgift med den noden — fler är dubbelloggning — ingen annan nod
+             något, och ett andra Kontrollera inget nytt (första försöket räknas, inte varje tryck).
+     --sabba tyst|dubbel|nod   negativ verifiering i proben: loggningen avslagen, varje försök loggat
+             två gånger, eller en uppgifts nod bytt mot en som inte finns. Varje sabotage ska fälla.
+
+   KÖR:  node verktyg/loggnings-grind.js [--sabba tyst|dubbel|nod]
+   Omfång: OMFANG (Plugg till prov k1 d10) + kedjesidorna (hittas på motorn). Noll nätväg, ingen fil
+   ändras (proben skriver bara till den tillfälliga webbläsarens localStorage). */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), vm = require('vm'), { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
@@ -104,5 +115,113 @@ OMFANG.forEach(sida => {
   u.data.filter(g => g.loggarEj !== null).forEach(g => console.log('    · ' + g.dok + ' · ' + g.grupp + ' — "' + g.loggarEj + '"'));
 });
 try { fs.unlinkSync(TMP); } catch(e){}
+
+// ══ KEDJAN: balansmetodens sidor, k3-storen ══════════════════════════════════════════════════════
+const Sidor = require('./sidor');
+const MOTOR = 'ekvationer-balans/ekvationer-balans.js';
+const SABBA = (i => i >= 0 ? process.argv[i + 1] : null)(process.argv.indexOf('--sabba'));
+const w3 = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js/data/k3-taxonomi.js'), 'utf8'), { window: w3 });
+const NODER3 = new Set(w3.K3_TAXONOMI.noder.map(n => n.id));
+const KEDJESIDOR = Sidor.alla().filter(s => fs.readFileSync(path.join(ROOT, s), 'utf8').indexOf(MOTOR) >= 0);
+const PROBE3 = String.raw`new Promise(function(res){
+  var vanta = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  (async function(){
+    for(var t = 0; t < 50 && !(window.EkvBlad && window.EkvParser && window.EkvKedja); t++) await vanta(100);
+    if(!window.MasteryK3) return res({ ingenStore: true });
+    var SABBA = window.__SABBA || null;
+    if(SABBA === 'tyst') MasteryK3.loggaForsok = function(){};
+    if(SABBA === 'dubbel'){ var o = MasteryK3.loggaForsok; MasteryK3.loggaForsok = function(){ o.apply(this, arguments); o.apply(this, arguments); }; }
+    if(SABBA === 'nod'){ var b0 = document.querySelector('.uppgift[data-nod]'); if(b0) b0.setAttribute('data-nod', 'finns-inte:rakna'); }
+    function rakna(){ var m = MasteryK3.lasMatris() || {}, n = {}; Object.keys(m).forEach(function(k){ (m[k] || []).forEach(function(p){ var x = k + '|' + p.resultat; n[x] = (n[x] || 0) + 1; }); }); return n; }
+    function skillnad(a, b){ var d = {}; Object.keys(b).forEach(function(k){ var x = b[k] - (a[k] || 0); if(x) d[k] = x; }); return d; }
+    // Tal i kedjans skrivsätt: decimaltal när det är exakt, annars blandad form [t|n].
+    function sgd(a, b){ return b ? sgd(b, a % b) : a; }
+    function tal(q){
+      var s = q < 0 ? '−' : '', a = Math.abs(q);
+      if(Math.abs(a * 1e6 - Math.round(a * 1e6)) < 1e-6) return s + String(Math.round(a * 1e6) / 1e6).replace('.', ',');
+      for(var n = 2; n <= 1000; n++){ var t = Math.round(a * n); if(Math.abs(t / n - a) < 1e-9){ var g = sgd(t, n), hel = Math.floor(t / n), r = (t - hel * n) / g; return s + (hel ? hel + ' ' : '') + '[' + r + '|' + (n / g) + ']'; } }
+      return s + String(a).replace('.', ',');
+    }
+    var BRAK = /\[([^\[\]|]*)\|([^\[\]|]*)\]/;
+    function inp(el, v){ el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+    function fyllSida(sida, str){
+      var cur = sida.querySelector('.seg-text'), rest = str.trim(), m;
+      while((m = rest.match(BRAK))){ inp(cur, rest.slice(0, m.index).trim()); var b = EkvKedja.brakVid(cur, {}); inp(b._tIn, m[1]); inp(b._nIn, m[2]); cur = b.nextSibling; rest = rest.slice(m.index + m[0].length).trim(); }
+      inp(cur, rest);
+    }
+    // En kedja som rättaren godtar: k·v = k·s för k = 2, 3, … tills radkravet nås, sist v = s.
+    function kedja(upp){
+      var v = upp.vars || 'x', R = upp.regler, s, krav;
+      if(R && R.namnare){ var mng = EkvParser.losningsmangd(upp.vl, upp.hl, { variabel: v }); s = mng && mng.x; }
+      else { var e = EkvParser.parseEkvation(upp.vl, upp.hl, { variabel: v }); s = e.B / e.A; }
+      krav = R ? EkvParser.minstaAntalRaderUtokad(upp.vl, upp.hl, { variabel: v, lage: upp.lage, spegling: R.spegling, samla: R.samla, namnare: R.namnare })
+               : EkvParser.minstaAntalRader(upp.vl, upp.hl, { lage: upp.lage || EkvBlad.lage() });
+      // En faktor vars rad upprepar raden före (2x = 5 ur uppgiften 2x = 5) hoppas över — den fälls, med rätta.
+      var rader = [], fore = { vl: upp.vl, hl: upp.hl };
+      for(var k = 2; rader.length < krav - 2; k++){
+        var rad = { vl: k + v, hl: tal(k * s) };
+        if(EkvParser.upprepar(fore, { vl: rad.vl, hl: rad.hl.replace(/−/g, '-').replace(',', '.') })) continue;
+        rader.push(rad.vl + ' = ' + rad.hl); fore = rad;
+      }
+      rader.push(v + ' = ' + tal(s));
+      return rader;
+    }
+    var ut = { data: [], live: [] }, UPP = EkvBlad.uppgifter();
+    var blad = Array.prototype.filter.call(document.querySelectorAll('[id^="sheet-"]'), function(s){ return s.querySelector('.uppgift'); });
+    for(var bi = 0; bi < blad.length; bi++){
+      var sheet = blad[bi], block = sheet.querySelectorAll('.uppgift'), uppg = [];
+      Array.prototype.forEach.call(block, function(b, i){
+        var upp = UPP.filter(function(u){ return u.grid === b.querySelector('.eq-grid'); })[0];
+        ut.data.push({ blad: sheet.id, uppgift: i + 1, nod: b.getAttribute('data-nod') });
+        if(!upp) return;
+        var grid = upp.grid, nyB = b.querySelector('.uppg-verktyg .mini-btn');
+        kedja(upp).forEach(function(r, ri){
+          if(ri > 0) nyB.click();
+          var vl = grid.querySelectorAll('.sida-vl'), hl = grid.querySelectorAll('.sida-hl'), d = r.split('=');
+          fyllSida(vl[vl.length - 1], d[0]); fyllSida(hl[hl.length - 1], d[1]);
+        });
+        uppg.push({ block: b, nod: b.getAttribute('data-nod') });
+      });
+      var fore = rakna(), kn = sheet.querySelector('.actions .btn.primary');
+      kn.click(); await vanta(300);
+      var efter1 = rakna(); kn.click(); await vanta(300); var efter2 = rakna();
+      ut.live.push({ blad: sheet.id, uppgifter: uppg.map(function(u){ return { nod: u.nod, klar: u.block.querySelector('.uppg-klar').classList.contains('show') }; }),
+                     nya: skillnad(fore, efter1), andraTrycket: skillnad(efter1, efter2) });
+    }
+    res(Object.assign(ut, { jsFel: window.__e || [] }));
+  })().catch(function(e){ res({ FEL: e.message }); });
+})`;
+const TMP3 = path.join(os.tmpdir(), 'loggningsgrind-kedja-' + process.pid + '.js'), PRE3 = TMP3.replace(/\.js$/, '-pre.js');
+fs.writeFileSync(TMP3, PROBE3);
+fs.writeFileSync(PRE3, "window.__e=[]; window.addEventListener('error', function(e){ window.__e.push(String(e.message)); });" + (SABBA ? ' window.__SABBA=' + JSON.stringify(SABBA) + ';' : ''));
+console.log('\nKEDJAN — balansmetodens sidor loggar i k3-storen (hittade på motorn: ' + KEDJESIDOR.length + ' sidor)' + (SABBA ? ' · SABOTAGE: ' + SABBA : ''));
+if(!KEDJESIDOR.length){ fel++; console.log('✗ inga kedjesidor hittades — benet mäter ingenting'); }
+KEDJESIDOR.forEach(sida => {
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP3, '--pre', PRE3, '--vanta-pa', 'laddad', '--timeout', '120000'], { encoding: 'utf8', timeout: 180000 });
+  let u = null; try { u = JSON.parse((r.stdout || '').trim().split('\n').filter(l => l.trim().startsWith('{')).pop()); } catch(e){}
+  const kort = sida.replace(/\/index\.html$/, '');
+  if(!u || u.FEL){ fel++; console.log('✗ ' + kort + ': ' + (u ? u.FEL : 'inget svar')); return; }
+  if(u.ingenStore){ fel++; console.log('✗ ' + kort + ': sidan laddar ingen k3-store (window.MasteryK3) — ingenting kan loggas'); return; }
+  if(u.jsFel && u.jsFel.length){ fel++; console.log('✗ ' + kort + ': JS-fel: ' + u.jsFel.slice(0, 3).join(' | ')); }
+  // DATA
+  u.data.forEach(d => {
+    if(!d.nod){ fel++; console.log('✗ DATA ' + kort + ' · ' + d.blad + ' uppgift ' + d.uppgift + ': ingen data-nod'); }
+    else if(!NODER3.has(d.nod)){ fel++; console.log('✗ DATA ' + kort + ' · ' + d.blad + ' uppgift ' + d.uppgift + ': noden "' + d.nod + '" finns inte i k3-taxonomin'); }
+  });
+  // LIVE
+  let uppgifter = 0;
+  u.live.forEach(l => {
+    const vant = {};
+    l.uppgifter.forEach(x => { uppgifter++; if(!x.klar){ fel++; console.log('✗ LIVE ' + kort + ' · ' + l.blad + ': en uppgift (' + x.nod + ') blev inte löst av en godtagbar kedja — grinden kan inte mäta loggningen'); } vant[x.nod + '|ratt'] = (vant[x.nod + '|ratt'] || 0) + 1; });
+    const nycklar = new Set(Object.keys(vant).concat(Object.keys(l.nya)));
+    const avv = [...nycklar].filter(k => (l.nya[k] || 0) !== (vant[k] || 0));
+    avv.forEach(k => { fel++; console.log('✗ LIVE ' + kort + ' · ' + l.blad + ': ' + k.replace('|', ' ') + ' fick ' + (l.nya[k] || 0) + ' nya försök, väntat ' + (vant[k] || 0)); });
+    Object.keys(l.andraTrycket).forEach(k => { fel++; console.log('✗ LIVE ' + kort + ' · ' + l.blad + ': ett andra Kontrollera loggade ' + l.andraTrycket[k] + ' till ' + k.replace('|', ' ') + ' (första försöket ska räknas, inte varje tryck)'); });
+    if(!avv.length && !Object.keys(l.andraTrycket).length) console.log('✓ ' + kort + ' · ' + l.blad + ': ' + l.uppgifter.length + ' uppgifter → ' + Object.keys(l.nya).map(k => k.replace('|ratt', '') + ' +' + l.nya[k]).join(', '));
+  });
+  console.log('  ' + kort + ': ' + u.live.length + ' blad, ' + uppgifter + ' uppgifter, ' + u.data.length + ' noder i datan');
+});
+try { fs.unlinkSync(TMP3); fs.unlinkSync(PRE3); } catch(e){}
+
 console.log('\n' + (fel ? '✗ LOGGNINGS-GRIND RÖD (' + fel + ')' : '✓ LOGGNINGS-GRIND GRÖN'));
 process.exit(fel ? 1 : 0);
