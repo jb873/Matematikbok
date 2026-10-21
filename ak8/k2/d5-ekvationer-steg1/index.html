@@ -150,10 +150,9 @@
 <!-- PANEL: FÖRELÄSNING — panelen ägs av föreläsningsregistret -->
 <section class="tab-panel" data-panel="forelasningar"></section>
 
-<!-- PANEL: ÖVA — en flik per nivå. Nivå 1 är piloten (Joachim granskar innan nivå 2 och 3). -->
+<!-- PANEL: ÖVA — en flik per nivå. Nivåerna (och deras ytor) skapas ur datan, inte här. -->
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
-  <div id="blad-niva1" class="blad-mount"><div class="ovn-wrap" id="sheet-niva1"></div></div>
 </section>
 
 <!-- PANEL: FÄRDIGHETSTRÄNING -->
@@ -187,8 +186,18 @@
 <script src="../../../js/data/ak8-ekv1.js"></script>
 <script>
 // Bladen ritas ur DATAN: dokumentets grupper, läget per nivå och sidans regler (js/data/ak8-ekv1.js).
-// Nivå 1 är piloten. Sätts före motorn, som ritar dessa i stället för sjuans steg.
-window.EKV_STEG = [{ data: AK8_EKV1, niva: 1, mount: 'niva1' }];
+// NIVÅANTALET kommer ur datan: en yta och ett blad per nivå. Sätts före motorn, som ritar dessa i
+// stället för sjuans steg.
+(function(){
+  var ova = document.querySelector('.tab-panel[data-panel="ova"]');
+  window.EKV_NIVAER = Object.keys(AK8_EKV1.nivaer);
+  EKV_NIVAER.forEach(function(n, i){
+    var m = document.createElement('div'); m.id = 'blad-niva' + n; m.className = 'blad-mount'; m.hidden = i > 0;
+    m.innerHTML = '<div class="ovn-wrap" id="sheet-niva' + n + '"></div>';
+    ova.appendChild(m);
+  });
+  window.EKV_STEG = EKV_NIVAER.map(function(n){ return { data: AK8_EKV1, niva: +n, mount: 'niva' + n }; });
+})();
 </script>
 <script src="../../../js/motor/ekvationer-balans/ekvationer-balans.js"></script>
 
@@ -199,11 +208,9 @@ window.EKV_STEG = [{ data: AK8_EKV1, niva: 1, mount: 'niva1' }];
 <script src="../../../js/motor/blad/delkapitel-skal.js"></script>
 
 <script>
-// Sidan monteras av det delade skalet. En flik per nivå; nivå 1 är piloten.
+// Sidan monteras av det delade skalet. En flik per nivå i datan.
 DelkapitelSkal.montera({
-  ova: [
-    { titel: 'Nivå 1', mount: 'niva1' }
-  ],
+  ova: EKV_NIVAER.map(function(n){ return { titel: 'Nivå ' + n, mount: 'niva' + n }; }),
   taxonomi:    function(){ return window.K3_TAXONOMI; },
   utbudslista: 'ak8k2d5',
   ram:         '../../../ak7-k3-ram.html',
