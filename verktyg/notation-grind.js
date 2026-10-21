@@ -17,6 +17,9 @@
        ingenting — och "ingenting" gäller bara om varken noden eller dess element har en granne
        till vänster. "5x − 7" och "▢ − 4" är binära.
 
+   KEDJAN (balansmetoden, Joachim 2026-10-21): bladet är .eq-kort och det staplade bråket .seg-brak —
+   uppgiftens led mäts som all annan mattetext, och bråket räknas med i K-I.
+
    Kör:  node verktyg/notation-grind.js [--sida d3] [--sabba mellanrum|fortecken|blandad]
    Exit 1 vid brott. Ingen nätväg, ingen fil ändras. */
 'use strict';
@@ -60,7 +63,7 @@ const PROBE = `(function(){
       }
     }
     if(SABBA === 'blandad'){
-      var br = Array.prototype.filter.call(sh.querySelectorAll('.ovn-brak, .brak'), synlig)[0];
+      var br = Array.prototype.filter.call(sh.querySelectorAll('.ovn-brak, .brak, .seg-brak'), synlig)[0];
       if(br){ br.parentNode.insertBefore(document.createTextNode('2\\u00a0'), br);
         ut.noter.push('SABBA: satte ett heltal med mellanrum fore ett stablat brak'); }
     }
@@ -69,7 +72,7 @@ const PROBE = `(function(){
     while((nod = gang.nextNode())){
       var mor = nod.parentElement;
       if(!mor || !synlig(mor) || mor.tagName === 'INPUT') continue;
-      if(mor.closest('.ovn-brak, .brak, .pot, sup, .keypad, .nr-lager, .blad-nav, .blad-subnav')) continue;
+      if(mor.closest('.ovn-brak, .brak, .seg-brak, .pot, sup, .keypad, .nr-lager, .blad-nav, .blad-subnav')) continue;
       var s = String(nod.nodeValue).replace(/\\u00a0/g, ' ');
       if(!/[0-9xyabcn]/.test(s)) continue;
       b.texter++;
@@ -103,7 +106,7 @@ const PROBE = `(function(){
 
     /* K-I: blandad form. Ett heltal direkt före ett staplat bråk hör ihop med det — mellanrummet
        (hårt eller vanligt) är brottet. Står ett räknetecken emellan är bråket en egen term. */
-    Array.prototype.forEach.call(sh.querySelectorAll('.ovn-brak, .brak'), function(brak){
+    Array.prototype.forEach.call(sh.querySelectorAll('.ovn-brak, .brak, .seg-brak'), function(brak){
       if(!synlig(brak)) return;
       b.brak++;
       var f = brak.previousSibling;
@@ -119,7 +122,7 @@ const PROBE = `(function(){
     while((n = g.nextNode())){
       var mor = n.parentElement;
       if(!mor || !synlig(mor) || mor.tagName === 'INPUT') continue;
-      if(mor.closest('.ovn-brak, .brak, .pot, sup, .keypad')) continue;
+      if(mor.closest('.ovn-brak, .brak, .seg-brak, .pot, sup, .keypad')) continue;
       if(monster.test(n.nodeValue)) return n;
     }
     return null;
@@ -131,13 +134,13 @@ const PROBE = `(function(){
   var sedda = [];
   (nav.length ? nav : [null]).forEach(function(knapp){
     if(knapp){ if(knapp.disabled) return; knapp.click(); }
-    Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet'), function(sh){
+    Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet, .eq-kort'), function(sh){
       if(sedda.indexOf(sh) >= 0 || !synlig(sh)) return;
       sedda.push(sh);
       var vard = sh.parentElement || sh;
       function stegKnappar(){ return vard.querySelectorAll('.niva-rad .niva-btn'); }
       function namnNu(nr){
-        var el = vard.querySelector('.ovn-sheet') || sh, h2 = el.querySelector('h2');
+        var el = vard.querySelector('.ovn-sheet') || sh, h2 = el.querySelector('h2, .niva-rubrik');
         var bas = h2 ? String(h2.textContent).replace(/\\s+/g, ' ').trim() : 'blad ' + sedda.length;
         if(bas.length > 30) bas = '…' + bas.slice(-29);
         return nr ? bas.slice(0, 24) + ' niva ' + nr : bas;

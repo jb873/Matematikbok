@@ -118,7 +118,16 @@ const PROBE = String.raw`new Promise(function(res){
   (async function(){
     for(var t = 0; t < 50 && !(window.EkvBlad && window.EkvRattare && window.EkvKedja); t++) await vanta(100);
     var C = window.__FUZZ, ut = { dom: {}, n: 0, lika: 0, upprepning: 0, bokstav: 0, vandning: 0, olika: 0, mildare: 0, ex: [], regelTraffGammalLost: 0 };
-    ['steg1', 'steg2', 'steg3'].forEach(function(id){ var s = document.getElementById('sheet-' + id); ut.dom[id] = s ? s.innerHTML : null; });
+    // K-F (2026-10-21) lade EN sak till i DOM:en: gruppens omslag .eq-grupp. Det löses upp i en kopia, och
+    // resten ska vara byte för byte e6a9554 — så bevisas att omslaget är den enda ändringen.
+    ut.grupper = {};
+    ['steg1', 'steg2', 'steg3'].forEach(function(id){
+      var s = document.getElementById('sheet-' + id); if(!s){ ut.dom[id] = null; return; }
+      var k = s.cloneNode(true);
+      ut.grupper[id] = k.querySelectorAll('.eq-grupp').length;
+      Array.prototype.forEach.call(k.querySelectorAll('.eq-grupp'), function(g){ while(g.firstChild) g.parentNode.insertBefore(g.firstChild, g); g.remove(); });
+      ut.dom[id] = k.innerHTML;
+    });
 
     // ── GAMLA implementationen, ordagrant ur e6a9554 (ekvationer-balans.js r. 95–119 och 190–201).
     //    Enda ändringen: namnen (…Gammal), så att den inte krockar med den nya.
@@ -284,7 +293,7 @@ else {
   const url = 'file:///' + path.join(ROOT, 'ak7/k3/d4-ekvationer/index.html').replace(/\\/g, '/');
   const SATSER = 4, per = Math.ceil(N / SATSER);
   const sum = { n: 0, lika: 0, upprepning: 0, bokstav: 0, vandning: 0, olika: 0, mildare: 0, regelTraffGammalLost: 0 }, ex = [], jsFel = [];
-  let dom = null;
+  let dom = null, grupperIDom = null;
   for(let s = 0; s < SATSER; s++){
     const pre = path.join(tmp, 'pre' + s + '.js');
     fs.writeFileSync(pre, "window.__e=[]; window.addEventListener('error', function(e){ window.__e.push(String(e.message)); });\n" +
@@ -294,15 +303,18 @@ else {
     let j = null;
     try { j = JSON.parse(String(r.stdout).replace(/^﻿/, '').trim().split('\n').filter(l => l.trim().startsWith('{')).pop()); } catch(e){}
     if(!j || j.FEL){ fall('D4', 'sats ' + s + ' gav inget resultat: ' + (j && j.FEL ? j.FEL : String(r.stderr).slice(0, 300))); continue; }
-    if(!dom) dom = j.dom;
+    if(!dom){ dom = j.dom; grupperIDom = j.grupper; }
     Object.keys(sum).forEach(k => { sum[k] += j[k] || 0; });
     j.ex.forEach(e => { if(ex.length < 6) ex.push(e); });
     (j.jsFel || []).forEach(e => jsFel.push(e));
   }
   if(dom){
     const avv = Object.keys(DOM_MD5).filter(k => crypto.createHash('md5').update(dom[k] || '', 'utf8').digest('hex') !== DOM_MD5[k]);
-    console.log('DOM     ' + (avv.length ? '✗' : '✓') + ' sjuans tre blad renderas som i e6a9554' + (avv.length ? ' — skiljer: ' + avv.join(', ') : ''));
+    const enGrupp = Object.keys(DOM_MD5).every(k => grupperIDom && grupperIDom[k] === 1);
+    console.log('DOM     ' + (avv.length || !enGrupp ? '✗' : '✓') + ' sjuans tre blad renderas som i e6a9554, utom K-F:s gruppomslag (ett .eq-grupp per blad: '
+      + (grupperIDom ? Object.keys(DOM_MD5).map(k => grupperIDom[k]).join('/') : '?') + ')' + (avv.length ? ' — skiljer: ' + avv.join(', ') : ''));
     if(avv.length) fall('DOM', 'sjuans blad renderas annorlunda: ' + avv.join(', '));
+    if(!enGrupp) fall('DOM', 'sjuans blad ska vara precis en grupp vardera (K-F)');
   }
   const ok = !sum.olika && !sum.mildare && sum.upprepning && sum.bokstav && sum.vandning && sum.n >= 30000 && !jsFel.length;
   console.log('D4      ' + (ok ? '✓' : '✗') + ' ' + sum.n + ' kedjor: som förut ' + sum.lika + ' · förklarade skillnader: upprepning ' + sum.upprepning +

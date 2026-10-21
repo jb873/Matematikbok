@@ -1,13 +1,18 @@
 /* ekv-kedja.css — BALANSMETODENS KEDJA, delad formgivning (order 2026-10-21).
    Flyttad ORDAGRANT ur ak7/k3/d4-ekvationer/index.html (sidans egna <style>), så att åttans Ekvationer
    steg 1 använder samma regler i stället för en kopia. Länkas EFTER sidans <style>, på den plats blocket
-   stod — kaskaden är densamma. Mätt: sjuans beräknade stilar oförändrade (563 element, båda vyportarna). */
+   stod — kaskaden är densamma. Mätt: sjuans beräknade stilar oförändrade (563 element, båda vyportarna).
+   Därefter, med avsikt: K-F på kedjan (Joachim 2026-10-21) — se .uppgift och .eq-grupp nedan. */
 /* ── EKVATIONSKEDJAN (balansmetoden). Raderna staplas, likhetstecknen under varandra, lösningen
    växer nedåt. Rutnätet (VL | = | HL | status) är det som håller likhetstecknen i linje. ── */
 :root{ --red:#b3261e; --red-dk:#8f1d17; --green:#2d6a4f; --green-dk:#26543f; }
 .eq-kort{max-width:920px;margin:0 auto;padding:6px 28px 30px;}
-.uppgift{padding:16px 0 18px;border-top:1px solid var(--paper-dk);}
-.uppgift:first-of-type{border-top:none;}
+/* K-F (Joachim 2026-10-21): inget streck mellan deluppgifterna a, b, c … — de hör till samma uppgift
+   och läses som en grupp. Strecket som stod här (1 px, kontrast 1,11 mot arket) syntes inte heller. */
+.uppgift{padding:16px 0 18px;}
+/* K-F: ett synligt streck ovanför varje grupp utom den första — samma linje som bladens .ovn-grupp
+   i kanon. Sjuans blad är en enda grupp och får därför inget streck alls. */
+.eq-grupp ~ .eq-grupp{border-top:1.5px solid rgba(122,110,101,.55);margin-top:22px;padding-top:18px;}
 .uppg-etikett{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--gold);margin-bottom:4px;}
 .eq-grid{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:baseline;gap:8px 10px;max-width:560px;font-feature-settings:'tnum';}
 .eq-vl{justify-self:end;text-align:right;}
@@ -53,8 +58,6 @@
 .niva-rubrik{font-family:var(--serif);font-size:24px;font-weight:600;margin:10px 0 8px;}
 @media (max-width:560px){ .eq-kort{padding:6px 16px 24px;} .eq-grid{gap:6px;} }
 
-/* Åttans Ekvationer steg 1: dokumentets grupper får en rubrik (1. Lös med balansmetoden). Reglerna
-   matchar inget på sjuans sida, som inte har grupprubriker. */
-.eq-kort .eq-grupp-rubrik{margin:24px 0 2px;}
-.eq-kort .eq-grupp-rubrik:first-child{margin-top:8px;}
-.eq-grupp-rubrik + .uppgift{border-top:none;}
+/* Åttans Ekvationer steg 1: dokumentets grupper får en rubrik (1. Lös med balansmetoden), först i
+   gruppen, under strecket. Sjuans sida har inga grupprubriker. */
+.eq-kort .eq-grupp-rubrik{margin:8px 0 2px;}

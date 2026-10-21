@@ -182,12 +182,16 @@ function renderSteg(mount, steg){
   }
 
   // Sjuans steg är EN grupp utan rubrik; åttans data har dokumentets grupper, numrerade 1., 2., 3.
+  // K-F (Joachim 2026-10-21): varje grupp är ett eget element (.eq-grupp) — strecket står ovanför
+  // gruppen, aldrig mellan deluppgifterna. Grindarna läser grupperna ur samma element.
   var grupper = steg.grupper || [{ uppg: steg.uppg }];
   grupper.forEach(function(g, gi){
+  var grp = document.createElement('div'); grp.className = 'eq-grupp';
+  kort.appendChild(grp);
   if(g.rubrik){
     var gr = document.createElement('div'); gr.className = 'ovn-grupp-rubrik eq-grupp-rubrik';
     gr.textContent = (gi + 1) + '. ' + g.rubrik;
-    kort.appendChild(gr);
+    grp.appendChild(gr);
   }
   g.uppg.forEach(function(u, idx){
     var ny = typeof u.uppg === 'string', d = ny ? delaUppg(u) : u;
@@ -223,7 +227,7 @@ function renderSteg(mount, steg){
     var forFa = document.createElement('div'); forFa.className = 'uppg-forfa'; forFa.textContent = EKV_TEXT.forFa.hint;
     upp.forFaEl = forFa; block.appendChild(forFa);
 
-    kort.appendChild(block);
+    grp.appendChild(block);
     nyRad(upp);
   });
   });

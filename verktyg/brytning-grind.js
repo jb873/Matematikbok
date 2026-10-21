@@ -15,6 +15,8 @@
           under sig; varje grupp utom den första ska ha en linje ovanför sig som SYNS — kontrasten
           mot arkets botten mäts, med alfa inräknad, och måste nå 2,0. De gamla deluppgiftsstrecken
           låg på 1,16 och var osynliga; en regel som bara kräver "en linje" hade godkänt dem.
+          KEDJAN (balansmetoden, Joachim 2026-10-21): bladet är .eq-kort, huvuduppgiften .eq-grupp och
+          deluppgiften .uppgift — som inte får bära någon linje, varken ovanför eller under sig.
 
      K-J  Deluppgiftsbokstaven hör till bokens typografi: samma familj som radens text, minst 60 %
           av dess storlek och nära den i ljushet. Mäts RELATIVT radens egen text, aldrig mot en
@@ -160,12 +162,12 @@ const PROBE = `(function(){
       }
     }
     if(SABBA === 'streck'){
-      var r0 = sh.querySelector('.ovn-rad, .ak8-rad');
+      var r0 = sh.querySelector('.ovn-rad, .ak8-rad') || (sh.classList.contains('eq-kort') && sh.querySelector('.uppgift'));
       if(r0){ r0.style.borderBottom = '1px dotted rgb(237,230,214)';
         ut.noter.push('SABBA: satte tillbaka en linje under en deluppgiftsrad'); }
     }
     if(SABBA === 'grupp'){
-      var g0 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-grupp, .ak8-grupp'), synlig)[1];
+      var g0 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-grupp, .ak8-grupp, .eq-grupp'), synlig)[1];
       if(g0){ g0.style.borderTop = 'none';
         ut.noter.push('SABBA: tog bort strecket ovanfor en huvuduppgift'); }
     }
@@ -213,6 +215,18 @@ const PROBE = `(function(){
         ut.noter.push('SABBA: loste upp ett likhetstecken fran sin ruta');
       }
     }
+
+    // ── K-F a på KEDJAN: deluppgiften (.uppgift) bär ingen linje, varken ovanför eller under sig.
+    //    Kedjan har inga .ovn-rad; K-D och K-E har ingen motsvarighet där och mäts inte. ─────────
+    if(sh.classList.contains('eq-kort')) Array.prototype.forEach.call(sh.querySelectorAll('.uppgift'), function(u){
+      if(!synlig(u)) return;
+      b.rader++;
+      ['Top', 'Bottom'].forEach(function(s){
+        var k = kant(u, s);
+        if(k) b.brott.push('K-F AVDELARE MELLAN DELUPPGIFTER: deluppgiften "' + kort(u.textContent).slice(0, 22)
+          + '" har en linje ' + (s === 'Top' ? 'ovanfor' : 'under') + ' sig (' + k.bredd + ' px) — strecket hor till huvuduppgiften');
+      });
+    });
 
     // ── K-F a: ingen linje mellan deluppgifterna ──────────────────────────────────────────
     Array.prototype.forEach.call(sh.querySelectorAll('.ovn-rad, .ak8-rad, .ovn-brak-rad'), function(r){
@@ -373,7 +387,7 @@ const PROBE = `(function(){
     /* EN UPPGIFT är en grupp som bär något att göra — en rad eller en ruta. Rena rubriker
        ("Blad B1" i åttans negativa tal) bär samma klass men är inte uppgifter, och en linje mellan
        en rubrik och dess egen första uppgift skiljer ingenting åt. */
-    var grupper = Array.prototype.filter.call(sh.querySelectorAll('.ovn-grupp, .ak8-grupp'), function(g){
+    var grupper = Array.prototype.filter.call(sh.querySelectorAll('.ovn-grupp, .ak8-grupp, .eq-grupp'), function(g){
       return synlig(g) && (g.querySelector('.ovn-rad, .ak8-rad, .ovn-brak-rad, input'));
     });
     grupper.forEach(function(g, i){
@@ -478,13 +492,13 @@ const PROBE = `(function(){
   var sedda = [];
   (nav.length ? nav : [null]).forEach(function(knapp){
     if(knapp){ if(knapp.disabled) return; knapp.click(); }
-    Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet'), function(sh){
+    Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet, .eq-kort'), function(sh){
       if(sedda.indexOf(sh) >= 0 || !synlig(sh)) return;
       sedda.push(sh);
       var vard = sh.parentElement || sh;
       function stegKnappar(){ return vard.querySelectorAll('.niva-rad .niva-btn'); }
       function namnNu(nr){
-        var el = vard.querySelector('.ovn-sheet') || sh, h2 = el.querySelector('h2');
+        var el = vard.querySelector('.ovn-sheet') || sh, h2 = el.querySelector('h2, .niva-rubrik');
         var bas = h2 ? kort(h2.textContent) : 'blad ' + sedda.length;
         if(bas.length > 30) bas = '…' + bas.slice(-29);
         return nr ? bas.slice(0, 24) + ' niva ' + nr : bas;
