@@ -203,9 +203,205 @@ function minstaAntalRader(vl, hl, opts){
   return 1 + ((opts && opts.lage === 'utskriven') ? 2 * n : n);
 }
 
+/* ══ TILLÄGGET (order 2026-10-21, åttans Ekvationer steg 1) ═══════════════════════════════════════
+   Allt ovanför är orört, byte för byte (verktyg/ekv-parser-fuzz.js prövar det mot ett fäst md5).
+   Det här är NYA funktioner. Inget befintligt anrop går hit; den sida som vill ha dem anropar dem.
+
+   1. x I NÄMNAREN. 12/x, 1/(2x), 1/x + 3/(2x). En sida är a·v + b + c/v. Samma grammatik och
+      samma normalisering som parseSida. Division med k·v ger en 1/v-term; v² och 1/v² avvisas (null),
+      och division med något annat än ett tal eller k·v likaså. En ekvation där både v och 1/v blir
+      kvar är en andragradsekvation och ligger utanför steg 1 (null). Har sidan delat med v är v = 0
+      uteslutet ur lösningsmängden.
+   2. RADKRAVET med tre tillägg som sidan slår på var för sig (Joachims beslut 2026-10-21):
+        spegling  x bara i högerledet: räkna som om leden bytt plats — den naturliga vägen godtas
+        samla     två termer av samma slag i samma led (x-termer, tal, termer med x i nämnaren) är
+                  ett eget steg
+        namnare   "multiplicera båda leden med x (eller 6x)" är ett steg; sedan räknas den rensade
+                  ekvationen, multiplicerad med M·x där M är minsta gemensamma multipel av nämnarnas tal
+   3. RADERNAS TERMER, för upprepning och vändning (delat med kedjerättaren och problemlösningen):
+      samma termer i samma led som raden före = upprepning; leden bytta = vändning. Ordningen är fri. */
+
+function parseSidaNamnare(str, opts){
+  opts = opts || {};
+  var s = normalisera(str);
+  if(s === '') return null;
+  var v = opts.variabel ? String(opts.variabel).toLowerCase() : hittaVariabel(s);
+  if(v === false) return null;
+  if(!/^[-+*/().0-9a-zåäö]*$/i.test(s)) return null;
+  if(v){ var andra = s.toLowerCase().replace(new RegExp(v, 'g'), '').match(/[a-zåäö]/i); if(andra) return null; }
+
+  var i = 0, trasig = false, namnare = false;
+  function noll(t){ return Math.abs(t) < EPS; }
+  function k(b){ return { a: 0, b: b, c: 0 }; }
+  function add(p, q){ return { a: p.a + q.a, b: p.b + q.b, c: p.c + q.c }; }
+  function neg(p){ return { a: -p.a, b: -p.b, c: -p.c }; }
+  function mult(p, q){
+    if(!noll(p.a * q.a) || !noll(p.c * q.c)) return null;          // v² eller 1/v²
+    return { a: p.a * q.b + p.b * q.a, b: p.b * q.b + p.a * q.c + p.c * q.a, c: p.b * q.c + p.c * q.b };
+  }
+  function div(p, q){
+    if(noll(q.a) && noll(q.c) && !noll(q.b)) return { a: p.a / q.b, b: p.b / q.b, c: p.c / q.b };
+    if(noll(q.b) && noll(q.c) && !noll(q.a) && noll(p.c)){ namnare = true; return { a: 0, b: p.a / q.a, c: p.b / q.a }; }
+    return null;
+  }
+  function tecken(){ return s[i]; }
+  function primar(){
+    var c = tecken();
+    if(c === '('){ i++; var inre = uttryck(); if(tecken() !== ')'){ trasig = true; return k(0); } i++; return inre; }
+    if(c && /[0-9.]/.test(c)){
+      var start = i;
+      while(i < s.length && /[0-9.]/.test(s[i])) i++;
+      var tal = parseFloat(s.slice(start, i));
+      if(isNaN(tal)){ trasig = true; return k(0); }
+      return k(tal);
+    }
+    if(c && v && c.toLowerCase() === v){ i++; return { a: 1, b: 0, c: 0 }; }
+    trasig = true; return k(0);
+  }
+  function faktor(){
+    var c = tecken();
+    if(c === '+'){ i++; return faktor(); }
+    if(c === '-'){ i++; return neg(faktor()); }
+    return primar();
+  }
+  function arImplicit(){
+    var c = tecken();
+    if(!c) return false;
+    if(c === '(') return true;
+    if(v && c.toLowerCase() === v) return true;
+    return /[0-9.]/.test(c) && !/[0-9.]/.test(s[i - 1] || '');
+  }
+  function term(){
+    var p = faktor();
+    for(;;){
+      var c = tecken();
+      if(c === '*' || c === '/'){
+        i++;
+        var q = faktor(), r = (c === '*') ? mult(p, q) : div(p, q);
+        if(!r){ trasig = true; return k(0); }
+        p = r;
+      } else if(arImplicit()){
+        var r2 = mult(p, faktor());
+        if(!r2){ trasig = true; return k(0); }
+        p = r2;
+      } else return p;
+    }
+  }
+  function uttryck(){
+    var p = term();
+    for(;;){
+      var c = tecken();
+      if(c === '+'){ i++; p = add(p, term()); }
+      else if(c === '-'){ i++; p = add(p, neg(term())); }
+      else return p;
+    }
+  }
+  var res = uttryck();
+  if(trasig || i !== s.length) return null;
+  return { a: res.a, b: res.b, c: res.c, namnare: namnare };
+}
+
+// Lösningsmängden: { x: tal } · 'ingen' · 'alla' — eller null när ekvationen inte går att tolka
+// eller ligger utanför steg 1 (både v och 1/v kvar: andragrad).
+function losningsmangd(vl, hl, opts){
+  var L = parseSidaNamnare(vl, opts), H = parseSidaNamnare(hl, opts);
+  if(!L || !H) return null;
+  var A = L.a - H.a, B = L.b - H.b, C = L.c - H.c, uteslutNoll = L.namnare || H.namnare;
+  var nA = Math.abs(A) < EPS, nB = Math.abs(B) < EPS, nC = Math.abs(C) < EPS;
+  if(!nA && !nC) return null;
+  if(nA && nC) return nB ? 'alla' : 'ingen';
+  var x = nC ? -B / A : (nB ? NaN : -C / B);
+  if(isNaN(x)) return 'ingen';
+  if(uteslutNoll && Math.abs(x) < EPS) return 'ingen';
+  return { x: x };
+}
+function sammaMangd(m1, m2){
+  if(m1 == null || m2 == null) return false;
+  if(typeof m1 === 'object' && typeof m2 === 'object') return Math.abs(m1.x - m2.x) < EPS;
+  return m1 === m2;
+}
+function arUnikMangd(m){ return !!m && typeof m === 'object'; }
+// v ensam i vänsterledet och ett tal till höger.
+function arLostNamnare(vl, hl, opts){
+  var L = parseSidaNamnare(vl, opts), H = parseSidaNamnare(hl, opts);
+  if(!L || !H) return false;
+  return Math.abs(L.a - 1) < EPS && Math.abs(L.b) < EPS && Math.abs(L.c) < EPS && Math.abs(H.a) < EPS && Math.abs(H.c) < EPS;
+}
+// Spegelbilden: ett tal i vänsterledet och v ensam till höger (25,5 = x).
+function arVandLost(vl, hl, opts){ return arLostNamnare(hl, vl, opts); }
+
+// Termerna i ett led, på toppnivå (inte inne i parenteser), med sitt tecken.
+function termer(sida){
+  var s = normalisera(sida), ut = [], d = 0, st = 0;
+  for(var i = 0; i < s.length; i++){
+    var c = s[i];
+    if(c === '(') d++;
+    else if(c === ')') d--;
+    else if(d === 0 && i > st && (c === '+' || c === '-') && !/[*\/]/.test(s[i - 1])){ ut.push(s.slice(st, i)); st = i; }
+  }
+  ut.push(s.slice(st));
+  return ut.filter(function(t){ return t !== '' && t !== '+' && t !== '-'; });
+}
+// Ledets termer som en sorterad nyckel: ordningen är fri, '+' framför och koefficienten 1 skrivs bort.
+function termNyckel(sida){
+  return termer(sida).map(function(t){
+    return t.replace(/^\+/, '').replace(/(^|-)1(?=[a-zåäö(])/gi, '$1').toLowerCase();
+  }).sort().join('|');
+}
+// fore och rad är { vl, hl }. Upprepning: samma termer i samma led. Vändning: leden har bytt plats.
+function upprepar(fore, rad){
+  return !!fore && !!rad && termNyckel(fore.vl) === termNyckel(rad.vl) && termNyckel(fore.hl) === termNyckel(rad.hl);
+}
+function vandning(fore, rad){
+  return !!fore && !!rad && !upprepar(fore, rad) &&
+         termNyckel(fore.vl) === termNyckel(rad.hl) && termNyckel(fore.hl) === termNyckel(rad.vl);
+}
+
+function sgd(a, b){ return b ? sgd(b, a % b) : a; }
+function operationerUtokad(vl, hl, opts){
+  opts = opts || {};
+  var L = parseSidaNamnare(vl, opts), H = parseSidaNamnare(hl, opts);
+  if(!L || !H) return null;
+  var n = 0;
+  if(opts.samla){
+    var slag = function(t){
+      var p = parseSidaNamnare(t, opts);
+      return !p ? '?' : Math.abs(p.a) > EPS ? 'v' : Math.abs(p.c) > EPS ? '1/v' : 'tal';
+    };
+    var dubbel = function(sida){ var k = termer(sida).map(slag); return k.some(function(x, i){ return k.indexOf(x) !== i; }); };
+    if(dubbel(vl) || dubbel(hl)) n++;
+  }
+  var l = { a: L.a, b: L.b }, h = { a: H.a, b: H.b };
+  if(opts.namnare && (Math.abs(L.c) > EPS || Math.abs(H.c) > EPS)){
+    n++;
+    var M = 1;
+    (String(vl) + ' ' + String(hl)).replace(/\/\s*\(\s*(\d+)/g, function(m, tal){
+      var t = parseInt(tal, 10); if(t > 0) M = M / sgd(M, t) * t; return m;
+    });
+    l = { a: L.b * M, b: L.c * M }; h = { a: H.b * M, b: H.c * M };
+  }
+  if(opts.spegling && Math.abs(l.a) < EPS && Math.abs(h.a) > EPS){ var t0 = l; l = h; h = t0; }
+  if(Math.abs(l.b) > EPS) n++;
+  if(Math.abs(h.a) > EPS) n++;
+  if(Math.abs(Math.abs(l.a - h.a) - 1) > EPS) n++;
+  var multParentes = /[0-9a-zåäö)]\s*[·*]?\s*\(/i;
+  if(multParentes.test(String(vl)) || multParentes.test(String(hl))) n++;
+  return n;
+}
+function minstaAntalRaderUtokad(vl, hl, opts){
+  var n = operationerUtokad(vl, hl, opts);
+  if(n == null) return null;
+  return 1 + ((opts && opts.lage === 'utskriven') ? 2 * n : n);
+}
+
 var API = { parseSida: parseSida, parseEkvation: parseEkvation, sammaLosning: sammaLosning,
             harUnikLosning: harUnikLosning, losningAv: losningAv, arLost: arLost,
-            varde: varde, operationer: operationer, minstaAntalRader: minstaAntalRader };
+            varde: varde, operationer: operationer, minstaAntalRader: minstaAntalRader,
+            // tillägget
+            parseSidaNamnare: parseSidaNamnare, losningsmangd: losningsmangd, sammaMangd: sammaMangd,
+            arUnikMangd: arUnikMangd, arLostNamnare: arLostNamnare, arVandLost: arVandLost,
+            termer: termer, termNyckel: termNyckel, upprepar: upprepar, vandning: vandning,
+            operationerUtokad: operationerUtokad, minstaAntalRaderUtokad: minstaAntalRaderUtokad };
 if(typeof window !== 'undefined') window.EkvParser = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();
