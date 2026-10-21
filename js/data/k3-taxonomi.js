@@ -217,34 +217,50 @@ window.K3_TAXONOMI = {
        sektioner, INTE nivåparameter → taxonomin modellerar ekvationstyper, inte nivåer. */
     {
       "id": "alg-ekvationer", "namn": "Ekvationer", "parent": null, "niva": "omrade",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Lösa ekvationer med balansmetoden, variabel på båda sidor, parenteser som fördjupning.",
       "grupp": "algebra", "implemented": true
     },
     {
       "id": "alg-ekv-ensidig", "namn": "Lösa ekvationer (balansmetoden)", "parent": "alg-ekvationer", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Lösa ekvationer steg för steg med balansmetoden – gör samma sak på båda sidor.",
       "visning": null
     },
     {
       "id": "alg-ekv-ensidig:rakna", "namn": "Lösa ekvationer (balansmetoden)", "parent": "alg-ekv-ensidig", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
-      "begrepp": "Lös ekvationer med en obekant på ena sidan (även bråk-koefficient och decimaler) med balansmetoden. Öva-bladen: en operation, sedan två.",
-      "visning": { "utbudslista": ["k3d4"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 1,
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Lös ekvationer med en obekant på ena sidan (även bråk-koefficient och decimaler) med balansmetoden. Öva-bladen: en operation, sedan två. Åttans Ekvationer steg 1 (ak8k2d5) ärver noden: bråk och decimaltal är band.",
+      "visning": { "utbudslista": ["k3d4", "ak8k2d5"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 1,
                    "etikett": "räkna", "formagaKey": "rakna", "niva": null, "kommer": true }
     },
     {
       "id": "alg-ekv-badaled", "namn": "Variabel på båda sidor", "parent": "alg-ekvationer", "niva": "deldoman",
-      "arskursRelevans": { "ak7": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Lösa ekvationer där variabeln står i båda leden – samla x på en sida.",
       "visning": null
     },
     {
       "id": "alg-ekv-badaled:rakna", "namn": "Variabel på båda sidor", "parent": "alg-ekv-badaled", "niva": "lovnod",
-      "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
-      "begrepp": "Lös ekvationer med variabel i båda leden. Omkastningen (största x-koefficienten till vänster) är tillåten men inte krävd.",
-      "visning": { "utbudslista": ["k3d4"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 2,
+      "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Lös ekvationer med variabel i båda leden. Omkastningen (största x-koefficienten till vänster) är tillåten men inte krävd. Åttans Ekvationer steg 1 (ak8k2d5) ärver noden: bråk och decimaltal är band.",
+      "visning": { "utbudslista": ["k3d4", "ak8k2d5"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 2,
+                   "etikett": "räkna", "formagaKey": "rakna", "niva": null, "kommer": true }
+    },
+    /* x I NÄMNAREN (order 2026-10-21, Joachims godkännande i FAS 2): en NY METOD — multiplicera båda
+       leden med x (eller med en gemensam nämnare som innehåller x) — och därför en egen nod, enligt
+       regeln att ett band ändrar talen och en ny nod ändrar metoden. Bara åttan. */
+    {
+      "id": "alg-ekv-namnare", "namn": "Variabel i nämnaren", "parent": "alg-ekvationer", "niva": "deldoman",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Lösa ekvationer där x står i nämnaren – multiplicera båda leden med x och lös vidare med balansmetoden.",
+      "visning": null
+    },
+    {
+      "id": "alg-ekv-namnare:rakna", "namn": "Variabel i nämnaren", "parent": "alg-ekv-namnare", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Lös ekvationer med x i nämnaren (12/x, 1/(2x), 1/x + 3/(2x)): multiplicera båda leden med x eller 6x, sedan balansmetoden. Åttans Ekvationer steg 1, nivå 3.",
+      "visning": { "utbudslista": ["ak8k2d5"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 3,
                    "etikett": "räkna", "formagaKey": "rakna", "niva": null, "kommer": true }
     },
     {

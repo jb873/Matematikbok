@@ -1702,6 +1702,7 @@
   "hint | Värdet stämmer inte."
  ],
  "ak8/k2/index.html": [
+  "sub | Lös ekvationer med balansmetoden – bråk, decimaltal och x i nämnaren.",
   "sub | Multiplicera in i parentes, och förenkla uttryck med parenteser.",
   "sub | Parenteser i ekvationen, fler delar och figurer.",
   "sub | Problem där sambandet bär lösningen: procent och förhållande.",
@@ -1712,6 +1713,9 @@
   "sub | Två okända och ekvationssystem.",
   "titel | Algebra och {problemlösning}",
   "titel | Algebraiska uttryck",
+  "titel | Ekvationer steg 1",
+  "titel | Ekvationer steg 2",
+  "titel | Ekvationer steg 3",
   "titel | Mönster",
   "titel | Problemlösning nivå 1",
   "titel | Problemlösning nivå 2",
@@ -2017,6 +2021,15 @@
  ],
  "js/motor/metod/uppstallning-yta.js": [
   "rubrik | minnessiffror"
+ ],
+ "ak8/k2/d5-ekvationer-steg1/index.html": [
+  "titel | Nivå 1"
+ ],
+ "js/data/ak8-ekv1.js": [
+  "rubrik | Lös med balansmetoden"
+ ],
+ "js/data/k3-taxonomi.js": [
+  "namn | Variabel i nämnaren"
  ],
  "js/motor/ekvationer-balans/ekv-rattare.js": [
   "hint | Raden är samma som raden före. Varje rad ska vara ett nytt steg.",

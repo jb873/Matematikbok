@@ -70,10 +70,25 @@ const SKAL = [
    *
    * ÖPPEN FRÅGA, Joachims: noll undantag kräver ett REGELBESLUT, inte mer markup — antingen att
    * nämnarregeln inte gäller en fri kedja (och grinden får veta det), eller att varje kedjerad
-   * ska ha ett facit, vilket motsäger den fria kedjan. Jag väljer inte åt dig. */
-  { verktyg: 'namnare-grind.js',  sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'fri kedja: antalet rader är elevens val, så nämnaren "synliga svarsenheter" är rörlig med flit' },
-  { verktyg: 'flerruts-grind.js', sida: 'ak7/k3/d4-ekvationer/index.html', bevis: 'ekvationer-balans', skal: 'fri kedja: ingen facit per rad att fylla ur — grinden fyller 0 och jämför mot ett facit som inte finns' }
+   * ska ha ett facit, vilket motsäger den fria kedjan. Jag väljer inte åt dig.
+   *
+   * MOTOR I STÄLLET FÖR SIDA (2026-10-21). Kedjan finns nu på två sidor — sjuans d4 och åttans
+   * Ekvationer steg 1 — och skälet är detsamma, för det hör till MOTORN, inte till sidan. Raden bär
+   * därför `motor` (en sträng som måste stå i sidans källa, och som också är beviset) i stället för
+   * `sida`. Nästa sida med kedjan får skälet utan att en sökväg skrivs för hand. En sida som laddar
+   * motorn men ändå ger mätpunkter fäller som förut ("står kvar i SKAL"). */
+  { verktyg: 'namnare-grind.js',  motor: 'ekvationer-balans/ekvationer-balans.js', bevis: 'ekvationer-balans/ekvationer-balans.js', skal: 'fri kedja: antalet rader är elevens val, så nämnaren "synliga svarsenheter" är rörlig med flit' },
+  { verktyg: 'flerruts-grind.js', motor: 'ekvationer-balans/ekvationer-balans.js', bevis: 'ekvationer-balans/ekvationer-balans.js', skal: 'fri kedja: ingen facit per rad att fylla ur — grinden fyller 0 och jämför mot ett facit som inte finns' }
 ];
+
+/* Träffar en SKAL- eller ETIKETT-rad sidan? Med `sida`: samma sökväg. Med `motor`: sidans källa
+   laddar motorn. Källan läses en gång per sida. */
+const KALLA = {};
+function kallaFor(sida){
+  if(!(sida in KALLA)) KALLA[sida] = fs.existsSync(path.join(ROOT, sida)) ? fs.readFileSync(path.join(ROOT, sida), 'utf8') : '';
+  return KALLA[sida];
+}
+function traffar(rad, sida){ return rad.sida ? rad.sida === sida : !!(rad.motor && kallaFor(sida).indexOf(rad.motor) >= 0); }
 
 /* KÄNDA RÖDA MED ORSAK. En rad här gör INGENTING grönt — sidan räknas som brott precis som
    förut. Den enda skillnaden är att utskriften säger varför den är röd, och att granska() kan
@@ -90,8 +105,10 @@ const ETIKETT = [
   { sida: 'ak9/k1/tal-och-berakna-ova.html',        etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
   /* d4 och d5 bygger uppgiftsytan som rutnät (eq-grid, prob-uppg) med .seg-text-rutor — mätt
      2026-10-05: noll .ovn-sheet, noll .ovn-rad, noll .ovn-in på båda sidorna. K-D och K-E har
-     ingen motsvarighet där; K-F har det, och om strecket ska gälla rutnäten är Joachims beslut. */
-  { sida: 'ak7/k3/d4-ekvationer/index.html',        etikett: 'väntar beslut', skal: 'egen rutnätsyta (eq-grid) utan .ovn-sheet — K-F på rutnäten väntar på besked' },
+     ingen motsvarighet där; K-F har det, och om strecket ska gälla rutnäten är Joachims beslut.
+     Rutnätet (eq-grid) hör till balansmetodens MOTOR och finns sedan 2026-10-21 också på åttans
+     Ekvationer steg 1 — raden gäller därför motorn, inte en sökväg. */
+  { motor: 'ekvationer-balans/ekvationer-balans.js', etikett: 'väntar beslut', skal: 'egen rutnätsyta (eq-grid) utan .ovn-sheet — K-F på rutnäten väntar på besked' },
   { sida: 'ak7/k3/d5-problemlosning/index.html',    etikett: 'väntar beslut', skal: 'egen rutnätsyta (prob-uppg) utan .ovn-sheet — K-F på rutnäten väntar på besked' }
 ];
 
@@ -140,7 +157,7 @@ function skapa(verktyg){
 
       forsokta.filter(s => bladsidor.has(s)).forEach(function(sida){
         const n = matt[sida] || 0;
-        const u = skal.find(x => x.sida === sida);
+        const u = skal.find(x => traffar(x, sida));
         if(n > 0){
           // Ett undantag för en sida som mäts ska bort — annars döljer det nästa riktiga nolla.
           if(u) gamla.push(sida + ' ger ' + n + ' mätpunkter men står kvar i SKAL');
@@ -156,8 +173,8 @@ function skapa(verktyg){
       if(nollor.length){
         brott += nollor.length;
         // Kända röda och nya röda skiljs i utskriften. Båda är brott; bara den nya är en nyhet.
-        const kanda = nollor.filter(s => ETIKETT.some(e => e.sida === s));
-        const nya = nollor.filter(s => !ETIKETT.some(e => e.sida === s));
+        const kanda = nollor.filter(s => ETIKETT.some(e => traffar(e, s)));
+        const nya = nollor.filter(s => !ETIKETT.some(e => traffar(e, s)));
         if(nya.length){
           console.log('  ✗ ' + nya.length + ' NY röd: sida i listan gav NOLL mätpunkter, utan skäl och utan etikett:');
           nya.forEach(s => console.log('      ' + s));
@@ -166,7 +183,7 @@ function skapa(verktyg){
         if(kanda.length){
           console.log('  ✗ ' + kanda.length + ' känd röd (räknas som brott, orsaken känd):');
           kanda.forEach(function(s){
-            const e = ETIKETT.find(x => x.sida === s);
+            const e = ETIKETT.find(x => traffar(x, s));
             console.log('      [' + e.etikett + '] ' + s + ' — ' + e.skal);
           });
         }
@@ -200,9 +217,9 @@ function skapa(verktyg){
          inget brott. Beskedet står därför kvar med sin begränsning utskriven, men räknas inte.
          Vill man göra det till ett brott måste etiketten bära vilka grindar den gäller för, eller
          mätningen samlas över alla grindar i en körning. De verkliga nollorna är brott som förr. */
-      ETIKETT.filter(e => forsokta.indexOf(e.sida) >= 0 && (matt[e.sida] || 0) > 0).forEach(function(e){
-        console.log('  · etiketten för ' + e.sida + ' behövs inte för DEN HÄR grinden — sidan ger '
-          + matt[e.sida] + ' mätpunkter här. Delad lista: pröva de andra grindarna före du tar bort den.');
+      forsokta.filter(s => (matt[s] || 0) > 0 && ETIKETT.some(e => traffar(e, s))).forEach(function(s){
+        console.log('  · etiketten för ' + s + ' behövs inte för DEN HÄR grinden — sidan ger '
+          + matt[s] + ' mätpunkter här. Delad lista: pröva de andra grindarna före du tar bort den.');
       });
       return brott;
     }
@@ -213,9 +230,9 @@ module.exports = { skapa, SKAL, ETIKETT, UTANFOR };
 
 if(require.main === module){
   console.log('V14 — skäl-listan (' + SKAL.length + ' rader):');
-  SKAL.forEach(s => console.log('  ' + s.verktyg.padEnd(18) + s.sida + '  [bevis: ' + s.bevis + ']  ' + s.skal));
+  SKAL.forEach(s => console.log('  ' + s.verktyg.padEnd(18) + (s.sida || 'motor ' + s.motor) + '  [bevis: ' + s.bevis + ']  ' + s.skal));
   console.log('\nKända röda med orsak (' + ETIKETT.length + ' rader) — röda, inte gröna:');
-  ETIKETT.forEach(e => console.log('  [' + e.etikett + '] ' + e.sida));
+  ETIKETT.forEach(e => console.log('  [' + e.etikett + '] ' + (e.sida || 'motor ' + e.motor)));
   console.log('\nUtanför V14:s räckvidd:');
   Object.keys(UTANFOR).forEach(k => console.log('  ' + k.padEnd(18) + UTANFOR[k]));
 }

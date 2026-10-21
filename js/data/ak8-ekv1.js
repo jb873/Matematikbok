@@ -22,7 +22,9 @@
 'use strict';
 
 var ENSIDIG = 'alg-ekv-ensidig:rakna', BADA = 'alg-ekv-badaled:rakna', NAMNARE = 'alg-ekv-namnare:rakna';
-var RUBRIK = 'Lös med balansmetoden';
+// ELEVTEXT som fält, så att elevtext-låset ser den: dokumentets egen rubrik, samma i alla grupper.
+var TEXT = { rubrik: 'Lös med balansmetoden' };
+var RUBRIK = TEXT.rubrik;
 
 var AK8_EKV1 = {
   // Kedjans regler på den här sidan. Var och en är en flagga i den delade rättaren (ekv-rattare.js).

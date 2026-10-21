@@ -14,8 +14,8 @@
 <script src="../../js/kapitel/kapitel-lista.js"></script>
 <script src="../../js/kapitel/kapitelsida.js"></script>
 <script>
-// ÅTTANS ALGEBRAKAPITEL — de åtta delkapitlen som PLATSER (order 2026-09-25), på den delade
-// renderaren (order 2026-09-29).
+// ÅTTANS ALGEBRAKAPITEL — delkapitlen som PLATSER (order 2026-09-25), på den delade renderaren
+// (order 2026-09-29). Elva platser sedan 2026-10-21: tre ekvationsdelkapitel före problemlösningen.
 //
 // STATUSEN HÄRLEDS UR fil. Ingen av platserna utom den första har innehåll än: utan fil ritas ett
 // tonat kort utan länk. Ett kort får aldrig leda in i tomrum. När ett delkapitel byggs får det sin
@@ -39,10 +39,15 @@ Kapitelsida.montera({
     { nr: 2, titel: 'Mönster',               sub: 'Talföljder, uttryck för mönster och att räkna med dem.',           fil: null, typ: 'avsnitt' },
     { nr: 3, titel: 'Uttryck med parentes',  sub: 'Multiplicera in i parentes, och förenkla uttryck med parenteser.', fil: 'd3-parentes/index.html', typ: 'avsnitt', utbud: 'ak8k2d3' },
     { nr: 4, titel: 'Uttryck med potenser',  sub: 'Räkna med potenser där basen är en variabel.',                     fil: null, typ: 'avsnitt' },
-    { nr: 5, titel: 'Problemlösning nivå 1', sub: 'Skriv en ekvation ur texten och lös den med balansmetoden.',        fil: null, typ: 'avsnitt', utbud: 'prob1' },
-    { nr: 6, titel: 'Problemlösning nivå 2', sub: 'Parenteser i ekvationen, fler delar och figurer.',                  fil: null, typ: 'avsnitt', utbud: 'prob2' },
-    { nr: 7, titel: 'Problemlösning nivå 3', sub: 'Problem där sambandet bär lösningen: procent och förhållande.',     fil: null, typ: 'avsnitt', utbud: 'prob3' },
-    { nr: 8, titel: 'Problemlösning nivå 4', sub: 'Två okända och ekvationssystem.',                                   fil: null, typ: 'avsnitt', utbud: 'prob4' }
+    // Ekvationerna före problemlösningen (Joachim 2026-10-21, placering A): metoden övas innan
+    // problemlösningen använder den. Steg 2 och 3 är platser utan beskrivning tills de byggs.
+    { nr: 5, titel: 'Ekvationer steg 1',     sub: 'Lös ekvationer med balansmetoden – bråk, decimaltal och x i nämnaren.', fil: 'd5-ekvationer-steg1/index.html', typ: 'avsnitt', utbud: 'ak8k2d5' },
+    { nr: 6, titel: 'Ekvationer steg 2',     fil: null, typ: 'avsnitt' },
+    { nr: 7, titel: 'Ekvationer steg 3',     fil: null, typ: 'avsnitt' },
+    { nr: 8, titel: 'Problemlösning nivå 1', sub: 'Skriv en ekvation ur texten och lös den med balansmetoden.',        fil: null, typ: 'avsnitt', utbud: 'prob1' },
+    { nr: 9, titel: 'Problemlösning nivå 2', sub: 'Parenteser i ekvationen, fler delar och figurer.',                  fil: null, typ: 'avsnitt', utbud: 'prob2' },
+    { nr: 10, titel: 'Problemlösning nivå 3', sub: 'Problem där sambandet bär lösningen: procent och förhållande.',    fil: null, typ: 'avsnitt', utbud: 'prob3' },
+    { nr: 11, titel: 'Problemlösning nivå 4', sub: 'Två okända och ekvationssystem.',                                  fil: null, typ: 'avsnitt', utbud: 'prob4' }
   ]
 });
 </script>
