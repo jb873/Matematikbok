@@ -235,13 +235,13 @@ window.K3_TAXONOMI = {
                    "etikett": "räkna", "formagaKey": "rakna", "niva": null, "kommer": true }
     },
     {
-      "id": "alg-ekv-badaled", "namn": "Variabel på båda sidor", "parent": "alg-ekvationer", "niva": "deldoman",
+      "id": "alg-ekv-badaled", "namn": "Variabel i båda leden", "parent": "alg-ekvationer", "niva": "deldoman",
       "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
       "begrepp": "Lösa ekvationer där variabeln står i båda leden – samla x på en sida.",
       "visning": null
     },
     {
-      "id": "alg-ekv-badaled:rakna", "namn": "Variabel på båda sidor", "parent": "alg-ekv-badaled", "niva": "lovnod",
+      "id": "alg-ekv-badaled:rakna", "namn": "Variabel i båda leden", "parent": "alg-ekv-badaled", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Lös ekvationer med variabel i båda leden. Omkastningen (största x-koefficienten till vänster) är tillåten men inte krävd. Åttans Ekvationer steg 1 (ak8k2d5) ärver noden: bråk och decimaltal är band.",
       "visning": { "utbudslista": ["k3d4", "ak8k2d5"], "grupp": "Ekvationer", "gruppordning": 0, "radordning": 2,

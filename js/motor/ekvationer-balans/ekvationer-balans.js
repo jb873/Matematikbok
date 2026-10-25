@@ -39,7 +39,7 @@ var EKV_TEXT = {
   ganger:    { titel: 'Gånger' },
   brak:      { titel: 'Bråk' },
   kontroll:  { titel: 'Kontrollera' },
-  omstart:   { titel: 'Börja om' },
+  omstart:   { titel: 'Återställ' },
   allaRatt:  { hint: 'Alla ekvationer lösta och rätt uppställda.' },
   pagang:    { hint: 'De ifyllda raderna stämmer. Fortsätt tills variabeln står ensam i vänsterledet.' },
   fel:       { hint: 'Någon rad har inte samma värde på båda sidor – den är rödmarkerad.' },
