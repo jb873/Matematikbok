@@ -477,3 +477,16 @@
   .test-ws-actions, .keypad{ display:none !important; }
   .test-take-question{ break-inside:avoid; page-break-inside:avoid; }
 }
+
+/* STAPLADE BRÅK i testets fråge-, facit- och ledtexter (.ovn-brak) — order 2026-10-25. Testmotorn äger sin
+   markup, och nu också dess form. Förut saknade ak7-k2-ram (och k3-ramen) reglerna, så varje bråk i k2-testen
+   ritades platt: 11/3 blev "113". Reglerna är åttans k1-rams, ordagrant; den ramen och sjuans k1-ram har dem
+   kvar i sidan och påverkas inte. Mäts av verktyg/test-brak-svep.js. */
+.ovn-brak{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 5px;line-height:1.15}
+.ovn-brak-taljare,.ovn-brak-namnare{padding:0 7px 1px;font-feature-settings:'tnum';white-space:nowrap;display:inline-block;line-height:1.25}
+.ovn-brak sup{font-size:.72em;vertical-align:super;line-height:0}   /* exponent inne i staplat bråk (exponentlagen) */
+.ovn-brak-namnare{padding:1px 7px 0}
+.ovn-brak-strecket{height:2px;background:currentColor;width:100%;min-width:22px;border-radius:1px}
+.ovn-brak .ovn-brak{margin:0 2px}
+.ovn-brak .ovn-brak .ovn-brak-taljare,.ovn-brak .ovn-brak .ovn-brak-namnare{font-size:.92em;padding:0 5px 1px}
+.ovn-brak:has(> .ovn-brak-taljare .ovn-brak) > .ovn-brak-strecket,.ovn-brak:has(> .ovn-brak-namnare .ovn-brak) > .ovn-brak-strecket{height:3px;min-width:44px}

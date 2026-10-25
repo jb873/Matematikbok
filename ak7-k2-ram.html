@@ -807,10 +807,10 @@ function blandadEngine(){
     'brak-forlanga': { snabb: [ G.numeric('k2-forlanga','Förläng bråket','brak-forlanga', function(){
       var bp = bankPost('BLAD_K2_D3', 'brak-forlanga:rakna');   // ÖVA-bladets tal först
       if(bp && bp.malN % bp.n === 0){ var bf = bp.malN / bp.n;
-        return { key: bp.t + '/' + bp.n + 'x' + bf, prompt: 'Förläng ' + bp.t + '/' + bp.n + ' till ' + bp.malN + '-delar:    ' + bp.t + '/' + bp.n + ' = ___/' + bp.malN,
+        return { key: bp.t + '/' + bp.n + 'x' + bf, prompt: 'Förläng ' + bp.t + '/' + bp.n + ' till ' + bp.malN + '-delar:    ' + bp.t + '/' + bp.n + ' = BRAK(▢)(' + bp.malN + ')',
           ans: bp.t * bf, expl: bp.t + '/' + bp.n + ' = ' + (bp.t * bf) + '/' + bp.malN + ' (förläng med ' + bf + ').' }; }
       var n=rP([2,3,4,5,6]), t=rI(1,n-1), f=rP([2,3,4,5]);
-      return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = ___/'+(n*f), ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
+      return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = BRAK(▢)('+(n*f)+')', ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
     }) ] },
     'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
       var bp = bankPost('BLAD_K2_D3', 'brak-forkorta:rakna');   // ÖVA-bladets tal först
@@ -822,7 +822,7 @@ function blandadEngine(){
     }) ] },
     'brak-likformig': { snabb: [ G.numeric('k2-likformig','Likformiga bråk','brak-likformig', function(){
       var n=rP([2,3,4,5,6]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var k=rP([2,3,4,5]);
-      return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+t+'/'+n+':    '+t+'/'+n+' = ___/'+(n*k), ans:t*k, expl:t+'/'+n+' = '+(t*k)+'/'+(n*k)+' (förläng med '+k+').'};
+      return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+t+'/'+n+':    '+t+'/'+n+' = BRAK(▢)('+(n*k)+')', ans:t*k, expl:t+'/'+n+' = '+(t*k)+'/'+(n*k)+' (förläng med '+k+').'};
     }) ] },
     // d4 — Jämför (flerval)
     'brak-jmf-lika': { snabb: [ G.flerval('k2-jmf-lika','Jämför bråk (samma nämnare)','brak-jmf-lika', function(){
@@ -1011,7 +1011,7 @@ function blandadEngine(){
     }) ] },
     'losut-taljare': { snabb: [ G.numeric('losut-taljare','Vilket tal saknas?','brak-add', function(){
       var n=rP([3,4,5,6,7,8]), a=rI(1,n-2), b=rI(1,n-a-1), sum=a+b;
-      return {key:'lt'+a+'_'+b+'_'+n, prompt:'Vilket tal saknas?    ▢/'+n+' + '+b+'/'+n+' = '+sum+'/'+n, ans:a, expl:a+'/'+n+' + '+b+'/'+n+' = '+sum+'/'+n+'.'};
+      return {key:'lt'+a+'_'+b+'_'+n, prompt:'Vilket tal saknas?    BRAK(▢)('+n+') + '+b+'/'+n+' = '+sum+'/'+n, ans:a, expl:a+'/'+n+' + '+b+'/'+n+' = '+sum+'/'+n+'.'};
     }) ] },
     // k2d6: lös ut faktorn i en multiplikativ ekvation — brak
     'mult-losut': { snabb: [ G.brak('mult-losut','Lös ut faktorn','brak-mult-rakna', function(){
