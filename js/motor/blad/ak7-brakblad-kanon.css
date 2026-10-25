@@ -66,6 +66,11 @@
 .mellan-eq{margin:0 8px;font-size:21px;color:var(--ink-soft);}
 .mellan-scaffold .ovn-brak-taljare,.mellan-scaffold .ovn-brak-namnare{padding:0 7px;color:var(--c-rakna);font-weight:600;white-space:nowrap;}
 .mellan-prod{display:inline-flex;align-items:center;gap:3px;justify-content:center;font-size:16px;white-space:nowrap;}
+/* Mellanledet som eleven skriver själv: (2 · 3)/(9 · 3) och (4/2)/(14/2) — ledrutorna rymmer ett uttryck. */
+.ml-led .ovn-in{width:84px;height:30px;font-size:16px;padding:0 4px;}
+.ml-svar .ovn-in{width:42px;height:30px;font-size:16px;padding:0 2px;}
+.ml-blandad{display:inline-flex;align-items:center;gap:5px;}
+.ml-blandad .ml-svar-hel{height:44px;}
 .mgn-rad{align-items:flex-start;}
 .mgn-block{display:flex;flex-direction:column;gap:11px;}
 .mgn-text{font-size:16px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}

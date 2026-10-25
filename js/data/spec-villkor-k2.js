@@ -282,6 +282,23 @@
       kalla: 'Joachim 2026-10-10 (arbetsorder v2): största gemensamma nämnare 30 — femtondelar ryms, fyrtiondelar och större tas bort, även i decimalvägens uppgifter',
       tak: { maxGemNamnare: 30 },
       kravs: { exakt: true, mellanled: 'kravt' }
+    },
+    /* d3 "Förlänga och förkorta". Gäller varje uppgift som förlänger eller förkortar: bladets mellanled-
+       rader, luckan "Vilket tal saknas?" och paren till minsta gemensamma nämnare.
+         minNamnare/maxNamnare  nämnaren i bråket i ENKLASTE form (det givna vid förlängning, svaret vid
+                                förkortning)
+         faktorer               förkortningens faktor per nivå — faktorn är största gemensamma delaren,
+                                så ett led räcker och svaret blir enklaste form */
+    'k2d3:forlanga': {
+      kalla: 'Joachim 2026-10-25 (FAS 2): en förlängning per uppgift, nämnare 3–10, bråket i enklaste form, alltid med mellanled (2/9 = (2 · 3)/(9 · 3) = 6/27)',
+      tak: { minNamnare: 3, maxNamnare: 10 },
+      kravs: { enFaktor: true, enklasteForm: true, mellanled: 'kravt' }
+    },
+    'k2d3:forkorta': {
+      kalla: 'Joachim 2026-10-25 (FAS 2): (T · f)/(N · f) med T/N i enklaste form, N 3–10, f 2–6 på nivå 1 och f ∈ {4, 6, 8, 9, 12} på nivå 2 ("så långt som möjligt"); mellanled (4/14 = (4/2)/(14/2) = 2/7)',
+      tak: { minNamnare: 3, maxNamnare: 10 },
+      faktorer: { 1: [2, 3, 4, 5, 6], 2: [4, 6, 8, 9, 12] },
+      kravs: { enFaktor: true, enklasteForm: true, mellanled: 'kravt' }
     }
   };
 

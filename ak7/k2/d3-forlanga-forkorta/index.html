@@ -169,7 +169,6 @@
 <section class="tab-panel is-active" data-panel="ova">
   <div class="blad-nav" id="blad-nav" role="tablist" aria-label="Delkapitlets blad"></div>
   <div id="blad-forlanga" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-forlanga"></div></div>
-  <div id="blad-mellan" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-mellan"></div></div>
   <div id="blad-forkorta" class="blad-mount" hidden><div class="ovn-wrap" id="sheet-forkorta"></div></div>
 </section>
 
@@ -225,8 +224,8 @@
   }
   // Testlåset öppet (som k1): ta bort is-locked på testfliken efter att blad-filen låst den.
   var tb = document.querySelector('.tab-btn[data-tab="test"]'); if(tb) tb.classList.remove('is-locked');
-  // ÖVA: blad-nav över de tre bladen
-  var OVA = [ {titel:'Förlänga', mount:'forlanga'}, {titel:'Med mellanled', mount:'mellan'}, {titel:'Förkorta', mount:'forkorta'} ];
+  // ÖVA: blad-nav över de två bladen ("Med mellanled" ingår i Förlänga, Joachim 2026-10-25)
+  var OVA = [ {titel:'Förlänga', mount:'forlanga'}, {titel:'Förkorta', mount:'forkorta'} ];
   var navEl = document.getElementById('blad-nav');
   if(navEl){
     var mounts = [], knappar = [];

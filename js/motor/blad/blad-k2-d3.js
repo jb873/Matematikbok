@@ -178,7 +178,8 @@ function bladHTML(blad){
   // .brak-hint borttagen (order 2026-09-23): inga hjälptexter i öva
 
   blad.grupper.forEach(function(grupp, gi){
-    html += '<div class="ovn-grupp">';
+    // Mellanledskravet står i DATAN (grupp.mellanled), inte i rubriken — mellanled-grind läser flaggan.
+    html += '<div class="ovn-grupp"' + (grupp.mellanled ? ' data-mellanled="' + grupp.mellanled + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     var radNummer = 0;
     grupp.rader.forEach(function(rad){
@@ -310,39 +311,43 @@ function bladHTML(blad){
         return;
       }
 
-      if(rad.typ === 'mellanFyll'){
-        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
+      /* MELLANLEDET, FÖRLÄNGA OCH FÖRKORTA (Joachim 2026-10-25). Eleven skriver hela ledet själv:
+           förläng  2/9 = (2 · 3)/(9 · 3) = 6/27
+           förkorta 4/14 = (4/2)/(14/2) = 2/7   — snedstrecket inne i täljare och nämnare är ett
+                                                 uttryckligt undantag från regeln om staplad division
+         Rättas i kontrollera (steg 7): samma faktor i täljare och nämnare, rätt faktor, och ett led
+         som redan är svaret (ett ensamt tal) fälls. Rutorna i ledet bär data-mellan med ledets facit
+         (repots konvention: en |-lista, första formen först), svaret data-svar. */
+      if(rad.typ === 'mellanled'){
+        var k = rad.k, T = rad.slag === 'forlang' ? rad.t * k : rad.t / k, N = rad.slag === 'forlang' ? rad.n * k : rad.n / k;
+        var tkn = rad.slag === 'forlang' ? ' · ' : '/';
+        var facit = '(' + rad.t + tkn + k + ')/(' + rad.n + tkn + k + ') = ' + T + '/' + N;
+        var bl = rad.blandad && T > N ? { hel: Math.floor(T / N), t: T % N, n: N } : null;
+        if(bl) facit += ' = ' + bl.hel + (bl.t ? ' ' + bl.t + '/' + bl.n : '');
+        html += '<div class="ovn-brak-rad mellanled-rad" data-rad="' + radNummer + '" data-slag="' + rad.slag + '" data-t="' + rad.t
+          + '" data-n="' + rad.n + '" data-k="' + k + '" data-facit="' + facit + '">';
         html += '<span class="ovn-label">' + bokstav + ')</span>';
         html += fracSpan(rad.t, rad.n);
         html += '<span class="mellan-eq">=</span>';
-        html += '<span class="ovn-brak kedje-brak">'
-          + '<span class="mellan-prod">' + rad.t + '·<input class="ovn-in mellan-fin" data-svar="' + rad.f + '" inputmode="numeric" autocomplete="off"></span>'
+        var ledFacit = function(tal){ return rad.slag === 'forlang' ? tal + '·' + k + '|' + k + '·' + tal : tal + '/' + k; };
+        html += '<span class="ovn-brak kedje-brak ml-led">'
+          + '<input class="ovn-in ml-cell ml-t" data-mellan="' + ledFacit(rad.t) + '" inputmode="text" autocomplete="off" aria-label="täljarens led">'
           + '<span class="ovn-brak-strecket"></span>'
-          + '<span class="mellan-prod">' + rad.n + '·<input class="ovn-in mellan-fin" data-svar="' + rad.f + '" inputmode="numeric" autocomplete="off"></span></span>';
+          + '<input class="ovn-in ml-cell ml-n" data-mellan="' + ledFacit(rad.n) + '" inputmode="text" autocomplete="off" aria-label="nämnarens led"></span>';
         html += '<span class="mellan-eq">=</span>';
-        html += '<span class="ovn-brak kedje-brak">'
-          + '<input class="ovn-in forlang-in" data-svar="' + (rad.t * rad.f) + '" inputmode="numeric" autocomplete="off">'
-          + '<span class="ovn-brak-strecket"></span>'
-          + '<input class="ovn-in forlang-in" data-svar="' + (rad.n * rad.f) + '" inputmode="numeric" autocomplete="off"></span>';
-        html += '</div>';
-        return;
-      }
-
-      if(rad.typ === 'mellanMal'){
-        var mf = rad.malN / rad.n;
-        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += fracSpan(rad.t, rad.n);
-        html += '<span class="mellan-eq">=</span>';
-        html += '<span class="ovn-brak kedje-brak">'
-          + '<span class="mellan-prod">' + rad.t + '·<input class="ovn-in mellan-fin" data-svar="' + mf + '" inputmode="numeric" autocomplete="off"></span>'
-          + '<span class="ovn-brak-strecket"></span>'
-          + '<span class="mellan-prod">' + rad.n + '·<input class="ovn-in mellan-fin" data-svar="' + mf + '" inputmode="numeric" autocomplete="off"></span></span>';
-        html += '<span class="mellan-eq">=</span>';
-        html += '<span class="ovn-brak kedje-brak">'
-          + '<input class="ovn-in forlang-in" data-svar="' + (rad.t * mf) + '" inputmode="numeric" autocomplete="off">'
-          + '<span class="ovn-brak-strecket"></span>'
-          + '<span class="ovn-brak-namnare">' + rad.malN + '</span></span>';
+        if(bl){
+          html += '<span class="ml-svar ml-blandad"><input class="ovn-in ml-cell ml-svar-hel" data-svar="' + bl.hel + '" inputmode="numeric" autocomplete="off" aria-label="heltal">'
+            + (bl.t ? '<span class="ovn-brak kedje-brak"><input class="ovn-in ml-cell ml-svar-t" data-svar="' + bl.t + '" inputmode="numeric" autocomplete="off">'
+              + '<span class="ovn-brak-strecket"></span><input class="ovn-in ml-cell ml-svar-n" data-svar="' + bl.n + '" inputmode="numeric" autocomplete="off"></span>' : '')
+            + '</span>';
+        } else {
+          html += '<span class="ovn-brak kedje-brak ml-svar">'
+            + '<input class="ovn-in ml-cell ml-svar-t" data-svar="' + T + '" inputmode="numeric" autocomplete="off">'
+            + '<span class="ovn-brak-strecket"></span>'
+            + (rad.fastN ? '<span class="ovn-brak-namnare">' + N + '</span>'
+                         : '<input class="ovn-in ml-cell ml-svar-n" data-svar="' + N + '" inputmode="numeric" autocomplete="off">')
+            + '</span>';
+        }
         html += '</div>';
         return;
       }
@@ -495,6 +500,10 @@ function bygg_blad(rotEl, blad){
         var rad = inp.closest('.brak-svar-rad, .brak-fragerad, .blandad-rad, .brak-bada-rad');
         if(rad) rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
         if(rad) rad.querySelectorAll('.brak-cell, .brak-bada-dec').forEach(function(c){ c.classList.remove('correct','wrong'); });
+      } else if(inp.classList.contains('ml-cell')){
+        var mlRad = inp.closest('.mellanled-rad');
+        if(mlRad) mlRad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
+        if(mlRad) mlRad.querySelectorAll('.ml-cell').forEach(function(c){ c.classList.remove('correct','wrong'); });
       } else if(inp.classList.contains('brak-bada-dec')){
         var rad = inp.closest('.brak-bada-rad');
         if(rad) rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
@@ -533,7 +542,7 @@ function bygg_blad(rotEl, blad){
 
     // 1) Vanliga enstaka svar (hoppa över bråkcellerna)
     inputs.forEach(function(inp){
-      if(inp.classList.contains('brak-cell') || inp.classList.contains('brak-kladd') || inp.classList.contains('brak-bada-dec') || inp.classList.contains('stam-cell')) return;
+      if(inp.classList.contains('brak-cell') || inp.classList.contains('brak-kladd') || inp.classList.contains('brak-bada-dec') || inp.classList.contains('stam-cell') || inp.classList.contains('ml-cell')) return;
       var rad = inp.closest('.ovn-rad, .ovn-brak-rad, .prob-rad') || inp.parentElement;
       rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
       inp.classList.remove('correct','wrong','just-checked');
@@ -711,6 +720,42 @@ function bygg_blad(rotEl, blad){
         f.textContent = 'rätt: ' + sel.dataset.ratt;
         if(item) item.appendChild(f);
       }
+    });
+
+    // 7) Mellanled (förlänga och förkorta) — raden är EN enhet: ledet och svaret.
+    //    Ledet: i täljaren det givna talet och faktorn (2 · 3, eller 3 · 2), i nämnaren samma faktor;
+    //    vid förkortning talet delat med faktorn (4/2). Samma faktor uppe och nere, och den faktor
+    //    uppgiften säger. Ett led som är ett ensamt tal är genvägen — svaret, inte steget — och fälls.
+    rotEl.querySelectorAll('.mellanled-rad').forEach(function(row){
+      totalt++;
+      row.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
+      var celler = Array.prototype.slice.call(row.querySelectorAll('.ml-cell'));
+      celler.forEach(function(c){ c.classList.remove('correct','wrong','just-checked'); });
+      if(celler.every(function(c){ return String(c.value).trim() === ''; })) return;   // obesvarad
+      var slag = row.dataset.slag, t = +row.dataset.t, n = +row.dataset.n, k = +row.dataset.k;
+      function led(el, bas){
+        var s = AK8_UI.avTusental(String(el.value)).replace(/\s+/g, '').replace(/[*×x⋅]/g, '·');
+        var m = slag === 'forlang' ? s.match(/^(\d+)·(\d+)$/) : s.match(/^(\d+)[\/:÷](\d+)$/);
+        if(!m) return null;
+        var a = +m[1], b = +m[2];
+        if(slag === 'forkort') return a === bas ? b : null;
+        return a === bas ? b : (b === bas ? a : null);
+      }
+      var kt = led(row.querySelector('.ml-t'), t), kn = led(row.querySelector('.ml-n'), n);
+      var ledOk = kt !== null && kt === kn && kt === k;
+      var svarOk = true;
+      row.querySelectorAll('[data-svar]').forEach(function(c){
+        var cOk = String(c.value).trim() !== '' && AK8_UI.pInt(c.value) === +c.dataset.svar;
+        if(!cOk) svarOk = false;
+        if(String(c.value).trim() !== '') c.classList.add(cOk ? 'correct' : 'wrong');
+      });
+      row.querySelectorAll('[data-mellan]').forEach(function(c){
+        if(String(c.value).trim() !== '') c.classList.add(ledOk ? 'correct' : 'wrong');
+      });
+      var ok = ledOk && svarOk, mk = marker(ok);
+      row.appendChild(mk);
+      if(ok) ratt++;
+      else { var fx = document.createElement('span'); fx.className = 'ovn-fasit'; fx.textContent = 'rätt svar: ' + row.dataset.facit; row.appendChild(fx); }
     });
 
     var sam = rotEl.querySelector('[data-sammanf]');
@@ -1252,7 +1297,7 @@ function GEN_TEST_N2(){ return bladTest(2, false); }
 // ============================================================
 //  GRINDAR / LÅS  (sparas i localStorage)
 // ============================================================
-var PRAKTIKFLIKAR = ['forlanga','mellan','forkorta'];
+var PRAKTIKFLIKAR = ['forlanga','forkorta'];   // "Med mellanled" ingår i Förlänga (Joachim 2026-10-25)
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 
@@ -1285,8 +1330,17 @@ function uppdateraLas(){
 //  DELKAPITEL 3 · FÖRLÄNGA  (innehåll)
 // ============================================================
 // Radbyggare
-function radForlang(t, n, malN){ return {typ:'forlang', t:t, n:n, malN:malN, svarT: t * (malN / n)}; }
-function radTvaSteg(t, n, f1, f2){ var f = f1 * f2; return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar:{hel:0, t:t*f, n:n*f}}; }
+/* MELLANLEDET (Joachim 2026-10-25). En förlängning per uppgift, bråket i enklaste form, nämnare 3–10,
+   och förlängningen visas alltid som ett led eleven skriver: 2/9 = (2 · 3)/(9 · 3) = 6/27.
+   Förkortningen likadant: 4/14 = (4/2)/(14/2) = 2/7, där T/N är i enklaste form och faktorn är
+   största gemensamma delaren. Kravet står i gruppens data (mellanled: 'kravt'), inte i rubriken. */
+function radMellanled(slag, t, n, k, extra){
+  var r = {typ:'mellanled', slag:slag, t:t, n:n, k:k};
+  if(extra) Object.keys(extra).forEach(function(e){ r[e] = extra[e]; });
+  return r;
+}
+function radForlangMed(p, k){ return radMellanled('forlang', p[0], p[1], k); }
+function radForlangTill(p, malN){ return radMellanled('forlang', p[0], p[1], malN / p[1], {fastN:true}); }
 function radTecken(t1, n1, t2, n2){
   var v = t1 * n2 - t2 * n1;
   var s = v < 0 ? '<' : (v > 0 ? '>' : '=');
@@ -1294,20 +1348,17 @@ function radTecken(t1, n1, t2, n2){
 }
 function radMC(o){ return {typ:'mc', mal:o.mal, alternativ:o.alternativ, ratt:o.ratt}; }
 function radKedja(led){ return {typ:'kedja', led: led}; }
+// "Vilket tal saknas?" — ett steg: 3/5 = ▢/20
+function radLucka(p){ return radKedja([{t:p[0], n:p[1]}, {t:p[0] * p[2] / p[1], n:p[2], bt:true}]); }
+function radMGN(t1, n1, t2, n2){ var M = n1 * n2 / gcd(n1, n2); return {typ:'mgn', a:[t1,n1], b:[t2,n2], M:M}; }
 
-// Pooler (seedade med Joachims papper)
-var FORL_NAMN = [   // [täljare, nämnare, ny nämnare]
-  [1,2,8],[3,4,8],[1,4,8],[5,6,12],[2,3,12],[3,4,12],[1,3,12],[1,2,10],[2,5,10],[3,5,10]
-];
+// Pooler — [täljare, nämnare] i enklaste form, nämnare 3–10
+var FORL_MED2 = [[4,5],[3,4],[2,5],[1,5],[2,3],[3,7],[5,9],[7,10]];
+var FORL_MED3 = [[2,9],[3,4],[4,7],[5,8],[1,6],[2,5],[3,10],[5,7]];
 var FORL_TECKEN = [ // [t1,n1,t2,n2]
   [8,13,11,13],[5,8,5,12],[4,9,8,18],[2,2,4,4],[7,11,7,9],[3,4,3,8],[5,6,7,8]
 ];
-var FORL_KEDJA = [
-  [{t:1,n:2},{t:3,n:6},{t:6,n:12,bt:true},{t:4,n:8,bn:true}],
-  [{t:2,n:3},{t:4,n:6,bt:true},{t:10,n:15,bn:true},{t:6,n:9}],
-  [{t:3,n:4},{t:6,n:8,bn:true},{t:9,n:12,bt:true},{t:15,n:20}],
-  [{t:1,n:5},{t:2,n:10,bt:true},{t:3,n:15,bn:true},{t:4,n:20}]
-];
+var FORL_LUCKA = [[3,5,20],[2,3,12],[3,4,20],[4,9,27],[5,6,24],[2,7,21]];   // [t, n, ny nämnare]
 var FORL_MC = [
   {mal:[1,2], alternativ:[[1,3],[2,4],[3,5],[1,4],[3,4]], ratt:1},
   {mal:[2,3], alternativ:[[2,4],[4,6],[3,5],[5,6],[1,2]], ratt:1},
@@ -1315,32 +1366,36 @@ var FORL_MC = [
   {mal:[3,4], alternativ:[[3,5],[6,8],[4,6],[9,16],[2,3]], ratt:1},
   {mal:[1,3], alternativ:[[1,4],[2,5],[2,6],[3,6],[1,2]], ratt:2}
 ];
-var FORL_TVA23 = [[16,40],[2,9],[5,17],[7,12]];  // förläng med 2 sedan med 3
-var FORL_TVA34 = [[6,15],[2,17],[23,29],[5,8]];  // förläng med 3 sedan med 4
-
+var FORL_TILL   = [[3,8,24],[5,6,30],[4,9,36],[7,10,50],[2,7,28],[3,5,45]];   // [t, n, nämnaren som står]
+var FORL_TILL60 = [[5,6],[7,10],[3,4],[2,5],[1,3]];
+var MGN_PAIRS   = [[1,3,1,4],[2,3,1,4],[3,4,1,6],[2,5,1,4],[3,10,1,4]];
 
 function bladForlanga(niva, forsta){
   if(niva === 2){
-    var a23 = forsta ? FORL_TVA23.slice(0,3) : gSample(FORL_TVA23, 3);
-    var a34 = forsta ? FORL_TVA34.slice(0,3) : gSample(FORL_TVA34, 3);
+    var till = forsta ? FORL_TILL.slice(0,3)   : gSample(FORL_TILL, 3);
+    var t60  = forsta ? FORL_TILL60.slice(0,3) : gSample(FORL_TILL60, 3);
+    var mgn  = forsta ? MGN_PAIRS.slice(0,2)   : gSample(MGN_PAIRS, 2);
     return {
-      titel: 'Förlänga i två steg – nivå 2' + (forsta ? '' : ' (nytt blad)'),
+      titel: 'Förlänga – nivå 2',
       grupper: [
-        {rubrik:'Förläng med 2 och sedan med 3', rader: a23.map(function(p){ return radTvaSteg(p[0], p[1], 2, 3); })},
-        {rubrik:'Förläng med 3 och sedan med 4', rader: a34.map(function(p){ return radTvaSteg(p[0], p[1], 3, 4); })}
+        {rubrik:'Förläng till nämnaren som står – skriv mellanledet och svaret', mellanled:'kravt', rader: till.map(function(p){ return radForlangTill(p, p[2]); })},
+        {rubrik:'Förläng så att nämnaren blir 60', mellanled:'kravt', rader: t60.map(function(p){ return radForlangTill(p, 60); })},
+        {rubrik:'Förläng två bråk till minsta gemensamma nämnare', mellanled:'kravt', rader: mgn.map(function(p){ return radMGN(p[0], p[1], p[2], p[3]); })}
       ]
     };
   }
-  var namn   = forsta ? FORL_NAMN.slice(0,4)   : gSample(FORL_NAMN, 4);
+  var med2   = forsta ? FORL_MED2.slice(0,3)   : gSample(FORL_MED2, 3);
+  var med3   = forsta ? FORL_MED3.slice(0,3)   : gSample(FORL_MED3, 3);
   var tecken = forsta ? FORL_TECKEN.slice(0,4) : gSample(FORL_TECKEN, 4);
-  var kedja  = forsta ? FORL_KEDJA.slice(0,2)  : gSample(FORL_KEDJA, 2);
+  var lucka  = forsta ? FORL_LUCKA.slice(0,3)  : gSample(FORL_LUCKA, 3);
   var mc     = forsta ? FORL_MC.slice(0,2)     : gSample(FORL_MC, 2);
   return {
-    titel: 'Förlänga – nivå 1' + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Förlänga – nivå 1',
     grupper: [
-      {rubrik:'Skriv bråket med den nya nämnaren', rader: namn.map(function(p){ return radForlang(p[0], p[1], p[2]); })},
+      {rubrik:'Förläng med 2 – fyll i mellanledet och svaret', mellanled:'kravt', rader: med2.map(function(p){ return radForlangMed(p, 2); })},
+      {rubrik:'Förläng med 3 – skriv mellanledet och svaret', mellanled:'kravt', rader: med3.map(function(p){ return radForlangMed(p, 3); })},
       {rubrik:'Vilket tecken ska stå mellan bråken? <, = eller >', rader: tecken.map(function(p){ return radTecken(p[0], p[1], p[2], p[3]); })},
-      {rubrik:'Vilket tal saknas?', rader: kedja.map(function(x){ return radKedja(x); })},
+      {rubrik:'Vilket tal saknas?', rader: lucka.map(radLucka)},
       {rubrik:'Vilket bråk är likvärdigt? Välj rätt alternativ', rader: mc.map(function(x){ return radMC(x); })}
     ]
   };
@@ -1351,59 +1406,19 @@ function GRUND_FORLANGA_N2(){ return bladForlanga(2, true); }
 function GEN_FORLANGA_N2(){ return bladForlanga(2, false); }
 
 // ============================================================
-//  DELKAPITEL 3 · MED MELLANLED  (innehåll)
-// ============================================================
-function radMellanFyll(t, n, f){ return {typ:'mellanFyll', t:t, n:n, f:f}; }
-function radMellanMal(t, n, malN){ return {typ:'mellanMal', t:t, n:n, malN:malN}; }
-function radMGN(t1, n1, t2, n2){ var M = n1 * n2 / gcd(n1, n2); return {typ:'mgn', a:[t1,n1], b:[t2,n2], M:M}; }
-
-var MELL_A   = [[1,2],[3,4],[2,5],[1,5]];   // förläng med 2
-var MELL_B   = [[2,3],[1,4],[3,5],[2,7]];   // förläng med 3
-var MELL_MAL = [[1,2,8],[3,4,8],[2,3,12],[1,3,12],[2,5,10],[5,6,12]];
-var MGN_PAIRS = [[1,3,1,4],[1,2,1,3],[2,3,1,4],[3,4,1,6],[1,2,2,5],[1,4,1,6]];
-
-function bladMellan(niva, forsta){
-  if(niva === 2){
-    var mal = forsta ? MELL_MAL.slice(0,3) : gSample(MELL_MAL, 3);
-    var mgn = forsta ? MGN_PAIRS.slice(0,2) : gSample(MGN_PAIRS, 2);
-    return {
-      titel: 'Med mellanled – nivå 2' + (forsta ? '' : ' (nytt blad)'),
-      keypadOps: [],
-      grupper: [
-        {rubrik:'Förläng till nämnaren som står – fyll i faktorn och täljaren', rader: mal.map(function(p){ return radMellanMal(p[0], p[1], p[2]); })},
-        {rubrik:'Förläng två bråk till minsta gemensamma nämnare', rader: mgn.map(function(p){ return radMGN(p[0], p[1], p[2], p[3]); })}
-      ]
-    };
-  }
-  var a = forsta ? MELL_A.slice(0,3) : gSample(MELL_A, 3);
-  var b = forsta ? MELL_B.slice(0,3) : gSample(MELL_B, 3);
-  return {
-    titel: 'Med mellanled – nivå 1' + (forsta ? '' : ' (nytt blad)'),
-    grupper: [
-      {rubrik:'Förläng med 2 – fyll i mellanledet och svaret', rader: a.map(function(p){ return radMellanFyll(p[0], p[1], 2); })},
-      {rubrik:'Förläng med 3 – fyll i mellanledet och svaret', rader: b.map(function(p){ return radMellanFyll(p[0], p[1], 3); })}
-    ]
-  };
-}
-function GRUND_MELLAN_N1(){ return bladMellan(1, true); }
-function GEN_MELLAN_N1(){ return bladMellan(1, false); }
-function GRUND_MELLAN_N2(){ return bladMellan(2, true); }
-function GEN_MELLAN_N2(){ return bladMellan(2, false); }
-
-// ============================================================
 //  DELKAPITEL 3 · FÖRKORTA  (innehåll)
 // ============================================================
-function radForkorta(t, n, f){ return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar:{hel:0, t:t/f, n:n/f}, opnd:{slag:'forkorta', t:t, n:n, f:f}}; }
-function radEnklaste(t, n){ var g = gcd(t, n); return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar:{hel:0, t:t/g, n:n/g}, opnd:{slag:'enklaste', t:t, n:n}}; }
-function radBlandadForkort(t, n){ return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar: kanonisk(t, n)}; }
+// Talen är (T · f)/(N · f): T/N i enklaste form, N 3–10. Nivå 1 f 2–6, nivå 2 f ∈ {4, 6, 8, 9, 12}.
+function radForkorta(p){ return radMellanled('forkort', p[0], p[1], gcd(p[0], p[1])); }
+function radBlandadForkort(p){ return radMellanled('forkort', p[0], p[1], gcd(p[0], p[1]), {blandad:true}); }
 function radStam(){ return {typ:'stambrak'}; }
 function radPara(par){ return {typ:'para', par: par}; }
 
-var FORK_MED2  = [[2,4],[4,14],[6,8],[10,12]];
-var FORK_MED5  = [[10,15],[15,20],[20,25],[5,30]];
+var FORK_MED2  = [[4,6],[4,14],[6,8],[10,12],[8,10],[6,14],[14,16],[10,18]];
+var FORK_MED5  = [[10,15],[15,20],[20,25],[5,30],[35,40],[15,50],[10,45]];
 var FORK_ENK1  = [[16,20],[15,25],[24,30],[6,9],[8,12],[9,15]];
-var FORK_LANG  = [[16,40],[24,54],[48,72],[48,60],[49,56],[36,48]];
-var FORK_BLAND = [[72,20],[96,18],[144,64],[162,18]];
+var FORK_LANG  = [[16,40],[24,54],[27,36],[48,60],[36,48],[40,72],[42,54],[20,36]];
+var FORK_BLAND = [[72,20],[96,18],[63,36],[88,24],[60,16],[84,36]];
 var FORK_PARA  = [
   [[4,8],[6,9],[9,12],[4,10]],
   [[6,8],[10,15],[8,10],[3,12]],
@@ -1413,12 +1428,12 @@ var FORK_PARA  = [
 function bladForkorta(niva, forsta){
   if(niva === 2){
     var lang  = forsta ? FORK_LANG.slice(0,4)  : gSample(FORK_LANG, 4);
-    var bland = forsta ? FORK_BLAND.slice(0,4) : gSample(FORK_BLAND, 4);
+    var bland = forsta ? FORK_BLAND.slice(0,3) : gSample(FORK_BLAND, 3);
     return {
-      titel: 'Förkorta – nivå 2' + (forsta ? '' : ' (nytt blad)'),
+      titel: 'Förkorta – nivå 2',
       grupper: [
-        {rubrik:'Förkorta så långt som möjligt (enklaste form)', rader: lang.map(function(p){ return radEnklaste(p[0], p[1]); })},
-        {rubrik:'Förkorta och skriv i blandad form', rader: bland.map(function(p){ return radBlandadForkort(p[0], p[1]); })}
+        {rubrik:'Förkorta så långt som möjligt (enklaste form)', mellanled:'kravt', rader: lang.map(radForkorta)},
+        {rubrik:'Förkorta och skriv i blandad form', mellanled:'kravt', rader: bland.map(radBlandadForkort)}
       ]
     };
   }
@@ -1427,11 +1442,11 @@ function bladForkorta(niva, forsta){
   var enk  = forsta ? FORK_ENK1.slice(0,3) : gSample(FORK_ENK1, 3);
   var para = forsta ? FORK_PARA[0]         : gPick(FORK_PARA);
   return {
-    titel: 'Förkorta – nivå 1' + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Förkorta – nivå 1',
     grupper: [
-      {rubrik:'Förkorta med 2', rader: m2.map(function(p){ return radForkorta(p[0], p[1], 2); })},
-      {rubrik:'Förkorta med 5', rader: m5.map(function(p){ return radForkorta(p[0], p[1], 5); })},
-      {rubrik:'Skriv i enklaste form', rader: enk.map(function(p){ return radEnklaste(p[0], p[1]); })},
+      {rubrik:'Förkorta med 2', mellanled:'kravt', rader: m2.map(radForkorta)},
+      {rubrik:'Förkorta med 5', mellanled:'kravt', rader: m5.map(radForkorta)},
+      {rubrik:'Skriv i enklaste form', mellanled:'kravt', rader: enk.map(radForkorta)},
       {rubrik:'Skriv ett stambråk (1 i täljaren)', rader: [radStam(), radStam(), radStam()]},
       {rubrik:'Para ihop bråk som har samma värde', rader: [radPara(para)]}
     ]
@@ -1452,8 +1467,6 @@ function placeholderHTML(titel, text){
 var GENERATORER = {
   forlanga: { nivaer: { 1: { grund: GRUND_FORLANGA_N1, gen: GEN_FORLANGA_N1 },
                         2: { grund: GRUND_FORLANGA_N2, gen: GEN_FORLANGA_N2 } } },
-  mellan:   { nivaer: { 1: { grund: GRUND_MELLAN_N1,   gen: GEN_MELLAN_N1 },
-                        2: { grund: GRUND_MELLAN_N2,   gen: GEN_MELLAN_N2 } } },
   forkorta: { nivaer: { 1: { grund: GRUND_FORKORTA_N1, gen: GEN_FORKORTA_N1 },
                         2: { grund: GRUND_FORKORTA_N2, gen: GEN_FORKORTA_N2 } } }
 };
@@ -1503,7 +1516,6 @@ if(tabRow) tabRow.querySelectorAll('.tab-btn').forEach(function(btn){
 
 uppdateraLas();
 byggSheet('forlanga', true);
-byggSheet('mellan', true);
 byggSheet('forkorta', true);
 
 // Visa en liten badge i hörnet om dev-läget är aktivt
@@ -1522,18 +1534,17 @@ window.BLAD_K2_D3 = (function(){
   var bank = {};
   function lagg(nod, post){ (bank[nod] = bank[nod] || []).push(post); }
   var blad = [];
-  [GRUND_FORLANGA_N1, GRUND_FORLANGA_N2, GRUND_MELLAN_N1, GRUND_MELLAN_N2, GRUND_FORKORTA_N1, GRUND_FORKORTA_N2].forEach(function(bygg){
+  [GRUND_FORLANGA_N1, GRUND_FORLANGA_N2, GRUND_FORKORTA_N1, GRUND_FORKORTA_N2].forEach(function(bygg){
     if(typeof bygg !== 'function') return;
     try { blad.push(bygg()); } catch(e){}
   });
   blad.forEach(function(b){
     (b.grupper || []).forEach(function(g){
       (g.rader || []).forEach(function(r){
-        if(r.typ === 'forlang') lagg('brak-forlanga:rakna', { slag:'forlang', t:r.t, n:r.n, malN:r.malN });
-        else if(r.typ === 'mellanMal') lagg('brak-forlanga:rakna', { slag:'forlang', t:r.t, n:r.n, malN:r.malN });
+        if(r.typ === 'mellanled' && r.slag === 'forlang') lagg('brak-forlanga:rakna', { slag:'forlang', t:r.t, n:r.n, malN:r.n * r.k });
+        else if(r.typ === 'mellanled' && !r.blandad) lagg('brak-forkorta:rakna', { slag:'forkorta', t:r.t, n:r.n, f:r.k });
         else if(r.typ === 'tecken') lagg('brak-jmf-lika:begrepp', { slag:'tecken', a:r.a, b:r.b, svar:r.svar });
         else if(r.typ === 'mgn') lagg('brak-mgn:rakna', { slag:'mgn', t1:r.t1, n1:r.n1, t2:r.t2, n2:r.n2 });
-        else if(r.opnd) lagg('brak-forkorta:rakna', r.opnd);
       });
     });
   });
