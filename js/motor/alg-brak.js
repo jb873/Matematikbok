@@ -44,10 +44,21 @@
   function rfDiv(a, b){ return rf(pMul(a.num, b.den), pMul(a.den, b.num)); }
   function rfPow(a, n){ var r = rf(pConst(R(1))); for(var i = 0; i < n; i++) r = rfMul(r, a); return r; }
 
+  /* UPPHÖJDA SIFFROR (Joachim 2026-10-26): knappsatsens potensknapp skriver exponenten upphöjd,
+     x², och ett fysiskt tangentbord ger x^2. Båda läses som samma potens. Översättningen sker
+     först, så att parsern och formläsningen bara ser ^-formen. */
+  var UPPHOJDA = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+                   '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+  function utanUpphojt(s){
+    return String(s).replace(/[⁰¹²³⁴-⁹]+/g, function(m){
+      return '^' + m.split('').map(function(c){ return UPPHOJDA[c]; }).join('');
+    });
+  }
+
   // ── Parser (rekursiv nedstigning) → RatFunc. Klarar +−·/ ^ parenteser, variabler, decimaler,
   //    implicit multiplikation (2x, 3(x+1), xy, (x-1)(x+1)) och BRAK(a)(b). ──
   function parse(str){
-    var s = ('' + str).replace(/[−–—]/g, '-').replace(/·/g, '*').replace(/×/g, '*').replace(/,(\d)/g, '.$1').replace(/\s+/g, '');   // FAS1: även en-/em-dash
+    var s = utanUpphojt('' + str).replace(/[−–—]/g, '-').replace(/·/g, '*').replace(/×/g, '*').replace(/,(\d)/g, '.$1').replace(/\s+/g, '');   // FAS1: även en-/em-dash
     var i = 0;
     function peek(){ return s[i]; }
     function eof(){ return i >= s.length; }
@@ -146,9 +157,12 @@
   // kvar. Analysen läser elevens sträng (inte polynomet) — därför en egen liten läsning här.
   //   FORMREGLER (Joachim 2026-09-22): koefficienten 1 skrivs som x, inte 1x.  Termernas ordning
   //   är fri. Decimalkoefficienter tillåtna (12,5x). Parentes behövs aldrig i ett förenklat svar.
+  //   POTENSER (2026-10-26): en variabel f\u00e5r b\u00e4ra en exponent, x\u00b2 eller x^2, och d\u00e5 \u00e4r x\u00b2 och x
+  //   olika termer. Samma bokstav tv\u00e5 g\u00e5nger i en term (10yy, x\u00b7x) \u00e4r en multiplikation som inte
+  //   \u00e4r utr\u00e4knad, och en upph\u00f6jd siffra (3\u00b2) likas\u00e5.
   function polyForm(str, opts){
     opts = opts || {};
-    var s = ('' + str).replace(/[\u2212\u2013\u2014]/g, '-').replace(/[·\u00d7]/g, '*').replace(/,(\d)/g, '.$1').replace(/\s+/g, '');
+    var s = utanUpphojt('' + str).replace(/[\u2212\u2013\u2014]/g, '-').replace(/[·\u00d7]/g, '*').replace(/,(\d)/g, '.$1').replace(/\s+/g, '');
     if(s === '') return { fel: 'tom' };
     if(/[()]/.test(s)) return { fel: 'parentes' };
     // dela i toppnivåtermer (tecknet hör till termen)
@@ -163,13 +177,19 @@
     var analys = [], fel = null;
     termer.forEach(function(t){
       var neg = t[0] === '-'; if(neg || t[0] === '+') t = t.slice(1);
-      var siffror = [], bokstaver = [], division = false, ettor = false, j = 0;
+      var siffror = [], bokstaver = [], exp = {}, division = false, ettor = false, j = 0;
       while(j < t.length){
         var ch = t[j];
         if(ch === '*'){ j++; continue; }
         if(ch === '/'){ division = true; j++; continue; }
         if(/[0-9.]/.test(ch)){ var num = ''; while(j < t.length && /[0-9.]/.test(t[j])) num += t[j++]; siffror.push(num); continue; }
-        if(/[a-z]/.test(ch)){ bokstaver.push(ch); j++; continue; }
+        if(/[a-z]/.test(ch)){
+          if(bokstaver.indexOf(ch) >= 0) fel = fel || 'ejMultiplicerad';   // 10yy, x·x
+          bokstaver.push(ch); j++;
+          if(t[j] === '^'){ j++; var e = ''; while(j < t.length && /[0-9]/.test(t[j])) e += t[j++]; exp[ch] = parseInt(e, 10); if(!(exp[ch] > 1)) fel = fel || 'tecken'; }
+          continue;
+        }
+        if(ch === '^'){ fel = fel || 'ejMultiplicerad'; j++; while(j < t.length && /[0-9]/.test(t[j])) j++; continue; }   // 3², (…)²
         fel = fel || 'tecken'; j++;
       }
       if(siffror.length > 1 && !division) fel = fel || 'ejMultiplicerad';   // 2·3x
@@ -177,7 +197,7 @@
       if(bokstaver.length && siffror.length === 1 && parseFloat(siffror[0]) === 1) ettor = true;   // 1x
       if(bokstaver.length && siffror.length && parseFloat(siffror[0]) === 0) fel = fel || 'nollterm';   // 0x
       if(ettor && !opts.tillatEtta) fel = fel || 'koefficient1';
-      analys.push({ nyckel: bokstaver.slice().sort().join(''), konstant: !bokstaver.length, nollTerm: !bokstaver.length && siffror.length === 1 && parseFloat(siffror[0]) === 0 });
+      analys.push({ nyckel: bokstaver.slice().sort().map(function(b){ return b + (exp[b] ? '^' + exp[b] : ''); }).join(''), konstant: !bokstaver.length, nollTerm: !bokstaver.length && siffror.length === 1 && parseFloat(siffror[0]) === 0 });
     });
     if(!fel){
       var sedda = {};
@@ -294,7 +314,7 @@
   }
 
   var API = { gradeOmkrets: gradeOmkrets, OMKRETSBESKED: OMKRETSBESKED, termerAv: termerAv, sammaTermer: sammaTermer,
-              parse: parse, pointEqual: pointEqual, grade: grade, gradePoly: gradePoly, gradeSidor: gradeSidor, gradeOppet: gradeOppet, polyForm: polyForm, termAntal: termAntal, _rf: { rf: rf, rfDiv: rfDiv, pEval: pEval, pIsConst: pIsConst }, VARS: VARS };
+              parse: parse, pointEqual: pointEqual, grade: grade, gradePoly: gradePoly, gradeSidor: gradeSidor, gradeOppet: gradeOppet, polyForm: polyForm, termAntal: termAntal, utanUpphojt: utanUpphojt, _rf: { rf: rf, rfDiv: rfDiv, pEval: pEval, pIsConst: pIsConst }, VARS: VARS };
   if(typeof window !== 'undefined') window.AlgBrak = API;
   if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();
