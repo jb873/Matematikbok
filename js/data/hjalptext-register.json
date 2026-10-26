@@ -5,5 +5,11 @@
     "– avrunda till två decimaler",
     "– byt mellan bråk och decimalform",
     "– ingen uppställning"
+  ],
+  "js/motor/blad/blad-ak8-parentes.js": [
+    "– visa mellanled",
+    "– visa mellanled – och beräkna värdet när x = 3",
+    "– visa mellanled – och beräkna värdet när x = 4 och y = −2",
+    "– visa mellanled – och beräkna värdet när x = 7"
   ]
 }

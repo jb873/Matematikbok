@@ -18,14 +18,32 @@
    KÖR:  node verktyg/hjalptext-grind.js                  prövar OMFANG mot registret
          node verktyg/hjalptext-grind.js --godkann <fil>  skriver filens NUVARANDE kandidater som godkända
                                                          (bara efter Joachims granskning)
-   Omfång: OMFANG (Plugg till prov k1 d10). Ny fil → en rad. Noll nätväg. */
+         node verktyg/hjalptext-grind.js --sabba ledtrad|blind   negativ verifiering (i minnet, källan orörd):
+                                                         ledtrad = en ledtråd läggs till i första filen,
+                                                         blind = första filen läses som tom → båda ska fälla
+   Omfång: OMFANG (Plugg till prov k1 d10 + algebrasidorna). Ny fil → en rad. Noll nätväg.
+
+   BLIND FIL FÄLLER. En fil i omfånget där läsaren inte hittar ett enda fält mäts inte — den ser grön
+   ut för att grinden inte ser något. Varje fil måste ge minst ett läst fält. */
 'use strict';
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const REG = path.join(ROOT, 'js/data/hjalptext-register.json');
-const OMFANG = ['js/motor/blad/blad-k1-d10.js'];
+// Algebrasidorna (Joachim 2026-10-26: "d3 och övriga algebrasidor"): sjuans k3 och åttans k2 —
+// bladfilerna, problemlösningens texter (prob-modell) och sidorna själva (intron i html).
+const OMFANG = ['js/motor/blad/blad-k1-d10.js',
+  'js/motor/blad/blad-k3-d1.js', 'js/motor/blad/blad-k3-d2.js', 'js/motor/blad/blad-k3-d3.js', 'js/motor/blad/blad-k3-d7.js',
+  'js/motor/ekvationer-balans/ekvationer-balans.js', 'js/motor/problemlosning/prob-modell.js',
+  'js/motor/problemlosning/prob-blad.js', 'js/motor/problemlosning/prob-blad2.js', 'js/motor/problemlosning/prob-blad3.js',
+  'js/motor/problemlosning/prob-blad4.js', 'js/motor/problemlosning/prob-blad5.js',
+  'js/motor/blad/blad-ak8-alg1.js', 'js/motor/blad/blad-ak8-parentes.js', 'js/motor/blad/blad-ak8-mult-parentes.js',
+  'js/data/ak8-ekv1.js',
+  'ak7/k3/d1-algebraiska-uttryck/index.html', 'ak7/k3/d2-monster/index.html', 'ak7/k3/d3-forenkla-uttryck/index.html',
+  'ak7/k3/d4-ekvationer/index.html', 'ak7/k3/d5-problemlosning/index.html', 'ak7/k3/d7-pluggtillprov/index.html',
+  'ak8/k2/d1-algebraiska-uttryck/index.html', 'ak8/k2/d3-parentes/index.html', 'ak8/k2/d5-ekvationer-steg1/index.html'];
 const args = process.argv.slice(2);
 const GODKANN = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--godkann'));
+const SABBA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sabba'));
 
 const LEDORD = /(^|[^a-zåäö])(använd|tänk på|kom ihåg|gärna|papper|med komma|minusknapp|svara i|ledtråd|tips|t\.ex\.)([^a-zåäö]|$)/i;
 const UI = /tryck (sedan )?på kontrollera|när du är klar/i;          // knappinstruktion, inte en ledtråd
@@ -41,6 +59,9 @@ function falt(kalla){
   // intron och instruktioner som byggs i html i renderarna
   const re2 = /class="(ovn-intro|ftrad-uppg-instr)">([^<]*)</g;
   while((m = re2.exec(kalla)) !== null) ut.push({ falt: m[1], text: m[2] });
+  // sidans ingress under rubriken (d3:s metodbeskrivning låg där, 2026-10-26)
+  const re3 = /class="hero-desc">([^<]*)</g;
+  while((m = re3.exec(kalla)) !== null) ut.push({ falt: 'ingress', text: m[1] });
   return ut;
 }
 function kandidater(f){
@@ -52,9 +73,16 @@ function kandidater(f){
   ren.split(/(?<=[.!?])\s+/).forEach(men => { if(LEDORD.test(men) && !UI.test(men)) ut.push(men.trim()); });
   return ut;
 }
+const lastaFalt = {};
 function las(fil){
-  const kalla = fs.readFileSync(path.join(ROOT, fil), 'utf8'), set = new Set();
-  falt(kalla).forEach(f => kandidater(f).forEach(k => set.add(k.replace(/\s+/g, ' '))));
+  let kalla = fs.readFileSync(path.join(ROOT, fil), 'utf8');
+  if(SABBA && fil === OMFANG[0]){
+    if(SABBA === 'blind') kalla = '';
+    else if(SABBA === 'ledtrad') kalla += "\nrubrik: 'Förenkla uttrycket – tänk på att byta tecken'";
+  }
+  const set = new Set(), f = falt(kalla);
+  lastaFalt[fil] = f.length;
+  f.forEach(x => kandidater(x).forEach(k => set.add(k.replace(/\s+/g, ' '))));
   return [...set].sort();
 }
 
@@ -71,9 +99,11 @@ console.log('HJÄLPTEXT-GRIND — instruktioner i uppgifterna ska vara godkända
 OMFANG.forEach(fil => {
   const nu = las(fil), godk = new Set(reg[fil] || []);
   const nya = nu.filter(k => !godk.has(k)), borta = [...godk].filter(k => nu.indexOf(k) < 0);
+  // En bladfil utan ett enda läst fält är en blind fil. En sida (html) får sakna intro och ingress.
+  if(!lastaFalt[fil] && /\.js$/.test(fil)){ fel++; console.log('✗ ' + fil + ': BLIND — läsaren hittade inga fält, filen mäts inte'); return; }
   nya.forEach(k => { fel++; console.log('✗ ' + fil + ': NY instruktion, inte godkänd: "' + k + '"'); });
   borta.forEach(k => console.log('  ⓘ ' + fil + ': godkänd instruktion finns inte längre: "' + k + '" (städas vid nästa --godkann)'));
-  if(!nya.length) console.log('✓ ' + fil + ': ' + nu.length + ' instruktioner, alla godkända');
+  if(!nya.length) console.log('✓ ' + fil + ': ' + nu.length + ' instruktioner, alla godkända (' + lastaFalt[fil] + ' fält lästa)');
 });
 console.log('\n' + (fel ? '✗ HJÄLPTEXT-GRIND RÖD (' + fel + ')' : '✓ HJÄLPTEXT-GRIND GRÖN'));
 process.exit(fel ? 1 : 0);
