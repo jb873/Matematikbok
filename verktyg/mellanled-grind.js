@@ -115,7 +115,10 @@ const PROBE = `(function(){
       var MEL = 'input[data-prioled], input[data-mellan], input[data-vl], input[data-mellanvarde], input[data-oms]';
       var satt = function(i, v){ i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
       var prov = [];
-      rader.forEach(function(r, ri){
+      /* FRIVILLIGT mellanled (mellanled: 'frivilligt', Joachim 2026-10-26 — decimaltal som bråk): ledet får
+         lämnas tomt och rättas på värdet, så svaret i ledet är tillåtet. Genvägen provas bara där ledet krävs;
+         platsen för ledet mäts ändå. */
+      if(flagga === 'kravt') rader.forEach(function(r, ri){
         var mel = Array.prototype.filter.call(r.querySelectorAll(MEL), synlig)[0];
         var sv = Array.prototype.filter.call(r.querySelectorAll('input[data-svar]'), synlig).pop();
         if(!mel || !sv || mel === sv) return;

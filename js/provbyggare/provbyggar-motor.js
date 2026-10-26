@@ -734,6 +734,8 @@ function gradeSub(s, ans){
     // Varje LED rättas på VÄRDE (valfri giltig korsförkortning godtas) — speglat från drillens mellanRatt.
     const ledOk = (s.led || []).every((L, i) => {
       if(L.faktor) return faktorLedOk(L.faktor, ans.led[i]);
+      // FRIVILLIGT led (decimaltal som bråk, Joachim 2026-10-26): tomt är varken fel eller krav; ifyllt rättas på värdet.
+      if(L.frivilligt && !(ans.led[i] && (String(ans.led[i][0]).trim() || String(ans.led[i][1]).trim()))) return true;
       const t = AK8_UI.pInt(ans.led[i] && ans.led[i][0]), n = AK8_UI.pInt(ans.led[i] && ans.led[i][1]);
       if(isNaN(t) || isNaN(n) || n === 0) return false;
       return Math.abs(t / n - L.varde) < 1e-9;

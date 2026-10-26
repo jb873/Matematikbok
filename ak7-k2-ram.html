@@ -1006,9 +1006,14 @@ function blandadEngine(){
       var k=function(x){return(''+x).replace('.',',');}, b=rP([[1,2,0.5],[1,4,0.25],[3,4,0.75],[1,5,0.2],[2,5,0.4],[3,5,0.6],[4,5,0.8],[1,10,0.1],[3,10,0.3],[7,10,0.7],[1,8,0.125],[3,8,0.375]]);
       return {key:'bd'+b[0]+'/'+b[1], prompt:'Skriv '+b[0]+'/'+b[1]+' som decimaltal.', ans:b[2], expl:b[0]+'/'+b[1]+' = '+k(b[2])+'.'};
     }) ] },
-    'dec-brak': { snabb: [ G.brak('dec-brak','Decimaltal som bråk','brak-blandad', function(){
+    // Frivilligt mellanled (Joachim 2026-10-26): 0,25 = 25/100 = 1/4, men 0,25 = 1/4 godtas också. Ledet är
+    // frivilligt i datan (provbyggarens mellanled-typ, led.frivilligt): tomt godtas, ifyllt rättas på värdet.
+    'dec-brak': { snabb: [ G.mellanled('dec-brak','Decimaltal som bråk','brak-blandad', function(){
       var k=function(x){return(''+x).replace('.',',');}, b=rP([[0.5,1,2],[0.25,1,4],[0.75,3,4],[0.2,1,5],[0.4,2,5],[0.6,3,5],[0.8,4,5],[0.1,1,10],[0.3,3,10]]);
-      return {key:'db'+b[0], prompt:'Skriv '+k(b[0])+' som bråk i enklaste form.', talj:b[1], namn:b[2], expl:k(b[0])+' = '+b[1]+'/'+b[2]+'.'};
+      var d=(k(b[0]).split(',')[1]||'').length, N=Math.pow(10,d), T=Math.round(b[0]*N);
+      return {key:'db'+b[0], prompt:'Skriv '+k(b[0])+' som bråk i enklaste form.',
+        led:[ { fraga:k(b[0]), varde:b[0], facit:T+'/'+N, frivilligt:true } ], slutTalj:b[1], slutNamn:b[2], svarform:'enklaste',
+        expl:k(b[0])+' = '+T+'/'+N+' = '+b[1]+'/'+b[2]+'.'};
     }) ] },
     'oakta-blandad': { snabb: [ function genOaktaBland(seen){
       var subs=[], tries=0;

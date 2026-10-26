@@ -77,9 +77,13 @@
 .ml-facit .ovn-text{font-size:inherit;}
 .ml-facit .ovn-brak-strecket{min-width:18px;}
 .ml-facit .ovn-brak-taljare,.ml-facit .ovn-brak-namnare{display:inline-flex;align-items:center;gap:2px;}
+/* Frivilligt mellanled (d2, decimaltal som bråk, Joachim 2026-10-26): ritas som ett led — streckad guldram som
+   stegrutorna — inte som en svarsruta. Rättat får det samma gröna/röda ram som andra rutor. */
+.brak-friv .ovn-in:not(.correct):not(.wrong){border:2px dashed var(--gold-lt,#c49a40);background:rgba(154,114,40,.05);}
 /* Korsvis förkortning (d6): fyra ledrutor, två i täljaren och två i nämnaren — smalare än d3:s två. */
 .kors-led .ovn-brak-taljare,.kors-led .ovn-brak-namnare{display:inline-flex;align-items:center;gap:3px;}
 .kors-led .ovn-in{width:62px;height:30px;font-size:16px;padding:0 3px;}
+.kors-tre .kors-led .ovn-in{width:54px;}   /* tre bråk: sex rutor på en rad */
 .mgn-rad{align-items:flex-start;}
 .mgn-block{display:flex;flex-direction:column;gap:11px;}
 .mgn-text{font-size:16px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
@@ -128,6 +132,16 @@
 .brak-femled .ovn-brak{margin:0 1px;}
 .brak-femled .ovn-text{margin:0 3px !important;}
 .brak-stegfrak .ovn-brak-taljare,.brak-stegfrak .ovn-brak-namnare{padding:1px 0;}
+/* Femled med TRE termer (d5, Joachim 2026-10-26): hela kedjan på en rad vid 1366 och 1536 (K-L) — tätare
+   mellan tecken och led; rutorna och talen har samma storlek som i tvåtermsraderna. */
+.brak-femled.femled-tre .ovn-led-par{gap:2px;}
+.brak-femled.femled-tre .femled-eq{margin:0 2px;font-size:17px;}
+.brak-femled.femled-tre .ovn-text{margin:0 1px !important;}
+.brak-femled.femled-tre .ovn-brak{margin:0;}
+.brak-femled.femled-tre .brak-prodfrak .ovn-brak-taljare,.brak-femled.femled-tre .brak-prodfrak .ovn-brak-namnare{gap:0;}
+.brak-femled.femled-tre .brak-steg-cell:not(.smal){width:30px;}
+.brak-femled.femled-tre .brak-svar .brak-cell{width:40px;}
+.brak-femled.femled-tre .brak-svar .brak-hel{width:34px;}
 .brak-steg-cell.smal{width:26px;font-size:14px;}
 .brak-steg-cell:focus{outline:none;box-shadow:0 0 0 3px rgba(154,114,40,.15);background:#fff;}
 .brak-steg-cell.correct{border-color:#16a34a;border-style:solid;background:rgba(22,163,74,.08);color:#15803d;}

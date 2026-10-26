@@ -22,7 +22,14 @@
    --sabba d3   lägger [16,40] i poolen "Förläng med 3" → (1) och (2) ska fälla.
    --sabba d3t  lägger 2/2 mot 4/4 i tecken och 1/2 i flervalet → (1) och (2) ska fälla.
 
-   KÖR:  node verktyg/spec-fuzz-k2-blad.js [--sabba d3|d3t]     Noll nätväg, ingen fil ändras. */
+   d5 'k2d5:forlang' (förläng en/båda nämnarna) och 'k2:addsub' (gemensam nämnare ≤ 42 i addition och
+   subtraktion, alla flikar; rader i decimalform räknas upp men mäts inte). d6 'k2d6:korsvis' (två och tre
+   bråk). Drillarnas talval (förkorta, förlänga, likformiga, addition/subtraktion) och ramens testgeneratorer
+   (faktorled, andelens rutnät, decimaltal som bråk med frivilligt led, gemensam nämnare i add/sub), de
+   senare i sidan via cdp-kor.
+   --sabba d5 | addsub | d6 | d6t | drill | drill42 | test | test42   fäller var sitt ben.
+
+   KÖR:  node verktyg/spec-fuzz-k2-blad.js [--sabba <ben>]     Noll nätväg, ingen fil ändras. */
 'use strict';
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..');
@@ -231,6 +238,28 @@ else {
     });
   }
   console.log('\n  ' + rader5 + ' rader ur ' + GEN5.join(', ') + ' (' + steg5 + ' med förlängningsled)');
+
+  // Addition och subtraktion i d5 (alla flikar): gemensam nämnare högst 42 (k2:addsub). Radens nämnare ur
+  // datan (steg, opnd eller namnare); rader som räknas i decimalform mäts inte och räknas upp för sig.
+  const AS = SPEC.BLAD['k2:addsub'];
+  if(SABBA('addsub')){ vm.runInContext('PAR_FB_S.push([9,10])', S5); console.log('\n  [SABBA addsub: [9,10] (90) i "Förläng båda nämnarna", nivå 2]'); }
+  const GEN5B = GEN5.concat(['GRUND_BLANDAD_N1', 'GEN_BLANDAD_N1', 'GRUND_BLANDAD_N2', 'GEN_BLANDAD_N2']);
+  let raderAS = 0, decimal = 0, storstAS = 0, varvAS = 0; const fAS = brott;
+  while(raderAS < 30000 && varvAS++ < 20000){
+    GEN5B.forEach(function(namn){
+      vm.runInContext(namn + '()', S5).grupper.forEach(function(g){
+        g.rader.forEach(function(r){
+          if(r.typ === 'brakDecimal'){ decimal++; return; }
+          const ns = r.steg ? r.steg.termer.map(function(x){ return x.n; }) : r.opnd ? [r.opnd.n1, r.opnd.n2] : r.namnare;
+          if(!ns) return;
+          raderAS++;
+          const m = ns.reduce(lcm, 1); storstAS = Math.max(storstAS, m);
+          if(m > AS.tak.maxGemNamnare) fel(namn + ' · ' + g.rubrik + ': nämnarna ' + ns.join(', ') + ' har gemensam nämnare ' + m + ' > ' + AS.tak.maxGemNamnare);
+        });
+      });
+    });
+  }
+  console.log('  ' + (brott === fAS ? '✓' : '✗') + ' addition och subtraktion: ' + raderAS + ' rader ur alla flikar, största gemensamma nämnare ' + storstAS + ' (≤ ' + AS.tak.maxGemNamnare + ') · ' + decimal + ' rader i decimalform mäts inte');
 }
 
 // ── d6 "Förkorta korsvis" ─────────────────────────────────────────────────────────────────────────
@@ -239,20 +268,36 @@ if(!K6) fel('spec-villkor-k2.js saknar BLAD[k2d6:korsvis]');
 else {
   const S6 = sandlada('js/motor/blad/blad-k2-d6.js');
   if(SABBA('d6')){ vm.runInContext('gStoraRad = function(){ return radKors(26,45,9,13); }', S6); console.log('\n  [SABBA d6: 26/45 · 9/13 (faktorerna 13 och 9) i generatorn]'); }
+  if(SABBA('d6t')){ vm.runInContext('gStoraTreRad = function(){ return radKorsTre(3,8,4,5,1,6); }', S6); console.log('\n  [SABBA d6t: 3/8 · 4/5 · 1/6 (= 1/20) i tre-bråksgeneratorn]'); }
   console.log('\nSPEC-FUZZ k2-BLAD — d6 "Förkorta korsvis": båda bråken i enklaste form, faktorer ur nivån, svaret i enklaste form med nämnare ' + K6.tak.minNamnare + '–' + K6.tak.maxNamnare + '\n');
-  const GEN6 = ['GRUND_STORATAL_N1', 'GEN_STORATAL_N1'];
+  const GEN6 = ['GRUND_STORATAL_N1', 'GEN_STORATAL_N1', 'GRUND_STORATAL_N2', 'GEN_STORATAL_N2'];
   let rader6 = 0, varv6 = 0;
   while(rader6 < 30000 && varv6++ < 20000){
     GEN6.forEach(function(namn){
       const blad = vm.runInContext(namn + '()', S6);
       blad.grupper.forEach(function(g){
         const v = namn + ' · ' + g.rubrik;
-        const kors = /korsvis/.test(g.rubrik);
+        const kors = /korsvis|ta bort ett mellanled/.test(g.rubrik);
         if(kors && g.mellanled !== 'kravt') fel(v + ': gruppen förkortar korsvis men kräver inte mellanledet i datan');
         g.rader.forEach(function(r){
           if(!kors) return;
           rader6++;
           if(r.typ !== 'mulKors'){ fel(v + ': radtypen ' + r.typ + ' saknar förkortningsledet'); return; }
+          if(r.br.length === 3){
+            // tre bråk (blad 2): ledet med en faktor per tal, produkten uppe = produkten nere, enklaste form
+            const u3 = r.br.map(function(f){ return f.join('/'); }).join(' · ');
+            if(r.br.some(function(f){ return gcd(f[0], f[1]) !== 1; })) fel(v + ': ' + u3 + ' — ett bråk är inte i enklaste form');
+            let fT = 1, fN = 1, kT = 1, kN = 1;
+            r.br.forEach(function(f, i){
+              if(f[0] % r.gT[i] || f[1] % r.gN[i]) fel(v + ': ' + u3 + ' — facitets faktor går inte jämnt upp');
+              fT *= r.gT[i]; fN *= r.gN[i]; kT *= f[0] / r.gT[i]; kN *= f[1] / r.gN[i];
+            });
+            if(fT !== fN) fel(v + ': ' + u3 + ' — facitets faktorer uppe (' + fT + ') och nere (' + fN + ') är inte samma');
+            if(gcd(kT, kN) !== 1) fel(v + ': ' + u3 + ' — ledet når inte enklaste form (' + kT + '/' + kN + ')');
+            if(!inom(K6, kN)) fel(v + ': ' + u3 + ' = ' + kT + '/' + kN + ', nämnaren ' + kN + ' utanför ' + K6.tak.minNamnare + '–' + K6.tak.maxNamnare);
+            if(r.gT.filter(function(x){ return x > 1; }).length < 2) fel(v + ': ' + u3 + ' — färre än två tal förkortas');
+            return;
+          }
           const u = r.t1 + '/' + r.n1 + ' · ' + r.t2 + '/' + r.n2;
           if(gcd(r.t1, r.n1) !== 1 || gcd(r.t2, r.n2) !== 1) fel(v + ': ' + u + ' — ett bråk är inte i enklaste form');
           const g1 = gcd(r.t1, r.n2), g2 = gcd(r.t2, r.n1), lista = K6.faktorer[g.niva || 1];
@@ -295,6 +340,16 @@ else {
     }
   });
   console.log('  ' + (brott === fore ? '✓' : '✗') + ' ' + n + ' uppgifter ur genForkortaTal, genForlangaTal och genLikformig (nivå 1–3)');
+  // Addition/subtraktion-drillen: gemensam nämnare högst 42 i varje par (k2:addsub).
+  if(SABBA('drill42')){ vm.runInContext('RAKNA_POOL3.push([1,9,1,10])', SD); console.log('\n  [SABBA drill42: 1/9 + 1/10 (90) i addition/subtraktion-drillen]'); }
+  const AS = SPEC.BLAD['k2:addsub'], fA = brott;
+  if(!AS) fel('spec-villkor-k2.js saknar BLAD[k2:addsub]');
+  else {
+    const P2 = vm.runInContext('RAKNA_POOL2', SD), P3 = vm.runInContext('RAKNA_POOL3', SD), N1 = vm.runInContext('RAKNA_N1_NAMNARE', SD);
+    P2.concat(P3).forEach(function(p){ const m = lcm(p[1], p[3]); if(m > AS.tak.maxGemNamnare) fel('Addition/subtraktion-drillen: ' + p[0] + '/' + p[1] + ' och ' + p[2] + '/' + p[3] + ' har gemensam nämnare ' + m + ' > ' + AS.tak.maxGemNamnare); });
+    N1.forEach(function(n){ if(n > AS.tak.maxGemNamnare) fel('Addition/subtraktion-drillen nivå 1: nämnaren ' + n); });
+    console.log('  ' + (brott === fA ? '✓' : '✗') + ' addition/subtraktion-drillen: ' + (P2.length + P3.length) + ' par och ' + N1.length + ' nämnare, gemensam nämnare ≤ ' + AS.tak.maxGemNamnare);
+  }
   if(typeof SD.ledFaktor === 'function'){
     // Ledets rättning (delad av drillarna): rätt faktor, åt båda hållen, och genvägen.
     const P = [['forlang', '2·3', '9·3', 2, 9, 3], ['forlang', '3·2', '3·9', 2, 9, 3], ['forlang', '2·4', '9·3', 2, 9, null], ['forlang', '6', '27', 2, 9, null],
@@ -320,9 +375,10 @@ else {
   fs.writeFileSync(probe, `new Promise(function(res){ setTimeout(function(){
     var G = window.__GEN || {}, ut = {};
     if(${SABBA('test')} && window.BLAD_K2_D3) window.BLAD_K2_D3.talBank = function(nod){ return /forlanga/.test(nod) ? [{ slag:'forlang', t:1, n:2, malN:4 }] : []; };
-    ['brak-forlanga', 'brak-forkorta', 'brak-likformig', 'andel-brak'].forEach(function(k){
-      var fn = G[k] && G[k].snabb && G[k].snabb[0], subs = [];
-      for(var i = 0; fn && i < 700; i++){ var r = fn(new Set()); if(r) r.subs.forEach(function(s){
+    if(${SABBA('test42')} && window.BLAD_K2_D5) window.BLAD_K2_D5.talBank = function(nod){ return /add/.test(nod) ? [{ slag:'brak', t1:1, n1:9, op:'+', t2:1, n2:10 }] : []; };
+    ['brak-forlanga', 'brak-forkorta', 'brak-likformig', 'andel-brak', 'brak-add', 'brak-sub', 'brak-sub:blandad', 'losut-taljare', 'dec-brak'].forEach(function(k){
+      var del = k.split(':'), gen = G[del[0]], fn = gen && gen.snabb && gen.snabb[0], opts = del[1] ? { variant: del[1] } : undefined, subs = [];
+      for(var i = 0; fn && i < 700; i++){ var r = fn(new Set(), opts); if(r) r.subs.forEach(function(s){
         var f = s.figur ? { fyllda: (s.figur.match(/fill="#2f6ea0"/g) || []).length, alla: (s.figur.match(/<rect/g) || []).length } : null;
         subs.push({ type: s.type, prompt: s.prompt, led: s.led, slutTalj: s.slutTalj, slutNamn: s.slutNamn, svarform: s.svarform, talj: s.talj, namn: s.namn, figur: f, besked: !!s.forkortaBesked }); }); }
       ut[k] = subs;
@@ -367,6 +423,32 @@ else {
       if(s.prompt !== 'Hur stor del av rutorna är färgad?') fel('andel-brak: frågan "' + s.prompt + '"');
     });
     console.log('  ' + (brott === fA ? '✓' : '✗') + ' andel-brak       ' + String(and.length).padStart(5) + ' deluppgifter: rutnätet ritat ur facits tal');
+    // Decimaltal som bråk: ett FRIVILLIGT led (tiondels-/hundradelsbråket) med samma värde, svaret i enklaste form.
+    const db = u.gen['dec-brak'] || [], fD = brott;
+    if(!db.length) fel('dec-brak: inga deluppgifter');
+    db.forEach(function(s){
+      const L = s.led && s.led[0], m = String(L && L.facit || '').match(/^(\d+)\/(\d+)$/);
+      if(s.type !== 'mellanled' || !L || !L.frivilligt || !m){ fel('dec-brak "' + s.prompt + '": inte ett frivilligt led'); return; }
+      if(+m[1] * s.slutNamn !== +m[2] * s.slutTalj || gcd(s.slutTalj, s.slutNamn) !== 1 || s.svarform !== 'enklaste') fel('dec-brak "' + s.prompt + '": ledet och svaret stämmer inte');
+    });
+    console.log('  ' + (brott === fD ? '✓' : '✗') + ' dec-brak         ' + String(db.length).padStart(5) + ' deluppgifter med frivilligt led');
+    // Addition och subtraktion: gemensam nämnare högst 42 (k2:addsub). Ledets facit är summan över den
+    // gemensamma nämnaren (komb/L); luckan har samma nämnare i alla bråk (BRAK(▢)(n) + b/n).
+    const AS = SPEC.BLAD['k2:addsub'];
+    if(SABBA('test42')) console.log('\n  [SABBA test42: bladets talbank ger 1/9 + 1/10 (90) i "Addition med bråk"]');
+    ['brak-add', 'brak-sub', 'brak-sub:blandad', 'losut-taljare'].forEach(function(k){
+      const subs = u.gen[k] || [], fore = brott; let storst = 0;
+      if(!subs.length) fel(k + ': inga deluppgifter');
+      subs.forEach(function(s){
+        let L = null;
+        if(s.type === 'mellanled'){ const m = String(s.led && s.led[0] && s.led[0].facit || '').match(/\/(\d+)$/); L = m ? +m[1] : null; }
+        else { const ns = (String(s.prompt).match(/\((\d+)\)|\/(\d+)/g) || []).map(function(x){ return +x.replace(/\D/g, ''); }); L = ns.reduce(lcm, 1); }
+        if(!L){ fel(k + ' "' + s.prompt + '": hittar inte den gemensamma nämnaren'); return; }
+        storst = Math.max(storst, L);
+        if(L > AS.tak.maxGemNamnare) fel(k + ' "' + String(s.prompt).replace(/\s+/g, ' ').slice(0, 60) + '": gemensam nämnare ' + L + ' > ' + AS.tak.maxGemNamnare);
+      });
+      console.log('  ' + (brott === fore ? '✓' : '✗') + ' ' + k.padEnd(16) + ' ' + String(subs.length).padStart(5) + ' deluppgifter · största gemensamma nämnare ' + storst);
+    });
   }
 }
 

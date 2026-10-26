@@ -308,9 +308,18 @@
       tak: { minNamnare: 3, maxNamnare: 10 },
       kravs: { enFaktor: true, enklasteForm: true, mellanled: 'kravt' }
     },
+    /* Addition och subtraktion med bråk: den gemensamma nämnaren (minsta gemensamma nämnaren för uppgiftens
+       bråk, förkortade) högst 42. Gäller d5:s blad (alla flikar), addition/subtraktion-drillen och testets
+       generatorer för addition och subtraktion. Uppgifter som räknas i decimalform (svar i decimaltal) mäts inte. */
+    'k2:addsub': {
+      kalla: 'Joachim 2026-10-26: gemensam nämnare högst 42 i addition och subtraktion med bråk, i d5:s blad, drillar och testgeneratorer',
+      tak: { maxGemNamnare: 42 }
+    },
     /* d6 "Förkorta korsvis": båda bråken i enklaste form, så förkortningen sker korsvis med g1 = sgd(t1, n2) och
        g2 = sgd(t2, n1). Svaret i enklaste form med nämnare 3–10 (som förkortningens bråk i d3); faktorerna ur
-       gruppens nivå, där 1 betyder att paret inte förkortas — minst ett par förkortas. */
+       gruppens nivå, där 1 betyder att paret inte förkortas — minst ett par förkortas. Tre bråk ("Stora tal –
+       blad 2", nivå 3, Joachim 2026-10-26): samma krav på bråken och svaret, en faktor per tal, faktorernas
+       produkt lika uppe och nere, minst två tal förkortas; faktorerna är inte begränsade till en lista. */
     'k2d6:korsvis': {
       kalla: 'Joachim 2026-10-25 (FAS 2): förkortningens mellanled med snedstreck inne i täljare och nämnare gäller också d6:s "Förkorta korsvis"',
       tak: { minNamnare: 3, maxNamnare: 10 },

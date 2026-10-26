@@ -108,7 +108,8 @@ function radTermer(termer){
     var v = frVarde(t, n, termer[i].op, termer[i].t, termer[i].n);
     t = v.t; n = v.n;
   }
-  var rad = {typ:'brakSvar', vanster: vanster, likhet:true, svar: kanonisk(t, n), olikaNamn: olika};
+  var rad = {typ:'brakSvar', vanster: vanster, likhet:true, svar: kanonisk(t, n), olikaNamn: olika,
+    namnare: termer.map(function(x){ return x.n; })};   // uppgiftens nämnare (spec-fuzzen: gemensam nämnare ≤ 42)
   // Femledad uppställning när nämnarna skiljer sig — två eller tre termer (tre termer fick förr inget led)
   if(olika) rad.steg = femledSteg(termer);
   return rad;
@@ -122,21 +123,21 @@ function radSaknad(t1, n1, op, nLucka, x){
     + '<span class="ovn-brak-namnare">' + nLucka + '</span></span>';
   var html = fracSpan(t1,n1) + opSpan(op) + luckBrak
     + '<span class="ovn-text" style="margin:0 6px;">=</span>' + mixedSpan(res);
-  return {typ:'brakSaknad', html: html, svar: x};
+  return {typ:'brakSaknad', html: html, svar: x, namnare: [n1, nLucka]};
 }
 // "Vilket tal ska adderas med base för att summan ska bli target?"  svar = target - base
 function radFragaAdd(bt, bn, tgt){
   var ans = frVarde(tgt.t, tgt.n, '-', bt, bn);
   var fraga = 'Vilket tal ska adderas med ' + fracSpan(bt,bn)
     + ' för att summan ska bli ' + mixedSpan(kanonisk(tgt.t, tgt.n)) + ' ?';
-  return {typ:'brakSvar', fraga:true, vanster: fraga, svar: kanonisk(ans.t, ans.n)};
+  return {typ:'brakSvar', fraga:true, vanster: fraga, svar: kanonisk(ans.t, ans.n), namnare: [bn, kanonisk(tgt.t, tgt.n).n]};
 }
 // "Vilket tal ska subtraheras med base för att differensen ska bli target?"  n - base = target -> n = target + base
 function radFragaSub(bt, bn, tgt){
   var ans = frVarde(tgt.t, tgt.n, '+', bt, bn);
   var fraga = 'Vilket tal ska subtraheras med ' + fracSpan(bt,bn)
     + ' för att differensen ska bli ' + mixedSpan(kanonisk(tgt.t, tgt.n)) + ' ?';
-  return {typ:'brakSvar', fraga:true, vanster: fraga, svar: kanonisk(ans.t, ans.n)};
+  return {typ:'brakSvar', fraga:true, vanster: fraga, svar: kanonisk(ans.t, ans.n), namnare: [bn, kanonisk(tgt.t, tgt.n).n]};
 }
 
 // ============================================================
@@ -266,7 +267,8 @@ function bladHTML(blad){
           var termerHTML = function(del){ return s.termer.map(function(x){ return (x.op ? opSpan(x.op) : '') + del(x); }).join(''); };
           // svaret: heltal + ev. bråkdel
           var svarBox = svarBrakHTML(rad.svar);
-          html += '<div class="ovn-brak-rad brak-svar-rad brak-femled" data-rad="' + radNummer + '">';
+          // tre termer: tätare avstånd så att kedjan står på en rad vid 1366 och 1536 (K-L, Joachim 2026-10-26)
+          html += '<div class="ovn-brak-rad brak-svar-rad brak-femled' + (s.termer.length > 2 ? ' femled-tre' : '') + '" data-rad="' + radNummer + '">';
           html += '<span class="ovn-label">' + bokstav + ')</span>';
           // 1. uppgift
           html += '<span class="femled-grp">' + termerHTML(function(x){ return fracSpan(x.t, x.n); }) + '</span>';
@@ -699,7 +701,7 @@ function unika(genFn, antal, maxLika){
 }
 function GEN_FORLANG1(){
   return {
-    titel: 'Addition och subtraktion med bråk – nytt blad',
+    titel: 'Addition och subtraktion med bråk',
     tabId: 'forlang1',
     kanGenerera: true,
     mellanled: true,
@@ -737,7 +739,7 @@ function GRUND_FORLANG2_N1(){
       {rubrik:'Beräkna med bråk', mellanled:'kravt', rader:[
         radTermer([F(3,4),T('+',5,6)]),
         radTermer([F(5,8),T('+',3,5)]),
-        radTermer([F(7,9),T('-',3,5)]),
+        radTermer([F(7,9),T('-',1,6)]),      // förr 7/9 − 3/5 (gemensam nämnare 45; Joachim 2026-10-26: högst 42)
         radTermer([F(7,8),T('-',5,6)])
       ]}
     ]
@@ -749,16 +751,17 @@ function GRUND_FORLANG2_N2(){
     titel: 'Förläng båda nämnarna – nivå 2',
     mellanled: true,
     grupper: [
-      // Förr 2/9 + 10/11, 1/4 + 1/3 + 1/2 och 3/7 + 3/4 − 1/2 (nämnarna 11 och 2).
+      // Förr 2/9 + 10/11, 1/4 + 1/3 + 1/2 och 3/7 + 3/4 − 1/2 (nämnarna 11 och 2). Gemensam nämnare högst 42
+      // (Joachim 2026-10-26): förr 2/9 + 9/10 (90), 3/8 + 1/9 (72) och 3/7 + 3/4 − 3/8 (56).
       {rubrik:'Beräkna med bråk', mellanled:'kravt', rader:[
         radTermer([F(4,9),T('+',5,6)]),
-        radTermer([F(2,9),T('+',9,10)]),
-        radTermer([F(3,8),T('+',1,9)])
+        radTermer([F(7,10),T('+',5,6)]),
+        radTermer([F(3,7),T('+',1,6)])
       ]},
       {rubrik:'Beräkna med bråk', mellanled:'kravt', rader:[
         radTermer([F(1,4),T('+',1,3),T('+',1,6)]),
         radTermer([F(2,3),T('+',3,4),T('+',1,6)]),
-        radTermer([F(3,7),T('+',3,4),T('-',3,8)]),
+        radTermer([F(3,4),T('+',5,6),T('-',3,8)]),
         radTermer([F(3,5),T('-',5,6),T('+',7,10)])
       ]}
     ]
@@ -766,9 +769,11 @@ function GRUND_FORLANG2_N2(){
 }
 
 // Par där NÅGON täljare INTE delar den andra (kräver att båda förlängs)
-// Nämnare 3–10 (Joachim 2026-10-25): förr också 2, 11 och 12.
-var PAR_FB    = [[3,4],[4,5],[4,6],[5,8],[5,6],[3,8],[3,10],[6,8],[3,5],[5,9]];
-var PAR_FB_S  = [[9,6],[8,9],[7,8],[7,9],[5,8],[7,10],[9,10],[8,6]];
+// Nämnare 3–10 (Joachim 2026-10-25): förr också 2, 11 och 12. Gemensam nämnare högst 42 (2026-10-26):
+// förr [5,9] (45), [8,9] (72), [7,8] (56), [7,9] (63), [7,10] (70) och [9,10] (90).
+var MAX_GEM_NAMNARE = 42;
+var PAR_FB    = [[3,4],[4,5],[4,6],[5,8],[5,6],[3,8],[3,10],[6,8],[3,5],[6,9]];
+var PAR_FB_S  = [[9,6],[5,8],[8,6],[7,6],[9,4],[7,4],[7,5],[8,10],[10,6],[10,4]];
 
 function genTvaTerm(pool){
   var par = gPick(pool);
@@ -787,6 +792,8 @@ function genTreTerm(){
   for(var a=0; a<80; a++){
     var d = [gPick(denoms), gPick(denoms), gPick(denoms)];
     if(d[0]===d[1] && d[1]===d[2]) continue;           // kräv olika nämnare
+    var L = d[0] * d[1] / gcd(d[0], d[1]); L = L * d[2] / gcd(L, d[2]);
+    if(L > MAX_GEM_NAMNARE) continue;                   // gemensam nämnare högst 42
     var t = [gTaljare(d[0]), gTaljare(d[1]), gTaljare(d[2])];
     var ops = [gPick(['+','-']), gPick(['+','-'])];
     var v = frVarde(t[0], d[0], ops[0], t[1], d[1]);
@@ -887,7 +894,7 @@ function gBlandDec(specs){
 }
 function GEN_BLANDAD_N1(){
   return {
-    titel: 'Räkna med blandad form – nytt blad',
+    titel: 'Räkna med blandad form',
     tabId: 'blandad', mellanled: true, keypadOps: ['+','−','/','='],
     grupper: [
       {rubrik:'Räkna med blandad form (samma nämnare)', rader: unika(function(){ return gBland(5,[4,5,6,8],true); }, 4, 1)},
@@ -898,7 +905,7 @@ function GEN_BLANDAD_N1(){
 }
 function GEN_BLANDAD_N2(){
   return {
-    titel: 'Räkna med blandad form – nytt blad (svårare)',
+    titel: 'Räkna med blandad form (svårare)',
     tabId: 'blandad', mellanled: true, keypadOps: ['+','−','/','='],
     grupper: [
       {rubrik:'Räkna med blandad form', rader: unika(function(){ return gBlandOlika(6); }, 4, 1)},

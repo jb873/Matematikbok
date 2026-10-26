@@ -170,6 +170,11 @@ function bytaFormEngine(){
 // ============================================================
 // ÖVNING: ADDITION / SUBTRAKTION MED BRÅK
 // ============================================================
+// Addition/subtraktion-drillens tal (spec-fuzz-k2-blad läser dem: gemensam nämnare högst 42, Joachim 2026-10-26).
+// Nivå 1 samma nämnare; nivå 2 den ena nämnaren delar den andra; nivå 3 förläng båda. [t1, n1, t2, n2]
+var RAKNA_N1_NAMNARE = [4,5,6,8,10];
+var RAKNA_POOL2 = [[1,2,1,4],[1,3,1,6],[1,2,1,6],[1,4,3,8],[2,3,1,6],[1,5,3,10],[3,4,1,8],[1,2,3,8]];
+var RAKNA_POOL3 = [[1,2,1,3],[1,3,1,4],[2,3,1,4],[1,2,2,5],[3,4,1,3],[2,5,1,3],[3,5,1,2],[2,3,1,5]];
 function raknaEngine(op){
   var aro = (op==='addition');
   document.getElementById('hero').style.display='none';
@@ -197,16 +202,14 @@ function raknaEngine(op){
   function nyUppgift(){
     var par;
     if(level===1){ // samma nämnare
-      var n=randPick([4,5,6,8,10]); var a=d3RandInt(1,n-2), b=d3RandInt(1,n-1-a);
+      var n=randPick(RAKNA_N1_NAMNARE); var a=d3RandInt(1,n-2), b=d3RandInt(1,n-1-a);
       if(!aro){ if(a<b){var t=a;a=b;b=t;} }
       par=[a,n,b,n];
     } else if(level===2){ // ena nämnaren delar den andra
-      var pool=[[1,2,1,4],[1,3,1,6],[1,2,1,6],[1,4,3,8],[2,3,1,6],[1,5,3,10],[3,4,1,8],[1,2,3,8]];
-      par=randPick(pool).slice();
+      par=randPick(RAKNA_POOL2).slice();
       if(!aro && par[0]/par[1] < par[2]/par[3]){ var x=par[0],y=par[1]; par[0]=par[2];par[1]=par[3];par[2]=x;par[3]=y; }
     } else { // förläng båda
-      var pool3=[[1,2,1,3],[1,3,1,4],[2,3,1,4],[1,2,2,5],[3,4,1,3],[2,5,1,3],[3,5,1,2],[2,3,1,5]];
-      par=randPick(pool3).slice();
+      par=randPick(RAKNA_POOL3).slice();
       if(!aro && par[0]/par[1] < par[2]/par[3]){ var x3=par[0],y3=par[1]; par[0]=par[2];par[1]=par[3];par[2]=x3;par[3]=y3; }
     }
     var t1=par[0],n1=par[1],t2=par[2],n2=par[3];

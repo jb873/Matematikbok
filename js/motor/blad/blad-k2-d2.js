@@ -208,6 +208,15 @@ function bladHTML(blad){
           html += '<span class="ovn-label">' + bokstav + ')</span>';
           html += rad.vanster;
           html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+          if(rad.frivilligtLed){
+            // frivilligt led (35/100): rättas på värdet om det fylls i, annars inte alls (steg 2b i kontrollera)
+            var fl = rad.frivilligtLed;
+            html += '<span class="ovn-brak brak-svar-frak brak-friv" data-varde="' + (fl.t / fl.n) + '">'
+              + '<input class="ovn-in brak-cell friv-t" data-mellan="' + fl.t + '" inputmode="numeric" autocomplete="off" aria-label="mellanledets täljare">'
+              + '<span class="ovn-brak-strecket"></span>'
+              + '<input class="ovn-in brak-cell friv-n" data-mellan="' + fl.n + '" inputmode="numeric" autocomplete="off" aria-label="mellanledets nämnare"></span>'
+              + '<span class="ovn-text" style="margin:0 4px;">=</span>';
+          }
           if(blad.mellanled){
             html += kladd + '<span class="ovn-text" style="margin:0 4px;">=</span>';
           }
@@ -457,6 +466,19 @@ function bygg_blad(rotEl, blad){
       setTimeout(function(){ boxar.forEach(function(b){ b.classList.remove('just-checked'); }); }, 500);
     });
 
+    // 2b) Frivilligt mellanled (decimaltal som bråk, Joachim 2026-10-26): ett tomt led är varken fel eller
+    //     räknas i nämnaren. Ett ifyllt led rättas på VÄRDET — 35/100 och 70/200 är båda rätt för 0,35.
+    rotEl.querySelectorAll('.brak-friv').forEach(function(led){
+      var t = led.querySelector('.friv-t'), n = led.querySelector('.friv-n');
+      [t, n].forEach(function(c){ c.classList.remove('correct','wrong','just-checked'); });
+      if(String(t.value).trim() === '' && String(n.value).trim() === '') return;
+      totalt++;
+      var vt = AK8_UI.pInt(t.value), vn = AK8_UI.pInt(n.value);
+      var ok = !isNaN(vt) && !isNaN(vn) && vn !== 0 && Math.abs(vt / vn - parseFloat(led.dataset.varde)) < 1e-9;
+      if(ok) ratt++;
+      [t, n].forEach(function(c){ if(String(c.value).trim() !== '') c.classList.add(ok ? 'correct' : 'wrong'); });
+    });
+
     // 3) Båda-rader (decimal + blandad form i samma rad, rättas var för sig)
     rotEl.querySelectorAll('.brak-bada-rad').forEach(function(row){
       row.querySelectorAll('.ovn-mark, .ovn-fasit').forEach(function(x){ x.remove(); });
@@ -622,9 +644,14 @@ function avr(x, d){ var p = Math.pow(10, d); return Math.round(x * p) / p; }
 function radBrakDec(t, n, val, note, rund){
   return {typ:'brakTillDec', taljare:t, namnare:n, svar:val, not:note||'', rund:rund||''};
 }
-// Bråk-rad: decimaltal visas, eleven skriver bråket i enklaste form (återanvänder brakSvar)
+// Bråk-rad: decimaltal visas, eleven skriver bråket i enklaste form (återanvänder brakSvar).
+// FRIVILLIGT MELLANLED (Joachim 2026-10-26): 0,35 = 35/100 = 7/20, men 0,35 = 7/20 godtas också. Ledet är
+// decimaltalet som tiondels-, hundradels- eller tusendelsbråk; ett ifyllt led rättas på VÄRDET, ett tomt led
+// är varken fel eller räknas. Gruppen bär mellanled: 'frivilligt' i datan.
 function radDecBrak(t, n, dec){
-  return {typ:'brakSvar', vanster:'<span class="ovn-text ovn-num">' + dec + '</span>', svar:kanonisk(t, n), opnd:{slag:'decBrak', t:t, n:n, dec:dec}};
+  var d = (String(dec).split(',')[1] || '').length, N = Math.pow(10, d), T = Math.round(parseFloat(String(dec).replace(',', '.')) * N);
+  return {typ:'brakSvar', vanster:'<span class="ovn-text ovn-num">' + dec + '</span>', svar:kanonisk(t, n), opnd:{slag:'decBrak', t:t, n:n, dec:dec},
+    frivilligtLed: {t: T, n: N}};
 }
 
 // ── Talpooler per nivå ──
@@ -687,7 +714,7 @@ function bladBTform(niva, forsta){
       {rubrik:'Skriv bråket som decimaltal', rader:
         bd.map(function(p){ return radBrakDec(p[0], p[1], avr(p[0]/p[1], 6)); })
         .concat(rd.map(function(p){ return rundRad(p); }))},
-      {rubrik:'Skriv som bråk i enklaste form', rader:
+      {rubrik:'Skriv som bråk i enklaste form', mellanled:'frivilligt', rader:
         db.map(function(p){ return radDecBrak(p[0], p[1], p[2]); })}
     ]
   };
@@ -1118,7 +1145,7 @@ function bladTest(niva, forsta){
     grupper: [
       {rubrik:'Skriv bråket som decimaltal',
        rader: t1.map(function(p){ return radBrakDec2(p[0], p[1]); })},
-      {rubrik:'Skriv decimaltalet som bråk i enklaste form',
+      {rubrik:'Skriv decimaltalet som bråk i enklaste form', mellanled:'frivilligt',
        rader: t2.map(function(p){ return radDecBrak(p[0], p[1], p[2]); })},
       {rubrik:'Skriv det oäkta bråket i blandad form',
        rader: t3.map(function(p){ return radBrakBlandad(p[0], p[1]); })},

@@ -94,13 +94,30 @@ function radAndelBrak(t1, n1, t2, n2){
    Eleven skriver varje tal i ledet, delat med faktorn det förkortas med (4/2), eller talet ensamt när det
    inte förkortas. Rättas som EN enhet: varje ruta börjar med sitt givna tal, samma faktorer står i täljaren
    som i nämnaren, och ledet når enklaste form; svaret i enklaste form. Ett ensamt förkortat tal (genvägen)
-   fälls. Talen: båda bråken i enklaste form, så förkortningen sker korsvis — g1 = sgd(t1, n2), g2 = sgd(t2, n1). */
-function radKors(t1, n1, t2, n2){
-  var g1 = gcd(t1, n2), g2 = gcd(t2, n1);
-  return {typ:'mulKors', t1:t1, n1:n1, t2:t2, n2:n2, g1:g1, g2:g2,
-    tal:['f'+t1+'/'+n1, 'f'+t2+'/'+n2],
-    svar: kanonisk(t1 * t2, n1 * n2)};
+   fälls. Talen: båda bråken i enklaste form, så förkortningen sker korsvis — g1 = sgd(t1, n2), g2 = sgd(t2, n1).
+   TRE BRÅK (Joachim 2026-10-26, "Stora tal – blad 2"): samma led med tre tal uppe och tre nere. Ett tal kan
+   förkortas mot flera nämnare (16 mot 4 och 2 → 16/8), så regeln gäller faktorernas PRODUKT: det man delar
+   med i täljaren delar man med i nämnaren. Facit räknas fram genom att förkorta korsvis steg för steg tills
+   inget tal i täljaren har en gemensam faktor med något tal i nämnaren; varje ruta får sin samlade faktor. */
+function korsRad(br){
+  var tk = br.map(function(f){ return f[0]; }), nk = br.map(function(f){ return f[1]; }), byt = true;
+  while(byt){
+    byt = false;
+    for(var i = 0; i < tk.length; i++) for(var j = 0; j < nk.length; j++){
+      var g = gcd(tk[i], nk[j]);
+      if(g > 1){ tk[i] /= g; nk[j] /= g; byt = true; }
+    }
+  }
+  var T = 1, N = 1; br.forEach(function(f){ T *= f[0]; N *= f[1]; });
+  var rad = {typ:'mulKors', br: br,
+    gT: br.map(function(f, i){ return f[0] / tk[i]; }), gN: br.map(function(f, j){ return f[1] / nk[j]; }),
+    tal: br.map(function(f){ return 'f' + f[0] + '/' + f[1]; }),
+    svar: kanonisk(T, N)};
+  if(br.length === 2){ rad.t1 = br[0][0]; rad.n1 = br[0][1]; rad.t2 = br[1][0]; rad.n2 = br[1][1]; rad.g1 = rad.gT[0]; rad.g2 = rad.gT[1]; }
+  return rad;
 }
+function radKors(t1, n1, t2, n2){ return korsRad([[t1, n1], [t2, n2]]); }
+function radKorsTre(t1, n1, t2, n2, t3, n3){ return korsRad([[t1, n1], [t2, n2], [t3, n3]]); }
 // Ledets facit för en ruta: talet delat med faktorn, eller talet ensamt (faktorn 1).
 function korsLed(tal, g){ return g > 1 ? tal + '/' + g : String(tal); }
 // x-ekvation:  (t/n) · x = (ht hela/bråk)  → svar för x. Om vänster är heltal: anvand h-attribut.
@@ -109,17 +126,6 @@ function radEkvation(vansterHTML, hogerHTML, svT, svN, talSig){
   return {typ:'mulEkvation', vansterHTML:vansterHTML, hogerHTML:hogerHTML,
     tal: talSig ? [talSig] : null,
     svar: kanonisk(svT, svN)};
-}
-// tre bråk med flexibelt mellanled: t1/n1 · t2/n2 · t3/n3
-// Mellanledet: en täljarprodukt och en nämnarprodukt (tre rutor var). Rättas på VÄRDE:
-// täljarprodukten ska gånger ihop till rätt täljarvärde, nämnarprodukten till rätt nämnarvärde
-// (valfri giltig korsvis förkortning godtas). Slutsvaret rättas mot enklaste form.
-function radTreBrak(t1, n1, t2, n2, t3, n3){
-  var prodT = t1*t2*t3, prodN = n1*n2*n3;
-  return {typ:'mulTre', t1:t1,n1:n1,t2:t2,n2:n2,t3:t3,n3:n3,
-    prodT:prodT, prodN:prodN,
-    tal:['f'+t1+'/'+n1, 'f'+t2+'/'+n2, 'f'+t3+'/'+n3],
-    svar: kanonisk(prodT, prodN)};
 }
 
 
@@ -355,48 +361,22 @@ function bladHTML(blad){
         return;
       }
 
-      if(rad.typ === 'mulTre'){
-        // tre bråk: t1/n1 · t2/n2 · t3/n3 = (_·_·_)/(_·_·_) = svar
-        // mellanledet har tre täljarrutor och tre nämnarrutor (flexibel rättning på produkt)
-        function treProdBox(){
-          return '<span class="ovn-brak brak-stegfrak brak-trefrak">'
-            + '<span class="ovn-brak-taljare">'
-            + '<input class="ovn-in brak-tre-cell smal tre-t" inputmode="numeric" autocomplete="off"><span class="prod-gng">·</span>'
-            + '<input class="ovn-in brak-tre-cell smal tre-t" inputmode="numeric" autocomplete="off"><span class="prod-gng">·</span>'
-            + '<input class="ovn-in brak-tre-cell smal tre-t" inputmode="numeric" autocomplete="off"></span>'
-            + '<span class="ovn-brak-strecket"></span>'
-            + '<span class="ovn-brak-namnare">'
-            + '<input class="ovn-in brak-tre-cell smal tre-n" inputmode="numeric" autocomplete="off"><span class="prod-gng">·</span>'
-            + '<input class="ovn-in brak-tre-cell smal tre-n" inputmode="numeric" autocomplete="off"><span class="prod-gng">·</span>'
-            + '<input class="ovn-in brak-tre-cell smal tre-n" inputmode="numeric" autocomplete="off"></span>'
-            + '</span>';
-        }
-        html += '<div class="ovn-brak-rad brak-svar-rad brak-femled brak-tre-rad" data-rad="' + radNummer + '" data-prodt="' + rad.prodT + '" data-prodn="' + rad.prodN + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span class="femled-grp">' + fracSpan(rad.t1, rad.n1) + '<span class="ovn-text mult-tecken" style="margin:0 6px;">·</span>' + fracSpan(rad.t2, rad.n2) + '<span class="ovn-text mult-tecken" style="margin:0 6px;">·</span>' + fracSpan(rad.t3, rad.n3) + '</span>';
-        html += '<span class="ovn-text femled-eq">=</span>';
-        html += '<span class="femled-grp">' + treProdBox() + '</span>';
-        html += '<span class="ovn-text femled-eq">=</span>';
-        html += '<span class="femled-grp">' + svarBrakHTML(rad.svar) + '</span>';
-        html += '</div>';
-        return;
-      }
-
       if(rad.typ === 'mulKors'){
-        // t1/n1 · t2/n2 = (t1/g1 · t2/g2)/(n1/g2 · n2/g1) = svar. Rutorna bär data-tal (det givna talet)
-        // och data-mellan (ledets facit, repots konvention).
-        var korsCell = function(tal, g, aria){
-          return '<input class="ovn-in ml-cell kors-cell" data-tal="' + tal + '" data-mellan="' + korsLed(tal, g) + '" inputmode="text" autocomplete="off" aria-label="' + aria + '">';
+        // t1/n1 · t2/n2 (· t3/n3) = (t1/g · t2/g …)/(n1/g · n2/g …) = svar. Rutorna bär data-tal (det givna
+        // talet), data-roll (t eller n) och data-mellan (ledets facit, repots konvention).
+        var ORD = ['första', 'andra', 'tredje'], gng = '<span class="prod-gng">·</span>';
+        var korsCell = function(tal, g, roll, aria){
+          return '<input class="ovn-in ml-cell kors-cell" data-tal="' + tal + '" data-roll="' + roll + '" data-mellan="' + korsLed(tal, g) + '" inputmode="text" autocomplete="off" aria-label="' + aria + '">';
         };
-        html += '<div class="ovn-brak-rad brak-femled kors-rad" data-rad="' + radNummer + '" data-t1="' + rad.t1 + '" data-n1="' + rad.n1
-          + '" data-t2="' + rad.t2 + '" data-n2="' + rad.n2 + '" data-hel="' + rad.svar.hel + '" data-t="' + rad.svar.t + '" data-n="' + rad.svar.n + '">';
+        html += '<div class="ovn-brak-rad brak-femled kors-rad' + (rad.br.length > 2 ? ' kors-tre' : '') + '" data-rad="' + radNummer
+          + '" data-hel="' + rad.svar.hel + '" data-t="' + rad.svar.t + '" data-n="' + rad.svar.n + '">';
         html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += '<span class="femled-grp">' + fracSpan(rad.t1, rad.n1) + '<span class="ovn-text mult-tecken" style="margin:0 7px;">·</span>' + fracSpan(rad.t2, rad.n2) + '</span>';
+        html += '<span class="femled-grp">' + rad.br.map(function(f){ return fracSpan(f[0], f[1]); }).join('<span class="ovn-text mult-tecken" style="margin:0 7px;">·</span>') + '</span>';
         html += '<span class="ovn-text femled-eq">=</span>';
         html += '<span class="femled-grp"><span class="ovn-brak kedje-brak ml-led kors-led">'
-          + '<span class="ovn-brak-taljare">' + korsCell(rad.t1, rad.g1, 'första täljaren') + '<span class="prod-gng">·</span>' + korsCell(rad.t2, rad.g2, 'andra täljaren') + '</span>'
+          + '<span class="ovn-brak-taljare">' + rad.br.map(function(f, i){ return korsCell(f[0], rad.gT[i], 't', ORD[i] + ' täljaren'); }).join(gng) + '</span>'
           + '<span class="ovn-brak-strecket"></span>'
-          + '<span class="ovn-brak-namnare">' + korsCell(rad.n1, rad.g2, 'första nämnaren') + '<span class="prod-gng">·</span>' + korsCell(rad.n2, rad.g1, 'andra nämnaren') + '</span>'
+          + '<span class="ovn-brak-namnare">' + rad.br.map(function(f, j){ return korsCell(f[1], rad.gN[j], 'n', ORD[j] + ' nämnaren'); }).join(gng) + '</span>'
           + '</span></span>';
         html += '<span class="ovn-text femled-eq">=</span>';
         html += '<span class="femled-grp">' + svarBrakHTML(rad.svar) + '</span>';
@@ -579,10 +559,7 @@ function bygg_blad(rotEl, blad){
     // 1) Vanliga enstaka svar (hoppa över bråkcellerna)
     inputs.forEach(function(inp){
       if(inp.classList.contains('brak-cell') || inp.classList.contains('brak-kladd') || inp.classList.contains('brak-kladd-cell')) return;
-      if(inp.classList.contains('kors-cell')) return;   // korsvisa ledet rättas med sin rad (steg 5)
-      // Tre-bråk-ledets rutor rättas med sin rad (steg 4). Förr räknades de också här, utan facit, och
-      // "Stora tal – blad 2" kunde aldrig ge full pott (8 av 32 med allt rätt, mätt vid HEAD 2026-10-25).
-      if(inp.classList.contains('brak-tre-cell')) return;
+      if(inp.classList.contains('kors-cell')) return;   // korsvisa ledet rättas med sin rad (steg 4)
       // Steg-celler (femledad uppställning): rätta och färglägg, men utan inline-markörer
       if(inp.classList.contains('brak-steg-cell')){
         inp.classList.remove('correct','wrong','just-checked');
@@ -680,29 +657,10 @@ function bygg_blad(rotEl, blad){
       if(alltRatt) ratt++;
     });
 
-    // 4) Tre-bråk-rader (mulTre): flexibelt mellanled – täljarprodukt/nämnarprodukt ska ge rätt värde
-    rotEl.querySelectorAll('.brak-tre-rad').forEach(function(row){
-      var prodT = parseInt(row.dataset.prodt, 10), prodN = parseInt(row.dataset.prodn, 10);
-      var tCells = Array.from(row.querySelectorAll('.tre-t'));
-      var nCells = Array.from(row.querySelectorAll('.tre-n'));
-      totalt++;
-      // läs in elevens produkter
-      var tVals = tCells.map(function(c){ return AK8_UI.pInt(c.value); });
-      var nVals = nCells.map(function(c){ return AK8_UI.pInt(c.value); });
-      var tFyllda = tVals.every(function(v){ return !isNaN(v) && v > 0; });
-      var nFyllda = nVals.every(function(v){ return !isNaN(v) && v > 0; });
-      var mtT = tVals.reduce(function(a,b){ return a*b; }, 1);
-      var mnN = nVals.reduce(function(a,b){ return a*b; }, 1);
-      // flexibel: produkten av mellanledet ska ha samma värde som facit (valfri giltig förkortning)
-      var mellanOk = tFyllda && nFyllda && mnN !== 0 && Math.abs(mtT / mnN - prodT / prodN) < 1e-9;
-      tCells.concat(nCells).forEach(function(c){ c.classList.remove('correct','wrong'); c.classList.add(mellanOk ? 'correct' : 'wrong'); });
-      if(mellanOk) ratt++;
-    });
-
-    // 5) Korsvis förkortning (mulKors) — raden är EN enhet: ledet och svaret.
+    // 4) Korsvis förkortning (mulKors, två eller tre bråk) — raden är EN enhet: ledet och svaret.
     //    Ledet: varje ruta är sitt givna tal, ensamt eller delat med en faktor som går jämnt upp (4/2).
-    //    Faktorerna i täljaren ska vara samma som i nämnaren (samma faktor uppe och nere), och de
-    //    förkortade talen ska ge enklaste form. Ett ensamt förkortat tal (1 i stället för 6/6) fälls.
+    //    Faktorerna i täljaren ska ge samma produkt som i nämnaren (det man delar med uppe delar man med
+    //    nere), och de förkortade talen ska ge enklaste form. Ett ensamt förkortat tal (1 i stället för 6/6) fälls.
     rotEl.querySelectorAll('.kors-rad').forEach(function(row){
       totalt++;
       row.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
@@ -721,9 +679,9 @@ function bygg_blad(rotEl, blad){
       var d = celler.map(del);
       var ledOk = d.every(Boolean);
       if(ledOk){
-        var uppe = [d[0].faktor, d[1].faktor].filter(function(g){ return g > 1; }).sort(),
-            nere = [d[2].faktor, d[3].faktor].filter(function(g){ return g > 1; }).sort();
-        ledOk = uppe.join(',') === nere.join(',') && gcd(d[0].kvot * d[1].kvot, d[2].kvot * d[3].kvot) === 1;
+        var fT = 1, fN = 1, kT = 1, kN = 1;
+        d.forEach(function(x, i){ if(celler[i].dataset.roll === 't'){ fT *= x.faktor; kT *= x.kvot; } else { fN *= x.faktor; kN *= x.kvot; } });
+        ledOk = fT === fN && gcd(kT, kN) === 1;
       }
       var cH = +row.dataset.hel, cT = +row.dataset.t, cN = +row.dataset.n;
       var helIn = row.querySelector('.brak-hel'), tIn = row.querySelector('.brak-t'), nIn = row.querySelector('.brak-n');
@@ -739,7 +697,8 @@ function bygg_blad(rotEl, blad){
         var gng = '<span class="prod-gng">·</span>';
         var fx = document.createElement('span'); fx.className = 'ovn-fasit';
         fx.innerHTML = 'rätt svar: <span class="ml-facit">'
-          + fracSpan(celler[0].dataset.mellan + gng + celler[1].dataset.mellan, celler[2].dataset.mellan + gng + celler[3].dataset.mellan)
+          + fracSpan(celler.filter(function(c){ return c.dataset.roll === 't'; }).map(function(c){ return c.dataset.mellan; }).join(gng),
+                     celler.filter(function(c){ return c.dataset.roll === 'n'; }).map(function(c){ return c.dataset.mellan; }).join(gng))
           + opSpan('=') + mixedSpan({hel: cH, t: cT, n: cN}) + '</span>';
         row.appendChild(fx);
       }
@@ -814,7 +773,7 @@ function bygg_blad(rotEl, blad){
 function fyllFacitData(rotEl, blad){
   var rader = rotEl.querySelectorAll('.brak-svar-rad, .brak-fragerad');
   var fasitLista = [];
-  blad.grupper.forEach(function(g){ g.rader.forEach(function(r){ if(r.typ === 'brakSvar' || r.typ === 'mulHeltal' || r.typ === 'mulBrak' || r.typ === 'mulEkvation' || r.typ === 'mulTre') fasitLista.push(r.svar); }); });
+  blad.grupper.forEach(function(g){ g.rader.forEach(function(r){ if(r.typ === 'brakSvar' || r.typ === 'mulHeltal' || r.typ === 'mulBrak' || r.typ === 'mulEkvation') fasitLista.push(r.svar); }); });
   rader.forEach(function(row, i){
     var s = fasitLista[i];
     if(!s) return;
@@ -896,7 +855,7 @@ function GRUND_HELTAL_N2(){
 function gHeltalRad(){ return radHeltalGanger(gRand(2,9), gRand(1,7), gPick([3,4,5,6,7,8,9])); }
 function gAndelRad(){ var n=gPick([3,4,5,6,8]); var t=gRand(1,n-1); var bas=gPick([60,80,100,120,150,200,240,300,360,400,560]); var N=Math.round(bas/n)*n; return radAndel(t,n,N); }
 function GEN_HELTAL_N1(){
-  return { titel:'Heltal × bråk och andel – nytt blad', tabId:'heltal', keypadOps:['/','='], mellanled:true,
+  return { titel:'Heltal × bråk och andel', tabId:'heltal', keypadOps:['/','='], mellanled:true,
     grupper:[
       {rubrik:'Beräkna', rader: unika(gHeltalRad, 4, 1)},
       {rubrik:'Beräkna andelen av antalet', rader: unika(gAndelRad, 3, 1)}
@@ -940,7 +899,7 @@ function GRUND_BRAKBRAK_N2(){
     ]};
 }
 function gBrakBrakRad(){ return radBrakMellan(gRand(1,6), gPick([2,3,4,5,7]), gRand(1,6), gPick([2,3,5,6,8])); }
-function GEN_BRAKBRAK_N1(){ return { titel:'Bråk × bråk – nytt blad', tabId:'brakbrak', keypadOps:['/','='], mellanled:true,
+function GEN_BRAKBRAK_N1(){ return { titel:'Bråk × bråk', tabId:'brakbrak', keypadOps:['/','='], mellanled:true,
   grupper:[{rubrik:'Beräkna', rader: unika(gBrakBrakRad, 5, 1)}] }; }
 function GEN_BRAKBRAK_N2(){ return GEN_BRAKBRAK_N1(); }
 
@@ -959,11 +918,14 @@ function GRUND_STORATAL_N1(){
       ]}
     ]};
 }
+/* Blad 2 (Joachim 2026-10-26): samma snedstrecksled med tre bråk. Talen som förkortningen i övrigt: varje bråk i
+   enklaste form, svaret i enklaste form med nämnare 3–10. Förr 3/8 · 4/5 · 1/6 (= 1/20), 5/18 · 6/7 · 14/25
+   (= 2/15), 11/4 · 9/33 · 16/5 (9/33 inte i enklaste form) och 15/8 · 2/3 · 14/9 (= 35/18); ett tal bytt i varje. */
 function GRUND_STORATAL_N2(){
   return { titel:'Stora tal – blad 2 (tre bråk)', tabId:'storatal', keypadOps:['/','='], mellanled:true,
     grupper:[
-      {rubrik:'Beräkna – ta bort ett mellanled', rader:[
-        radTreBrak(3,8,4,5,1,6), radTreBrak(5,18,6,7,14,25), radTreBrak(11,4,9,33,16,5), radTreBrak(15,8,2,3,14,9)
+      {rubrik:'Beräkna – ta bort ett mellanled', mellanled:'kravt', niva:3, rader:[
+        radKorsTre(3,8,4,5,5,6), radKorsTre(5,18,6,7,14,15), radKorsTre(11,4,9,22,16,5), radKorsTre(15,8,2,3,14,15)
       ]}
     ]};
 }
@@ -980,23 +942,29 @@ function gStoraRad(){
   }
   return radKors(3,4,2,9);   // reserv
 }
-// Generator blad 2: tre bråk där faktorer återkommer korsvis (förkortning lönar sig)
+// Generator blad 2: tre bråk där faktorer återkommer korsvis (förkortning lönar sig). Varje bråk i enklaste
+// form, minst två tal förkortas, svaret i enklaste form med nämnare 3–10 och inte ett heltal.
 function gStoraTreRad(){
-  for(var i=0;i<80;i++){
+  for(var i=0;i<400;i++){
     var a=gPick([2,3,4,5]), b=gPick([2,3,5,7]), c=gPick([2,3,4,5]), d=gPick([3,5,7]);
     var t1=gPick([1,2,3,4])*b, n1=a*c;
     var t2=a*gPick([1,2,3]), n2=b*d;
     var t3=d*gPick([1,2]), n3=c*gPick([2,3,4]);
     var fr=[t1+'/'+n1, t2+'/'+n2, t3+'/'+n3];
     // alla tre bråk i raden ska vara olika
-    if(fr[0]!==fr[1] && fr[1]!==fr[2] && fr[0]!==fr[2]) return radTreBrak(t1,n1,t2,n2,t3,n3);
+    if(fr[0]===fr[1] || fr[1]===fr[2] || fr[0]===fr[2]) continue;
+    if(gcd(t1,n1)!==1 || gcd(t2,n2)!==1 || gcd(t3,n3)!==1) continue;
+    var r = radKorsTre(t1,n1,t2,n2,t3,n3);
+    if(r.svar.t === 0 || r.svar.n < 3 || r.svar.n > 10) continue;
+    if(r.gT.filter(function(g){ return g > 1; }).length < 2) continue;
+    return r;
   }
-  return radTreBrak(3,8,4,5,1,6);
+  return radKorsTre(3,8,4,5,5,6);   // reserv
 }
-function GEN_STORATAL_N1(){ return { titel:'Stora tal – nytt blad', tabId:'storatal', keypadOps:['/','='], mellanled:true,
+function GEN_STORATAL_N1(){ return { titel:'Stora tal', tabId:'storatal', keypadOps:['/','='], mellanled:true,
   grupper:[{rubrik:'Beräkna – förkorta korsvis innan beräkning', mellanled:'kravt', niva:1, rader: unika(gStoraRad, 4, 1)}] }; }
-function GEN_STORATAL_N2(){ return { titel:'Stora tal – nytt blad (tre bråk)', tabId:'storatal', keypadOps:['/','='], mellanled:true,
-  grupper:[{rubrik:'Beräkna – ta bort ett mellanled', rader: unika(gStoraTreRad, 4, 1)}] }; }
+function GEN_STORATAL_N2(){ return { titel:'Stora tal (tre bråk)', tabId:'storatal', keypadOps:['/','='], mellanled:true,
+  grupper:[{rubrik:'Beräkna – ta bort ett mellanled', mellanled:'kravt', niva:3, rader: unika(gStoraTreRad, 4, 1)}] }; }
 
 // E. Blandad form × blandad form
 function GRUND_MBLANDAD_N1(){
@@ -1016,7 +984,7 @@ function GRUND_MBLANDAD_N2(){
     ]};
 }
 function gMBlandRad(){ return radBlandGanger(gRand(1,4), gRand(1,5), gPick([2,3,4,5,6,7]), gRand(1,3), gRand(1,4), gPick([2,3,4,5])); }
-function GEN_MBLANDAD_N1(){ return { titel:'Blandad form × blandad form – nytt blad', tabId:'blandad', keypadOps:['/','='],
+function GEN_MBLANDAD_N1(){ return { titel:'Blandad form × blandad form', tabId:'blandad', keypadOps:['/','='],
   grupper:[{rubrik:'Multiplicera tal i blandad form', rader: unika(gMBlandRad, 4, 1)}] }; }
 function GEN_MBLANDAD_N2(){ return GEN_MBLANDAD_N1(); }
 
@@ -1113,7 +1081,7 @@ window.BLAD_K2_D6 = (function(){
       (g.rader || []).forEach(function(r){
         if(r.typ === 'mulHeltal') lagg('brak-mult-rakna:rakna', { slag:'hb', h:r.h, t:r.t, n:r.n });
         else if(r.typ === 'mulAndel') lagg('brak-mult-rakna:rakna', { slag:'andel', t:r.t, n:r.n, N:r.N });
-        else if(r.typ === 'mulBrak' || r.typ === 'mulKors') lagg('brak-mult-forkorta:rakna', { slag:'bb', t1:r.t1, n1:r.n1, t2:r.t2, n2:r.n2 });
+        else if(r.typ === 'mulBrak' || (r.typ === 'mulKors' && r.br.length === 2)) lagg('brak-mult-forkorta:rakna', { slag:'bb', t1:r.t1, n1:r.n1, t2:r.t2, n2:r.n2 });
         else if(r.opnd) lagg('brak-mult-rakna:rakna', r.opnd);
       });
     });

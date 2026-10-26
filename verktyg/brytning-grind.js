@@ -26,7 +26,11 @@
           utan tecken skrivs "Svar:" och rutans högerkant ligger vid radens. Luckor (.lucka) är
           delar av uttrycket, inte svar, och en flerrutsrad har inget enskilt svar att högerställa.
 
-   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar]
+     K-L  Kedjan bryts inte vid Chromebook-bredd (Joachim 2026-10-26): en rad med flera led och
+          likhetstecken mellan dem står på EN rad vid 1366 × 768 och 1536 × 864 — svaret hamnar aldrig
+          på nästa rad. Mäts bara vid de bredderna, på sidor där telefonvyn hittade kedjor.
+
+   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar|kedja]
          --sabba återskapar felet regeln finns för → benet MÅSTE fälla. Ett motprov som inte kan
          fälla bevisar ingenting.
 
@@ -483,6 +487,24 @@ const PROBE = `(function(){
       if(Object.keys(kommaPlats).length > 1)
         b.brott.push('K-U KOMMAT PÅ OLIKA PLATS: efter ' + Object.keys(kommaPlats).join(' resp. ') + ' siffror från höger i "' + tal + '"');
     });
+    // ── K-L: kedjan bryts inte vid Chromebook-bredd (Joachim 2026-10-26) ─────────────────────────
+    // En KEDJA är en rad med flera led och likhetstecken mellan dem (.femled-eq, .mellan-eq): förläng-
+    // och förkortningsleden, femledet i addition och multiplikation, korsvisa förkortningen. Vid 1366 och
+    // 1536 ska hela kedjan stå på EN rad — svaret får inte hamna på nästa rad. Mätt så: radens barn
+    // överlappar alla ett gemensamt höjdband. Bara Chromebook-körningen räknar benet (i telefonens vy
+    // bryter kedjan strukturerat enligt K-D).
+    b.kedjor = 0; b.kl = [];
+    if(SABBA === 'kedja'){
+      var kS = Array.prototype.filter.call(sh.querySelectorAll('.ovn-brak-rad'), function(r){ return synlig(r) && r.querySelectorAll('.femled-eq, .mellan-eq').length >= 2; })[0];
+      if(kS){ kS.style.maxWidth = '320px'; kS.style.flexWrap = 'wrap'; ut.noter.push('SABBA: tvingade en kedja att brytas'); }
+    }
+    Array.prototype.forEach.call(sh.querySelectorAll('.ovn-brak-rad'), function(r){
+      if(!synlig(r) || r.querySelectorAll('.femled-eq, .mellan-eq').length < 2) return;
+      b.kedjor++;
+      var barn = Array.prototype.filter.call(r.children, synlig).map(function(c){ return c.getBoundingClientRect(); });
+      var topp = Math.max.apply(null, barn.map(function(x){ return x.top; })), botten = Math.min.apply(null, barn.map(function(x){ return x.bottom; }));
+      if(topp >= botten) b.kl.push('K-L KEDJAN BRYTS: "' + kort(r.textContent).slice(0, 30) + '" ligger på flera rader — ledet och svaret ska stå på en rad');
+    });
     ut.blad.push(b);
   }
 
@@ -562,6 +584,21 @@ Sidor.alla().forEach(sida => {
       if(!antal){ fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · K-U ' + vy + ': sidan laddar ytan men ingen uppställning mättes'); return; }
       console.log((ku.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · K-U ' + vy + ': ' + antal + ' uppställningar'
         + (ku.length ? '\n     ' + ku.slice(0, 4).join('\n     ') + (ku.length > 4 ? '\n     … och ' + (ku.length - 4) + ' till' : '') : ', hela'));
+    });
+  }
+  // K-L VID CHROMEBOOK: sidor där telefonvyn hittade kedjor mäts också vid 1366 och 1536, och där räknas
+  // bara K-L (kedjan på en rad). Ett ben som bara mäter i telefonens vy ser aldrig felet.
+  if((ut.blad || []).some(b => b.kedjor)){
+    ['1366x768', '1536x864'].forEach(vy => {
+      const rc = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp,
+        '--pre', pre, '--vanta-pa', 'blad', '--viewport', vy, '--size', vy, '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
+      let uc = null; try { uc = JSON.parse((rc.stdout || '').trim().split('\n').pop()); } catch(e){}
+      if(!uc){ fel++; console.log('✗ ' + sida + ' · K-L ' + vy + ': inget svar'); return; }
+      let antal = 0; const kl = [];
+      (uc.blad || []).forEach(b => { antal += b.kedjor || 0; (b.kl || []).forEach(x => kl.push(b.blad + ': ' + x)); });
+      fel += kl.length;
+      console.log((kl.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · K-L ' + vy + ': ' + antal + ' kedjor'
+        + (kl.length ? '\n     ' + kl.slice(0, 6).join('\n     ') + (kl.length > 6 ? '\n     … och ' + (kl.length - 6) + ' till' : '') : ', var och en på en rad'));
     });
   }
   try { fs.unlinkSync(tmp); fs.unlinkSync(pre); } catch(e){}
