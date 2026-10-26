@@ -825,6 +825,7 @@
     var kpEl = mount.querySelector('.keypad'), sisteFram = null, doljSel = opts.hideFor || '[data-nokeypad]';
     pa('focusin', function(e){
       if(e.target.tagName !== 'INPUT') return;
+      if(active && active !== e.target) active.__exp = null;   // exponentläget hör till rutan det öppnades i
       active = e.target;
       var dolj = arOrdruta(active, doljSel); if(kpEl) kpEl.classList.toggle('keypad-hidden', dolj);
       if(!dolj && active !== sisteFram) skrollaFram(kpEl, active);
@@ -837,7 +838,15 @@
         e.preventDefault();
         if(!active || active.disabled){ var first = mount.querySelector('input:not([disabled])'); if(first) active = first; else return; }
         var k = btn.dataset.key;
-        if(k === 'frac' || k === 'pot'){ var f = insertWidget(active, k); if(f){ active = f; f.focus(); var xp = f.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); } return; }
+        if(k === 'frac' || k === 'pot'){
+          var f = insertWidget(active, k);
+          if(f){ active = f; f.focus(); var xp = f.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); return; }
+          // Rutan bär ingen byggd struktur (en vanlig ruta på ett åttan-blad): exponent eller /.
+          // Förr hände då ingenting alls — knappen var tänd men död.
+          byggarKnapp(active, k); active.dispatchEvent(new Event('input', { bubbles:true })); active.focus(); return;
+        }
+        if(active.__exp && UPPHOJD[k]){ byggarKnapp(active, k); active.dispatchEvent(new Event('input', { bubbles:true })); active.focus(); return; }
+        active.__exp = null;
         if(k === 'back'){
           var rad0 = active.closest('.ak8-rad');
           var till = radera(active);                          // ångra det senaste (tecken/widget/led) — alla celltyper
@@ -932,6 +941,30 @@
     });
   }
 
+  /* ── BYGGARKNAPPARNA I EN VANLIG RUTA (Joachim 2026-10-26) ──
+     INGEN KNAPP FÅR SKRIVA ETT ORD I EN RUTA. Förr lades knappens namn till som text: i en vanlig
+     ruta skrev bråkknappen "frac" och potensknappen "pot" (mätt i d3: "x" → "xpot" → "xpotfrac").
+     Nu gör knapparna det de står för:
+       potens  en UPPHÖJD exponent. Knappen skriver ² direkt — det vanligaste, och eleven ser att
+               något hände — och öppnar exponentläget: siffror direkt efter blir upphöjda och
+               ersätter tvåan (potens 3 → ³, potens 1 2 → ¹²). Varje annan knapp stänger läget.
+       bråk    ett STAPLAT bråk där rutan kan bära det (en uttryckscell med bråkbyggare), annars /.
+     Returnerar true om knappen är omhändertagen. */
+  var UPPHOJD = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+                  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  function byggarKnapp(inp, k){
+    if(k === 'pot'){ inp.value += UPPHOJD['2']; inp.__exp = { orord: true }; return true; }
+    if(inp.__exp){
+      if(UPPHOJD[k]){
+        if(inp.__exp.orord) inp.value = inp.value.slice(0, -1);
+        inp.value += UPPHOJD[k]; inp.__exp.orord = false; return true;
+      }
+      inp.__exp = null;                                       // annan knapp: läget stängs, knappen skrivs som vanligt
+    }
+    if(k === 'frac'){ inp.value += '/'; return true; }
+    return false;
+  }
+
   // ── UNIVERSELL KEYPAD-BINDNING ──  för ytor UTAN ak8-widgets (öva-blad, prov, drillar, ovamer).
   // keypadHTML(...) monteras i mount; denna binder EN keypad som följer fokus, döljer sig för
   // ordsvars-rutor (data-nokeypad) och scrollar fram den aktiva rutan så den aldrig hamnar bakom
@@ -951,6 +984,7 @@
     var active = mount.querySelector('input:not([disabled])'), sisteFram = null;
     mount.addEventListener('focusin', function(e){
       if(e.target.tagName !== 'INPUT') return;
+      if(active && active !== e.target) active.__exp = null;   // exponentläget hör till rutan det öppnades i
       active = e.target;
       var dolj = arOrdruta(active, doljSel); if(kp) kp.classList.toggle('keypad-hidden', dolj);
       if(!dolj && active !== sisteFram) skrollaFram(kp, active);
@@ -967,8 +1001,15 @@
         if(opts.byggare && (k === 'frac' || k === 'pot' || k === 'back')){
           if(opts.byggare(k, active) === true){ active.dispatchEvent(new Event('input', { bubbles: true })); return; }
         }
-        if(k === 'back'){ active.value = active.value.slice(0, -1); }
-        else if(!ml || active.value.length < ml){ active.value += k; }
+        // En uttryckscell kan bära ett staplat bråk och en potens — där bygger knappen strukturen.
+        if((k === 'frac' || k === 'pot') && active.closest('.ak8-expr')){
+          var w = insertWidget(active, k);
+          if(w){ active = w; w.focus(); var xp = w.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); return; }
+        }
+        if(k === 'back'){ active.__exp = null; active.value = active.value.slice(0, -1); }
+        else if(ml && active.value.length >= ml){ /* rutan är full: inget skrivs, inte heller en exponent */ }
+        else if(byggarKnapp(active, k)){ /* omhändertagen: exponent eller / */ }
+        else { active.value += k; }
         active.dispatchEvent(new Event('input', { bubbles:true }));
         active.focus({ preventScroll:true });
       });
