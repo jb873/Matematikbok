@@ -2007,7 +2007,9 @@
   "namn | Geometriska figurer · area",
   "namn | Geometriska figurer · omkrets",
   "namn | Lösa ekvationer (balansmetoden)",
+  "namn | Multiplicera in i parentes",
   "namn | Multiplicera och dela en term",
+  "namn | Multiplicera två parenteser",
   "namn | Mönster",
   "namn | Parentes i ekvation",
   "namn | Personer eller delar",
@@ -2031,6 +2033,8 @@
   "namn | Välja och skapa uttryck",
   "titel | Beräkna med uttryck",
   "titel | Förenkla uttryck",
+  "titel | Multiplicera in i parentes",
+  "titel | Multiplicera två parenteser",
   "titel | Problem med parentes",
   "titel | Resonera om parenteser",
   "titel | Skriva uttryck",
@@ -2066,5 +2070,26 @@
   "titel | En operation",
   "titel | Två operationer",
   "titel | Variabel i båda leden"
+ ],
+ "ak8/k2/d3-parentes/index.html": [
+  "titel | Minus eller plus framför parentes",
+  "titel | Multiplikation med parentes"
+ ],
+ "js/motor/blad/blad-ak8-mult-parentes.js": [
+  "fraga | 6a(3b + 3)",
+  "fraga | 6a(b + 3)",
+  "fraga | 6a(b − 3)",
+  "fraga | Beräkna hur mycket hon ska betala om ett suddgummi kostar 8 kr.",
+  "fraga | Hur många suddgummin och hur många anteckningsböcker köper Lina?",
+  "namn | Anteckningsbok",
+  "namn | Suddgummi",
+  "rubrik | Lina köper suddgummin och anteckningsböcker för sammanlagt 4(x + 12) + 2x kr.",
+  "rubrik | Multiplicera in i parentesen",
+  "rubrik | Multiplicera in i parentesen och förenkla uttrycket",
+  "rubrik | Para ihop uttrycken med rätt alternativ",
+  "rubrik | Skriv ett uttryck för rektanglarnas area och förenkla det",
+  "rubrik | Skriv ett uttryck för vad tre suddgummin och två anteckningsböcker kostar sammanlagt och förenkla det.",
+  "rubrik | Vad ska stå i rutan för att likheten ska gälla?",
+  "titel | Multiplikation med parentes"
  ]
 }

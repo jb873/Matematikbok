@@ -120,6 +120,33 @@ var BAND = {
     }
   },
 
+  // ══ DEL 2 · MULTIPLIKATION MED PARENTES (order v3, bandet godkänt i FAS 2 2026-10-26) ══════
+  // Källa: Multiplikation med parentes.docx, md5 d940806229c9616123050f6d1d5fe110. Talområdet är
+  // läst ur dokumentets uppgifter. Nivåraden får sitt antal HÄR (tre steg); Fördjupning är ett
+  // eget blad med en nivå och får ingen rad.
+  //   1  tal gånger parentes, parentes bland termer, lucka, area, prislapp, para ihop
+  //   2  negativ faktor framför, två parenteser i rad, bråk i parentesen, flerval, pyramid
+  //   3  variabel framför parentesen, kvadrattermer, tre parenteser, figur, hålfigur
+  multiplicera: {
+    nivaer: {
+      1: { varianter: ['talGangerParentes', 'parentesBlandTermer', 'parentesSedanMinusParentes', 'lucka',
+                       'areaRektangel', 'prislapp', 'paraIhop'],
+           faktor: [2, 9], inreKoeff: [1, 5], inreKonstant: [3, 9], utanfor: [2, 13] },
+      2: { varianter: ['negativFaktor', 'tvaParenteserIRad', 'brakIParentes', 'flervalAreaOmkrets',
+                       'pyramidMedParentes', 'omkretsTillArea'],
+           faktor: [-8, 8], inreKoeff: [2, 8], inreKonstant: [1, 9], namnare: [3, 4] },
+      3: { varianter: ['variabelFramfor', 'kvadratterm', 'treParenteser', 'figurOmkretsArea',
+                       'pyramidMinusParentes', 'halfigur'],
+           faktor: [2, 6], variabelFaktor: true, inreKoeff: [1, 7], inreKonstant: [1, 12] }
+    }
+  },
+  fordjupning: {
+    nivaer: {
+      1: { varianter: ['tvaParenteser', 'koefficienter', 'produktMedTermer', 'deladFigur', 'halfigur'],
+           ab: [2, 7], koeff: [2, 8], konstant: [3, 8] }
+    }
+  },
+
   // ── Regler som gäller alla flikar ─────────────────────────────────────────────────────────
   regler: {
     // Minustecknet framför parentesen är uppgiften. Ett byte som gör alla parenteser till
@@ -131,7 +158,10 @@ var BAND = {
     tillatNollTerm: true,
     // Decimaler skrivs med komma. Bråk renderas staplat, aldrig "a/b" på en rad.
     decimaltecken: ',',
-    brakStaplat: true
+    brakStaplat: true,
+    // Del 2 (Joachim 2026-10-26): mellanledet vid multiplikation krävs där det SKILJER SIG från
+    // svaret — räknat ur uttrycket av MellanledRattare.kravAv. Pyramider har inga led.
+    mellanledMultiplikation: 'kravt där ledet skiljer sig från svaret'
   }
 };
 

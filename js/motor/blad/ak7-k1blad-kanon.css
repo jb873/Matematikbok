@@ -217,6 +217,7 @@
    Linjer, inte text: de behöver stroke. .af-matt är en textstil och ritar ingen linje — en <line>
    med bara den klassen syns inte alls. Den sökta delen får avvikande färg. */
 .af-svg line.af-matt{stroke:var(--ink-faint,#7a6e65);stroke-width:1.2;}
+.af-svg line.af-hjalp{stroke:var(--ink-faint,#7a6e65);stroke-width:1.4;stroke-dasharray:6 5;}   /* hjälplinje: triangelurtagets diagonaler */
 .af-del{stroke:var(--navy,#0f1e2e);stroke-width:3;stroke-linecap:round;}
 .af-del.af-sokt{stroke:var(--rod,#b14536);stroke-width:4;}
 .af-sokt-txt{fill:var(--rod,#b14536);font-weight:600;}

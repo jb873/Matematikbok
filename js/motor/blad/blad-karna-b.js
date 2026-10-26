@@ -400,7 +400,9 @@ function evalUttryck(str){
   if(s === '' || !/^[-+*/().0-9]+$/.test(s)) return NaN;
   var i = 0;
   function expr(){ var v = term(); while(s[i]==='+'||s[i]==='-'){ var o=s[i++]; var t=term(); v = o==='+'?v+t:v-t; } return v; }
-  function term(){ var v = factor(); while(s[i]==='*'||s[i]==='/'){ var o=s[i++]; var f=factor(); v = o==='*'?v*f:v/f; } return v; }
+  // IMPLICIT MULTIPLIKATION före en parentes: 4(8 + 12) är 4 · (8 + 12). Insättningen i ett
+  // uttryck med parentes (Lina, d3 del 2) skrivs så, och utan regeln blev ledet NaN — alltid fel.
+  function term(){ var v = factor(); while(s[i]==='*'||s[i]==='/'||s[i]==='('){ var o = s[i]==='(' ? '*' : s[i++]; var f=factor(); v = o==='*'?v*f:v/f; } return v; }
   function factor(){ if(s[i]==='+'){ i++; return factor(); } if(s[i]==='-'){ i++; return -factor(); }
     if(s[i]==='('){ i++; var v=expr(); if(s[i]===')') i++; return v; }
     var m = /^[0-9]*\.?[0-9]+/.exec(s.slice(i)); if(!m) return NaN; i += m[0].length; return parseFloat(m[0]); }
@@ -1184,6 +1186,9 @@ function bladHTML(blad){
                  : (rad.sidor ? rad.sidor.join(' + ') : ''));
         var _km = rad.mellanled || grupp.mellanled
           || (rad.skriv && window.MellanledRattare ? window.MellanledRattare.kravAv(rad.skriv) : null);
+        /* mellanled:'nej' på raden = MEDVETET inget led, även om gruppen kräver det: ledet vore en
+           kopia av svaret (7(x + 4) → 7x + 28). Flaggan räknas ur uttrycket i datan (d3 del 2). */
+        if(_km === 'nej') _km = null;
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
         if(rad.fraga) html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
@@ -1381,12 +1386,34 @@ function bladHTML(blad){
         html += '<span class="ovn-text">och</span>';
         html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="1" inputmode="decimal" autocomplete="off" style="width:80px;">';
       } else if(rad.typ === 'lucka'){
-        // text innehåller '__' där luckan ska sitta
-        var bitar = rad.text.split('__');
-        html += '<span class="ovn-text ovn-num">' + bitar[0] + '</span>';
-        html += '<input class="ovn-in lucka" data-svar="' + rad.svar
-          + '" inputmode="decimal" autocomplete="off">';
-        if(bitar[1] !== undefined) html += '<span class="ovn-text ovn-num">' + bitar[1] + '</span>';
+        // text innehåller '__' där luckan ska sitta. FLERA LUCKOR (d3 del 2, "▢ suddgummin och ▢
+        // anteckningsböcker"): svar är då en lista, en per lucka, och varje ruta bär sitt eget facit.
+        var bitar = rad.text.split('__'), _lsv = [].concat(rad.svar);
+        if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
+        bitar.forEach(function(b, bi){
+          if(b !== '') html += '<span class="ovn-text ovn-num">' + b + '</span>';
+          if(bi < bitar.length - 1) html += '<input class="ovn-in lucka" data-svar="' + _lsv[Math.min(bi, _lsv.length - 1)]
+            + '" inputmode="decimal" autocomplete="off">';
+        });
+      } else if(rad.typ === 'berakna'){
+        /* BERÄKNA PÅ ETT GIVET UTTRYCK (d3 del 2, Lina): uttrycket står i uppgiften, och kedjan är
+           Beräkna-kedjans — ersätt variabeln med talet, räkna, svaret. Ersättningsledet byggs
+           mekaniskt ur uttrycket med samma funktion som K-B:s kedja; "+ led" ger ett steg till. */
+        var _rb = insattningsFacit(rad.uttryck, rad.x);
+        if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
+        html += '<div class="ovn-berakna">';
+        html += '<input class="ovn-in bred" data-insatt="' + encodeURIComponent(_rb)
+          + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + rad.svar
+          + '" data-kp="uttryck" data-visa="' + _rb + '" inputmode="text" autocomplete="off">';
+        html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
+        html += '<input class="ovn-in bred ovn-led-extra" data-mellanvarde="' + rad.svar
+          + '" data-kp="uttryck" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" hidden>';
+        html += '<span class="ovn-text">=</span>';
+        html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+        if(rad.enhet) html += '<span class="ovn-text">' + rad.enhet + '</span>';
+        html += '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>';
+        html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
+        html += '</div>';
       } else if(rad.typ === 'overslag'){
         // [Vänster] (≈ eller =) [mellanled-input] = [svar-input]
         var mellanTecken = rad.tecken || '=';

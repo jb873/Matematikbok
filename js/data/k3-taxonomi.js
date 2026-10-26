@@ -204,9 +204,40 @@ window.K3_TAXONOMI = {
     {
       "id": "alg-forenkla-parentes:problem", "namn": "Problem med parentes", "parent": "alg-forenkla-parentes", "niva": "lovnod",
       "arskursRelevans": { "ak7": "fordjupning", "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "PROBLEMLOSNING", "generator": null,
-      "begrepp": "Ställa upp ett uttryck ur en text där något dras bort, och förenkla det.",
+      "begrepp": "Ställa upp ett uttryck ur en text där något dras bort eller multipliceras, och förenkla det.",
       "visning": { "utbudslista": ["ak8k2d3"], "grupp": "Uttryck med parentes", "gruppordning": 2, "radordning": 2,
                    "titel": "Problem med parentes", "etikett": "problemlösning", "formagaKey": "problemlosning", "niva": 2, "drillKommer": true }
+    },
+    /* Del 2 av delkapitel 3, multiplikation med parentes (Joachim 2026-10-26). Para ihop loggas inte
+       och delar :begrepp med del 1; problemen delar :problem.
+       DE TVÅ RÄKNA-NODERNA ÄR EGNA DELDOMÄNER under alg-forenkla, inte lövnoder under
+       alg-forenkla-parentes: en lövnods id-suffix ÄR förmågan (koppling-grind), och den deldomänen
+       har redan sin :rakna. Namnen är Joachims. */
+    {
+      "id": "alg-multiplicera-parentes", "namn": "Multiplicera in i parentes", "parent": "alg-forenkla", "niva": "deldoman",
+      "arskursRelevans": { "ak8": "mal" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Multiplicera in ett tal eller en variabel i en parentes och förenkla (delkapitel 3, del 2).",
+      "visning": null
+    },
+    {
+      "id": "alg-multiplicera-parentes:rakna", "namn": "Multiplicera in i parentes", "parent": "alg-multiplicera-parentes", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Multiplicera in ett tal eller en variabel i en parentes och förenkla. Varje produkt räknas ut innan termerna samlas. Tre nivåer enligt band-ak8-alg3 (multiplicera).",
+      "visning": { "utbudslista": ["ak8k2d3"], "grupp": "Uttryck med parentes", "gruppordning": 4, "radordning": 4,
+                   "titel": "Multiplicera in i parentes", "etikett": "räkna", "formagaKey": "rakna", "niva": 3, "drillKommer": true }
+    },
+    {
+      "id": "alg-multiplicera-tva-parenteser", "namn": "Multiplicera två parenteser", "parent": "alg-forenkla", "niva": "deldoman",
+      "arskursRelevans": { "ak8": "fordjupning" }, "roll": "karna", "formaga": null, "generator": null,
+      "begrepp": "Multiplicera två parenteser med varandra och förenkla (delkapitel 3, Fördjupning).",
+      "visning": null
+    },
+    {
+      "id": "alg-multiplicera-tva-parenteser:rakna", "namn": "Multiplicera två parenteser", "parent": "alg-multiplicera-tva-parenteser", "niva": "lovnod",
+      "arskursRelevans": { "ak8": "fordjupning" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
+      "begrepp": "Multiplicera två parenteser med varandra: varje term i den ena gånger varje term i den andra, sedan förenkla. Fördjupning i åttan.",
+      "visning": { "utbudslista": ["ak8k2d3"], "grupp": "Uttryck med parentes", "gruppordning": 5, "radordning": 5,
+                   "titel": "Multiplicera två parenteser", "etikett": "räkna", "formagaKey": "rakna", "niva": 1, "drillKommer": true }
     },
 
     /* ═══════════════ Del 4 · Ekvationer (öppet) ═══════════════
