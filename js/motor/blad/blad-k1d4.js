@@ -44,7 +44,7 @@ function bladBTform(niva, forsta){
     db = gSample(pool, 6);
   }
   return {
-    titel: 'Bråk ↔ decimal – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Bråk ↔ decimal – nivå ' + niva,
     intro: niva === 2
       ? 'Nu även åttondelar. Skriv bråken som decimaltal och decimaltalen som bråk i enklaste form.'
       : 'Skriv bråken som decimaltal och decimaltalen som bråk i enklaste form.',
@@ -101,7 +101,7 @@ function bladHundra(niva, forsta){
     fset = gSample(forlPool, 4);
   }
   return {
-    titel: 'Tiondelar och hundradelar – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Tiondelar och hundradelar – nivå ' + niva,
     intro: niva === 2
       ? 'Använd tiondelar och hundradelar som brygga mellan bråkform och decimalform.'
       : 'Använd tiondelar som brygga mellan bråkform och decimalform.',
@@ -144,7 +144,7 @@ function bladTest(niva, forsta){
     t3 = gSample(poolF, 3);
   }
   return {
-    titel: 'Test – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Test – nivå ' + niva,
     intro: 'Ett samlingstest för hela delkapitlet. Tre områden.',
     keypadOps: [','],
     isTest: true,

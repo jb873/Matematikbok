@@ -14,12 +14,15 @@
    d3 "FÖRLÄNGA OCH FÖRKORTA" (nivå 1 och 2) — villkoren 'k2d3:forlanga' och 'k2d3:forkorta':
      (1) HELA POOLEN: varje förläng- och förkortpool — bråket i enklaste form med nämnare 3–10, och
          vid förkortning en faktor ur nivåns lista som är största gemensamma delaren.
-     (2) ≥30 000 RADER ur bladets generatorer: mellanledsraderna, luckan (ett steg) och mgn-paren mot
-         samma villkor, räknat oberoende ur radens tal; varje förläng- och förkortgrupp bär
-         mellanled: 'kravt' i datan.
+         Tecken och flerval: det givna bråket likadant, det andra ett sådant bråk eller en förlängning av
+         ett; flervalet har exakt ett likvärdigt alternativ (det givna bråket förlängt).
+     (2) ≥30 000 RADER ur bladets generatorer: mellanledsraderna, luckan (ett steg), mgn-paren, tecken
+         och flerval mot samma villkor, räknat oberoende ur radens tal; varje förläng- och förkortgrupp
+         bär mellanled: 'kravt' i datan.
    --sabba d3   lägger [16,40] i poolen "Förläng med 3" → (1) och (2) ska fälla.
+   --sabba d3t  lägger 2/2 mot 4/4 i tecken och 1/2 i flervalet → (1) och (2) ska fälla.
 
-   KÖR:  node verktyg/spec-fuzz-k2-blad.js [--sabba d3]     Noll nätväg, ingen fil ändras. */
+   KÖR:  node verktyg/spec-fuzz-k2-blad.js [--sabba d3|d3t]     Noll nätväg, ingen fil ändras. */
 'use strict';
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..');
@@ -96,6 +99,10 @@ else {
   vm.createContext(S3);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/motor/blad/blad-k2-d3.js'), 'utf8'), S3, { filename: 'blad-k2-d3.js' });
   if(process.argv.includes('--sabba') && process.argv.includes('d3')){ vm.runInContext('FORL_MED3.push([16,40])', S3); console.log('\n  [SABBA d3: [16,40] i poolen "Förläng med 3"]'); }
+  if(process.argv.includes('--sabba') && process.argv.includes('d3t')){
+    vm.runInContext('FORL_TECKEN.push([2,2,4,4]); FORL_MC.push({mal:[1,2], alternativ:[[1,3],[2,4],[3,5],[1,4],[3,4]], ratt:1})', S3);
+    console.log('\n  [SABBA d3t: 2/2 mot 4/4 i tecken, 1/2 i flervalet]');
+  }
   const inom = n => n >= FL.tak.minNamnare && n <= FL.tak.maxNamnare;
   // förläng: t/n är det givna bråket
   const forlang = (t, n, k, var_) => {
@@ -113,8 +120,22 @@ else {
   // (1) HELA POOLEN
   const P3 = { FORL_MED2: ['forlang', 2, 'Förläng med 2'], FORL_MED3: ['forlang', 3, 'Förläng med 3'], FORL_TILL: ['till', 0, 'Förläng till nämnaren som står'],
                FORL_TILL60: ['till60', 0, 'Förläng så att nämnaren blir 60'], FORL_LUCKA: ['till', 0, 'Vilket tal saknas?'], MGN_PAIRS: ['mgn', 0, 'Minsta gemensamma nämnare'],
-               FORK_MED2: ['fk', 1, 'Förkorta med 2'], FORK_MED5: ['fk', 1, 'Förkorta med 5'], FORK_ENK1: ['fk', 1, 'Skriv i enklaste form'],
-               FORK_LANG: ['fk', 2, 'Förkorta så långt som möjligt'], FORK_BLAND: ['fk', 2, 'Förkorta och skriv i blandad form'] };
+               FORK_MED2: ['fk', 1, 'Förkorta med 2'], FORK_MED5: ['fk', 1, 'Förkorta med 5'], FORK_ENK1: ['fk', 1, 'Förkorta till enklaste form'],
+               FORK_LANG: ['fk', 2, 'Förkorta så långt som möjligt'], FORK_BLAND: ['fk', 2, 'Förkorta till blandad form'],
+               FORL_TECKEN: ['tecken', 0, 'Vilket tecken ska stå mellan bråken?'], FORL_MC: ['mc', 0, 'Vilket bråk är likvärdigt?'] };
+  // tecken och flerval (Joachim 2026-10-25): det givna bråket i enklaste form med nämnare 3–10; det andra
+  // bråket är ett sådant eller en förlängning av ett. Flervalet har exakt ett likvärdigt alternativ, och det
+  // är det givna bråket förlängt med en heltalsfaktor.
+  const tecken = (a, b, var_) => {
+    forlang(a[0], a[1], undefined, var_);
+    const g = gcd(b[0], b[1]); forlang(b[0] / g, b[1] / g, undefined, var_ + ' (andra bråket förkortat)');
+  };
+  const mc = (o, var_) => {
+    forlang(o.mal[0], o.mal[1], undefined, var_);
+    const lika = o.alternativ.map(function(x, i){ return x[0] * o.mal[1] === o.mal[0] * x[1] ? i : -1; }).filter(function(i){ return i >= 0; });
+    if(lika.length !== 1 || lika[0] !== o.ratt) fel(var_ + ': ' + o.mal.join('/') + ' har likvärdiga alternativ ' + JSON.stringify(lika) + ', rätt = ' + o.ratt);
+    else { const r = o.alternativ[o.ratt]; if(r[1] % o.mal[1] || r[1] === o.mal[1]) fel(var_ + ': ' + r.join('/') + ' är inte ' + o.mal.join('/') + ' förlängt'); }
+  };
   console.log('\nSPEC-FUZZ k2-BLAD — d3 "Förlänga och förkorta": enklaste form, nämnare ' + FL.tak.minNamnare + '–' + FL.tak.maxNamnare + ', en faktor\n');
   Object.keys(P3).forEach(function(p){
     const [slag, x, namn] = P3[p], pool = vm.runInContext(p, S3), fore = brott;
@@ -124,6 +145,8 @@ else {
       else if(slag === 'till'){ forlang(u[0], u[1], u[2] / u[1], v); }
       else if(slag === 'till60') forlang(u[0], u[1], 60 / u[1], v);
       else if(slag === 'mgn'){ forlang(u[0], u[1], undefined, v); forlang(u[2], u[3], undefined, v); }
+      else if(slag === 'tecken') tecken([u[0], u[1]], [u[2], u[3]], v);
+      else if(slag === 'mc') mc(u, v);
       else forkort(u[0], u[1], gcd(u[0], u[1]), x, v);
       if(slag === 'fk' && namn === 'Förkorta med 2' && gcd(u[0], u[1]) !== 2) fel(v + ': ' + u[0] + '/' + u[1] + ' förkortas inte med 2');
       if(slag === 'fk' && namn === 'Förkorta med 5' && gcd(u[0], u[1]) !== 5) fel(v + ': ' + u[0] + '/' + u[1] + ' förkortas inte med 5');
@@ -149,6 +172,8 @@ else {
             if(r.slag === 'forlang') forlang(r.t, r.n, r.k, v);
             else forkort(r.t, r.n, r.k, niva, v);
           } else if(r.typ === 'mgn'){ forlang(r.a[0], r.a[1], undefined, v); forlang(r.b[0], r.b[1], undefined, v); }
+          else if(r.typ === 'tecken') tecken(r.a, r.b, v);
+          else if(r.typ === 'mc') mc(r, v);
           else if(r.typ === 'kedja'){
             if(r.led.length !== 2) fel(v + ': luckan har ' + r.led.length + ' led (en förlängning per uppgift)');
             const a = r.led[0], b = r.led[r.led.length - 1];
@@ -161,5 +186,189 @@ else {
   }
   console.log('\n  ' + rader3 + ' rader ur ' + GEN3.map(function(x){ return x[0]; }).join(', ') + ' (' + mellan + ' mellanledsrader)');
 }
+
+const SABBA = v => process.argv.includes('--sabba') && process.argv.includes(v);
+const inom = (B, n) => n >= B.tak.minNamnare && n <= B.tak.maxNamnare;
+const sandlada = fil => { const C = Object.assign({}, S); C.window = C; vm.createContext(C); vm.runInContext(fs.readFileSync(path.join(ROOT, fil), 'utf8'), C, { filename: path.basename(fil) }); return C; };
+
+// ── d5 "Förläng en nämnare" och "Förläng båda nämnarna" ─────────────────────────────────────────
+const F5 = SPEC.BLAD['k2d5:forlang'];
+if(!F5) fel('spec-villkor-k2.js saknar BLAD[k2d5:forlang]');
+else {
+  const S5 = sandlada('js/motor/blad/blad-k2-d5.js');
+  if(SABBA('d5')){ vm.runInContext('FORLANG_EN.push([2,4])', S5); console.log('\n  [SABBA d5: [2,4] i poolen "Förläng en nämnare"]'); }
+  console.log('\nSPEC-FUZZ k2-BLAD — d5 "Förläng en/båda nämnarna": varje bråk i enklaste form, nämnare ' + F5.tak.minNamnare + '–' + F5.tak.maxNamnare + ', en faktor per bråk, mellanled i datan\n');
+  [['FORLANG_EN', 'Förläng en nämnare', true], ['PAR_FB', 'Förläng båda nämnarna, nivå 1', false], ['PAR_FB_S', 'Förläng båda nämnarna, nivå 2', false]].forEach(function([p, namn, delar]){
+    const pool = vm.runInContext(p, S5), fore = brott;
+    pool.forEach(function(par){
+      par.forEach(function(n){ if(!inom(F5, n)) fel('POOL ' + namn + ': nämnaren ' + n + ' utanför ' + F5.tak.minNamnare + '–' + F5.tak.maxNamnare); });
+      if(delar && (par[1] % par[0] || par[0] === par[1])) fel('POOL ' + namn + ': ' + par.join(' och ') + ' — den ena nämnaren delar inte den andra');
+    });
+    console.log('  ' + (brott === fore ? '✓' : '✗') + ' ' + namn.padEnd(40) + ' ' + String(pool.length).padStart(3) + ' nämnarpar');
+  });
+  const GEN5 = ['GRUND_FORLANG1', 'GEN_FORLANG1', 'GRUND_FORLANG2_N1', 'GEN_FORLANG2_N1', 'GRUND_FORLANG2_N2', 'GEN_FORLANG2_N2'];
+  let rader5 = 0, steg5 = 0, varv5 = 0;
+  while(rader5 < 30000 && varv5++ < 20000){
+    GEN5.forEach(function(namn){
+      const blad = vm.runInContext(namn + '()', S5);
+      blad.grupper.forEach(function(g){
+        const v = namn + ' · ' + g.rubrik, medSteg = g.rader.filter(function(r){ return r.steg; });
+        if(medSteg.length && g.mellanled !== 'kravt') fel(v + ': gruppen förlänger men kräver inte mellanledet i datan');
+        if(g.mellanled === 'kravt' && medSteg.length !== g.rader.length) fel(v + ': en rad i gruppen saknar förlängningsledet');
+        g.rader.forEach(function(r){
+          rader5++;
+          if(!r.steg) return;
+          steg5++;
+          const L = r.steg.termer.reduce(function(a, x){ return lcm(a, x.n); }, 1);
+          if(L !== r.steg.L) fel(v + ': radens L ' + r.steg.L + ' ≠ omräknad ' + L);
+          r.steg.termer.forEach(function(x){
+            if(gcd(x.t, x.n) !== 1) fel(v + ': ' + x.t + '/' + x.n + ' är inte i enklaste form');
+            if(!inom(F5, x.n)) fel(v + ': ' + x.t + '/' + x.n + ' har nämnaren ' + x.n + ' utanför ' + F5.tak.minNamnare + '–' + F5.tak.maxNamnare);
+            if(x.f !== L / x.n || x.nt !== x.t * x.f) fel(v + ': ' + x.t + '/' + x.n + ' förlängs inte med EN faktor till ' + L);
+          });
+        });
+      });
+    });
+  }
+  console.log('\n  ' + rader5 + ' rader ur ' + GEN5.join(', ') + ' (' + steg5 + ' med förlängningsled)');
+}
+
+// ── d6 "Förkorta korsvis" ─────────────────────────────────────────────────────────────────────────
+const K6 = SPEC.BLAD['k2d6:korsvis'];
+if(!K6) fel('spec-villkor-k2.js saknar BLAD[k2d6:korsvis]');
+else {
+  const S6 = sandlada('js/motor/blad/blad-k2-d6.js');
+  if(SABBA('d6')){ vm.runInContext('gStoraRad = function(){ return radKors(26,45,9,13); }', S6); console.log('\n  [SABBA d6: 26/45 · 9/13 (faktorerna 13 och 9) i generatorn]'); }
+  console.log('\nSPEC-FUZZ k2-BLAD — d6 "Förkorta korsvis": båda bråken i enklaste form, faktorer ur nivån, svaret i enklaste form med nämnare ' + K6.tak.minNamnare + '–' + K6.tak.maxNamnare + '\n');
+  const GEN6 = ['GRUND_STORATAL_N1', 'GEN_STORATAL_N1'];
+  let rader6 = 0, varv6 = 0;
+  while(rader6 < 30000 && varv6++ < 20000){
+    GEN6.forEach(function(namn){
+      const blad = vm.runInContext(namn + '()', S6);
+      blad.grupper.forEach(function(g){
+        const v = namn + ' · ' + g.rubrik;
+        const kors = /korsvis/.test(g.rubrik);
+        if(kors && g.mellanled !== 'kravt') fel(v + ': gruppen förkortar korsvis men kräver inte mellanledet i datan');
+        g.rader.forEach(function(r){
+          if(!kors) return;
+          rader6++;
+          if(r.typ !== 'mulKors'){ fel(v + ': radtypen ' + r.typ + ' saknar förkortningsledet'); return; }
+          const u = r.t1 + '/' + r.n1 + ' · ' + r.t2 + '/' + r.n2;
+          if(gcd(r.t1, r.n1) !== 1 || gcd(r.t2, r.n2) !== 1) fel(v + ': ' + u + ' — ett bråk är inte i enklaste form');
+          const g1 = gcd(r.t1, r.n2), g2 = gcd(r.t2, r.n1), lista = K6.faktorer[g.niva || 1];
+          if(g1 !== r.g1 || g2 !== r.g2) fel(v + ': ' + u + ' — radens faktorer ' + r.g1 + ', ' + r.g2 + ' ≠ omräknade ' + g1 + ', ' + g2);
+          [g1, g2].forEach(function(f){ if(f > 1 && lista.indexOf(f) < 0) fel(v + ': ' + u + ' har faktorn ' + f + ', inte ur nivå ' + (g.niva || 1) + ':s ' + lista.join(', ')); });
+          if(g1 === 1 && g2 === 1) fel(v + ': ' + u + ' förkortas inte alls');
+          const T = (r.t1 / g1) * (r.t2 / g2), N = (r.n1 / g2) * (r.n2 / g1);
+          if(gcd(T, N) !== 1) fel(v + ': ' + u + ' — ledet når inte enklaste form (' + T + '/' + N + ')');
+          if(!inom(K6, N)) fel(v + ': ' + u + ' = ' + T + '/' + N + ', nämnaren ' + N + ' utanför ' + K6.tak.minNamnare + '–' + K6.tak.maxNamnare);
+        });
+      });
+    });
+  }
+  console.log('  ' + rader6 + ' korsvisa rader ur ' + GEN6.join(', '));
+}
+
+// ── Drillarna (Öva mer): Förkorta, Förlänga och Likformiga bråk ──────────────────────────────────
+{
+  const SD = { Math: Math, console: S.console };
+  SD.randPick = function(a){ return a[Math.floor(Math.random() * a.length)]; };
+  SD.d3RandInt = function(lo, hi){ return lo + Math.floor(Math.random() * (hi - lo + 1)); };
+  SD.window = SD; vm.createContext(SD);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/motor/ovamer/ovamer-k2.js'), 'utf8'), SD, { filename: 'ovamer-k2.js' });
+  if(SABBA('drill')){ vm.runInContext('var _gfl = genForlangaTal; genForlangaTal = function(l){ var u = _gfl(l); u.bas = [1,2]; return u; }', SD); console.log('\n  [SABBA drill: 1/2 i "Förlänga bråk"]'); }
+  const LF = require(path.join(ROOT, 'js/motor/ovamer/ovamer-k2-likvtid.js'));
+  console.log('\nSPEC-FUZZ k2 — drillarna: bråket i enklaste form, nämnare ' + FL.tak.minNamnare + '–' + FL.tak.maxNamnare + ', en faktor (förkorta: ' + FK.faktorer[1].join(', ') + ' · sista nivån ' + FK.faktorer[2].join(', ') + ')\n');
+  const fore = brott; let n = 0;
+  [1, 2, 3].forEach(function(lv){
+    for(let i = 0; i < 4000; i++){
+      n += 3;
+      const k = vm.runInContext('genForkortaTal(' + lv + ')', SD), lista = FK.faktorer[lv === 3 ? 2 : 1];
+      if(gcd(k.bas[0], k.bas[1]) !== 1 || !inom(FK, k.bas[1])) fel('Förkorta bråk nivå ' + lv + ': ' + k.bas.join('/') + ' utanför bandet');
+      if(lista.indexOf(k.f) < 0 || k.T !== k.bas[0] * k.f || k.N !== k.bas[1] * k.f) fel('Förkorta bråk nivå ' + lv + ': ' + k.T + '/' + k.N + ' med faktorn ' + k.f + ', inte ur ' + lista.join(', '));
+      const l = vm.runInContext('genForlangaTal(' + lv + ')', SD);
+      if(gcd(l.bas[0], l.bas[1]) !== 1 || !inom(FL, l.bas[1])) fel('Förlänga bråk nivå ' + lv + ': ' + l.bas.join('/') + ' utanför bandet');
+      if(!(Number.isInteger(l.f) && l.f >= 2) || l.malN !== l.bas[1] * l.f) fel('Förlänga bråk nivå ' + lv + ': förlängs inte med EN heltalsfaktor (' + l.f + ')');
+      const u = LF.genLikformig(lv);
+      if(gcd(u.t, u.n) !== 1 || !inom(FL, u.n)) fel('Likformiga bråk nivå ' + lv + ': ' + u.t + '/' + u.n + ' utanför bandet');
+      if(!(Number.isInteger(u.k) && u.k >= 2) || u.nn !== u.n * u.k || u.nt !== u.t * u.k) fel('Likformiga bråk nivå ' + lv + ': förlängs inte med EN faktor');
+    }
+  });
+  console.log('  ' + (brott === fore ? '✓' : '✗') + ' ' + n + ' uppgifter ur genForkortaTal, genForlangaTal och genLikformig (nivå 1–3)');
+  if(typeof SD.ledFaktor === 'function'){
+    // Ledets rättning (delad av drillarna): rätt faktor, åt båda hållen, och genvägen.
+    const P = [['forlang', '2·3', '9·3', 2, 9, 3], ['forlang', '3·2', '3·9', 2, 9, 3], ['forlang', '2·4', '9·3', 2, 9, null], ['forlang', '6', '27', 2, 9, null],
+               ['forkort', '4/2', '14/2', 4, 14, 2], ['forkort', '4/1', '14/1', 4, 14, 1], ['forkort', '2', '7', 4, 14, null], ['forkort', '4/2', '14/7', 4, 14, null]];
+    const f0 = brott;
+    P.forEach(function(p){ const k = SD.ledFaktor(p[0], p[1], p[2], p[3], p[4]); if(k !== p[5]) fel('ledFaktor(' + p.slice(0, 5).join(', ') + ') = ' + k + ', väntat ' + p[5]); });
+    console.log('  ' + (brott === f0 ? '✓' : '✗') + ' ledFaktor: rätt faktor, omvänd ordning, olika faktor uppe och nere, genvägen (' + P.length + ' prov)');
+  }
+}
+
+// ── Testgeneratorerna (ak7-k2-ram.html) — i sidan, eftersom de bor i ramens boot ─────────────────
+{
+  const { spawnSync } = require('child_process'), os = require('os');
+  const pre = path.join(os.tmpdir(), 'sfk2b-pre-' + process.pid + '.js'), probe = path.join(os.tmpdir(), 'sfk2b-probe-' + process.pid + '.js');
+  fs.writeFileSync(pre, `(function(){
+    window.__e = []; window.addEventListener('error', function(e){ window.__e.push(String(e.message)); });
+    try { localStorage.clear(); } catch(e){}
+    var riktig;
+    Object.defineProperty(window, 'ProvbyggarMotor', { configurable: true,
+      get: function(){ return riktig; },
+      set: function(v){ riktig = v; if(v && v.montera && !v.__fangad){ var m = v.montera; v.montera = function(o){ window.__GEN = o && o.generators; return m.apply(this, arguments); }; v.__fangad = true; } } });
+  })();`);
+  fs.writeFileSync(probe, `new Promise(function(res){ setTimeout(function(){
+    var G = window.__GEN || {}, ut = {};
+    if(${SABBA('test')} && window.BLAD_K2_D3) window.BLAD_K2_D3.talBank = function(nod){ return /forlanga/.test(nod) ? [{ slag:'forlang', t:1, n:2, malN:4 }] : []; };
+    ['brak-forlanga', 'brak-forkorta', 'brak-likformig', 'andel-brak'].forEach(function(k){
+      var fn = G[k] && G[k].snabb && G[k].snabb[0], subs = [];
+      for(var i = 0; fn && i < 700; i++){ var r = fn(new Set()); if(r) r.subs.forEach(function(s){
+        var f = s.figur ? { fyllda: (s.figur.match(/fill="#2f6ea0"/g) || []).length, alla: (s.figur.match(/<rect/g) || []).length } : null;
+        subs.push({ type: s.type, prompt: s.prompt, led: s.led, slutTalj: s.slutTalj, slutNamn: s.slutNamn, svarform: s.svarform, talj: s.talj, namn: s.namn, figur: f, besked: !!s.forkortaBesked }); }); }
+      ut[k] = subs;
+    });
+    res({ gen: ut, fel: window.__e });
+  }, 1500); })`);
+  const url = 'file:///' + path.join(ROOT, 'ak7-k2-ram.html').replace(/\\/g, '/') + '?view=test-config&del=k2d3';
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), url, probe, '--pre', pre, '--vanta-pa', 'laddad', '--timeout', '90000'], { encoding: 'utf8', timeout: 180000, maxBuffer: 1 << 28 });
+  try { fs.unlinkSync(pre); fs.unlinkSync(probe); } catch(e){}
+  let u = null; try { u = JSON.parse((r.stdout || '').trim().split('\n').filter(l => l.startsWith('{')).pop()); } catch(e){}
+  if(SABBA('test')) console.log('\n  [SABBA test: bladets talbank ger 1/2 → 4 i "Förläng bråket"]');
+  console.log('\nSPEC-FUZZ k2 — testgeneratorerna: faktorledet, bandet och andelens rutnät\n');
+  if(!u){ fel('testgeneratorerna: inget svar från sidan ' + (r.stderr || '').slice(0, 200)); }
+  else {
+    if(u.fel && u.fel.length) fel('testgeneratorerna: JS-fel ' + u.fel.slice(0, 2).join(' | '));
+    const forkLista = FK.faktorer[1].concat(FK.faktorer[2]);
+    [['brak-forlanga', 'forlang'], ['brak-likformig', 'forlang'], ['brak-forkorta', 'forkort']].forEach(function([k, slag]){
+      const subs = u.gen[k] || [], fore = brott;
+      if(!subs.length) fel(k + ': inga deluppgifter');
+      subs.forEach(function(s){
+        const L = s.led && s.led[0], F = L && L.faktor, v = k + ' "' + String(s.prompt).slice(0, 50) + '"';
+        if(s.type !== 'mellanled' || !F || s.led.length !== 1 || F.slag !== slag){ fel(v + ': inte ett faktorled (' + s.type + ')'); return; }
+        if(slag === 'forlang'){
+          if(gcd(F.t, F.n) !== 1 || !inom(FL, F.n)) fel(v + ': ' + F.t + '/' + F.n + ' utanför bandet');
+          if(!(Number.isInteger(F.k) && F.k >= 2) || s.slutTalj !== F.t * F.k || s.slutNamn !== F.n * F.k || s.svarform !== 'exakt') fel(v + ': svaret är inte bråket förlängt med ' + F.k);
+        } else {
+          const g = gcd(F.t, F.n);
+          if(F.k !== g) fel(v + ': faktorn ' + F.k + ' är inte största gemensamma delaren ' + g);
+          if(!inom(FK, F.n / g) || forkLista.indexOf(g) < 0) fel(v + ': ' + F.t + '/' + F.n + ' = ' + (F.t / g) + '/' + (F.n / g) + ' utanför bandet (faktorn ' + g + ')');
+          if(s.slutTalj !== F.t / g || s.slutNamn !== F.n / g || s.svarform !== 'enklaste') fel(v + ': svaret är inte enklaste formen');
+        }
+      });
+      console.log('  ' + (brott === fore ? '✓' : '✗') + ' ' + k.padEnd(16) + ' ' + String(subs.length).padStart(5) + ' deluppgifter med faktorled');
+    });
+    const and = u.gen['andel-brak'] || [], fA = brott;
+    if(!and.length) fel('andel-brak: inga deluppgifter');
+    and.forEach(function(s){
+      if(!s.figur || !s.figur.alla) { fel('andel-brak: ingen figur'); return; }
+      if(s.figur.fyllda * s.namn !== s.talj * s.figur.alla) fel('andel-brak: figuren visar ' + s.figur.fyllda + '/' + s.figur.alla + ', facit ' + s.talj + '/' + s.namn);
+      if(gcd(s.talj, s.namn) !== 1) fel('andel-brak: facit ' + s.talj + '/' + s.namn + ' inte i enklaste form');
+      if(!s.besked) fel('andel-brak: saknar beskedet "förkorta svaret"');
+      if(s.prompt !== 'Hur stor del av rutorna är färgad?') fel('andel-brak: frågan "' + s.prompt + '"');
+    });
+    console.log('  ' + (brott === fA ? '✓' : '✗') + ' andel-brak       ' + String(and.length).padStart(5) + ' deluppgifter: rutnätet ritat ur facits tal');
+  }
+}
+
 console.log('\n' +(brott ? '✗ SPEC-FUZZ k2-BLAD RÖD (' + brott + ')' : '✓ SPEC-FUZZ k2-BLAD GRÖN'));
 process.exit(brott ? 1 : 0);

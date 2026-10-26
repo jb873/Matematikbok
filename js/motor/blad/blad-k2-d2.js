@@ -681,7 +681,7 @@ function bladBTform(niva, forsta){
     db = gSample(exakt, 6);
   }
   return {
-    titel: 'Bråk ↔ decimal – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Bråk ↔ decimal – nivå ' + niva,
     keypadOps: [','],
     grupper: [
       {rubrik:'Skriv bråket som decimaltal', rader:
@@ -778,7 +778,7 @@ function bladBlandad(niva, forsta){
     grupper.push({rubrik:'Skriv i enklaste form', rader: enklaste.map(function(p){ return radEnklasteForm(p[0], p[1], p[2]); })});
   }
   return {
-    titel: 'Blandad form och bråkform – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Blandad form och bråkform – nivå ' + niva,
     keypadOps: [],
     grupper: grupper
   };
@@ -1050,7 +1050,7 @@ function bladRakna(niva, forsta){
     return g;
   }
   return {
-    titel: 'Räkna med former – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Räkna med former – nivå ' + niva,
     keypadOps: niva === 2 ? [',', '-'] : [','],
     grupper: [
       grupp({rubrik: niva === 2 ? 'Bråk och decimaltal med tredjedelar'
@@ -1112,7 +1112,7 @@ function bladTest(niva, forsta){
     t5 = gSample(poolRK, 3);
   }
   return {
-    titel: 'Test – nivå ' + niva + (forsta ? '' : ' (nytt blad)'),
+    titel: 'Test – nivå ' + niva,
     keypadOps: niva === 2 ? [',', '-'] : [','],
     isTest: true,
     grupper: [

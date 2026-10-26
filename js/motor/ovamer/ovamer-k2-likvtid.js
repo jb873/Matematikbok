@@ -7,16 +7,16 @@
      • tidBrakEngine    — minuter → del av en timme i bråkform (enklaste)  → brak-tid
      • likformigEngine  — förläng ett bråk till given nämnare (ny täljare)  → brak-likformig
 
-   Bägge SINGLE-STEP compute (inget mellanled): tid = m/60 förkortat; likformig = förläng
-   täljare och nämnare med samma tal till en angiven nämnare. Speglar principen i
-   forlangaEngine (ovamer-k2.js) utan att röra den. Rena generatorer exponeras för fuzz.
+   Tid är SINGLE-STEP compute: m/60 förkortat. Likformig = förläng täljare och nämnare med
+   samma tal till en angiven nämnare, med mellanledet (2026-10-25) — ledets rättning är
+   forlangaEngines (ovamer-k2.js: ledFaktor). Rena generatorer exponeras för fuzz.
    ============================================================ */
 (function(){
   'use strict';
   function _gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
-  function _drawProper(maxN, rnd){                 // äkta förkortat bråk t/n (0<t<n)
+  function _drawProper(maxN, rnd){                 // äkta förkortat bråk t/n (0<t<n), nämnare 3..maxN
     for(;;){
-      var n = 2 + Math.floor(rnd() * (maxN - 1));
+      var n = 3 + Math.floor(rnd() * (maxN - 2));
       var t = 1 + Math.floor(rnd() * (n - 1));
       if(_gcd(t, n) === 1) return [t, n];
     }
@@ -36,10 +36,11 @@
     var g = _gcd(m, 60);
     return { min: m, t: m / g, n: 60 / g };
   }
-  // Likformig: förläng t/n med k → ny täljare t·k över given nämnare n·k.
+  // Likformig: förläng t/n med k → ny täljare t·k över given nämnare n·k. Bråket i enklaste form med
+  // nämnare 3–(4 + nivå), alltså högst 7 (Joachim 2026-10-25: nämnare 3–10, aldrig 2).
   function genLikformig(level, rnd){
     rnd = rnd || Math.random;
-    var f = _drawProper(3 + (level || 1), rnd), t = f[0], n = f[1];
+    var f = _drawProper(4 + (level || 1), rnd), t = f[0], n = f[1];
     var k = 2 + Math.floor(rnd() * (1 + (level || 1)));
     return { t: t, n: n, k: k, nt: t * k, nn: n * k };
   }
@@ -80,19 +81,23 @@
       });
     };
 
-    // ── förläng bråk till given nämnare (skriv den nya täljaren) ──
+    // ── förläng bråk till given nämnare (skriv mellanledet och den nya täljaren) ──
+    // Mellanledet (Joachim 2026-10-25): t/n = (t · k)/(n · k) = ▢/nk, rättat med ovamer-k2.js:s ledFaktor
+    // (samma faktor uppe och nere, den faktor som ger nämnaren; ett ensamt tal i ledet fälls).
     window.likformigEngine = function(){
       window.korOvning({
         titel: 'Likformiga bråk', sub: 'Förläng bråket så att det får den angivna nämnaren. Skriv den nya täljaren.',
         back: window.renderOversikt,
+        extraTangenter: ['·'],
         gen: function(level){
           var u = genLikformig(level);
+          var ledOk = function(){ return window.ledFaktor('forlang', valFor('lf-lt'), valFor('lf-ln'), u.t, u.n) === u.k; };
           return {
             fragaHtml: '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">'
-              + frac(u.t, u.n) + LIKA + cfrac(heltalBox('lf-s'), intg(u.nn)) + '</div>',
-            facitText: u.nt + '/' + u.nn,
-            faltRatt: function(f){ return num(u.nt, 'lf-s'); },
-            check: function(){ return num(u.nt, 'lf-s'); }
+              + frac(u.t, u.n) + LIKA + window.ledBoxes('lf-lt', 'lf-ln') + LIKA + cfrac(heltalBox('lf-s'), intg(u.nn)) + '</div>',
+            facitText: window.ledFacit('forlang', u.t, u.n, u.k) + LIKA + frac(u.nt, u.nn),
+            faltRatt: function(f){ return /lf-l[tn]/.test(f.className) ? ledOk() : num(u.nt, 'lf-s'); },
+            check: function(){ return ledOk() && num(u.nt, 'lf-s'); }
           };
         }
       });

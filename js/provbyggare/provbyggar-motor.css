@@ -470,6 +470,12 @@
 .test-sub-mellan .tsg-svar{display:inline-flex;align-items:center;gap:5px}
 .test-sub-mellan .tsg-svar .tsn-cell{width:70px}
 .test-sub-mellan .tsg-bas{font-family:var(--mono,monospace);font-size:16px;color:var(--ink,#12110f)}
+/* Faktorledet (förläng 2 · 3, förkorta 4/2): rutan rymmer ett uttryck, inte bara ett tal. */
+.test-sub-brak .tsb-led{width:92px}
+.test-sub-brak .tsb-led + .tsb-streck{width:92px}
+/* Andelsuppgiftens rutnät (SvgAndel.delRuta), ritat ur samma tal som facit. */
+.test-sub-figur{margin:6px 0 10px}
+.test-sub-figur svg{width:120px;height:120px;display:block}
 
 /* Skriv ut arbetsbladet: dölj knappraden + keypad så bara frågor och tomma svarsrutor skrivs ut.
    Kompletterar ramarnas egna @media print-block (som redan döljer .btn/.keypad i olika grad). */

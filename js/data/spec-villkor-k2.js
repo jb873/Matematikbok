@@ -299,6 +299,23 @@
       tak: { minNamnare: 3, maxNamnare: 10 },
       faktorer: { 1: [2, 3, 4, 5, 6], 2: [4, 6, 8, 9, 12] },
       kravs: { enFaktor: true, enklasteForm: true, mellanled: 'kravt' }
+    },
+    /* d5 "Förläng en nämnare" och "Förläng båda nämnarna": förlängningen inne i additionen och subtraktionen.
+       Varje bråk i uppgiften i enklaste form med nämnare 3–10; varje bråk förlängs med EN faktor, L/n, och
+       visas med faktorn i täljare och nämnare innan additionen (gruppen bär mellanled: 'kravt'). */
+    'k2d5:forlang': {
+      kalla: 'Joachim 2026-10-25 (FAS 2): förlängningen gäller också inne i en annan uppgift — varje förlängt bråk visas med faktorn i täljare och nämnare innan additionen eller subtraktionen',
+      tak: { minNamnare: 3, maxNamnare: 10 },
+      kravs: { enFaktor: true, enklasteForm: true, mellanled: 'kravt' }
+    },
+    /* d6 "Förkorta korsvis": båda bråken i enklaste form, så förkortningen sker korsvis med g1 = sgd(t1, n2) och
+       g2 = sgd(t2, n1). Svaret i enklaste form med nämnare 3–10 (som förkortningens bråk i d3); faktorerna ur
+       gruppens nivå, där 1 betyder att paret inte förkortas — minst ett par förkortas. */
+    'k2d6:korsvis': {
+      kalla: 'Joachim 2026-10-25 (FAS 2): förkortningens mellanled med snedstreck inne i täljare och nämnare gäller också d6:s "Förkorta korsvis"',
+      tak: { minNamnare: 3, maxNamnare: 10 },
+      faktorer: { 1: [2, 3, 4, 5, 6], 2: [4, 6, 8, 9, 12] },
+      kravs: { enklasteForm: true, mellanled: 'kravt' }
     }
   };
 

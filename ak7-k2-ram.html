@@ -526,7 +526,7 @@ function korOvning(opts){
       +'<div class="scorebar">'+dots+'</div>'
       +'<div class="brak-fraga" style="font-size:24px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:8px 0 4px;">'+task.fragaHtml+'</div>'
       +'<div class="ex-feedback" id="fb"></div>'
-      +keypadHTML(['7','8','9','4','5','6','1','2','3','0'])
+      +keypadHTML(['7','8','9','4','5','6','1','2','3','0'].concat(opts.extraTangenter || []))   // mellanledets '·' eller '/'
       +'<div class="ex-actions"><button class="btn primary" id="check">Kontrollera</button>'
       +'<button class="btn subtle" id="back">Tillbaka</button></div></div></div>';
     var falt=Array.prototype.slice.call(app.querySelectorAll('.brak-in'));
@@ -784,6 +784,27 @@ function blandadEngine(){
         slutTalj: t / g2, slutNamn: n / g2, expl: o.t1 + '/' + o.n1 + ' · ' + o.t2 + '/' + o.n2 + ' = ' + t + '/' + n + ' = ' + (t / g2) + '/' + (n / g2) + '.' }; }
     return null;                                // andel/blandad: egna frågeformer → slumpen
   }
+  // d3 — FÖRLÄNGA OCH FÖRKORTA MED MELLANLED (Joachim 2026-10-25): provbyggarens mellanled-typ med ett
+  // faktorled. Eleven skriver ledet (2 · 3 över 9 · 3, eller 4/2 över 14/2) och svaret; ledet rättas på faktorn
+  // (samma uppe och nere, den uppgiften gäller), inte på värdet. Förlängningens svar är det förlängda bråket
+  // ('exakt'), förkortningens svaret i enklaste form. Talen: bladets först, annars nämnare 3–10 i enklaste form.
+  // Prompten skrivs av generatorn (prompt: …, elevtext-låset läser den där); hjälparna lägger till ledet.
+  function forlangFraga(u, t, n, k){
+    u.key = (u.key || '') + t + '/' + n + 'x' + k;
+    u.led = [ { fraga: 'BRAK(' + t + ')(' + n + ')', faktor: { slag: 'forlang', t: t, n: n, k: k }, facit: 'BRAK(' + t + ' · ' + k + ')(' + n + ' · ' + k + ')' } ];
+    u.slutTalj = t * k; u.slutNamn = n * k; u.svarform = 'exakt';
+    u.expl = t + '/' + n + ' = ' + (t * k) + '/' + (n * k) + ' (förläng med ' + k + ').';
+    return u;
+  }
+  function forkortFraga(u, T, N){
+    var g = gcd2(T, N);
+    u.key = 'fk' + T + '/' + N;
+    u.led = [ { fraga: 'BRAK(' + T + ')(' + N + ')', faktor: { slag: 'forkort', t: T, n: N, k: g }, facit: 'BRAK(' + T + '/' + g + ')(' + N + '/' + g + ')' } ];
+    u.slutTalj = T / g; u.slutNamn = N / g; u.svarform = 'enklaste';
+    u.expl = T + '/' + N + ' = ' + (T / g) + '/' + (N / g) + ' (förkorta med ' + g + ').';
+    return u;
+  }
+  function enklastBrak(minN, maxN){ var n = rI(minN, maxN), t; do{ t = rI(1, n - 1); }while(gcd2(t, n) !== 1); return [t, n]; }
   var K2_TEST_GENERATORS = {
     // d1 — Andel av ett antal (numeric). Visuella andel-figur/tallinje hoppas (kan ej genereras entydigt i testformatet).
     'andel-antal': { snabb: [ G.numeric('k2-andel-antal','Andel av ett antal','andel-antal', function(){
@@ -803,26 +824,24 @@ function blandadEngine(){
       var m=rP([15,30,45,20,40,10,50,12,24,36,48,6,54,5,25,35,55,18,42]); var g=gcd2(m,60), t=m/g, n=60/g;
       return {key:'tid'+m, prompt:'Skriv '+m+' min som del av en timme (enklaste form).', talj:t, namn:n, expl:m+' min = '+m+'/60 h = '+t+'/'+n+' h.'};
     }) ] },
-    // d3 — Förlänga (numeric: nämnaren given, täljaren efterfrågas — förläng ⇒ EJ enklaste, så numeric) + Förkorta (brak, enklaste)
-    'brak-forlanga': { snabb: [ G.numeric('k2-forlanga','Förläng bråket','brak-forlanga', function(){
+    // d3 — Förlänga och förkorta med mellanled (se forlangFraga ovan).
+    'brak-forlanga': { snabb: [ G.mellanled('k2-forlanga','Förläng bråket','brak-forlanga', function(){
       var bp = bankPost('BLAD_K2_D3', 'brak-forlanga:rakna');   // ÖVA-bladets tal först
-      if(bp && bp.malN % bp.n === 0){ var bf = bp.malN / bp.n;
-        return { key: bp.t + '/' + bp.n + 'x' + bf, prompt: 'Förläng ' + bp.t + '/' + bp.n + ' till ' + bp.malN + '-delar:    ' + bp.t + '/' + bp.n + ' = BRAK(▢)(' + bp.malN + ')',
-          ans: bp.t * bf, expl: bp.t + '/' + bp.n + ' = ' + (bp.t * bf) + '/' + bp.malN + ' (förläng med ' + bf + ').' }; }
-      var n=rP([2,3,4,5,6]), t=rI(1,n-1), f=rP([2,3,4,5]);
-      return {key:t+'/'+n+'x'+f, prompt:'Förläng '+t+'/'+n+' till '+(n*f)+'-delar:    '+t+'/'+n+' = BRAK(▢)('+(n*f)+')', ans:t*f, expl:t+'/'+n+' = '+(t*f)+'/'+(n*f)+'.'};
+      var t, n, k;
+      if(bp && bp.malN % bp.n === 0){ t = bp.t; n = bp.n; k = bp.malN / bp.n; }
+      else { var b = enklastBrak(3, 10); t = b[0]; n = b[1]; k = rP([2,3,4,5]); }
+      return forlangFraga({ prompt: 'Förläng BRAK(' + t + ')(' + n + ') till ' + (n * k) + '-delar.' }, t, n, k);
     }) ] },
-    'brak-forkorta': { snabb: [ G.brak('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
+    'brak-forkorta': { snabb: [ G.mellanled('k2-forkorta','Förkorta till enklaste form','brak-forkorta', function(){
       var bp = bankPost('BLAD_K2_D3', 'brak-forkorta:rakna');   // ÖVA-bladets tal först
-      if(bp){ var g0 = gcd2(bp.t, bp.n), T0 = bp.t / g0, N0 = bp.n / g0;
-        if(T0 < N0) return { key: 'fk' + bp.t + '/' + bp.n, prompt: 'Skriv ' + bp.t + '/' + bp.n + ' i enklaste form.', talj: T0, namn: N0,
-          expl: bp.t + '/' + bp.n + ' = ' + T0 + '/' + N0 + '.' }; }
-      var N=rP([2,3,4,5,6]), T; do{ T=rI(1,N-1); }while(gcd2(T,N)!==1); var f=rP([2,3,4]);
-      return {key:(T*f)+'/'+(N*f), prompt:'Förkorta '+(T*f)+'/'+(N*f)+' till enklaste form.', talj:T, namn:N, expl:(T*f)+'/'+(N*f)+' = '+T+'/'+N+'.'};
+      var T, N;
+      if(bp && bp.t < bp.n){ T = bp.t; N = bp.n; }
+      else { var b = enklastBrak(3, 10), f = rP([2,3,4,5,6]); T = b[0] * f; N = b[1] * f; }
+      return forkortFraga({ prompt: 'Förkorta BRAK(' + T + ')(' + N + ') till enklaste form.' }, T, N);
     }) ] },
-    'brak-likformig': { snabb: [ G.numeric('k2-likformig','Likformiga bråk','brak-likformig', function(){
-      var n=rP([2,3,4,5,6]), t; do{ t=rI(1,n-1); }while(gcd2(t,n)!==1); var k=rP([2,3,4,5]);
-      return {key:'lf'+t+'/'+n+'x'+k, prompt:'Skriv ett bråk med nämnaren '+(n*k)+' som är lika mycket som '+t+'/'+n+':    '+t+'/'+n+' = BRAK(▢)('+(n*k)+')', ans:t*k, expl:t+'/'+n+' = '+(t*k)+'/'+(n*k)+' (förläng med '+k+').'};
+    'brak-likformig': { snabb: [ G.mellanled('k2-likformig','Likformiga bråk','brak-likformig', function(){
+      var b = enklastBrak(3, 6), k = rP([2,3,4,5]);
+      return forlangFraga({ key: 'lf', prompt: 'Skriv ett bråk med nämnaren ' + (b[1] * k) + ' som är lika mycket som BRAK(' + b[0] + ')(' + b[1] + ').' }, b[0], b[1], k);
     }) ] },
     // d4 — Jämför (flerval)
     'brak-jmf-lika': { snabb: [ G.flerval('k2-jmf-lika','Jämför bråk (samma nämnare)','brak-jmf-lika', function(){
@@ -971,9 +990,16 @@ function blandadEngine(){
     }) ] },
     // ── ÖVA-TÄCKNING (sjuan k2-sweep): quiz-bara luckor per delkapitel ──
     // k2d1: skriv andelen som bråk (antal→bråk, inversen av andel-noden) — brak
+    // Rutnätet (Joachim 2026-10-25) ritas med SvgAndel.delRuta ur SAMMA tal som facit: hel rutor i rader × kolumner,
+    // del av dem färgade. Svaret krävs i enklaste form; rätt värde i annan form får beskedet "förkorta svaret".
     'andel-brak': { snabb: [ G.brak('andel-brak','Skriv andelen som bråk','andel-antal', function(){
-      var hel=rP([8,10,12,15,16,20,24]), del=rI(1,hel-1), g=gcd2(del,hel);
-      return {key:'ab'+del+'/'+hel, prompt:'Av '+hel+' rutor är '+del+' färgade. Hur stor andel är färgad? (bråk, enklaste form)', talj:del/g, namn:hel/g, expl:del+'/'+hel+' = '+(del/g)+'/'+(hel/g)+'.'};
+      if(!window.SvgAndel) return null;
+      var RUTNAT = { 8:[2,4], 10:[2,5], 12:[3,4], 15:[3,5], 16:[4,4], 20:[4,5], 24:[4,6] };
+      var hel=rP([8,10,12,15,16,20,24]), del=rI(1,hel-1), g=gcd2(del,hel), rc=RUTNAT[hel];
+      var fargade=[], ix=[]; for(var i=0;i<hel;i++) ix.push(i);
+      for(var j=0;j<del;j++){ var p=rI(j,hel-1), x=ix[p]; ix[p]=ix[j]; ix[j]=x; fargade.push(x); }
+      return {key:'ab'+del+'/'+hel, prompt:'Hur stor del av rutorna är färgad?', figur: window.SvgAndel.delRuta(rc[0], rc[1], fargade),
+        forkortaBesked: true, talj:del/g, namn:hel/g, expl:del+'/'+hel+' = '+(del/g)+'/'+(hel/g)+'.'};
     }) ] },
     // k2d2: bråk↔decimal + oäkta→blandad
     'brak-dec': { snabb: [ G.numeric('brak-dec','Bråk som decimaltal','brak-blandad', function(){

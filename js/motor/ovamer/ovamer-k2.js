@@ -1,29 +1,73 @@
 /* FAMILJ C · k2 öva-mer bråk-motorer: forkorta/forlanga/bytaForm/rakna (korOvning + hjälpare stannar inline)
    Byte-identiskt utbrutet ur ak7-k2-ram.html. Laddas via <script src>; delade delar inline i ram-C. */
 
+/* MELLANLEDET (Joachim 2026-10-25): förlängning och förkortning skrivs som ett led, som på d3-bladet.
+     förläng  2/9 = (2 · 3)/(9 · 3) = 6/27      förkorta  4/14 = (4/2)/(14/2) = 2/7
+   ledFaktor läser ledets två rutor och ger faktorn — eller null om ledet inte är bråkets tal med EN faktor,
+   samma uppe och nere. Ett led som redan är svaret (ett ensamt tal) ger null: genvägen fälls.
+   Talen: bråket i enklaste form med nämnare 3–10; förkortningens faktor 2–6, på sista nivån {4, 6, 8, 9, 12}. */
+function ledFaktor(slag, vt, vn, t, n){
+  function led(v, bas){
+    var s=String(v||'').replace(/\s+/g,'').replace(/[*×x⋅]/g,'·');
+    var m=slag==='forlang' ? s.match(/^(\d+)·(\d+)$/) : s.match(/^(\d+)[\/:÷](\d+)$/);
+    if(!m) return null;
+    var a=+m[1], b=+m[2];
+    if(slag==='forkort') return a===bas ? b : null;
+    return a===bas ? b : (b===bas ? a : null);
+  }
+  var kt=led(vt, t), kn=led(vn, n);
+  return (kt!==null && kt===kn) ? kt : null;
+}
+// Ledets rutor: ett uttryck per ruta (2 · 3 eller 4/2), därför bredare och med textinmatning.
+function ledBoxes(idT,idN){
+  return '<span class="brak"><span class="taljare"><input class="brak-in '+idT+'" inputmode="text" autocomplete="off" style="width:84px;text-align:center;"></span><span class="namnare"><input class="brak-in '+idN+'" inputmode="text" autocomplete="off" style="width:84px;text-align:center;"></span></span>';
+}
+function ledFacit(slag, t, n, k){
+  var tkn=slag==='forlang' ? ' · ' : '/';
+  return frac(t+tkn+k, n+tkn+k);
+}
+
+// Rena talval (spec-fuzz-k2-blad läser dem utan sida): förkorta → {bas, f, T, N}, förlänga → {bas, f, malN}.
+function genForkortaTal(level){
+  // välj enklaste bråk t/n, förläng med faktor f → uppgift (t·f)/(n·f), svar t/n
+  var bas;
+  if(level===1) bas=randPick([[1,3],[2,3],[1,4],[3,4],[2,5]]);
+  else if(level===2) bas=randPick([[2,5],[3,5],[1,6],[5,6],[3,8],[5,8]]);
+  else bas=randPick([[3,7],[4,9],[4,7],[7,10],[5,9],[5,8]]);
+  var f=(level===1)?d3RandInt(2,4):(level===2?d3RandInt(2,6):randPick([4,6,8,9,12]));
+  return { bas:bas, f:f, T:bas[0]*f, N:bas[1]*f };
+}
+function genForlangaTal(level){
+  var bas;
+  if(level===1) bas=randPick([[1,3],[2,3],[1,4],[3,4],[2,5],[1,5]]);
+  else if(level===2) bas=randPick([[2,5],[3,5],[1,6],[5,6],[3,8],[3,7],[4,9]]);
+  else bas=randPick([[3,7],[4,9],[4,7],[7,10],[5,9],[3,10],[5,8]]);
+  // nivå 1: förläng med ett givet tal; nivå 2–3: förläng till en given nämnare
+  var f=(level===1)?d3RandInt(2,5):(level===2?d3RandInt(2,6):d3RandInt(3,9));
+  return { bas:bas, f:f, malN:bas[1]*f };
+}
+
 function forkortaEngine(){
   korOvning({
     titel:'Förkorta bråk',
     sub:'Förkorta bråket så långt det går. Skriv täljare och nämnare i enklaste form.',
     back:renderOversikt,
+    extraTangenter:['/'],
     gen:function(level){
-      // välj enklaste bråk t/n, förläng med faktor f → uppgift (t·f)/(n·f), svar t/n
-      var bas;
-      if(level===1) bas=randPick([[1,2],[1,3],[2,3],[1,4],[3,4]]);
-      else if(level===2) bas=randPick([[2,5],[3,5],[1,6],[5,6],[3,8],[5,8]]);
-      else bas=randPick([[3,7],[4,9],[5,12],[7,10],[5,9],[7,12]]);
-      var f=(level===1)?d3RandInt(2,4):(level===2?d3RandInt(2,6):d3RandInt(3,8));
-      var T=bas[0]*f, N=bas[1]*f;
+      var u=genForkortaTal(level), bas=u.bas, f=u.f, T=u.T, N=u.N;
       var svarT=bas[0], svarN=bas[1];
+      var ledOk=function(){ return ledFaktor('forkort', valFor('fk-lt'), valFor('fk-ln'), T, N)===f; };
+      var svarOk=function(){
+        var t=parseInt(valFor('fk-t'),10), n=parseInt(valFor('fk-n'),10);
+        if(isNaN(t)||isNaN(n)||n===0) return false;
+        // rätt värde och enklaste form
+        return (t*N===T*n) && gcd(t,n)===1;
+      };
       return {
-        fragaHtml: frac(T,N)+'<span style="margin:0 6px;">=</span>'+fracBoxes('fk-t','fk-n'),
-        facitText: frac(svarT,svarN),
-        check:function(){
-          var t=parseInt(valFor('fk-t'),10), n=parseInt(valFor('fk-n'),10);
-          if(isNaN(t)||isNaN(n)||n===0) return false;
-          // rätt värde och enklaste form
-          return (t*N===T*n) && gcd(t,n)===1;
-        }
+        fragaHtml: frac(T,N)+'<span style="margin:0 6px;">=</span>'+ledBoxes('fk-lt','fk-ln')+'<span style="margin:0 6px;">=</span>'+fracBoxes('fk-t','fk-n'),
+        facitText: ledFacit('forkort',T,N,f)+'<span style="margin:0 6px;">=</span>'+frac(svarT,svarN),
+        faltRatt:function(el){ return /fk-l[tn]/.test(el.className) ? ledOk() : svarOk(); },
+        check:function(){ return ledOk() && svarOk(); }
       };
     }
   });
@@ -37,38 +81,41 @@ function forlangaEngine(){
     titel:'Förlänga bråk',
     sub:'Förläng bråket genom att multiplicera täljare och nämnare med samma tal.',
     back:renderOversikt,
+    extraTangenter:['·'],
     gen:function(level){
-      var bas;
-      if(level===1) bas=randPick([[1,2],[1,3],[2,3],[1,4],[3,4],[2,5]]);
-      else if(level===2) bas=randPick([[2,5],[3,5],[1,6],[5,6],[3,8],[3,7],[4,9]]);
-      else bas=randPick([[3,7],[4,9],[5,12],[7,10],[5,9],[7,12],[5,8]]);
-      var t0=bas[0], n0=bas[1];
+      var u=genForlangaTal(level), t0=u.bas[0], n0=u.bas[1];
+      var ledOk=function(k){ return ledFaktor('forlang', valFor('fl-lt'), valFor('fl-ln'), t0, n0)===k; };
+      var ledHtml=frac(t0,n0)+'<span style="margin:0 6px;">=</span>'+ledBoxes('fl-lt','fl-ln')+'<span style="margin:0 6px;">=</span>';
       if(level===1){
-        // förläng med ett givet tal: t0/n0 · (f/f) = ?
-        var f=d3RandInt(2,5);
+        // förläng med ett givet tal: t0/n0 = (t0·f)/(n0·f) = ?
+        var f=u.f;
+        var svarOk1=function(){
+          var t=parseInt(valFor('fl-t'),10), n=parseInt(valFor('fl-n'),10);
+          if(isNaN(t)||isNaN(n)||n===0) return false;
+          return t===t0*f && n===n0*f;
+        };
         return {
-          fragaHtml: frac(t0,n0)+'<span style="margin:0 6px;">förläng med '+f+'  =</span>'+fracBoxes('fl-t','fl-n'),
-          facitText: frac(t0*f, n0*f),
-          check:function(){
-            var t=parseInt(valFor('fl-t'),10), n=parseInt(valFor('fl-n'),10);
-            if(isNaN(t)||isNaN(n)||n===0) return false;
-            return t===t0*f && n===n0*f;
-          }
+          fragaHtml: ledHtml+fracBoxes('fl-t','fl-n')
+            +'<span style="margin-left:8px;font-size:14px;color:var(--ink-faint);">(förläng med '+f+')</span>',
+          facitText: ledFacit('forlang',t0,n0,f)+'<span style="margin:0 6px;">=</span>'+frac(t0*f, n0*f),
+          faltRatt:function(el){ return /fl-l[tn]/.test(el.className) ? ledOk(f) : svarOk1(); },
+          check:function(){ return ledOk(f) && svarOk1(); }
         };
       }
       // nivå 2-3: förläng till en given nämnare
-      var f2=(level===2)?d3RandInt(2,6):d3RandInt(3,9);
-      var malN=n0*f2;
+      var f2=u.f, malN=u.malN;
+      var svarOk2=function(){
+        var t=parseInt(valFor('fl-t'),10), n=parseInt(valFor('fl-n'),10);
+        if(isNaN(t)||isNaN(n)||n===0) return false;
+        // rätt värde OCH rätt nämnare
+        return n===malN && t*n0===t0*n;
+      };
       return {
-        fragaHtml: frac(t0,n0)+'<span style="margin:0 6px;">=</span>'+fracBoxes('fl-t','fl-n')
+        fragaHtml: ledHtml+fracBoxes('fl-t','fl-n')
           +'<span style="margin-left:8px;font-size:14px;color:var(--ink-faint);">(nämnaren ska bli '+malN+')</span>',
-        facitText: frac(t0*f2, malN),
-        check:function(){
-          var t=parseInt(valFor('fl-t'),10), n=parseInt(valFor('fl-n'),10);
-          if(isNaN(t)||isNaN(n)||n===0) return false;
-          // rätt värde OCH rätt nämnare
-          return n===malN && t*n0===t0*n;
-        }
+        facitText: ledFacit('forlang',t0,n0,f2)+'<span style="margin:0 6px;">=</span>'+frac(t0*f2, malN),
+        faltRatt:function(el){ return /fl-l[tn]/.test(el.className) ? ledOk(f2) : svarOk2(); },
+        check:function(){ return ledOk(f2) && svarOk2(); }
       };
     }
   });

@@ -7,7 +7,8 @@
    ── Elev-lokalt: läser/skriver bara via config.mastery (localStorage). Ingen nätväg i den här filen. ── */
 (function(){
   // Slutsvarets form-hint i mellanled-subtypen, per svarform (elevtext som fält).
-  const FORMHINT = { enklaste: { hint: 'enklaste form' }, blandad: { hint: 'blandad form' }, brak: { hint: 'bråkform, enklaste form' } };
+  // 'exakt' (förlängning, Joachim 2026-10-25): svaret är det förlängda bråket, inte ett förkortat — ingen hint.
+  const FORMHINT = { enklaste: { hint: 'enklaste form' }, blandad: { hint: 'blandad form' }, brak: { hint: 'bråkform, enklaste form' }, exakt: { hint: '' } };
   // OBS: medvetet INTE 'use strict' — den flyttade koden kördes i ramens sloppy mode (t.ex.
   // generateTest:s safetyCounter läcker till global mellan snabb-/problem-looparna). Byte-identiskt.
 
@@ -28,6 +29,21 @@ function primeFactorize(n){
 function randPick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;} // för enklaste form (gcd=1)
+// Faktorledet (mellanled-typens förläng/förkort-led): celler = [täljarens led, nämnarens led], F = {slag, t, n, k}.
+// Förläng: "2·3" eller "3·2" (* × x ⋅ godtas som gånger). Förkorta: "4/2" (: ÷ godtas). Samma regel som d3-bladet.
+function faktorLedOk(F, celler){
+  if(!celler) return false;
+  function led(v, bas){
+    const s = AK8_UI.avTusental(String(v || '')).replace(/\s+/g, '').replace(/[*×x⋅]/g, '·');
+    const m = F.slag === 'forlang' ? s.match(/^(\d+)·(\d+)$/) : s.match(/^(\d+)[\/:÷](\d+)$/);
+    if(!m) return null;
+    const a = +m[1], b = +m[2];
+    if(F.slag === 'forkort') return a === bas ? b : null;
+    return a === bas ? b : (b === bas ? a : null);
+  }
+  const kt = led(celler[0], F.t), kn = led(celler[1], F.n);
+  return kt !== null && kt === kn && kt === F.k;
+}
 function komma(x){return String(x).replace('.',',')}                    // 0.04 → "0,04" (svensk decimal)
 // Seedbar PRNG (mulberry32) — BARA för seedad verifiering (byggFardigt seed). Ersätter Math.random
 // under EN testgenerering och återställs direkt efteråt → deterministisk dump utan att röra elevens
@@ -102,13 +118,22 @@ function testBrakGen(genId, titel, omrade, makeItem){
       const it = makeItem();
       if(!it || seen.has(genId+'-'+it.key)) continue;
       seen.add(genId+'-'+it.key);
-      subs.push({ label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:it.prompt, talj:it.talj, namn:it.namn, explanation:it.expl||'' });
+      const sub = { label:String.fromCharCode(97+subs.length)+')', type:'brak', prompt:it.prompt, talj:it.talj, namn:it.namn, explanation:it.expl||'' };
+      // Valfria fält (andelsuppgiften, Joachim 2026-10-25): en figur ritad ur samma tal som facit, och
+      // formbeskedet "förkorta svaret" när värdet är rätt men inte i enklaste form. Utan dem: som förr.
+      if(it.figur) sub.figur = it.figur;
+      if(it.forkortaBesked) sub.forkortaBesked = true;
+      subs.push(sub);
     }
     return subs.length ? { generator:genId, title:titel, omrade:omrade, subs:subs } : null;
   };
 }
 // Flerstegs (mellanled): makeItem → {key, prompt, led:[{fraga, varde, facit?}], slutTalj, slutNamn, expl}.
 // led = mellansteg (värde-rättade); slutTalj/slutNamn = slutsvar i enklaste form. Speglar drillens tresektion.
+// FAKTORLED (förlänga och förkorta, Joachim 2026-10-25): ett led med faktor:{slag:'forlang'|'forkort', t, n, k}
+// är inte värde-rättat — vid förlängning har varje led samma värde som bråket. Eleven skriver ledet,
+// 2 · 3 över 9 · 3 eller 4/2 över 14/2, och det rättas som på d3-bladet: samma faktor uppe och nere, den
+// faktor uppgiften gäller, och ett led som redan är svaret (ett ensamt tal) fälls.
 function testMellanledGen(genId, titel, omrade, makeItem){
   // opts.variant (valfritt): config-vald variant vidarebefordras till makeItem, som får producera bara den.
   return function(seen, opts){
@@ -274,6 +299,7 @@ function renderSubInput(qNum, subIdx, s){
   } else if(s.type === 'brak'){
     inputHtml = `
       <div class="test-sub-q"><span class="num-inline">${mattextUt(s.prompt)}</span></div>
+      ${s.figur ? `<div class="test-sub-figur">${s.figur}</div>` : ''}
       <div class="test-sub-input-row">
         <span class="test-sub-eq">Svar:</span>
         <span class="test-sub-brak">
@@ -286,7 +312,16 @@ function renderSubInput(qNum, subIdx, s){
   } else if(s.type === 'mellanled'){
     // Flerstegs-bråk: ett led-fält per mellansteg (värde-rättat) + slutsvar (enklaste form).
     // Speglar drillens tresektions-rättning (mellanRatt/svarRatt) — drill-motorn orörd.
-    const ledRows = (s.led || []).map((L, i) => `
+    const ledRows = (s.led || []).map((L, i) => L.faktor ? `
+      <div class="tsm-led">
+        <span class="tsm-fraga"><span class="num-inline">${mattextUt(L.fraga)}</span></span>
+        <span class="test-sub-eq">=</span>
+        <span class="test-sub-brak">
+          <input type="text" class="test-sub-input tsb-cell tsb-led" inputmode="text" maxlength="9" data-sub-input="${idBase}-L${i}-t" aria-label="mellanled täljare">
+          <span class="tsb-streck"></span>
+          <input type="text" class="test-sub-input tsb-cell tsb-led" inputmode="text" maxlength="9" data-sub-input="${idBase}-L${i}-n" aria-label="mellanled nämnare">
+        </span>
+      </div>` : `
       <div class="tsm-led">
         <span class="tsm-fraga"><span class="num-inline">${mattextUt(L.fraga)}</span></span>
         <span class="test-sub-eq">=</span>
@@ -303,7 +338,7 @@ function renderSubInput(qNum, subIdx, s){
         <div class="tsm-led tsm-slut">
           <span class="tsm-fraga">Svar</span>
           <span class="test-sub-eq">=</span>
-          <input type="text" class="test-sub-input tsb-hel" style="width:34px;text-align:center;margin-right:5px" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-shel" aria-label="slutsvar heltalsdel">
+          ${s.svarform === 'exakt' ? '' : `<input type="text" class="test-sub-input tsb-hel" style="width:34px;text-align:center;margin-right:5px" inputmode="numeric" maxlength="3" data-sub-input="${idBase}-shel" aria-label="slutsvar heltalsdel">`}
           <span class="test-sub-brak">
             <input type="text" class="test-sub-input tsb-cell" inputmode="numeric" maxlength="4" data-sub-input="${idBase}-st" aria-label="slutsvar täljare">
             <span class="tsb-streck"></span>
@@ -691,12 +726,14 @@ function gradeSub(s, ans){
     if(isNaN(t) || isNaN(n) || n === 0) return {status:'wrong', given: fx(ans[0]||'?', ans[1]||'?')};
     const vardeOk = (t * s.namn === n * s.talj);   // t/n === talj/namn (samma värde)
     const enklast = (gcd(t, n) === 1);             // enklaste form (gcd=1)
-    return {status: (vardeOk && enklast) ? 'correct' : 'wrong', given: fx(t, n)};
+    const besked = (vardeOk && !enklast && s.forkortaBesked && window.Likhetsrattare) ? ' — ' + window.Likhetsrattare.besked('forkorta') : '';
+    return {status: (vardeOk && enklast) ? 'correct' : 'wrong', given: fx(t, n) + besked};
   }
   if(s.type === 'mellanled'){
     if(!ans || !ans.led) return {status:'skipped'};
     // Varje LED rättas på VÄRDE (valfri giltig korsförkortning godtas) — speglat från drillens mellanRatt.
     const ledOk = (s.led || []).every((L, i) => {
+      if(L.faktor) return faktorLedOk(L.faktor, ans.led[i]);
       const t = AK8_UI.pInt(ans.led[i] && ans.led[i][0]), n = AK8_UI.pInt(ans.led[i] && ans.led[i][1]);
       if(isNaN(t) || isNaN(n) || n === 0) return false;
       return Math.abs(t / n - L.varde) < 1e-9;
@@ -708,7 +745,9 @@ function gradeSub(s, ans){
     const shel = harHel ? AK8_UI.pInt(shelStr) : 0;
     const brakTom = !(ans.slut && (String(ans.slut[0]).trim() || String(ans.slut[1]).trim()));
     let slutOk = false, besked = '';
-    if(s.slutNamn === 1){                                   // facit är ett heltal
+    if(s.svarform === 'exakt'){                             // förlängning: just det förlängda bråket
+      slutOk = !harHel && st === s.slutTalj && sn === s.slutNamn;
+    } else if(s.slutNamn === 1){                            // facit är ett heltal
       slutOk = harHel && !isNaN(shel) && shel === s.slutTalj && (brakTom || st === 0);
     } else if(!isNaN(st) && !isNaN(sn) && sn !== 0 && !isNaN(shel)){
       const LR = window.Likhetsrattare;
@@ -900,7 +939,8 @@ function renderReviewSub(sr){
     questionText = sub.prompt;
     const ledFacit = (sub.led || []).map(L => L.facit || (L.varde)).join(' → ');
     const bl = Math.floor(sub.slutTalj / sub.slutNamn) + ' ' + fx(sub.slutTalj % sub.slutNamn, sub.slutNamn);
-    const slutText = (sub.slutNamn === 1) ? String(sub.slutTalj)
+    const slutText = (sub.svarform === 'exakt') ? fx(sub.slutTalj, sub.slutNamn)
+      : (sub.slutNamn === 1) ? String(sub.slutTalj)
       : (sub.slutTalj > sub.slutNamn)
         ? (sub.svarform === 'blandad' ? bl + ' (blandad form)' : sub.svarform === 'brak' ? fx(sub.slutTalj, sub.slutNamn) + ' (bråkform)' : fx(sub.slutTalj, sub.slutNamn) + ' = ' + bl + ' (enklaste form)')
       : (fx(sub.slutTalj, sub.slutNamn) + ' (enklaste form)');

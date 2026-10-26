@@ -48,21 +48,24 @@ function radBerakna(t1, n1, op, t2, n2){
   var rad = {typ:'brakSvar', vanster: fracSpan(t1,n1) + opSpan(op) + fracSpan(t2,n2),
           likhet:true, svar: kanonisk(v.t, v.n), olikaNamn: (n1 !== n2),
           opnd: {slag:'brak', t1:t1, n1:n1, op:op, t2:t2, n2:n2}};   // testets talbank läser härifrån
-  if(n1 !== n2){
-    // Steg-data för femledad uppställning (förläng → samma nämnare → lägg ihop → svar)
-    var L = n1 * n2 / gcd(n1, n2);   // minsta gemensamma nämnare
-    var f1 = L / n1, f2 = L / n2;     // förlängningsfaktorer
-    var nt1 = t1 * f1, nt2 = t2 * f2; // nya täljare
-    var komb = (op === '+') ? (nt1 + nt2) : (nt1 - nt2);
-    rad.steg = {
-      t1:t1, n1:n1, op:op, t2:t2, n2:n2,
-      f1:f1, f2:f2,                       // förläng: (t1·f1)/(n1·f1)
-      L:L, nt1:nt1, nt2:nt2,              // samma nämnare: nt1/L op nt2/L
-      kombT:komb, kombN:L,                // lägg ihop: komb/L
-      svar: kanonisk(komb, L)            // svar (enklaste/blandad form)
-    };
-  }
+  if(n1 !== n2) rad.steg = femledSteg([{t:t1, n:n1}, {op:op, t:t2, n:n2}]);
   return rad;
+}
+
+/* Steg-data för femledad uppställning: förläng → samma nämnare → lägg ihop → svar. Två eller tre termer.
+   MELLANLEDET (Joachim 2026-10-25): varje förlängt bråk visas med faktorn i täljare och nämnare innan
+   additionen eller subtraktionen, (t · f)/(n · f) med f = L/n. Ett bråk som redan har nämnaren L förlängs
+   inte (f = 1) och står kvar som det är. */
+function femledSteg(termer){
+  var L = termer[0].n;
+  for(var i = 1; i < termer.length; i++) L = L * termer[i].n / gcd(L, termer[i].n);   // minsta gemensamma nämnare
+  var komb = 0;
+  var steg = termer.map(function(x, i){
+    var f = L / x.n, nt = x.t * f;
+    komb += (i > 0 && x.op === '-') ? -nt : nt;
+    return {op: i > 0 ? x.op : null, t: x.t, n: x.n, f: f, nt: nt};
+  });
+  return {termer: steg, L: L, kombT: komb, kombN: L, svar: kanonisk(komb, L)};
 }
 
 // ── Blandad form: heltal + bråk ──
@@ -106,14 +109,8 @@ function radTermer(termer){
     t = v.t; n = v.n;
   }
   var rad = {typ:'brakSvar', vanster: vanster, likhet:true, svar: kanonisk(t, n), olikaNamn: olika};
-  // Femledad uppställning bara för tvåtermsuttryck med olika nämnare
-  if(termer.length === 2 && termer[0].n !== termer[1].n){
-    var t1=termer[0].t, n1=termer[0].n, op=termer[1].op, t2=termer[1].t, n2=termer[1].n;
-    var L = n1 * n2 / gcd(n1, n2);
-    var f1 = L / n1, f2 = L / n2, nt1 = t1*f1, nt2 = t2*f2;
-    var komb = (op === '+') ? (nt1 + nt2) : (nt1 - nt2);
-    rad.steg = {t1:t1,n1:n1,op:op,t2:t2,n2:n2,f1:f1,f2:f2,L:L,nt1:nt1,nt2:nt2,kombT:komb,kombN:L,svar:kanonisk(komb,L)};
-  }
+  // Femledad uppställning när nämnarna skiljer sig — två eller tre termer (tre termer fick förr inget led)
+  if(olika) rad.steg = femledSteg(termer);
   return rad;
 }
 // Vilket tal saknas (lucka i en täljare). Heltalssvar = x.
@@ -234,7 +231,8 @@ function bladHTML(blad){
   // .brak-hint borttagen (order 2026-09-23): inga hjälptexter i öva
 
   blad.grupper.forEach(function(grupp, gi){
-    html += '<div class="ovn-grupp">';
+    // Mellanledskravet står i DATAN (grupp.mellanled) — mellanled-grind läser flaggan.
+    html += '<div class="ovn-grupp"' + (grupp.mellanled ? ' data-mellanled="' + grupp.mellanled + '"' : '') + '>';
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + grupp.rubrik + '</div>';
     var radNummer = 0;
     grupp.rader.forEach(function(rad){
@@ -265,18 +263,19 @@ function bladHTML(blad){
 
         if(rad.steg && blad.mellanled){
           var s = rad.steg;
+          var termerHTML = function(del){ return s.termer.map(function(x){ return (x.op ? opSpan(x.op) : '') + del(x); }).join(''); };
           // svaret: heltal + ev. bråkdel
           var svarBox = svarBrakHTML(rad.svar);
           html += '<div class="ovn-brak-rad brak-svar-rad brak-femled" data-rad="' + radNummer + '">';
           html += '<span class="ovn-label">' + bokstav + ')</span>';
           // 1. uppgift
-          html += '<span class="femled-grp">' + fracSpan(s.t1,s.n1) + opSpan(s.op) + fracSpan(s.t2,s.n2) + '</span>';
+          html += '<span class="femled-grp">' + termerHTML(function(x){ return fracSpan(x.t, x.n); }) + '</span>';
           html += '<span class="ovn-text femled-eq">=</span>';
-          // 2. förläng: (t1·f1)/(n1·f1) op (t2·f2)/(n2·f2)
-          html += '<span class="femled-grp">' + gProd(s.t1,s.f1,s.n1) + opSpan(s.op) + gProd(s.t2,s.f2,s.n2) + '</span>';
+          // 2. förläng: (t·f)/(n·f) för varje bråk som förlängs; ett bråk med nämnaren L står kvar
+          html += '<span class="femled-grp">' + termerHTML(function(x){ return x.f === 1 ? fracSpan(x.t, x.n) : gProd(x.t, x.f, x.n); }) + '</span>';
           html += '<span class="ovn-text femled-eq">=</span>';
-          // 3. samma nämnare: nt1/L op nt2/L
-          html += '<span class="femled-grp">' + gFrac(s.nt1,s.L) + opSpan(s.op) + gFrac(s.nt2,s.L) + '</span>';
+          // 3. samma nämnare: nt/L för varje term
+          html += '<span class="femled-grp">' + termerHTML(function(x){ return gFrac(x.nt, s.L); }) + '</span>';
           html += '<span class="ovn-text femled-eq">=</span>';
           // 4. lägg ihop: kombT/kombN
           html += '<span class="femled-grp">' + gFrac(s.kombT,s.kombN) + '</span>';
@@ -593,10 +592,12 @@ function GRUND_FORLANG1(){
         radBerakna(4,5,'+',2,5),
         radBerakna(7,9,'+',8,9)
       ]},
-      {rubrik:'Beräkna – förläng en nämnare', rader:[
-        radBerakna(1,2,'+',3,4),
-        radBerakna(5,12,'-',1,4),
-        radBerakna(4,10,'+',2,5),
+      // Talen (Joachim 2026-10-25): varje bråk i enklaste form med nämnare 3–10, en förlängning per bråk.
+      // Förr 1/2 + 3/4, 5/12 − 1/4 och 4/10 + 2/5.
+      {rubrik:'Beräkna – förläng en nämnare', mellanled:'kravt', rader:[
+        radBerakna(1,3,'+',5,6),
+        radBerakna(7,10,'-',1,5),
+        radBerakna(3,10,'+',2,5),
         radBerakna(7,9,'-',1,3)
       ]},
       {rubrik:'Vilket tal saknas för att likheten ska stämma?', rader:[
@@ -637,13 +638,16 @@ function genG2(){ // samma nämnare, kan bli oäkta -> blandad form
   else { a = gRand(2, n-1); b = gRand(1, a-1); }
   return radBerakna(a, n, op, b, n);
 }
-var FORLANG_PAR = [[2,4],[2,6],[2,8],[3,6],[3,9],[4,8],[4,12],[5,10],[6,12]];
+var FORLANG_PAR = [[2,4],[2,6],[2,8],[3,6],[3,9],[4,8],[4,12],[5,10],[6,12]];   // luckorna (genG4)
+// Förläng en nämnare: båda nämnarna 3–10, den ena delar den andra (Joachim 2026-10-25).
+var FORLANG_EN = [[3,6],[3,9],[4,8],[5,10]];
+function gTaljare(n){ var t; do{ t = gRand(1, n-1); }while(gcd(t, n) !== 1); return t; }   // bråket i enklaste form
 function genG3(){ // förläng EN nämnare (den ena delar den andra)
-  var par = gPick(FORLANG_PAR);
+  var par = gPick(FORLANG_EN);
   var liten = par[0], stor = par[1];
   var op = gPick(['+','-']);
-  var tStor = gRand(1, stor-1);
-  var tLiten = gRand(1, liten-1);
+  var tStor = gTaljare(stor);
+  var tLiten = gTaljare(liten);
   if(op === '+'){
     // se till att summan inte blir orimligt stor men tillåt oäkta ibland
     return gPick([true,false])
@@ -703,7 +707,7 @@ function GEN_FORLANG1(){
     grupper: [
       {rubrik:'Beräkna', rader: unika(genG1, 4, 1)},
       {rubrik:'Beräkna – svara i enklaste form', rader: unika(genG2, 4, 1)},
-      {rubrik:'Beräkna – förläng en nämnare', rader: unika(genG3, 4, 1)},
+      {rubrik:'Beräkna – förläng en nämnare', mellanled:'kravt', rader: unika(genG3, 4, 1)},
       {rubrik:'Vilket tal saknas för att likheten ska stämma?', rader: unika(genG4, 3, 2)},
       {rubrik:'Vilket tal ska adderas?', rader: unika(genG5, 3, 1)},
       {rubrik:'Vilket tal ska subtraheras?', rader: unika(genG6, 3, 1)}
@@ -723,13 +727,14 @@ function GRUND_FORLANG2_N1(){
     titel: 'Förläng båda nämnarna – nivå 1',
     mellanled: true,
     grupper: [
-      {rubrik:'Beräkna med bråk', rader:[
+      // Förr 3/5 + 1/2 och 2/3 − 1/2 (nämnaren 2, Joachim 2026-10-25: nämnare 3–10).
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader:[
         radTermer([F(3,4),T('+',1,3)]),
-        radTermer([F(3,5),T('+',1,2)]),
-        radTermer([F(2,3),T('-',1,2)]),
+        radTermer([F(3,5),T('+',1,3)]),
+        radTermer([F(2,3),T('-',1,4)]),
         radTermer([F(3,4),T('-',2,5)])
       ]},
-      {rubrik:'Beräkna med bråk', rader:[
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader:[
         radTermer([F(3,4),T('+',5,6)]),
         radTermer([F(5,8),T('+',3,5)]),
         radTermer([F(7,9),T('-',3,5)]),
@@ -744,15 +749,16 @@ function GRUND_FORLANG2_N2(){
     titel: 'Förläng båda nämnarna – nivå 2',
     mellanled: true,
     grupper: [
-      {rubrik:'Beräkna med bråk', rader:[
+      // Förr 2/9 + 10/11, 1/4 + 1/3 + 1/2 och 3/7 + 3/4 − 1/2 (nämnarna 11 och 2).
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader:[
         radTermer([F(4,9),T('+',5,6)]),
-        radTermer([F(2,9),T('+',10,11)]),
+        radTermer([F(2,9),T('+',9,10)]),
         radTermer([F(3,8),T('+',1,9)])
       ]},
-      {rubrik:'Beräkna med bråk', rader:[
-        radTermer([F(1,4),T('+',1,3),T('+',1,2)]),
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader:[
+        radTermer([F(1,4),T('+',1,3),T('+',1,6)]),
         radTermer([F(2,3),T('+',3,4),T('+',1,6)]),
-        radTermer([F(3,7),T('+',3,4),T('-',1,2)]),
+        radTermer([F(3,7),T('+',3,4),T('-',3,8)]),
         radTermer([F(3,5),T('-',5,6),T('+',7,10)])
       ]}
     ]
@@ -760,13 +766,14 @@ function GRUND_FORLANG2_N2(){
 }
 
 // Par där NÅGON täljare INTE delar den andra (kräver att båda förlängs)
-var PAR_FB    = [[3,4],[2,5],[2,3],[4,5],[4,6],[5,8],[5,6],[3,8],[3,10],[6,8],[3,5],[5,9]];
-var PAR_FB_S  = [[9,6],[9,11],[8,9],[7,8],[7,9],[5,8],[7,10],[8,11],[9,10],[7,12],[5,12],[8,6]];
+// Nämnare 3–10 (Joachim 2026-10-25): förr också 2, 11 och 12.
+var PAR_FB    = [[3,4],[4,5],[4,6],[5,8],[5,6],[3,8],[3,10],[6,8],[3,5],[5,9]];
+var PAR_FB_S  = [[9,6],[8,9],[7,8],[7,9],[5,8],[7,10],[9,10],[8,6]];
 
 function genTvaTerm(pool){
   var par = gPick(pool);
   var d1 = par[0], d2 = par[1];
-  var t1 = gRand(1, d1-1), t2 = gRand(1, d2-1);
+  var t1 = gTaljare(d1), t2 = gTaljare(d2);
   var op = gPick(['+','-']);
   if(op === '-'){
     // se till att resultatet blir positivt
@@ -776,36 +783,36 @@ function genTvaTerm(pool){
   return radTermer([F(t1,d1), T('+',t2,d2)]);
 }
 function genTreTerm(){
-  var denoms = [2,3,4,5,6,8,10,12];
+  var denoms = [3,4,5,6,8,10];                          // nämnare 3–10 (förr också 2 och 12)
   for(var a=0; a<80; a++){
     var d = [gPick(denoms), gPick(denoms), gPick(denoms)];
     if(d[0]===d[1] && d[1]===d[2]) continue;           // kräv olika nämnare
-    var t = [gRand(1,d[0]-1), gRand(1,d[1]-1), gRand(1,d[2]-1)];
+    var t = [gTaljare(d[0]), gTaljare(d[1]), gTaljare(d[2])];
     var ops = [gPick(['+','-']), gPick(['+','-'])];
     var v = frVarde(t[0], d[0], ops[0], t[1], d[1]);
     v = frVarde(v.t, v.n, ops[1], t[2], d[2]);
     if(v.t <= 0) continue;                              // positivt slutsvar
     return radTermer([F(t[0],d[0]), T(ops[0],t[1],d[1]), T(ops[1],t[2],d[2])]);
   }
-  return radTermer([F(1,4), T('+',1,3), T('+',1,2)]);   // reserv
+  return radTermer([F(1,4), T('+',1,3), T('+',1,6)]);   // reserv
 }
 function GEN_FORLANG2_N1(){
   return {
-    titel: 'Förläng båda nämnarna – nivå 1 (nytt blad)',
+    titel: 'Förläng båda nämnarna – nivå 1',
     mellanled: true,
     grupper: [
-      {rubrik:'Beräkna med bråk', rader: unika(function(){ return genTvaTerm(PAR_FB); }, 4, 1)},
-      {rubrik:'Beräkna med bråk', rader: unika(function(){ return genTvaTerm(PAR_FB); }, 4, 1)}
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader: unika(function(){ return genTvaTerm(PAR_FB); }, 4, 1)},
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader: unika(function(){ return genTvaTerm(PAR_FB); }, 4, 1)}
     ]
   };
 }
 function GEN_FORLANG2_N2(){
   return {
-    titel: 'Förläng båda nämnarna – nivå 2 (nytt blad)',
+    titel: 'Förläng båda nämnarna – nivå 2',
     mellanled: true,
     grupper: [
-      {rubrik:'Beräkna med bråk', rader: unika(function(){ return genTvaTerm(PAR_FB_S); }, 3, 1)},
-      {rubrik:'Beräkna med bråk', rader: unika(genTreTerm, 4, 1)}
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader: unika(function(){ return genTvaTerm(PAR_FB_S); }, 3, 1)},
+      {rubrik:'Beräkna med bråk', mellanled:'kravt', rader: unika(genTreTerm, 4, 1)}
     ]
   };
 }
