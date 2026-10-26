@@ -18,9 +18,10 @@
    KÖR:  node verktyg/hjalptext-grind.js                  prövar OMFANG mot registret
          node verktyg/hjalptext-grind.js --godkann <fil>  skriver filens NUVARANDE kandidater som godkända
                                                          (bara efter Joachims granskning)
-         node verktyg/hjalptext-grind.js --sabba ledtrad|blind   negativ verifiering (i minnet, källan orörd):
-                                                         ledtrad = en ledtråd läggs till i första filen,
-                                                         blind = första filen läses som tom → båda ska fälla
+         node verktyg/hjalptext-grind.js --sabba ledtrad|blind[:fil]   negativ verifiering (i minnet, källan
+                                                         orörd): ledtrad = en ledtråd läggs till i filen,
+                                                         blind = filen läses som tom → båda ska fälla.
+                                                         Utan :fil gäller det första filen i omfånget.
    Omfång: OMFANG (Plugg till prov k1 d10 + algebrasidorna). Ny fil → en rad. Noll nätväg.
 
    BLIND FIL FÄLLER. En fil i omfånget där läsaren inte hittar ett enda fält mäts inte — den ser grön
@@ -41,6 +42,15 @@ const OMFANG = ['js/motor/blad/blad-k1-d10.js',
   'ak7/k3/d1-algebraiska-uttryck/index.html', 'ak7/k3/d2-monster/index.html', 'ak7/k3/d3-forenkla-uttryck/index.html',
   'ak7/k3/d4-ekvationer/index.html', 'ak7/k3/d5-problemlosning/index.html', 'ak7/k3/d7-pluggtillprov/index.html',
   'ak8/k2/d1-algebraiska-uttryck/index.html', 'ak8/k2/d3-parentes/index.html', 'ak8/k2/d5-ekvationer-steg1/index.html'];
+// KÄND SKULD (Joachim 2026-10-26): sjuans k3 d7 är taluppfattningens kopia och byggs om senare.
+// Instruktionerna där rapporteras, men fäller inte. En NY instruktion i filen fäller som vanligt.
+const KAND_SKULD = {
+  'js/motor/blad/blad-k3-d7.js': [
+    'Längst ned bygger du faktorträd – rita gärna på papper också.',
+    'Skriv svaret med komma där det behövs.',
+    'Tänk på hur decimaltecknet flyttar när du multiplicerar eller dividerar med 10, 100 och 1000.',
+    '– visa mellanled']
+};
 const args = process.argv.slice(2);
 const GODKANN = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--godkann'));
 const SABBA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sabba'));
@@ -76,9 +86,11 @@ function kandidater(f){
 const lastaFalt = {};
 function las(fil){
   let kalla = fs.readFileSync(path.join(ROOT, fil), 'utf8');
-  if(SABBA && fil === OMFANG[0]){
-    if(SABBA === 'blind') kalla = '';
-    else if(SABBA === 'ledtrad') kalla += "\nrubrik: 'Förenkla uttrycket – tänk på att byta tecken'";
+  // --sabba ledtrad|blind[:delsträng] — målfilen är första filen, eller den första som matchar delsträngen
+  const [sabbaTyp, sabbaFil] = (SABBA || '').split(':');
+  if(SABBA && fil === (sabbaFil ? OMFANG.find(f => f.indexOf(sabbaFil) >= 0) : OMFANG[0])){
+    if(sabbaTyp === 'blind') kalla = '';
+    else if(sabbaTyp === 'ledtrad') kalla += "\nrubrik: 'Förenkla uttrycket – tänk på att byta tecken'";
   }
   const set = new Set(), f = falt(kalla);
   lastaFalt[fil] = f.length;
@@ -97,8 +109,10 @@ if(GODKANN){
 let fel = 0;
 console.log('HJÄLPTEXT-GRIND — instruktioner i uppgifterna ska vara godkända (regel 4)\n');
 OMFANG.forEach(fil => {
-  const nu = las(fil), godk = new Set(reg[fil] || []);
-  const nya = nu.filter(k => !godk.has(k)), borta = [...godk].filter(k => nu.indexOf(k) < 0);
+  const nu = las(fil), godk = new Set(reg[fil] || []), skuld = new Set(KAND_SKULD[fil] || []);
+  const nya = nu.filter(k => !godk.has(k) && !skuld.has(k)), borta = [...godk].filter(k => nu.indexOf(k) < 0);
+  nu.filter(k => skuld.has(k)).forEach(k => console.log('  ~ SKULD ' + fil + ': "' + k + '" (känd skuld, sidan byggs om)'));
+  [...skuld].filter(k => nu.indexOf(k) < 0).forEach(k => console.log('  ⓘ ' + fil + ': känd skuld finns inte längre: "' + k + '" (stryk raden i KAND_SKULD)'));
   // En bladfil utan ett enda läst fält är en blind fil. En sida (html) får sakna intro och ingress.
   if(!lastaFalt[fil] && /\.js$/.test(fil)){ fel++; console.log('✗ ' + fil + ': BLIND — läsaren hittade inga fält, filen mäts inte'); return; }
   nya.forEach(k => { fel++; console.log('✗ ' + fil + ': NY instruktion, inte godkänd: "' + k + '"'); });

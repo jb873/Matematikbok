@@ -39,7 +39,7 @@ var BLAD_SKRIVA = {
     {rubrik:'Elsa är x år gammal', rader:[
       {typ:'uttryck', fraga:'Elsas bror är 2 år äldre än henne. Skriv ett uttryck för broderns ålder.', svar:'x+2', accept:['x+2','2+x']},
       {typ:'uttryck', fraga:'Elsas syster är dubbelt så gammal som Elsa. Skriv ett uttryck för systerns ålder.', svar:'2x', accept:['2x','x·2','x+x']},
-      {typ:'uttryck', fraga:'Skriv ett uttryck för syskonens sammanlagda ålder (Elsa + bror + syster).', svar:'4x+2', accept:['4x+2','2+4x']}
+      {typ:'uttryck', fraga:'Skriv ett uttryck för syskonens sammanlagda ålder.', svar:'4x+2', accept:['4x+2','2+4x']}
     ]},
     {rubrik:'Vilket eller vilka uttryck beskriver kvadratens omkrets? (sidan är x)', rader:[
       {typ:'valruta', flera:true, fraga:'Välj alla som stämmer:', alt:['4x','4 · x','4 + x','x + x + x + x'], ratt:['4x','4·x','x+x+x+x']}

@@ -11,5 +11,15 @@
     "– visa mellanled – och beräkna värdet när x = 3",
     "– visa mellanled – och beräkna värdet när x = 4 och y = −2",
     "– visa mellanled – och beräkna värdet när x = 7"
+  ],
+  "js/motor/blad/blad-k3-d1.js": [
+    "(förenklat)",
+    "(sidan är x)"
+  ],
+  "js/motor/blad/blad-k3-d2.js": [
+    "Använd ett korrekt uttryck och beräkna antalet knappar i figur nummer 70",
+    "Använd ett korrekt uttryck och beräkna antalet prickar i figur nummer 70",
+    "Gör en talföljd där mönstret ökar med tre, använd fyra tal",
+    "– fyll i tabellen"
   ]
 }
