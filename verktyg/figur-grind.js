@@ -19,7 +19,12 @@
  *   KONTRAST  en text som ligger inuti en yta måste skilja sig från ytans fyllning. Mäts som
  *             avstånd i RGB; samma färg på text och botten betyder oläslig text.
  *
- * KÖR:  node verktyg/figur-grind.js [--sida <delsträng>] [--lista]
+ * NIVÅVARVET (2026-10-31): ett blad med egen nivårad bygger om sina figurer vid stegbyte. Grinden
+ * klickade flikarna men aldrig stegen, så figurerna på nivå 2 och 3 i åttans d3 del 2 mättes inte.
+ * Stegen låses upp och vandras med de delade snuttarna i niva-las-upp.js, som de andra grindarna.
+ *
+ * KÖR:  node verktyg/figur-grind.js [--sida <delsträng>] [--lista] [--bredd 1366x768]
+ *       --bredd mäter vid den bredden (Chromebook 1366 × 768, 1536 × 864); utan den cdp-kors standard
  *       --sabba svart     målar en yta svart        → SVART-benet måste fälla
  *       --sabba osynlig   lägger in en <line> med en textklass → OSYNLIG-benet måste fälla
  *       --sabba kontrast  ger en text sin egen bottens färg → KONTRAST-benet måste fälla
@@ -34,10 +39,14 @@ const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.blad())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const SABBA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sabba'));
+const BREDD = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--bredd'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
+const LAS_UPP = require('./niva-las-upp').snutt, STEG = require('./niva-las-upp').stegSnutt;
 
 const PROBE = `(function(){
   var SABBA = ${JSON.stringify(SABBA)};
+  ${LAS_UPP}
+  ${STEG}
   var ut = { onerr: window.__onerr || null, figurer: 0, ritade: 0, ytor: 0, linjer: 0, texter: 0,
              brott: [], noter: [] };
 
@@ -78,6 +87,14 @@ const PROBE = `(function(){
     // rutor var då inte på plats — en överlappning som syns i sidan fanns inte i mätningen.
     // Läsningen av offsetHeight tvingar fram en omflödning innan figurerna mäts.
     if(b){ if(b.disabled) return; b.click(); }
+    samla();
+    // Bladets egna steg: varje steg bygger nya figurer, och de mäts medan steget är framme.
+    Array.prototype.forEach.call(document.querySelectorAll('[data-nivaer]'), function(ark){
+      if(!ritad(ark)) return;
+      nivaVarv(ark.closest('[id^="sheet-"]') || ark, function(){ samla(); });
+    });
+  });
+  function samla(){
     void document.body.offsetHeight;
     Array.prototype.slice.call(document.querySelectorAll(ROTAR)).forEach(function(r){
       Array.prototype.forEach.call(r.querySelectorAll('svg'), function(x){
@@ -89,7 +106,7 @@ const PROBE = `(function(){
         matSvg(x, svgar.length - 1);
       });
     });
-  });
+  }
   function ritad(s){
     var b = s.getBoundingClientRect();
     return s.getClientRects().length > 0 && b.width > 0 && b.height > 0;
@@ -291,7 +308,8 @@ Sidor.blad().forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   MP.forsok(sida);
   const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
-    '--vanta-pa', 'blad', '--wait', '400', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
+    '--vanta-pa', 'blad', '--wait', '400', '--timeout', '60000']
+    .concat(BREDD ? ['--viewport', BREDD, '--size', BREDD] : []), { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!u){ console.log('? ' + sida + ': inget svar'); return; }
