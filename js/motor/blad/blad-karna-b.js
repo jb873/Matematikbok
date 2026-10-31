@@ -271,6 +271,22 @@ function insattningsFacit(uttryck, varde){
 }
 window.BLAD_SKRIV_FORENKLAT = SKRIV_FORENKLAT;   // grindarna läser regeln i stället för att gissa
 
+// "+ led" / "− led", samma knappar i varje kedja.
+function ledKnappar(){
+  return '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>'
+       + '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
+}
+// Ett VALFRITT led, dolt tills eleven trycker "+ led": sitt likhetstecken och ett uttryck värt samma
+// som svaret. Står före det SYNLIGA likhetstecknet framför det obligatoriska ledet (rad.extraLed).
+// Ordningen är bärande: AK8_UI.ledPar parar varje "=" med rutan efter, så det dolda tecknet måste
+// stå före den dolda rutan — annars hamnar det obligatoriska ledet i ett dolt par.
+function extraLed(svar, vars){
+  return '<span class="ovn-text ovn-led-extra" style="margin:0 4px;" hidden>=</span>'
+    + '<input class="ovn-in bred ovn-led-extra" data-mellanuttryck="' + encodeURIComponent(svar)
+    + '" data-kp="uttryck" data-vars="' + vars + '" data-visa="' + minusUt(svar)
+    + '" inputmode="text" autocomplete="off" hidden>';
+}
+
 // ETT LED SOM REDAN ÄR SLUTSVARET ÄR INGET LED (Joachim 2026-10-05). Samma prov som genvägen i
 // skriv-rutan: ledet ska ha FLER TERMER än svaret. Ett led ÄR värt samma som svaret — det är
 // formen som skiljer dem, inte värdet. Gäller båda kedjorna och alla led i dem.
@@ -1092,9 +1108,15 @@ function bladHTML(blad){
         var _pk = rad.mellanled || grupp.mellanled
           || (window.MellanledRattare ? window.MellanledRattare.kravAv(rad.uttryck) : null) || 'kravt';
         var _pv = rad.vars || 'xy';
+        /* EXTRA LED (d3 del 2, Joachim 2026-10-26): vid minus framför en produkt av två parenteser
+           räcker ett led, och "+ led" ger fler. Det obligatoriska ledet rättas efter regeln som förut;
+           det valfria står FÖRE det — produkten kvar inom parentes — och rättas på värde. */
+        var _px = !!rad.extraLed && _pk !== 'nej' && !delaVidSlash(rad.uttryck);
+        if(_px) html += '<div class="ovn-berakna" style="margin-top:0;width:auto;flex:1;">';
         /* uttryckHtml: uppgiften VISAS med staplat bråk, medan uttryck (ren text) matar rättaren.
            Boken visar bråket stående, och ett bråk skrivet på en rad är en annan uppgift att läsa. */
         html += '<span class="ovn-text ovn-num">' + (rad.uttryckHtml || matteUt(rad.uttryck)) + '</span>';
+        if(_px) html += extraLed(rad.svar, _pv);
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
         /* mellanled:'nej' = raden har MEDVETET inget mellanled, och då ritas ingen ruta. Nivå 3:s
            bråkuppgift är fallet: uttrycket är ett bråk av två parenteser, och mellanledsregeln —
@@ -1127,6 +1149,7 @@ function bladHTML(blad){
           + '" data-kp="uttryck" data-vars="' + _pv + '" data-visa="' + minusUt(rad.svar)
           + (rad.brak ? '" data-tillat-brak="1' : '')
           + '" inputmode="text" autocomplete="off">';
+        if(_px) html += ledKnappar() + '</div>';
         /* VALFRI VARDERUTA: uppgiften kan bade be om forenkling och om vardet for ett givet x.
            Dokumentets egen form ar EN uppgift, sa den ritas som en rad och inte som tva. */
         if(rad.varde){
@@ -1192,7 +1215,11 @@ function bladHTML(blad){
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
         if(rad.fraga) html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
-        html += _kfri ? '<div class="ovn-berakna">'
+        /* EXTRA LED (rad.extraLed): som parentesraden — det obligatoriska ledet rättas efter regeln,
+           och "+ led" lägger ett valfritt steg FÖRE det. Inte den fria kedjan: där rättas även det
+           första ledet bara på värde. */
+        var _kx = !!rad.extraLed && !_kfri && !!_km && !!rad.skriv;
+        html += (_kfri || _kx) ? '<div class="ovn-berakna">'
                  : '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
         html += '<input class="ovn-in bred" data-skriv="' + encodeURIComponent(_ku) + '"'
           + (rad.sidor ? ' data-sidor="' + encodeURIComponent(rad.sidor.join('|')) + '"' : '')
@@ -1211,6 +1238,7 @@ function bladHTML(blad){
             + '" inputmode="text" autocomplete="off">';
         }
         if(_km && rad.skriv && !_kfri){
+          if(_kx) html += extraLed(rad.svar, _kv);
           html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
           html += '<input class="ovn-in bred" data-parentesmellan="' + encodeURIComponent(rad.skriv)
             + '" data-krav="' + _km + '" data-kp="uttryck" data-vars="' + _kv
@@ -1231,10 +1259,7 @@ function bladHTML(blad){
           + '" data-kp="uttryck" data-vars="' + _kv + '" data-visa="' + minusUt(rad.svar)
           + (rad.brak ? '" data-tillat-brak="1' : '')
           + '" inputmode="text" autocomplete="off">';
-        if(_kfri){
-          html += '<button type="button" class="ovn-led-knapp" data-mer>' + LED_TEXT.mer.titel + '</button>';
-          html += '<button type="button" class="ovn-led-knapp" data-mindre hidden>' + LED_TEXT.mindre.titel + '</button>';
-        }
+        if(_kfri || _kx) html += ledKnappar();
         html += '</div></div>';
       } else if(rad.typ === 'forenkla'){
         // FÖRENKLA (k3 d3): svaret är ett uttryck som ska vara förenklat så långt det går.
@@ -1656,9 +1681,13 @@ function bygg_blad(rotEl, blad){
   // KEDJANS LED: "+ led" visar nästa dolda steg, "− led" gömmer och tömmer det senaste.
   // Svarsrutan och de två obligatoriska leden rörs aldrig — minimum är K-B:s tre steg.
   rotEl.querySelectorAll('.ovn-berakna').forEach(function(kedja){
-    var extra = Array.prototype.slice.call(kedja.querySelectorAll('.ovn-led-extra'));
+    /* De dolda delarna letas upp VID KLICKET, inte här. AK8_UI.ledPar körs efter bindningen och
+       lägger "=" och rutan i ett nytt par (.ovn-led-par.ovn-led-extra, dolt). En lista tagen här
+       saknade paret: "+ led" visade rutan, men paret stod kvar som [hidden], och rättningen hoppar
+       över allt inuti ett dolt element — ledet syntes men rättades aldrig (mätt i del 1, nivå 2–3). */
     var mer = kedja.querySelector('[data-mer]'), mindre = kedja.querySelector('[data-mindre]');
     function stall(visa){
+      var extra = Array.prototype.slice.call(kedja.querySelectorAll('.ovn-led-extra'));
       extra.forEach(function(e){ e.hidden = !visa; });
       if(mer) mer.hidden = visa;
       if(mindre) mindre.hidden = !visa;
@@ -1666,7 +1695,7 @@ function bygg_blad(rotEl, blad){
     }
     if(mer) mer.addEventListener('click', function(){ stall(true); });
     if(mindre) mindre.addEventListener('click', function(){
-      extra.forEach(function(e){ if(e.tagName === 'INPUT'){ e.value = ''; e.classList.remove('correct', 'wrong'); } });
+      kedja.querySelectorAll('input.ovn-led-extra').forEach(function(e){ e.value = ''; e.classList.remove('correct', 'wrong'); });
       stall(false);
     });
   });
