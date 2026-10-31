@@ -160,9 +160,12 @@
       if(!nagot) return null;            // platt sida — låt den vanliga vägen gälla
       return grupper.map(function(g){
         if(!g.subs.length){
-          /* Blad utan (eller med EN) underflik: ingen rubrik, bara varianten. Med en rubrik hade
-             raden blivit en grupp att fälla ut igen — samma fel i ny förpackning. */
-          return { rubrik: null, varianter: [variantAv(g.blad)] };
+          /* VARJE FLIK FÅR SIN RUBRIK (Joachim 2026-10-31). Förr ritades en flik med ett blad
+             rubriklöst, och på d3 hamnade "Multiplikation med parentes" då som en lös rad på samma
+             indrag som nivåerna under "Minus eller plus framför parentes" — den såg ut att höra
+             dit. Nu får fliken sin rubrik på samma nivå som de andra flikarna. fast: rubriken går
+             inte att fälla ihop, så bladet nås ändå med ETT klick (beteendevaktens ben D). */
+          return { rubrik: txt(g.blad).replace(/^\d+/, ''), fast: true, varianter: [variantAv(g.blad)] };
         }
         return { rubrik: txt(g.blad).replace(/^\d+/, ''),
           varianter: g.subs.map(function(sb){

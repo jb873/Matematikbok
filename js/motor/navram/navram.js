@@ -25,7 +25,8 @@
  * KONFIGURATION (en källa per sida, inget hårdkodat här):
  *   montera({
  *     vard:      element som ramen ritas i,
- *     arbeta:    [{ rubrik, grupper:[{ rubrik, varianter:[{ titel, etikett, kommer, valj() }] }] }],
+ *     arbeta:    [{ rubrik, grupper:[{ rubrik, fast, varianter:[{ titel, etikett, kommer, valj() }] }] }],
+ *                // rubrik null = platt grupp; fast = rubrik som aldrig fälls ihop
  *     mina:      [{ titel, sub, vy }]      // vy = element-id i arbetsytan
  *     niva:      { prefix, bladId, antal, aktuell, valj(n) } | null
  *   })
@@ -62,7 +63,7 @@
   function toggleGrp(grp){
     var varOpen = grp.classList.contains('is-open');
     var scope = grp.closest('.nr-huvud-body') || grp.parentElement;
-    scope.querySelectorAll('.nr-grp').forEach(function(g){
+    scope.querySelectorAll('.nr-grp:not(.nr-grp-fast)').forEach(function(g){
       g.classList.remove('is-open');
       var c = g.querySelector('.nr-grp-h .nr-chev');
       if(c) c.textContent = '▸';
@@ -154,11 +155,15 @@
         /* En grupp UTAN rubrik ritas platt: inget dragspelshuvud, alltid öppen. Platta blad
            (de flesta k1-sidorna har inga varianter) ska inte kosta två klick för ett blad. */
         var platt = !g.rubrik;
-        var gOpen = platt || (forst && gi === 0);
-        var grp = el('div', 'nr-grp' + (gOpen ? ' is-open' : '') + (platt ? ' nr-grp-platt' : ''));
+        /* En FAST grupp har rubrik men fälls aldrig ihop: en flik med ett blad ska synas som egen
+           flik (rubrik på samma nivå som de andra) men ändå nås med ett klick. Ingen pil, inget
+           klick på rubriken, och toggleGrp rör den inte. */
+        var fast = !platt && !!g.fast;
+        var gOpen = platt || fast || (forst && gi === 0);
+        var grp = el('div', 'nr-grp' + (gOpen ? ' is-open' : '') + (platt ? ' nr-grp-platt' : '') + (fast ? ' nr-grp-fast' : ''));
         var gh = null;
         if(!platt){
-          gh = el('div', 'nr-grp-h', g.rubrik + ' ' + chev(gOpen));
+          gh = el('div', 'nr-grp-h', g.rubrik + (fast ? '' : ' ' + chev(gOpen)));
           grp.appendChild(gh);
         }
         var gbody = el('div', 'nr-grp-body');
@@ -183,7 +188,7 @@
         });
 
         grp.appendChild(gbody);
-        if(gh) gh.addEventListener('click', function(){ toggleGrp(grp); });
+        if(gh && !fast) gh.addEventListener('click', function(){ toggleGrp(grp); });
         body.appendChild(grp);
       });
 

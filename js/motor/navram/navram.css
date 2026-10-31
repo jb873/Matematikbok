@@ -93,6 +93,9 @@ body.embed .nr-dold-embed{ display:none !important; }
 .nr-grp.nr-grp-platt{border:0;background:none;}
 .nr-grp.nr-grp-platt .nr-grp-body{padding:0;}
 .nr-grp.is-open .nr-grp-body{display:block;}
+/* Fast grupp: en flik med ett blad. Samma låda och rubrik som de andra flikarna, men rubriken
+   är ingen knapp — gruppen är alltid öppen. */
+.nr-grp.nr-grp-fast .nr-grp-h{cursor:default;}
 
 /* ── VARIANT (klick laddar den i arbetsytan) ── */
 .nr-rad{

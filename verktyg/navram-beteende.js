@@ -21,12 +21,22 @@
  *   BEN E  Efter klicket sitter markeringen (is-on) på den klickade varianten och ingen annan.
  *   BEN C  Antalet ritade .niva-btn = det antal ramen fick ur datan (window.__NAVRAM), där 0 och
  *          1 betyder ingen rad alls.
+ *   BEN F  EN FLIK HAMNAR ALDRIG UNDER EN ANNAN FLIK (Joachim 2026-10-31). Har spalten flikar med
+ *          rubrik får ingen rad ligga rubriklös bredvid dem — den ser ut att höra till fliken
+ *          ovanför (d3: "Multiplikation med parentes" under "Minus eller plus framför parentes").
+ *          Och på en sida med underflikar är varje flik en egen rubrik.
+ *   BEN G  TILLBAKALÄNKARNA, på varje nivå och i varje flik: efter varje klick prövas varje synlig
+ *          länk i sidhuvudet och brödsmulan. Målet ska finnas och ligga ovanför sidan (aldrig i
+ *          sidans egen mapp eller under den), och "← Alla delkapitel" ska leda till en sida som
+ *          listar just det här delkapitlet.
  *
  * KÖR:  node verktyg/navram-beteende.js [--sida <delsträng>] [--lista]
  *       --sabba delegering  låter varje variant peka på FÖRSTA ytan → BEN B måste fälla
  *       --sabba nivarad     ritar en extra nivåknapp → BEN C måste fälla
  *       --sabba tvaklick    fäller ihop en grupp → BEN D måste fälla
  *       --sabba markering   flyttar markeringen till en annan rad → BEN E måste fälla
+ *       --sabba flikplatt   tar rubriken från spaltens sista flik → BEN F måste fälla
+ *       --sabba tillbaka    pekar om "← Alla delkapitel" efter första klicket → BEN G måste fälla
  * Exit 1 vid brott. Ingen nätväg, ingen fil ändras. */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
@@ -123,6 +133,51 @@ const PROBE = `(function(){
   })[0];
   if(!uppg){ ut.brott.push('INGEN UPPGIFTER-RUBRIK att prova'); aterstall(); return ut; }
 
+  // ── BEN F: en flik hamnar aldrig under en annan flik ───────────────────────────────────
+  if(SABBA === 'flikplatt'){
+    var sista = Array.prototype.slice.call(uppg.querySelectorAll('.nr-grp')).filter(function(g){ return g.querySelector('.nr-grp-h'); }).pop();
+    if(sista){
+      sista.removeChild(sista.querySelector('.nr-grp-h'));
+      sista.classList.remove('nr-grp-fast'); sista.classList.add('nr-grp-platt', 'is-open');
+      ut.noter.push('SABBA: tog rubriken fr\\u00e5n spaltens sista flik');
+    }
+  }
+  var spaltGrp = Array.prototype.slice.call(uppg.querySelectorAll('.nr-grp'));
+  var medRubrik = spaltGrp.filter(function(g){ return g.querySelector('.nr-grp-h'); });
+  var rubrikText = function(g){ return g.querySelector('.nr-grp-h').textContent.replace(/[\\s\\u25be\\u25b8]+/g, ' ').trim(); };
+  if(medRubrik.length){
+    spaltGrp.forEach(function(g, gi){
+      if(g.querySelector('.nr-grp-h')) return;
+      var ovan = spaltGrp.slice(0, gi).filter(function(x){ return x.querySelector('.nr-grp-h'); }).pop();
+      var rader = Array.prototype.map.call(g.querySelectorAll('.nr-rad'), function(r){ return r.textContent.replace(/\\s+/g, ' ').trim().slice(0, 32); });
+      ut.brott.push('FLIK UNDER ANNAN FLIK: "' + rader.join('", "') + '" saknar egen rubrik och ligger '
+        + (ovan ? 'under "' + rubrikText(ovan) + '"' : 'rubriklöst bland flikarna') + ' — varje flik ska vara en egen rubrik');
+    });
+  }
+  /* Sidor med underflikar: varje flik (bladnav-knapp) ska stå som egen rubrik i spalten. */
+  if(document.querySelector('.blad-subnav')){
+    var rubriker = medRubrik.map(rubrikText);
+    Array.prototype.forEach.call(document.querySelectorAll('#blad-nav .blad-nav-btn'), function(b){
+      var t = b.textContent.replace(/\\s+/g, ' ').trim().replace(/^\\d+/, '');
+      if(rubriker.indexOf(t) < 0) ut.brott.push('FLIKEN "' + t + '" HAR INGEN EGEN RUBRIK i spalten');
+    });
+  }
+
+  // ── BEN G: tillbakalänkarna, mätta efter varje klick (node prövar målen) ────────────────
+  ut.lankar = [];
+  function samlaLankar(var_){
+    Array.prototype.forEach.call(document.querySelectorAll('a[href]'), function(a){
+      if(!synlig(a)) return;
+      /* Tillbakalänkar: brödsmulan och varje länk som börjar med en vänsterpil ("← Alla
+         delkapitel"). Klassen räcker inte: plugg-sidans "Var står jag? … →" är en .hero-back som
+         leder framåt, till kunskapsläget. */
+      if(!(a.matches('.nav-crumbs a') || /^\\s*\\u2190/.test(a.textContent))) return;
+      ut.lankar.push({ efter: var_, text: a.textContent.replace(/\\s+/g, ' ').trim().slice(0, 32), href: a.href,
+                       alla: /Alla delkapitel/i.test(a.textContent) });
+    });
+  }
+  samlaLankar('(start)');
+
   /* BEN D — ETT KLICK RÄCKER. Mäts FÖRE någon grupprubrik klickats: är varianten gömd i en
      hopfälld grupp måste eleven fälla ut den först, och då är ett byte två klick. */
   var allaRader = Array.prototype.slice.call(uppg.querySelectorAll('.nr-rad'));
@@ -178,6 +233,11 @@ const PROBE = `(function(){
       var ytor = synligaYtor();
       var titel = v.textContent.replace(/\\s+/g, ' ').trim().slice(0, 28);
       rad.varianter.push({ titel: titel, ytor: ytor.length, yta: ytor[0] || '(ingen)' });
+      if(SABBA === 'tillbaka' && !ut.sabbadTillbaka){
+        var hb = document.querySelector('.hero-back');
+        if(hb){ hb.setAttribute('href', '../../index.html'); ut.sabbadTillbaka = true; ut.noter.push('SABBA: "' + hb.textContent.trim() + '" pekar om efter klick p\\u00e5 "' + titel + '"'); }
+      }
+      samlaLankar(namn + ' / ' + titel);
 
       if(ytor.length !== 1){
         ut.brott.push('EJ EXAKT EN YTA: "' + namn + ' / ' + titel + '" visar ' + ytor.length
@@ -222,6 +282,28 @@ const MASTE_HA_RAM = [
   'ak7/k2/d2-byta-form', 'ak7/k2/d3-forlanga-forkorta', 'ak7/k2/d4-jamfora-brak', 'ak7/k2/d5-addsub-brak', 'ak7/k2/d6-multiplikation-brak', 'ak7/k2/d7-division-brak', 'ak7/k2/d1-andel-antal'   // bråk-migreringen 2026-10-09
 ];
 
+/* BEN G i node: länkarna sidan samlade efter varje klick. Målet ska finnas, ligga ovanför sidans
+   mapp, och "← Alla delkapitel" ska leda till en sida som listar delkapitlet (dess mappnamn står
+   i målets källa). En länk som är fel efter EN variant räcker för brott — felet anmält per variant. */
+function provaLankar(sida, lankar){
+  const brott = [], sidMapp = path.dirname(path.join(ROOT, sida)), mappNamn = path.basename(sidMapp);
+  const sett = {};
+  lankar.forEach(l => {
+    if(!/^file:/.test(l.href)) return;
+    const mal = decodeURIComponent(l.href.replace(/^file:\/\/\//, '').replace(/[?#].*$/, ''));
+    const nyckel = l.text + '→' + mal;
+    const fel = [];
+    if(!fs.existsSync(mal)) fel.push('målet finns inte (' + path.relative(ROOT, mal).replace(/\\/g, '/') + ')');
+    else {
+      const relUpp = path.relative(path.dirname(mal), sidMapp);
+      if(relUpp === '' || relUpp.startsWith('..') || path.isAbsolute(relUpp)) fel.push('leder inte uppåt (' + path.relative(ROOT, mal).replace(/\\/g, '/') + ')');
+      else if(l.alla && fs.readFileSync(mal, 'utf8').indexOf(mappNamn) < 0) fel.push('leder till ' + path.relative(ROOT, mal).replace(/\\/g, '/') + ', som inte listar ' + mappNamn);
+    }
+    if(fel.length && !sett[nyckel]){ sett[nyckel] = 1; brott.push('TILLBAKALÄNK FEL efter "' + l.efter + '": "' + l.text + '" ' + fel.join(', ')); }
+  });
+  return brott;
+}
+
 const TMP = path.join(os.tmpdir(), 'navrambet-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);
 
@@ -254,6 +336,7 @@ Sidor.blad().forEach(sida => {
     MP.varde(sida, 'variant:' + g.grupp + '/' + v.titel, { ytor: v.kommer ? 0 : v.ytor })));
 
   (u.noter || []).forEach(n => console.log('   ' + n));
+  u.brott = (u.brott || []).concat(provaLankar(sida, u.lankar || []));
   if(u.brott && u.brott.length){
     fel += u.brott.length;
     console.log('✗ ' + kort + ':\n     ' + u.brott.join('\n     '));
