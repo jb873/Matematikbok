@@ -183,8 +183,8 @@
 <script src="../../../js/motor/mellanled-rattare.js"></script>
 <script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
-<!-- Nivåraden FÖRE monteringen: bladkärnan räknar stegen när bladet byggs, och utan NivaRad blev
-     det ett steg — "Multiplikation med parentes" visades utan nivårad trots tre nivåer i datan. -->
+<!-- Nivåraden FÖRE monteringen: ett blad med nivaer räknar sina steg när det byggs, och utan
+     NivaRad blir det ett steg (mätt 2026-10-31). -->
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
 <script src="../../../js/data/band-ak8-alg3.js"></script>
@@ -199,17 +199,15 @@
 
 <script>
 // Sidan monteras av det delade skalet. Två flikar (Joachim 2026-10-26): del 1 behåller sina blad-id
-// (niva1–3) som underflikar; del 2 är ett blad vars nivårad kommer ur bandet, och Fördjupning är
-// ett eget blad bredvid det (Joachim 2026-10-26).
+// (niva1–3) som underflikar; del 2 ser likadan ut — Nivå 1, 2, 3 och Fördjupning, en underflik per
+// blad (Joachim 2026-10-31). Del 2:s bladlista byggs i datafilen, med nivåantalet ur bandet.
 DelkapitelSkal.montera({
   ova: [
     { titel: 'Minus eller plus framför parentes', mount: 'minus', blad: [
       { titel: 'Nivå 1', id: 'niva1', data: AK8_PARENTES.niva1 },
       { titel: 'Nivå 2', id: 'niva2', data: AK8_PARENTES.niva2 },
       { titel: 'Nivå 3', id: 'niva3', data: AK8_PARENTES.niva3 } ] },
-    { titel: 'Multiplikation med parentes', mount: 'mult', blad: [
-      { titel: 'Multiplikation med parentes', id: 'mult', data: AK8_MULT_PARENTES },
-      { titel: 'Fördjupning', id: 'mult-fordj', data: AK8_MULT_FORDJUPNING } ] }
+    { titel: 'Multiplikation med parentes', mount: 'mult', blad: AK8_MULT_PARENTES.blad }
   ],
   taxonomi:    function(){ return window.K3_TAXONOMI; },
   utbudslista: 'ak8k2d3',

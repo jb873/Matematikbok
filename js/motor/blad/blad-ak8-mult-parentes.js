@@ -49,8 +49,8 @@
      B12    yttre kvadrat (x + 5), hålet (x − 3)                facit  16x + 16
 
    NIVÅANTALET kommer ur bandet (band-ak8-alg3.js, multiplicera.nivaer: tre steg), begränsat till de
-   nivåer som är BYGGDA — ett steg utan uppgifter vore en knapp in i tomhet. Fördjupningen är ett
-   eget blad (bandets avsnitt fordjupning, en nivå) och får ingen nivårad. */
+   nivåer som är BYGGDA — ett steg utan uppgifter vore en rad in i tomhet. Varje nivå är ett eget
+   blad, som i del 1 (Joachim 2026-10-31), och Fördjupningen (bandets avsnitt fordjupning) ett till. */
 (function(){
   'use strict';
   var F = window.SvgAlgebraFigur, ML = window.MellanledRattare, BAND = window.BAND_AK8_ALG3;
@@ -343,14 +343,17 @@
     ]
   };
 
-  // Nivåerna ur bandet, de byggda.
+  /* EN RAD PER NIVÅ (Joachim 2026-10-31): fliken ser ut som "Minus eller plus framför parentes" —
+     Nivå 1, Nivå 2, Nivå 3, Fördjupning i vänsterspalten, ett blad per rad. Stegen är raderna, så
+     bladen har ingen egen nivårad. Antalet kommer ur bandet, begränsat till de BYGGDA nivåerna. */
   var BYGGDA = { 1: NIVA1, 2: NIVA2, 3: NIVA3 };
-  var nivaer = {};
+  var RAD = { 1: { titel: 'Nivå 1' }, 2: { titel: 'Nivå 2' }, 3: { titel: 'Nivå 3' } };
+  var blad = [];
   Object.keys(BAND && BAND.multiplicera ? BAND.multiplicera.nivaer : BYGGDA).forEach(function(n){
-    if(BYGGDA[n]) nivaer[n] = BYGGDA[n];
+    if(BYGGDA[n]) blad.push({ titel: RAD[n].titel, id: 'mult-niva' + n, data: BYGGDA[n] });
   });
+  // Fördjupningen: bandets eget avsnitt, ett blad efter nivåerna.
+  blad.push({ titel: 'Fördjupning', id: 'mult-fordj', data: FORDJ });
 
-  window.AK8_MULT_PARENTES = { titel: 'Multiplikation med parentes', nivaPrefix: 'ak8k2d3', nivaer: nivaer };
-  // Fördjupningen: bandets avsnitt har EN nivå, och ett ensamt steg ritar ingen nivårad.
-  window.AK8_MULT_FORDJUPNING = FORDJ;
+  window.AK8_MULT_PARENTES = { titel: 'Multiplikation med parentes', blad: blad };
 })();

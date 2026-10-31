@@ -2079,8 +2079,10 @@
   "fraga | 6a(3b + 3)",
   "fraga | 6a(b + 3)",
   "fraga | 6a(b − 3)",
+  "fraga | Area",
   "fraga | Beräkna hur mycket hon ska betala om ett suddgummi kostar 8 kr.",
   "fraga | Hur många suddgummin och hur många anteckningsböcker köper Lina?",
+  "fraga | Omkrets",
   "fraga | den lilla rektangeln",
   "fraga | det färgade området",
   "namn | Anteckningsbok",
@@ -2095,6 +2097,7 @@
   "rubrik | Para ihop uttrycken med rätt alternativ",
   "rubrik | Skriv ett förenklat uttryck för arean av",
   "rubrik | Skriv ett förenklat uttryck för arean av det färgade området",
+  "rubrik | Skriv ett förenklat uttryck för figurens omkrets och area",
   "rubrik | Skriv ett uttryck för det färgade områdets area och förenkla det",
   "rubrik | Skriv ett uttryck för figurens area och förenkla det",
   "rubrik | Skriv ett uttryck för rektanglarnas area och förenkla det",
@@ -2102,7 +2105,14 @@
   "rubrik | Vad ska stå i rutan för att likheten ska gälla?",
   "rubrik | Vilket av uttrycken representerar rektangelns area?",
   "rubrik | Vilket av uttrycken representerar rektangelns omkrets?",
+  "titel | Fördjupning",
   "titel | Multiplikation med parentes",
-  "titel | Multiplikation med parentes – nivå 1"
+  "titel | Multiplikation med parentes – fördjupning",
+  "titel | Multiplikation med parentes – nivå 1",
+  "titel | Multiplikation med parentes – nivå 2",
+  "titel | Multiplikation med parentes – nivå 3",
+  "titel | Nivå 1",
+  "titel | Nivå 2",
+  "titel | Nivå 3"
  ]
 }
