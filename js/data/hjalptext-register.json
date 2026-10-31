@@ -21,5 +21,8 @@
     "Använd ett korrekt uttryck och beräkna antalet prickar i figur nummer 70",
     "Gör en talföljd där mönstret ökar med tre, använd fyra tal",
     "– fyll i tabellen"
+  ],
+  "js/motor/blad/blad-ak8-mult-parentes.js": [
+    "– visa mellanled"
   ]
 }
