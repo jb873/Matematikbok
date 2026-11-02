@@ -7,7 +7,7 @@
 
    KÖR:
      node verktyg/cdp-kor.js <url> <js-fil> [--vanta-pa blad|laddad|generatorer|<uttryck>] [--vanta-tak ms]
-                              [--wait ms] [--timeout ms] [--pre fil.js] [--screenshot ut.png] [--size WxH] [--viewport WxH]
+                              [--wait ms] [--timeout ms] [--pre fil.js] [--screenshot ut.png] [--size WxH] [--viewport WxH] [--skarm]
      --vanta-pa ersätter --wait: väntan på ett VILLKOR i stället för på en klocka. Se noten vid VILLKOR_NAMN.
        <js-fil> = en JS-text som EVALUERAS i sidan; får vara ett async-uttryck / IIFE som returnerar ett
                   Promise. Resultatet (JSON) skrivs på stdout.
@@ -67,6 +67,16 @@ const vpI = args.indexOf('--viewport'), VIEWPORT = vpI >= 0 ? args[vpI + 1].spli
 // --console: sidans console.log strömmas (Runtime.consoleAPICalled) till stderr som `console: …` — de sista raderna före
 // en tidsgräns pekar ut var sidan hängde (testgen-fuzz loggar generatorns namn före varje anrop).
 const KONSOL = args.includes('--console');
+/* --skarm: proben får `window.__skarm(clip)` → Promise med en PNG (base64) av sidan inom clip
+   ({x, y, width, height, scale}, CSS-px i DOKUMENTETS koordinater). Det som ligger på skärmen —
+   bläcket — finns inte i DOM:en: en Range ger tecknets ruta, och den är lika hög för "1" som för
+   "7" vad typsnittet än ritar. Proben ber därför om pixlarna där den behöver dem (K-L i
+   notation-grind.js). Bindningen överlever navigeringen; svaret skickas tillbaka med evaluate. */
+const SKARM = args.includes('--skarm');
+const SKARM_SHIM = `(function(){ var n = 0, vant = {};
+  window.__skarmSvar = function(id, data, fel){ var v = vant[id]; delete vant[id]; if(v) v(fel ? Promise.reject(new Error(fel)) : data); };
+  window.__skarm = function(clip){ return new Promise(function(res){ var id = ++n; vant[id] = res; window.__cdpSkarm(JSON.stringify({ id: id, clip: clip })); }); };
+})();`;
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const PORT = 9222 + Math.floor(Math.random() * 500);
 const expr = fs.readFileSync(path.resolve(jsFile), 'utf8');
@@ -117,13 +127,25 @@ async function waitPort(){ for(let i = 0; i < 200; i++){ try { return await getJ
     await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; setTimeout(() => rej(new Error('WebSocket-anslutning tidsgränsad')), 30000); });
     let id = 0; const pending = {};
     ws.onmessage = ev => { const m = JSON.parse(ev.data); if(m.id && pending[m.id]){ pending[m.id](m); delete pending[m.id]; }
+      else if(SKARM && m.method === 'Runtime.bindingCalled' && m.params.name === '__cdpSkarm') skarmBud(m.params.payload);
       else if(KONSOL && m.method === 'Runtime.consoleAPICalled'){ try { console.error('console: ' + (m.params.args || []).map(a => a.value !== undefined ? a.value : a.description).join(' ')); } catch(e){} } };
     // Varje CDP-steg har egen tidsgräns (30 s; Runtime.evaluate: TIMEOUT+5 s) → en hängd handskakning blir ett
     // namngivet fel i st f en tyst hängning (grinden kan då göra om körningen).
     const send = (method, params) => new Promise((res, rej) => { const i = ++id; const ms = method === 'Runtime.evaluate' ? TIMEOUT + 5000 : 30000;
       const tm = setTimeout(() => { delete pending[i]; rej(new Error('CDP-steg tidsgränsat (' + method + ', ' + ms + ' ms)')); }, ms);
       pending[i] = m => { clearTimeout(tm); res(m); }; ws.send(JSON.stringify({ id: i, method, params: params || {} })); });
+    // Skärmdumpen tas medan probens evaluate väntar på sitt löfte — CDP tar flera kommandon samtidigt.
+    const skarmBud = async payload => {
+      let id = 0;
+      try {
+        const b = JSON.parse(payload); id = b.id;
+        const sh = await send('Page.captureScreenshot', { format: 'png', clip: Object.assign({ scale: 1 }, b.clip) });
+        const data = sh.result && sh.result.data;
+        await send('Runtime.evaluate', { expression: 'window.__skarmSvar(' + id + ', ' + JSON.stringify(data || '') + (data ? '' : ', "ingen bild"') + ')' });
+      } catch(e){ try { await send('Runtime.evaluate', { expression: 'window.__skarmSvar(' + id + ', "", ' + JSON.stringify(String(e.message)) + ')' }); } catch(x){} }
+    };
     await send('Page.enable'); await send('Runtime.enable');
+    if(SKARM){ await send('Runtime.addBinding', { name: '__cdpSkarm' }); await send('Page.addScriptToEvaluateOnNewDocument', { source: SKARM_SHIM }); }
     if(PRE) await send('Page.addScriptToEvaluateOnNewDocument', { source: PRE });
     if(VIEWPORT) await send('Emulation.setDeviceMetricsOverride', { width: VIEWPORT[0], height: VIEWPORT[1], deviceScaleFactor: 1, mobile: false });
     await send('Page.navigate', { url });
