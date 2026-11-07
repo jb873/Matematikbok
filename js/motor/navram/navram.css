@@ -55,6 +55,20 @@ body.embed .nr-dold-embed{ display:none !important; }
   color:var(--ink-faint);font-weight:400;margin-top:1px;text-transform:none;
 }
 .nr-lager button.is-on .nr-mini{color:var(--ink-soft);}
+/* RETUR: "← Till översikten" ritas bara när adressen bär ?retur= (navram-delkapitel.js, djuplank).
+   Klassen .har-retur sätts samtidigt — utan retur ändras ingenting i raden. */
+.nr-lager.har-retur{position:relative;}
+.nr-retur{
+  position:absolute;left:26px;top:50%;transform:translateY(-50%);
+  font-family:var(--cinzel);font-size:11px;letter-spacing:.08em;
+  color:var(--ink-soft);text-decoration:none;white-space:nowrap;
+}
+.nr-retur:hover{color:var(--gold);}
+/* Smalt: länken får en egen rad OVANFÖR knapparna (luft i raden), så knappraden ligger kvar som utan retur. */
+@media (max-width:900px){
+  .nr-lager.har-retur{padding-top:24px;}
+  .nr-retur{left:0;right:0;top:6px;transform:none;text-align:center;}
+}
 
 /* ── TVÅ SPALTER: navigering vänster, ren arbetsyta höger ── */
 .nr-wrap{display:flex;gap:24px;max-width:1180px;margin:0 auto;padding:20px 26px 42px;}

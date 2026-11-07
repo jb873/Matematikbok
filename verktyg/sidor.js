@@ -47,7 +47,9 @@ const EJ_MOTOR = {
   'ak8-blad-ui.js': 'delat rut-UI (keypad, grow, markeraRutor) — definierar inget blad, men dess närvaro visar att sidan har rutor'
 };
 
-const HOPPA = new Set(['Arkiv', '.git', 'node_modules', 'fonts', 'mallar']);
+/* prototyp/: sidor som prövas utanför boken (uppslaget, Joachim 2026-11-07). Ingen elevsida länkar dit,
+   och grindarna ska inte räkna in dem — de verifieras med egna prov tills de blir en del av boken. */
+const HOPPA = new Set(['Arkiv', '.git', 'node_modules', 'fonts', 'mallar', 'prototyp']);
 
 function rel(p){ return path.relative(ROOT, p).replace(/\\/g, '/'); }
 

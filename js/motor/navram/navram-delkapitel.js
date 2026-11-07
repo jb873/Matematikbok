@@ -304,7 +304,57 @@
       testPanel.style.setProperty('display', 'block', 'important');
     }
 
+    djuplank(ram, arbeta, vard);
     return ram;
+  }
+
+  /* ── DJUPLÄNK OCH RETUR (uppslaget, Joachim 2026-11-07) ──
+     Utan parametrar gör den här funktionen INGENTING — sidan beter sig exakt som förut.
+       ?visa=uppgift:N            Uppgifters N:te rad (1 = första), i spaltens ordning
+       ?visa=film:N               Föreläsningens N:te film
+       ?visa=mina:kunskapslage|sjalvskattning|test|dagens
+       &retur=<url>&retur_txt=    "← Till översikten" i lagerväxlaren — samma kontrakt som drillsidans
+                                  FAS 4-retur. Bara RELATIVA adresser: ett schema (javascript:, https:)
+                                  eller en rotadress ritar ingen länk alls.
+     Raden väljs genom att klicka RAMENS EGEN knapp, så markering, dragspel och arbetsyta blir
+     desamma som när eleven klickar själv. Ingen ny historikpost: bakåtknappen går dit eleven kom ifrån. */
+  var MINA_VY = { kunskapslage: 0, sjalvskattning: 1, test: 2, dagens: 3 };
+  function relativ(u){
+    var s = String(u).replace(/[\u0000- ]/g, '');   // URL-tolken stryker blanktecken och tabbar
+    return !!s && !/^[a-z][a-z0-9+.\-]*:/i.test(s) && !/^[\/\\]/.test(s);
+  }
+  function djuplank(ram, arbeta, vard){
+    var q;
+    try { q = new URLSearchParams(location.search); } catch(e){ return; }
+    var retur = q.get('retur');
+    if(retur && relativ(retur)){
+      var lager = vard.querySelector('.nr-lager');
+      var a = el('a', 'nr-retur');
+      a.href = retur;
+      a.textContent = q.get('retur_txt') || '← Tillbaka';
+      lager.classList.add('har-retur');
+      lager.insertBefore(a, lager.firstChild);
+    }
+    var m = /^(uppgift|film|mina):([a-z0-9]+)$/i.exec(q.get('visa') || '');
+    if(!m) return;
+    var typ = m[1].toLowerCase(), varde = m[2].toLowerCase();
+    if(typ === 'mina'){
+      if(!(varde in MINA_VY)) return;
+      var mrad = ram.ytaMina.parentElement.querySelectorAll('.nr-mrad')[MINA_VY[varde]];
+      if(!mrad) return;
+      ram.valjLager('mina');
+      mrad.click();
+      return;
+    }
+    var hi = -1;
+    arbeta.forEach(function(h, i){ if(h.rubrik === (typ === 'film' ? 'Föreläsning' : 'Uppgifter')) hi = i; });
+    var huvud = ram.ytaArbeta.parentElement.querySelectorAll('.nr-huvud')[hi];
+    var btn = huvud ? huvud.querySelectorAll('.nr-rad')[parseInt(varde, 10) - 1] : null;
+    if(!btn || btn.disabled) return;
+    if(!huvud.classList.contains('is-open')) huvud.querySelector('.nr-huvud-h').click();
+    var grp = btn.closest('.nr-grp'), gh = grp && grp.querySelector('.nr-grp-h');
+    if(gh && !grp.classList.contains('is-open') && !grp.classList.contains('nr-grp-fast')) gh.click();
+    btn.click();
   }
 
   window.NavRamDelkapitel = { montera: montera, visaPanel: visaPanel };
