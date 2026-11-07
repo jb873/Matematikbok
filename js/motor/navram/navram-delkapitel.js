@@ -311,6 +311,7 @@
   /* ── DJUPLÄNK OCH RETUR (uppslaget, Joachim 2026-11-07) ──
      Utan parametrar gör den här funktionen INGENTING — sidan beter sig exakt som förut.
        ?visa=uppgift:N            Uppgifters N:te rad (1 = första), i spaltens ordning
+       ?visa=uppgift:N:G          samma, och sidan rullas till bladets G:te uppgiftsgrupp (.ovn-grupp)
        ?visa=film:N               Föreläsningens N:te film
        ?visa=mina:kunskapslage|sjalvskattning|test|dagens
        &retur=<url>&retur_txt=    "← Till översikten" i lagerväxlaren — samma kontrakt som drillsidans
@@ -335,9 +336,9 @@
       lager.classList.add('har-retur');
       lager.insertBefore(a, lager.firstChild);
     }
-    var m = /^(uppgift|film|mina):([a-z0-9]+)$/i.exec(q.get('visa') || '');
+    var m = /^(uppgift|film|mina):([a-z0-9]+)(?::([1-9][0-9]?))?$/i.exec(q.get('visa') || '');
     if(!m) return;
-    var typ = m[1].toLowerCase(), varde = m[2].toLowerCase();
+    var typ = m[1].toLowerCase(), varde = m[2].toLowerCase(), grupp = (typ === 'uppgift' && m[3]) ? parseInt(m[3], 10) : 0;
     if(typ === 'mina'){
       if(!(varde in MINA_VY)) return;
       var mrad = ram.ytaMina.parentElement.querySelectorAll('.nr-mrad')[MINA_VY[varde]];
@@ -355,6 +356,40 @@
     var grp = btn.closest('.nr-grp'), gh = grp && grp.querySelector('.nr-grp-h');
     if(gh && !grp.classList.contains('is-open') && !grp.classList.contains('nr-grp-fast')) gh.click();
     btn.click();
+    if(grupp) rullaTillGrupp(grupp);
+  }
+
+  /* Rulla till bladets G:te uppgiftsgrupp, räknat bland de SYNLIGA grupperna i den aktiva panelen
+     (bladen ligger i samma panel; bara det valda syns). Två saker flyttar sidan efteråt — mätt på
+     multiplikationsbladets grupp 4, som hamnade 47 px fel: sidans scroll-behavior:smooth gör rullningen
+     till en animation, och bladmotorn fokuserar en ruta mitt i den (fokus drar sidan till rutan).
+     Därför rullas det DIREKT (behavior:'instant'), och om vid varje fokusbyte och höjdändring de första
+     två sekunderna — men ALDRIG efter att eleven själv rört sidan. Finns ingen sådan grupp händer ingenting. */
+  function rullaTillGrupp(g){
+    var elevenRor = false, slut = Date.now() + 2000;
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function(h){
+      window.addEventListener(h, function(){ elevenRor = true; }, { once: true, passive: true });
+    });
+    function rulla(){
+      if(elevenRor) return;
+      var panel = document.querySelector('.tab-panel.is-active');
+      var grupper = panel ? Array.prototype.filter.call(panel.querySelectorAll('.ovn-grupp'), function(e){ return !!e.offsetParent; }) : [];
+      var mal = grupper[g - 1];
+      if(!mal) return;
+      var topp = document.querySelector('.topnav'), luft = (topp ? topp.getBoundingClientRect().height : 0) + 12;
+      window.scrollTo({ top: Math.max(0, mal.getBoundingClientRect().top + window.pageYOffset - luft), behavior: 'instant' });
+    }
+    function omFoskt(){ if(Date.now() <= slut) setTimeout(rulla, 0); }
+    document.addEventListener('focusin', omFoskt);
+    setTimeout(function(){ document.removeEventListener('focusin', omFoskt); }, 2100);
+    rulla();
+    if(document.readyState !== 'complete') window.addEventListener('load', rulla, { once: true });
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(rulla);
+    if(window.ResizeObserver){
+      var ro = new ResizeObserver(function(){ if(Date.now() > slut || elevenRor){ ro.disconnect(); return; } rulla(); });
+      ro.observe(document.body);
+      setTimeout(function(){ ro.disconnect(); }, 2100);
+    }
   }
 
   window.NavRamDelkapitel = { montera: montera, visaPanel: visaPanel };

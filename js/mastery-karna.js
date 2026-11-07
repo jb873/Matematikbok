@@ -81,6 +81,10 @@
 
   // ── Aktuell nod ur deeplinken ?ko=&formaga= (lövnod-id = ko:formaga, samma som utbudslistor/karta) ──
   function aktuellNodId(){
+    /* NODBRYGGA (som nivåbryggan): en drill som byter nod mitt i — Uppställning med åtta nivåer
+       (metod-mult.js, variant 'hela') loggar nivå 5–8 på uppstallning-stora — sätter window.__aktuellNod.
+       Additivt: osatt → URL:ens nod som förr. */
+    if(typeof window !== 'undefined' && typeof window.__aktuellNod === 'string' && window.__aktuellNod) return window.__aktuellNod;
     try {
       var q = new URLSearchParams(location.search), ko = q.get('ko'), f = q.get('formaga');
       return (ko && f) ? ko + ':' + f : null;

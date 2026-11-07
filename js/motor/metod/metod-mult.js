@@ -775,18 +775,32 @@ function renderMultMetoder(body, startMetod){
 // --- METOD: UPPSTÄLLNING (multiplikation) ---
 // Nivå 1: tvåsiffrigt · ensiffrigt   Nivå 2: tresiffrigt · ensiffrigt
 // Nivå 3: decimaltal · ensiffrigt    Nivå 4: tvåsiffrigt · tvåsiffrigt
+// HELA (variant:'hela', uppslaget — Joachim 2026-11-07): Uppställning som EN metod med åtta nivåer.
+// Nivå 1–4 = bandet 'mult' (ensiffrig faktor), nivå 5–8 = bandet 'mult-fler' (båda faktorerna > 10).
+// Evidensen hamnar på rätt nod: 1–4 på mult-metoder:uppstallning, 5–8 på mult-metoder:uppstallning-stora,
+// med BANDETS nivå (1–4) — via nodbryggan window.__aktuellNod (mastery-karna) och nivåbryggan.
+// Utan variant eller med 'fler' är varje anrop och varje värde detsamma som förut (differentiell fuzz).
 function renderUppstallningMult(body, backFn, cfg){
   cfg = cfg || {};
   const FLER = cfg.variant === 'fler';   // flersiffrig multiplikator (två delprodukter)
+  const HELA = cfg.variant === 'hela';
   let level = 1;
+  function arFler(){ return HELA ? level > 4 : FLER; }
+  function bandNiva(){ return (HELA && level > 4) ? level - 4 : level; }
+  const tillbaka = HELA ? function(){ window.__aktuellNod = null; backFn(); } : backFn;
   let omgangResults = [];
   let uppgNr = 0;              // tipset under minnesrutorna visas bara de 2 första uppgifterna
   // Talområdet är DATA: js/data/spec-villkor.js UPPST_BAND.mult / .'mult-fler' (Joachims band, order 2026-09-19).
   const BAND = UppstBand.band(FLER ? 'mult-fler' : 'mult');
-  const MAXN = UppstBand.maxNiva(FLER ? 'mult-fler' : 'mult');   // fyra nivåer (decimaltal = nivå 4)
+  const MAXN = HELA ? UppstBand.maxNiva('mult') + UppstBand.maxNiva('mult-fler')
+                    : UppstBand.maxNiva(FLER ? 'mult-fler' : 'mult');   // fyra nivåer (decimaltal = nivå 4)
   const OMG = BAND.omgang || (FLER ? 5 : 3);
   const TITEL = FLER ? 'Metod · uppställning · flersiffrig' : 'Metod · uppställning';
   const LEVELNAMN = BAND.namn;
+  // Per nivå: HELA byter band vid nivå 5; annars de fasta värdena ovan.
+  function omgLangd(){ if(!HELA) return OMG; const b = UppstBand.band(arFler() ? 'mult-fler' : 'mult'); return b.omgang || (arFler() ? 5 : 3); }
+  function titel(){ return HELA ? (arFler() ? 'Metod · uppställning · flersiffrig' : 'Metod · uppställning') : TITEL; }
+  function nivaNamn(){ return HELA ? UppstBand.band(arFler() ? 'mult-fler' : 'mult').namn[bandNiva()] : LEVELNAMN[level]; }
 
   // Nivåjustering: DELAD adjustLevel (metod-karna) — modellen ur nodens nivamodell-fält, annars ramens default.
   // Förr en lokal kopia som sjönk vid ≤ ⅓ rätt — en tredje modell ingen bestämt (order 2026-09-18).
@@ -798,10 +812,12 @@ function renderUppstallningMult(body, backFn, cfg){
   // EXEMPELVAKT (order 2026-09-20): exemplet i förklaringen dras om i omgångsbygget (ExempelVakt i metod-karna).
   const EXEMPEL_MULT = '67 · 4';   // demons exempel i renderExplain
   const vakt = ExempelVakt.skapa('mult-metoder:' + (FLER ? 'uppstallning-stora' : 'uppstallning'), EXEMPEL_MULT);
+  const vaktFler = HELA ? ExempelVakt.skapa('mult-metoder:uppstallning-stora', EXEMPEL_MULT) : null;
   function genTask(){
-    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang(FLER ? 'mult-fler' : 'mult', level, OMG, vakt); ko.lvl = level; }
+    const fler = arFler();
+    if(!ko.length || ko.lvl !== level){ ko = UppstBand.omgang(fler ? 'mult-fler' : 'mult', bandNiva(), omgLangd(), (HELA && fler) ? vaktFler : vakt); ko.lvl = level; }
     const t = ko.shift(), dec = t.dec || 0, dDec = t.dDec || 0;
-    if(!FLER){
+    if(!fler){
       if(!dec) return {kind:'enkel', mDisplay:String(t.m), d:t.d, answer:t.answer};
       return {kind:'decimal', mDisplay:d3DecStr(t.m, dec), dec:dec, d:t.d, answerIntStr:String(t.answer), answerValue:t.answer / Math.pow(10, dec)};   // nivå 4
     }
@@ -898,7 +914,7 @@ function renderUppstallningMult(body, backFn, cfg){
     }
 
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(TITEL, LEVELNAMN[level] + '.', level, MAXN)
+      + exerciseHeader(titel(), nivaNamn() + '.', level, MAXN)
       + '<div class="metod-explain-card">'
         + '<p style="font-size:15px;margin:0 0 4px;color:var(--ink-soft);">Beräkna <strong style="font-family:var(--mono);color:var(--c-metod);">' + task.mDisplay + ' · ' + (task.dDisplay || task.d) + '</strong></p>'
         + '<p style="font-size:13px;margin:0 0 12px;color:var(--ink-soft);">' + infoHTML + '</p>'
@@ -912,6 +928,8 @@ function renderUppstallningMult(body, backFn, cfg){
       + '</div>'
     + '</div>';
 
+    // HELA: evidensen ska till bandets nod med bandets nivå (exerciseHeader satte 1–8).
+    if(HELA){ window.__aktuellNiva = bandNiva(); window.__aktuellNod = 'mult-metoder:' + (arFler() ? 'uppstallning-stora' : 'uppstallning'); }
     const card = body.querySelector('.exercise-card');
     bindKeypad(card);
     UppstYta.mult.bindMinne(card);
@@ -934,7 +952,9 @@ function renderUppstallningMult(body, backFn, cfg){
       fb.className = 'rakna-uppdela-feedback show';
       document.getElementById('upp-check').disabled = true;
       const ts = getTutorScore('mult-metoder','metod');
-      const tsG = getTutorScore('mult-metoder', FLER ? 'uppstallning-stora' : 'uppstallning');   // nodens nyckel: flersiffriga drillen loggade 'uppstallning' → uppstallning-stora fick aldrig evidens (svep 2026-09-19)
+      // Nyckeln i en variabel: kopplings- och nivåtaksgrindarna läser anropet statiskt och tål inga parenteser i det.
+      const nodNyckel = arFler() ? 'uppstallning-stora' : 'uppstallning';
+      const tsG = getTutorScore('mult-metoder', nodNyckel);   // nodens nyckel: flersiffriga drillen loggade 'uppstallning' → uppstallning-stora fick aldrig evidens (svep 2026-09-19)
       ts.total++; tsG.total++;
       omgangResults.push(correct);
       const dTxt = task.dDisplay || task.d;
@@ -948,11 +968,11 @@ function renderUppstallningMult(body, backFn, cfg){
         fb.textContent = 'Inte rätt – ' + task.mDisplay + ' · ' + dTxt + ' = ' + ansTxt
           + '. Kontrollera kolumn för kolumn.';
       }
-      if(omgangResults.length >= OMG) setTimeout(showSummary, correct ? 1700 : 2700);
+      if(omgangResults.length >= omgLangd()) setTimeout(showSummary, correct ? 1700 : 2700);
       else setTimeout(renderPractice, correct ? 1700 : 2700);
     }
     document.getElementById('upp-check').onclick = check;
-    document.getElementById('upp-back').onclick = backFn;
+    document.getElementById('upp-back').onclick = tillbaka;
   }
 
   function showSummary(){
@@ -961,7 +981,7 @@ function renderUppstallningMult(body, backFn, cfg){
     const adj = adjustLevel(level, right, total, null, MAXN);
     level = adj.level;
     body.innerHTML = '<div class="exercise-card">'
-      + exerciseHeader(TITEL, 'Du klarade ' + right + ' av ' + total + '.')
+      + exerciseHeader(titel(), 'Du klarade ' + right + ' av ' + total + '.')
       + renderSummaryCard({right:right, total:total, level:level, levelChange:adj.change, nextLabel:'Ny omgång'})
       + '<div style="margin-top:-8px;text-align:center;">'
         + '<button class="btn subtle" id="upp-tillmetoder">Tillbaka till metoder</button>'
@@ -970,7 +990,7 @@ function renderUppstallningMult(body, backFn, cfg){
     document.getElementById('summary-next-btn').onclick = function(){
       omgangResults = []; renderPractice();
     };
-    document.getElementById('upp-tillmetoder').onclick = backFn;
+    document.getElementById('upp-tillmetoder').onclick = tillbaka;
   }
 
   if(FLER) renderPractice(); else renderExplain();

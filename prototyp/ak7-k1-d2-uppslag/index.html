@@ -4,59 +4,64 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Matematik · De fyra räknesätten · uppslag</title>
-<!-- PROTOTYP (order 2026-11-07): delkapitlet som ett bokuppslag. Ingen befintlig sida länkar hit.
-     Raderna är en ögonblicksbild av d2 (blad, Metodträning, test, filmer) och leder in i originalen:
-       blad, film och Mina   → d2 med ?visa=…  (navram-delkapitel.js, djuplank)
-       drill och test        → drillsidan direkt, med dess befintliga ?retur=
-     Lästal-drillarna står på Problemlösningsraden, märkta med sitt räknesätt.
-     Alla länkar bär retur hit, så "← Till översikten" syns i dokumentet. -->
+<!-- PROTOTYP (Joachim 2026-11-07, v2): delkapitlets räknesätt som en lista. Ett räknesätt fälls ut åt
+     gången och visar, i taxonomins ordning, Begrepp · Huvudräkning eller Tabell · Metoder a) b) c).
+     Raden är metoden (namnet är text); kolumnerna Öva · Metodträning · Föreläsning · Musikvideo leder in
+     i originalen. En tom ruta är tom och går inte att klicka. Ingen befintlig sida länkar hit.
+       Öva, Föreläsning, Mina → d2 med ?visa=uppgift:N:G | film:N | mina:… (navram-delkapitel.js, djuplank)
+       Metodträning, Test     → drillsidan direkt, med dess befintliga ?retur=
+     Varje länk bär retur hit (med räknesättet i #), så "← Till översikten" leder tillbaka till samma läge.
+     Elevtexten står i fält (rubrik/namn/titel) så att elevtext-låset ser den. -->
 <link rel="stylesheet" href="../../fonts/fonts.css">
 <link rel="stylesheet" href="../../js/kapitel/navsida.css">
 <style>
-.up{max-width:1340px;margin:0 auto;padding:12px 24px 14px;font-variant-numeric:lining-nums;}
+.up{max-width:1100px;margin:0 auto;padding:10px 24px 12px;font-variant-numeric:lining-nums;}
 .up-huvud{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;}
 .up-eyebrow{font-family:var(--cinzel);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
 .up-titel{font-family:var(--serif);font-size:26px;font-weight:500;line-height:1.1;}
 .up-titel em{color:var(--gold);font-style:italic;}
-.up-tillbaka{margin-left:auto;font-family:var(--cinzel);font-size:11px;letter-spacing:.08em;color:var(--ink-faint);text-decoration:none;}
-.up-tillbaka:hover{color:var(--gold);}
+.up-mina{margin-left:auto;display:flex;gap:16px;font-family:var(--cinzel);font-size:11px;letter-spacing:.08em;}
+.up-mina a{color:var(--ink-soft);text-decoration:none;}
+.up-mina a:hover{color:var(--gold);}
+.up-mina .up-kommer{color:var(--ink-faint);opacity:.6;cursor:default;}
 
-/* BOKEN: tre kolumner — bladet (vänster sida), Metodträning och Test (höger sida). Raderna går
-   tvärs över uppslaget, så räknesättets hjälpmedel står i höjd med dess blad. */
-.up-bok{display:grid;grid-template-columns:5fr 5.4fr 1.6fr;background:var(--paper-lt);border:1px solid var(--paper-dk);
-  border-radius:6px;box-shadow:0 6px 24px rgba(15,30,46,.08);}
-.up-bok > *{padding:7px 14px;border-bottom:1px solid var(--paper-dk);min-width:0;}
-.c-blad{grid-column:1;}
-.c-metod{grid-column:2;border-left:1px solid var(--paper-dk);background:linear-gradient(90deg,rgba(15,30,46,.045),transparent 16px);}
-.c-test{grid-column:3;}
-.c-hel{grid-column:2 / 4;border-left:1px solid var(--paper-dk);background:linear-gradient(90deg,rgba(15,30,46,.045),transparent 16px);}
-.up-spann{grid-row:span 2;}
-.up-sida-h{font-family:var(--cinzel);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);
-  padding-top:12px;border-bottom:2px solid var(--gold-lt);}
-.up-kol-h{font-family:var(--cinzel);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);padding-top:5px;padding-bottom:3px;}
-.up-bok > .up-tom{border-bottom:none;}
+.up-lista{background:var(--paper-lt);border:1px solid var(--paper-dk);border-radius:6px;box-shadow:0 6px 24px rgba(15,30,46,.08);padding:2px 0;}
+.up-rs{border-bottom:1px solid var(--paper-dk);}
+.up-rs:last-child{border-bottom:none;}
+.up-rs-h{display:flex;align-items:center;gap:10px;padding:0 20px 0 0;}
+.up-fall{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:8px 0 8px 20px;background:none;border:none;
+  cursor:pointer;text-align:left;font:inherit;color:var(--ink);}
+.up-fall:focus-visible{outline:2px solid var(--gold-lt);outline-offset:-2px;}
+.up-nr{font-family:var(--cinzel);font-size:12px;color:var(--gold);width:18px;}
+.up-namn{font-family:var(--body);font-size:16px;font-weight:600;}
+.up-chev{margin-left:auto;color:var(--ink-faint);width:14px;text-align:right;transition:transform .15s;}
+.up-rs.is-open .up-chev{transform:rotate(90deg);}
+.up-hoger{display:flex;gap:6px;}
+.up-kropp{display:none;padding:0 20px 8px 48px;}
+.up-rs.is-open .up-kropp{display:block;}
+.up-rad{display:grid;grid-template-columns:minmax(0,1fr) 90px 130px 120px 120px;align-items:center;gap:0 6px;
+  padding:2px 0;border-top:1px solid var(--paper-dk);min-height:27px;}
+.up-kolh{border-top:none;min-height:0;padding-bottom:1px;font-family:var(--cinzel);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint);}
+.up-del{font-family:var(--cinzel);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);
+  padding:7px 0 2px;border-top:1px solid var(--paper-dk);}
+.up-m{font-size:14px;}
+.up-l{justify-self:start;font-size:12px;line-height:1.35;color:var(--ink);text-decoration:none;background:var(--paper);
+  border:1px solid var(--paper-dk);border-radius:4px;padding:1px 8px;white-space:nowrap;}
+.up-l:hover{border-color:var(--gold-lt);}
 
-.up-blad{display:flex;flex-wrap:wrap;align-items:baseline;align-content:flex-start;gap:0 8px;text-decoration:none;color:var(--ink);}
-.up-blad:hover{background:var(--paper-dk);}
-.up-nr{font-family:var(--cinzel);font-size:11px;color:var(--gold);width:14px;}
-.up-bt{font-family:var(--body);font-size:15px;font-weight:600;}
-.up-sub{flex-basis:100%;padding-left:22px;font-size:12px;color:var(--ink-faint);line-height:1.3;}
-.c-metod, .c-test{display:flex;flex-wrap:wrap;align-content:flex-start;gap:4px 5px;}
-.up-lank{font-size:12.5px;line-height:1.3;color:var(--ink);text-decoration:none;padding:2px 6px;border-radius:4px;}
-.up-lank:hover{background:var(--paper-dk);}
-.c-metod .up-lank, .c-test .up-lank{background:var(--paper);border:1px solid var(--paper-dk);}
-.c-metod .up-lank:hover, .c-test .up-lank:hover{border-color:var(--gold-lt);background:var(--paper);}
-.up-flod{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 10px;}
-.up-kommer{color:var(--ink-faint);opacity:.6;cursor:default;}
-
-/* Smal skärm: en spalt, raderna i följd. */
-@media (max-width:760px){
+/* Smal skärm: namnet på egen rad, rutorna under; kolumnrubriken behövs inte (rutorna bär sitt namn). */
+@media (max-width:700px){
   .up{padding:10px 16px 16px;}
   .up-huvud{flex-wrap:wrap;}
-  .up-bok{display:block;}
-  .c-metod, .c-hel{border-left:none;background:none;}
-  .up-flod{grid-template-columns:1fr;}
-  .up-kol-h.c-test{display:none;}
+  .up-mina{margin-left:0;flex-wrap:wrap;}
+  .up-kropp{padding:0 12px 8px 16px;}
+  .up-rs-h{padding-right:12px;}
+  .up-fall{padding-left:12px;}
+  .up-kolh{display:none;}
+  .up-rad{grid-template-columns:repeat(4,auto);justify-content:start;gap:4px 6px;padding:5px 0;}
+  .up-rad .up-m{grid-column:1 / -1;}
+  .up-rad > span:empty{display:none;}
 }
 </style>
 </head>
@@ -79,90 +84,157 @@
   <div class="up-huvud">
     <span class="up-eyebrow">Delkapitel 2 · Kapitel 1</span>
     <h1 class="up-titel">De fyra <em>räknesätten</em></h1>
-    <a class="up-tillbaka" href="../../ak7-k1.html">← Alla delkapitel</a>
+    <div class="up-mina" id="up-mina"></div>
   </div>
-
-  <div class="up-bok">
-    <div class="c-blad up-sida-h">Uppgifter</div>
-    <div class="c-hel up-sida-h">Hjälpmedel</div>
-    <div class="c-blad up-kol-h up-tom"></div>
-    <div class="c-metod up-kol-h">Metodträning</div>
-    <div class="c-test up-kol-h">Test</div>
-
-    <!-- Addition -->
-    <a class="c-blad up-blad" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=uppgift:1&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="uppgift:1">
-      <span class="up-nr">1</span><span class="up-bt">Addition</span>
-      <span class="up-sub">Beräkna · Vilka tal? · Talsorterna var för sig · Vilket tal saknas? · Flytta över</span>
-    </a>
-    <div class="c-metod"><a class="up-lank" href="../../ak7-k1-ram.html?ko=add-begrepp&amp;formaga=begrepp&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=add-begrepp&amp;formaga=begrepp&amp;maxniva=1">Term och summa</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=add-begrepp&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=add-begrepp&amp;formaga=rakna">Tiokompisar och dela upp tal</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=add-rakna&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=add-rakna&amp;formaga=rakna">Huvudräkning</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=add-metoder&amp;formaga=uppstallning&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=add-metoder&amp;formaga=uppstallning">Uppställning</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=add-metoder&amp;formaga=talsorterna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=add-metoder&amp;formaga=talsorterna">Talsorterna var för sig</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=add-metoder&amp;formaga=flytta-over&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=add-metoder&amp;formaga=flytta-over">Flytta över</a></div>
-    <div class="c-test"><a class="up-lank" href="../../ak7-k1-ram.html?view=test-fardigt&amp;del=d2&amp;test=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="test:1">Addition</a></div>
-
-    <!-- Subtraktion -->
-    <a class="c-blad up-blad" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=uppgift:2&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="uppgift:2">
-      <span class="up-nr">2</span><span class="up-bt">Subtraktion</span>
-      <span class="up-sub">Uppställning · Addition bakifrån · Vilket tal saknas? · Öka och minska lika</span>
-    </a>
-    <div class="c-metod"><a class="up-lank" href="../../ak7-k1-ram.html?ko=sub-begrepp&amp;formaga=begrepp&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=sub-begrepp&amp;formaga=begrepp&amp;maxniva=1">Term och differens</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=sub-begrepp&amp;formaga=rakna&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=sub-begrepp&amp;formaga=rakna&amp;maxniva=1">Dela upp tal i termer</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=sub-rakna&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=sub-rakna&amp;formaga=rakna">Huvudräkning</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=sub-metoder&amp;formaga=uppstallning&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=sub-metoder&amp;formaga=uppstallning">Uppställning</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=sub-metoder&amp;formaga=okaminska&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=sub-metoder&amp;formaga=okaminska">Öka och minska lika</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=sub-metoder&amp;formaga=bakifran&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=sub-metoder&amp;formaga=bakifran">Addition bakifrån</a></div>
-    <div class="c-test"><a class="up-lank" href="../../ak7-k1-ram.html?view=test-fardigt&amp;del=d2&amp;test=2&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="test:2">Subtraktion</a></div>
-
-    <!-- Multiplikation -->
-    <a class="c-blad up-blad" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=uppgift:3&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="uppgift:3">
-      <span class="up-nr">3</span><span class="up-bt">Multiplikation</span>
-      <span class="up-sub">Uppställning · Talsorterna var för sig · Dubbla och halvera</span>
-    </a>
-    <div class="c-metod"><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-begrepp&amp;formaga=begrepp&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-begrepp&amp;formaga=begrepp&amp;maxniva=1">Faktor, produkt och primtal</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-begrepp&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-begrepp&amp;formaga=rakna">Faktorisera tal</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-tabell&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-tabell&amp;formaga=rakna">Multiplikationstabellen</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-metoder&amp;formaga=uppstallning&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-metoder&amp;formaga=uppstallning">Uppställning</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-metoder&amp;formaga=uppstallning-stora&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-metoder&amp;formaga=uppstallning-stora">Uppställning (båda faktorerna &gt; 10)</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-metoder&amp;formaga=talsorterna&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-metoder&amp;formaga=talsorterna&amp;maxniva=1">Talsorterna var för sig</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-metoder&amp;formaga=dubbla&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-metoder&amp;formaga=dubbla&amp;maxniva=1">Dubbla och halvera</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-metoder&amp;formaga=faktorer&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-metoder&amp;formaga=faktorer&amp;maxniva=1">Dela upp i faktorer</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-metoder&amp;formaga=termer&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-metoder&amp;formaga=termer&amp;maxniva=1">Dela upp i termer (dubbelparentes)</a></div>
-    <div class="c-test"><a class="up-lank" href="../../ak7-k1-ram.html?view=test-fardigt&amp;del=d2&amp;test=3&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="test:3">Multiplikation</a></div>
-
-    <!-- Division -->
-    <a class="c-blad up-blad" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=uppgift:4&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="uppgift:4">
-      <span class="up-nr">4</span><span class="up-bt">Division</span>
-      <span class="up-sub">Kort division</span>
-    </a>
-    <div class="c-metod"><a class="up-lank" href="../../ak7-k1-ram.html?ko=div-begrepp&amp;formaga=begrepp&amp;maxniva=1&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=div-begrepp&amp;formaga=begrepp&amp;maxniva=1">Täljare, nämnare och kvot</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=div-begrepp&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=div-begrepp&amp;formaga=rakna">Delbarhetsregler</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=div-tabell&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=div-tabell&amp;formaga=rakna">Divisionstabellen</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=div-metoder&amp;formaga=kort&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=div-metoder&amp;formaga=kort">Kort division</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=div-metoder&amp;formaga=lang&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=div-metoder&amp;formaga=lang">Lång division</a></div>
-    <div class="c-test up-spann"><a class="up-lank" href="../../ak7-k1-ram.html?view=test-fardigt&amp;del=d2&amp;test=4&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="test:4">Division och prioriteringsregeln</a></div>
-
-    <!-- Prioriteringsregeln -->
-    <a class="c-blad up-blad" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=uppgift:5&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="uppgift:5">
-      <span class="up-nr">5</span><span class="up-bt">Prioriteringsregeln</span>
-      <span class="up-sub">Beräkna – visa mellanled</span>
-    </a>
-    <div class="c-metod"><a class="up-lank" href="../../ak7-k1-ram.html?ko=prio-samband&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=prio-samband&amp;formaga=rakna">Samband mellan räknesätt</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=prio-prioritering&amp;formaga=rakna&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=prio-prioritering&amp;formaga=rakna">Prioriteringsregeln</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=prio-prioritering&amp;formaga=metod&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=prio-prioritering&amp;formaga=metod">Räkna steg för steg</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=prio-lagar&amp;formaga=kommutativa&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=prio-lagar&amp;formaga=kommutativa">Kommutativa lagen</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=prio-lagar&amp;formaga=associativa&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=prio-lagar&amp;formaga=associativa">Associativa lagen</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=prio-lagar&amp;formaga=distributiva&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=prio-lagar&amp;formaga=distributiva">Distributiva lagen</a></div>
-
-    <!-- Problemlösning -->
-    <a class="c-blad up-blad" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=uppgift:6&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="uppgift:6">
-      <span class="up-nr">6</span><span class="up-bt">Problemlösning</span>
-      <span class="up-sub">Blad 1 · Blad 2 · Blad 3 · Blad 4</span>
-    </a>
-    <div class="c-metod"><a class="up-lank" href="../../ak7-k1-ram.html?ko=add-problem&amp;formaga=problem&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=add-problem&amp;formaga=problem">Addition</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=sub-problem&amp;formaga=problem&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=sub-problem&amp;formaga=problem">Subtraktion</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=mult-problem&amp;formaga=problem&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=mult-problem&amp;formaga=problem">Multiplikation</a><a class="up-lank" href="../../ak7-k1-ram.html?ko=div-problem&amp;formaga=problem&amp;retur=prototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="drill:ko=div-problem&amp;formaga=problem">Division</a></div>
-    <div class="c-test"></div>
-
-    <!-- Föreläsning och Mina kunskaper, underst på högersidan -->
-    <div class="c-blad up-tom"></div>
-    <div class="c-hel">
-      <div class="up-kol-h">Föreläsning</div>
-      <div class="up-flod">
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:1&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:1">Addition – uppställning</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:2&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:2">Addition – talsorterna var för sig</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:3&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:3">Addition – flytta över</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:4&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:4">Subtraktion – uppställning</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:5&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:5">Subtraktion – öka och minska lika</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:6&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:6">Subtraktion – addition bakifrån</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:7&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:7">Multiplikation – uppställning</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:8&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:8">Multiplikation – talsorterna var för sig</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=film:9&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="film:9">Division – kort division</a>
-      </div>
-    </div>
-    <div class="c-blad up-tom"></div>
-    <div class="c-hel up-tom">
-      <div class="up-kol-h">Mina kunskaper</div>
-      <div class="up-flod">
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=mina:kunskapslage&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="mina:kunskapslage">Kunskapsläge</a>
-        <a class="up-lank" href="../../ak7/k1/d2-fyraraknesatt/index.html?visa=mina:sjalvskattning&amp;retur=..%2F..%2F..%2Fprototyp%2Fak7-k1-d2-uppslag%2Findex.html&amp;retur_txt=%E2%86%90%20Till%20%C3%B6versikten" data-mal="mina:sjalvskattning">Självskattning</a>
-        <span class="up-lank up-kommer" aria-disabled="true">Dagens träning · kommer</span>
-      </div>
-    </div>
-  </div>
+  <div class="up-lista" id="up-lista"></div>
 </main>
+
+<script>
+(function(){
+  'use strict';
+  /* ── INNEHÅLLET (Joachims beslut 2026-11-07). Ordning: Begrepp · Huvudräkning/Tabell · Metoder.
+     ova  = 'blad:grupp' i d2 (grupp = bladets uppgiftsgrupp, 1 = första)
+     drill = drillsidans fråga (ko, formaga, ev. maxniva/stege)
+     film  = föreläsningens nummer i d2:s filmlista
+     Tom ruta = fältet saknas. Musikvideo saknas överallt tills det finns videor. ── */
+  var KOLUMNER = [{ titel: 'Öva' }, { titel: 'Metodträning' }, { titel: 'Föreläsning' }, { titel: 'Musikvideo' }];
+  var MINA = [
+    { titel: 'Kunskapsläge', visa: 'mina:kunskapslage' },
+    { titel: 'Självskattning', visa: 'mina:sjalvskattning' },
+    { titel: 'Dagens träning · kommer' }
+  ];
+  var TEST = { titel: 'Test' }, OVA = { titel: 'Öva' };
+  var RAKNESATT = [
+    { namn: 'Addition', test: 1, delar: [
+      { rubrik: 'Begrepp', rader: [
+        { namn: 'Term och summa', ova: '1:1', drill: 'ko=add-begrepp&formaga=begrepp&maxniva=1' },
+        { namn: 'Tiokompisar och dela upp tal', ova: '1:2', drill: 'ko=add-begrepp&formaga=rakna' } ] },
+      { rubrik: 'Huvudräkning', rader: [
+        { namn: 'Huvudräkning', ova: '1:4', drill: 'ko=add-rakna&formaga=rakna' } ] },
+      { rubrik: 'Metoder', metoder: true, rader: [
+        { namn: 'Uppställning', drill: 'ko=add-metoder&formaga=uppstallning', film: 1 },
+        { namn: 'Talsorterna var för sig', ova: '1:3', drill: 'ko=add-metoder&formaga=talsorterna', film: 2 },
+        { namn: 'Flytta över', ova: '1:5', drill: 'ko=add-metoder&formaga=flytta-over', film: 3 } ] } ] },
+    { namn: 'Subtraktion', test: 2, delar: [
+      { rubrik: 'Begrepp', rader: [
+        { namn: 'Term och differens', drill: 'ko=sub-begrepp&formaga=begrepp&maxniva=1' },
+        { namn: 'Dela upp tal i termer', drill: 'ko=sub-begrepp&formaga=rakna&maxniva=1' } ] },
+      { rubrik: 'Huvudräkning', rader: [
+        { namn: 'Huvudräkning', ova: '2:3', drill: 'ko=sub-rakna&formaga=rakna' } ] },
+      { rubrik: 'Metoder', metoder: true, rader: [
+        { namn: 'Uppställning', ova: '2:1', drill: 'ko=sub-metoder&formaga=uppstallning', film: 4 },
+        { namn: 'Öka och minska lika', ova: '2:4', drill: 'ko=sub-metoder&formaga=okaminska', film: 5 },
+        { namn: 'Addition bakifrån', ova: '2:2', drill: 'ko=sub-metoder&formaga=bakifran', film: 6 } ] } ] },
+    { namn: 'Multiplikation', test: 3, delar: [
+      { rubrik: 'Begrepp', rader: [
+        { namn: 'Faktor, produkt och primtal', drill: 'ko=mult-begrepp&formaga=begrepp&maxniva=1' },
+        { namn: 'Faktorisera tal', drill: 'ko=mult-begrepp&formaga=rakna' } ] },
+      { rubrik: 'Tabell', rader: [
+        { namn: 'Multiplikationstabellen', drill: 'ko=mult-tabell&formaga=rakna' } ] },
+      { rubrik: 'Metoder', metoder: true, rader: [
+        // EN metod: drillen har åtta nivåer — 1–4 ensiffrig faktor, 5–8 båda faktorerna > 10 (metod-mult.js, 'hela')
+        { namn: 'Uppställning', ova: '3:1', drill: 'ko=mult-metoder&formaga=uppstallning&stege=hela', film: 7 },
+        { namn: 'Talsorterna var för sig', ova: '3:3', drill: 'ko=mult-metoder&formaga=talsorterna&maxniva=1', film: 8 },
+        { namn: 'Dubbla och halvera', ova: '3:4', drill: 'ko=mult-metoder&formaga=dubbla&maxniva=1' },
+        { namn: 'Dela upp i faktorer', drill: 'ko=mult-metoder&formaga=faktorer&maxniva=1' },
+        { namn: 'Dela upp i termer (dubbelparentes)', drill: 'ko=mult-metoder&formaga=termer&maxniva=1' } ] } ] },
+    { namn: 'Division', test: 4, delar: [
+      { rubrik: 'Begrepp', rader: [
+        { namn: 'Täljare, nämnare och kvot', drill: 'ko=div-begrepp&formaga=begrepp&maxniva=1' },
+        { namn: 'Delbarhetsregler', drill: 'ko=div-begrepp&formaga=rakna' } ] },
+      { rubrik: 'Tabell', rader: [
+        { namn: 'Divisionstabellen', drill: 'ko=div-tabell&formaga=rakna' } ] },
+      { rubrik: 'Metoder', metoder: true, rader: [
+        { namn: 'Kort division', ova: '4:1', drill: 'ko=div-metoder&formaga=kort', film: 9 },
+        { namn: 'Lång division', drill: 'ko=div-metoder&formaga=lang' } ] } ] },
+    { namn: 'Prioriteringsregeln', test: 4, delar: [
+      { rubrik: 'Begrepp', rader: [
+        { namn: 'Samband mellan räknesätt', drill: 'ko=prio-samband&formaga=rakna' },
+        { namn: 'Kommutativa lagen', drill: 'ko=prio-lagar&formaga=kommutativa' },
+        { namn: 'Associativa lagen', drill: 'ko=prio-lagar&formaga=associativa' },
+        { namn: 'Distributiva lagen', drill: 'ko=prio-lagar&formaga=distributiva' } ] },
+      { rubrik: 'Huvudräkning', rader: [
+        { namn: 'Prioriteringsregeln', drill: 'ko=prio-prioritering&formaga=rakna' } ] },
+      { rubrik: 'Metoder', metoder: true, rader: [
+        { namn: 'Räkna steg för steg', ova: '5:1', drill: 'ko=prio-prioritering&formaga=metod' } ] } ] },
+    { namn: 'Problemlösning', ova: '6', delar: [
+      { rader: [
+        { namn: 'Lästal med addition', drill: 'ko=add-problem&formaga=problem' },
+        { namn: 'Lästal med subtraktion', drill: 'ko=sub-problem&formaga=problem' },
+        { namn: 'Lästal med multiplikation', drill: 'ko=mult-problem&formaga=problem' },
+        { namn: 'Lästal med division', drill: 'ko=div-problem&formaga=problem' } ] } ] }
+  ];
+
+  // ── ADRESSER. retur är relativ till MÅLSIDAN: d2 ligger tre nivåer ner, drillsidan i roten. ──
+  var HIT = 'prototyp/ak7-k1-d2-uppslag/index.html', RETUR_TXT = '← Till översikten';
+  function retur(fran, nr){ return '&retur=' + encodeURIComponent(fran + HIT + '#rs-' + nr) + '&retur_txt=' + encodeURIComponent(RETUR_TXT); }
+  function tillD2(visa, nr){ return '../../ak7/k1/d2-fyraraknesatt/index.html?visa=' + visa + retur('../../../', nr); }
+  function tillRam(q, nr){ return '../../ak7-k1-ram.html?' + q + retur('', nr); }
+
+  function el(tagg, klass, text){ var e = document.createElement(tagg); if(klass) e.className = klass; if(text != null) e.textContent = text; return e; }
+  function lank(text, href, mal){ var a = el('a', 'up-l', text); a.href = href; a.setAttribute('data-mal', mal); return a; }
+
+  // Mina kunskaper, uppe till höger
+  var mina = document.getElementById('up-mina');
+  MINA.forEach(function(m){
+    if(m.visa) mina.appendChild(lank(m.titel, tillD2(m.visa, 0), m.visa)).className = '';
+    else { var s = el('span', 'up-kommer', m.titel); s.setAttribute('aria-disabled', 'true'); mina.appendChild(s); }
+  });
+
+  // Listan
+  var lista = document.getElementById('up-lista'), sektioner = [];
+  RAKNESATT.forEach(function(r, i){
+    var nr = i + 1, sek = el('section', 'up-rs'); sek.id = 'rs-' + nr;
+    var huvud = el('div', 'up-rs-h');
+    var knapp = el('button', 'up-fall'); knapp.type = 'button';
+    knapp.setAttribute('aria-expanded', 'false'); knapp.setAttribute('aria-controls', 'rs-kropp-' + nr);
+    knapp.appendChild(el('span', 'up-nr', nr + '.'));
+    knapp.appendChild(el('span', 'up-namn', r.namn));
+    knapp.appendChild(el('span', 'up-chev', '▸'));
+    huvud.appendChild(knapp);
+    var hoger = el('span', 'up-hoger');
+    if(r.ova) hoger.appendChild(lank(OVA.titel, tillD2('uppgift:' + r.ova, nr), 'uppgift:' + r.ova));
+    if(r.test) hoger.appendChild(lank(TEST.titel, tillRam('view=test-fardigt&del=d2&test=' + r.test, nr), 'test:' + r.test + '@' + nr));
+    huvud.appendChild(hoger);
+    sek.appendChild(huvud);
+
+    var kropp = el('div', 'up-kropp'); kropp.id = 'rs-kropp-' + nr;
+    var kolh = el('div', 'up-rad up-kolh'); kolh.setAttribute('aria-hidden', 'true');
+    kolh.appendChild(el('span'));
+    KOLUMNER.forEach(function(k){ kolh.appendChild(el('span', null, k.titel)); });
+    kropp.appendChild(kolh);
+    r.delar.forEach(function(d){
+      if(d.rubrik) kropp.appendChild(el('div', 'up-del', d.rubrik));
+      d.rader.forEach(function(rad, j){
+        var row = el('div', 'up-rad');
+        row.appendChild(el('span', 'up-m', (d.metoder ? String.fromCharCode(97 + j) + ') ' : '') + rad.namn));
+        row.appendChild(rad.ova ? lank(KOLUMNER[0].titel, tillD2('uppgift:' + rad.ova, nr), 'uppgift:' + rad.ova) : el('span'));
+        row.appendChild(rad.drill ? lank(KOLUMNER[1].titel, tillRam(rad.drill, nr), 'drill:' + rad.drill) : el('span'));
+        row.appendChild(rad.film ? lank(KOLUMNER[2].titel, tillD2('film:' + rad.film, nr), 'film:' + rad.film) : el('span'));
+        row.appendChild(el('span'));   // Musikvideo: tom tills det finns videor
+        kropp.appendChild(row);
+      });
+    });
+    sek.appendChild(kropp);
+    lista.appendChild(sek);
+    sektioner.push(sek);
+    knapp.addEventListener('click', function(){ oppna(sek.classList.contains('is-open') ? 0 : nr); });
+  });
+
+  // ── Ett räknesätt utfällt åt gången. Läget står i # (replaceState: ingen ny historikpost), så både
+  //    bakåtknappen och "← Till översikten" (retur bär #rs-N) kommer tillbaka till samma läge. ──
+  function oppna(nr){
+    sektioner.forEach(function(s, i){
+      var pa = (i + 1) === nr;
+      s.classList.toggle('is-open', pa);
+      s.querySelector('.up-fall').setAttribute('aria-expanded', pa ? 'true' : 'false');
+    });
+    try { history.replaceState(null, '', nr ? '#rs-' + nr : location.pathname + location.search); } catch(e){}
+  }
+  var m = /^#rs-([1-9])$/.exec(location.hash);
+  oppna(m ? parseInt(m[1], 10) : 0);
+})();
+</script>
 
 </body>
 </html>

@@ -4618,7 +4618,9 @@ const GEN_NOD = {
   'div-rakna-pow10':'div-rakna:pow10',          // ·10/100/1000 → d5
   'div-rakna-stora':'div-rakna:stora',          // stora tal → d7
   'prio-samband':   'prio-samband:rakna',
-  'prio-uttryck':   'prio-prioritering:rakna',
+  // Bladets "Beräkna – visa mellanled" tränar METODEN (räkna steg för steg), inte räkneuppgiften —
+  // loggades förr på :rakna = falsk evidens där (Joachim 2026-11-07). Nians -ml är egen och oförändrad.
+  'prio-uttryck':   'prio-prioritering:metod',
   'prio-uttryck-ml':'prio-prioritering:rakna',   // nian: komplex prioritering + mellanled + bråkstreck
   'neg-begr':       'neg-begrepp:begrepp',
   'neg-addsub':     'neg-rakna:addsub',
@@ -4636,7 +4638,9 @@ const GEN_NOD = {
   'bd-hundra':      'bd-hundra:rakna',
   'bd-forlang':     'bd-forlang:rakna',
   // ── ÖVA-TÄCKNING (sjuan-sweep): nya generatorer → rätt kart-cell ──
-  'add-tvatal':     'add-rakna:rakna', 'add-term':        'add-rakna:rakna',       // d2
+  // d2 "Vilka tal?" (dela upp i termer, två tal ur summa och differens) tränar BEGREPP — raden
+  // "Tiokompisar och dela upp tal". Loggades förr på huvudräkning = falsk evidens där (Joachim 2026-11-07).
+  'add-tvatal':     'add-begrepp:rakna', 'add-term':      'add-begrepp:rakna',     // d2
   'neg-losut-as':   'neg-rakna:addsub', 'neg-dubbel':     'neg-rakna:addsub',      // d3
   'neg-fallande':   'neg-begrepp:begrepp',                                          // d3
   'neg-ordna':      'neg-begrepp:begrepp',                                          // d3 storleksordna
@@ -5313,7 +5317,11 @@ const OVNING_RENDERS = {
   // Del 3 - Metoder för multiplikation (picker + uppställnings-deeplink; uppställning loggar egen nod)
   'mult-metoder':{
     metod:        (b)=> renderMultMetoder(b),
-    uppstallning: (b)=> renderUppstallningMult(b, ()=> renderMultMetoder(b)),
+    // &stege=hela (uppslaget): EN Uppställning med åtta nivåer — 1–4 ensiffrig faktor, 5–8 båda > 10.
+    // Utan flaggan exakt samma anrop som förut.
+    uppstallning: (b)=> /[?&]stege=hela\b/.test(location.search)
+      ? renderUppstallningMult(b, ()=> renderMultMetoder(b), {variant:'hela'})
+      : renderUppstallningMult(b, ()=> renderMultMetoder(b)),
     // karta-noder mult-metoder:* → deeplink direkt in i rätt picker-metod (öva-täckta, ingen drill)
     'uppstallning-stora': (b)=> renderUppstallningMult(b, ()=> renderMultMetoder(b), {variant:'fler'}),  // båda faktorerna >10 = flersiffrig multiplikator
     talsorterna:  (b)=> renderMultMetoder(b, 'talsorterna'),

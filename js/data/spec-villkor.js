@@ -106,14 +106,21 @@
     },
 
     // ── Öva 3 / d2: prioritering ────────────────────────────────────────────────────────────
-    'prio-prioritering:rakna': {
-      kalla: 'åk7 blad-k1-d2 (27/3−3·2 · (32−8)/(4+6) · 20+8,3·100) · åk9 ova3 (4–6 op, nästlade parenteser, bråkstreck)',
+    // Sjuans profil följer generatorn prio-uttryck till :metod (GEN_NOD 2026-11-07: bladets "Beräkna – visa
+    // mellanled" tränar metoden). Villkoren är oförändrade — bara nodnyckeln, så fuzzen hittar generatorn.
+    'prio-prioritering:metod': {
+      kalla: 'åk7 blad-k1-d2 (27/3−3·2 · (32−8)/(4+6) · 20+8,3·100)',
       profiler: {
         ak7: { variant:null, enforce:false,
           _pending:'åk7-default: max 3 tal, en parentes, ingen division/decimal. Öva-d2 har mer — men åk7-default rörs ej.',
           tak:{ maxOperationer:4, maxParenteser:2, brakstreck:true, maxMagnitud:1000, maxDecimaler:2 },
           kravs:{} },
-        ak8: 'ak7',
+        ak8: 'ak7'
+      }
+    },
+    'prio-prioritering:rakna': {
+      kalla: 'åk9 ova3 (4–6 op, nästlade parenteser, bråkstreck)',
+      profiler: {
         ak9: { variant:{ struktur:['parenteser','koefficient','brakstreck'] }, enforce:true,  // slice 3 MÅL
           tak:{ maxOperationer:6, maxParenteser:2, brakstreck:true, maxMagnitud:1000, maxDecimaler:2 },
           kravs:{ minOperationer:4, parenteser:true } }

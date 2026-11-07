@@ -11,9 +11,9 @@
   var BYGGBARA = {};
   ['primtal:begrepp','primtal:rakna','primtal:kommunikation','delbarhet:rakna','delbarhet:begrepp',
    'siffror:begrepp','position:begrepp','position:rakna','utvecklad:metod','utvecklad:rakna','rakneträning:rakna',
-   'add-begrepp:begrepp','add-rakna:rakna','add-metoder:uppstallning','sub-begrepp:begrepp','sub-rakna:rakna',
+   'add-begrepp:begrepp','add-begrepp:rakna','add-rakna:rakna','add-metoder:uppstallning','sub-begrepp:begrepp','sub-rakna:rakna',
    'sub-metoder:uppstallning','mult-begrepp:begrepp','mult-tabell:rakna','mult-metoder:uppstallning',
-   'div-begrepp:begrepp','div-tabell:rakna','div-metoder:kort','prio-samband:rakna','prio-prioritering:rakna',
+   'div-begrepp:begrepp','div-tabell:rakna','div-metoder:kort','prio-samband:rakna','prio-prioritering:rakna','prio-prioritering:metod',
    'prio-lagar:kommutativa','prio-lagar:associativa','prio-lagar:distributiva','neg-begrepp:begrepp',
    'neg-rakna:addsub','neg-rakna:multdiv','bd-vaxla:rakna','bd-tillbrak:rakna','bd-hundra:rakna','bd-forlang:rakna',
    'mult-rakna:pow10','div-rakna:pow10','mult-rakna:stora','div-rakna:stora'
@@ -24,7 +24,8 @@
   // Antal test-TYPER (snabb-generatorer) per nod — spegel av GEN_NOD. Styr coverage-splitten. Default 1.
   var TYP_PER_NOD = { 'primtal:rakna':2, 'sub-rakna:rakna':2,
     // sjuan-sweep tillägg:
-    'add-rakna:rakna':4, 'neg-rakna:addsub':3, 'neg-begrepp:begrepp':2, 'position:rakna':3,
+    'add-rakna:rakna':2, 'add-begrepp:rakna':2,   // add-term/add-tvatal → Begrepp (2026-11-07)
+'neg-rakna:addsub':3, 'neg-begrepp:begrepp':2, 'position:rakna':3,
     'mult-rakna:stora':2, 'div-rakna:stora':2 };
   function typCount(n){ return TYP_PER_NOD[n] || 1; }
 
