@@ -39,6 +39,12 @@ const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const SABBA = args.includes('--sabba');
 // --sabba drift: motprov för drift-benet (kravet i rubriken men inte i datan).
 const SABBA_DRIFT = args.includes('drift');
+// RADENS FLAGGA (2026-11-10, v3 k2 d2): en rad kan bära sitt eget krav (data-mellanled på raden), och det går
+// före gruppens. Motprov, egna växlar (blandas inte med --sabba ovan):
+//   --sabba-rad     tar bort ledets rutor på rader med krävt led → "rad utan plats" ska fälla
+//   --sabba-genvag  öppnar genvägen i d2:s rättning (ett led som redan är svaret godkänns) → genvägen ska fälla
+const SABBA_RAD = args.includes('--sabba-rad'), SABBA_GV = args.includes('--sabba-genvag');
+const NYTT = require('./niva-las-upp').nyttSnutt;   // varje steg också efter "Nytt blad" (k = 3)
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
 /* LEGACY-VOKABULÄREN. Metodnamn som BÄR signalen utan att ha markören.
@@ -59,6 +65,12 @@ const PROBE = `(function(){
   var SABBA = ${SABBA};
   var SABBA_DRIFT = ${SABBA_DRIFT};  /* Nivåstegen upplåsta innan mätningen — delad snutt (verktyg/niva-las-upp.js). */
   ${LAS_UPP}
+  ${NYTT}
+  var SABBA_RAD = ${SABBA_RAD}, SABBA_GV = ${SABBA_GV};
+  if(SABBA_GV && typeof window.provaDecBrakKravt === 'function'){
+    window.provaDecBrakKravt = (function(f){ return function(a, b, c, d, fac){ var r = f(a, b, c, d, fac);
+      if(r.orsak === 'genvagDecBrak'){ r.ledOk = true; r.ok = r.svarOk; r.status = r.ok ? 'ratt' : 'fel'; r.orsak = null; r.besked = ''; } return r; }; })(window.provaDecBrakKravt);
+  }
   var VOK = ${JSON.stringify(VOKABULAR.map(v => v.nyckel))};
   function synlig(el){ return !!el.offsetParent; }
   var ut = { grupper: [], onerr: window.__onerr || null , drift: [] };
@@ -94,16 +106,29 @@ const PROBE = `(function(){
           varfor: markor ? 'rubriken s\\u00e4ger "visa mellanled"' : 'metodnamnet "' + legacy[0] + '"' });
         return;
       }
-      if(!flagga) return;
+      // RADENS FLAGGA går före gruppens (2026-11-10). En grupp utan egen flagga mäts ändå om en rad bär en.
+      var radflaggade = g.querySelectorAll('.ovn-rad[data-mellanled], .ovn-brak-rad[data-mellanled], .ak8-rad[data-mellanled]').length;
+      if(!flagga && !radflaggade) return;
 
       var rader = Array.prototype.filter.call(g.querySelectorAll('.ovn-rad, .ovn-brak-rad, .ak8-rad'), synlig);
       if(!rader.length) rader = [g];
+      function radFlagga(r){ return (r.dataset && r.dataset.mellanled) || flagga; }
+      /* KRÄVT LED PÅ RADEN i en bråkrad ("Skriv som bråk", nivå 2 c–f): svaret självt har två rutor (täljare och
+         nämnare), så "två rutor" bevisar ingenting. Platsen för ledet är ledets egna rutor. */
+      function egetLed(r){ return r.classList.contains('brak-svar-rad') && r.dataset.mellanled === 'kravt'; }
+      if(SABBA_RAD) rader.forEach(function(r){ if(egetLed(r)){ var fl = r.querySelector('.brak-friv'); if(fl){ var eq = fl.nextElementSibling; fl.remove(); if(eq) eq.remove(); } } });
       var utan = [];
       rader.forEach(function(r, ri){
         // MEDVETET UTAN: raden säger själv att den inte har något mellanled, eller bär inget
         // svar alls (figurrad). Ingen av dem KAN ha plats — och båda är beslut, inte luckor.
         if(r.dataset && r.dataset.mellanledNej) return;
+        if(!radFlagga(r)) return;
         if(!r.querySelector("input, .valruta-grid, .ovn-val-grid, .ovn-flerval-grid")) return;
+        if(egetLed(r)){
+          var led = r.querySelector('.brak-friv'), lr = led ? Array.prototype.filter.call(led.querySelectorAll('input'), synlig).length : 0;
+          if(lr < 2) utan.push('rad ' + (ri + 1) + ' (krävt led, ' + lr + ' ledrutor)');
+          return;
+        }
         var p = harPlats(r);
         if(!p.ok) utan.push('rad ' + (ri + 1) + ' (' + p.rutor + ' ruta)');
       });
@@ -118,7 +143,17 @@ const PROBE = `(function(){
       /* FRIVILLIGT mellanled (mellanled: 'frivilligt', Joachim 2026-10-26 — decimaltal som bråk): ledet får
          lämnas tomt och rättas på värdet, så svaret i ledet är tillåtet. Genvägen provas bara där ledet krävs;
          platsen för ledet mäts ändå. */
-      if(flagga === 'kravt') rader.forEach(function(r, ri){
+      rader.forEach(function(r, ri){
+        if(radFlagga(r) !== 'kravt') return;
+        /* Bråkraden med krävt led: svaret (förkortat, radens data-t/n) i BÅDE ledet och svaret. Ledet
+           får inte bli grönt — ett förkortat led är svaret. */
+        if(egetLed(r)){
+          var lt = r.querySelector('.friv-t'), ln = r.querySelector('.friv-n'), st = r.querySelector('.brak-t'), sn = r.querySelector('.brak-n');
+          if(!lt || !ln || !st || !sn || r.dataset.t === undefined) return;
+          satt(lt, r.dataset.t); satt(ln, r.dataset.n); satt(st, r.dataset.t); satt(sn, r.dataset.n);
+          prov.push({ mel: lt, sv: st, extra: [ln, sn], rad: ri + 1, varde: r.dataset.t + '/' + r.dataset.n, radEl: r });
+          return;
+        }
         var mel = Array.prototype.filter.call(r.querySelectorAll(MEL), synlig)[0];
         var sv = Array.prototype.filter.call(r.querySelectorAll('input[data-svar]'), synlig).pop();
         if(!mel || !sv || mel === sv) return;
@@ -136,8 +171,8 @@ const PROBE = `(function(){
             if(p.mel.classList.contains('correct')) genvag.push('rad ' + p.rad + ': mellanledet "' + p.varde + '" (= slutsvaret) godkändes');
           });
         }
-        prov.forEach(function(p){ [p.mel, p.sv].forEach(function(i){ satt(i, ''); i.classList.remove('correct', 'wrong'); delete i.dataset.loggat; });
-          Array.prototype.forEach.call(p.mel.parentElement.querySelectorAll('.ovn-mark, .ovn-fasit'), function(x){ x.remove(); }); });
+        prov.forEach(function(p){ [p.mel, p.sv].concat(p.extra || []).forEach(function(i){ satt(i, ''); i.classList.remove('correct', 'wrong'); delete i.dataset.loggat; });
+          Array.prototype.forEach.call((p.radEl || p.mel.parentElement).querySelectorAll('.ovn-mark, .ovn-fasit'), function(x){ x.remove(); }); });
       }
       ut.grupper.push({ yta: yta, rubrik: txt.slice(0, 60), signal: 'data:' + flagga,
                         rader: rader.length, utanPlats: utan, genvag: genvag, genvagProvade: provade });
@@ -159,9 +194,11 @@ const PROBE = `(function(){
   (nav.length ? nav : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
     var namn = b ? b.textContent.replace(/\\s+/g, ' ').trim().slice(0, 26) : '(enda)';
+    /* NYTT BLAD (2026-11-10): varje steg mäts också efter "Nytt blad" (k = 3). */
+    function medNytt(nm){ nyttVarv(synligMount(), function(i){ mat(nm + ' nytt ' + i); }); }
     var steg = nivaKnappar().length;
-    if(steg < 2){ mat(namn); return; }
-    for(var n = 0; n < steg; n++){ if(klickaNiva(n)) mat(namn + ' niv\\u00e5 ' + (n + 1)); }
+    if(steg < 2){ mat(namn); medNytt(namn); return; }
+    for(var n = 0; n < steg; n++){ if(klickaNiva(n)){ mat(namn + ' niv\\u00e5 ' + (n + 1)); medNytt(namn + ' niv\\u00e5 ' + (n + 1)); } }
   });
   return ut;
 })()`;

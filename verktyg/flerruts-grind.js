@@ -14,6 +14,7 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
+const NYTT = require('./niva-las-upp').nyttSnutt;  // och varje steg också efter "Nytt blad" (k = 3)
 const MP = require('./matpunkt').skapa('flerruts-grind.js');   // V14
 const args = process.argv.slice(2), BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
@@ -265,13 +266,17 @@ const PROBE8 = `(function(){
     kedjeProv(mount, kn, b);       // åttans kedjerader (fri och fast) — egen fyllning, egen regel
     ut.blad.push(b);
   }
-  if(knappar.length) knappar.forEach(function(k){ k.click(); mat(k.textContent.trim().slice(0, 30)); }); else mat('(enda)');
+  /* NYTT BLAD (2026-11-10): varje flik mäts också efter "Nytt blad" (k = 3). */
+  ${NYTT}
+  function medNytt(namn){ var m = document.querySelector('[id^="sheet-"]') || document.querySelector('.ovn-sheet'); if(m) nyttVarv(m, function(i){ mat(namn.slice(0, 24) + ' nytt ' + i); }); }
+  if(knappar.length) knappar.forEach(function(k){ k.click(); var nm = k.textContent.trim().slice(0, 30); mat(nm); medNytt(nm); }); else { mat('(enda)'); medNytt('(enda)'); }
   return ut;
 })()`;
 // ÅK7 (blad-karna-b / blad-karna): per .ovn-sheet, rader med ≥ 2 .ovn-in[data-svar]
 const PROBE7 = `(function(){
   /* Nivåstegen upplåsta innan mätningen — delad snutt (verktyg/niva-las-upp.js). */
   ${LAS_UPP}
+  ${NYTT}
   var ut = { onerr: window.__onerr, blad: [] };
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
   function mat(namn, root){
@@ -304,7 +309,16 @@ const PROBE7 = `(function(){
       txt(v.slice(sist).trim());
     }
     var fkRader = Array.from(root.querySelectorAll('.form-kedja')).filter(function(r){ return fkCeller(r).length >= 2; });
-    b.rader = rader.length + brakRader.length + fkRader.length; if(!b.rader){ ut.blad.push(b); return; }
+    /* HELTAL OCH BRÅK (k2 d2 nivå 1, 2026-11-10): svaret i tre rutor (heltal, täljare, nämnare) är EN enhet,
+       facit ur radens data-varde. Samma prov som bråkraderna: sista rutan rätt, övriga fel → inte grön. */
+    var blRader = Array.from(root.querySelectorAll('.bland-kedja')).filter(function(r){ return r.querySelectorAll('.bland-svar .brak-cell').length >= 2; });
+    b.rader = rader.length + brakRader.length + fkRader.length + blRader.length; if(!b.rader){ ut.blad.push(b); return; }
+    blRader.forEach(function(r){
+      var vd = String(r.dataset.varde || '').split('/'), T = +vd[0], N = +vd[1], h = Math.floor(T / N);
+      var fac = { hel: h, t: T - h * N, n: N };
+      var cel = ['hel', 't', 'n'].map(function(k){ return { el: r.querySelector('.bland-svar .brak-' + k), v: fac[k] }; }).filter(function(x){ return x.el; });
+      cel.forEach(function(c, i){ c.el.value = String(i === cel.length - 1 ? c.v : c.v + 1); ev(c.el, 'input'); });
+    });
     fkRader.forEach(function(r){ var c = fkCeller(r);
       c.forEach(function(x, i){ var v = x.getAttribute('data-visa') || ''; byggCell(x.querySelector('.ak8-expr'), i === c.length - 1 ? v : v + ' + 1'); }); });
     function plus1(v){ return String(parseFloat(String(v).replace(',', '.')) + 1).replace('.', ','); }
@@ -336,6 +350,12 @@ const PROBE7 = `(function(){
       var cel = Array.from(r.querySelectorAll('.brak-hel, .brak-t, .brak-n'));
       var st = cel.map(function(i){ return i.classList.contains('correct') ? 'ok' : i.classList.contains('wrong') ? 'fel' : '-'; });
       if(marks.length && marks.every(function(m){ return m === '\u2713'; })) b.gronFastFel.push('bråkrad [' + st.join(',') + ']');
+    });
+    blRader.forEach(function(r){
+      b.provade++;
+      var st = Array.from(r.querySelectorAll('.bland-svar .brak-cell')).map(function(i){ return i.classList.contains('correct') ? 'ok' : i.classList.contains('wrong') ? 'fel' : '-'; });
+      var mk = r.querySelector('.ovn-mark');
+      if(mk && mk.textContent.indexOf('\\u2713') >= 0) b.gronFastFel.push('heltal och bråk [' + st.join(',') + ']');
     });
     fkRader.forEach(function(r){
       b.provade++;
@@ -381,13 +401,16 @@ const PROBE7 = `(function(){
         var bas = kortNamn(h2 ? h2.textContent : 'blad ' + seddaBlad.length);
         return nr ? bas.slice(0, 24) + ' niv\u00e5 ' + nr : bas;
       }
+      /* NYTT BLAD (2026-11-10): varje steg mäts också efter "Nytt blad" (arket letas upp på nytt per tryck). */
+      function medNytt(namn){ nyttVarv(vard, function(i){ var s = vard.querySelector('.ovn-sheet'); if(s) mat(namn.slice(0, 24) + ' nytt ' + i, s); }); }
       var steg = stegKnappar().length;
-      if(steg < 2){ mat(namnNu(0), sh); return; }
+      if(steg < 2){ mat(namnNu(0), sh); medNytt(namnNu(0)); return; }
       for(var n = 0; n < steg; n++){
         var nb = stegKnappar()[n]; if(!nb || nb.disabled) continue;
         nb.click();
         var nySh = vard.querySelector('.ovn-sheet'); if(!nySh) continue;
         mat(namnNu(n + 1), nySh);
+        medNytt(namnNu(n + 1));
       }
     });
   });

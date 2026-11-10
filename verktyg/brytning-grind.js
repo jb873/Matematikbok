@@ -40,6 +40,7 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
+const NYTT = require('./niva-las-upp').nyttSnutt;  // och varje steg också efter "Nytt blad" (k = 3)
 const MP = require('./matpunkt').skapa('brytning-grind.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.alla())) process.exit(0);
@@ -510,6 +511,7 @@ const PROBE = `(function(){
 
   // EN FLIK I TAGET, och matningen MEDAN fliken ar framme: ett dolt blad har inga matt.
   ${LAS_UPP}
+  ${NYTT}
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   var sedda = [];
   (nav.length ? nav : [null]).forEach(function(knapp){
@@ -525,8 +527,12 @@ const PROBE = `(function(){
         if(bas.length > 30) bas = '…' + bas.slice(-29);
         return nr ? bas.slice(0, 24) + ' niva ' + nr : bas;
       }
+      /* NYTT BLAD (2026-11-10): varje steg mäts också efter "Nytt blad" — bladet byggs om, så arket letas
+         upp på nytt per tryck (sh är då ett löst element). */
+      function nuSh(){ return vard.querySelector('.ovn-sheet, .ak8-sheet, .eq-kort') || sh; }
+      function medNytt(namn){ nyttVarv(vard, function(i){ matSheet(namn.slice(0, 24) + ' nytt ' + i, nuSh()); }); }
       var steg = stegKnappar().length;
-      if(steg < 2){ matSheet(namnNu(0), sh); return; }
+      if(steg < 2){ matSheet(namnNu(0), sh); medNytt(namnNu(0)); return; }
       /* Bladet byggs om vid nivåklick, så BÅDE knappen och arket letas upp på nytt per steg —
          en hållen nod är ett löst element och har inga mått. */
       for(var n = 0; n < steg; n++){
@@ -534,6 +540,7 @@ const PROBE = `(function(){
         nb.click();
         var nySh = vard.querySelector('.ovn-sheet') || sh;
         matSheet(namnNu(n + 1), nySh);
+        medNytt(namnNu(n + 1));
       }
     });
   });

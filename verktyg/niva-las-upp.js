@@ -58,4 +58,34 @@ const stegSnutt = `
   }
 `;
 
-module.exports = { snutt: snutt, stegSnutt: stegSnutt };
+/* NYTT BLAD (2026-11-10, arbetsorder v3 k2 d2): grindarna mätte bara det FÖRSTA bladet per steg — med tom
+ * lagring bygger varje blad sitt grundblad, och "Nytt blad med andra tal" trycktes aldrig. Ett fel som bara
+ * finns i Nytt blad-vägen (rubriken "(nytt blad)" i d3, variant B i k1 d5–d7) gick därför igenom. EN snutt
+ * för alla grindar:
+ *
+ *     const NYTT = require('./niva-las-upp').nyttSnutt;
+ *     ... ${NYTT} ... mat(namn); nyttVarv(mount, function(i){ mat(namn + ' nytt ' + i); });
+ *
+ * nyttVarv trycker på bladets SYNLIGA Nytt blad-knapp (kärnornas data-action="nytt-blad", kvrot:s data-nytt)
+ * K gånger och anropar fn efter varje tryck. Knappen letas upp på nytt per varv — bladet byggs om vid klick.
+ * Saknar bladet knappen händer ingenting (returnerar 0). nyttKlick trycker en gång (för grindar med jobblista).
+ * K = 3 (Joachim 2026-11-10). */
+const NYTT_K = 3;
+const nyttSnutt = `
+  function nyttKnapp(mount){
+    var m = mount || document;
+    return Array.prototype.filter.call(m.querySelectorAll('[data-action="nytt-blad"], [data-nytt]'), function(b){
+      return !!b.offsetParent && !b.disabled; })[0] || null;
+  }
+  function nyttKlick(mount){ var b = nyttKnapp(mount); if(!b) return false; b.click(); return true; }
+  function nyttVarv(mount, fn, k){
+    k = k || ${NYTT_K};
+    for(var _i = 1; _i <= k; _i++){
+      if(!nyttKlick(mount)) return _i - 1;
+      fn(_i);
+    }
+    return k;
+  }
+`;
+
+module.exports = { snutt: snutt, stegSnutt: stegSnutt, nyttSnutt: nyttSnutt, NYTT_K: NYTT_K };

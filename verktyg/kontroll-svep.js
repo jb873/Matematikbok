@@ -22,6 +22,7 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
+const NYTT = require('./niva-las-upp').nyttSnutt, NYTT_K = require('./niva-las-upp').NYTT_K;   // och efter "Nytt blad"
 const MP = require('./matpunkt').skapa('kontroll-svep.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
@@ -64,18 +65,24 @@ const PROBE = `(function(){
   }
   /* Stegen låses upp först — delad snutt, se verktyg/niva-las-upp.js. */
   ${LAS_UPP}
+  ${NYTT}
   var nav = Array.prototype.slice.call(document.querySelectorAll('.blad-nav-btn, .blad-subnav-btn, .nr-rad'));
   var jobb = (nav.length ? nav : [null]).map(function(b){ return { knapp: b, niva: null }; });
+  /* NYTT BLAD (2026-11-10): varje blad och steg m\u00e4ts ocks\u00e5 efter "Nytt blad" \u2014 ${NYTT_K} egna jobb, som vart
+     och ett klickar fliken och steget p\u00e5 nytt och sedan trycker Nytt blad en g\u00e5ng. Bladet saknar knappen \u2192
+     jobbet m\u00e4ter ingenting. */
   function kor(j){
     var b = j.knapp;
-    var nivaNamn = j.niva === null ? '' : ' niv\u00e5 ' + (j.niva + 1);
+    var nivaNamn = (j.niva === null ? '' : ' niv\u00e5 ' + (j.niva + 1)) + (j.nytt ? ' nytt ' + j.nytt : '');
     if(b){ if(b.disabled) return; b.click(); }
     if(j.niva === null){
-      var steg = nivaKnappar().length;
-      for(var n = 1; n < steg; n++) jobb.push({ knapp: b, niva: n });
+      if(!j.nytt){ var steg = nivaKnappar().length; for(var n = 1; n < steg; n++) jobb.push({ knapp: b, niva: n }); }
+      else { var n0 = nivaKnappar()[0]; if(n0 && !n0.disabled) n0.click(); }   // ett tidigare jobb kan ha lämnat ett annat steg framme
     } else {
       var nb = nivaKnappar()[j.niva]; if(!nb || nb.disabled) return; nb.click();
     }
+    if(j.nytt){ if(!nyttKlick(synligMount())) return; }
+    else for(var nk = 1; nk <= ${NYTT_K}; nk++) jobb.push({ knapp: b, niva: j.niva, nytt: nk });
     var mount = Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
              || document.querySelector('.ovn-sheet') || document.body;
     var rutor = Array.prototype.filter.call(mount.querySelectorAll('input.ovn-in, input.ak8-in'), synlig)
@@ -114,7 +121,9 @@ const PROBE = `(function(){
     // facit som hör till en TOM ruta
     var facitPaTom = facitEfter.filter(function(f){
       var rad = f.parentElement;
-      var i = rad && rad.querySelector('input.ovn-in, input.ak8-in');
+      // Radens första SYNLIGA ruta (2026-11-10): ett dolt led bakom "+ led" står först i Heltal och bråk,
+      // och det är ingen ruta eleven lämnat tom.
+      var i = rad && Array.prototype.filter.call(rad.querySelectorAll('input.ovn-in, input.ak8-in'), synlig)[0];
       return i && String(i.value).trim() === '';
     });
     // Ett obesvarat rutnät som fått correct/wrong pekar ut svaret. Vi räknar rutnäten, inte

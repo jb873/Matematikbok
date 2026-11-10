@@ -47,6 +47,7 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
+const NYTT = require('./niva-las-upp').nyttSnutt;  // och varje steg också efter "Nytt blad" (k = 3)
 const MP = require('./matpunkt').skapa('yt-kontrakt.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, sidor())) process.exit(0);
@@ -461,6 +462,7 @@ const PROBE = `(function(){
      Rätt lösning är en NÄSTLAD genomgång: klicka flik, läs om underflikarna, klicka var och en.
      Det är en egen ändring, inte en selektor-rad. Kontroll-svepet mäter plugg-sidorna redan. */
   ${LAS_UPP}
+  ${NYTT}
   /* NIVÅSTEGEN är egna ytor: bara det aktiva steget finns i DOM:en, så ett ostett steg har
      inga rutor att mäta. Knapparna läses om per varv — bladet byggs om vid klick. */
   function synligMount(){
@@ -468,6 +470,8 @@ const PROBE = `(function(){
         || document.querySelector('.ovn-wrap') || document.body;
   }
   function stegKnappar(m){ return m.querySelectorAll('.niva-rad .niva-btn'); }
+  /* NYTT BLAD (2026-11-10): varje steg är en yta också efter "Nytt blad" (k = 3). */
+  function medNytt(namn){ nyttVarv(synligMount(), function(i){ mat(namn.slice(0, 20) + ' nytt ' + i, synligMount()); }); }
   var nav = Array.prototype.slice.call(document.querySelectorAll('#blad-nav .blad-nav-btn, .blad-nav-btn, .nr-rad'));
   if(nav.length){
     nav.forEach(function(k){
@@ -476,16 +480,18 @@ const PROBE = `(function(){
       var namn = k.textContent.trim().slice(0, 26);
       var m = synligMount();
       var steg = stegKnappar(m).length;
-      if(steg < 2){ mat(namn, m); return; }
+      if(steg < 2){ mat(namn, m); medNytt(namn); return; }
       for(var n = 0; n < steg; n++){
         var m2 = synligMount();
         var nb = stegKnappar(m2)[n]; if(!nb || nb.disabled) continue;
         nb.click();
         mat(namn.slice(0, 20) + ' niva ' + (n + 1), synligMount());
+        medNytt(namn.slice(0, 14) + ' niva ' + (n + 1));
       }
     });
   } else {
     mat('(enda)', document.body);
+    medNytt('(enda)');
   }
   ut.onerr = window.__onerr || null;
   return ut;

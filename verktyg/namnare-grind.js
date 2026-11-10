@@ -16,6 +16,7 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const MP = require('./matpunkt').skapa('namnare-grind.js');   // V14
+const NYTT = require('./niva-las-upp').nyttSnutt;   // åk7/åk9: varje steg också efter "Nytt blad" (k = 3)
 const args = process.argv.slice(2), arg = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const BARA = arg('--sida'), SEEDS = +(arg('--seeds') || 1);
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
@@ -118,6 +119,7 @@ const PROBE8_FYLL = `(function(){
 })()`;
 // ── ÅK7/ÅK9 (blad-karna / blad-karna-b): per .ovn-sheet ──
 const PROBE7 = `(function(){
+  ${NYTT}
   var ut = { onerr: window.__onerr, blad: [] };
   function ev(el, t){ el.dispatchEvent(new Event(t, { bubbles:true })); }
   function synlig(el){ return !!(el.offsetParent) && getComputedStyle(el).visibility !== 'hidden'; }
@@ -222,7 +224,17 @@ const PROBE7 = `(function(){
     b.platshallare = ins.length > 0 && tomma === ins.length;   // byggar-platshållare (tomt facit i varje ruta) → rapporteras med ?, fälls ej
     root.querySelectorAll('.valruta-grid, .ovn-val-grid, .ovn-flerval-grid').forEach(function(g){ if(!synlig(g)) b.doldGrid++; else b.synligGrid++; });
     root.querySelectorAll('.brak-svar-rad, .brak-fragerad').forEach(function(row){ var h = row.querySelector('.brak-hel'), t = row.querySelector('.brak-t'), n = row.querySelector('.brak-n'); if(h && row.dataset.hel !== undefined){ h.value = row.dataset.hel; ev(h, 'input'); } if(t && row.dataset.t !== undefined){ t.value = row.dataset.t; ev(t, 'input'); } if(n && row.dataset.n !== undefined){ n.value = row.dataset.n; ev(n, 'input'); } });
-    ins.forEach(function(i){ if(i.closest('.brak-svar-rad, .brak-fragerad') && /brak-(hel|t|n)\\b/.test(i.className)) return; if(i.dataset.brakdel === undefined && /brak-cell|brak-kladd|brak-bada-dec|forlang-tal|forlang-dec/.test(i.className)){ b.ejTackta++; return; } if(i.hidden || i.closest('[hidden]')) return; fyll(i, b); });
+    /* LEDET I "SKRIV SOM BRÅK" (k2 d2, krävt på nivå 2 c–f, 2026-11-10): ledets rutor bär sitt facit i
+       data-mellan (175 och 100). Förr räknades de som ej täckta, och då stängdes "allt fyllt men X av Y"
+       av för hela bladet. HELTAL OCH BRÅK (k2 d2 nivå 1): svaret i tre rutor ur radens data-varde. */
+    root.querySelectorAll('.brak-friv').forEach(function(l){ ['t', 'n'].forEach(function(k){ var c = l.querySelector('.friv-' + k); if(c && c.dataset.mellan !== undefined){ c.value = c.dataset.mellan; ev(c, 'input'); } }); });
+    root.querySelectorAll('.bland-kedja').forEach(function(row){
+      var vd = String(row.dataset.varde || '').split('/'), T = +vd[0], N = +vd[1];
+      if(!N){ b.ejTackta++; return; }
+      var h = Math.floor(T / N), fac = { hel: h, t: T - h * N, n: N };
+      ['hel', 't', 'n'].forEach(function(k){ var c = row.querySelector('.bland-svar .brak-' + k); if(c){ c.value = String(fac[k]); ev(c, 'input'); } });
+    });
+    ins.forEach(function(i){ if(i.closest('.bland-kedja') || /\\bfriv-(t|n)\\b/.test(i.className)) return; if(i.closest('.brak-svar-rad, .brak-fragerad') && /brak-(hel|t|n)\\b/.test(i.className)) return; if(i.dataset.brakdel === undefined && /brak-cell|brak-kladd|brak-bada-dec|forlang-tal|forlang-dec/.test(i.className)){ b.ejTackta++; return; } if(i.hidden || i.closest('[hidden]')) return; fyll(i, b); });
     // val-rad: klicka knappen vars data-val = radens data-ratt
     root.querySelectorAll('.val-rad').forEach(function(rad){
       var r = rad.dataset.ratt, bt = Array.from(rad.querySelectorAll('.val-knapp')).filter(function(k){ return k.dataset.val === r; })[0];
@@ -318,12 +330,16 @@ const PROBE7 = `(function(){
     var sh = vard.querySelector('.ovn-sheet'), h = sh && sh.querySelector('h2');
     var namn = (h ? h.textContent.trim() : 'blad ' + (i + 1)).slice(0, 28);
     if(!nabar || !sh){ ut.blad.push({ blad: namn, onabar: true }); return; }
+    /* NYTT BLAD (2026-11-10): varje steg m\u00e4ts ocks\u00e5 efter "Nytt blad" (k = 3) \u2014 beh\u00e5llaren best\u00e5r, bladet
+       byggs om i den. */
+    function medNytt(nm){ nyttVarv(vard, function(k){ mat(nm.slice(0, 22) + ' nytt ' + k, vard); }); }
     var steg = nivaKnappar(vard).length;
-    if(steg < 2){ mat(namn, vard); return; }
+    if(steg < 2){ mat(namn, vard); medNytt(namn); return; }
     for(var n = 0; n < steg; n++){
       var nb = nivaKnappar(vard)[n]; if(!nb || nb.disabled) continue;
       nb.click();
       mat(namn.slice(0, 24) + ' niv\u00e5 ' + (n + 1), vard);   // korta NAMNET, inte stegnumret
+      medNytt(namn.slice(0, 16) + ' niv\u00e5 ' + (n + 1));
     }
   });
   // Plugg till prov (k1/d10, k3/d7): dokumenten renderas först vid klick → öppna varje grupp + dokument och mät bladet som skapas

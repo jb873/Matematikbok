@@ -37,6 +37,7 @@ const Sidor = require('./sidor');
 const MP = require('./matpunkt').skapa('keypad-grind.js');
 const LAS_UPP = require('./niva-las-upp').snutt;        // nivåstegen upplåsta innan mätning
 const STEG = require('./niva-las-upp').stegSnutt;       // och stegade: nivå 2 och 3 mäts
+const NYTT = require('./niva-las-upp').nyttSnutt;       // och varje steg också efter "Nytt blad" (k = 3)
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.blad())) process.exit(0);
 const BARA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sida'));
@@ -188,6 +189,7 @@ const PROBE = `(function(){
      Förr mättes bara flikens aktiva steg — nivå 2 och 3 hade aldrig fått sin keypad prövad. */
   ${LAS_UPP}
   ${STEG}
+  ${NYTT}
   function synligMount(){
     return Array.prototype.filter.call(document.querySelectorAll('.blad-mount'), function(e){ return !e.hidden && e.offsetParent; })[0]
         || Array.prototype.filter.call(document.querySelectorAll('.ovn-wrap'), function(e){ return !!e.offsetParent && e.querySelector('.niva-rad'); })[0]
@@ -197,8 +199,14 @@ const PROBE = `(function(){
   (nav.length ? nav : [null]).forEach(function(b){
     if(b){ if(b.disabled) return; b.click(); }
     var namn = b ? b.textContent.replace(/\\s+/g, ' ').trim().slice(0, 28) : '(enda)';
+    /* NYTT BLAD (2026-11-10): varje steg mäts också efter "Nytt blad" — det första bladet är grundbladet,
+       och ett fel som bara finns i Nytt blad-vägen gick igenom. */
     mat(namn);
-    nivaVarv(synligMount(), function(niva){ mat(namn.slice(0, 22) + ' niv\\u00e5 ' + niva); });
+    nyttVarv(synligMount(), function(i){ mat(namn.slice(0, 20) + ' nytt ' + i); });
+    nivaVarv(synligMount(), function(niva){
+      mat(namn.slice(0, 22) + ' niv\\u00e5 ' + niva);
+      nyttVarv(synligMount(), function(i){ mat(namn.slice(0, 16) + ' niv\\u00e5 ' + niva + ' nytt ' + i); });
+    });
   });
   return ut;
 })()`;
