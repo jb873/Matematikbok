@@ -1496,7 +1496,7 @@ function bladHTML(blad){
   html += '<div class="ovn-kontroll-rad">'
     + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
     + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'
-    + (blad.kanGenerera ? '<button type="button" class="ovn-aterstall" data-action="nytt-blad">↻ Nytt blad med andra tal</button>' : '')
+    + (kanNyttBlad(blad) ? '<button type="button" class="ovn-aterstall" data-action="nytt-blad">↻ Nytt blad med andra tal</button>' : '')
   + '</div>';
 
   html += '<div class="ovn-sammanf" data-sammanf style="display:none;"></div>';
@@ -1543,6 +1543,19 @@ function ritaNivaRad(rotEl){
     else rotEl.insertAdjacentElement('afterbegin', ny);
   }
   NivaRad.bind(rotEl, function(n){ NIVA_VAL[bid] = n; bygg_blad(rotEl, def); });
+}
+
+/* NYTT BLAD (2026-11-10, åk8 k2 d1): ett nytt blad byggs av BLADETS egen funktion (blad.nyttBlad, t.ex.
+   blad-ak8-alg1.js: samma blad med nästa frö) eller, som förut, av sidans globala byggSheet (sjuans k1 d5–d7).
+   SKYDDET: knappen ritas, och det automatiska bytet sker, bara när något av dem finns — åttans algebra hade
+   kanGenerera men ingen byggSheet, så knappen var död ("byggSheet is not defined") och "Nytt blad med andra
+   tal kommer …" följdes aldrig av något blad. */
+function kanNyttBlad(blad){
+  return !!(blad && blad.kanGenerera) && (typeof blad.nyttBlad === 'function' || typeof byggSheet === 'function');
+}
+function byggNyttBlad(rotEl, blad, variant){
+  if(typeof blad.nyttBlad === 'function') return blad.nyttBlad(rotEl, variant);
+  if(typeof byggSheet === 'function') return byggSheet(rotEl.id.replace('sheet-',''), variant, false);
 }
 
 function bygg_blad(rotEl, blad){
@@ -2364,7 +2377,7 @@ function bygg_blad(rotEl, blad){
     // (slarvfel räcker inte för att låsa upp samma blad – men 2+ fel betyder
     //  att hen bör få rätta och försöka igen utan att bladet byts).
     var fel = totalt - ratt;
-    if(forstaForsoket && fel <= 1 && blad.kanGenerera && blad.genId){
+    if(forstaForsoket && fel <= 1 && kanNyttBlad(blad) && blad.genId){
       // Visa en mjuk meddelandetext och byt blad efter en kort paus
       setTimeout(function(){
         var sam2 = rotEl.querySelector('[data-sammanf]');
@@ -2377,7 +2390,7 @@ function bygg_blad(rotEl, blad){
       }, 1600);
       setTimeout(function(){
         // markera att vi börjat en ny "session" på bladet, så nytt blad genereras
-        byggSheet(rotEl.id.replace('sheet-',''), 'A', false);
+        byggNyttBlad(rotEl, blad, 'A');
       }, 3200);
     }
     forstaForsoket = false;
@@ -2419,7 +2432,7 @@ function bygg_blad(rotEl, blad){
   var nyttBtn = rotEl.querySelector('[data-action="nytt-blad"]');
   if(nyttBtn){
     nyttBtn.addEventListener('click', function(){
-      byggSheet(rotEl.id.replace('sheet-',''), 'B', false);
+      byggNyttBlad(rotEl, blad, 'B');
     });
   }
 

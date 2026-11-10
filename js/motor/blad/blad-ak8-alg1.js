@@ -316,7 +316,21 @@ function talBank(nod, maxNiva){
 }
 
 // Skalet hämtar bladen som DATA (ova: [{ blad: [...] }]) — modulen monterar inte själv.
-function bygg(id){ var b = BLAD[id](FRON[id]); b.kanGenerera = true; b.genId = id; return b; }
+// NYTT BLAD (2026-11-10): "Nytt blad med andra tal" bygger samma blad med NÄSTA frö (fröet + 1000 · k, k =
+// antal nya blad på den ytan sedan sidan laddades). Bladet ritas om som skalet ritar det (stegvis av, samma
+// titel). Kärnan (blad-karna-b.js) anropar blad.nyttBlad — både knappen och det automatiska bytet efter
+// högst ett fel på första försöket (Joachim: som i sjuan). Omladdning ger det första bladet igen.
+var NYTT_ANTAL = {};
+function bygg(id, k){
+  var b = BLAD[id](FRON[id] + 1000 * (k || 0));
+  b.kanGenerera = true; b.genId = id;
+  b.nyttBlad = function(rotEl){
+    NYTT_ANTAL[id] = (NYTT_ANTAL[id] || 0) + 1;
+    var nb = bygg(id, NYTT_ANTAL[id]);
+    window.bygg_blad(rotEl, Object.assign({}, nb, { stegvis: false, titel: nb.titel, onResultat: function(){} }));
+  };
+  return b;
+}
 function flikar(){
   return [
     { titel: 'Tolka uttryck',       mount: 'tolka',    blad: [{ titel: 'Blad 1', id: 'tolka1', data: bygg('tolka1') }, { titel: 'Blad 2', id: 'tolka2', data: bygg('tolka2') }] },
