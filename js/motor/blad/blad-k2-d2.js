@@ -1190,22 +1190,24 @@ var RK_G2_N2 = [
   [['frac',5,8],  '−', ['dec','0,25']]
 ];
 
-// Nivå 2, Grupp 3: blandad/oäkta − blandad/oäkta (vissa svar är negativa)
+// Nivå 2, Grupp 3: blandad/oäkta − blandad/oäkta. INGA NEGATIVA SVAR (Joachim 2026-11-10: för svårt i sjuan):
+// de sex som gav negativt svar är vända så att det större talet står först (1 4/5 − 2 1/4 → 2 1/4 − 1 4/5).
+// spec-fuzz-k2-blad.js vaktar (BLAD 'k2:ejNegativ').
 var RK_G3_N2 = [
   [['mixed',3,3,4], '−', ['mixed',1,3,8]],
-  [['mixed',1,4,5], '−', ['mixed',2,1,4]],
-  [['frac',3,4],    '−', ['imp',7,5]],
+  [['mixed',2,1,4], '−', ['mixed',1,4,5]],     // vänd
+  [['imp',7,5],     '−', ['frac',3,4]],        // vänd
   [['mixed',2,1,2], '−', ['mixed',1,3,4]],
   [['imp',9,4],     '−', ['mixed',1,1,2]],
-  [['mixed',1,1,4], '−', ['mixed',2,1,2]],
+  [['mixed',2,1,2], '−', ['mixed',1,1,4]],     // vänd
   [['mixed',3,1,5], '−', ['mixed',1,3,4]],
-  [['mixed',1,1,2], '−', ['imp',9,4]],
+  [['imp',9,4],     '−', ['mixed',1,1,2]],     // vänd (samma uppgift som rad 5 — se rapporten)
   [['imp',11,4],    '−', ['mixed',1,3,8]],
   [['mixed',2,3,8], '−', ['mixed',1,1,4]],
-  [['mixed',1,2,5], '−', ['mixed',2,1,2]],
+  [['mixed',2,1,2], '−', ['mixed',1,2,5]],     // vänd
   [['imp',7,4],     '−', ['mixed',1,5,8]],
   [['mixed',3,1,2], '−', ['mixed',1,7,8]],
-  [['mixed',1,1,8], '−', ['mixed',2,1,4]]
+  [['mixed',2,1,4], '−', ['mixed',1,1,8]]      // vänd
 ];
 
 // RUBRIKERNA per nivå och grupp, som rubrik-fält (elevtext-låset ser var och en).
@@ -1232,7 +1234,7 @@ function bladRakna(niva, forsta){
     } else {
       a = [RK_G1_N2[0], RK_G1_N2[1], RK_G1_N2[2]];                    // 1/3−0,1, 0,7−2/3, 0,5+1/3
       b = [RK_G2_N2[0], RK_G2_N2[1], RK_G2_N2[2]];                    // 0,4−1/5, 0,5−1/8, 0,375+1/4
-      c = [RK_G3_N2[0], RK_G3_N2[1], RK_G3_N2[2]];                    // 3 3/4−1 3/8, 1 4/5−2 1/4, 3/4−7/5
+      c = [RK_G3_N2[0], RK_G3_N2[1], RK_G3_N2[2]];                    // 3 3/4−1 3/8, 2 1/4−1 4/5, 7/5−3/4
     }
   } else {
     a = gSample(p1, 3);

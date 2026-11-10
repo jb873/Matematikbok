@@ -286,6 +286,10 @@
       undantag: { 'niva1:grupp1': { svarsform: 'blandad', mellanled: 'frivilligt',
         kalla: 'Joachim 2026-11-10 (v3): 3 − 2/3 = 2 1/3, svarsrutor för blandad form, bara uppgifter med svar i blandad form' } }
     },
+    'k2:ejNegativ': {   // ALLA sjuans bråkblad (k2 d1–d7) — vaktas av spec-fuzz-k2-blad.js (generatorbladen d2, d3, d5, d6)
+      kalla: 'Joachim 2026-11-10: inga negativa svar i sjuans bråkblad — för svårt i sjuan. Räkna med former nivå 2 fråga 3: det större talet först (2 1/4 − 1 4/5 = 0,45). d1, d4 och d7 är statiska blad utan negativa svar (kontrollerat i den ritade sidan 2026-11-10).',
+      kravs: { minSvar: 0 }
+    },
     'k2d2:byta-form': {   // d2 "Bråk ↔ decimal" (v3, Joachim 2026-11-10) — vaktas av spec-fuzz-k2-blad.js (4)
       kalla: 'Joachim 2026-11-10 (v3): ≈ bara där decimalformen inte tar slut (9/8 = 1,125 och 11/8 = 1,375 exakta); "Skriv som bråk i enklaste form" nivå 2: a–b < 1 med frivilligt led, c–f > 1 med krävt led (1,75 = 175/100 = 7/4), svaret ett oäkta bråk, aldrig blandad form',
       kravs: { avrundaBaraOandligt: true, enklasteFormEjBlandad: true, uppstallningNiva2: { under1: 2, over1: 4 } }

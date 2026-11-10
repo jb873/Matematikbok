@@ -516,5 +516,53 @@ else {
   }
 }
 
+// ── INGA NEGATIVA SVAR i sjuans bråkblad (k2:ejNegativ, Joachim 2026-11-10) ───────────────────────
+// Generatorbladen d2, d3, d5 och d6 laddas i var sin sandlåda; varje GRUND_-byggare en gång och varje GEN_-
+// byggare (Nytt blad) 300 gånger. Varje facitfält i raderna läses: tal < 0, en text som börjar med minus, ett
+// bråk {hel, t, n} med negativt värde. d1, d4 och d7 är statiska blad (inga generatorer) — se kalla.
+//   --sabba neg   lägger 1 1/4 − 2 1/2 (= −1 1/4) i d2:s "Blandad form och oäkta bråk" → ska fälla.
+{
+  const EN = SPEC.BLAD['k2:ejNegativ'];
+  if(!EN){ fel('spec-villkor-k2.js saknar BLAD[k2:ejNegativ]'); }
+  else {
+    console.log('\nSPEC-FUZZ k2-BLAD — inga negativa svar i sjuans bråkblad (minSvar ' + EN.kravs.minSvar + ')\n');
+    const SVARF = /^(svar|varde|decSvar|brakSvar|facitSvar|svarText|facit|dec)$/i;
+    const negV = function(v){
+      if(v == null) return false;
+      if(typeof v === 'number') return v < EN.kravs.minSvar;
+      if(typeof v === 'string') return /^\s*[−\-–]\s*\d/.test(v);
+      if(typeof v === 'object' && typeof v.t === 'number' && typeof v.n === 'number') return ((v.hel || 0) * v.n + v.t) / v.n < EN.kravs.minSvar;
+      return false;
+    };
+    const tomtE = { classList: { toggle(){}, add(){}, remove(){}, contains(){ return false; } }, style: {}, dataset: {}, appendChild(){}, addEventListener(){}, querySelector(){ return null; }, querySelectorAll(){ return []; } };
+    ['d2', 'd3', 'd5', 'd6'].forEach(function(d){
+      const SN = { console: { log(){}, info(){}, warn(){}, error(){} }, Math: Math, location: { search: '' }, localStorage: { getItem(){ return null; }, setItem(){} },
+        document: { getElementById(){ return null; }, querySelector(){ return null; }, querySelectorAll(){ return []; }, createElement(){ return tomtE; }, body: tomtE, addEventListener(){} }, setTimeout(){} };
+      SN.window = SN; vm.createContext(SN);
+      vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/motor/blad/blad-k2-' + d + '.js'), 'utf8'), SN, { filename: 'blad-k2-' + d + '.js' });
+      if(d === 'd2' && SABBA('neg')){ vm.runInContext("RK_G3_N2.push([['mixed',1,1,4], '−', ['mixed',2,1,2]])", SN); console.log('  [SABBA neg: 1 1/4 − 2 1/2 i d2 "Blandad form och oäkta bråk"]'); }
+      const byggare = Object.keys(SN).filter(function(n){ return /^(GRUND|GEN)_/.test(n) && typeof SN[n] === 'function'; });
+      const fore = brott; let rader = 0;
+      byggare.forEach(function(namn){
+        for(let i = 0, n = /^GRUND_/.test(namn) ? 1 : 300; i < n; i++){
+          const b = SN[namn]();
+          (b.grupper || []).forEach(function(g){ (g.rader || []).forEach(function(r){
+            rader++;
+            (function walk(o, dj){
+              if(!o || typeof o !== 'object' || dj > 4) return;
+              Object.keys(o).forEach(function(k){
+                const v = o[k];
+                if(SVARF.test(k) && negV(v)) fel(d + ' ' + namn + ' · ' + String(g.rubrik || '').slice(0, 40) + ': negativt svar ' + k + '=' + (typeof v === 'object' ? JSON.stringify(v) : v));
+                else if(v && typeof v === 'object') walk(v, dj + 1);
+              });
+            })(r, 0);
+          }); });
+        }
+      });
+      console.log('  ' + (brott === fore ? '✓' : '✗') + ' blad-k2-' + d + ': ' + byggare.length + ' byggare, ' + rader + ' rader');
+    });
+  }
+}
+
 console.log('\n' +(brott ? '✗ SPEC-FUZZ k2-BLAD RÖD (' + brott + ')' : '✓ SPEC-FUZZ k2-BLAD GRÖN'));
 process.exit(brott ? 1 : 0);
