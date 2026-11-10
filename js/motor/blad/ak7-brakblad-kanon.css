@@ -152,7 +152,7 @@
    med klassen och knappen inuti, och diven fick då en ram runt knappen. Egenskaperna åttans ark sätter
    återställs här till sjuans; knappen inuti är orörd. Utan åttans ark ändrar regeln ingenting. */
 div.ovn-skriv-ut{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;border-radius:0;padding:0;cursor:auto;}
-/* ── Formkedjan (k2 d2 "Räkna med former", nivå 2): åttans uttrycksceller i sjuans typografi ──
+/* ── Formkedjan (k2 d2 "Räkna med former", nivå 1 och 2): åttans uttrycksceller i sjuans typografi ──
    Cellerna kommer ur AK8_UI, men sjuans ark skiljer sig på två punkter. --serif är Cormorant här (Source Serif
    på åttans sidor), och * { box-sizing:border-box } gör att grow(), som räknar med innehållets bredd, gav
    bråkrutan 19 px innehåll för "10" — nämnaren klipptes (mätt 2026-10-10). Typsnittet följer sjuans egna
@@ -163,3 +163,11 @@ div.ovn-skriv-ut{font-family:inherit;font-size:inherit;color:inherit;background:
 .form-kedja .ovn-fasit .ovn-text{font-size:inherit;}
 .form-kedja .form-facit{display:inline-flex;align-items:center;white-space:nowrap;vertical-align:middle;}
 .form-kedja .ovn-fasit .ovn-brak-strecket{min-width:18px;}
+/* ── Heltal och bråk (k2 d2 "Räkna med former" nivå 1, fråga 1 — 2026-11-10): frivilliga led i åttans
+   uttrycksceller, svaret i sjuans rutor för blandad form. Samma typografi och facit som formkedjan. */
+.bland-kedja .ak8-in{font-family:'Source Serif 4',Georgia,serif;font-feature-settings:'tnum';box-sizing:content-box;}
+.bland-kedja .ovn-fasit .ovn-brak-taljare,.bland-kedja .ovn-fasit .ovn-brak-namnare{font-size:15px;padding:1px 4px 0;}
+.bland-kedja .ovn-fasit .ovn-text{font-size:inherit;}
+.bland-kedja .form-facit{display:inline-flex;align-items:center;white-space:nowrap;vertical-align:middle;}
+.bland-kedja .ovn-fasit .ovn-brak-strecket{min-width:18px;}
+.bland-kedja .bland-svar{display:inline-flex;align-items:center;}

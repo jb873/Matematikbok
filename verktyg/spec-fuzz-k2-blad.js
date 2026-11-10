@@ -66,27 +66,57 @@ console.log('SPEC-FUZZ k2-BLAD — d2 "Räkna med former": bråkvägens minsta g
 
 // (1) HELA POOLEN
 const POOLER = { RK_G1_N1: 'nivå 1 · 1. Heltal och bråk', RK_G2_N1: 'nivå 1 · 2. Decimaltal och bråk', RK_G3_N1: 'nivå 1 · 3. Blandad form och oäkta bråk',
-                 RK_G1_N2: 'nivå 2 · 1. Bråk och decimaltal med tredjedelar', RK_G2_N2: 'nivå 2 · 2. Decimaltal och bråk (åtton- och femtedelar)', RK_G3_N2: 'nivå 2 · 3. Blandad form och oäkta bråk' };
+                 RK_G1_N2: 'nivå 2 · 1. Bråk och decimaltal med tredjedelar', RK_G2_N2: 'nivå 2 · 2. Decimaltal och bråk', RK_G3_N2: 'nivå 2 · 3. Blandad form och oäkta bråk' };
+// (1) körs efter --sabba-benen nedan (de ändrar poolen) — därför i en funktion.
+function poolProv(){
 Object.keys(POOLER).forEach(function(p){
   const pool = vm.runInContext(p, S);
   let storst = 0;
-  pool.forEach(function(u){ const a = frac(u[0]), b = frac(u[2]), m = lcm(a.n, b.n); storst = Math.max(storst, m); if(m > TAK) fel('POOL ' + POOLER[p] + ': "' + text(u) + '" gemensam nämnare ' + m + ' > ' + TAK); });
+  pool.forEach(function(u){ const a = frac(u[0]), b = frac(u[2]), m = lcm(a.n, b.n); storst = Math.max(storst, m); if(m > TAK) fel('POOL ' + POOLER[p] + ': "' + text(u) + '" gemensam nämnare ' + m + ' > ' + TAK);
+    if(p === 'RK_G1_N1'){   // Heltal och bråk: svaret i blandad form — större än 1 och inte ett heltal
+      const s = u[1] === '−' ? -1 : 1, vt = a.t * b.n + s * b.t * a.n, vn = a.n * b.n;
+      if(!(vt > vn && vt % vn !== 0)) fel('POOL ' + POOLER[p] + ': "' + text(u) + '" = ' + vt + '/' + vn + ' är inte blandad form');
+    } });
   console.log('  ' + (pool.length >= 3 ? '✓' : '✗') + ' ' + POOLER[p].padEnd(58) + ' ' + String(pool.length).padStart(3) + ' uppgifter · största gemensamma nämnare ' + storst);
   if(pool.length < 3) fel('POOL ' + POOLER[p] + ': bara ' + pool.length + ' uppgifter — bladet tar tre');
 });
+}
+
+/* v3 (Joachim 2026-11-10). "Heltal och bråk" på nivå 1 (grupp 1): svaret ALLTID i blandad form (heltal > 0,
+   bråkdel i enklaste form), ledet frivilligt (mellanled: 'frivilligt'). Övriga grupper: formkedjan, krävt led.
+   Inget ≈ i någon grupp. Benen prövas med --sabba:
+     b1    1 − 2/3 (= 1/3, inte blandad form) i "Heltal och bråk"     → (1)–(2) ska fälla
+     gen   ett avrundat ≈-led BARA efter Nytt blad (GEN_RAKNA_N1)        → (2) ska fälla, första bladet grönt
+     rund  9/8 tillbaka bland de avrundade (≈ 1,13)                      → (4) ska fälla
+     a     blandat svar (1 3/4) på c–f i "Skriv som bråk", nivå 2       → (4) ska fälla */
+const SAB2 = v => process.argv.includes('--sabba') && process.argv.includes(v);
+if(SAB2('b1')){ vm.runInContext("RK_G1_N1.push([['int',1], '−', ['frac',2,3]])", S); console.log('\n  [SABBA b1: 1 − 2/3 i "Heltal och bråk"]'); }
+if(SAB2('gen')){ vm.runInContext("GEN_RAKNA_N1 = (function(f){ return function(){ var b = f(); b.grupper[1].rader[0] = {typ:'rakna', not:'≈', rund:'0,33|0,3', svar:0.33}; return b; }; })(GEN_RAKNA_N1)", S); console.log('\n  [SABBA gen: ≈-rad bara efter Nytt blad, nivå 1]'); }
+if(SAB2('rund')){ vm.runInContext("RUND2.push([9,8, 1.13, '1,13', '1,13|1,1'])", S); console.log('\n  [SABBA rund: 9/8 ≈ 1,13 tillbaka]'); }
+if(SAB2('a')){ vm.runInContext("radDecBrak = (function(f){ return function(t,n,d,k){ var r = f(t,n,d,k); if(k === 'kravt') r.svar = kanonisk(t, n); return r; }; })(radDecBrak)", S); console.log('\n  [SABBA a: blandat svar på c–f]'); }
+poolProv();
 
 // (2)+(3) SAMPEL ur bladets generatorer
 const GEN = ['GRUND_RAKNA_N1', 'GEN_RAKNA_N1', 'GRUND_RAKNA_N2', 'GEN_RAKNA_N2'];
-let rader = 0, varv = 0;
+let rader = 0, varv = 0, blandRader = 0;
 while(rader < 30000){
   GEN.forEach(function(namn){
     const blad = vm.runInContext(namn + '()', S);
-    blad.grupper.forEach(function(g){
-      if(g.mellanled !== 'kravt') fel(namn + ' · ' + g.rubrik + ': gruppen kräver inte mellanledet i datan');
+    blad.grupper.forEach(function(g, gi){
+      const bland = /_N1$/.test(namn) && gi === 0;
+      if(bland && g.mellanled !== 'frivilligt') fel(namn + ' · ' + g.rubrik + ': ledet ska vara frivilligt i datan (mellanled: \'frivilligt\')');
+      if(!bland && g.mellanled !== 'kravt') fel(namn + ' · ' + g.rubrik + ': gruppen kräver inte mellanledet i datan');
       g.rader.forEach(function(r){
         rader++;
-        if(r.typ !== 'formKedja'){ fel(namn + ' · ' + g.rubrik + ': radtypen ' + r.typ + ' (inte formkedjan)'); return; }
-        if(r.not === '≈' || r.rund) fel(namn + ': avrundat facit kvar');
+        if(r.not === '≈' || r.rund){ fel(namn + ' · ' + g.rubrik + ': avrundat facit (≈) kvar'); return; }
+        if(bland){
+          if(r.typ !== 'blandKedja'){ fel(namn + ' · ' + g.rubrik + ': radtypen ' + r.typ + ' (inte blandad form)'); return; }
+          blandRader++;
+          const a = r.uppg.termer[0], b = r.uppg.termer[1], s = r.uppg.ops[0] === '−' ? -1 : 1;
+          const vt = a.t * b.n + s * b.t * a.n, vn = a.n * b.n, sv = r.svar;
+          if(!(sv.hel > 0 && sv.t > 0 && sv.t < sv.n && gcd(sv.t, sv.n) === 1)) fel(namn + ' · ' + g.rubrik + ': svaret ' + sv.hel + ' ' + sv.t + '/' + sv.n + ' är inte blandad form');
+          else if(Math.abs((sv.hel + sv.t / sv.n) - vt / vn) > 1e-12) fel(namn + ': svaret ' + sv.hel + ' ' + sv.t + '/' + sv.n + ' ≠ uppgiftens värde ' + vt + '/' + vn);
+        } else if(r.typ !== 'formKedja'){ fel(namn + ' · ' + g.rubrik + ': radtypen ' + r.typ + ' (inte formkedjan)'); return; }
         const T = r.uppg.termer.map(function(x){ const k = gcd(x.t, x.n); return { t: x.t / k, n: x.n / k }; });
         const m = lcm(T[0].n, T[1].n);
         if(m !== r.mgn) fel(namn + ': radens mgn ' + r.mgn + ' ≠ omräknad ' + m);
@@ -96,7 +126,41 @@ while(rader < 30000){
   });
   varv++;
 }
-console.log('\n  ' + rader + ' rader ur ' + GEN.join(', ') + ' (' + varv + ' varv)');
+console.log('\n  ' + rader + ' rader ur ' + GEN.join(', ') + ' (' + varv + ' varv) · ' + blandRader + ' i "Heltal och bråk" (blandad form)');
+
+// (4) "BRÅK ↔ DECIMAL" (v3 fråga A och 9/8): ≈ bara där decimalformen inte tar slut; varje exakt rad har exakt
+// facit. "Skriv som bråk" nivå 2: a–b tal < 1 (ledet frivilligt), c–f tal > 1 (ledet krävt, svaret ett oäkta
+// bråk i enklaste form — aldrig blandad form). Nivå 1 oförändrad: tal < 1, ingen radflagga.
+const GENBT = ['GRUND_BTFORM_N1', 'GEN_BTFORM_N1', 'GRUND_BTFORM_N2', 'GEN_BTFORM_N2'];
+let raderBT = 0, varvBT = 0, kravtBT = 0; const fBT = brott;
+while(raderBT < 30000){
+  GENBT.forEach(function(namn){
+    const blad = vm.runInContext(namn + '()', S), n2 = /_N2$/.test(namn);
+    blad.grupper[0].rader.forEach(function(r){
+      raderBT++;
+      const k = gcd(r.taljare, r.namnare), slut = !andra(r.namnare / k);
+      if(r.not === '≈' && slut) fel(namn + ': ' + r.taljare + '/' + r.namnare + ' går jämnt ut men har ≈');
+      if(r.not !== '≈' && !slut) fel(namn + ': ' + r.taljare + '/' + r.namnare + ' tar inte slut men saknar ≈');
+      if(r.not !== '≈' && Math.abs(r.svar - r.taljare / r.namnare) > 1e-12) fel(namn + ': ' + r.taljare + '/' + r.namnare + ' har facit ' + r.svar);
+    });
+    const g2 = blad.grupper[1];
+    if(n2 && g2.rader.length !== 6) fel(namn + ': "Skriv som bråk" har ' + g2.rader.length + ' rader, inte 6');
+    g2.rader.forEach(function(r, i){
+      raderBT++;
+      const v = r.opnd.t / r.opnd.n, sv = r.svar, sant = sv.hel + sv.t / sv.n;
+      if(Math.abs(sant - v) > 1e-12) fel(namn + ': ' + r.opnd.dec + ' har facit ' + sv.hel + ' ' + sv.t + '/' + sv.n);
+      if(n2 && sv.hel > 0) fel(namn + ': ' + r.opnd.dec + ' har ett blandat svar (' + sv.hel + ' ' + sv.t + '/' + sv.n + ')');
+      if(!n2){ if(r.mellanled) fel(namn + ': nivå 1 har radflaggan ' + r.mellanled); if(v >= 1) fel(namn + ': nivå 1 har ' + r.opnd.dec + ' > 1'); return; }
+      const over = i >= 2;
+      if(over !== (v > 1)) fel(namn + ': rad ' + 'abcdef'[i] + ' är ' + r.opnd.dec + ' (a–b ska vara < 1, c–f > 1)');
+      if(r.mellanled !== (over ? 'kravt' : 'frivilligt')) fel(namn + ': rad ' + 'abcdef'[i] + ' (' + r.opnd.dec + ') har flaggan ' + r.mellanled);
+      if(over){ kravtBT++; if(gcd(sv.t, sv.n) !== 1) fel(namn + ': ' + r.opnd.dec + ' har svaret ' + sv.t + '/' + sv.n + ', inte förkortat');
+        if(gcd(r.frivilligtLed.t, r.frivilligtLed.n) === 1) fel(namn + ': ' + r.opnd.dec + ' har ledet ' + r.frivilligtLed.t + '/' + r.frivilligtLed.n + ' = svaret (genvägen går inte att pröva)'); }
+    });
+  });
+  varvBT++;
+}
+console.log('  ' + (brott === fBT ? '✓' : '✗') + ' Bråk ↔ decimal: ' + raderBT + ' rader ur ' + GENBT.join(', ') + ' (' + varvBT + ' varv) · ' + kravtBT + ' rader med krävt led');
 
 // ── d3 "Förlänga och förkorta" ──────────────────────────────────────────────────────────────────
 const FL = SPEC.BLAD['k2d3:forlanga'], FK = SPEC.BLAD['k2d3:forkorta'];

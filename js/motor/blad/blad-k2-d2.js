@@ -135,6 +135,87 @@ function jamforLed(inp, facit){
   return isFinite(v) && Math.abs(v - facit) < 1e-9;
 }
 
+// ============================================================
+//  RÄTTNINGEN AV DE KRÄVDA LEDEN I "SKRIV SOM BRÅK" OCH AV "HELTAL OCH BRÅK" (Joachim 2026-11-10)
+//  Rena funktioner (värden in, dom ut) — kontrollera anropar dem, och rättar-fuzzen prövar dem direkt.
+//  Svarsformen avgörs av den DELADE Likhetsrattare (ffAv + finalStatus); modulen är orörd.
+// ============================================================
+// ELEVTEXT, godkänd av Joachim 2026-11-10 (v3 FAS 1). Övriga besked är rättarens egna, redan godkända.
+var D2_BESKED = { genvagDecBrak: { hint: 'Det där är svaret. Skriv först decimaltalet som bråk.' } };
+function d2Besked(orsak){
+  return (D2_BESKED[orsak] || {}).hint || (window.Likhetsrattare ? window.Likhetsrattare.formledBesked(orsak) : '');
+}
+function d2Tom(s){ return String(s == null ? '' : s).replace(/[\s  ]/g, '') === ''; }
+// En bråkruta bär ett HELTAL: "7,9" och "7a" är inte 7 (pInt hade läst dem som 7).
+function d2Heltal(s){
+  var t = String(s == null ? '' : s).replace(/[\s  ]/g, '').replace(/[−–—]/g, '-');
+  return /^-?\d+$/.test(t) ? parseInt(t, 10) : NaN;
+}
+/* "SKRIV SOM BRÅK I ENKLASTE FORM", tal > 1 (nivå 2, c–f): 1,75 = 175/100 = 7/4.
+   Ledet KRÄVS och rättas på värdet; ett led som redan är förkortat är svaret och underkänns (genvägen).
+   Svaret är ett bråk i enklaste form, oäkta när talet är > 1 (krav 'brak'); ett oförkortat svar får
+   "Rätt värde – förkorta svaret." Led och svar är EN enhet. facit = {t, n} i enklaste form. */
+function provaDecBrakKravt(tL, nL, tS, nS, facit){
+  var ledFylld = !d2Tom(tL) || !d2Tom(nL), svarFylld = !d2Tom(tS) || !d2Tom(nS);
+  if(!ledFylld && !svarFylld) return { status: 'tom', ok: false, ledOk: false, svarOk: false, ledFylld: false, svarFylld: false, orsak: null, besked: '' };
+  var R = window.Likhetsrattare, v = facit.t / facit.n;
+  var lt = d2Heltal(tL), ln = d2Heltal(nL);
+  var ledVarde = ledFylld && isFinite(lt) && isFinite(ln) && ln !== 0 && Math.abs(lt / ln - v) < 1e-9;
+  var ledOk = ledVarde && gcd(lt, ln) > 1;
+  var st = svarFylld ? R.finalStatus(R.ffAv(0, d2Heltal(tS), d2Heltal(nS)), { k: 'br', t: facit.t, n: facit.n }, 'brak') : { status: 'fel' };
+  var svarOk = st.status === 'ratt';
+  var orsak = (ledVarde && !ledOk) ? 'genvagDecBrak' : (st.status === 'form' ? st.orsak : null);
+  return { status: (ledOk && svarOk) ? 'ratt' : 'fel', ok: ledOk && svarOk, ledOk: ledOk, svarOk: svarOk,
+           ledFylld: ledFylld, svarFylld: svarFylld, orsak: orsak, besked: orsak ? d2Besked(orsak) : '' };
+}
+/* "HELTAL OCH BRÅK" (Räkna med former nivå 1, fråga 1): 3 − 2/3 = 2 1/3. Svaret är exakt i BLANDAD FORM
+   (heltalsruta + bråk). Rätt värde i annan form underkänns med rättarens besked: 4,9 eller 49/10 →
+   "Rätt värde – skriv svaret i blandad form.", 4 18/20 → "Rätt värde – förkorta svaret.".
+   Leden är frivilliga: ett ifyllt led rättas på värdet, och ett led som redan är svaret underkänns
+   ("Det där är svaret. Skriv det bara i sista rutan."). ledEls = de synliga ledens .ak8-expr i ordning. */
+function provaBlandKedja(ledEls, helS, tS, nS, varde){
+  var R = window.Likhetsrattare, v = varde.t / varde.n, fin = { k: 'br', t: varde.t, n: varde.n };
+  var cellStatus = ledEls.map(function(){ return null; });
+  var fyllda = ledEls.filter(function(e){ return [].some.call(e.querySelectorAll('input'), function(i){ return !d2Tom(i.value); }); });
+  var svarFylld = !d2Tom(helS) || !d2Tom(tS) || !d2Tom(nS);
+  if(!fyllda.length && !svarFylld) return { status: 'tom', ok: false, svarOk: false, mellanOk: true, cellStatus: cellStatus, orsak: null, besked: '' };
+  var mellan = { ok: true, orsak: null };
+  fyllda.forEach(function(c){
+    var ok = Math.abs(R.mixedEval(c) - v) < 1e-9, o = ok ? null : 'fel';
+    if(ok && R.finalStatus(R.finalForm(c), fin, 'blandad').status === 'ratt'){ ok = false; o = 'genvagLed'; }
+    cellStatus[ledEls.indexOf(c)] = ok ? 'ok' : 'fel';
+    if(!ok && mellan.ok) mellan = { ok: false, orsak: o };
+  });
+  var st;
+  if(!svarFylld) st = { status: 'fel' };
+  else if(d2Tom(tS) && d2Tom(nS)){                       // bara heltalsrutan: 4,9 är rätt värde i fel form
+    var x = AK8_UI.pNum(helS);
+    st = (isFinite(x) && Math.abs(x - v) < 1e-9) ? { status: 'form', orsak: 'blandad' } : { status: 'fel' };
+  } else {
+    var h = d2Tom(helS) ? 0 : d2Heltal(helS);
+    st = isFinite(h) ? R.finalStatus(R.ffAv(h, d2Heltal(tS), d2Heltal(nS)), fin, 'blandad') : { status: 'fel' };
+  }
+  var svarOk = st.status === 'ratt', ok = svarOk && mellan.ok;
+  var orsak = (!mellan.ok && mellan.orsak !== 'fel') ? mellan.orsak : (st.status === 'form' ? st.orsak : null);
+  return { status: ok ? 'ratt' : 'fel', ok: ok, svarOk: svarOk, mellanOk: mellan.ok, cellStatus: cellStatus,
+           orsak: orsak, besked: orsak ? d2Besked(orsak) : '' };
+}
+// "+ led"/"− led" i Heltal och bråk: knapparna följer läget (inget dolt led kvar → "+ led" göms;
+// inget synligt led → "− led" göms). Ett gömt led ritas om tomt (byggda bråk bort), som i åttans kedja.
+function blandKnappar(row){
+  var alla = row.querySelectorAll('.ak8-ledwrap').length, extra = row.querySelectorAll('.ak8-ledwrap.ak8-extra').length;
+  var mer = row.querySelector('[data-bmer]'), mindre = row.querySelector('[data-bmindre]');
+  if(mer) mer.hidden = extra === 0;
+  if(mindre) mindre.hidden = (alla - extra) === 0;
+}
+function blandLedGom(row, w){
+  var roll = w.querySelector('[data-r]').getAttribute('data-r'), tmp = document.createElement('span');
+  tmp.innerHTML = AK8_UI.ledWrap(roll, 'ak8-extra');
+  w.parentNode.replaceChild(tmp.firstChild, w);
+  blandKnappar(row);
+}
+if(typeof window !== 'undefined') window.D2_RATT = { provaDecBrakKravt: provaDecBrakKravt, provaBlandKedja: provaBlandKedja, d2Besked: d2Besked };
+
 
 // ============================================================
 //  RENDERING AV BLAD
@@ -204,12 +285,17 @@ function bladHTML(blad){
           html += svarBrakHTML(rad.svar);
           html += '</div>';
         } else {
-          html += '<div class="ovn-brak-rad brak-svar-rad" data-rad="' + radNummer + '">';
+          // RADENS EGEN FLAGGA (Joachim 2026-11-10): i "Skriv som bråk i enklaste form" på nivå 2 krävs ledet på
+          // c–f (talet > 1) men är frivilligt på a–b. data-mellanled på raden går före gruppens (mellanled-grind).
+          html += '<div class="ovn-brak-rad brak-svar-rad" data-rad="' + radNummer + '"'
+            + (rad.mellanled ? ' data-mellanled="' + rad.mellanled + '"' : '')
+            + (rad.mellanled === 'kravt' && rad.frivilligtLed ? ' data-facit-led="' + rad.frivilligtLed.t + '/' + rad.frivilligtLed.n + '"' : '') + '>';
           html += '<span class="ovn-label">' + bokstav + ')</span>';
           html += rad.vanster;
           html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
           if(rad.frivilligtLed){
-            // frivilligt led (35/100): rättas på värdet om det fylls i, annars inte alls (steg 2b i kontrollera)
+            // Ledet (35/100). Frivilligt: rättas på värdet om det fylls i, annars inte alls (steg 2b i kontrollera).
+            // Krävt (rad.mellanled 'kravt'): rättas ihop med svaret som EN enhet (steg 2 i kontrollera).
             var fl = rad.frivilligtLed;
             html += '<span class="ovn-brak brak-svar-frak brak-friv" data-varde="' + (fl.t / fl.n) + '">'
               + '<input class="ovn-in brak-cell friv-t" data-mellan="' + fl.t + '" inputmode="numeric" autocomplete="off" aria-label="mellanledets täljare">'
@@ -226,23 +312,29 @@ function bladHTML(blad){
         return;
       }
 
+      if(rad.typ === 'blandKedja'){
+        // HELTAL OCH BRÅK (Räkna med former nivå 1, fråga 1 — Joachim 2026-11-10): uppgift = svar i blandad
+        // form (heltalsruta + bråk). Ledet är FRIVILLIGT: två led ligger dolda bakom "+ led" (åttans
+        // uttrycksceller, samma som formkedjan) och rättas på värdet om de fylls i; ett led som redan är svaret
+        // underkänns. Knapparnas text är kedjans egen (AK8_UI) — attributen byts, så att den delade "+ led"-
+        // logiken (som kräver två synliga led) inte tar raden.
+        var knappar = AK8_UI.kedjaRadHTML(0, '').match(/<button[\s\S]*<\/button>/)[0]
+          .replace('data-mer', 'data-bmer').replace('data-mindre', 'data-bmindre');
+        html += '<div class="ovn-brak-rad ak8-rad ak8-rad-kedja ak8-lana bland-kedja" data-rad="' + radNummer + '" data-logg="' + rad.logg + '"'
+          + ' data-mellanled="frivilligt" data-varde="' + rad.varde.t + '/' + rad.varde.n + '">';
+        html += '<span class="ovn-label">' + bokstav + ')</span><span class="ak8-q">' + rad.vansterHTML + '</span>';
+        html += AK8_UI.ledWrap('L0', 'ak8-extra') + AK8_UI.ledWrap('L1', 'ak8-extra');
+        html += '<span class="bland-svar"><span class="ovn-text ak8-eq">=</span>' + svarBrakHTML(rad.svar) + '</span>';
+        html += knappar + '</div>';
+        return;
+      }
+
       if(rad.typ === 'brakTillDec'){
         html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
         html += '<span class="ovn-label">' + bokstav + ')</span>';
         html += fracSpan(rad.taljare, rad.namnare);
         var tecken = (rad.not === '≈') ? '≈' : '=';
         html += '<span class="ovn-text" style="margin:0 6px;font-size:20px;">' + tecken + '</span>';
-        html += '<input class="ovn-in" data-svar="' + rad.svar + '"' + (rad.rund ? ' data-rund="' + rad.rund + '"' : '') + ' inputmode="decimal" autocomplete="off">';
-        html += '</div>';
-        return;
-      }
-
-      if(rad.typ === 'rakna'){
-        html += '<div class="ovn-brak-rad" data-rad="' + radNummer + '">';
-        html += '<span class="ovn-label">' + bokstav + ')</span>';
-        html += rad.vansterHTML;
-        var teckenR = (rad.not === '≈') ? '≈' : '=';
-        html += '<span class="ovn-text" style="margin:0 6px;font-size:20px;">' + teckenR + '</span>';
         html += '<input class="ovn-in" data-svar="' + rad.svar + '"' + (rad.rund ? ' data-rund="' + rad.rund + '"' : '') + ' inputmode="decimal" autocomplete="off">';
         html += '</div>';
         return;
@@ -362,7 +454,11 @@ function bygg_blad(rotEl, blad){
       // Rutan följer talet: måttet är formen (34 px bråkcell, 26 px stegruta), inte ett tak.
       if(window.AK8_UI && AK8_UI.vaxMedGolv) AK8_UI.vaxMedGolv(inp);
       inp.classList.remove('correct','wrong');
-      if(inp.classList.contains('brak-cell')){
+      var bk = inp.closest('.bland-kedja');
+      if(bk){   // Heltal och bråk: hela raden är en enhet — markering, facit och rutornas färg bort
+        AK8_UI.rensaRad(bk);
+        bk.querySelectorAll('.brak-cell').forEach(function(c){ c.classList.remove('correct','wrong'); });
+      } else if(inp.classList.contains('brak-cell')){
         var rad = inp.closest('.brak-svar-rad, .brak-fragerad, .blandad-rad, .brak-bada-rad');
         if(rad) rad.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
         if(rad) rad.querySelectorAll('.brak-cell, .brak-bada-dec').forEach(function(c){ c.classList.remove('correct','wrong'); });
@@ -381,8 +477,28 @@ function bygg_blad(rotEl, blad){
   // Knappsats – delad AK8_UI-bindning (fokus-följning, kontext-gråning, ⌫, Enter→nästa ruta).
   // Formkedjans celler bygger staplade bråk med bråkknappen → åttans fulla bindning (bindSheet: bråk-
   // och potensbyggare, ⌫ ur ett byggt bråk, räknesätt ur bråkfältet, auto-mellanslag). Övriga blad som förr.
-  if(window.AK8_UI && AK8_UI.bindSheet && rotEl.querySelector('.form-kedja')) AK8_UI.bindSheet(rotEl, {focus: false});
+  if(window.AK8_UI && AK8_UI.bindSheet && rotEl.querySelector('.form-kedja, .bland-kedja')) AK8_UI.bindSheet(rotEl, {focus: false});
   else if(window.AK8_UI && AK8_UI.bindKeypad) AK8_UI.bindKeypad(rotEl);
+
+  // Heltal och bråk: "+ led" visar nästa dolda led, "− led" gömmer och tömmer det senast tillagda.
+  // Lyssnarna sitter på radens egna element (nya vid varje ritning) — de staplas inte vid Nytt blad.
+  rotEl.querySelectorAll('.bland-kedja').forEach(function(row){
+    var mer = row.querySelector('[data-bmer]'), mindre = row.querySelector('[data-bmindre]');
+    mer.addEventListener('click', function(){
+      var d = row.querySelector('.ak8-ledwrap.ak8-extra'); if(!d) return;
+      d.classList.remove('ak8-extra'); var i0 = d.querySelector('input'); if(i0){ AK8_UI.grow(i0); i0.focus(); }
+      AK8_UI.rensaRad(row); blandKnappar(row);
+    });
+    mindre.addEventListener('click', function(){
+      var syn = row.querySelectorAll('.ak8-ledwrap:not(.ak8-extra)'); if(!syn.length) return;
+      blandLedGom(row, syn[syn.length - 1]); AK8_UI.rensaRad(row);
+      // fokus till det senaste synliga ledet, annars svarets första ruta — keypaden ska ha en levande ruta
+      var kvar = row.querySelectorAll('.ak8-ledwrap:not(.ak8-extra) .ak8-in');
+      var f = kvar.length ? kvar[kvar.length - 1] : row.querySelector('.bland-svar input'); if(f) f.focus();
+    });
+    row.addEventListener('input', function(){ row.querySelectorAll('.bland-svar .brak-cell').forEach(function(c){ c.classList.remove('correct','wrong'); }); });
+    blandKnappar(row);
+  });
 
   function marker(ok){
     var m = document.createElement('span');
@@ -431,6 +547,27 @@ function bygg_blad(rotEl, blad){
       totalt++;
       row.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(x){ x.remove(); });
       boxar.forEach(function(b){ b.classList.remove('correct','wrong','just-checked'); });
+      // KRÄVT LED (nivå 2, c–f): led och svar är EN enhet — provaDecBrakKravt dömer, beskedet säger vad.
+      if(row.dataset.mellanled === 'kravt'){
+        // Saknas ledets rutor (ska inte hända — då är raden fel byggd) rättas ledet som tomt, utan krasch.
+        var ledRutor = [row.querySelector('.friv-t'), row.querySelector('.friv-n')].filter(Boolean);
+        ledRutor.forEach(function(c){ c.classList.remove('correct','wrong','just-checked'); });
+        var lv = function(k){ var c = row.querySelector('.friv-' + k); return c ? c.value : ''; };
+        var rk = provaDecBrakKravt(lv('t'), lv('n'), tIn.value, nIn.value, { t: parseInt(row.dataset.t, 10), n: parseInt(row.dataset.n, 10) });
+        if(rk.status === 'tom') return;                    // obesvarad: räknas i nämnaren, ingen markering
+        ledRutor.forEach(function(c){ if(!d2Tom(c.value)) c.classList.add(rk.ledOk ? 'correct' : 'wrong', 'just-checked'); });
+        [tIn, nIn].forEach(function(c){ if(!d2Tom(c.value)) c.classList.add(rk.svarOk ? 'correct' : 'wrong', 'just-checked'); });
+        var mkK = marker(rk.ok), ankK = row.querySelector('.brak-svar');
+        ankK.insertAdjacentElement('afterend', mkK);
+        if(rk.ok) ratt++;
+        else {
+          var fK = document.createElement('span'); fK.className = 'ovn-fasit';
+          fK.textContent = (rk.besked ? rk.besked + ' ' : '') + 'rätt svar: ' + row.dataset.facitLed + ' = ' + row.dataset.facit;
+          mkK.insertAdjacentElement('afterend', fK);
+        }
+        setTimeout(function(){ row.querySelectorAll('.brak-cell').forEach(function(b){ b.classList.remove('just-checked'); }); }, 500);
+        return;
+      }
       // Bråksvaret är EN enhet. Är hela raden tom är den obesvarad — inte fel.
       if(boxar.every(function(b){ return String(b.value).trim() === ''; })) return;
 
@@ -469,6 +606,7 @@ function bygg_blad(rotEl, blad){
     // 2b) Frivilligt mellanled (decimaltal som bråk, Joachim 2026-10-26): ett tomt led är varken fel eller
     //     räknas i nämnaren. Ett ifyllt led rättas på VÄRDET — 35/100 och 70/200 är båda rätt för 0,35.
     rotEl.querySelectorAll('.brak-friv').forEach(function(led){
+      if(led.closest('[data-mellanled="kravt"]')) return;   // krävt led: rättat ihop med svaret i steg 2
       var t = led.querySelector('.friv-t'), n = led.querySelector('.friv-n');
       [t, n].forEach(function(c){ c.classList.remove('correct','wrong','just-checked'); });
       if(String(t.value).trim() === '' && String(n.value).trim() === '') return;
@@ -549,6 +687,33 @@ function bygg_blad(rotEl, blad){
       AK8_UI.loggaForstaForsoket(row, window.MasteryK2, row.dataset.logg, r.ok);   // första försöket per rad
     });
 
+    // 5) Heltal och bråk (Räkna med former nivå 1, fråga 1): svar i blandad form, frivilliga led.
+    //    provaBlandKedja dömer; loggning som formkedjan (första försöket per rad, k2-storen).
+    rotEl.querySelectorAll('.bland-kedja').forEach(function(row){
+      AK8_UI.rensaRad(row);
+      var celler = row.querySelectorAll('.bland-svar .brak-cell');
+      celler.forEach(function(c){ c.classList.remove('correct','wrong','just-checked'); });
+      totalt++;
+      var leds = AK8_UI.kedjaCeller(row).filter(function(e){ return !e.closest('.ak8-extra'); });
+      var h = row.querySelector('.bland-svar .brak-hel'), t = row.querySelector('.bland-svar .brak-t'), n = row.querySelector('.bland-svar .brak-n');
+      var vd = row.dataset.varde.split('/');
+      var r = provaBlandKedja(leds, h.value, t.value, n.value, { t: parseInt(vd[0], 10), n: parseInt(vd[1], 10) });
+      if(r.status === 'tom') return;                       // obesvarad: räknas i nämnaren, ingen markering
+      leds.forEach(function(c, k){
+        var st = r.cellStatus[k]; if(!st) return;
+        c.querySelectorAll('.ak8-in').forEach(function(inp){ if(!d2Tom(inp.value)) inp.classList.add(st === 'ok' ? 'ak8-ok' : 'ak8-fel'); });
+      });
+      celler.forEach(function(c){ if(!d2Tom(c.value)) c.classList.add(r.svarOk ? 'correct' : 'wrong'); });
+      AK8_UI.markera(row, r.ok);
+      if(r.ok) ratt++;
+      else {
+        var fb = document.createElement('span'); fb.className = 'ak8-fasit ovn-fasit';
+        fb.innerHTML = (r.besked ? r.besked + ' ' : '') + 'rätt: <span class="form-facit">' + rk_brakHTML(parseInt(vd[0], 10), parseInt(vd[1], 10)) + '</span>';
+        row.appendChild(fb);
+      }
+      AK8_UI.loggaForstaForsoket(row, window.MasteryK2, row.dataset.logg, r.ok);
+    });
+
     var sam = rotEl.querySelector('[data-sammanf]');
     sam.style.display = 'block';
     sam.classList.remove('ok','delvis');
@@ -558,8 +723,7 @@ function bygg_blad(rotEl, blad){
         + '<span class="ovn-sammanf-titel">Allt rätt!</span>'
         + ratt + ' av ' + totalt + ' — jättebra jobbat!';
       visaKonfetti();
-      if(blad.tabId && !blad.isTest && (blad.niva === undefined || blad.niva === 1)) markeraKlar(blad.tabId);
-      if(blad.isTest) godkannTest();
+      if(blad.tabId && (blad.niva === undefined || blad.niva === 1)) markeraKlar(blad.tabId);
     } else {
       sam.classList.add('delvis');
       sam.textContent = 'Du fick ' + ratt + ' av ' + totalt + ' rätt. Titta på de rödmarkerade rutorna och försök igen.';
@@ -601,6 +765,11 @@ function bygg_blad(rotEl, blad){
       var mer = row.querySelector('[data-mer]'), mindre = row.querySelector('[data-mindre]');
       if(mer) mer.hidden = false;
       if(mindre) mindre.hidden = true;
+    });
+    // Heltal och bråk: de tillagda leden göms och töms igen (startläget: uppgift = svar).
+    rotEl.querySelectorAll('.bland-kedja').forEach(function(row){
+      AK8_UI.rensaRad(row);
+      row.querySelectorAll('.ak8-ledwrap').forEach(function(w){ blandLedGom(row, w); });
     });
     var sam = rotEl.querySelector('[data-sammanf]'); sam.style.display = 'none'; sam.textContent = '';
     if(inputs[0]) inputs[0].focus();
@@ -648,10 +817,17 @@ function radBrakDec(t, n, val, note, rund){
 // FRIVILLIGT MELLANLED (Joachim 2026-10-26): 0,35 = 35/100 = 7/20, men 0,35 = 7/20 godtas också. Ledet är
 // decimaltalet som tiondels-, hundradels- eller tusendelsbråk; ett ifyllt led rättas på VÄRDET, ett tomt led
 // är varken fel eller räknas. Gruppen bär mellanled: 'frivilligt' i datan.
-function radDecBrak(t, n, dec){
+// NIVÅ 2 (Joachim 2026-11-10): ENKLASTE FORM ÄR ALDRIG BLANDAD FORM. Ett tal > 1 får svaret som oäkta bråk
+// (1,75 = 175/100 = 7/4), utan heltalsruta, och ledet KRÄVS: krav 'kravt' på raden. a–b (talet < 1) bär
+// 'frivilligt' på raden. Radens flagga går före gruppens. Nivå 1 (bara tal < 1) är oförändrad: krav saknas.
+function radDecBrak(t, n, dec, krav){
   var d = (String(dec).split(',')[1] || '').length, N = Math.pow(10, d), T = Math.round(parseFloat(String(dec).replace(',', '.')) * N);
-  return {typ:'brakSvar', vanster:'<span class="ovn-text ovn-num">' + dec + '</span>', svar:kanonisk(t, n), opnd:{slag:'decBrak', t:t, n:n, dec:dec},
+  var g = gcd(t, n);
+  var r = {typ:'brakSvar', vanster:'<span class="ovn-text ovn-num">' + dec + '</span>',
+    svar: krav === 'kravt' ? {hel: 0, t: t / g, n: n / g} : kanonisk(t, n), opnd:{slag:'decBrak', t:t, n:n, dec:dec},
     frivilligtLed: {t: T, n: N}};
+  if(krav) r.mellanled = krav;
+  return r;
 }
 
 // ── Talpooler per nivå ──
@@ -668,12 +844,16 @@ var TERM2_OAKTA = [ [5,4,'1,25'], [7,4,'1,75'], [6,5,'1,2'], [7,5,'1,4'], [8,5,'
 var TERM2 = TERM1.concat(TERM2_ATTON, TERM2_OAKTA);
 
 // Bråk som måste avrundas (bara bråk→decimal) – [t, n, avrundat, sträng, godkända svar]
+// BARA NÄMNARE VARS DECIMALFORM INTE TAR SLUT (tredjedelar). Ett tal som går jämnt ut skrivs exakt med =.
 var RUND1 = [ [1,3, 0.33, '0,33', '0,33|0,3'], [2,3, 0.67, '0,67', '0,67|0,7'] ];
-// Nivå 2 får även åttondels-/tredjedels-tal > 1 som avrundas i bråk→decimal-riktningen
+// Nivå 2 får även tredjedels-tal > 1 som avrundas i bråk→decimal-riktningen
 var RUND2 = RUND1.concat([
-  [9,8, 1.13, '1,13', '1,13|1,1'], [11,8, 1.38, '1,38', '1,38|1,4'],
   [10,3, 3.33, '3,33', '3,33|3,3'], [11,3, 3.67, '3,67', '3,67|3,7']
 ]);
+// 9/8 och 11/8 GÅR JÄMNT UT (Joachim 2026-11-10, v3 fråga A): förr bland de avrundade (≈ 1,13 och ≈ 1,38,
+// och det exakta 1,125 underkändes). Nu exakta med =, svaren 1,125 och 1,375. Bara bråk→decimal-riktningen:
+// talen hör inte till "Skriv som bråk", vars tal > 1 är TERM2_OAKTA.
+var BD2_EXAKT_EXTRA = [ [9,8,'1,125'], [11,8,'1,375'] ];
 
 function rundRad(p){ return radBrakDec(p[0], p[1], p[2], '≈', p[4]); }
 
@@ -684,13 +864,14 @@ function gSample(arr, k){
   return kopia.slice(0, k);
 }
 
-  + 'och bråk i <strong>enklaste form</strong>. Tecknet ≈ betyder att svaret är avrundat.';
-
 // Bygg ett blad ur poolerna för given nivå
+// "SKRIV SOM BRÅK" PÅ NIVÅ 2 HAR FAST UPPSTÄLLNING (Joachim 2026-11-10), även efter Nytt blad: a–b tal < 1
+// (TERM1 + åttondelar, ledet frivilligt), c–f tal > 1 (TERM2_OAKTA, ledet krävs, svaret oäkta bråk).
+var DB2_UNDER = TERM1.concat(TERM2_ATTON);
 function bladBTform(niva, forsta){
-  var exakt = niva === 2 ? TERM2 : TERM1;
-  var rund  = niva === 2 ? RUND2 : RUND1;
-  var bd, rd, db, titel, hint;
+  var bdPool = niva === 2 ? TERM2.concat(BD2_EXAKT_EXTRA) : TERM1;
+  var rund   = niva === 2 ? RUND2 : RUND1;
+  var bd, rd, db;
   if(forsta){
     // Representativ, fast första uppsättning per nivå
     if(niva === 1){
@@ -699,14 +880,18 @@ function bladBTform(niva, forsta){
       db = [[1,2,'0,5'],[1,4,'0,25'],[4,5,'0,8'],[3,5,'0,6'],[1,5,'0,2'],[3,10,'0,3']];
     } else {
       bd = [[5,8,'0,625'],[3,8,'0,375'],[5,4,'1,25'],[7,5,'1,4']];
-      rd = [RUND2[0], gPick([RUND2[2],RUND2[3],RUND2[4],RUND2[5]])];
-      db = [[1,8,'0,125'],[7,8,'0,875'],[6,5,'1,2'],[5,2,'2,5'],[3,4,'0,75'],[2,5,'0,4']];
+      rd = [RUND2[0], gPick([RUND2[2],RUND2[3]])];
+      db = { under: [[1,8,'0,125'],[7,8,'0,875']], over: [[7,4,'1,75'],[7,2,'3,5'],[6,5,'1,2'],[5,2,'2,5']] };
     }
   } else {
-    bd = gSample(exakt, 4);
+    bd = gSample(bdPool, 4);
     rd = gSample(rund, 2);
-    db = gSample(exakt, 6);
+    db = niva === 2 ? { under: gSample(DB2_UNDER, 2), over: gSample(TERM2_OAKTA, 4) } : gSample(TERM1, 6);
   }
+  var dbRader = niva === 2
+    ? db.under.map(function(p){ return radDecBrak(p[0], p[1], p[2], 'frivilligt'); })
+        .concat(db.over.map(function(p){ return radDecBrak(p[0], p[1], p[2], 'kravt'); }))
+    : db.map(function(p){ return radDecBrak(p[0], p[1], p[2]); });
   return {
     titel: 'Bråk ↔ decimal – nivå ' + niva,
     keypadOps: [','],
@@ -714,8 +899,7 @@ function bladBTform(niva, forsta){
       {rubrik:'Skriv bråket som decimaltal', rader:
         bd.map(function(p){ return radBrakDec(p[0], p[1], avr(p[0]/p[1], 6)); })
         .concat(rd.map(function(p){ return rundRad(p); }))},
-      {rubrik:'Skriv som bråk i enklaste form', mellanled:'frivilligt', rader:
-        db.map(function(p){ return radDecBrak(p[0], p[1], p[2]); })}
+      {rubrik:'Skriv som bråk i enklaste form', mellanled:'frivilligt', rader: dbRader}
     ]
   };
 }
@@ -728,26 +912,11 @@ function GEN_BTFORM_N2(){ return bladBTform(2, false); }
 // ============================================================
 //  DEL 2 · BLANDAD FORM  (växla mellan blandad form, bråk, decimal)
 // ============================================================
-// Talpooler: tal > 1 som ger exakt decimal. [täljare, nämnare, decimalsträng]
-var BL_N1 = [
-  [3,2,'1,5'],[5,2,'2,5'],[7,2,'3,5'],[9,2,'4,5'],
-  [5,4,'1,25'],[7,4,'1,75'],[9,4,'2,25'],[11,4,'2,75'],
-  [6,5,'1,2'],[7,5,'1,4'],[8,5,'1,6'],[9,5,'1,8'],[11,5,'2,2'],[12,5,'2,4'],
-  [11,10,'1,1'],[13,10,'1,3'],[17,10,'1,7'],[19,10,'1,9'],[21,10,'2,1'],[23,10,'2,3']
-];
-var BL_N2_EXTRA = [
-  [9,8,'1,125'],[11,8,'1,375'],[13,8,'1,625'],[15,8,'1,875'],[17,8,'2,125'],[19,8,'2,375'],
-  [26,25,'1,04'],[29,25,'1,16'],[31,25,'1,24'],[37,25,'1,48'],[43,25,'1,72'],[51,25,'2,04'],[57,25,'2,28']
-];
-var BL_N2 = BL_N1.concat(BL_N2_EXTRA);
+// (Talpoolerna BL_N1/BL_N2 och radBrakDec2 användes bara av det gamla samlingstestet — borttagna 2026-11-10.)
 
 // Bråk visas, eleven skriver blandad form (brakSvar med blandat svar)
 function radBrakBlandad(t, n){
   return {typ:'brakSvar', vanster: fracSpan(t, n), likhet:true, svar: kanonisk(t, n)};
-}
-// Bråk visas, eleven skriver decimaltal
-function radBrakDec2(t, n){
-  return {typ:'brakTillDec', taljare:t, namnare:n, svar: avr(t/n, 6), not:''};
 }
 // Bråk visas, eleven fyller i BÅDE decimal och blandad form
 function radBlandadBada(t, n){
@@ -856,29 +1025,8 @@ function rk_termHTML(term){
 function rk_uttryckHTML(L, op, R){
   return '<span class="rakna-uttryck" style="display:inline-flex;align-items:center;">' + rk_termHTML(L) + opSpan(op) + rk_termHTML(R) + '</span>';
 }
-function rk_avr(x, d){ var p = Math.pow(10, d); return Math.round(x * p) / p; }
-
-// Bygg en räkna-rad utifrån två termer och operator
-function radRakna(L, op, R){
-  var fL = rk_toFrac(L), fR = rk_toFrac(R);
-  var sign = (op === '−' || op === '-') ? -1 : 1;
-  var ct = fL.t * fR.n + sign * fR.t * fL.n;
-  var cn = fL.n * fR.n;
-  var g = ct === 0 ? cn : gcd(Math.abs(ct), cn);
-  var simN = cn / g;                                   // förenkla nämnaren
-  var exakt = rk_isFiniteDec(simN);
-  var v = ct / cn;
-  if(exakt){
-    return {typ:'rakna', vansterHTML: rk_uttryckHTML(L, op, R), svar: rk_avr(v, 6), not: '='};
-  } else {
-    var v2 = rk_avr(v, 2);
-    var v1 = rk_avr(v, 1);
-    var rund = String(v2).replace('.', ',') + '|' + String(v1).replace('.', ',');
-    return {typ:'rakna', vansterHTML: rk_uttryckHTML(L, op, R), svar: v2, rund: rund, not: '≈'};
-  }
-}
-
 // ----- FORMKEDJAN (båda nivåerna — Joachims beslut 2026-10-10, piloten + v2) -----
+// Gäller alla grupper utom "Heltal och bråk" på nivå 1, som har svar i blandad form (radBlandKedja nedan).
 // Uppgift = mellanled = svar. EN väg per uppgift, avgjord av talen: går båda talen att skriva exakt i
 // decimalform räknar eleven med decimaltal (heltalet står kvar, 3 − 0,8); annars skrivs båda om till
 // bråk med gemensam nämnare (vilken som helst; heltalet som bråk 9/3; blandad form godtas i ledet).
@@ -934,12 +1082,26 @@ function radFormKedja(L, op, R){
     facitLed: ledText, facitSvar: svarText, facitHTML: '<span class="form-facit">' + led + opSpan('=') + svar + '</span>'};
 }
 
+// ----- HELTAL OCH BRÅK (nivå 1, fråga 1 — Joachim 2026-11-10) -----
+// Svaret är ALLTID exakt i blandad form, oavsett talen (3 − 2/3 = 2 1/3, 5 − 1/10 = 4 9/10, 4 + 1/5 = 4 1/5):
+// gruppen följer inte formkedjans väg-regel. Svarsrutor för blandad form (heltal + bråk); ledet är frivilligt
+// (mellanled: 'frivilligt'). Rättas av provaBlandKedja; loggar till räknesättets nod som formkedjan.
+function radBlandKedja(L, op, R){
+  var fL = rk_toFrac(L), fR = rk_toFrac(R), minus = (op === '−' || op === '-'), opTxt = minus ? '−' : '+';
+  var ct = fL.t * fR.n + (minus ? -1 : 1) * fR.t * fL.n, cn = fL.n * fR.n, g = gcd(ct, cn);
+  var varde = {t: ct / g, n: cn / g};
+  var rL = fL.n / gcd(fL.t, fL.n), rR = fR.n / gcd(fR.t, fR.n);
+  return {typ:'blandKedja', vansterHTML: rk_uttryckHTML(L, op, R), logg: minus ? 'brak-sub:rakna' : 'brak-add:rakna',
+    mellanled: 'frivilligt', mgn: rk_lcm(rL, rR), varde: varde, svar: kanonisk(varde.t, varde.n),
+    uppg: {termer: [fL, fR], ops: [opTxt], varde: varde}, facitSvar: rk_brakText(varde.t, varde.n)};
+}
+
 // ----- TALPOOLER -----
 // Varje element: [L-term, op, R-term]
 
-// Nivå 1, Grupp 1: heltal ± äkta bråk (alla svar positiva)
+// Nivå 1, Grupp 1: heltal ± äkta bråk — VARJE svar i blandad form (heltal > 0 och en bråkdel).
+// Bort 2026-11-10: 1 − 2/3 (= 1/3, inte blandad form). spec-fuzz-k2-blad.js vaktar.
 var RK_G1_N1 = [
-  [['int',1], '−', ['frac',2,3]],
   [['int',3], '−', ['frac',4,5]],
   [['int',2], '+', ['frac',1,4]],
   [['int',1], '+', ['frac',3,10]],
@@ -993,7 +1155,7 @@ var RK_G3_N1 = [
   [['mixed',1,1,4], '+', ['dec','0,75']]
 ];
 
-// Nivå 2, Grupp 1: bråk med tredjedel ± decimal (svar med ≈)
+// Nivå 2, Grupp 1: bråk med tredjedel ± decimal — bråkvägen, exakt svar i bråkform (7/30)
 var RK_G1_N2 = [
   [['frac',1,3], '−', ['dec','0,1']],
   [['dec','0,7'], '−', ['frac',2,3]],
@@ -1046,7 +1208,16 @@ var RK_G3_N2 = [
   [['mixed',1,1,8], '−', ['mixed',2,1,4]]
 ];
 
-  + 'Skriv svaret som decimaltal med komma (t.ex. 0,75). Tecknet ≈ betyder att svaret är avrundat.';
+// RUBRIKERNA per nivå och grupp, som rubrik-fält (elevtext-låset ser var och en).
+// Godkända av Joachim 2026-11-10 (v3): svarsformen står i rubriken. Fråga 2 på nivå 2 utan parentes.
+var RK_RUBRIK = {
+  1: [ { rubrik: 'Heltal och bråk – svara i blandad form' },
+       { rubrik: 'Decimaltal och bråk – svara i decimalform' },
+       { rubrik: 'Blandad form och oäkta bråk – svara i decimalform' } ],
+  2: [ { rubrik: 'Bråk och decimaltal med tredjedelar – svara i bråkform' },
+       { rubrik: 'Decimaltal och bråk' },
+       { rubrik: 'Blandad form och oäkta bråk – svara i decimalform' } ]
+};
 
 function bladRakna(niva, forsta){
   var p1 = niva === 2 ? RK_G1_N2 : RK_G1_N1;
@@ -1055,7 +1226,7 @@ function bladRakna(niva, forsta){
   var a, b, c;
   if(forsta){
     if(niva === 1){
-      a = [RK_G1_N1[0], RK_G1_N1[1], RK_G1_N1[2]];                    // 1−2/3, 3−4/5, 2+1/4
+      a = [RK_G1_N1[13], RK_G1_N1[8], RK_G1_N1[10]];                  // 3−2/3, 5−1/10, 4+1/5 (Joachims exempel)
       b = [RK_G2_N1[0], RK_G2_N1[1], RK_G2_N1[2]];                    // 0,5+1/5, 3/4−0,3, 3/4+1,1
       c = [RK_G3_N1[0], RK_G3_N1[1], RK_G3_N1[2]];                    // 1 2/5−0,65, 8/5−1 1/4, 2 1/4−0,75
     } else {
@@ -1068,25 +1239,21 @@ function bladRakna(niva, forsta){
     b = gSample(p2, 3);
     c = gSample(p3, 3);
   }
-  // BÅDA NIVÅERNA är formkedjan (nivå 1 flyttad efter piloten, Joachim 2026-10-10): mellanledet krävs
-  // (flaggan i datan, inte i rubriken), svaret är exakt, vägen följer talen, och raderna loggar i k2-storen.
-  // Rubrikerna står som rubrik:-fält, så att elevtext-låset ser dem.
-  function grupp(g, tal){
-    g.rader = tal.map(function(t){ return radFormKedja(t[0], t[1], t[2]); });
-    g.mellanled = 'kravt'; g.loggStore = 'k2';
+  // FORMKEDJAN i alla grupper utom "Heltal och bråk" på nivå 1: mellanledet krävs (flaggan i datan, inte i
+  // rubriken), svaret är exakt, vägen följer talen. "Heltal och bråk" (Joachim 2026-11-10): svar i blandad
+  // form, ledet frivilligt (radBlandKedja). Alla rader loggar i k2-storen.
+  function grupp(nr, tal){
+    var bland = niva === 1 && nr === 0;
+    // Rubriken TILLDELAS (inte som fält med ett uttryck): elevtext-låset läser då bara RK_RUBRIK.
+    var g = { mellanled: bland ? 'frivilligt' : 'kravt', loggStore: 'k2',
+      rader: tal.map(function(t){ return bland ? radBlandKedja(t[0], t[1], t[2]) : radFormKedja(t[0], t[1], t[2]); }) };
+    g.rubrik = RK_RUBRIK[niva][nr].rubrik;
     return g;
   }
   return {
     titel: 'Räkna med former – nivå ' + niva,
     keypadOps: niva === 2 ? [',', '-'] : [','],
-    grupper: [
-      grupp({rubrik: niva === 2 ? 'Bråk och decimaltal med tredjedelar'
-                                : 'Heltal och bråk'}, a),
-      grupp({rubrik: niva === 2 ? 'Decimaltal och bråk (åtton- och femtedelar)'
-                                : 'Decimaltal och bråk'}, b),
-      grupp({rubrik: niva === 2 ? 'Blandad form och oäkta bråk'
-                                : 'Blandad form och oäkta bråk'}, c)
-    ]
+    grupper: [ grupp(0, a), grupp(1, b), grupp(2, c) ]
   };
 }
 function GRUND_RAKNA_N1(){ return bladRakna(1, true); }
@@ -1094,72 +1261,9 @@ function GEN_RAKNA_N1(){ return bladRakna(1, false); }
 function GRUND_RAKNA_N2(){ return bladRakna(2, true); }
 function GEN_RAKNA_N2(){ return bladRakna(2, false); }
 
-// ============================================================
-//  DEL 4 · TEST – VISA VAD DU KAN  (samlingstest från hela kapitlet)
-// ============================================================
-// 5 områden, 3 frågor per område (a, b, c) = 15 totalt:
-//   1. Skriv bråket som decimaltal              (TERM-pool)
-//   2. Skriv decimaltalet som bråk              (TERM-pool, ej överlapp med 1)
-//   3. Skriv oäkta bråket i blandad form        (BL-pool)
-//   4. Skriv oäkta bråket som decimaltal        (BL-pool, ej överlapp med 3)
-//   5. Räkna och svara i decimalform            (kombinerad räkna-pool)
-
-var TEST_RAKNA_N1 = RK_G1_N1.concat(RK_G2_N1, RK_G3_N1);
-var TEST_RAKNA_N2 = RK_G1_N2.concat(RK_G2_N2, RK_G3_N2);
-
-  + 'Skriv decimaltal med komma och bråk i <strong>enklaste form</strong>. '
-  + 'Tecknet ≈ betyder att svaret är avrundat.';
-
-function bladTest(niva, forsta){
-  var poolBD = niva === 2 ? TERM2 : TERM1;
-  var poolBL = niva === 2 ? BL_N2 : BL_N1;
-  var poolRK = niva === 2 ? TEST_RAKNA_N2 : TEST_RAKNA_N1;
-  var t1, t2, t3, t4, t5;
-  if(forsta){
-    if(niva === 1){
-      t1 = [[1,2,'0,5'], [3,4,'0,75'], [3,5,'0,6']];
-      t2 = [[1,4,'0,25'], [2,5,'0,4'], [7,10,'0,7']];
-      t3 = [[3,2,'1,5'], [5,4,'1,25'], [7,5,'1,4']];
-      t4 = [[5,2,'2,5'], [9,5,'1,8'], [11,10,'1,1']];
-      t5 = [RK_G1_N1[0], RK_G2_N1[0], RK_G3_N1[0]];          // 1−2/3, 0,5+1/5, 1 2/5−0,65
-    } else {
-      t1 = [[5,8,'0,625'], [3,4,'0,75'], [7,2,'3,5']];
-      t2 = [[3,8,'0,375'], [1,8,'0,125'], [6,5,'1,2']];
-      t3 = [[9,8,'1,125'], [31,25,'1,24'], [11,4,'2,75']];
-      t4 = [[13,8,'1,625'], [37,25,'1,48'], [9,4,'2,25']];
-      t5 = [RK_G1_N2[0], RK_G2_N2[0], RK_G3_N2[0]];          // 1/3−0,1, 0,4−1/5, 3 3/4−1 3/8
-    }
-  } else {
-    var bd = gSample(poolBD, 6);                              // unika över tema 1+2
-    var bl = gSample(poolBL, 6);                              // unika över tema 3+4
-    t1 = bd.slice(0, 3);
-    t2 = bd.slice(3, 6);
-    t3 = bl.slice(0, 3);
-    t4 = bl.slice(3, 6);
-    t5 = gSample(poolRK, 3);
-  }
-  return {
-    titel: 'Test – nivå ' + niva,
-    keypadOps: niva === 2 ? [',', '-'] : [','],
-    isTest: true,
-    grupper: [
-      {rubrik:'Skriv bråket som decimaltal',
-       rader: t1.map(function(p){ return radBrakDec2(p[0], p[1]); })},
-      {rubrik:'Skriv decimaltalet som bråk i enklaste form', mellanled:'frivilligt',
-       rader: t2.map(function(p){ return radDecBrak(p[0], p[1], p[2]); })},
-      {rubrik:'Skriv det oäkta bråket i blandad form',
-       rader: t3.map(function(p){ return radBrakBlandad(p[0], p[1]); })},
-      {rubrik:'Skriv det oäkta bråket som decimaltal',
-       rader: t4.map(function(p){ return radBrakDec2(p[0], p[1]); })},
-      {rubrik:'Räkna och svara i decimalform',
-       rader: t5.map(function(task){ return radRakna(task[0], task[1], task[2]); })}
-    ]
-  };
-}
-function GRUND_TEST_N1(){ return bladTest(1, true); }
-function GEN_TEST_N1(){ return bladTest(1, false); }
-function GRUND_TEST_N2(){ return bladTest(2, true); }
-function GEN_TEST_N2(){ return bladTest(2, false); }
+// DEL 4, sidans gamla samlingstest (bladTest), togs bort 2026-11-10 (v3): sidan hade ingen yta för det
+// (#sheet-test saknas — testfliken leder till kapitlets provbyggare), och det var den sista användaren av
+// den avrundande räkna-raden (≈). Verifierat att inget annat i repot använde testet eller dess talpooler.
 
 // ============================================================
 //  GRINDAR / LÅS  (sparas i localStorage)
@@ -1175,7 +1279,6 @@ function devLas(){
 }
 
 function markeraKlar(tabId){ lsSet('brak2_klar_' + tabId, '1'); uppdateraLas(); }
-function godkannTest(){ lsSet('brak2_test_godkand', '1'); uppdateraLas(); }
 
 function setLas(tabId, locked){
   var btn = document.querySelector('.tab-btn[data-tab="' + tabId + '"]');
@@ -1199,9 +1302,7 @@ var GENERATORER = {
   blandad: { nivaer: { 1: { grund: GRUND_BLANDAD_N1, gen: GEN_BLANDAD_N1 },
                        2: { grund: GRUND_BLANDAD_N2, gen: GEN_BLANDAD_N2 } } },
   rakna:  { nivaer: { 1: { grund: GRUND_RAKNA_N1,   gen: GEN_RAKNA_N1 },
-                      2: { grund: GRUND_RAKNA_N2,   gen: GEN_RAKNA_N2 } } },
-  test:   { nivaer: { 1: { grund: GRUND_TEST_N1,    gen: GEN_TEST_N1 },
-                      2: { grund: GRUND_TEST_N2,    gen: GEN_TEST_N2 } } }
+                      2: { grund: GRUND_RAKNA_N2,   gen: GEN_RAKNA_N2 } } }
 };
 function harBesokt(id){ return lsGet('brak2_besokt_' + id) === '1'; }
 function markeraBesokt(id){ lsSet('brak2_besokt_' + id, '1'); }
@@ -1251,7 +1352,6 @@ uppdateraLas();
 byggSheet('btform', true);
 byggSheet('blandad', true);
 byggSheet('rakna', true);
-byggSheet('test', true);
 
 // Visa en liten badge i hörnet om dev-läget är aktivt
 if(devLas()){

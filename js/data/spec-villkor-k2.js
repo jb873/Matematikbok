@@ -281,7 +281,14 @@
     'k2d2:rakna-former': {   // d2 "Räkna med former", nivå 1 och 2 (formkedjan)
       kalla: 'Joachim 2026-10-10 (arbetsorder v2): största gemensamma nämnare 30 — femtondelar ryms, fyrtiondelar och större tas bort, även i decimalvägens uppgifter',
       tak: { maxGemNamnare: 30 },
-      kravs: { exakt: true, mellanled: 'kravt' }
+      kravs: { exakt: true, mellanled: 'kravt' },
+      // v3 (Joachim 2026-11-10): "Heltal och bråk" på nivå 1 har svaret i blandad form och frivilligt led
+      undantag: { 'niva1:grupp1': { svarsform: 'blandad', mellanled: 'frivilligt',
+        kalla: 'Joachim 2026-11-10 (v3): 3 − 2/3 = 2 1/3, svarsrutor för blandad form, bara uppgifter med svar i blandad form' } }
+    },
+    'k2d2:byta-form': {   // d2 "Bråk ↔ decimal" (v3, Joachim 2026-11-10) — vaktas av spec-fuzz-k2-blad.js (4)
+      kalla: 'Joachim 2026-11-10 (v3): ≈ bara där decimalformen inte tar slut (9/8 = 1,125 och 11/8 = 1,375 exakta); "Skriv som bråk i enklaste form" nivå 2: a–b < 1 med frivilligt led, c–f > 1 med krävt led (1,75 = 175/100 = 7/4), svaret ett oäkta bråk, aldrig blandad form',
+      kravs: { avrundaBaraOandligt: true, enklasteFormEjBlandad: true, uppstallningNiva2: { under1: 2, over1: 4 } }
     },
     /* d3 "Förlänga och förkorta". Gäller varje uppgift som förlänger eller förkortar: bladets mellanled-
        rader, luckan "Vilket tal saknas?" och paren till minsta gemensamma nämnare.
