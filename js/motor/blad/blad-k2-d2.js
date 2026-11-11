@@ -1201,7 +1201,7 @@ var RK_G3_N2 = [
   [['imp',9,4],     '−', ['mixed',1,1,2]],
   [['mixed',2,1,2], '−', ['mixed',1,1,4]],     // vänd
   [['mixed',3,1,5], '−', ['mixed',1,3,4]],
-  [['imp',9,4],     '−', ['mixed',1,1,2]],     // vänd (samma uppgift som rad 5 — se rapporten)
+  // (1 1/2 − 9/4 vänd blev 9/4 − 1 1/2, som redan står ovan — borttagen, Joachim 2026-11-11: 13 uppgifter)
   [['imp',11,4],    '−', ['mixed',1,3,8]],
   [['mixed',2,3,8], '−', ['mixed',1,1,4]],
   [['mixed',2,1,2], '−', ['mixed',1,2,5]],     // vänd

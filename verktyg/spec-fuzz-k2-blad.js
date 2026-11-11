@@ -564,5 +564,38 @@ else {
   }
 }
 
+// ── INGA DUBBLETTER I EN POOL (k2:ingaDubbletter, Joachim 2026-11-11) ───────────────────────────────
+// Varje talpool i generatorbladen d2, d3, d5 och d6: en global var med VERSALNAMN vars poster är listor eller
+// objekt. Två poster som är exakt samma uppgift (samma tal i samma ordning) fäller. Poolerna läses ur
+// källan, så en ny pool kommer med av sig själv.
+//   --sabba dubb   lägger 9/4 − 1 1/2 en gång till i d2:s "Blandad form och oäkta bråk" → ska fälla.
+{
+  const ID = SPEC.BLAD['k2:ingaDubbletter'];
+  if(!ID){ fel('spec-villkor-k2.js saknar BLAD[k2:ingaDubbletter]'); }
+  else {
+    console.log('\nSPEC-FUZZ k2-BLAD — inga dubbletter i en pool\n');
+    const tomtD = { classList: { toggle(){}, add(){}, remove(){}, contains(){ return false; } }, style: {}, dataset: {}, appendChild(){}, addEventListener(){}, querySelector(){ return null; }, querySelectorAll(){ return []; } };
+    ['d2', 'd3', 'd5', 'd6'].forEach(function(d){
+      const fil = path.join(ROOT, 'js/motor/blad/blad-k2-' + d + '.js'), kalla = fs.readFileSync(fil, 'utf8');
+      const SD2 = { console: { log(){}, info(){}, warn(){}, error(){} }, Math: Math, location: { search: '' }, localStorage: { getItem(){ return null; }, setItem(){} },
+        document: { getElementById(){ return null; }, querySelector(){ return null; }, querySelectorAll(){ return []; }, createElement(){ return tomtD; }, body: tomtD, addEventListener(){} }, setTimeout(){} };
+      SD2.window = SD2; vm.createContext(SD2);
+      vm.runInContext(kalla, SD2, { filename: path.basename(fil) });
+      if(d === 'd2' && SABBA('dubb')){ vm.runInContext("RK_G3_N2.push([['imp',9,4], '−', ['mixed',1,1,2]])", SD2); console.log('  [SABBA dubb: 9/4 − 1 1/2 en gång till i d2 "Blandad form och oäkta bråk"]'); }
+      const namn = Array.from(new Set((kalla.match(/^var ([A-Z][A-Z0-9_]+)\s*=/gm) || []).map(function(s){ return s.replace(/^var\s+|\s*=$/g, ''); })));
+      const fore = brott; let pooler = 0, poster = 0;
+      namn.forEach(function(n){
+        let v; try { v = vm.runInContext(n, SD2); } catch(e){ return; }
+        if(!Array.isArray(v) || !v.length || typeof v[0] !== 'object' || v[0] === null) return;
+        pooler++; poster += v.length;
+        const sett = {};
+        v.forEach(function(p, i){ const k = JSON.stringify(p);
+          if(sett[k] !== undefined) fel(d + ' ' + n + ': dubblett ' + k + ' (plats ' + (sett[k] + 1) + ' och ' + (i + 1) + ')'); else sett[k] = i; });
+      });
+      console.log('  ' + (brott === fore ? '✓' : '✗') + ' blad-k2-' + d + ': ' + pooler + ' pooler, ' + poster + ' poster');
+    });
+  }
+}
+
 console.log('\n' +(brott ? '✗ SPEC-FUZZ k2-BLAD RÖD (' + brott + ')' : '✓ SPEC-FUZZ k2-BLAD GRÖN'));
 process.exit(brott ? 1 : 0);
