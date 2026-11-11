@@ -37,7 +37,11 @@ var BAND = {
   // Räkneordet och pluralformen står också här: "te" räknas i koppar.
   VAROR: [
     { b1:'a', b2:'b', ental:['smörgås','juice'],    flertal:['smörgåsar','juicer'],   emoji:['🥪','🧃'], pris:[[25,45],[15,25]] },
-    { b1:'a', b2:'b', ental:['biljett','popcorn'],  flertal:['biljetter','popcorn'],  emoji:['🎟️','🍿'], pris:[[80,140],[30,60]] },
+    // Biljett och popcorn (Joachim 2026-11-11): talen ska gå enkelt att räkna och situationen vara rimlig.
+    // 2–4 biljetter, popcorn högst lika många som biljetterna (antalHogstForsta); priserna ur listor, inte spann.
+    // Vaktas av verktyg/spec-fuzz-ak8-alg1.js mot spec-villkor.js (BLAD 'ak8k2d1:biljett-popcorn').
+    { b1:'a', b2:'b', ental:['biljett','popcorn'],  flertal:['biljetter','popcorn'],  emoji:['🎟️','🍿'],
+      antal:[2,4], antalHogstForsta:true, prisVal:[[90,100,110,120],[30,40,50]] },
     { b1:'x', b2:'y', ental:['bok','penna'],        flertal:['böcker','pennor'],      emoji:['📕','✏️'], pris:[[60,120],[8,20]] },
     { b1:'x', b2:'y', ental:['äpple','päron'],      flertal:['äpplen','päron'],       emoji:['🍎','🍐'], pris:[[4,9],[5,12]] },
     { b1:'a', b2:'b', ental:['kaka','kopp te'],     flertal:['kakor','koppar te'],    emoji:['🍪','🍵'], pris:[[12,25],[20,35]] }

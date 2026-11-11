@@ -277,7 +277,18 @@
     return ut;
   }
 
-  var API = { VILLKOR: VILLKOR, UPPST_BAND: UPPST_BAND, uppstBand: uppstBand,
+  /* ── BLAD: villkor för ett BLADS egna uppgifter (inte testnodernas) ─────────────────────────────
+     Vaktas av verktyg/spec-fuzz-ak8-alg1.js, som bygger bladet med det första fröet och 300 Nytt blad. */
+  var BLAD = {
+    'ak8k2d1:biljett-popcorn': {   // åk8 k2 d1, Tolka uttryck blad 1, uppgift 2 (biljett a kr, popcorn b kr)
+      kalla: 'Joachim 2026-11-11: talen ska gå enkelt att räkna och situationen vara rimlig (3a + 6b med a = 109, b = 33 var det inte)',
+      blad: 'tolka1', grupp: 2,
+      antal: { forsta: [2, 4], andraHogstForsta: true },    // 2–4 biljetter, popcorn högst lika många
+      pris:  { forsta: [90, 100, 110, 120], andra: [30, 40, 50] }
+    }
+  };
+
+  var API = { VILLKOR: VILLKOR, UPPST_BAND: UPPST_BAND, uppstBand: uppstBand, BLAD: BLAD,
     // löser upp ak8:'ak7'-arv till konkret profil
     profil: function(nod, ars){
       var n = VILLKOR[nod]; if(!n) return null;

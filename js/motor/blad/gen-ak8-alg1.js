@@ -167,13 +167,28 @@ function skrivaRad(r, variant){
 // ── FLIK 1 · TOLKA: uttryck → ord, och värdet ──
 function tolkaRad(r, varor){
   var T = B.BAND.tolka;
-  // olika antal och olika pris: annars syns inte vilken bokstav som hör till vilken vara
-  var a = ri(r, T.antal[0], T.antal[1]), b = ri(r, T.antal[0], T.antal[1]);
-  while(b === a) b = ri(r, T.antal[0], T.antal[1]);
-  // varans EGET prisspann när det finns, annars flikens yttre ram
-  var s1 = (varor.pris && varor.pris[0]) || T.pris, s2 = (varor.pris && varor.pris[1]) || T.pris;
-  var p1 = ri(r, s1[0], s1[1]), p2 = ri(r, s2[0], s2[1]);
-  while(p2 === p1) p2 = ri(r, s2[0], s2[1]);
+  var a, b;
+  if(varor.antalHogstForsta){
+    // Varans EGNA antal (Joachim 2026-11-11, biljett och popcorn): den första varan inom varans antal, den
+    // andra högst lika många som den första. Lika antal tillåts — 2 biljetter ger annars ingen popcorn.
+    var A = varor.antal || T.antal;
+    a = ri(r, A[0], A[1]); b = ri(r, T.antal[0], a);
+  } else {
+    // olika antal och olika pris: annars syns inte vilken bokstav som hör till vilken vara
+    a = ri(r, T.antal[0], T.antal[1]); b = ri(r, T.antal[0], T.antal[1]);
+    while(b === a) b = ri(r, T.antal[0], T.antal[1]);
+  }
+  var p1, p2;
+  if(varor.prisVal){
+    // priserna ur varans LISTOR (jämna priser som går enkelt att räkna)
+    p1 = val(r, varor.prisVal[0]); p2 = val(r, varor.prisVal[1]);
+    while(p2 === p1) p2 = val(r, varor.prisVal[1]);
+  } else {
+    // varans EGET prisspann när det finns, annars flikens yttre ram
+    var s1 = (varor.pris && varor.pris[0]) || T.pris, s2 = (varor.pris && varor.pris[1]) || T.pris;
+    p1 = ri(r, s1[0], s1[1]); p2 = ri(r, s2[0], s2[1]);
+    while(p2 === p1) p2 = ri(r, s2[0], s2[1]);
+  }
   var bok = [varor.b1, varor.b2];
   return { uttryck: term(a, bok[0]) + ' + ' + term(b, bok[1]),
            svar: varor.ord(a, b),

@@ -58,6 +58,7 @@ function legendSvg(vara){
 }
 function tolkaGrupp(r, vara, vakt){
   var varor = { b1: vara.b1, b2: vara.b2, pris: vara.pris,
+    antal: vara.antal, antalHogstForsta: vara.antalHogstForsta, prisVal: vara.prisVal,
     ord: function(a, b){ return ordTal(a) + ' ' + formen(a, vara.ental[0], vara.flertal[0])
                               + ' och ' + ordTal(b) + ' ' + formen(b, vara.ental[1], vara.flertal[1]); } };
   var x = G.dra('tolka', function(){ return G.tolkaRad(r, varor); }, null, r, vakt);
