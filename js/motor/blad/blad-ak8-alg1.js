@@ -61,11 +61,21 @@ function tolkaGrupp(r, vara, vakt){
     antal: vara.antal, antalHogstForsta: vara.antalHogstForsta, prisVal: vara.prisVal,
     ord: function(a, b){ return ordTal(a) + ' ' + formen(a, vara.ental[0], vara.flertal[0])
                               + ' och ' + ordTal(b) + ' ' + formen(b, vara.ental[1], vara.flertal[1]); } };
-  var x = G.dra('tolka', function(){ return G.tolkaRad(r, varor); }, null, r, vakt);
+  // tillatSjuansTal (biljett och popcorn, Joachim 2026-11-11): uppgiften dras utan sjuans lista — fliknamnet
+  // 'tolkaFri' har ingen post i SJUANS_PAR, så bara vakten mot upprepning i bladet gäller.
+  var x = G.dra(vara.tillatSjuansTal ? 'tolkaFri' : 'tolka', function(){ return G.tolkaRad(r, varor); }, null, r, vakt);
   var utanMellanslag = x.svar.replace(/\s/g, '');
-  return G_('En ' + vara.ental[0] + ' kostar ' + vara.b1 + ' kronor och en ' + vara.ental[1] + ' kostar ' + vara.b2 + ' kronor', [
+  var accept = [utanMellanslag, utanMellanslag.replace(/och/g, '')];
+  // acceptOrd: ett annat godtaget ord för varan ("två bägare popcorn" lika väl som "två popcorn")
+  Object.keys(vara.acceptOrd || {}).forEach(function(ord){
+    var alt = String(vara.acceptOrd[ord]).replace(/\s/g, '');
+    accept.slice().forEach(function(a){ accept.push(a.split(ord).join(alt)); });
+  });
+  // Rubriken ur bandet när varan har en egen (rätt genus: "ett äpple", "en bägare popcorn"), annars byggd
+  var rubrik = vara.rubrik || ('En ' + vara.ental[0] + ' kostar ' + vara.b1 + ' kronor och en ' + vara.ental[1] + ' kostar ' + vara.b2 + ' kronor');
+  return G_(rubrik, [
     { typ: 'bild', svarTyp: 'text', fraga: 'Vad har någon köpt om uttrycket ' + x.uttryck + ' beskriver kostnaden?',
-      svar: x.svar, accept: [utanMellanslag, utanMellanslag.replace(/och/g, '')], svg: legendSvg(vara) },
+      svar: x.svar, accept: accept, svg: legendSvg(vara) },
     { typ: 'enkel', vansterText: 'Hur mycket kostar det om ' + x.varden + '?', svar: x.belopp }
   ]);
 }
@@ -113,9 +123,9 @@ function strackaSvg(delar){
 }
 function bladSkriva(nr, seed){
   var r = G.rng(seed), vakt = {}, grupper = [];
-  function rader(variant, antal){
+  function rader(variant, antal, bokstav){
     var ut = [];
-    for(var i = 0; i < antal; i++) ut.push(G.dra('skriva', function(){ return G.skrivaRad(r, variant); }, null, r, vakt));
+    for(var i = 0; i < antal; i++) ut.push(G.dra('skriva', function(){ return G.skrivaRad(r, variant, bokstav); }, null, r, vakt));
     return ut;
   }
   if(nr === 1){
@@ -123,9 +133,11 @@ function bladSkriva(nr, seed){
     grupper.push(G_(TEXT.valjUttryck.rubrik, v.map(function(x){
       return { typ: 'valruta', fraga: x.fraga, alt: x.alt, ratt: [x.ratt] };
     })));
+    // Svaret använder rubrikens bokstav, och bara längre/kortare (Joachim 2026-11-11: "gånger så lång" är
+    // ingen rimlig jämförelse mellan personer). spec-fuzz-ak8-alg1.js vaktar ('ak8k2d1:person-langd').
     var bokstav = 'a';
     grupper.push(G_('En person är ' + bokstav + ' cm lång. Skriv ett uttryck för längden av en person som är', [
-      rader('langre', 1)[0], rader('kortare', 1)[0], rader('ganger', 1)[0]
+      rader('langre', 1, bokstav)[0], rader('kortare', 1, bokstav)[0]
     ].map(function(x){ return { typ: 'uttryck', fraga: x.fraga, svar: x.svar.replace(/\s/g, ''), accept: [x.svar.replace(/\s/g, '')], vars: x.varibel }; })));
     grupper.push(G_(TEXT.skrivUttryck.rubrik, rader('mer', 3).map(function(x){
       return { typ: 'uttryck', fraga: x.fraga, svar: x.svar.replace(/\s/g, ''), accept: [x.svar.replace(/\s/g, '')], vars: x.varibel };

@@ -38,12 +38,18 @@ var BAND = {
   VAROR: [
     { b1:'a', b2:'b', ental:['smörgås','juice'],    flertal:['smörgåsar','juicer'],   emoji:['🥪','🧃'], pris:[[25,45],[15,25]] },
     // Biljett och popcorn (Joachim 2026-11-11): talen ska gå enkelt att räkna och situationen vara rimlig.
-    // 2–4 biljetter, popcorn högst lika många som biljetterna (antalHogstForsta); priserna ur listor, inte spann.
-    // Vaktas av verktyg/spec-fuzz-ak8-alg1.js mot spec-villkor.js (BLAD 'ak8k2d1:biljett-popcorn').
+    // 2–4 biljetter, popcorn högst lika många som biljetterna (antalHogstForsta) — också färre; priserna ur
+    // listor, inte spann. tillatSjuansTal: regeln ejSjuansTal gäller INTE den här uppgiften (3a + 2b och
+    // 4a + 2b får förekomma). Vaktas av verktyg/spec-fuzz-ak8-alg1.js (BLAD 'ak8k2d1:biljett-popcorn').
+    // Uppgiftens rubrik står som elevtext i fältet nedan (godkänd 2026-11-11, "en bägare popcorn"). Svaret
+    // godtar både "två popcorn" och "två bägare popcorn" (acceptOrd).
     { b1:'a', b2:'b', ental:['biljett','popcorn'],  flertal:['biljetter','popcorn'],  emoji:['🎟️','🍿'],
-      antal:[2,4], antalHogstForsta:true, prisVal:[[90,100,110,120],[30,40,50]] },
+      antal:[2,4], antalHogstForsta:true, prisVal:[[90,100,110,120],[30,40,50]], tillatSjuansTal:true,
+      rubrik:'En biljett kostar a kronor och en bägare popcorn kostar b kronor', acceptOrd:{ 'popcorn': 'bägare popcorn' } },
     { b1:'x', b2:'y', ental:['bok','penna'],        flertal:['böcker','pennor'],      emoji:['📕','✏️'], pris:[[60,120],[8,20]] },
-    { b1:'x', b2:'y', ental:['äpple','päron'],      flertal:['äpplen','päron'],       emoji:['🍎','🍐'], pris:[[4,9],[5,12]] },
+    // "ett äpple", "ett päron" (godkänd 2026-11-11) — den genererade rubriken sa "En äpple … en päron"
+    { b1:'x', b2:'y', ental:['äpple','päron'],      flertal:['äpplen','päron'],       emoji:['🍎','🍐'], pris:[[4,9],[5,12]],
+      rubrik:'Ett äpple kostar x kronor och ett päron kostar y kronor' },
     { b1:'a', b2:'b', ental:['kaka','kopp te'],     flertal:['kakor','koppar te'],    emoji:['🍪','🍵'], pris:[[12,25],[20,35]] }
   ],
   // TRE NIVÅER: översätta en mening · dela och jämföra · läsa en figur och förenkla.
@@ -52,7 +58,7 @@ var BAND = {
     koeff:     [2, 9],        // "dubbelt så", "tre gånger så"
     sidor:     [2, 9],        // figurernas sidor (x, 3x, 4 …)
     nivaer: {
-      1: { varianter: ['valruta', 'langre', 'kortare', 'ganger', 'mer'] },
+      1: { varianter: ['valruta', 'langre', 'kortare', 'mer'] },   // "gånger så lång" bort för personer (2026-11-11)
       2: { varianter: ['strackfigur', 'halften', 'paraIhop'] },
       3: { varianter: ['omkrets', 'sammanlagd', 'prisKedja'] }
     }

@@ -8,8 +8,14 @@
      antalet ur uttrycket som eleven ser (3a + 2b): 2–4 biljetter, popcorn högst lika många
      priserna ur frågan (a = 100, b = 40): biljett 90/100/110/120 kr, popcorn 30/40/50 kr
      beloppet = antal · pris, räknat oberoende
+     täckning: popcorn ska också kunna vara FÄRRE än biljetterna (sjuans-regeln släppt för uppgiften)
+   'ak8k2d1:person-langd' — Skriva blad 1, grupp 2: svaret med rubrikens bokstav (a), bara längre/kortare
+   'ak8k2d1:valruta-ganger' — Skriva blad 1, valrutan: "hon får 3 gånger så många", inget "till"
    --sabba pris    lägger 109 kr bland biljettpriserna i bandet → ska fälla
    --sabba antal   tar bort "popcorn högst lika många" i bandet → ska fälla
+   --sabba lika    alltid 2 biljetter (aldrig färre popcorn) → täckningen ska fälla
+   --sabba person  personens längd utan rubrikens bokstav → ska fälla
+   --sabba till    "… så många till" tillbaka i valrutan → ska fälla
 
    KÖR:  node verktyg/spec-fuzz-ak8-alg1.js [--sabba pris|antal]     Exit 1 vid avvikelse. Noll nätväg. */
 'use strict';
@@ -28,6 +34,10 @@ const A = S.BLAD_AK8_ALG1;
 if(!A){ console.log('✗ blad-ak8-alg1.js gav inget BLAD_AK8_ALG1'); process.exit(1); }
 if(SABBA('pris')){ S.BAND_AK8_ALG1.BAND.VAROR[1].prisVal[0].push(109); console.log('[SABBA pris: 109 kr bland biljettpriserna]\n'); }
 if(SABBA('antal')){ S.BAND_AK8_ALG1.BAND.VAROR[1].antalHogstForsta = false; S.BAND_AK8_ALG1.BAND.VAROR[1].antal = undefined; console.log('[SABBA antal: popcorn inte längre högst lika många]\n'); }
+if(SABBA('lika')){ S.BAND_AK8_ALG1.BAND.VAROR[1].antal = [2, 2]; console.log('[SABBA lika: alltid 2 biljetter → aldrig färre popcorn]\n'); }
+const G0 = S.GEN_AK8_ALG1, skrivaOrig = G0.skrivaRad;
+if(SABBA('person')){ G0.skrivaRad = function(r, v){ return skrivaOrig(r, v); }; console.log('[SABBA person: personens längd utan rubrikens bokstav]\n'); }
+if(SABBA('till')){ G0.skrivaRad = function(r, v, b){ const x = skrivaOrig(r, v, b); if(v === 'valruta' && /så många$/.test(x.fraga)) x.fraga += ' till'; return x; }; console.log('[SABBA till: "… så många till" tillbaka]\n'); }
 
 let brott = 0;
 const fel = m => { brott++; if(brott <= 20) console.log('  ✗ ' + m); };
@@ -53,8 +63,45 @@ else {
     if(V.pris.andra.indexOf(pb) < 0) fel(tx + ' — popcornpriset ' + pb + ' kr (ska vara ' + V.pris.andra.join('/') + ')');
     if(g.rader[1].svar !== na * pa + nb * pb) fel(tx + ' — beloppet ' + g.rader[1].svar + ' ≠ ' + (na * pa + nb * pb));
   }
+  // TÄCKNING: popcorn ska också kunna vara FÄRRE än biljetterna (sjuans-regeln släppt för uppgiften)
+  if(V.tackning && V.tackning.andraFarre && !Object.keys(sett.antal).some(function(k){ const p = k.split('+'); return +p[1] < +p[0]; }))
+    fel('Tolka uttryck blad 1, uppgift 2: inget blad har färre popcorn än biljetter (' + Object.keys(sett.antal).sort().join(' ') + ')');
   console.log('  ' + (brott === fore ? '✓' : '✗') + ' Tolka uttryck blad 1, uppgift 2 (biljett och popcorn): ' + uppg + ' uppgifter · antal '
     + Object.keys(sett.antal).sort().join(' ') + ' · priser ' + Object.keys(sett.pris).length + ' par');
+}
+
+// 'ak8k2d1:person-langd' — "En person är a cm lång …": svaret med rubrikens bokstav, bara längre/kortare
+const P = SPEC.BLAD && SPEC.BLAD['ak8k2d1:person-langd'];
+if(!P){ fel('spec-villkor.js saknar BLAD[ak8k2d1:person-langd]'); }
+else {
+  const fore = brott; let rader = 0;
+  for(let k = 0; k <= NYTT; k++){
+    const g = A.BLAD[P.blad](A.FRON[P.blad] + 1000 * k).grupper[P.grupp - 1], vad = k ? 'Nytt blad ' + k : 'första bladet';
+    if(!g || g.rubrik.indexOf('En person är ' + P.bokstav + ' cm lång') !== 0){ fel(vad + ': grupp ' + P.grupp + ' är inte personens längd ("' + (g && g.rubrik) + '")'); continue; }
+    g.rader.forEach(function(r){
+      rader++;
+      if(!P.fragor.some(function(f){ return String(r.fraga).slice(-f.length) === f; })) fel(vad + ': "' + r.fraga + '" (bara ' + P.fragor.join(' / ') + ')');
+      const bokst = (String(r.svar).match(/[a-z]/g) || []).filter(function(c, i, a){ return a.indexOf(c) === i; });
+      if(bokst.length !== 1 || bokst[0] !== P.bokstav) fel(vad + ': "' + r.fraga + ' → ' + r.svar + '" (bokstaven ska vara ' + P.bokstav + ')');
+    });
+  }
+  console.log('  ' + (brott === fore ? '✓' : '✗') + ' Skriva uttryck blad 1, grupp 2 (personens längd): ' + rader + ' rader, bokstaven ' + P.bokstav + ', bara ' + P.fragor.join(' / '));
+}
+
+// 'ak8k2d1:valruta-ganger' — valrutan: "hon får 3 gånger så många", inte "… till"
+const VR = SPEC.BLAD && SPEC.BLAD['ak8k2d1:valruta-ganger'];
+if(!VR){ fel('spec-villkor.js saknar BLAD[ak8k2d1:valruta-ganger]'); }
+else {
+  const fore = brott; let rader = 0, ganger = 0;
+  for(let k = 0; k <= NYTT; k++){
+    const g = A.BLAD[VR.blad](A.FRON[VR.blad] + 1000 * k).grupper[VR.grupp - 1], vad = k ? 'Nytt blad ' + k : 'första bladet';
+    g.rader.forEach(function(r){
+      rader++;
+      if(/gånger|dubbelt/.test(r.fraga)) ganger++;
+      if(new RegExp('\\b' + VR.ejOrd + '\\b').test(r.fraga)) fel(vad + ': "' + r.fraga + '" (ordet "' + VR.ejOrd + '" ska bort)');
+    });
+  }
+  console.log('  ' + (brott === fore ? '✓' : '✗') + ' Skriva uttryck blad 1, valrutan: ' + rader + ' rader, varav ' + ganger + ' "gånger/dubbelt så många" — inget "' + VR.ejOrd + '"');
 }
 
 console.log('\n' + (brott ? '✗ SPEC-FUZZ ÅK8 ALG1 RÖD (' + brott + ')' : '✓ SPEC-FUZZ ÅK8 ALG1 GRÖN'));

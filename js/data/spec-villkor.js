@@ -284,7 +284,17 @@
       kalla: 'Joachim 2026-11-11: talen ska gå enkelt att räkna och situationen vara rimlig (3a + 6b med a = 109, b = 33 var det inte)',
       blad: 'tolka1', grupp: 2,
       antal: { forsta: [2, 4], andraHogstForsta: true },    // 2–4 biljetter, popcorn högst lika många
-      pris:  { forsta: [90, 100, 110, 120], andra: [30, 40, 50] }
+      pris:  { forsta: [90, 100, 110, 120], andra: [30, 40, 50] },
+      // Joachim 2026-11-11: sjuans-regeln släppt för uppgiften — popcorn ska ÄVEN kunna vara färre (3a + 2b)
+      tackning: { andraFarre: true }
+    },
+    'ak8k2d1:person-langd': {   // Skriva uttryck blad 1, grupp 2 ("En person är a cm lång …")
+      kalla: 'Joachim 2026-11-11: svaret använder rubrikens bokstav, och bara längre och kortare — "gånger så lång" är ingen rimlig jämförelse mellan personer',
+      blad: 'skriva1', grupp: 2, bokstav: 'a', fragor: ['cm längre', 'cm kortare']
+    },
+    'ak8k2d1:valruta-ganger': {   // Skriva uttryck blad 1, grupp 1 (valrutan)
+      kalla: 'Joachim 2026-11-11: "hon får 3 gånger så många" (svaret 3a) — inte "… så många till", som betyder a + 3a',
+      blad: 'skriva1', grupp: 1, ejOrd: 'till'
     }
   };
 

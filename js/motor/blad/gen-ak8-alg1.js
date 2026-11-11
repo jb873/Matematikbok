@@ -146,7 +146,7 @@ function beraknaRad(r, variant){
 }
 
 // ── FLIK 2 · SKRIVA: text → uttryck ──
-function skrivaRad(r, variant){
+function skrivaRad(r, variant, bokstav){
   // bandets namn → typens egen funktion (ett ordförråd, en uppslagning)
   if(variant === 'valruta')     return valrutaRad(r);
   if(variant === 'strackfigur') return strackfigurRad(r);
@@ -154,11 +154,14 @@ function skrivaRad(r, variant){
   if(variant === 'sammanlagd')  return sammanlagdRad(r);
   if(variant === 'prisKedja')   return prisKedjaGrupp(r);
   if(variant === 'omkrets')     return omkretsSkrivaRad(r);
+  // bokstav: rubrikens bokstav när uppgiften har en ("En person är a cm lång" → svaret a + 6), annars slump.
+  // Dragningen ur slumpen sker ändå, så att samma frö ger samma övriga tal som förut.
   var S = B.BAND.skriva, v = val(r, ['x', 'a', 'b', 'y']);
+  if(bokstav) v = bokstav;
   var n = ri(r, S.tal[0], S.tal[1]), k = ri(r, S.koeff[0], S.koeff[1]);
   if(variant === 'langre') return { fraga: n + ' cm längre', svar: v + ' + ' + n, varibel: v };
   if(variant === 'kortare') return { fraga: n + ' cm kortare', svar: v + ' − ' + n, varibel: v };
-  if(variant === 'ganger') return { fraga: k + ' gånger så lång', svar: term(k, v), varibel: v };
+  // ('ganger', "k gånger så lång", borttagen 2026-11-11 — ingen rimlig jämförelse mellan personer)
   if(variant === 'halften') return { fraga: 'hälften så lång', svar: v + '/2', varibel: v };
 
   return { fraga: n + ' mer än ' + v, svar: v + ' + ' + n, varibel: v };
@@ -207,7 +210,8 @@ function valrutaRad(r){
     alt: [term(1, v) + ' − ' + n, term(1, v) + ' + ' + n, term(n, v)], ratt: v + '+' + n };
   if(fall === 'ger')  return { typ: 'valruta', fraga: 'hon ger bort ' + n,
     alt: [term(1, v) + ' − ' + n, term(n, v), term(1, v) + ' + ' + n], ratt: v + '-' + n };
-  return { typ: 'valruta', fraga: 'hon får ' + (k === 2 ? 'dubbelt' : k + ' gånger') + ' så många till',
+  // "så många", inte "så många till" (Joachim 2026-11-11): "till" betyder a + 3a = 4a, men svaret är 3a
+  return { typ: 'valruta', fraga: 'hon får ' + (k === 2 ? 'dubbelt' : k + ' gånger') + ' så många',
     alt: [term(k, v), term(k + 1, v), v + '/' + k], ratt: String(k) + v };
 }
 // SKRIVA · sträckfigur: en sträcka delad i delar — figuren ritas ur delarna.
@@ -244,7 +248,7 @@ function prisKedjaGrupp(r){
   return { typ: 'prisKedja', variabel: v, mer: [n, m], varde: p, rader: [
     { fraga: 'Skriv ett uttryck för vad läsken kostar',   svar: v + '+' + n, visa: v + ' + ' + n },
     { fraga: 'Skriv ett uttryck för vad smörgåsen kostar', svar: v + '+' + m, visa: v + ' + ' + m },
-    { fraga: 'Skriv ett uttryck för vad allt tre kostar',  svar: '3' + v + '+' + (n + m), visa: term(3, v) + ' + ' + (n + m) },
+    { fraga: 'Skriv ett uttryck för vad alla tre kostar',  svar: '3' + v + '+' + (n + m), visa: term(3, v) + ' + ' + (n + m) },
     { fraga: 'Hur mycket kostar allt om ' + v + ' = ' + p + '?', svar: 3 * p + n + m }
   ] };
 }
