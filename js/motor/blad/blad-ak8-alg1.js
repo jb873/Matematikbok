@@ -58,7 +58,7 @@ function legendSvg(vara){
 }
 function tolkaGrupp(r, vara, vakt){
   var varor = { b1: vara.b1, b2: vara.b2, pris: vara.pris,
-    antal: vara.antal, antalHogstForsta: vara.antalHogstForsta, prisVal: vara.prisVal,
+    antal: vara.antal, antalHogstForsta: vara.antalHogstForsta, antal2: vara.antal2, prisVal: vara.prisVal,
     ord: function(a, b){ return ordTal(a) + ' ' + formen(a, vara.ental[0], vara.flertal[0])
                               + ' och ' + ordTal(b) + ' ' + formen(b, vara.ental[1], vara.flertal[1]); } };
   // tillatSjuansTal (biljett och popcorn, Joachim 2026-11-11): uppgiften dras utan sjuans lista — fliknamnet
@@ -68,8 +68,8 @@ function tolkaGrupp(r, vara, vakt){
   var accept = [utanMellanslag, utanMellanslag.replace(/och/g, '')];
   // acceptOrd: ett annat godtaget ord för varan ("två bägare popcorn" lika väl som "två popcorn")
   Object.keys(vara.acceptOrd || {}).forEach(function(ord){
-    var alt = String(vara.acceptOrd[ord]).replace(/\s/g, '');
-    accept.slice().forEach(function(a){ accept.push(a.split(ord).join(alt)); });
+    var fran = String(ord).replace(/\s/g, ''), alt = String(vara.acceptOrd[ord]).replace(/\s/g, '');
+    accept.slice().forEach(function(a){ accept.push(a.split(fran).join(alt)); });
   });
   // Rubriken ur bandet när varan har en egen (rätt genus: "ett äpple", "en bägare popcorn"), annars byggd
   var rubrik = vara.rubrik || ('En ' + vara.ental[0] + ' kostar ' + vara.b1 + ' kronor och en ' + vara.ental[1] + ' kostar ' + vara.b2 + ' kronor');

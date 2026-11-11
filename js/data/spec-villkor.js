@@ -280,13 +280,37 @@
   /* ── BLAD: villkor för ett BLADS egna uppgifter (inte testnodernas) ─────────────────────────────
      Vaktas av verktyg/spec-fuzz-ak8-alg1.js, som bygger bladet med det första fröet och 300 Nytt blad. */
   var BLAD = {
+    /* VARUPAREN i Tolka uttryck (Joachim 2026-11-11): antal och priser som går lätt att räkna, lika antal
+       tillåtet, sjuans-regeln släppt. typ 'varupar': antalet läses ur uttrycket eleven ser (3a + 2b),
+       priserna ur frågan (a = 100, b = 40), och beloppet räknas oberoende. tackning: vad som MÅSTE
+       förekomma över första bladet + 300 Nytt blad (andraFarre: färre av den andra varan; lika: lika antal). */
     'ak8k2d1:biljett-popcorn': {   // åk8 k2 d1, Tolka uttryck blad 1, uppgift 2 (biljett a kr, popcorn b kr)
-      kalla: 'Joachim 2026-11-11: talen ska gå enkelt att räkna och situationen vara rimlig (3a + 6b med a = 109, b = 33 var det inte)',
-      blad: 'tolka1', grupp: 2,
+      kalla: 'Joachim 2026-11-11: talen ska gå enkelt att räkna och situationen vara rimlig (3a + 6b med a = 109, b = 33 var det inte); facit följer rubriken ("två bägare popcorn")',
+      typ: 'varupar', blad: 'tolka1', grupp: 2, rubrikOrd: 'biljett', facitOrd: 'bägare popcorn',
       antal: { forsta: [2, 4], andraHogstForsta: true },    // 2–4 biljetter, popcorn högst lika många
       pris:  { forsta: [90, 100, 110, 120], andra: [30, 40, 50] },
-      // Joachim 2026-11-11: sjuans-regeln släppt för uppgiften — popcorn ska ÄVEN kunna vara färre (3a + 2b)
-      tackning: { andraFarre: true }
+      tackning: { andraFarre: true, lika: true }
+    },
+    'ak8k2d1:smorgas-juice': {   // Tolka uttryck blad 1, uppgift 1
+      kalla: 'Joachim 2026-11-11: 2–4 smörgåsar, juice högst lika många; smörgås 30/35/40/45 kr, juice 15/20/25 kr',
+      typ: 'varupar', blad: 'tolka1', grupp: 1, rubrikOrd: 'smörgås',
+      antal: { forsta: [2, 4], andraHogstForsta: true },
+      pris:  { forsta: [30, 35, 40, 45], andra: [15, 20, 25] },
+      tackning: { andraFarre: true, lika: true }
+    },
+    'ak8k2d1:bok-penna': {   // Tolka uttryck blad 1, uppgift 3
+      kalla: 'Joachim 2026-11-11: 2–3 böcker, 2–5 pennor; bok 80/100/120/150 kr, penna 10/15/20 kr',
+      typ: 'varupar', blad: 'tolka1', grupp: 3, rubrikOrd: 'bok',
+      antal: { forsta: [2, 3], andra: [2, 5] },
+      pris:  { forsta: [80, 100, 120, 150], andra: [10, 15, 20] },
+      tackning: { lika: true }
+    },
+    'ak8k2d1:kaka-te': {   // Tolka uttryck blad 2, uppgift 1
+      kalla: 'Joachim 2026-11-11: 2–5 kakor, te högst lika många; kaka 15/20/25 kr, kopp te 20/25/30 kr',
+      typ: 'varupar', blad: 'tolka2', grupp: 1, rubrikOrd: 'kaka',
+      antal: { forsta: [2, 5], andraHogstForsta: true },
+      pris:  { forsta: [15, 20, 25], andra: [20, 25, 30] },
+      tackning: { andraFarre: true, lika: true }
     },
     'ak8k2d1:person-langd': {   // Skriva uttryck blad 1, grupp 2 ("En person är a cm lång …")
       kalla: 'Joachim 2026-11-11: svaret använder rubrikens bokstav, och bara längre och kortare — "gånger så lång" är ingen rimlig jämförelse mellan personer',

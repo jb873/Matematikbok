@@ -171,11 +171,12 @@ function skrivaRad(r, variant, bokstav){
 function tolkaRad(r, varor){
   var T = B.BAND.tolka;
   var a, b;
-  if(varor.antalHogstForsta){
-    // Varans EGNA antal (Joachim 2026-11-11, biljett och popcorn): den första varan inom varans antal, den
-    // andra högst lika många som den första. Lika antal tillåts — 2 biljetter ger annars ingen popcorn.
-    var A = varor.antal || T.antal;
-    a = ri(r, A[0], A[1]); b = ri(r, T.antal[0], a);
+  if(varor.antal){
+    // Varans EGNA antal (Joachim 2026-11-11): den första varan inom varans antal; den andra antingen högst
+    // lika många som den första (antalHogstForsta) eller inom sitt eget spann (antal2). Lika antal tillåts.
+    var A = varor.antal;
+    a = ri(r, A[0], A[1]);
+    b = varor.antal2 ? ri(r, varor.antal2[0], varor.antal2[1]) : ri(r, T.antal[0], varor.antalHogstForsta ? a : T.antal[1]);
   } else {
     // olika antal och olika pris: annars syns inte vilken bokstav som hör till vilken vara
     a = ri(r, T.antal[0], T.antal[1]); b = ri(r, T.antal[0], T.antal[1]);

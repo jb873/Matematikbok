@@ -35,22 +35,26 @@ var BAND = {
   // VARORNA med rimliga priser. En juice för 28 kr bredvid en smörgås för 4 kr är ett tal som
   // eleven inte tror på, och då tappar sammanhanget sin poäng. Spannet står per vara.
   // Räkneordet och pluralformen står också här: "te" räknas i koppar.
+  // GRÄNSER SOM GÅR LÄTT ATT RÄKNA (Joachim 2026-11-11), för biljett/popcorn, smörgås/juice, bok/penna och
+  // kaka/te: varans EGET antal (antal = den första varan; antalHogstForsta = den andra högst lika många, också
+  // färre; antal2 = den andra varans eget spann), priserna ur LISTOR (prisVal), lika antal tillåts, och
+  // regeln ejSjuansTal gäller INTE de uppgifterna (tillatSjuansTal). Vaktas av verktyg/spec-fuzz-ak8-alg1.js
+  // mot spec-villkor.js (BLAD 'ak8k2d1:…'). Äpple och päron behåller sitt spann.
   VAROR: [
-    { b1:'a', b2:'b', ental:['smörgås','juice'],    flertal:['smörgåsar','juicer'],   emoji:['🥪','🧃'], pris:[[25,45],[15,25]] },
-    // Biljett och popcorn (Joachim 2026-11-11): talen ska gå enkelt att räkna och situationen vara rimlig.
-    // 2–4 biljetter, popcorn högst lika många som biljetterna (antalHogstForsta) — också färre; priserna ur
-    // listor, inte spann. tillatSjuansTal: regeln ejSjuansTal gäller INTE den här uppgiften (3a + 2b och
-    // 4a + 2b får förekomma). Vaktas av verktyg/spec-fuzz-ak8-alg1.js (BLAD 'ak8k2d1:biljett-popcorn').
-    // Uppgiftens rubrik står som elevtext i fältet nedan (godkänd 2026-11-11, "en bägare popcorn"). Svaret
-    // godtar både "två popcorn" och "två bägare popcorn" (acceptOrd).
-    { b1:'a', b2:'b', ental:['biljett','popcorn'],  flertal:['biljetter','popcorn'],  emoji:['🎟️','🍿'],
+    { b1:'a', b2:'b', ental:['smörgås','juice'],    flertal:['smörgåsar','juicer'],   emoji:['🥪','🧃'],
+      antal:[2,4], antalHogstForsta:true, prisVal:[[30,35,40,45],[15,20,25]], tillatSjuansTal:true },
+    // Uppgiftens rubrik står som elevtext i fältet nedan (godkänd 2026-11-11, "en bägare popcorn"), och facit
+    // följer rubriken ("två bägare popcorn"). Svaret godtar också "två popcorn" (acceptOrd).
+    { b1:'a', b2:'b', ental:['biljett','bägare popcorn'],  flertal:['biljetter','bägare popcorn'],  emoji:['🎟️','🍿'],
       antal:[2,4], antalHogstForsta:true, prisVal:[[90,100,110,120],[30,40,50]], tillatSjuansTal:true,
-      rubrik:'En biljett kostar a kronor och en bägare popcorn kostar b kronor', acceptOrd:{ 'popcorn': 'bägare popcorn' } },
-    { b1:'x', b2:'y', ental:['bok','penna'],        flertal:['böcker','pennor'],      emoji:['📕','✏️'], pris:[[60,120],[8,20]] },
+      rubrik:'En biljett kostar a kronor och en bägare popcorn kostar b kronor', acceptOrd:{ 'bägare popcorn': 'popcorn' } },
+    { b1:'x', b2:'y', ental:['bok','penna'],        flertal:['böcker','pennor'],      emoji:['📕','✏️'],
+      antal:[2,3], antal2:[2,5], prisVal:[[80,100,120,150],[10,15,20]], tillatSjuansTal:true },
     // "ett äpple", "ett päron" (godkänd 2026-11-11) — den genererade rubriken sa "En äpple … en päron"
     { b1:'x', b2:'y', ental:['äpple','päron'],      flertal:['äpplen','päron'],       emoji:['🍎','🍐'], pris:[[4,9],[5,12]],
       rubrik:'Ett äpple kostar x kronor och ett päron kostar y kronor' },
-    { b1:'a', b2:'b', ental:['kaka','kopp te'],     flertal:['kakor','koppar te'],    emoji:['🍪','🍵'], pris:[[12,25],[20,35]] }
+    { b1:'a', b2:'b', ental:['kaka','kopp te'],     flertal:['kakor','koppar te'],    emoji:['🍪','🍵'],
+      antal:[2,5], antalHogstForsta:true, prisVal:[[15,20,25],[20,25,30]], tillatSjuansTal:true }
   ],
   // TRE NIVÅER: översätta en mening · dela och jämföra · läsa en figur och förenkla.
   skriva: {

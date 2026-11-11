@@ -4,16 +4,20 @@
    blad-ak8-alg1.js), med det första fröet och 300 Nytt blad (fröet + 1000 · k, som knappen gör). Varje
    uppgift prövas mot sitt villkor i js/data/spec-villkor.js (BLAD).
 
-   'ak8k2d1:biljett-popcorn' (Joachim 2026-11-11) — Tolka uttryck blad 1, uppgift 2:
-     antalet ur uttrycket som eleven ser (3a + 2b): 2–4 biljetter, popcorn högst lika många
-     priserna ur frågan (a = 100, b = 40): biljett 90/100/110/120 kr, popcorn 30/40/50 kr
-     beloppet = antal · pris, räknat oberoende
-     täckning: popcorn ska också kunna vara FÄRRE än biljetterna (sjuans-regeln släppt för uppgiften)
+   VARUPAREN (typ 'varupar', Joachim 2026-11-11) — biljett/popcorn, smörgås/juice, bok/penna, kaka/te:
+     antalet ur uttrycket som eleven ser (3a + 2b), priserna ur frågan (a = 100, b = 40), mot villkorets
+     antal och prislistor; beloppet = antal · pris, räknat oberoende; facitOrd (popcorn: "bägare popcorn")
+     täckning: färre av den andra varan (andraFarre) och lika antal (lika) ska förekomma
    'ak8k2d1:person-langd' — Skriva blad 1, grupp 2: svaret med rubrikens bokstav (a), bara längre/kortare
    'ak8k2d1:valruta-ganger' — Skriva blad 1, valrutan: "hon får 3 gånger så många", inget "till"
    --sabba pris    lägger 109 kr bland biljettpriserna i bandet → ska fälla
    --sabba antal   tar bort "popcorn högst lika många" i bandet → ska fälla
    --sabba lika    alltid 2 biljetter (aldrig färre popcorn) → täckningen ska fälla
+   --sabba smorgas 37 kr bland smörgåspriserna → ska fälla
+   --sabba bok     upp till 8 pennor → ska fälla
+   --sabba kaka    te inte längre högst lika många som kakorna → ska fälla
+   --sabba olika   lika antal förbjudet igen → täckningen ska fälla
+   --sabba facit   "två popcorn" i facit igen → ska fälla
    --sabba person  personens längd utan rubrikens bokstav → ska fälla
    --sabba till    "… så många till" tillbaka i valrutan → ska fälla
 
@@ -35,6 +39,11 @@ if(!A){ console.log('✗ blad-ak8-alg1.js gav inget BLAD_AK8_ALG1'); process.exi
 if(SABBA('pris')){ S.BAND_AK8_ALG1.BAND.VAROR[1].prisVal[0].push(109); console.log('[SABBA pris: 109 kr bland biljettpriserna]\n'); }
 if(SABBA('antal')){ S.BAND_AK8_ALG1.BAND.VAROR[1].antalHogstForsta = false; S.BAND_AK8_ALG1.BAND.VAROR[1].antal = undefined; console.log('[SABBA antal: popcorn inte längre högst lika många]\n'); }
 if(SABBA('lika')){ S.BAND_AK8_ALG1.BAND.VAROR[1].antal = [2, 2]; console.log('[SABBA lika: alltid 2 biljetter → aldrig färre popcorn]\n'); }
+if(SABBA('smorgas')){ S.BAND_AK8_ALG1.BAND.VAROR[0].prisVal[0].push(37); console.log('[SABBA smorgas: 37 kr bland smörgåspriserna]\n'); }
+if(SABBA('bok')){ S.BAND_AK8_ALG1.BAND.VAROR[2].antal2 = [2, 8]; console.log('[SABBA bok: upp till 8 pennor]\n'); }
+if(SABBA('kaka')){ S.BAND_AK8_ALG1.BAND.VAROR[4].antalHogstForsta = false; console.log('[SABBA kaka: te inte längre högst lika många som kakorna]\n'); }
+if(SABBA('olika')){ const _t = S.GEN_AK8_ALG1.tolkaRad; S.GEN_AK8_ALG1.tolkaRad = function(r, v){ let x; do { x = _t(r, v); } while(/^(\d*)[a-z] \+ \1[a-z]$/.test(x.uttryck)); return x; }; console.log('[SABBA olika: lika antal förbjudet igen]\n'); }
+if(SABBA('facit')){ S.BAND_AK8_ALG1.BAND.VAROR[1].flertal[1] = 'popcorn'; console.log('[SABBA facit: "två popcorn" i facit igen]\n'); }
 const G0 = S.GEN_AK8_ALG1, skrivaOrig = G0.skrivaRad;
 if(SABBA('person')){ G0.skrivaRad = function(r, v){ return skrivaOrig(r, v); }; console.log('[SABBA person: personens längd utan rubrikens bokstav]\n'); }
 if(SABBA('till')){ G0.skrivaRad = function(r, v, b){ const x = skrivaOrig(r, v, b); if(v === 'valruta' && /så många$/.test(x.fraga)) x.fraga += ' till'; return x; }; console.log('[SABBA till: "… så många till" tillbaka]\n'); }
@@ -43,32 +52,35 @@ let brott = 0;
 const fel = m => { brott++; if(brott <= 20) console.log('  ✗ ' + m); };
 console.log('SPEC-FUZZ ÅK8 ALG1 — åttans algebraiska uttryck, bladens egna uppgifter (första fröet + ' + NYTT + ' Nytt blad)\n');
 
-const V = SPEC.BLAD && SPEC.BLAD['ak8k2d1:biljett-popcorn'];
-if(!V){ fel('spec-villkor.js saknar BLAD[ak8k2d1:biljett-popcorn]'); }
-else {
-  const fore = brott, sett = { antal: {}, pris: {} };
+// VARUPAREN (typ 'varupar'): antal ur uttrycket eleven ser, priser ur frågan, beloppet räknat oberoende.
+const VARUPAR = Object.keys(SPEC.BLAD || {}).filter(function(n){ return SPEC.BLAD[n].typ === 'varupar'; });
+if(VARUPAR.indexOf('ak8k2d1:biljett-popcorn') < 0) fel('spec-villkor.js saknar BLAD[ak8k2d1:biljett-popcorn]');
+VARUPAR.forEach(function(namn){
+  const V = SPEC.BLAD[namn], fore = brott, sett = { antal: {}, pris: {} }, plats = (V.blad.indexOf('tolka') === 0 ? 'Tolka uttryck blad ' : V.blad + ' ') + V.blad.slice(-1) + ', uppgift ' + V.grupp;
   let uppg = 0;
   for(let k = 0; k <= NYTT; k++){
-    const b = A.BLAD[V.blad](A.FRON[V.blad] + 1000 * k), g = b.grupper[V.grupp - 1], vad = k ? 'Nytt blad ' + k : 'första bladet';
-    if(!g || !/biljett/.test(g.rubrik)){ fel(vad + ': uppgift ' + V.grupp + ' är inte biljett och popcorn ("' + (g && g.rubrik) + '")'); continue; }
-    const m1 = /uttrycket\s+(\d*)a\s*\+\s*(\d*)b\b/.exec(g.rader[0].fraga || ''), m2 = /a = (\d+), b = (\d+)/.exec(g.rader[1].vansterText || '');
+    const b = A.BLAD[V.blad](A.FRON[V.blad] + 1000 * k), g = b.grupper[V.grupp - 1], vad = plats + ', ' + (k ? 'Nytt blad ' + k : 'första bladet');
+    if(!g || g.rubrik.indexOf(V.rubrikOrd) < 0){ fel(vad + ': uppgiften är inte "' + V.rubrikOrd + '" ("' + (g && g.rubrik) + '")'); continue; }
+    const m1 = /uttrycket\s+(\d*)([a-z])\s*\+\s*(\d*)([a-z])\b/.exec(g.rader[0].fraga || ''), m2 = /([a-z]) = (\d+), ([a-z]) = (\d+)/.exec(g.rader[1].vansterText || '');
     if(!m1 || !m2){ fel(vad + ': kan inte läsa uppgiften ("' + (g.rader[0].fraga || '') + '" / "' + (g.rader[1].vansterText || '') + '")'); continue; }
     uppg++;
-    const na = +(m1[1] || 1), nb = +(m1[2] || 1), pa = +m2[1], pb = +m2[2];
+    const na = +(m1[1] || 1), nb = +(m1[3] || 1), pa = +m2[2], pb = +m2[4];
     sett.antal[na + '+' + nb] = 1; sett.pris[pa + '/' + pb] = 1;
-    const tx = vad + ': ' + m1[0].replace('uttrycket ', '') + ', a = ' + pa + ', b = ' + pb;
-    if(na < V.antal.forsta[0] || na > V.antal.forsta[1]) fel(tx + ' — ' + na + ' biljetter (ska vara ' + V.antal.forsta.join('–') + ')');
-    if(V.antal.andraHogstForsta && nb > na) fel(tx + ' — ' + nb + ' popcorn till ' + na + ' biljetter (högst lika många)');
-    if(V.pris.forsta.indexOf(pa) < 0) fel(tx + ' — biljettpriset ' + pa + ' kr (ska vara ' + V.pris.forsta.join('/') + ')');
-    if(V.pris.andra.indexOf(pb) < 0) fel(tx + ' — popcornpriset ' + pb + ' kr (ska vara ' + V.pris.andra.join('/') + ')');
+    const tx = vad + ': ' + m1[0].replace('uttrycket ', '') + ', ' + m2[0];
+    if(na < V.antal.forsta[0] || na > V.antal.forsta[1]) fel(tx + ' — ' + na + ' av den första varan (ska vara ' + V.antal.forsta.join('–') + ')');
+    if(V.antal.andraHogstForsta && nb > na) fel(tx + ' — ' + nb + ' av den andra varan till ' + na + ' (högst lika många)');
+    if(V.antal.andra && (nb < V.antal.andra[0] || nb > V.antal.andra[1])) fel(tx + ' — ' + nb + ' av den andra varan (ska vara ' + V.antal.andra.join('–') + ')');
+    if(V.pris.forsta.indexOf(pa) < 0) fel(tx + ' — priset ' + pa + ' kr (ska vara ' + V.pris.forsta.join('/') + ')');
+    if(V.pris.andra.indexOf(pb) < 0) fel(tx + ' — priset ' + pb + ' kr (ska vara ' + V.pris.andra.join('/') + ')');
     if(g.rader[1].svar !== na * pa + nb * pb) fel(tx + ' — beloppet ' + g.rader[1].svar + ' ≠ ' + (na * pa + nb * pb));
+    if(V.facitOrd && String(g.rader[0].svar).indexOf(V.facitOrd) < 0) fel(tx + ' — facit "' + g.rader[0].svar + '" saknar "' + V.facitOrd + '"');
   }
-  // TÄCKNING: popcorn ska också kunna vara FÄRRE än biljetterna (sjuans-regeln släppt för uppgiften)
-  if(V.tackning && V.tackning.andraFarre && !Object.keys(sett.antal).some(function(k){ const p = k.split('+'); return +p[1] < +p[0]; }))
-    fel('Tolka uttryck blad 1, uppgift 2: inget blad har färre popcorn än biljetter (' + Object.keys(sett.antal).sort().join(' ') + ')');
-  console.log('  ' + (brott === fore ? '✓' : '✗') + ' Tolka uttryck blad 1, uppgift 2 (biljett och popcorn): ' + uppg + ' uppgifter · antal '
+  const par = Object.keys(sett.antal).map(function(k){ return k.split('+').map(Number); });
+  if(V.tackning && V.tackning.andraFarre && !par.some(function(p){ return p[1] < p[0]; })) fel(plats + ': inget blad har färre av den andra varan (' + Object.keys(sett.antal).sort().join(' ') + ')');
+  if(V.tackning && V.tackning.lika && !par.some(function(p){ return p[1] === p[0]; })) fel(plats + ': inget blad har lika antal (' + Object.keys(sett.antal).sort().join(' ') + ')');
+  console.log('  ' + (brott === fore ? '✓' : '✗') + ' ' + plats + ' (' + V.rubrikOrd + '): ' + uppg + ' uppgifter · antal '
     + Object.keys(sett.antal).sort().join(' ') + ' · priser ' + Object.keys(sett.pris).length + ' par');
-}
+});
 
 // 'ak8k2d1:person-langd' — "En person är a cm lång …": svaret med rubrikens bokstav, bara längre/kortare
 const P = SPEC.BLAD && SPEC.BLAD['ak8k2d1:person-langd'];
