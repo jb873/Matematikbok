@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Matematik · Algebra · Problemlösning · Uppgifter</title>
-<!-- PILOT (2026-11-18): UPPGIFTSSIDAN i det nya formatet (doc/KONVENTIONER.md, nov 2026). Ett blad per sida:
-     ?blad=instruktion|foljd|delar|omkrets|vinklar. Bladet, rättaren och knappsatsen är de BEFINTLIGA
-     komponenterna (js/motor/problemlosning/prob-blad*.js, ProbRattare, AK8_UI) — sidan skapar bara bladets
-     montering, och bladmodulen ritar sig själv. Hero borta → Tillbaka-knapp. -->
+<!-- PILOT (2026-11-18): UPPGIFTSSIDAN i det nya formatet (doc/KONVENTIONER.md, nov 2026). En typ per sida,
+     Blad A/B som växel: ?typ=instruktion|foljd|delar|omkrets|vinklar&blad=A|B — eller ett test: ?test=test1|test2.
+     Uppgifterna: js/motor/problemlosning/prob-bank-ak7.js (Joachims dokument). Bladet, rättaren och knappsatsen
+     är de BEFINTLIGA komponenterna (ProbBlad/ProbBlad2.render, ProbRattare, AK8_UI). Hero borta → Tillbaka-knapp. -->
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
@@ -49,6 +49,12 @@
 /* TIPSA-knappen (elevfeedback.js) står annars i samma hörn som knappsatsen — den flyttas till vänster här. */
 body .feedback-knapp{right:auto;left:20px;}
 .nf-yta .prob-kort .actions{position:fixed;right:16px;z-index:101;margin:0;}
+/* Växeln Blad A/B (kanonens .blad-nav) och "Visa genomgång" på en rad överst; filmen fälls ut under raden. */
+.nf-verktyg{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 28px 0;}
+.nf-yta .blad-nav{max-width:none;margin:0;padding:0;}
+.nf-film{padding:0 28px;}
+.nf-film .forel-wrap{max-width:820px;margin:0;padding:12px 0 4px;}
+.nf-film .lecture-list{max-width:none;margin:0;padding:0;}   /* kanonens kortlista bär egen sidmarginal */
 @media (max-width:640px){
   #prob-keypad{left:0;right:0;bottom:0;max-width:none;border-radius:0;}
   .nf-yta .prob-kort .actions{position:static;}
@@ -185,25 +191,22 @@ body .feedback-knapp{right:auto;left:20px;}
 </nav>
 
 <div class="nf-topp"><a class="nf-tillbaka" id="nf-tillbaka" href="index.html">← Tillbaka</a></div>
-<main class="nf-yta" id="nf-yta"></main>
+<main class="nf-yta" id="nf-yta">
+  <!-- Blad A/B som växel (kanonens bladnavigering) + "Visa genomgång"; filmen fälls ut överst, under raden. -->
+  <div class="nf-verktyg" id="nf-verktyg">
+    <div class="blad-nav" id="nf-bladnav" role="tablist" aria-label="Bladets varianter"></div>
+    <button type="button" class="btn subtle nf-genomgang" id="nf-genomgang" aria-expanded="false" hidden>Visa genomgång</button>
+  </div>
+  <section class="nf-film" id="nf-film" hidden></section>
+</main>
 
 <script>
-/* ── VILKET BLAD: ?blad=<id>. Bara det bladets montering skapas — bladmodulerna ritar sig själva i den
-   montering som finns (prob-blad*.js: #sheet-<id>). Rubriken följer det nya formatets namn. ── */
-window.NF_BLADEN = {
-  instruktion: { nr: 1, titel: 'följa instruktion' },
-  foljd:       { nr: 2, titel: 'Tal som följer varandra' },
-  delar:       { nr: 3, titel: 'Flera personer och saker (2–3 personer)' },
-  omkrets:     { nr: 4, titel: 'Omkrets' },
-  vinklar:     { nr: 5, titel: 'Vinklar' }
-};
+/* ── VAD SOM VISAS: ?typ=<typ>&blad=A|B (ett uppgiftsblad) eller ?test=test1|test2 (ett test).
+   Uppgifterna kommer ur banken (js/motor/problemlosning/prob-bank-ak7.js); sidan väljer bara vilka.
+   Tillbaka går till sidan man kom från: en relativ retur-adress, annars arbetssidan. ── */
 (function(){
-  var q = new URLSearchParams(location.search), id = q.get('blad');
-  if(!window.NF_BLADEN[id]) id = 'instruktion';
-  window.NF_BLAD = id;
-  var m = document.createElement('div'); m.className = 'ovn-wrap'; m.id = 'sheet-' + id;
-  document.getElementById('nf-yta').appendChild(m);
-  // Tillbaka till sidan man kom från: en relativ retur-adress, annars arbetssidan
+  var q = new URLSearchParams(location.search);
+  window.NF_VAL = { typ: q.get('typ') || q.get('blad'), blad: (q.get('blad') || '').toUpperCase(), test: q.get('test') };
   var retur = q.get('retur');
   if(retur && !/^[a-z][a-z0-9+.\-]*:|^\/|^\\/i.test(retur.replace(/[\u0000- ]/g, ''))) document.getElementById('nf-tillbaka').href = retur;
 })();
@@ -226,18 +229,64 @@ window.NF_BLADEN = {
 <script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad.js"></script>
 <script src="../../../js/motor/problemlosning/prob-blad2.js"></script>
-<script src="../../../js/motor/problemlosning/prob-blad3.js"></script>
-<script src="../../../js/motor/problemlosning/prob-blad4.js"></script>
-<script src="../../../js/motor/problemlosning/prob-blad5.js"></script>
+<script src="../../../js/motor/problemlosning/prob-bank-ak7.js"></script>
+<script src="../../../js/data/forelasningar.js"></script>
 
 <script>
+/* ── MONTERINGEN. Bladkomponenterna är de befintliga: ProbBlad.render (Följa instruktion — talet ÄR x,
+   inga delar att namnge) och ProbBlad2.render (femstegsformen). Båda bladen A och B ritas, var i sin
+   montering; växeln visar ett i taget, så det eleven skrivit på A finns kvar när hon går till B och tillbaka.
+   Ett test ritas med ProbBlad2.render: testet blandar typerna i ett blad, och bara femstegsformen bär
+   alla fem (se ANTAGANDEN i leveransen). ── */
 (function(){
-  var id = window.NF_BLAD, b = window.NF_BLADEN[id], mount = document.getElementById('sheet-' + id);
-  /* RUBRIKEN: bladmodulen skriver sin egen titel (den gamla sidans namn). Det nya formatets namn —
-     "Blad 1 · följa instruktion" — sätts här, och igen när bladet ritas om ("Börja om"). */
-  function rubrik(){ var r = mount && mount.querySelector('.niva-rubrik'); var t = 'Blad ' + b.nr + ' · ' + b.titel; if(r && r.textContent !== t) r.textContent = t; }
-  rubrik();
-  if(mount && window.MutationObserver) new MutationObserver(rubrik).observe(mount, { childList: true, subtree: true });
+  var BANK = window.ProbBankAk7, val = window.NF_VAL, yta = document.getElementById('nf-yta');
+  var nav = document.getElementById('nf-bladnav'), gk = document.getElementById('nf-genomgang'), film = document.getElementById('nf-film');
+  if(!BANK) return;
+  function montering(id){ var m = document.createElement('div'); m.className = 'ovn-wrap nf-mount'; m.id = id; yta.appendChild(m); return m; }
+
+  if(val.test){
+    var tb = BANK.testBlad(val.test) || BANK.testBlad('test1');
+    document.title = 'Matematik · Algebra · Problemlösning · ' + tb.titel;
+    nav.hidden = true;
+    window.ProbBlad2.render(montering('nf-sheet-' + tb.id), tb);
+    window.NF_BLAD = tb.id;
+    return;
+  }
+
+  var typ = BANK.typ(val.typ) || BANK.TYPER[0];
+  var render = (typ.form === 'instruktion') ? window.ProbBlad.render : window.ProbBlad2.render;
+  document.title = 'Matematik · Algebra · Problemlösning · ' + typ.titel;
+  var mounts = {}, knappar = {};
+  BANK.UPPGIFTSBLAD.forEach(function(b){
+    var m = montering('nf-sheet-' + typ.id + '-' + b); m.setAttribute('data-blad', b);
+    render(m, BANK.blad(typ.id, b));
+    mounts[b] = m;
+    var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'blad-nav-btn'; kn.setAttribute('role', 'tab');
+    kn.innerHTML = '<span class="blad-nav-nr">' + b + '</span>Blad ' + BANK.nr(typ.id) + b;
+    kn.addEventListener('click', function(){ visa(b); });
+    nav.appendChild(kn); knappar[b] = kn;
+  });
+  function visa(b){
+    Object.keys(mounts).forEach(function(k){
+      mounts[k].hidden = (k !== b);
+      knappar[k].classList.toggle('is-active', k === b); knappar[k].setAttribute('aria-selected', k === b ? 'true' : 'false');
+    });
+    window.NF_BLAD = typ.id + '-' + b;
+    try { history.replaceState(null, '', '?typ=' + typ.id + '&blad=' + b + (new URLSearchParams(location.search).get('retur') ? '&retur=' + encodeURIComponent(new URLSearchParams(location.search).get('retur')) : '')); } catch(e){}
+  }
+  visa(mounts[val.blad] ? val.blad : BANK.UPPGIFTSBLAD[0]);
+
+  /* VISA GENOMGÅNG: typens film ur föreläsningsregistret (nyckeln ak7-k3-d5). Föreläsningsmodulens egen
+     yta — YouTube laddas först när eleven klickar play (noll nätväg tills dess). */
+  var F = window.FOREL, f = F && F.videorFor('ak7-k3-d5').filter(function(x){ return x.id === typ.film; })[0];
+  if(f && F.renderFilmer){
+    gk.hidden = false;
+    gk.addEventListener('click', function(){
+      var oppen = gk.getAttribute('aria-expanded') === 'true';
+      if(!oppen && !film.firstChild) F.renderFilmer(film, [f]);
+      film.hidden = oppen; gk.setAttribute('aria-expanded', oppen ? 'false' : 'true');
+    });
+  }
 })();
 </script>
 
@@ -252,8 +301,8 @@ window.NF_BLADEN = {
   /* KONTROLLERA NERE TILL HÖGER, ovanför knappsatsen: bladets egen knapprad (Kontrollera, Börja om)
      placeras fast över knappsatsen. Komponenten är oförändrad — bara platsen. */
   function placera(){
-    var a = document.querySelector('.nf-yta .prob-kort .actions'); if(!a) return;
-    a.style.bottom = (kp.getBoundingClientRect().height + 28) + 'px';
+    var h = (kp.getBoundingClientRect().height + 28) + 'px';
+    Array.prototype.forEach.call(document.querySelectorAll('.nf-yta .prob-kort .actions'), function(a){ a.style.bottom = h; });
   }
   placera(); window.addEventListener('resize', placera);
   new MutationObserver(placera).observe(document.getElementById('nf-yta'), { childList: true, subtree: true });

@@ -26,7 +26,14 @@
     'ak7-k3-d1': [],
     'ak7-k3-d3': [],
     'ak7-k3-d4': [],
-    'ak7-k3-d5': []
+    // Problemlösning (order 2026-11-18, forts.): en genomgång per typ, samma namn som typen.
+    'ak7-k3-d5': [
+      { id: 'i32KuSLitLI', titel: 'Följa instruktion' },
+      { id: 'YAcUxMijrx4', titel: 'Tal som följer varandra' },
+      { id: 'VlMJXA95eVU', titel: 'Flera personer och saker' },
+      { id: 'ZnhbsnpMrqo', titel: 'Omkrets' },
+      { id: 'lmk_IgsQNeI', titel: 'Vinklar' }
+    ]
   };
 
   // ELEVTEXT som fält (intro/varning/titel) — elevtext-låset ser bara kända fältnamn, inte textContent-tilldelningar.
@@ -137,6 +144,8 @@
     panelEl.innerHTML = ''; panelEl.appendChild(wrap);
   }
 
-  window.AK8_FOREL = { register: AK8_FORELASNINGAR, videorFor: videorFor, renderForelFlik: renderForelFlik, renderFlik: renderFlik };
+  // renderFilmer exporteras för uppgiftssidans "Visa genomgång": samma yta, men bara bladets egen film.
+  window.AK8_FOREL = { register: AK8_FORELASNINGAR, videorFor: videorFor, renderForelFlik: renderForelFlik, renderFlik: renderFlik,
+                       renderFilmer: renderFilmer };
   window.FOREL     = window.AK8_FOREL;   // samma modul, namn utan årskurs (sjuan monterar mot denna)
 })();
