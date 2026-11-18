@@ -129,6 +129,62 @@ Två rader stod här till 2026-10-01 och står inte kvar: *ny sida in i grindarn
 
 ---
 
+## Arbetssidan — moment-sida, horisont och uppgiftssida (nov 2026)
+
+Pilot: algebra åk7 + procent åk8/9. Ombyggnad av delade delkapitel-skal.js
+verifieras av delkapitel-grind.js innan elever lutar sig mot det.
+
+MOMENT-SIDA (elevens arbetssida)
+- Slimmat sidhuvud på elevnivå; den stora heron bara på kapitelsidan.
+- Två flikar utan undertext: "Arbeta med området" / "Mina kunskaper".
+- Vänsterspalt moment-först. Dagens träning + Test UNDER momenten. Badge FRAMFÖR namnet.
+- Mittensektion, ordning: Uppgifter → Föreläsningar → Metodträning.
+
+HORISONT-BADGES (härleds, taggas inte för hand)
+Varje nod/moment bär årskurs (7/8/9) OCH roll (karna/breddning/fordjupning).
+Badgen härleds mot eleven:
+  doc-år = elevens, kärna      → 7/8/9 (Nu)
+  doc-år = elevens, fördjupning → F
+  doc-år > elevens             → FF
+  doc-år < elevens             → R (repetition)
+Badge framför namnet; bokstav bär, färg förstärker; ingen teckenförklaring.
+KRAV: taxonomin måste bära årskurs per nod (rollen finns redan).
+
+UPPGIFTER (blad)
+- Blad = nivå + ev. variant: "Blad 1A", "Blad 1B", "Blad 2" — utan mellanslag;
+  bokstav BARA vid flera varianter (speglar K-A).
+- Info/descriptor på bladet när det finns varianter (namnger, instruerar aldrig — §4).
+
+FÖRELÄSNINGAR
+- Har namn, samma som uppgifterna; ingen längd visas.
+
+METODTRÄNING = färdighetsträningens träd (INTE platta chips)
+- Metodträning är en knapp; trädet fälls ut UNDER den på sidan.
+- Trädet = den byggda färdighetsträningen/kartans noder, scope:at tre nivåer:
+  kapitel (Algebra) → avsnitt (Ekvationer) → bladet.
+- Horisonten filtrerar trädet (R/Nu/F/FF) — samma mekanism som kartans
+  "Godkänt (kärna)/Allt" roll-filter. En variant har inga siffror/underrubriker,
+  den är en mängd uppgifter att träna. Mastery-färg visar status. Klick → drill bredvid.
+- INGET parallellt träd byggs — återanvänd komponenten (A1/Regel 0).
+
+UPPGIFTSSIDA (övningssida)
+- Hero borta → "Tillbaka"-knapp (till sidan man kom från).
+- Full bredd (plats för flera mellanled). Knappsats + Kontrollera NERE TILL HÖGER,
+  inte kolumn till höger om uppgiften.
+- Blad A/B som växel på sidan. Bladfilm överst + "Visa genomgång"-knapp vid uppgiften.
+- Svarsrutor små, växer med svaret (§3).
+- Nytt blad prestationsstyrt (~80 %: 5→4, 10→8): löst → svårare författad nivå;
+  ej löst → samma. Svårare = nästa författade nivå, aldrig algoritm (takregeln).
+
+UPPGIFTSDOKUMENT (ett per blad)
+Fält: Del · Moment · Blad (nr + ev. bokstav) · Årskurs (7/8/9) ·
+Roll (kärna/breddning/fordjupning) · Metod-etikett (namnger, §4) ·
+Takregel golv/tak · Antal (mastery-tröskel) · uppgifter + facit per ruta (§K-K).
+
+Vad vaktar den: — mestadels ny UI utan grind; byggs och verifieras per pilot.
+
+---
+
 ## Delade plattformsregler — kanoniserade i alla ämnen
 
 ### Verifieringsregler — och vad som vaktar dem
