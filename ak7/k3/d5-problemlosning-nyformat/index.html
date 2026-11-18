@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Algebra · Problemlösning</title>
+<!-- PILOT (2026-11-18): Problemlösning åk7 i det nya formatet — doc/KONVENTIONER.md, "Arbetssidan — moment-sida,
+     horisont och uppgiftssida (nov 2026)". Byggd BREDVID den gamla sidan (../d5-problemlosning/), som är orörd.
+     Ingen befintlig sida länkar hit. Utkast för Joachims granskning. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
+<style>
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+/* SLIMMAT SIDHUVUD på elevnivå — den stora heron hör till kapitelsidan. */
+.nf-huvud{max-width:1180px;margin:0 auto;padding:18px 28px 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+.nf-huvud h1{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);margin:0;}
+.nf-huvud .nf-kapitel{font-family:var(--cinzel);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+/* TVÅ FLIKAR UTAN UNDERTEXT: ramens undertexter (.nr-mini, .nr-sub) visas inte i det nya formatet. */
+.nr-lager .nr-mini, .nr-mrad .nr-sub{display:none;}
+/* HORISONT-BADGE framför namnet: bokstaven bär, färgen förstärker. Ingen teckenförklaring. */
+.hz{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 5px;margin-right:8px;
+  border-radius:6px;font-family:var(--cinzel);font-size:11px;font-weight:600;letter-spacing:.02em;vertical-align:middle;}
+.hz-nu{background:var(--navy);color:#fff;}
+.hz-f{background:var(--gold-lt);color:var(--navy);}
+.hz-ff{background:var(--paper-dk);color:var(--ink-faint);border:1px dashed #c9bfa9;}
+.hz-r{background:#e3ece6;color:var(--green);}
+/* Dagens träning + Test UNDER momenten — en egen grupp, avskild från momenten. */
+.nr-spalt .nr-grp + .nr-grp{margin-top:14px;padding-top:12px;border-top:1px solid var(--paper-dk);}
+/* MITTENSEKTIONEN: Uppgifter → Föreläsningar → Metodträning */
+.nf-sek{margin:0 0 24px;}
+.nf-sek-h{font-family:var(--cinzel);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;}
+.nf-lista{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none;}
+.nf-blad{display:flex;align-items:baseline;gap:10px;padding:11px 14px;border:1px solid var(--paper-dk);border-radius:8px;
+  background:#fff;color:var(--ink);text-decoration:none;font-family:var(--serif);font-size:18px;}
+a.nf-blad:hover{border-color:var(--gold-lt);}
+.nf-blad .nf-nr{font-family:var(--cinzel);font-size:13px;letter-spacing:.04em;color:var(--ink-soft);min-width:58px;}
+.nf-blad.is-kommer{color:var(--ink-faint);background:var(--paper-lt);cursor:default;}
+.nf-metodknapp{font-family:var(--cinzel);font-size:12.5px;letter-spacing:.06em;color:var(--ink);background:var(--paper-lt);
+  border:1px solid var(--paper-dk);border-radius:8px;padding:10px 16px;cursor:pointer;}
+.nf-metodknapp[aria-expanded="true"]{background:var(--navy);border-color:var(--navy);color:#fff;}
+.nf-trad{width:100%;height:560px;border:1px solid var(--paper-dk);border-radius:8px;margin-top:10px;background:#fff;}
+.nr-karta-frame{width:100%;height:760px;border:0;}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="../../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7-k3.html">Kapitel 3</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Problemlösning</span>
+  </div>
+</nav>
+
+<header class="nf-huvud">
+  <span class="nf-kapitel">Algebra</span>
+  <h1>Problemlösning</h1>
+</header>
+
+<div id="navram"></div>
+
+<!-- Vyerna byggs här och flyttas in i ramens ytor (samma mönster som piloten ak7/k1/d1). -->
+<div id="scener" hidden>
+  <div class="nr-scen" id="scen-moment"></div>
+  <div class="nr-mview is-on" id="mv-kunskapslage">
+    <iframe class="nr-karta-frame" id="karta-frame" title="Kunskapsläge" loading="lazy"
+            src="../kunskapslage/index.html?embed=1"></iframe>
+  </div>
+  <div class="nr-mview" id="mv-sjalvskattning">
+    <iframe class="nr-karta-frame" id="sjalv-frame" title="Självskattning" loading="lazy"
+            src="../kunskapslage/index.html?embed=1&amp;tab=sjalv"></iframe>
+  </div>
+</div>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Problemlösning</span>
+</footer>
+
+<script src="../../../js/data/k3-taxonomi.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script>
+(function(){
+'use strict';
+var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
+var ELEVENS_AR = 7;
+
+/* ── BLADEN (åk7, Nivå 1). Namnen ORDAGRANT ur analysen (arbetsordern 2026-11-18). id = bladmodulens
+   montering (js/motor/problemlosning/prob-blad*.js) — uppgifterna och facit återanvänds därifrån. ── */
+var BLADEN = [
+  { nr: 1, titel: 'följa instruktion',                         id: 'instruktion', nod: 'alg-prob-instruktion:problem' },
+  { nr: 2, titel: 'Tal som följer varandra',                   id: 'foljd',       nod: 'alg-prob-foljd:problem' },
+  { nr: 3, titel: 'Flera personer och saker (2–3 personer)',   id: 'delar',       nod: 'alg-prob-delar:problem' },
+  { nr: 4, titel: 'Omkrets',                                   id: 'omkrets',     nod: 'alg-prob-omkrets:problem' },
+  { nr: 5, titel: 'Vinklar',                                   id: 'vinklar',     nod: 'alg-prob-vinklar:problem' }
+];
+
+/* ── MOMENTEN. Nivå 1 = åk7 (byggd). Nivå 2–4 = åttan/nian: refereras framåt, inget innehåll byggs nu.
+   Årskursen för Nivå 1 HÄRLEDS ur taxonomin (bladens noder); för Nivå 2–4 finns inga noder än, så den
+   står här (se ANTAGANDEN i leveransen). ── */
+var MOMENT = [
+  { titel: 'Nivå 1', blad: BLADEN },
+  { titel: 'Nivå 2', ar: 8, roll: 'karna', kommer: true },
+  { titel: 'Nivå 3', ar: 9, roll: 'karna', kommer: true },
+  { titel: 'Nivå 4', ar: 9, roll: 'karna', kommer: true }
+];
+
+// Taxonomin bär ingen årskurs per nod, bara arskursRelevans {ak7:'mal', …}. Årskursen = första år med 'mal'.
+function nod(id){ return TAX.filter(function(n){ return n.id === id; })[0] || null; }
+function arUrNod(n){
+  var r = (n && n.arskursRelevans) || {};
+  for(var a = 7; a <= 9; a++) if(r['ak' + a] === 'mal') return a;
+  for(var b = 7; b <= 9; b++) if(r['ak' + b]) return b;
+  return null;
+}
+function horisontFor(m){
+  var ar = m.ar, roll = m.roll;
+  if(m.blad){   // härleds: lägsta årskurs bland bladens noder; kärna om någon nod är kärna
+    var noder = m.blad.map(function(b){ return nod(b.nod); }).filter(Boolean);
+    ar = Math.min.apply(null, noder.map(arUrNod).filter(function(x){ return x; }));
+    roll = noder.some(function(n){ return n.roll === 'karna'; }) ? 'karna' : (noder[0] && noder[0].roll);
+  }
+  return badge(ar, roll);
+}
+/* HORISONT-BADGEN (KONVENTIONER, nov 2026): doc-år = elevens + kärna → 7/8/9 (Nu); doc-år = elevens +
+   fördjupning → F; doc-år > elevens → FF; doc-år < elevens → R. */
+function badge(ar, roll){
+  if(!ar) return '';
+  if(ar > ELEVENS_AR) return '<span class="hz hz-ff">FF</span>';
+  if(ar < ELEVENS_AR) return '<span class="hz hz-r">R</span>';
+  if(roll === 'fordjupning') return '<span class="hz hz-f">F</span>';
+  return '<span class="hz hz-nu">' + ar + '</span>';
+}
+
+var scen = document.getElementById('scen-moment');
+function el(tagg, klass, text){ var e = document.createElement(tagg); if(klass) e.className = klass; if(text != null) e.textContent = text; return e; }
+
+function visaMoment(m){
+  scen.innerHTML = '';
+  // UPPGIFTER — bladen, "Blad 1" utan bokstav (en variant per blad)
+  var s1 = el('section', 'nf-sek'); s1.appendChild(el('h2', 'nf-sek-h', 'Uppgifter'));
+  var l1 = el('div', 'nf-lista');
+  m.blad.forEach(function(b){
+    var a = el('a', 'nf-blad');
+    a.href = 'uppgift.html?blad=' + encodeURIComponent(b.id);
+    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel));
+    l1.appendChild(a);
+  });
+  s1.appendChild(l1); scen.appendChild(s1);
+  // FÖRELÄSNINGAR — samma namn som bladen, ingen längd. Registret (js/data/forelasningar.js) har inga
+  // filmer för ak7-k3-d5 än, så de står utan länk: inget går att klicka utan innehåll.
+  var s2 = el('section', 'nf-sek'); s2.appendChild(el('h2', 'nf-sek-h', 'Föreläsningar'));
+  var l2 = el('div', 'nf-lista');
+  m.blad.forEach(function(b){
+    var d = el('div', 'nf-blad is-kommer'); d.setAttribute('aria-disabled', 'true');
+    d.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); d.appendChild(el('span', null, b.titel));
+    l2.appendChild(d);
+  });
+  s2.appendChild(l2); scen.appendChild(s2);
+  // METODTRÄNING — en knapp; färdighetsträningens träd (kartans komponent, KartaMotor) fälls ut UNDER den.
+  var s3 = el('section', 'nf-sek'); s3.appendChild(el('h2', 'nf-sek-h', 'Metodträning'));
+  var kn = el('button', 'nf-metodknapp', 'Metodträning'); kn.type = 'button'; kn.setAttribute('aria-expanded', 'false');
+  var trad = null;
+  kn.addEventListener('click', function(){
+    var oppen = kn.getAttribute('aria-expanded') === 'true';
+    if(!trad){ trad = el('iframe', 'nf-trad'); trad.title = 'Metodträning'; trad.src = 'metodtraning.html'; s3.appendChild(trad); }
+    trad.hidden = oppen; kn.setAttribute('aria-expanded', oppen ? 'false' : 'true');
+  });
+  s3.appendChild(kn); scen.appendChild(s3);
+}
+
+var moment = MOMENT.map(function(m){
+  return { titel: horisontFor(m) + m.titel, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
+});
+
+/* VÄNSTERSPALTEN, moment-först: momenten, och UNDER dem Dagens träning + Test. Inget av de två finns
+   byggt för Problemlösning än (inget färdigt test för k3d5) — de står utan länk. */
+var ram = window.NavRam && window.NavRam.montera({
+  vard: document.getElementById('navram'),
+  arbeta: [ { rubrik: 'Problemlösning', grupper: [
+    { rubrik: null, varianter: moment },
+    { rubrik: null, varianter: [ { titel: 'Dagens träning', kommer: true }, { titel: 'Test', kommer: true } ] }
+  ] } ],
+  mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
+          { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ],
+  niva: null
+});
+if(ram){
+  var s = document.getElementById('scen-moment'); s.classList.add('is-on'); ram.ytaArbeta.appendChild(s);
+  ['mv-kunskapslage', 'mv-sjalvskattning'].forEach(function(id){ var e = document.getElementById(id); if(e) ram.ytaMina.appendChild(e); });
+  var hall = document.getElementById('scener'); if(hall) hall.remove();
+}
+})();
+</script>
+<script src="../../../js/elevfeedback.js" defer></script>
+</body>
+</html>

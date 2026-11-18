@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metodträning · Problemlösning</title>
+<!-- PILOT (2026-11-18): METODTRÄNING = färdighetsträningens träd. Inget parallellt träd: det är kartans
+     komponent (js/karta/karta-motor.js + karta.css, samma som ../kunskapslage/), monterad med taxonomin
+     scope:ad till Problemlösning. Visas i en iframe under knappen "Metodträning" på arbetssidan. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/karta/karta.css">
+<style>
+  .wrap{padding-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meter" id="meter"></div>
+  <div class="controls">
+    <span class="seg" id="mal-seg">
+      <button data-mal="godkant">Godkänt (kärna)</button>
+      <button data-mal="allt">Allt</button>
+    </span>
+    <span class="controls-note" id="scope-note"></span>
+  </div>
+  <div class="karta"><div class="cols" id="cols"></div></div>
+  <p class="privacy" id="privacy"></p>
+</div>
+
+<script src="../../../js/data/k3-taxonomi.js"></script>
+<script src="../../../js/mastery-karna.js"></script>
+<script src="../../../js/mastery-k3.js"></script>
+<script src="../../../js/karta/karta-motor.js"></script>
+<script>
+(function(){
+  // SCOPE: grenen Problemlösning (alg-problem) och allt under den — tre nivåer under kapitlets rot.
+  var ALLA = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
+  var byId = {}; ALLA.forEach(function(n){ byId[n.id] = n; });
+  function under(n){ while(n){ if(n.id === 'alg-problem') return true; n = byId[n.parent]; } return false; }
+  var GREN = ALLA.filter(under);
+  // Egen pref-nyckel: utfällningen här ska inte skriva över kunskapslägets.
+  window.KartaMotor.montera({ taxonomi: { noder: GREN }, mastery: window.MasteryK3, arskurs: 'ak7', minNiva: null,
+    prefKey: 'k3.prob.nyformat.pref.v1', ramPath: '../../../ak7-k3-ram.html', rotNamn: 'Algebra', orsakFramtid: 'åk 8' });
+})();
+</script>
+</body>
+</html>
