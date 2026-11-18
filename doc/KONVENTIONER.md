@@ -16,6 +16,18 @@ Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 
 ---
 
+## Regel 0 — inga beslut utan Joachims godkännande
+
+Den här filen är kontraktet. Varje chatt och varje Code-pass som rör matteboken läser den **FÖRST** och bygger på det som redan står här.
+
+- Finns en konvention: följ den exakt och bygg på **funktionen** där den bor — kopiera aldrig in en parallell variant (det är vad resten av filen vaktar mot).
+- Saknas en regel för det som behövs: **stanna, lägg fram alternativ, fråga Joachim.** Gissa aldrig, "kör inte bara på".
+- Inget nytt designval, ny komponent eller ny regel införs utan Joachims godkännande. En ny plattformsobservation skrivs i [`PLATTFORMS-ANDRINGAR.md`](PLATTFORMS-ANDRINGAR.md) tills den är beslutad.
+
+**Vad vaktar den:** — (ingen grind; bärs av att den står först och att varje pass läser filen.)
+
+---
+
 ## §1 Navigation
 
 | Konvention | Funktionen bor i | Vad vaktar den |
