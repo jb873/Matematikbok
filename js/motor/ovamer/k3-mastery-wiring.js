@@ -35,6 +35,8 @@
   // ── 1. Router ──
   function route(){
     if(nod && DEEPLINK[nod] && typeof oppnaGrupp === 'function'){ oppnaGrupp(DEEPLINK[nod][0], DEEPLINK[nod][1]); injiceraTillKarta(); }
+    // Författad källa (?bank=, k3-forfattad-kalla.js ritar drillen): samma väg tillbaka till kartan.
+    else if(!nod && /[?&]bank=[^&\s]/i.test(location.search)){ injiceraTillKarta(); }
     else if(nod && typeof renderOversikt === 'function'){ renderOversikt(); }   // okänd deeplink → översikt
     // ingen deeplink: ramen renderade redan översikten (ak7-k3-ram.html:450)
   }

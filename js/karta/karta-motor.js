@@ -32,7 +32,7 @@
     function lovAntalUnder(node){
       var n = 0;
       barnAv(node.id).forEach(function(c){
-        if(c.niva === 'lovnod'){ var sc = scopeAv(c, PREF); if(c.generator && !c.doljKarta && sc.inScope && !sc.stod) n++; }
+        if(c.niva === 'lovnod'){ var sc = scopeAv(c, PREF); if(harKalla(c) && !c.doljKarta && sc.inScope && !sc.stod) n++; }
         else n += lovAntalUnder(c);
       });
       return n;
@@ -48,6 +48,10 @@
     // kommer = obyggt: hela området (implemented:false) ELLER en enskild lövnod med visning.kommer (plats utan innehåll —
     // drillen är en stubb; hubben dämpar kortet, kartan länkar inte). Samma regel: en plats utan innehåll är inte klickbar.
     function arKommer(node){ if(node && node.visning && node.visning.kommer) return true; var o = (node && node.niva === 'omrade') ? node : omradeAv(node); return !!(o && !o.implemented && o.grupp !== 'avslutning'); }
+    // KÄLLAN till ett lövs drill (order 2026-11-19): en GENERATOR (som alltid) eller en FÖRFATTAD BANK —
+    // fältet bank: '<källa>:<referens>' (t.ex. 'prob-ak7:instruktion/1'). Ett löv med bank länkar till ramens
+    // drill precis som ett löv med generator; ramen serverar ur banken. Utan bank-fält är allt som förut.
+    function harKalla(n){ return !!(n && (n.generator || n.bank)); }
 
     // ── ELEV-LOKAL DATA · localStorage ENDAST. Lämnar ALDRIG enheten. ──
     function lasMatris(){
@@ -67,7 +71,7 @@
       var m = {}, nu = Date.now(), D = 86400000;
       var monster = [ {n:6, spann:30}, {n:3, spann:5}, {n:1, spann:0}, {n:0, spann:0} ];
       var i = 0;
-      TAX.filter(function(n){ return n.niva === 'lovnod' && n.generator && !n.doljKarta; }).forEach(function(n){
+      TAX.filter(function(n){ return n.niva === 'lovnod' && harKalla(n) && !n.doljKarta; }).forEach(function(n){
         var p = monster[i++ % monster.length], log = [];
         for(var k = 0; k < p.n; k++){
           var dagarSedan = p.n > 1 ? p.spann * (p.n - 1 - k) / (p.n - 1) : 0;
@@ -147,6 +151,11 @@
       return bas + '?nod=' + encodeURIComponent(nodeId) + '&mal=' + PREF.mal;
     }
     function deeplink(node){
+      if(node.bank && !node.generator){   // författad bank: ramen serverar ur den (retur-kontraktet är detsamma)
+        return RAM + '?bank=' + encodeURIComponent(node.bank)
+          + '&retur=' + encodeURIComponent(returUrl(node.id))
+          + '&retur_txt=' + encodeURIComponent('← Till kunskapsläget');
+      }
       var ko, formaga, p = node.id.split(':');
       if(p.length === 2){ ko = p[0]; formaga = p[1]; }
       else if(node.visning && node.visning.formagaKey){ ko = node.parent; formaga = node.visning.formagaKey; }
@@ -181,7 +190,7 @@
       var status = opts.rootStatus || nodStatus(node, PREF, MATRIS);
       var kommer = !!status.kommer;
       var farg = kommer ? KOMMER : (status.gra ? GRA : FARG[status.state]);
-      var lankbar = !kommer && node.niva === 'lovnod' && !status.gra && !!node.generator;   // concept/obyggda-noder länkas ej
+      var lankbar = !kommer && node.niva === 'lovnod' && !status.gra && harKalla(node);   // concept/obyggda-noder länkas ej
       var isLov = node.niva === 'lovnod';
       var grenBarn = (!isLov && !opts.root) ? synligaBarn(node, false) : [];
       var arGren = grenBarn.length > 0;                 // fällbar gren (har synliga barn)
@@ -190,7 +199,7 @@
       var b = document.createElement(lankbar ? 'a' : 'div');
       b.className = 'node' + (opts.root ? ' root' : '') + (kommer ? ' kommer' : '') + (status.gra ? ' gra' : '')
         + (arGren ? ' gren' : '') + (isLov && lankbar ? ' lov-lank' : '')
-        + (isLov && !status.gra && !kommer && !node.generator ? ' nolink' : '');
+        + (isLov && !status.gra && !kommer && !harKalla(node) ? ' nolink' : '');
       if(node.id != null) b.setAttribute('data-nodid', node.id);
       b.style.background = farg.bg; b.style.borderColor = farg.br; b.style.color = farg.fg;
       // Utfällningsmarkör: EGEN symbol (▸ stängd / ▾ öppen) — ALDRIG ＋/★ som betyder breddning/fördjupning.
@@ -235,7 +244,7 @@
       renderControls();
     }
     function renderMeter(){
-      var lov = TAX.filter(function(n){ var sc = scopeAv(n, PREF); return n.niva === 'lovnod' && n.generator && !n.doljKarta && sc.inScope && !sc.stod; });
+      var lov = TAX.filter(function(n){ var sc = scopeAv(n, PREF); return n.niva === 'lovnod' && harKalla(n) && !n.doljKarta && sc.inScope && !sc.stod; });
       var Y = lov.length;
       var X = lov.filter(function(n){ return MAST.masteryState(MATRIS[n.id], kravNiva(n, PREF.minNiva), BLEKNING, !!LARD[n.id]) === 3; }).length;
       var pct = Y ? Math.round(X / Y * 100) : 0;

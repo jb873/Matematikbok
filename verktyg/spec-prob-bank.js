@@ -10,12 +10,13 @@
      3  följdfrågan (arean) = dokumentets värde (u.facitFoljd)
      4  modellens eget lösningsförslag rättas som RÄTT av ProbRattare (bladet går att få helt rätt)
      5  formen: fem typer, blad A–D, sex uppgifter per blad, sex varianter per typ, unika id
-     6  testen refererar till uppgifter som finns, och ingen av dem är en åttans uppgift
+     6  testen: sex frågor var som Joachim skrev dem, 3.2 med som författat innehåll (ingen nod), facit som
+        testdokumentet, Följa instruktion i ekvationsformen
+     7  metodträningens källa: varje variant ger Blad A → B → C → D, uppgift nr k på respektive blad
 
-   Negativ verifiering: --sabba facit (ett facitvärde ändras) och --sabba relation (en relation vänds)
-   ska båda fälla specen.
+   Negativ verifiering: --sabba facit | relation | test | rabatt | form ska var och en fälla specen.
 
-   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation] */
+   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form] */
 'use strict';
 const path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -29,6 +30,9 @@ const BANK = require(path.join(ROOT, 'js/motor/problemlosning/prob-bank-ak7.js')
 const sabba = (process.argv.indexOf('--sabba') > 0) ? process.argv[process.argv.indexOf('--sabba') + 1] : null;
 if(sabba === 'facit') BANK.TYPER[2].blad.B[0].facit = [12, 14];
 if(sabba === 'relation') BANK.TYPER[3].blad.C[2].relationer = ['A = B + 9'];
+if(sabba === 'test') BANK.TEST[0].uppgifter.splice(2, 1);                     // 3.2-frågan borttagen igen
+if(sabba === 'rabatt') BANK.TEST[1].uppgifter[4].relationer = ['U = 0,2·V', 'B = 0,55·V'];
+if(sabba === 'form') BANK.TYPER[0].blad.B[4].form = undefined;
 
 const brott = [];
 function fall(id, vad){ brott.push(id + ': ' + vad); }
@@ -66,12 +70,53 @@ BANK.TYPER.forEach(function(t){
     });
   });
 });
+// En uppgift: entydig, modellens värden = dokumentets facit, lösningsförslaget rättas rätt.
+function provaUppgift(u, utanNod){
+  const g = MOD.granska(u).filter(function(f){ return !(utanNod && f === 'nod saknas'); });
+  if(g.length){ fall(u.id, 'granska: ' + g.join('; ')); return; }
+  const v = MOD.varden(u, MOD.grenarAv(u)[0]);
+  if(v.fel){ fall(u.id, 'varden: ' + v.fel); return; }
+  MOD.nycklarAv(u).forEach(function(k, i){ if(!lika(v.varden[k], u.facit[i])) fall(u.id, 'del ' + k + ': modellen ger ' + v.varden[k] + ', dokumentet ' + u.facit[i]); });
+  const lf = MOD.losningsforslag(u);
+  const res = lf && R.ratta(u, { uttryck: lf.uttryck, rader: [lf.ekvation].concat(lf.kedja), insattning: lf.insattning, svar: lf.svar });
+  if(!res || res.status !== 'ratt') fall(u.id, 'lösningsförslaget rättas inte rätt');
+}
+
+// 6  TESTEN: sex frågor var, som Joachim skrev dem; 3.2 (rabatter) står med som författat testinnehåll
+//    (ingen nod), resten är bankens uppgifter. Följa instruktion bär form 'ekvation'.
+const TEST_FACIT = { test1: [[13, 22], [32], [400, 280, 240], [42, 44, 46], [56, 112, 86, 106], [80, 100, 65]],
+                     test2: [[500, 1000, 700], [65, 25], [73, 75, 77], [32, 20], [2400, 1920, 1320], [12]] };
 BANK.TEST.forEach(function(te){
-  te.uppgifter.forEach(function(ref){
-    const u = BANK.uppgift(ref);
-    if(!u) fall(te.id, 'okänd uppgift ' + ref);
+  const tb = BANK.testBlad(te.id);
+  if(!tb || tb.uppgifter.length !== 6) fall(te.id, 'ska ha sex frågor, har ' + (tb ? tb.uppgifter.length : 0));
+  (tb ? tb.uppgifter : []).forEach(function(u, i){
+    if(!u){ fall(te.id, 'fråga ' + (i + 1) + ' finns inte'); return; }
+    const forf = (typeof te.uppgifter[i] !== 'string');
+    if(forf){ if(u.typ !== 'rabatter' || u.nod !== null) fall(u.id, 'författad testfråga ska vara 3.2 utan nod'); provaUppgift(u, true); }
+    if(u.typ === 'instruktion' && u.form !== 'ekvation') fall(u.id, 'Följa instruktion ska lösas som ekvation (form)');
+    const f = (TEST_FACIT[te.id] || [])[i];
+    if(f && JSON.stringify(u.facit) !== JSON.stringify(f)) fall(te.id + ' fråga ' + (i + 1), 'facit ' + JSON.stringify(u.facit) + ' ≠ testets ' + JSON.stringify(f));
   });
 });
+const rabatter = BANK.TEST.reduce(function(n, te){ return n + BANK.testBlad(te.id).uppgifter.filter(function(u){ return u && u.typ === 'rabatter'; }).length; }, 0);
+if(rabatter !== 2) fall('testen', 'ska bära två 3.2-frågor, bär ' + rabatter);
+
+// 7  METODTRÄNINGENS KÄLLA: varje variant ger fyra instanser A → B → C → D, uppgift nr k på respektive blad.
+let varianter = 0;
+BANK.TYPER.forEach(function(t){
+  t.varianter.forEach(function(v, i){
+    const k = BANK.drillKalla(t.id + '/' + (i + 1)); varianter++;
+    if(!k){ fall(t.id + '/' + (i + 1), 'ingen källa'); return; }
+    if(k.arskurs !== 7) fall(t.id + '/' + (i + 1), 'horisont ' + k.arskurs);
+    const ordning = k.instanser.map(function(x){ return x.bokstav; }).join('');
+    if(ordning !== 'ABCD') fall(t.id + '/' + (i + 1), 'ordning ' + ordning);
+    k.instanser.forEach(function(x){
+      const vant = t.blad[x.bokstav][i];
+      if(x.blad.uppgifter.length !== 1 || x.blad.uppgifter[0] !== vant) fall(t.id + '/' + (i + 1) + ' ' + x.bokstav, 'fel uppgift');
+    });
+  });
+});
+if(BANK.drillKalla('instruktion/7') || BANK.drillKalla('okand/1')) fall('drillKalla', 'okänd referens ska ge null');
 
 const antal = ids.size;
 if(brott.length){
@@ -79,4 +124,5 @@ if(brott.length){
   brott.forEach(function(b){ console.log('   ' + b); });
   process.exit(1);
 }
-console.log('✓ spec-prob-bank: ' + antal + ' uppgifter — modellens facit = dokumentets facit per ruta, lösningsförslagen rättas rätt, ' + BANK.TEST.length + ' test refererar till banken');
+console.log('✓ spec-prob-bank: ' + antal + ' uppgifter — modellens facit = dokumentets facit per ruta, lösningsförslagen rättas rätt; '
+  + BANK.TEST.length + ' test à sex frågor (3.2 författad, facit som testdokumentet); ' + varianter + ' varianter A→B→C→D');

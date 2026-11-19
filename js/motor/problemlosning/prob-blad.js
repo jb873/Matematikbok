@@ -77,8 +77,25 @@ function render(mount, blad){
   kort.appendChild(rub);
 
   var state = [];
+  blad.uppgifter.forEach(function(u, idx){ state.push(renderUppgift(kort, u, idx)); });
 
-  blad.uppgifter.forEach(function(u, idx){
+  var actions = document.createElement('div'); actions.className = 'actions';
+  var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'btn primary'; kn.textContent = TEXT.kontroll.titel;
+  kn.setAttribute('data-action', 'kontroll');
+  var rn = document.createElement('button'); rn.type = 'button'; rn.className = 'btn subtle'; rn.textContent = TEXT.omstart.titel;
+  var hint = document.createElement('div'); hint.className = 'global-hint';
+  var sammanf = document.createElement('div'); sammanf.className = 'ovn-sammanf'; sammanf.setAttribute('data-sammanf', '');
+  kn.onclick = function(){ kontrollera(state, hint, sammanf); };
+  rn.onclick = function(){ render(mount, blad); };
+  actions.appendChild(kn); actions.appendChild(rn);
+  kort.appendChild(actions); kort.appendChild(sammanf); kort.appendChild(hint);
+  mount.appendChild(kort);
+  return state;
+}
+
+// EN uppgift i ekvationsformen (ekvation → balansmetoden → svar). Utbruten ur render så att ett blad i
+// femstegsformen (ProbBlad2) kan bära en uppgift i den här formen — testet blandar typerna (order 2026-11-19).
+function renderUppgift(kort, u, idx){
     var block = document.createElement('div'); block.className = 'prob-uppg';
     block.setAttribute('data-nod', u.nod);
 
@@ -123,22 +140,8 @@ function render(mount, blad){
     var besked = document.createElement('div'); besked.className = 'uppg-besked'; block.appendChild(besked);
 
     kort.appendChild(block);
-    state.push({ u: u, ekvRad: ekvRad, kedja: kedja, svarIn: svarIn, svarStatus: svarStatus,
-                 klarEl: klar, beskedEl: besked, delNyckel: u.delar[0].nyckel });
-  });
-
-  var actions = document.createElement('div'); actions.className = 'actions';
-  var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'btn primary'; kn.textContent = TEXT.kontroll.titel;
-  kn.setAttribute('data-action', 'kontroll');
-  var rn = document.createElement('button'); rn.type = 'button'; rn.className = 'btn subtle'; rn.textContent = TEXT.omstart.titel;
-  var hint = document.createElement('div'); hint.className = 'global-hint';
-  var sammanf = document.createElement('div'); sammanf.className = 'ovn-sammanf'; sammanf.setAttribute('data-sammanf', '');
-  kn.onclick = function(){ kontrollera(state, hint, sammanf); };
-  rn.onclick = function(){ render(mount, blad); };
-  actions.appendChild(kn); actions.appendChild(rn);
-  kort.appendChild(actions); kort.appendChild(sammanf); kort.appendChild(hint);
-  mount.appendChild(kort);
-  return state;
+    return { form: 'ekvation', u: u, ekvRad: ekvRad, kedja: kedja, svarIn: svarIn, svarStatus: svarStatus,
+             klarEl: klar, beskedEl: besked, delNyckel: u.delar[0].nyckel };
 }
 
 // ── RÄTTNING: ingen förrän Kontrollera. Första felet i metodordningen pekas ut. ────────────────
@@ -170,15 +173,13 @@ function summaAv(s){
   v.push(ytaOmdome(s.svarIn));
   return las_summa(v);
 }
-function kontrollera(state, hintEl, sammanfEl){
-  var klara = 0, besvarade = 0;
-  state.forEach(function(s){
+// EN uppgift: rensa förra rättningen och rätta. Ut: 'ratt' | 'fel' | null (obesvarad — ingen rättning).
+function kontrolleraUppgift(s){
     // rensa förra rättningen
     K.rensa(s.ekvRad); s.kedja.forEach(K.rensa);
     s.svarStatus.textContent = ''; s.svarIn.classList.remove('ratt', 'fel');
     s.beskedEl.textContent = ''; s.klarEl.classList.remove('show');
-    if(!besvarad(s)) return;
-    besvarade++;
+    if(!besvarad(s)) return null;
 
     var res = R.ratta(s.u, svarPaUppgift(s));
     if(res.status === 'ratt'){
@@ -186,9 +187,8 @@ function kontrollera(state, hintEl, sammanfEl){
       s.kedja.forEach(function(r){ if(!K.tomRad(r)) K.markera(r, true); });
       s.svarIn.classList.add('ratt'); s.svarStatus.textContent = '✓';   // klassen sitter på ytan
       s.klarEl.classList.add('show');
-      klara++;
       logga(s.u.nod, 'ratt');
-      return;
+      return 'ratt';
     }
     // markera DÄR felet är, inte överallt
     if(res.steg === 'ekvation' || res.steg === 'uttryck'){
@@ -206,6 +206,14 @@ function kontrollera(state, hintEl, sammanfEl){
     }
     s.beskedEl.textContent = res.besked || '';
     logga(s.u.nod, 'fel');
+    return 'fel';
+}
+function kontrollera(state, hintEl, sammanfEl){
+  var klara = 0, besvarade = 0;
+  state.forEach(function(s){
+    var r = kontrolleraUppgift(s);
+    if(r) besvarade++;
+    if(r === 'ratt') klara++;
   });
   if(sammanfEl){
     var tot = 0, ratt = 0, obedomt = 0;
@@ -218,8 +226,9 @@ function kontrollera(state, hintEl, sammanfEl){
   else { hintEl.className = 'global-hint'; hintEl.textContent = TEXT.pagang.hint; }
 }
 
+// En uppgift utan nod (testets författade 3.2-uppgifter, åttans stoff) loggas inte — ingen nod att bära den.
 function logga(nod, utfall){
-  if(window.MasteryK3 && window.MasteryK3.loggaForsok) window.MasteryK3.loggaForsok(nod, utfall);
+  if(nod && window.MasteryK3 && window.MasteryK3.loggaForsok) window.MasteryK3.loggaForsok(nod, utfall);
 }
 
 // ── MONTERING ─────────────────────────────────────────────────────────────────────────────────
@@ -228,5 +237,7 @@ function logga(nod, utfall){
   if(mount && K && EP && R) render(mount, BLAD);
 })();
 
-if(typeof window !== 'undefined') window.ProbBlad = { BLAD: BLAD, render: render };
+// Per uppgift: ProbBlad2 bär en uppgift i ekvationsformen i sitt blad genom de här (testet, order 2026-11-19).
+if(typeof window !== 'undefined') window.ProbBlad = { BLAD: BLAD, render: render, renderUppgift: renderUppgift,
+  kontrolleraUppgift: kontrolleraUppgift, besvarad: besvarad, summaAv: summaAv };
 })();

@@ -38,8 +38,10 @@ function upp(typ, id, text, d, relationer, villkor, enhet, facit, extra){
   return u;
 }
 // Följa instruktion: en del (talet), inga relationer.
+// form 'ekvation': löses som en vanlig ekvation (ekvation → balansmetoden → svar = talet), aldrig i
+// femstegsformen — också när uppgiften står i ett blandat blad som testet (order 2026-11-19).
 function ins(id, text, villkor, x, enhet){
-  return upp('instruktion', id, text, [['T', 'talet']], [], villkor, enhet, [x]);
+  return upp('instruktion', id, text, [['T', 'talet']], [], villkor, enhet, [x], { form: 'ekvation' });
 }
 // Tal som följer varandra: antal tal, steget mellan dem (1 = heltal, 2 = jämna/udda), summan.
 function fo(id, text, antal, steg, summa, enhet){
@@ -334,12 +336,25 @@ var TYPER = [
   } }
 ];
 
-// ── TESTEN: "Problemlösning – blandade uppgifter 1 och 2". Varje uppgift i testen står ORDAGRANT i
-// banken ovan och refereras med sitt id. Uppgift 3 i test 1 och uppgift 5 i test 2 hör till
-// kategori 3.2 (åttan) och är utelämnade här — se ANTAGANDEN i leveransen.
+// ── TESTEN: "Problemlösning – blandade uppgifter 1 och 2", sex frågor var, som Joachim skrev dem.
+// Frågorna ur sjuans typer står ORDAGRANT i banken ovan och refereras med sitt id.
+// Fråga 3 i test 1 och fråga 5 i test 2 hör till kategori 3.2 (fyra–sex personer, rabatter). Den är
+// inget byggt moment i sjuan och finns inte i banken — den står här som FÖRFATTAT testinnehåll,
+// Joachims text och facit (order 2026-11-19). Ingen nod: svaren loggas inte till någon sjuan-nod.
+function test32(id, text, d, relationer, villkor, facit){
+  return { id: 'p7-test-' + id, typ: 'rabatter', nod: null, niva: 1, variabel: 'x', fraga: text.fraga,
+           delar: d.map(function(p){ return { nyckel: p[0], namn: p[1] }; }), relationer: relationer, villkor: [villkor],
+           enhet: 'kr', svarDelar: d.map(function(p){ return p[0]; }), facit: facit };
+}
 var TEST = [
-  { id: 'test1', titel: 'Test 1', uppgifter: ['omkrets-C3', 'instruktion-B5', 'foljd-C6', 'vinklar-A5', 'delar-C5'] },
-  { id: 'test2', titel: 'Test 2', uppgifter: ['delar-D6', 'vinklar-D2', 'foljd-D4', 'omkrets-A6', 'instruktion-C6'] }
+  { id: 'test1', titel: 'Test 1', uppgifter: ['omkrets-C3', 'instruktion-B5',
+      test32('1-3', { fraga: 'Fyra kompisar köper likadana hoodies. Två betalar fullpris. En har medlemskort och får 30 % rabatt, och en har studentkort och får 40 % rabatt. Tillsammans betalar de 1 320 kr. Vad kostar en hoodie till fullpris?' },
+             [['F', 'fullpris'], ['M', 'med medlemskort'], ['S', 'med studentkort']], ['M = 0,7·F', 'S = 0,6·F'], '2·F + M + S = 1320', [400, 280, 240]),
+      'foljd-C6', 'vinklar-A5', 'delar-C5'] },
+  { id: 'test2', titel: 'Test 2', uppgifter: ['delar-D6', 'vinklar-D2', 'foljd-D4', 'omkrets-A6',
+      test32('2-5', { fraga: 'Fem personer köper skidpaket: två vuxna, en ungdom och två barn. Ungdomen får 20 % rabatt och barnen 45 % rabatt. Tillsammans kostar paketen 9 360 kr. Vad kostar ett skidpaket för en vuxen?' },
+             [['V', 'vuxen'], ['U', 'ungdom'], ['B', 'barn']], ['U = 0,8·V', 'B = 0,55·V'], '2·V + U + 2·B = 9360', [2400, 1920, 1320]),
+      'instruktion-C6'] }
 ];
 
 var BOKSTAVER = ['A', 'B', 'C', 'D'];
@@ -357,9 +372,13 @@ function blad(typId, bokstav){
   var t = typ(typId); if(!t || !t.blad[bokstav]) return null;
   return { id: t.id + '-' + bokstav, titel: 'Blad ' + nr(typId) + bokstav + ' · ' + t.titel, nod: t.nod, uppgifter: t.blad[bokstav] };
 }
+// Ett test i bladkomponenternas form. En fråga är ett id ur banken eller en författad uppgift (3.2).
+// Testet ritas med ProbBlad2.render; frågor med form 'ekvation' (Följa instruktion) ritas där i
+// ekvationsformen — svarsformen följer frågans typ.
 function testBlad(testId){
   var te = TEST.filter(function(x){ return x.id === testId; })[0]; if(!te) return null;
-  return { id: te.id, titel: te.titel, nod: null, uppgifter: te.uppgifter.map(uppgift) };
+  return { id: te.id, titel: te.titel, nod: null,
+           uppgifter: te.uppgifter.map(function(x){ return typeof x === 'string' ? uppgift(x) : x; }) };
 }
 // Variant k (1–6) av en typ, i bladordning A–D — metodträningens bank för den varianten.
 function variantBank(typId, k){
@@ -367,8 +386,46 @@ function variantBank(typId, k){
   return BOKSTAVER.map(function(b){ return t.blad[b][k - 1]; }).filter(Boolean);
 }
 
+// ── RITA ETT BLAD: samma val av komponent överallt där bankens blad visas (uppgiftssidan och
+// metodträningens drill i ramen). Följa instruktion = ekvationsformen (ProbBlad), övriga = femstegsformen.
+function rita(mount, b, form){
+  var R = (form === 'instruktion') ? window.ProbBlad : window.ProbBlad2;
+  return R && R.render ? R.render(mount, b) : null;
+}
+
+// ── KNAPPSATSEN: en delad, fast (AK8_UI), med kedjans byggare (bråk, potens). Samma montering på
+// uppgiftssidan och i ramens drill. Returnerar knappsatsen (en per sida).
+function knappsats(){
+  var finns = document.getElementById('prob-keypad'); if(finns) return finns;
+  if(!(window.AK8_UI && AK8_UI.keypadHTML)) return null;
+  var w = document.createElement('div'); w.innerHTML = AK8_UI.keypadHTML({ vars: 'x' });
+  var kp = w.firstChild; if(!kp) return null;
+  kp.id = 'prob-keypad'; document.body.appendChild(kp);
+  AK8_UI.bindKeypad(document.body, { byggare: window.EkvKedja && EkvKedja.byggare });
+  return kp;
+}
+
+// ── METODTRÄNINGENS FÖRFATTADE KÄLLA (order 2026-11-19). Kartans löv för en variant deklarerar
+// bank: 'prob-ak7:<typ>/<variant>' (t.ex. 'prob-ak7:instruktion/1'). Ramens drill
+// (js/motor/ovamer/k3-forfattad-kalla.js) hämtar här varianternas instanser: uppgift nr k på
+// Blad A, B, C, D, i den ordningen. Nytt blad = nästa bokstav. Horisonten är typens: Nivå 1 = åk7.
+function drillKalla(ref){
+  var p = String(ref || '').split('/'), t = typ(p[0]), k = parseInt(p[1], 10);
+  if(!t || !(k >= 1 && k <= t.varianter.length)) return null;
+  var v = t.varianter[k - 1];
+  return {
+    arskurs: 7, form: t.form, titel: t.titel + ' · ' + v.titel,
+    instanser: BOKSTAVER.map(function(b){
+      return { bokstav: b, blad: { id: 'drill-' + t.id + '-v' + k + '-' + b, titel: t.titel + ' · ' + v.titel + ' · Blad ' + b,
+                                   nod: t.nod, uppgifter: [t.blad[b][k - 1]] } };
+    }),
+    rita: function(mount, b){ return rita(mount, b, t.form); }
+  };
+}
+
 var API = { TYPER: TYPER, TEST: TEST, BOKSTAVER: BOKSTAVER, UPPGIFTSBLAD: UPPGIFTSBLAD,
-            typ: typ, nr: nr, uppgift: uppgift, blad: blad, testBlad: testBlad, variantBank: variantBank };
+            typ: typ, nr: nr, uppgift: uppgift, blad: blad, testBlad: testBlad, variantBank: variantBank,
+            rita: rita, knappsats: knappsats, drillKalla: drillKalla };
 if(typeof window !== 'undefined') window.ProbBankAk7 = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

@@ -713,11 +713,13 @@ if(/[?&]view=test-fardigt/i.test(_hs)){
   var _mdel = _hs.match(/[?&]del=([a-z0-9]+)/i);
   PB.setDel((_mdel && /^k3d/.test(_mdel[1])) ? _mdel[1] : null);
   pbNav('test-config');
-} else if(!/[?&]ko=[^&\s]/i.test(_hs)){ renderOversikt(); }
+} else if(!/[?&](ko|bank)=[^&\s]/i.test(_hs)){ renderOversikt(); }   // ?bank= → författad källa (k3-forfattad-kalla.js)
 </script>
 <script src="js/motor/ovamer/ovamer-k3.js"></script>
 <!-- MasteryK3-loggning (elev-lokal, localStorage) laddas i head; deeplink-router + #fb-observatör här. -->
 <script src="js/motor/ovamer/k3-mastery-wiring.js"></script>
+<!-- FÖRFATTAD KÄLLA (order 2026-11-19): ett karta-löv med bank i stället för generator → ?bank=…. Gör inget utan ?bank=. -->
+<script src="js/motor/ovamer/k3-forfattad-kalla.js"></script>
 <script src="js/motor/keypad-clearance.js"></script>
 <script src="js/elevfeedback.js" defer></script>
 </body>

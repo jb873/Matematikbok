@@ -128,7 +128,7 @@ function render(mount, blad){
 
   var state = [];
   blad.uppgifter.forEach(function(u, idx){
-    state.push(renderUppgift(kort, u, idx));
+    state.push(arEkvation(u) ? window.ProbBlad.renderUppgift(kort, u, idx) : renderUppgift(kort, u, idx));
   });
 
   var actions = document.createElement('div'); actions.className = 'actions';
@@ -144,6 +144,12 @@ function render(mount, blad){
   mount.appendChild(kort);
   return state;
 }
+
+// SVARSFORM PER UPPGIFT (order 2026-11-19): en uppgift med form 'ekvation' (Följa instruktion — talet ÄR x,
+// inga delar att namnge) ritas och rättas av variant 1:s egna funktioner (ProbBlad), i samma blad. Så kan
+// ett test blanda typerna. Utan fältet är allt som förut.
+function arEkvation(u){ return !!(u && u.form === 'ekvation' && window.ProbBlad && window.ProbBlad.renderUppgift); }
+function arEkvationsState(s){ return !!(s && s.form === 'ekvation' && window.ProbBlad); }
 
 function steghuvud(el, text){
   var d = document.createElement('div'); d.className = 'prob-steg-rub'; d.textContent = text;
@@ -307,6 +313,12 @@ function summaAv(s){
 function kontrollera(state, hintEl, sammanfEl){
   var klara = 0, besvarade = 0;
   state.forEach(function(s){
+    if(arEkvationsState(s)){
+      var r1 = window.ProbBlad.kontrolleraUppgift(s);
+      if(r1) besvarade++;
+      if(r1 === 'ratt') klara++;
+      return;
+    }
     rensaUppgift(s);
     if(!besvarad(s)) return;
     besvarade++;
@@ -386,7 +398,11 @@ function kontrollera(state, hintEl, sammanfEl){
 
   if(sammanfEl){
     var tot = 0, ratt = 0, obedomt = 0;
-    state.forEach(function(s){ if(!besvarad(s)) return; var v = summaAv(s); tot += v.tot; ratt += v.ratt; obedomt += v.obedomt; });
+    state.forEach(function(s){
+      var E = arEkvationsState(s) ? window.ProbBlad : null;
+      if(!(E ? E.besvarad(s) : besvarad(s))) return;
+      var v = E ? E.summaAv(s) : summaAv(s); tot += v.tot; ratt += v.ratt; obedomt += v.obedomt;
+    });
     sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.'
                           + (obedomt ? ' ' + TEXT.obedomt.hint : '');
   }
@@ -395,8 +411,9 @@ function kontrollera(state, hintEl, sammanfEl){
   else { hintEl.className = 'global-hint'; hintEl.textContent = TEXT.pagang.hint; }
 }
 
+// En uppgift utan nod (testets författade 3.2-uppgifter, åttans stoff) loggas inte — ingen nod att bära den.
 function logga(nod, utfall){
-  if(window.MasteryK3 && window.MasteryK3.loggaForsok) window.MasteryK3.loggaForsok(nod, utfall);
+  if(nod && window.MasteryK3 && window.MasteryK3.loggaForsok) window.MasteryK3.loggaForsok(nod, utfall);
 }
 
 // ── MONTERING ─────────────────────────────────────────────────────────────────────────────────

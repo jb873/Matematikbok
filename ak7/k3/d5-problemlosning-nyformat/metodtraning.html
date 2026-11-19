@@ -35,20 +35,22 @@
 (function(){
   /* TRÄDET (order 2026-11-18, forts.): Problemlösning → de fem typerna → deras sex varianter. Noderna
      läses ur banken (js/motor/problemlosning/prob-bank-ak7.js) — varianterna finns inte i k3-taxonomin.
-     Komponenten är kartans (KartaMotor), oförändrad.
+     Komponenten är kartans (KartaMotor).
 
-     DRILLEN SERVERAS INTE ÄN: kartans löv länkar till ramens drill (ak7-k3-ram.html?ko=…), som bara kör
-     generatorer. Att servera FÖRFATTADE problem ur blad A–D kräver en ny mekanism i ramen. Den är inte
-     byggd (ordern: flagga, bygg ingen parallell drill), så grenen står som "kommer" (implemented: false). */
+     DRILLEN (order 2026-11-19): varje variant är ett löv med en FÖRFATTAD BANK i stället för en generator —
+     bank: 'prob-ak7:<typ>/<variant>'. Kartan länkar lövet till ramens drill (ak7-k3-ram.html?bank=…), som
+     serverar variantens uppgift ur Blad A, B, C, D i den ordningen (js/motor/ovamer/k3-forfattad-kalla.js).
+     Horisonten är typens: Nivå 1 = åk7 (arskursRelevans ak7: mal). */
   var BANK = window.ProbBankAk7, AR = { ak7: 'mal' }, NODER = [];
   NODER.push({ id: 'nf-prob', namn: 'Problemlösning', parent: null, niva: 'omrade', arskursRelevans: AR, roll: 'karna',
-               formaga: null, generator: null, grupp: 'algebra', implemented: false });
+               formaga: null, generator: null, grupp: 'algebra', implemented: true });
   (BANK ? BANK.TYPER : []).forEach(function(t){
     NODER.push({ id: 'nf-prob-' + t.id, namn: t.titel, parent: 'nf-prob', niva: 'deldoman', arskursRelevans: AR,
                  roll: 'karna', formaga: null, generator: null, visning: null });
     t.varianter.forEach(function(v, i){
       NODER.push({ id: 'nf-prob-' + t.id + '-v' + (i + 1), namn: v.titel, parent: 'nf-prob-' + t.id, niva: 'lovnod',
-                   arskursRelevans: AR, roll: 'karna', formaga: 'PROBLEM', generator: null, nod: t.nod });
+                   arskursRelevans: AR, roll: 'karna', formaga: 'PROBLEM', generator: null, nod: t.nod,
+                   bank: 'prob-ak7:' + t.id + '/' + (i + 1) });
     });
   });
   // Egen pref-nyckel: utfällningen här ska inte skriva över kunskapslägets. Första besöket: grenen
