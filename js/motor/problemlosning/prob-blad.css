@@ -118,3 +118,31 @@
 .prob-kort .prob-foljd.ratt{border-color:var(--green);}
 .prob-kort .prob-foljd.fel{border-color:var(--red);}
 @media (max-width:640px){ .prob-kort .prob-tvakol{grid-template-columns:1fr;} .prob-kort .prob-eko{min-width:70px;} }
+
+/* ── ARBETSYTAN (bladets val arbetsyta — uppgiftssidan; KONVENTIONER "Uppgiftssidan (arbetsytan)", 2026-11-22).
+   Gäller BARA .prob-kort.arbetsyta: ramens drill och den gamla sidan ritas som förut.
+   1) Rutorna MINDRE och växer med innehållet (§3 K-E): golven sänks; tillväxten är kedjans egen (size-attributet).
+   2) LIKHETSTECKNEN UNDER VARANDRA: Delarna och Sätt in värdet är rutnät (vänster led högerställt | tecken |
+      höger led), precis som kedjans eq-grid — en ruta som växer skjuter sitt led utåt, tecknet står still.
+      Raderna i de två rutnäten är lika höga (42 px), så rad n i Delarna står bredvid rad n i Sätt in värdet. */
+.prob-kort.arbetsyta .eq-vl .sida,.prob-kort.arbetsyta .eq-hl .sida{min-width:64px;min-height:36px;}
+.prob-kort.arbetsyta .prob-uttryck,.prob-kort.arbetsyta .prob-varde{min-width:64px;min-height:36px;}
+.prob-kort.arbetsyta .prob-svar{min-width:96px;min-height:38px;}
+.prob-kort.arbetsyta .prob-svar .seg-text{min-width:1.5ch;}
+.prob-kort.arbetsyta .prob-foljd{min-width:72px;min-height:36px;}
+.prob-kort.arbetsyta .prob-namn{width:auto;}
+.prob-kort.arbetsyta .prob-rutnat{display:grid;grid-template-columns:max-content auto max-content;column-gap:8px;
+  grid-auto-rows:minmax(42px,auto);align-items:center;justify-content:start;}
+.prob-kort.arbetsyta .prob-rutnat > .prob-delrad,.prob-kort.arbetsyta .prob-rutnat > .prob-insattrad{display:contents;}
+.prob-kort.arbetsyta .prob-rutnat .prob-namn,.prob-kort.arbetsyta .prob-insatt-vl{justify-self:end;}
+/* höger led börjar vid tecknet och växer åt höger — varje ruta för sig (rutnätet sträcker annars ut alla
+   rutor i kolumnen till den bredaste) */
+.prob-kort.arbetsyta .prob-rutnat .prob-uttryck,.prob-kort.arbetsyta .prob-rutnat .prob-varde{justify-self:start;}
+.prob-kort.arbetsyta .prob-insatt-vl{display:inline-flex;align-items:center;}
+.prob-kort.arbetsyta .prob-insatt-vl .prob-eko{min-width:0;}
+/* Beräkningsrutan i Sätt in värdet: samma ruta som värdet bredvid. Syns bara när delen är ett uttryck. */
+.prob-kort.arbetsyta .prob-berakning{display:inline-flex;align-items:center;min-height:36px;background:#fff;
+  border:2px solid var(--paper-dk);border-radius:8px;padding:2px 10px;min-width:64px;}
+.prob-kort.arbetsyta .prob-berakning:focus-within{border-color:var(--gold-lt);box-shadow:0 0 0 3px rgba(196,154,64,.15);}
+/* hidden ska gälla: .sida och ekot sätter display själva och slår annars ut attributet. */
+.prob-kort.arbetsyta .prob-berakning[hidden],.prob-kort.arbetsyta .prob-eko[hidden]{display:none;}

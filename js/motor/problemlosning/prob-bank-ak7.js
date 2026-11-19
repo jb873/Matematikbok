@@ -487,13 +487,18 @@ function uppgift(ref){
 // Bladets nummer = typens plats (1–5), bokstaven = varianten: "Blad 1A" (KONVENTIONER, Arbetssidan).
 function nr(typId){ return TYPER.indexOf(typ(typId)) + 1; }
 // Ett blad i bladkomponenternas form: { id, titel, nod, uppgifter }
-// RUBRIKEN ÄR TYPEN (order 2026-11-22): "Problemlösning omkrets" — inte "Blad 4A · Omkrets". Blad A/B står
-// kvar som växel på uppgiftssidan. (ELEVTEXT som fält: elevtext-låset ser fältnamnet.)
+// RUBRIKEN ÄR TYPEN (order 2026-11-22; KONVENTIONER "Uppgiftssidan (arbetsytan)"): "Problemlösning flera
+// personer och saker" — utan "Blad 3A" och utan typens parentes "(2–3 personer)", som står kvar i typens titel
+// där den visas annars (moment-sidan, drillen). Blad A/B är växeln på uppgiftssidan.
+// (ELEVTEXT som fält: elevtext-låset ser fältnamnet.)
 var RUBRIK = { titel: 'Problemlösning' };
+function rubrik(t){
+  var namn = t.titel.replace(/\s*\([^)]*\)\s*$/, '');
+  return RUBRIK.titel + ' ' + namn.charAt(0).toLowerCase() + namn.slice(1);
+}
 function blad(typId, bokstav){
   var t = typ(typId); if(!t || !t.blad[bokstav]) return null;
-  return { id: t.id + '-' + bokstav, titel: RUBRIK.titel + ' ' + t.titel.charAt(0).toLowerCase() + t.titel.slice(1),
-           nod: t.nod, uppgifter: t.blad[bokstav] };
+  return { id: t.id + '-' + bokstav, titel: rubrik(t), nod: t.nod, uppgifter: t.blad[bokstav] };
 }
 // Ett test i bladkomponenternas form. En fråga är ett id ur banken eller en författad uppgift (3.2).
 // Testet ritas med ProbBlad2.render; frågor med form 'ekvation' (Följa instruktion) ritas där i

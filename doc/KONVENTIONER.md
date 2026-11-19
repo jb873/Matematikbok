@@ -167,7 +167,9 @@ METODTRÄNING = färdighetsträningens träd (INTE platta chips)
   den är en mängd uppgifter att träna. Mastery-färg visar status. Klick → drill bredvid.
 - INGET parallellt träd byggs — återanvänd komponenten (A1/Regel 0).
 
-UPPGIFTSSIDA (övningssida)
+UPPGIFTSSIDA (övningssida) — preciserad i sektionen **Uppgiftssidan (arbetsytan)** nedan
+(2026-11-22); den gäller där de skiljer sig (bl.a. knappen heter "Föreläsning", Kontrollera står under
+kalkylatorn).
 - Hero borta → "Tillbaka"-knapp (till sidan man kom från).
 - Full bredd (plats för flera mellanled). Knappsats + Kontrollera NERE TILL HÖGER,
   inte kolumn till höger om uppgiften.
@@ -182,6 +184,29 @@ Roll (kärna/breddning/fordjupning) · Metod-etikett (namnger, §4) ·
 Takregel golv/tak · Antal (mastery-tröskel) · uppgifter + facit per ruta (§K-K).
 
 Vad vaktar den: — mestadels ny UI utan grind; byggs och verifieras per pilot.
+
+---
+
+## Uppgiftssidan (arbetsytan)
+
+*Joachim 2026-11-22.* Arbetsytan är sidan där eleven löser ett blad. Pilot: problemlösning åk7
+(`ak7/k3/d5-problemlosning-nyformat/uppgift.html`).
+
+| Konvention | Funktionen bor i | Vad vaktar den |
+|---|---|---|
+| **Sidhuvudet är slimmat:** navbar + brödsmula + ← Tillbaka. Inget hjältehuvud — skärmen maximeras för uppgifterna. Under: växeln **Blad A / Blad B** (nedtonad — ett val på sidan, inte sidans namn) och knappen **Föreläsning**. | sidans markup och CSS | **—** |
+| **Rubriken är typen**, t.ex. "Problemlösning flera personer och saker" — utan "Blad 3A" och utan typens parentes ("(2–3 personer)"). | `rubrik()` i bladets bank (`ProbBankAk7.blad`) | **—** |
+| **Talen numreras "1.", "2." på samma rad som uppgiftstexten.** a) b) bara vid deluppgifter (K-A), också de på raden. Som i boken. | bladkomponentens val `numrering: 'tal'` (`ProbBlad.fragaMedNummer`, delad av `ProbBlad2`) | **—** |
+| **Färgen är bokens egna palett-tokens** — samma som delkapitelsidorna, ordagrant. Ingen egen palett, inga approximerade värden. | sidans `:root` (= delkapitelsidornas) · kedjans färger i `ekv-kedja.css`/`prob-blad.css` | **—** mätt en gång 2026-11-22 (beräknade färger lika ekvationskapitlet d4); ingen grind |
+| **Stegen (Delarna, Ekvation, Balansmetoden, Sätt in värdet, Svar): rutorna små och växer med innehållet** (§3 K-E), och **likhetstecknen står under varandra genom raderna** — vänster led högerställt mot tecknet, höger led vänsterställt, i ett rutnät per steg. | bladkomponentens val `arbetsyta` (`.prob-kort.arbetsyta`, `.prob-rutnat` i `prob-blad.css`) · kedjans `eq-grid` | **—** |
+| **Sätt in värdet: vänster beräkningsruta BARA när delen är ett uttryck** — eleven räknar ut, t.ex. `18 + 12 = 30`. För x eller ett tal finns ingen vänsterruta (`x = 18`). | `ProbBlad2` (`arUttryck`, beräkningsrutan under `arbetsyta`) | **—** |
+| **Kalkylatorn till höger. Under den, på samma rad: Kontrollera, Börja om och Tipsa** — aldrig över tangenterna. Bladet går inte in under kalkylatorn. Den delade knappsatsen ändras inte; placeringen är sidans. | sidans CSS och `placera()` | **—** |
+| **Figurer för geometri är SVG** (eget pass). **Funktionella bilder stannar, dekorativa går.** | `svg-algebrafigur.js` | **—** |
+
+Inte med här (eget beslut senare): rättningsmodellen för flera giltiga lösningar. Tills dess rättas
+beräkningsrutan i Sätt in värdet inte.
+
+Vad vaktar den: — ny UI utan grind; verifieras per pilot med mätprober (båda vyportarna).
 
 ---
 

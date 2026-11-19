@@ -121,12 +121,12 @@ function ordnaDelar(u, radUttryck){
 // ── RENDERING ─────────────────────────────────────────────────────────────────────────────────
 function render(mount, blad){
   mount.innerHTML = '';
-  var kort = document.createElement('div'); kort.className = 'prob-kort';
+  var kort = document.createElement('div'); kort.className = 'prob-kort' + (blad.arbetsyta ? ' arbetsyta' : '');
   kort.setAttribute('data-blad', blad.id);
   var rub = document.createElement('div'); rub.className = 'niva-rubrik'; rub.textContent = blad.titel;
   kort.appendChild(rub);
 
-  var state = [], opt = { numrering: blad.numrering };
+  var state = [], opt = { numrering: blad.numrering, arbetsyta: !!blad.arbetsyta };
   blad.uppgifter.forEach(function(u, idx){
     state.push(arEkvation(u) ? window.ProbBlad.renderUppgift(kort, u, idx, opt) : renderUppgift(kort, u, idx, opt));
   });
@@ -150,6 +150,14 @@ function render(mount, blad){
 // ett test blanda typerna. Utan fältet är allt som förut.
 function arEkvation(u){ return !!(u && u.form === 'ekvation' && window.ProbBlad && window.ProbBlad.renderUppgift); }
 function arEkvationsState(s){ return !!(s && s.form === 'ekvation' && window.ProbBlad); }
+
+// Är delen ett UTTRYCK (då räknar eleven ut det i Sätt in värdet), eller bara variabeln/ett tal (då inte)?
+// Tom ruta = inget uttryck ännu.
+function arUttryck(t){
+  var s = String(t || '').replace(/\s+/g, '');
+  if(!s) return false;
+  return !(/^[a-zåäö]$/i.test(s) || /^[−-]?\d+([.,]\d+)?$/.test(s));
+}
 
 function steghuvud(el, text){
   var d = document.createElement('div'); d.className = 'prob-steg-rub'; d.textContent = text;
@@ -180,8 +188,14 @@ function renderUppgift(kort, u, idx, opt){
   var tva = document.createElement('div'); tva.className = 'prob-tvakol';
   var vk = document.createElement('div'), hk = document.createElement('div');
   steghuvud(vk, TEXT.delarna.etikett); steghuvud(hk, TEXT.insatt.etikett);
-  var delListaEl = document.createElement('div'); delListaEl.className = 'prob-delar'; vk.appendChild(delListaEl);
-  var insattListaEl = document.createElement('div'); insattListaEl.className = 'prob-insatt'; hk.appendChild(insattListaEl);
+  // ARBETSYTAN (opt.arbetsyta, uppgiftssidan — KONVENTIONER "Uppgiftssidan (arbetsytan)", 2026-11-22):
+  // Delarna och Sätt in värdet står i var sitt rutnät, så att kolon och likhetstecken står under varandra
+  // när rutorna växer; namnrutan växer med namnet; Sätt in värdet får en BERÄKNINGSRUTA till vänster när
+  // delen är ett uttryck (18 + 12 = 30) — för x eller ett tal finns ingen. Beräkningsrutan rättas inte
+  // (rättningen är oförändrad; modellen för flera giltiga lösningar är ett eget beslut). Utan valet: som förut.
+  var arbetsyta = !!(opt && opt.arbetsyta);
+  var delListaEl = document.createElement('div'); delListaEl.className = 'prob-delar' + (arbetsyta ? ' prob-rutnat' : ''); vk.appendChild(delListaEl);
+  var insattListaEl = document.createElement('div'); insattListaEl.className = 'prob-insatt' + (arbetsyta ? ' prob-rutnat' : ''); hk.appendChild(insattListaEl);
   tva.appendChild(vk); tva.appendChild(hk); block.appendChild(tva);
 
   var delRader = [];
@@ -190,6 +204,10 @@ function renderUppgift(kort, u, idx, opt){
     var namn = document.createElement('input');
     namn.type = 'text'; namn.className = 'prob-namn'; namn.setAttribute('data-nokeypad', '');
     namn.setAttribute('aria-label', 'delens namn');
+    if(arbetsyta){
+      var namnStorlek = function(){ namn.setAttribute('size', Math.max(4, namn.value.length + 1)); };
+      namnStorlek(); namn.addEventListener('input', namnStorlek);
+    }
     var kolon = document.createElement('span'); kolon.className = 'prob-kolon'; kolon.textContent = ':';
     var uttryckYta = document.createElement('div'); uttryckYta.className = 'prob-uttryck sida';
     uttryckYta.appendChild(K.textSeg({ vars: vars, etikett: 'uttryck för delen' }));
@@ -202,7 +220,16 @@ function renderUppgift(kort, u, idx, opt){
     var lika = document.createElement('span'); lika.className = 'prob-lika'; lika.textContent = '=';
     var vardeYta = document.createElement('div'); vardeYta.className = 'prob-varde sida';
     vardeYta.appendChild(K.textSeg({ vars: '', etikett: 'värdet' }));
-    irad.appendChild(eko); irad.appendChild(lika); irad.appendChild(vardeYta);
+    var berakningYta = null;
+    if(arbetsyta){
+      // vänster led: ekot (x, ett tal, —) ELLER beräkningsrutan (delen är ett uttryck) — aldrig båda
+      var vl = document.createElement('span'); vl.className = 'prob-insatt-vl';
+      berakningYta = document.createElement('div'); berakningYta.className = 'prob-berakning sida'; berakningYta.hidden = true;
+      berakningYta.appendChild(K.textSeg({ vars: '', etikett: 'beräkningen' }));
+      vl.appendChild(eko); vl.appendChild(berakningYta);
+      irad.appendChild(vl);
+    } else irad.appendChild(eko);
+    irad.appendChild(lika); irad.appendChild(vardeYta);
     insattListaEl.appendChild(irad);
 
     // ── STEG 5: ett svarsfält per del, med elevens eget namn framför ──
@@ -214,13 +241,17 @@ function renderUppgift(kort, u, idx, opt){
     srad.appendChild(snamn); srad.appendChild(svarYta); srad.appendChild(sstatus);
     svarListaEl.appendChild(srad);
 
-    function speglaUttryck(){ eko.textContent = K.las(uttryckYta) || '—'; }
+    function speglaUttryck(){
+      var t = K.las(uttryckYta);
+      eko.textContent = t || '—';
+      if(berakningYta){ var u2 = arUttryck(t); berakningYta.hidden = !u2; eko.hidden = u2; }
+    }
     function speglaNamn(){ snamn.textContent = namn.value.trim() || ('rad ' + (delRader.indexOf(post) + 1)); }
     uttryckYta.addEventListener('input', speglaUttryck);
     namn.addEventListener('input', speglaNamn);
 
     var post = { namn: namn, uttryckYta: uttryckYta, vardeYta: vardeYta, svarYta: svarYta,
-                 svarStatus: sstatus, eko: eko, rad: rad, irad: irad, srad: srad };
+                 svarStatus: sstatus, eko: eko, rad: rad, irad: irad, srad: srad, berakningYta: berakningYta };
     delRader.push(post);
     speglaUttryck(); speglaNamn();
     var f = uttryckYta.querySelector('.seg-text'); if(f) f.focus();
@@ -427,5 +458,5 @@ function logga(nod, utfall){
   if(mount && K && R && M) render(mount, BLAD);
 })();
 
-if(typeof window !== 'undefined') window.ProbBlad2 = { BLAD: BLAD, render: render, ordnaDelar: ordnaDelar };
+if(typeof window !== 'undefined') window.ProbBlad2 = { BLAD: BLAD, render: render, ordnaDelar: ordnaDelar, arUttryck: arUttryck };
 })();

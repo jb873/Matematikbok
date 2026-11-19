@@ -71,7 +71,7 @@ var START_KEDJERADER = 2;   // ekvationen + två rader = minimikravet i de här 
 
 function render(mount, blad){
   mount.innerHTML = '';
-  var kort = document.createElement('div'); kort.className = 'prob-kort';
+  var kort = document.createElement('div'); kort.className = 'prob-kort' + (blad.arbetsyta ? ' arbetsyta' : '');
   kort.setAttribute('data-blad', blad.id);
   var rub = document.createElement('div'); rub.className = 'niva-rubrik'; rub.textContent = blad.titel;
   kort.appendChild(rub);

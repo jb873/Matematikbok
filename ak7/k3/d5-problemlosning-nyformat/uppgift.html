@@ -33,8 +33,9 @@
   --las:#9a9388;
 }
 
-/* ── UPPGIFTSSIDAN (nytt format): Tillbaka-knapp i stället för hero, full bredd, knappsats och
-   Kontrollera NERE TILL HÖGER. ── */
+/* ── UPPGIFTSSIDAN (ARBETSYTAN) — doc/KONVENTIONER.md "Uppgiftssidan (arbetsytan)" (2026-11-22).
+   Slimmat sidhuvud + Tillbaka, inget hjältehuvud. Färgen är bokens tokens (:root ovan = delkapitelsidornas,
+   ordagrant). Kalkylatorn till höger; under den Kontrollera, Börja om och Tipsa på samma rad. ── */
 .nf-topp{padding:16px 28px 0;}
 .nf-tillbaka{display:inline-flex;align-items:center;gap:6px;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-soft);text-decoration:none;border:1px solid var(--paper-dk);border-radius:8px;
@@ -44,13 +45,13 @@
    (max 920 px, centrerad) och bladets eget .prob-kort-mått släpps här. */
 .nf-yta .ovn-wrap{max-width:none;margin:0;padding:8px 0 12px;}
 .nf-yta .prob-kort{max-width:none;margin:0;}
-/* BOTTENYTAN (order 2026-11-22, placeringen flaggad för granskning): knappsatsen NERE TILL VÄNSTER, i
-   bladets vänsterkant — rakt under rutorna eleven skriver i (Delarna, Ekvation, Balansmetoden, Svar), så att
-   markören inte ska över hela skärmen. Bredden följer knapparna, inte sidans bredd. Kontrollera har en EGEN
-   plats till höger om knappsatsen (aldrig över tangenterna; placera() nedan). Tipsa står i sitt eget hörn,
-   nere till höger (elevfeedback.js egen plats). Bara sidans CSS: den delade knappsatsen är orörd. */
-#prob-keypad{left:28px;right:auto;bottom:16px;width:max-content;max-width:calc(100vw - 32px);border:1px solid var(--paper-dk);
+/* KALKYLATORN TILL HÖGER (KONVENTIONER, arbetsytan): knappsatsen står fast i högerkanten, och bladet lämnar
+   en kolumn fri för den (--nf-hoger mäts i placera() nedan) — bladet går aldrig in under knappsatsen. Under
+   knappsatsen: Kontrollera, Börja om och Tipsa på EN rad, aldrig över tangenterna. Bredden följer knapparna.
+   Bara sidans CSS och placering: den delade knappsatsen, bladets knapprad och Tipsa (elevfeedback.js) är orörda. */
+#prob-keypad{left:auto;right:20px;bottom:86px;width:max-content;max-width:calc(100vw - 40px);border:1px solid var(--paper-dk);
   border-radius:12px;box-shadow:0 6px 22px rgba(15,30,46,.14);}
+@media (min-width:641px){ .nf-yta,.nf-verktyg,.nf-film{margin-right:var(--nf-hoger,0px);} }
 /* En namnruta (Delarnas vänstra, data-nokeypad — ett namngivande ord, §4) har rätt INGEN knappsats. Här döljs
    den på sin plats i stället för att tas bort: inget annat på sidan flyttar sig (Kontrollera, rutorna). */
 #prob-keypad.keypad-hidden{display:flex !important;visibility:hidden;}
@@ -151,9 +152,10 @@
   var nav = document.getElementById('nf-bladnav'), gk = document.getElementById('nf-genomgang'), film = document.getElementById('nf-film');
   if(!BANK) return;
   function montering(id){ var m = document.createElement('div'); m.className = 'ovn-wrap nf-mount'; m.id = id; yta.appendChild(m); return m; }
-  // NUMRERINGEN (order 2026-11-22): "1.", "2." på frågans rad, som i boken. Bladkomponentens eget val
-  // (numrering 'tal'); utan det ritar komponenten som förut (ramens drill).
-  function medNummer(b){ var c = {}; Object.keys(b || {}).forEach(function(k){ c[k] = b[k]; }); c.numrering = 'tal'; return c; }
+  // ARBETSYTAN (KONVENTIONER "Uppgiftssidan (arbetsytan)"): bladkomponentens egna val — numrering 'tal'
+  // ("1." på frågans rad, som i boken) och arbetsyta (mindre rutor som växer, likhetstecknen under varandra,
+  // beräkningsrutan i Sätt in värdet). Utan dem ritar komponenten som förut (ramens drill).
+  function medNummer(b){ var c = {}; Object.keys(b || {}).forEach(function(k){ c[k] = b[k]; }); c.numrering = 'tal'; c.arbetsyta = true; return c; }
 
   if(val.test){
     var tb = BANK.testBlad(val.test) || BANK.testBlad('test1');
@@ -187,7 +189,7 @@
     BANK.rita(m, medNummer(BANK.blad(typ.id, b)), typ.form);
     mounts[b] = m;
     var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'blad-nav-btn'; kn.setAttribute('role', 'tab');
-    kn.innerHTML = '<span class="blad-nav-nr">' + b + '</span>Blad ' + BANK.nr(typ.id) + b;
+    kn.innerHTML = '<span class="blad-nav-nr">' + b + '</span>Blad ' + b;   // växeln: "Blad A", "Blad B"
     kn.addEventListener('click', function(){ visa(b); });
     nav.appendChild(kn); knappar[b] = kn;
   });
@@ -219,26 +221,41 @@
 <script>
 (function(){
   var kp = window.ProbBankAk7 && ProbBankAk7.knappsats(); if(!kp) return;
-  /* KONTROLLERA PÅ EGEN PLATS (order 2026-11-22): bladets egen knapprad (Kontrollera, Börja om) står fast
-     BREDVID knappsatsen, till höger om den och i linje med dess nederkant — aldrig över tangenterna. Ryms den
-     inte där (smal skärm, Tipsa i hörnet) läggs den ovanför knappsatsen, fri från den. Mäts mot knappsatsens
-     renderade ruta (den behåller sin plats också när en namnruta döljer den). Komponenten är oförändrad. */
-  var LUFT = 16;
+  /* KALKYLATORN TILL HÖGER, KNAPPRADEN UNDER (KONVENTIONER, arbetsytan). Nederst i högerkanten: EN rad med
+     bladets egen knapprad (Kontrollera, Börja om) och Tipsa (elevfeedback.js, som står kvar på sin egen plats
+     — knappraden ställs till vänster om den, mitt för den i höjd). Knappsatsen står ovanför raden, högerkant mot
+     Tipsas högerkant. Bladet lämnar en kolumn fri för båda (--nf-hoger). Allt mäts mot de renderade rutorna
+     (knappsatsen behåller sin plats också när en namnruta döljer den). Komponenterna är oförändrade. */
+  var LUFT = 10, KANT = 20;
   function placera(){
-    var kr = kp.getBoundingClientRect(), fb = document.querySelector('.feedback-knapp');
-    var tipsa = fb ? (innerWidth - fb.getBoundingClientRect().left) : 0;
-    Array.prototype.forEach.call(document.querySelectorAll('.nf-yta .prob-kort .actions'), function(a){
-      var bredd = a.offsetWidth;
-      if(kr.right + LUFT + bredd + LUFT <= innerWidth - tipsa){
-        a.style.left = Math.round(kr.right + LUFT) + 'px'; a.style.bottom = Math.round(innerHeight - kr.bottom) + 'px';
-      } else {
-        a.style.left = Math.round(kr.left) + 'px'; a.style.bottom = Math.round(innerHeight - kr.top + 12) + 'px';
-      }
+    var akt = document.querySelectorAll('.nf-yta .prob-kort .actions');
+    if(innerWidth <= 640){            // telefon: knappsatsen över hela bredden, knappraden i flödet (CSS:en)
+      kp.style.bottom = ''; kp.style.right = ''; Array.prototype.forEach.call(akt, function(a){ a.style.right = ''; a.style.bottom = ''; });
+      document.documentElement.style.removeProperty('--nf-hoger'); return;
+    }
+    var fb = document.querySelector('.feedback-knapp'), fr = fb ? fb.getBoundingClientRect() : null;
+    var hoger = fr ? (innerWidth - fr.right) : KANT;                       // radens och knappsatsens högerkant
+    var radH = fr ? fr.height : 0, radBotten = fr ? (innerHeight - fr.bottom) : KANT;
+    var radTopp = innerHeight - radBotten - radH, radVanster = fr ? fr.left : innerWidth - KANT;
+    Array.prototype.forEach.call(akt, function(a){
+      var h = a.offsetHeight, w = a.offsetWidth;
+      if(!h) return;                                    // bladet som inte visas (växeln): ingen ruta att mäta
+      var hgr = fr ? (innerWidth - fr.left + LUFT) : KANT;
+      var btn = fr ? Math.round(radBotten + (radH - h) / 2) : KANT;
+      a.style.right = Math.round(hgr) + 'px'; a.style.bottom = btn + 'px';
+      if(!fr){ radH = h; radTopp = innerHeight - KANT - h; }
+      radTopp = Math.min(radTopp, innerHeight - btn - h);
+      radVanster = Math.min(radVanster, innerWidth - hgr - w);
     });
+    kp.style.right = Math.round(hoger) + 'px';
+    kp.style.bottom = Math.round(innerHeight - radTopp + LUFT) + 'px';
+    var kr = kp.getBoundingClientRect();
+    document.documentElement.style.setProperty('--nf-hoger', Math.round(innerWidth - Math.min(kr.left, radVanster) + 8) + 'px');
   }
   placera(); window.addEventListener('resize', placera);
   if(window.ResizeObserver) new ResizeObserver(placera).observe(kp);
-  new MutationObserver(placera).observe(document.getElementById('nf-yta'), { childList: true, subtree: true });
+  // nya blad (Börja om, blandade) och växeln Blad A/B (hidden på monteringen) → mät om
+  new MutationObserver(placera).observe(document.getElementById('nf-yta'), { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
   // Tipsa-knappen (elevfeedback.js, defer) kommer efter: mät om när den finns.
   window.addEventListener('load', function(){ setTimeout(placera, 0); });
 })();
