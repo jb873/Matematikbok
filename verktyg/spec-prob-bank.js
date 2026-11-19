@@ -13,10 +13,13 @@
      6  testen: sex frågor var som Joachim skrev dem, 3.2 med som författat innehåll (ingen nod), facit som
         testdokumentet, Följa instruktion i ekvationsformen
      7  metodträningens källa: varje variant ger Blad A → B → C → D, uppgift nr k på respektive blad
+     8  blad efter D (gen-prob-ak7.js): mallens mening oförändrad, samma antal steg, rena tal, rättas rätt,
+        seedat; ingen variant utan blad
 
-   Negativ verifiering: --sabba facit | relation | test | rabatt | form ska var och en fälla specen.
+   Negativ verifiering: --sabba facit | relation | test | rabatt | form | mening | genfacit ska var och en
+   fälla specen.
 
-   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form] */
+   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit] */
 'use strict';
 const path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -118,6 +121,48 @@ BANK.TYPER.forEach(function(t){
 });
 if(BANK.drillKalla('instruktion/7') || BANK.drillKalla('okand/1')) fall('drillKalla', 'okänd referens ska ge null');
 
+// 8  FLER BLAD EFTER D (gen-prob-ak7.js): blad E, F, … per variant. Varje genererat blad ska ha mallens
+//    MENING oförändrad (bara talen bytta), samma antal rader i balansmetoden som mallen, heltal där mallen
+//    har heltal, facit = modellen, och rättas rätt. Samma blad varje gång (seedat). Ingen variant tom.
+const GEN_ANTAL = 16;
+const skelett = function(s){ return String(s).replace(/\d{1,3}(?: \d{3})+|\d+(?:,\d+)?/g, '#'); };
+let genererade = 0;
+BANK.TYPER.forEach(function(t){
+  t.varianter.forEach(function(v, i){
+    const ref = t.id + '/' + (i + 1), k = BANK.drillKalla(ref), k2 = BANK.drillKalla(ref);
+    let antal = 0;
+    for(let n = 4; n < 4 + GEN_ANTAL; n++){
+      const x = k.nasta(n); if(!x) continue;
+      const u = x.blad.uppgifter[0];
+      if(sabba === 'mening' && n === 4 && i === 0 && t.id === 'instruktion') u.fraga = u.fraga.replace('multiplicerar', 'dividerar');
+      if(sabba === 'genfacit' && n === 5 && i === 2 && t.id === 'delar') u.facit = u.facit.map(function(f){ return f + 1; });
+      antal++; genererade++;
+      const id = ref + ' blad ' + x.bokstav, mallU = t.blad[u.mall][i];
+      if(x.bokstav !== String.fromCharCode(65 + n)) fall(id, 'bokstaven ska vara ' + String.fromCharCode(65 + n));
+      if(skelett(u.fraga) !== skelett(mallU.fraga)) fall(id, 'meningen är ändrad: "' + u.fraga + '"');
+      if(['A', 'B', 'C', 'D'].some(function(b){ return t.blad[b][i].fraga === u.fraga; })) fall(id, 'samma text som ett exempel');
+      if(t.form === 'instruktion' && u.form !== 'ekvation') fall(id, 'Följa instruktion ska lösas som ekvation');
+      const g = MOD.granska(u); if(g.length){ fall(id, 'granska: ' + g.join('; ')); continue; }
+      const vv = MOD.varden(u, MOD.grenarAv(u)[0]);
+      MOD.nycklarAv(u).forEach(function(key, j){
+        const ref0 = MOD.varden(mallU, MOD.grenarAv(mallU)[0]).varden[key];
+        if(!lika(vv.varden[key], u.facit[j])) fall(id, 'facit ' + u.facit[j] + ' ≠ modellen ' + vv.varden[key]);
+        if(!(vv.varden[key] > 0)) fall(id, 'del ' + key + ' ≤ 0');
+        if(Number.isInteger(ref0) && !Number.isInteger(Math.round(vv.varden[key] * 1e9) / 1e9)) fall(id, 'del ' + key + ' är inget heltal: ' + vv.varden[key]);
+      });
+      const lf = MOD.losningsforslag(u), lf0 = MOD.losningsforslag(mallU);
+      if(!lf || lf.kedja.length !== lf0.kedja.length) fall(id, 'balansmetoden har inte lika många rader som mallen');
+      const svar = { uttryck: lf.uttryck, rader: [lf.ekvation].concat(lf.kedja), insattning: lf.insattning, svar: lf.svar };
+      if(u.foljdfraga) svar.foljd = MOD.talStr(u.facitFoljd) + ' ' + u.foljdfraga.enhet;
+      const res = R.ratta(u, svar);
+      if(res.status !== 'ratt') fall(id, 'lösningsförslaget rättas ' + res.status + ' (' + res.besked + ')');
+      const y = k2.nasta(n);
+      if(!y || y.blad.uppgifter[0].fraga !== u.fraga) fall(id, 'inte samma blad vid ny körning (seed)');
+    }
+    if(!antal) fall(ref, 'inget blad efter D — varianten bär inte');
+  });
+});
+
 const antal = ids.size;
 if(brott.length){
   console.log('✗ spec-prob-bank: ' + brott.length + ' brott (' + antal + ' uppgifter)');
@@ -125,4 +170,5 @@ if(brott.length){
   process.exit(1);
 }
 console.log('✓ spec-prob-bank: ' + antal + ' uppgifter — modellens facit = dokumentets facit per ruta, lösningsförslagen rättas rätt; '
-  + BANK.TEST.length + ' test à sex frågor (3.2 författad, facit som testdokumentet); ' + varianter + ' varianter A→B→C→D');
+  + BANK.TEST.length + ' test à sex frågor (3.2 författad, facit som testdokumentet); ' + varianter + ' varianter A→B→C→D; '
+  + genererade + ' genererade blad efter D (mening oförändrad, samma antal steg, rena tal, rättas rätt)');

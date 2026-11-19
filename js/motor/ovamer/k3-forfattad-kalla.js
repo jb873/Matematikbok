@@ -9,8 +9,9 @@
      - banken per variant = de författade instanserna, en per blad (Blad A, B, C, D — samma position på
        bladet = samma variant). Ordningen är A → B → C → D.
      - "Nytt blad" = nästa bokstav (takregeln i författad form: samma band, nya tal).
-     - EFTER D: knappen visas inte — drillen stannar på sista bladet (se ANTAGANDEN i leveransen; ingen
-       omstart till A, eftersom samma uppgifter igen ger mastery som inte är träning).
+     - EFTER D (order 2026-11-20): källan ger fler blad inom bandet (källans nasta(i); för problemlösningen
+       gen-prob-ak7.js — exemplens meningar med nya tal, aldrig svårare). Ger källan inget blad till
+       (variant som inte bär) visas knappen inte — inget dåligt blad serveras.
      - Horisonten: källan bär sin årskurs; över ramens årskurs serveras inget (översikten visas i stället).
 
    RENDERINGEN ÄR UPPGIFTSSIDANS: källan ritar med sin egen bladkomponent (för problemlösningen
@@ -32,6 +33,7 @@
       css: ['js/motor/keypad.css', 'js/motor/problemlosning/prob-blad.css'],
       skript: ['js/motor/ekvationer-balans/ekv-parser.js', 'js/motor/ekvationer-balans/ekv-kedja.js',
                'js/motor/problemlosning/prob-modell.js', 'js/motor/problemlosning/prob-rattare.js',
+               'js/motor/problemlosning/gen-prob-ak7.js',   // behöver GEN_AK8_ALG1 (ramen laddar gen-ak8-alg1.js)
                'js/motor/problemlosning/prob-blad.js', 'js/motor/problemlosning/prob-blad2.js',
                'js/motor/problemlosning/prob-bank-ak7.js'],
       hamta: function(ref){ return window.ProbBankAk7 && window.ProbBankAk7.drillKalla(ref); },
@@ -79,19 +81,20 @@
       nytt.setAttribute('data-action', 'nytt-blad');
       rad.appendChild(nytt); yta.appendChild(mount); yta.appendChild(rad); app.appendChild(yta);
 
-      var sista = kalla.instanser.length - 1;
-      var start = 0;
-      kalla.instanser.forEach(function(x, i){ if(x.bokstav === (q.get('blad') || '').toUpperCase()) start = i; });
+      // Blad nr i: källans nasta(i) när den finns (fler blad efter D), annars bara de författade.
+      function instans(i){ return kalla.nasta ? kalla.nasta(i) : (kalla.instanser[i] || null); }
+      var start = 0, onskad = (q.get('blad') || '').toUpperCase();
+      for(var s = 0; s < 60 && onskad; s++){ var x = instans(s); if(!x) break; if(x.bokstav === onskad){ start = s; break; } }
       var nu = start;
       function visa(i){
         nu = i;
-        var inst = kalla.instanser[i];
+        var inst = instans(i);
         kalla.rita(mount, inst.blad);
         yta.setAttribute('data-blad', inst.bokstav);
-        rad.hidden = (i >= sista);                    // efter D: inget nytt blad (drillen stannar)
+        rad.hidden = !instans(i + 1);                 // inget nästa blad → ingen knapp (inget dåligt blad)
         try { var u = new URLSearchParams(location.search); u.set('blad', inst.bokstav); history.replaceState(null, '', '?' + u.toString()); } catch(e){}
       }
-      nytt.addEventListener('click', function(){ if(nu < sista){ visa(nu + 1); window.scrollTo(0, 0); } });
+      nytt.addEventListener('click', function(){ if(instans(nu + 1)){ visa(nu + 1); window.scrollTo(0, 0); } });
       visa(start);
       K.knappsats();
     });

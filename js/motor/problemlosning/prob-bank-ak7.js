@@ -409,16 +409,32 @@ function knappsats(){
 // bank: 'prob-ak7:<typ>/<variant>' (t.ex. 'prob-ak7:instruktion/1'). Ramens drill
 // (js/motor/ovamer/k3-forfattad-kalla.js) hämtar här varianternas instanser: uppgift nr k på
 // Blad A, B, C, D, i den ordningen. Nytt blad = nästa bokstav. Horisonten är typens: Nivå 1 = åk7.
+// EFTER D (order 2026-11-20): fler blad INOM BANDET — gen-prob-ak7.js byter talen i ett av exemplen A–D,
+// meningen oförändrad, aldrig svårare. nasta(i) ger blad nr i (0 = A … 3 = D, 4 = E, …) eller null när
+// varianten inte bär fler (flaggad: inget dåligt blad serveras).
+function bladBokstav(i){ return i < 26 ? String.fromCharCode(65 + i) : String(i + 1); }
 function drillKalla(ref){
   var p = String(ref || '').split('/'), t = typ(p[0]), k = parseInt(p[1], 10);
   if(!t || !(k >= 1 && k <= t.varianter.length)) return null;
   var v = t.varianter[k - 1];
+  function blad1(bokstav, u){
+    return { bokstav: bokstav, blad: { id: 'drill-' + t.id + '-v' + k + '-' + bokstav, titel: t.titel + ' · ' + v.titel + ' · Blad ' + bokstav,
+                                       nod: t.nod, uppgifter: [u] } };
+  }
+  var instanser = BOKSTAVER.map(function(b){ return blad1(b, t.blad[b][k - 1]); });
+  var GEN = (typeof window !== 'undefined' && window.ProbGenAk7) ||
+            (typeof require === 'function' ? (function(){ try { return require('./gen-prob-ak7.js'); } catch(e){ return null; } })() : null);
+  var gen = GEN ? GEN.variant(instanser.map(function(x){ return x.blad.uppgifter[0]; }), ref) : null;
   return {
     arskurs: 7, form: t.form, titel: t.titel + ' · ' + v.titel,
-    instanser: BOKSTAVER.map(function(b){
-      return { bokstav: b, blad: { id: 'drill-' + t.id + '-v' + k + '-' + b, titel: t.titel + ' · ' + v.titel + ' · Blad ' + b,
-                                   nod: t.nod, uppgifter: [t.blad[b][k - 1]] } };
-    }),
+    instanser: instanser,
+    nasta: function(i){
+      if(i < instanser.length) return instanser[i];
+      var u = gen && gen.generera(i - instanser.length);
+      if(!u) return null;
+      if(t.form === 'instruktion') u.form = 'ekvation';
+      return blad1(bladBokstav(i), u);
+    },
     rita: function(mount, b){ return rita(mount, b, t.form); }
   };
 }
