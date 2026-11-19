@@ -126,9 +126,9 @@ function render(mount, blad){
   var rub = document.createElement('div'); rub.className = 'niva-rubrik'; rub.textContent = blad.titel;
   kort.appendChild(rub);
 
-  var state = [];
+  var state = [], opt = { numrering: blad.numrering };
   blad.uppgifter.forEach(function(u, idx){
-    state.push(arEkvation(u) ? window.ProbBlad.renderUppgift(kort, u, idx) : renderUppgift(kort, u, idx));
+    state.push(arEkvation(u) ? window.ProbBlad.renderUppgift(kort, u, idx, opt) : renderUppgift(kort, u, idx, opt));
   });
 
   var actions = document.createElement('div'); actions.className = 'actions';
@@ -156,13 +156,18 @@ function steghuvud(el, text){
   el.appendChild(d); return d;
 }
 
-function renderUppgift(kort, u, idx){
+function renderUppgift(kort, u, idx, opt){
   var vars = u.variabel || 'x';
   var block = document.createElement('div'); block.className = 'prob-uppg'; block.setAttribute('data-nod', u.nod);
-  var et = document.createElement('div'); et.className = 'uppg-etikett'; et.textContent = String.fromCharCode(97 + idx) + ')';
-  block.appendChild(et);
-  var fraga = document.createElement('p'); fraga.className = 'prob-fraga'; fraga.textContent = u.fraga;
-  block.appendChild(fraga);
+  // Numret och frågan: samma funktion som ekvationsformen (ProbBlad.fragaMedNummer) — "1." på frågans rad när
+  // bladet bär numrering 'tal' (uppgiftssidan), annars "a)" ovanför som förut.
+  if(window.ProbBlad && window.ProbBlad.fragaMedNummer) block.appendChild(window.ProbBlad.fragaMedNummer(u, idx, opt));
+  else {
+    var et = document.createElement('div'); et.className = 'uppg-etikett'; et.textContent = String.fromCharCode(97 + idx) + ')';
+    block.appendChild(et);
+    var fraga = document.createElement('p'); fraga.className = 'prob-fraga'; fraga.textContent = u.fraga;
+    block.appendChild(fraga);
+  }
 
   // FIGUREN ur data: ett ändrat tal ändrar figur och facit tillsammans.
   if(u.fig && window.SvgAlgebraFigur && SvgAlgebraFigur[u.fig.typ]){

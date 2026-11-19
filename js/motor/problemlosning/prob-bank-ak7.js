@@ -487,9 +487,13 @@ function uppgift(ref){
 // Bladets nummer = typens plats (1–5), bokstaven = varianten: "Blad 1A" (KONVENTIONER, Arbetssidan).
 function nr(typId){ return TYPER.indexOf(typ(typId)) + 1; }
 // Ett blad i bladkomponenternas form: { id, titel, nod, uppgifter }
+// RUBRIKEN ÄR TYPEN (order 2026-11-22): "Problemlösning omkrets" — inte "Blad 4A · Omkrets". Blad A/B står
+// kvar som växel på uppgiftssidan. (ELEVTEXT som fält: elevtext-låset ser fältnamnet.)
+var RUBRIK = { titel: 'Problemlösning' };
 function blad(typId, bokstav){
   var t = typ(typId); if(!t || !t.blad[bokstav]) return null;
-  return { id: t.id + '-' + bokstav, titel: 'Blad ' + nr(typId) + bokstav + ' · ' + t.titel, nod: t.nod, uppgifter: t.blad[bokstav] };
+  return { id: t.id + '-' + bokstav, titel: RUBRIK.titel + ' ' + t.titel.charAt(0).toLowerCase() + t.titel.slice(1),
+           nod: t.nod, uppgifter: t.blad[bokstav] };
 }
 // Ett test i bladkomponenternas form. En fråga är ett id ur banken eller en författad uppgift (3.2).
 // Testet ritas med ProbBlad2.render; frågor med form 'ekvation' (Följa instruktion) ritas där i

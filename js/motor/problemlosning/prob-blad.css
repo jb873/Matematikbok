@@ -63,6 +63,8 @@
 .prob-kort .prob-uppg{padding:20px 0 22px;border-top:1px solid var(--paper-dk);}
 .prob-kort .prob-uppg:first-of-type{border-top:none;}
 .prob-kort .prob-fraga{font-size:16.5px;line-height:1.55;color:var(--ink);margin:2px 0 14px;max-width:62ch;}
+/* Talets nummer på frågans rad ("1. En rektangel …"), som i boken — bara när bladet bär numrering 'tal'. */
+.prob-kort .prob-fraga .uppg-nr{font-weight:600;margin-right:.4em;}
 .prob-kort .prob-grid{margin-left:2px;row-gap:6px;}
 .prob-kort .prob-steg-rub{font-family:var(--cinzel);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--gold);margin:10px 0 2px;padding-top:8px;border-top:1px dashed var(--paper-dk);}

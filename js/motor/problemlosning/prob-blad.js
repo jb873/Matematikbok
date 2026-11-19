@@ -76,8 +76,8 @@ function render(mount, blad){
   var rub = document.createElement('div'); rub.className = 'niva-rubrik'; rub.textContent = blad.titel;
   kort.appendChild(rub);
 
-  var state = [];
-  blad.uppgifter.forEach(function(u, idx){ state.push(renderUppgift(kort, u, idx)); });
+  var state = [], opt = { numrering: blad.numrering };
+  blad.uppgifter.forEach(function(u, idx){ state.push(renderUppgift(kort, u, idx, opt)); });
 
   var actions = document.createElement('div'); actions.className = 'actions';
   var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'btn primary'; kn.textContent = TEXT.kontroll.titel;
@@ -95,15 +95,13 @@ function render(mount, blad){
 
 // EN uppgift i ekvationsformen (ekvation → balansmetoden → svar). Utbruten ur render så att ett blad i
 // femstegsformen (ProbBlad2) kan bära en uppgift i den här formen — testet blandar typerna (order 2026-11-19).
-function renderUppgift(kort, u, idx){
+// opt.numrering 'tal' (uppgiftssidan, order 2026-11-22): talen numreras "1.", "2." på SAMMA rad som texten,
+// som i boken — bokstav bara för deluppgifter (K-A). Utan fältet: som förut (ramens drill, gamla sidan).
+function renderUppgift(kort, u, idx, opt){
     var block = document.createElement('div'); block.className = 'prob-uppg';
     block.setAttribute('data-nod', u.nod);
 
-    var et = document.createElement('div'); et.className = 'uppg-etikett';
-    et.textContent = String.fromCharCode(97 + idx) + ')';
-    block.appendChild(et);
-    var fraga = document.createElement('p'); fraga.className = 'prob-fraga'; fraga.textContent = u.fraga;
-    block.appendChild(fraga);
+    block.appendChild(fragaMedNummer(u, idx, opt));
 
     var grid = document.createElement('div'); grid.className = 'eq-grid prob-grid'; block.appendChild(grid);
     var vars = u.variabel || 'x';
@@ -142,6 +140,24 @@ function renderUppgift(kort, u, idx){
     kort.appendChild(block);
     return { form: 'ekvation', u: u, ekvRad: ekvRad, kedja: kedja, svarIn: svarIn, svarStatus: svarStatus,
              klarEl: klar, beskedEl: besked, delNyckel: u.delar[0].nyckel };
+}
+
+// Frågan med sitt nummer. 'tal': "1." inne i frågans rad. Annars: etiketten "a)" på egen rad ovanför (som förut).
+// Ett fragment, så att båda formerna (ProbBlad, ProbBlad2) lägger in samma sak på samma ställe.
+function fragaMedNummer(u, idx, opt){
+  var ut = document.createDocumentFragment();
+  var fraga = document.createElement('p'); fraga.className = 'prob-fraga';
+  if(opt && opt.numrering === 'tal'){
+    var nr = document.createElement('span'); nr.className = 'uppg-nr'; nr.textContent = (idx + 1) + '.';
+    fraga.appendChild(nr); fraga.appendChild(document.createTextNode(u.fraga));
+  } else {
+    var et = document.createElement('div'); et.className = 'uppg-etikett';
+    et.textContent = String.fromCharCode(97 + idx) + ')';
+    ut.appendChild(et);
+    fraga.textContent = u.fraga;
+  }
+  ut.appendChild(fraga);
+  return ut;
 }
 
 // ── RÄTTNING: ingen förrän Kontrollera. Första felet i metodordningen pekas ut. ────────────────
@@ -238,6 +254,6 @@ function logga(nod, utfall){
 })();
 
 // Per uppgift: ProbBlad2 bär en uppgift i ekvationsformen i sitt blad genom de här (testet, order 2026-11-19).
-if(typeof window !== 'undefined') window.ProbBlad = { BLAD: BLAD, render: render, renderUppgift: renderUppgift,
+if(typeof window !== 'undefined') window.ProbBlad = { BLAD: BLAD, render: render, renderUppgift: renderUppgift, fragaMedNummer: fragaMedNummer,
   kontrolleraUppgift: kontrolleraUppgift, besvarad: besvarad, summaAv: summaAv };
 })();
