@@ -16,10 +16,12 @@
      8  blad efter D (gen-prob-ak7.js): mallens mening oförändrad, samma antal steg, rena tal, rättas rätt,
         seedat; ingen variant utan blad
 
-   Negativ verifiering: --sabba facit | relation | test | rabatt | form | mening | genfacit ska var och en
-   fälla specen.
+        personnamnen bytta konsekvent, samma kön, rätt genitiv; A–D orörda
+   Negativ verifiering: --sabba facit | relation | test | rabatt | form | mening | genfacit | namn | genitiv
+   ska var och en fälla specen.
 
-   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit] */
+   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit|namn|genitiv]
+        [--namnprov]  (skriver ut de genererade bladen med personer) */
 'use strict';
 const path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -124,23 +126,85 @@ if(BANK.drillKalla('instruktion/7') || BANK.drillKalla('okand/1')) fall('drillKa
 // 8  FLER BLAD EFTER D (gen-prob-ak7.js): blad E, F, … per variant. Varje genererat blad ska ha mallens
 //    MENING oförändrad (bara talen bytta), samma antal rader i balansmetoden som mallen, heltal där mallen
 //    har heltal, facit = modellen, och rättas rätt. Samma blad varje gång (seedat). Ingen variant tom.
+//    NAMN (order 2026-11-21): personnamnen byts också — konsekvent inom bladet (en person = ett nytt namn,
+//    två personer = två namn), samma kön (meningens han/hon står kvar), rätt genitiv (det NYA namnet böjt:
+//    Majas, Elias), inget nytt namn som liknar exemplets. Resten av meningen oförändrad. A–D orörda.
+const GEN = require(path.join(ROOT, 'js/motor/problemlosning/gen-prob-ak7.js'));
 const GEN_ANTAL = 16;
-const skelett = function(s){ return String(s).replace(/\d{1,3}(?: \d{3})+|\d+(?:,\d+)?/g, '#'); };
-let genererade = 0;
+function utanNamn(s){
+  let t = String(s);
+  GEN.namnIText(t).slice().reverse().forEach(function(p){
+    t = t.slice(0, p.start) + (p.form === 'gen' ? '§s' : (p.form === 'oklar' ? '§?' : '§')) + t.slice(p.slut);
+  });
+  return t;
+}
+const skelett = function(s){ return utanNamn(s).replace(/\d{1,3}(?: \d{3})+|\d+(?:,\d+)?/g, '#'); };
+const forfattat = JSON.stringify(BANK.TYPER.map(function(t){ return BANK.BOKSTAVER.map(function(b){
+  return t.blad[b].map(function(u){ return [u.fraga, u.delar.map(function(d){ return d.namn; })]; }); }); }));
+function provaNamn(id, u, mallU){
+  const pm = GEN.namnIText(mallU.fraga), pn = GEN.namnIText(u.fraga);
+  if(pm.length !== pn.length){ fall(id, 'namnen: ' + pm.length + ' i mallen, ' + pn.length + ' i bladet'); return 0; }
+  const karta = {}, info = GEN.namnMall(mallU);
+  pm.forEach(function(p, j){
+    const q = pn[j], tok = u.fraga.slice(q.start, q.slut);
+    if(p.form !== q.form) fall(id, 'namnet "' + tok + '" står i ' + q.form + ', mallen har ' + p.form);
+    if(karta.hasOwnProperty(p.namn) && karta[p.namn] !== q.namn) fall(id, p.namn + ' har blivit både ' + karta[p.namn] + ' och ' + q.namn);
+    karta[p.namn] = q.namn;
+    if(q.form === 'gen' && tok !== GEN.genitiv(q.namn)) fall(id, 'genitiv av ' + q.namn + ' ska vara ' + GEN.genitiv(q.namn) + ', står ' + tok);
+    if(q.form === 'nom' && tok !== q.namn) fall(id, 'grundform ' + q.namn + ', står ' + tok);
+  });
+  const nya = Object.keys(karta).map(function(k){ return karta[k]; });
+  if(new Set(nya).size !== nya.length) fall(id, 'två personer har fått samma namn: ' + nya.join(', '));
+  let bytta = 0;
+  Object.keys(karta).forEach(function(gammal){
+    const ny = karta[gammal];
+    if(GEN.KON[ny] !== GEN.KON[gammal]) fall(id, gammal + ' → ' + ny + ' byter kön (meningens han/hon står kvar)');
+    if(info.oklara.indexOf(gammal) >= 0){ if(ny !== gammal) fall(id, gammal + ' står i en oklar position men har bytts'); return; }
+    if(ny === gammal || info.personer.some(function(x){ return x.slice(0, 3).toLowerCase() === ny.slice(0, 3).toLowerCase(); }))
+      fall(id, gammal + ' → ' + ny + ': inget nytt namn');
+    else bytta++;
+  });
+  mallU.delar.forEach(function(d, j){
+    const vantat = karta.hasOwnProperty(d.namn) ? karta[d.namn] : d.namn;
+    if(u.delar[j].namn !== vantat) fall(id, 'delens namn ' + u.delar[j].namn + ', väntat ' + vantat);
+  });
+  return bytta;
+}
+let genererade = 0, namnBlad = 0, namnBytta = 0, sabbatNamn = false, sabbatGenitiv = false;
+const namnProv = [];
 BANK.TYPER.forEach(function(t){
   t.varianter.forEach(function(v, i){
     const ref = t.id + '/' + (i + 1), k = BANK.drillKalla(ref), k2 = BANK.drillKalla(ref);
-    let antal = 0;
+    let antal = 0, forraNamn = [];
     for(let n = 4; n < 4 + GEN_ANTAL; n++){
       const x = k.nasta(n); if(!x) continue;
       const u = x.blad.uppgifter[0];
+      const nyaNamn = Object.keys(u.namnByte || {}).map(function(g){ return u.namnByte[g]; });
+      nyaNamn.forEach(function(nm){ if(forraNamn.indexOf(nm) >= 0) fall(ref + ' blad ' + x.bokstav, nm + ' fanns också i bladet före'); });
+      forraNamn = nyaNamn;
       if(sabba === 'mening' && n === 4 && i === 0 && t.id === 'instruktion') u.fraga = u.fraga.replace('multiplicerar', 'dividerar');
       if(sabba === 'genfacit' && n === 5 && i === 2 && t.id === 'delar') u.facit = u.facit.map(function(f){ return f + 1; });
+      const mallU = t.blad[u.mall][i];
+      if(sabba === 'namn' && !sabbatNamn){            // en person byter namn mitt i bladet
+        const pn = GEN.namnIText(u.fraga), sista = pn[pn.length - 1];
+        if(sista && pn.filter(function(p){ return p.namn === sista.namn; }).length > 1){
+          const annat = GEN.NAMN[GEN.KON[sista.namn]].filter(function(x){ return u.fraga.indexOf(x) < 0; })[0];
+          u.fraga = u.fraga.slice(0, sista.start) + annat + u.fraga.slice(sista.slut); sabbatNamn = true;
+        }
+      }
+      if(sabba === 'genitiv' && !sabbatGenitiv){       // genitiv-s:et tappat ("Leo mamma")
+        const g = GEN.namnIText(u.fraga).filter(function(p){ return p.form === 'gen' && !/[sxz]$/.test(p.namn); })[0];
+        if(g){ u.fraga = u.fraga.slice(0, g.start) + g.namn + u.fraga.slice(g.slut); sabbatGenitiv = true; }
+      }
       antal++; genererade++;
-      const id = ref + ' blad ' + x.bokstav, mallU = t.blad[u.mall][i];
+      const id = ref + ' blad ' + x.bokstav;
       if(x.bokstav !== String.fromCharCode(65 + n)) fall(id, 'bokstaven ska vara ' + String.fromCharCode(65 + n));
       if(skelett(u.fraga) !== skelett(mallU.fraga)) fall(id, 'meningen är ändrad: "' + u.fraga + '"');
       if(['A', 'B', 'C', 'D'].some(function(b){ return t.blad[b][i].fraga === u.fraga; })) fall(id, 'samma text som ett exempel');
+      if(GEN.namnMall(mallU).personer.length){
+        namnBlad++; const b2 = provaNamn(id, u, mallU); namnBytta += b2;
+        if(namnProv.length < 400) namnProv.push(id + ' (mall ' + u.mall + '): ' + u.fraga);
+      }
       if(t.form === 'instruktion' && u.form !== 'ekvation') fall(id, 'Följa instruktion ska lösas som ekvation');
       const g = MOD.granska(u); if(g.length){ fall(id, 'granska: ' + g.join('; ')); continue; }
       const vv = MOD.varden(u, MOD.grenarAv(u)[0]);
@@ -162,6 +226,13 @@ BANK.TYPER.forEach(function(t){
     if(!antal) fall(ref, 'inget blad efter D — varianten bär inte');
   });
 });
+if(sabba === 'namn' && !sabbatNamn) fall('sabba namn', 'hittade inget blad att sabba');
+if(sabba === 'genitiv' && !sabbatGenitiv) fall('sabba genitiv', 'hittade inget blad att sabba');
+if(JSON.stringify(BANK.TYPER.map(function(t){ return BANK.BOKSTAVER.map(function(b){
+  return t.blad[b].map(function(u){ return [u.fraga, u.delar.map(function(d){ return d.namn; })]; }); }); })) !== forfattat)
+  fall('A–D', 'de författade bladen har ändrats av genereringen');
+if(!namnBlad) fall('namn', 'inga genererade blad med personer');
+if(process.argv.indexOf('--namnprov') > 0) namnProv.forEach(function(s){ console.log(s); });
 
 const antal = ids.size;
 if(brott.length){
@@ -171,4 +242,5 @@ if(brott.length){
 }
 console.log('✓ spec-prob-bank: ' + antal + ' uppgifter — modellens facit = dokumentets facit per ruta, lösningsförslagen rättas rätt; '
   + BANK.TEST.length + ' test à sex frågor (3.2 författad, facit som testdokumentet); ' + varianter + ' varianter A→B→C→D; '
-  + genererade + ' genererade blad efter D (mening oförändrad, samma antal steg, rena tal, rättas rätt)');
+  + genererade + ' genererade blad efter D (mening oförändrad, samma antal steg, rena tal, rättas rätt); '
+  + namnBlad + ' av dem med personer, ' + namnBytta + ' namn bytta (konsekvent, samma kön, rätt genitiv)');

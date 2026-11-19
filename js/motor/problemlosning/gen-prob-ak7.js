@@ -24,7 +24,10 @@
    tal blir 0 eller 1 (grammatiken: "1 kakor") om exemplet inte hade det, och texten är inte ett av exemplen.
    Annars dras talen om (seedat). Ger en mall inget godtagbart blad, eller har mallen ingen annan uppgift
    med samma enhet att ta bandet ur, används den inte — och har varianten ingen användbar mall serveras
-   INGET (variantlista: ProbGenAk7.granska()). Hellre inget blad än ett dåligt. */
+   INGET (variantlista: ProbGenAk7.granska()). Hellre inget blad än ett dåligt.
+
+   NAMNEN (order 2026-11-21): i ett genererat blad byts också personnamnen — se PERSONNAMN nedan. Talen dras
+   först, exakt som utan namnbyte; A–D behåller Joachims namn. */
 (function(){
 'use strict';
 
@@ -274,36 +277,133 @@ function ettBlad(m, b, seed, exempelTexter){
   return null;
 }
 
+// ── PERSONNAMN (order 2026-11-21): i ett genererat blad byts också personnamnen, så bladet inte känns som
+// samma uppgift igen. Talen dras först och exakt som förut; namnen läggs på efteråt med en egen seedad slump.
+//   KÄLLA: de svenska förnamnen i Joachims problemlösningsdokument (A–D), påfyllda med två könsneutrala
+//   högstadienamn (Alex, Robin) så att "Kim" har något att bytas mot.
+//   KÖNET behålls: meningen står kvar ord för ord, också "han/hon/hennes" ("Noa tänker … Han multiplicerar").
+//   Bara personnamn byts — objekt, kontext och struktur står kvar.
+//   KONSEKVENT inom bladet: alla "Elias" → samma nya namn; två personer får två olika namn (och inga två namn
+//   med samma början, Noa/Noah); ett nytt namn liknar inte något av exemplets namn.
+//   GENITIV: positionen läses i exemplet ("Majas ålder" = genitiv, "som Elias." = grundform) och det NYA namnet
+//   böjs (Maja → Majas, Elias/Max/Alex → oförändrat). Ett namn på -s/-x/-z där det inte går att avgöra om
+//   positionen är genitiv (nästa ord är varken ett känt verb/småord eller ett känt huvudord) är OKLART: den
+//   personen behåller exemplets namn i hela bladet, och mallen flaggas (granska() → namn.oklara).
+var NAMN = {
+  pojke:  ['Noa', 'Omar', 'Noah', 'Ali', 'Elias', 'Leo', 'Liam', 'Hugo', 'Oskar', 'Max', 'Adam', 'Sam'],
+  flicka: ['Elsa', 'Mira', 'Liv', 'Maja', 'Ella', 'Moa', 'Vera', 'Ida', 'Saga', 'Alva', 'Alma', 'Tilde', 'Mia', 'Nora'],
+  neutralt: ['Kim', 'Alex', 'Robin']
+};
+var KON = {};
+Object.keys(NAMN).forEach(function(k){ NAMN[k].forEach(function(n){ KON[n] = k; }); });
+// Efter ett namn på -s/-x/-z: grundform om nästa ord är ett av de här (verb och småord ur dokumenten) …
+var NOM_FOLJER = ['är', 'har', 'väger', 'tänker', 'tänkte', 'äter', 'får', 'fick', 'och', 'eller', 'som', 'på', 'men',
+                  'multiplicerar', 'dividerar', 'adderar', 'subtraherar', 'dubblar', 'halverar'];
+// … genitiv om det är ett av de här (vad en person kan "ha": släkt, ålder, mått).
+var GEN_HUVUD = ['mamma', 'pappa', 'mor', 'far', 'bror', 'syster', 'moster', 'morbror', 'faster', 'farbror', 'mormor',
+                 'morfar', 'farmor', 'farfar', 'kusin', 'kompis', 'ålder', 'längd', 'vikt'];
+function sxz(n){ return /[sxz]$/i.test(n); }
+function genitiv(n){ return sxz(n) ? n : n + 's'; }
+var ORD = /[A-Za-zÅÄÖåäöÉé]+/g;
+// Personnamnen i en text: [{ start, slut, namn (grundform), form: 'nom' | 'gen' | 'oklar' }]
+function namnIText(t){
+  var s = String(t), ut = [], m; ORD.lastIndex = 0;
+  while((m = ORD.exec(s)) !== null){
+    var w = m[0], namn = null, form = null;
+    if(KON.hasOwnProperty(w)){
+      namn = w; form = 'nom';
+      if(sxz(w)){
+        var rest = s.slice(m.index + w.length), f = rest.match(/^ +([a-zåäöé]+)/);
+        if(f) form = NOM_FOLJER.indexOf(f[1]) >= 0 ? 'nom' : (GEN_HUVUD.indexOf(f[1]) >= 0 ? 'gen' : 'oklar');
+        else form = /^\s*([.,!?;:)]|$)/.test(rest) ? 'nom' : 'oklar';
+      }
+    } else if(/s$/.test(w) && KON.hasOwnProperty(w.slice(0, -1)) && !sxz(w.slice(0, -1))){
+      namn = w.slice(0, -1); form = 'gen';
+    }
+    if(namn) ut.push({ start: m.index, slut: m.index + w.length, namn: namn, form: form });
+  }
+  return ut;
+}
+// Mallens personer: vilka som byts och vilka som är oklara (behåller exemplets namn, flaggas).
+function namnMall(u){
+  var pos = namnIText(u.fraga);
+  (u.delar || []).forEach(function(d){ pos = pos.concat(namnIText(d.namn)); });
+  var personer = [], oklara = [];
+  pos.forEach(function(p){
+    if(personer.indexOf(p.namn) < 0) personer.push(p.namn);
+    if(p.form === 'oklar' && oklara.indexOf(p.namn) < 0) oklara.push(p.namn);
+  });
+  return { personer: personer, oklara: oklara, byts: personer.filter(function(n){ return oklara.indexOf(n) < 0; }) };
+}
+function borjan(n){ return n.slice(0, 3).toLowerCase(); }
+// Nya namn för mallens personer: samma kön, inbördes olika, inget som liknar exemplets namn — och helst
+// inget av namnen i bladet före (forra), så två blad i rad inte har samma person.
+function valjNamn(info, r, forra){
+  var upptagna = info.personer.map(borjan), karta = {}, nyss = (forra || []).map(borjan);
+  info.byts.forEach(function(n){
+    var kand = NAMN[KON[n]].filter(function(x){ return upptagna.indexOf(borjan(x)) < 0; });
+    var farska = kand.filter(function(x){ return nyss.indexOf(borjan(x)) < 0; });
+    if(farska.length) kand = farska;
+    if(!kand.length) return;                     // inget ledigt namn → personen behåller sitt
+    var ny = G.val(r, kand); karta[n] = ny; upptagna.push(borjan(ny));
+  });
+  return karta;
+}
+function sattNamn(str, karta){
+  var pos = namnIText(str), s = String(str);
+  pos.slice().reverse().forEach(function(p){
+    var ny = karta[p.namn]; if(!ny || p.form === 'oklar') return;
+    s = s.slice(0, p.start) + (p.form === 'gen' ? genitiv(ny) : ny) + s.slice(p.slut);
+  });
+  return s;
+}
+function bytNamn(nu, info, seed, forra){
+  if(!info.byts.length) return {};
+  var karta = valjNamn(info, G.rng(seed), forra);
+  nu.fraga = sattNamn(nu.fraga, karta);
+  (nu.delar || []).forEach(function(d){ d.namn = sattNamn(d.namn, karta); });
+  return karta;
+}
+
 // ── VARIANTEN: exemplen A–D (i ordning) → en källa för blad nr 5, 6, … ──
 function variant(exempel, ref){
   var mallar = exempel.map(mall);
   var texter = exempel.map(function(u){ return u.fraga; });
   var bas = 0; for(var i = 0; i < ref.length; i++) bas = (bas * 31 + ref.charCodeAt(i)) >>> 0;
-  var cache = {};
+  var namnInfo = exempel.map(namnMall);
+  var cache = {}, talTexter = {};
   // Blad nr n efter D (n = 0, 1, …): mallarna turas om (A, B, C, D, A, …); en mall som inte ger ett
   // godtagbart blad hoppas över för det bladet. null = ingen mall bär (varianten flaggas).
   // UPPREPNING: ett nytt blad ska helst inte ha visats förut (exemplen räknas alltid som visade). Är bandet
   // så smalt att allt är visat får ett tidigare genererat blad komma igen — men aldrig samma som bladet före.
+  // Upprepningen jämförs på TALEN (texten före namnbytet), så talen blir exakt desamma som utan namnbyte.
   function generera(n){
     if(cache.hasOwnProperty(n)) return cache[n];
     var tidigare = [];
-    for(var p = 0; p < n; p++){ var g = generera(p); if(g) tidigare.push(g.fraga); }
+    for(var p = 0; p < n; p++){ generera(p); if(talTexter[p]) tidigare.push(talTexter[p]); }
     var forra = tidigare.length ? tidigare[tidigare.length - 1] : null;
-    var ut = null;
+    var ut = null, utMi = -1;
     [texter.concat(tidigare), texter.concat(forra ? [forra] : [])].forEach(function(undvik, pass){
       for(var j = 0; j < mallar.length && !ut; j++){
         var mi = (n + j) % mallar.length, m = mallar[mi];
         var nu = ettBlad(m, band(mallar, m), (bas + 7919 * (n + 1) + 104729 * mi + 31337 * pass) >>> 0, undvik);
-        if(nu){ nu.id = m.u.id + '-g' + (n + 1); nu.mall = ['A', 'B', 'C', 'D'][mi]; nu.upprepning = pass > 0; ut = nu; }
+        if(nu){ nu.id = m.u.id + '-g' + (n + 1); nu.mall = ['A', 'B', 'C', 'D'][mi]; nu.upprepning = pass > 0; ut = nu; utMi = mi; }
       }
     });
+    if(ut){
+      talTexter[n] = ut.fraga;
+      var fore = n > 0 ? generera(n - 1) : null;
+      var forraNamn = fore && fore.namnByte ? Object.keys(fore.namnByte).map(function(k){ return fore.namnByte[k]; }) : [];
+      ut.namnByte = bytNamn(ut, namnInfo[utMi], (bas + 7919 * (n + 1) + 104729 * utMi + 2654435761) >>> 0, forraNamn);
+    }
     cache[n] = ut;
     return ut;
   }
   // Vilka mallar bär? (för flaggningen: provar de första blad)
   function granska(antal){
     antal = antal || 12;
-    var bar = mallar.map(function(m){ var b = band(mallar, m); return { platser: m.platser.length, grupp: b.grupp, blad: 0 }; });
+    var bar = mallar.map(function(m, mi){ var b = band(mallar, m);
+      return { platser: m.platser.length, grupp: b.grupp, blad: 0, namn: namnInfo[mi] }; });
     for(var n = 0; n < antal; n++){
       mallar.forEach(function(m, mi){
         if(ettBlad(m, band(mallar, m), (bas + 7919 * (n + 1) + 104729 * mi) >>> 0, texter)) bar[mi].blad++;
@@ -314,7 +414,8 @@ function variant(exempel, ref){
   return { generera: generera, granska: granska, mallar: mallar };
 }
 
-var API = { variant: variant, mall: mall, band: band, talText: talText, decimaler: decimaler };
+var API = { variant: variant, mall: mall, band: band, talText: talText, decimaler: decimaler,
+            NAMN: NAMN, KON: KON, namnIText: namnIText, namnMall: namnMall, genitiv: genitiv };
 if(typeof window !== 'undefined') window.ProbGenAk7 = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

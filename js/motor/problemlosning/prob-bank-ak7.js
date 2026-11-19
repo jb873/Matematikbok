@@ -411,7 +411,8 @@ function knappsats(){
 // Blad A, B, C, D, i den ordningen. Nytt blad = nästa bokstav. Horisonten är typens: Nivå 1 = åk7.
 // EFTER D (order 2026-11-20): fler blad INOM BANDET — gen-prob-ak7.js byter talen i ett av exemplen A–D,
 // meningen oförändrad, aldrig svårare. nasta(i) ger blad nr i (0 = A … 3 = D, 4 = E, …) eller null när
-// varianten inte bär fler (flaggad: inget dåligt blad serveras).
+// varianten inte bär fler (flaggad: inget dåligt blad serveras). Från 2026-11-21 byts också personnamnen i
+// de genererade bladen (konsekvent, samma kön, rätt genitiv); A–D behåller dokumentens namn.
 function bladBokstav(i){ return i < 26 ? String.fromCharCode(65 + i) : String(i + 1); }
 function drillKalla(ref){
   var p = String(ref || '').split('/'), t = typ(p[0]), k = parseInt(p[1], 10);
