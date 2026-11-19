@@ -28,22 +28,35 @@
 .nf-huvud .nf-kapitel{font-family:var(--cinzel);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
 /* TVÅ FLIKAR UTAN UNDERTEXT: ramens undertexter (.nr-mini, .nr-sub) visas inte i det nya formatet. */
 .nr-lager .nr-mini, .nr-mrad .nr-sub{display:none;}
-/* HORISONT-BADGE framför namnet: bokstaven bär, färgen förstärker. Ingen teckenförklaring. */
-.hz{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 5px;margin-right:8px;
-  border-radius:6px;font-family:var(--cinzel);font-size:11px;font-weight:600;letter-spacing:.02em;vertical-align:middle;}
-.hz-nu{background:var(--navy);color:#fff;}
-.hz-f{background:var(--gold-lt);color:var(--navy);}
-.hz-ff{background:var(--paper-dk);color:var(--ink-faint);border:1px dashed #c9bfa9;}
-.hz-r{background:#e3ece6;color:var(--green);}
+/* HORISONT-BADGE framför namnet: bokstaven bär, färgen förstärker. Ingen teckenförklaring.
+   BOKENS CHIP (order 2026-11-21): samma form och toner som kapitelsidornas statuschip (.card-badge i
+   js/kapitel/navsida.css) — diskret ljus ton, ingen mörk solid. Nu = "Öppet"-tonen (blå), FF = "Kommer
+   senare"-tonen (grå), F = "Prov"-tonen (guld), R = bokens grön i samma styrka. Färgvalet väntar på Joachims
+   godkännande. */
+.hz, .nf-chip{display:inline-block;font-family:var(--cinzel);font-size:10px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 8px;border-radius:2px;line-height:1.3;vertical-align:middle;}
+.hz{margin-right:8px;}
+.hz-nu{background:rgba(27,75,138,.1);color:var(--blue);}
+.hz-ff, .nf-chip.soon{background:var(--paper-dk);color:var(--ink-faint);}
+.hz-f{background:rgba(154,114,40,.12);color:var(--gold);}
+.hz-r{background:rgba(45,106,79,.1);color:var(--green);}
+/* "Kommer senare" i en rad i vänsterspalten: till höger, som på kapitelsidans kort. */
+.nr-rad .nf-chip{float:right;margin-left:8px;padding:2px 8px;}
+.nr-rad .nr-t:has(.nf-chip){display:flex;align-items:center;justify-content:space-between;}
+.nr-rad .nr-t:has(.nf-chip) .nf-chip{float:none;}
+/* Vänsterspaltens rader och bladkorten i bokens papperston (kapitelsidans .nav-card), inte vitt. Ramens
+   delade stil (js/motor/navram/navram.css) bär #fff — den rättas här på sidan; den delade filen är orörd. */
+.nr-rad{background:var(--paper-lt);}
 /* Dagens träning + Test UNDER momenten — en egen grupp, avskild från momenten. */
 .nr-spalt .nr-grp + .nr-grp{margin-top:14px;padding-top:12px;border-top:1px solid var(--paper-dk);}
 /* MITTENSEKTIONEN: Uppgifter → Föreläsningar → Metodträning */
 .nf-sek{margin:0 0 24px;}
 .nf-sek-h{font-family:var(--cinzel);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;}
 .nf-lista{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none;}
-.nf-blad{display:flex;align-items:baseline;gap:10px;padding:11px 14px;border:1px solid var(--paper-dk);border-radius:8px;
-  background:#fff;color:var(--ink);text-decoration:none;font-family:var(--serif);font-size:18px;}
-a.nf-blad:hover{border-color:var(--gold-lt);}
+.nf-blad{display:flex;align-items:baseline;gap:10px;padding:11px 14px;border:1px solid var(--paper-dk);border-radius:4px;
+  background:var(--paper-lt);color:var(--ink);text-decoration:none;font-family:var(--serif);font-size:18px;
+  transition:box-shadow .18s, transform .18s, border-color .18s;}
+a.nf-blad:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateX(3px);border-color:rgba(0,0,0,.12);}
 .nf-blad .nf-nr{font-family:var(--cinzel);font-size:13px;letter-spacing:.04em;color:var(--ink-soft);min-width:58px;}
 .nf-blad.is-kommer{color:var(--ink-faint);background:var(--paper-lt);cursor:default;}
 /* FÄLLBARA SEKTIONER (order 2026-11-21): rubriken är sidans egen (.nf-sek-h) och är knappen; chevronen är
@@ -235,7 +248,8 @@ var ram = window.NavRam && window.NavRam.montera({
   vard: document.getElementById('navram'),
   arbeta: [ { rubrik: 'Problemlösning', grupper: [
     { rubrik: null, varianter: moment },
-    { rubrik: null, varianter: [ { titel: 'Dagens träning', kommer: true }, { titel: 'Test', valj: visaTest } ] }
+    { rubrik: null, varianter: [ { titel: 'Dagens träning<span class="nf-chip soon">Kommer senare</span>', kommer: true },
+                                 { titel: 'Test', valj: visaTest } ] }
   ] } ],
   mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
           { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ],
