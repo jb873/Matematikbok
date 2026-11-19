@@ -114,7 +114,7 @@ var BLADEN = (BANK ? BANK.TYPER : []).map(function(t, i){ return { nr: i + 1, ti
 /* ── MOMENTEN (Joachims beslut 2026-11-18): moment = Nivå. Nivå 1 = åk7, byggd. Nivå 2–4 = FF, byggs inte
    nu — exakt årskurs per nivå avgörs när de byggs, så badgen står som FF utan årskurs. ── */
 var MOMENT = [
-  { titel: 'Nivå 1', blad: BLADEN },
+  { titel: 'Nivå 1', blad: BLADEN, blandade: 1 },
   { titel: 'Nivå 2', ff: true, kommer: true },
   { titel: 'Nivå 3', ff: true, kommer: true },
   { titel: 'Nivå 4', ff: true, kommer: true }
@@ -162,6 +162,18 @@ function visaMoment(m){
     a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel));
     l1.appendChild(a);
   });
+  /* BLANDADE UPPGIFTER (order 2026-11-21): sjätte posten, efter typerna. Nivåns författade blandade blad,
+     serverade ett i taget på uppgiftssidan (?blandade=<nivå>). Märket härleds ur källtypernas noder (samma
+     som momentets). Finns bladen inte ännu står posten tonad, utan länk. */
+  var bl = m.blandade && BANK && BANK.blandade ? BANK.blandade(m.blandade) : null;
+  if(bl){
+    var harBlad = bl.blad.length > 0, p = el(harBlad ? 'a' : 'div', 'nf-blad' + (harBlad ? '' : ' is-kommer'));
+    if(harBlad) p.href = 'uppgift.html?blandade=' + encodeURIComponent(bl.niva);
+    p.setAttribute('data-blandade', bl.niva);
+    p.appendChild(el('span', 'nf-nr', 'Blad ' + bl.nr));
+    var namn = el('span'); namn.innerHTML = horisontFor({ blad: m.blad }); namn.appendChild(document.createTextNode(bl.titel));
+    p.appendChild(namn); l1.appendChild(p);
+  }
   s1.appendChild(l1); scen.appendChild(s1);
   // FÖRELÄSNINGAR — samma namn som typerna, ingen längd. Föreläsningsmodulens egen yta (js/data/forelasningar.js,
   // nyckeln ak7-k3-d5); YouTube laddas först när eleven klickar play.

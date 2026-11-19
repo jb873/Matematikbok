@@ -357,6 +357,27 @@ var TEST = [
       'instruktion-C6'] }
 ];
 
+// ── BLANDADE UPPGIFTER (order 2026-11-21): sjätte posten i nivåns uppgiftslista, efter Vinklar. Joachims
+// författade blandade blad, ordagrant med facit per ruta (§K-K), serverade ett i taget av den återanvändbara
+// komponenten js/motor/problemlosning/prob-blandade.js. Bara uppgifter — ingen egen metodträning, inget eget
+// test (Test 1 och 2 står kvar under Test). Per nivå: { niva, nr, titel, kallTyper, antalPerBlad, antalBlad,
+// blad: [{ id, uppgifter: [upp/ins/fo …] }] }. Nivå 2–4 läggs till som nya poster här, utan nytt bygge.
+// BLADEN SAKNAS ÄNNU: dokumentet med de sex blandade bladen har inte kommit fram (vantar). Tills dess står
+// posten tonad, utan länk — inget blandas eller genereras i väntan på det.
+var BLANDADE = {
+  1: { niva: 1, titel: 'Blandade uppgifter', antalPerBlad: 8, antalBlad: 6,
+       vantar: 'Joachims dokument med de sex blandade bladen (åtta uppgifter per blad)',
+       blad: [] }
+};
+// Postens konfiguration för en nivå, i komponentens form. Källtyperna = nivåns typer (de fem), numret = nästa
+// efter dem (Blad 6A, 6B, …).
+function blandade(niva){
+  var b = BLANDADE[niva]; if(!b) return null;
+  return { id: 'ak7-niva' + niva, niva: b.niva, nr: TYPER.length + 1, titel: b.titel,
+           kallTyper: TYPER.map(function(t){ return t.id; }), antalPerBlad: b.antalPerBlad, antalBlad: b.antalBlad,
+           vantar: b.blad.length ? null : b.vantar, blad: b.blad };
+}
+
 var BOKSTAVER = ['A', 'B', 'C', 'D'];
 var UPPGIFTSBLAD = ['A', 'B'];
 
@@ -442,7 +463,7 @@ function drillKalla(ref){
 
 var API = { TYPER: TYPER, TEST: TEST, BOKSTAVER: BOKSTAVER, UPPGIFTSBLAD: UPPGIFTSBLAD,
             typ: typ, nr: nr, uppgift: uppgift, blad: blad, testBlad: testBlad, variantBank: variantBank,
-            rita: rita, knappsats: knappsats, drillKalla: drillKalla };
+            rita: rita, knappsats: knappsats, drillKalla: drillKalla, BLANDADE: BLANDADE, blandade: blandade };
 if(typeof window !== 'undefined') window.ProbBankAk7 = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

@@ -17,10 +17,11 @@
         seedat; ingen variant utan blad
 
         personnamnen bytta konsekvent, samma kön, rätt genitiv; A–D orörda
-   Negativ verifiering: --sabba facit | relation | test | rabatt | form | mening | genfacit | namn | genitiv
-   ska var och en fälla specen.
+     9  blandade uppgifter (prob-blandade.js): postens form eller tonad med skäl; kön på en fixtur
+   Negativ verifiering: --sabba facit | relation | test | rabatt | form | mening | genfacit | namn | genitiv |
+   blandade | blandko ska var och en fälla specen.
 
-   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit|namn|genitiv]
+   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit|namn|genitiv|blandade|blandko]
         [--namnprov]  (skriver ut de genererade bladen med personer) */
 'use strict';
 const path = require('path');
@@ -234,6 +235,61 @@ if(JSON.stringify(BANK.TYPER.map(function(t){ return BANK.BOKSTAVER.map(function
 if(!namnBlad) fall('namn', 'inga genererade blad med personer');
 if(process.argv.indexOf('--namnprov') > 0) namnProv.forEach(function(s){ console.log(s); });
 
+// 9  BLANDADE UPPGIFTER (prob-blandade.js, order 2026-11-21). Den riktiga posten: håller formen (antal blad,
+//    åtta uppgifter, minst en ur varje typ) och varje uppgift rättas som bankens — ELLER står tonad med ett
+//    skäl (vantar) så länge Joachims blad inte finns. Komponenten (form + kö) prövas dessutom på en FIXTUR ur
+//    bankens egna uppgifter (bara här i specen): ett blad i taget, nästa vid återkomst, ingen repris, stannar
+//    efter sista. Negativt: formfel i fixturen ska fångas.
+const PB = require(path.join(ROOT, 'js/motor/problemlosning/prob-blandade.js'));
+if(sabba === 'blandade') BANK.BLANDADE[1].vantar = null;
+if(sabba === 'blandko') PB.aktuellt = function(){ return 0; };   // kön står still: samma blad igen
+let blandadeStatus = '';
+(function(){
+  const cfg = BANK.blandade(1);
+  if(!cfg){ fall('blandade', 'nivå 1 saknar konfiguration'); return; }
+  if(cfg.nr !== 6 || cfg.kallTyper.join() !== 'instruktion,foljd,delar,omkrets,vinklar') fall('blandade', 'ska vara sjätte posten och spegla de fem typerna');
+  PB.granska(cfg).forEach(function(f){ fall('blandade nivå 1', f); });
+  if(!cfg.blad.length){
+    if(PB.harBlad(cfg)) fall('blandade', 'tom post ska stå tonad');
+    blandadeStatus = 'nivå 1 väntar på bladen (' + cfg.vantar + ') — posten tonad';
+  } else {
+    let n = 0;
+    PB.bladen(cfg).forEach(function(b){ b.uppgifter.forEach(function(u){
+      if(ids.has(u.id)) fall(u.id, 'id finns redan i banken'); provaUppgift(u); n++;
+      if(u.typ === 'instruktion' && u.form !== 'ekvation') fall(u.id, 'Följa instruktion ska lösas som ekvation (form)');
+    }); });
+    blandadeStatus = 'nivå 1: ' + cfg.blad.length + ' blad, ' + n + ' uppgifter rättas rätt';
+  }
+  // FIXTUREN: sex blad à åtta uppgifter ur banken, varje typ minst en gång per blad.
+  const typer = cfg.kallTyper;
+  const fix = Object.assign({}, cfg, { id: 'fixtur', vantar: null, blad: [0, 1, 2, 3, 4, 5].map(function(s){
+    const u = typer.map(function(t){ return BANK.typ(t).blad[BANK.BOKSTAVER[s % 4]][s]; })
+      .concat([0, 1, 2].map(function(j){ return BANK.typ(typer[(s + j) % 5]).blad[BANK.BOKSTAVER[(s + 1) % 4]][(s + j + 1) % 6]; }));
+    return { id: 'f' + (s + 1), uppgifter: u };
+  }) });
+  PB.granska(fix).forEach(function(f){ fall('blandade fixtur', f); });
+  // negativt: sju uppgifter, och ett blad utan vinklar, ska fångas
+  const trasig = Object.assign({}, fix, { blad: fix.blad.map(function(b, i){
+    return { id: b.id, uppgifter: i === 0 ? b.uppgifter.slice(0, 7) : (i === 1 ? b.uppgifter.map(function(u){ return u.typ === 'vinklar' ? BANK.typ('delar').blad.A[0] : u; }) : b.uppgifter) };
+  }) });
+  const tf = PB.granska(trasig);
+  if(!tf.some(function(f){ return /ska ha 8 uppgifter, har 7/.test(f); }) || !tf.some(function(f){ return /saknar en uppgift ur vinklar/.test(f); }))
+    fall('blandade fixtur', 'formfel fångas inte: ' + JSON.stringify(tf));
+  // kön: en lagring per elev; varje "återkomst" läser den på nytt
+  const minne = { d: {}, getItem: function(k){ return this.d[k] || null; }, setItem: function(k, v){ this.d[k] = v; } };
+  const opt = { lagring: minne }, visade = [];
+  for(let varv = 0; varv < 8; varv++){
+    const i = PB.aktuellt(fix, PB.lasGjorda(fix, opt));
+    if(i < 0) break;
+    const b = PB.bladen(fix)[i];
+    if(visade.indexOf(b.id) >= 0){ fall('blandade kö', 'repris: ' + b.id); break; }
+    visade.push(b.id); PB.markeraGjort(fix, b.id, opt);
+  }
+  if(visade.join() !== 'fixtur-f1,fixtur-f2,fixtur-f3,fixtur-f4,fixtur-f5,fixtur-f6') fall('blandade kö', 'ordning ' + visade.join());
+  if(PB.aktuellt(fix, PB.lasGjorda(fix, opt)) !== -1) fall('blandade kö', 'stannar inte efter sjätte');
+  if(PB.bladen(fix)[0].titel !== 'Blad 6A · Blandade uppgifter' || PB.bladen(fix)[5].titel !== 'Blad 6F · Blandade uppgifter') fall('blandade', 'bladnamn ' + PB.bladen(fix)[0].titel);
+})();
+
 const antal = ids.size;
 if(brott.length){
   console.log('✗ spec-prob-bank: ' + brott.length + ' brott (' + antal + ' uppgifter)');
@@ -243,4 +299,5 @@ if(brott.length){
 console.log('✓ spec-prob-bank: ' + antal + ' uppgifter — modellens facit = dokumentets facit per ruta, lösningsförslagen rättas rätt; '
   + BANK.TEST.length + ' test à sex frågor (3.2 författad, facit som testdokumentet); ' + varianter + ' varianter A→B→C→D; '
   + genererade + ' genererade blad efter D (mening oförändrad, samma antal steg, rena tal, rättas rätt); '
-  + namnBlad + ' av dem med personer, ' + namnBytta + ' namn bytta (konsekvent, samma kön, rätt genitiv)');
+  + namnBlad + ' av dem med personer, ' + namnBytta + ' namn bytta (konsekvent, samma kön, rätt genitiv); '
+  + 'blandade: ' + blandadeStatus + '; komponenten (fixtur 6 × 8): form, kö 6A→6F utan repris, stannar efter sjätte');
