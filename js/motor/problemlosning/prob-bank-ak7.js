@@ -362,12 +362,110 @@ var TEST = [
 // komponenten js/motor/problemlosning/prob-blandade.js. Bara uppgifter — ingen egen metodträning, inget eget
 // test (Test 1 och 2 står kvar under Test). Per nivå: { niva, nr, titel, kallTyper, antalPerBlad, antalBlad,
 // blad: [{ id, uppgifter: [upp/ins/fo …] }] }. Nivå 2–4 läggs till som nya poster här, utan nytt bygge.
-// BLADEN SAKNAS ÄNNU: dokumentet med de sex blandade bladen har inte kommit fram (vantar). Tills dess står
-// posten tonad, utan länk — inget blandas eller genereras i väntan på det.
+// KÄLLA för nivå 1: Joachims dokument "Blandade uppgifter" (rubrik "Problemlösning – Sjuan – Test 1–6"): sex
+// blad à åtta uppgifter, minst en ur varje typ, inga ur 3.2. Texterna ordagrant, i dokumentets ordning;
+// facit per ruta ur dokumentets facit. Utan blad står posten tonad, utan länk, med skälet i vantar.
+var M_ = { vinkel4: [['A', 'vinkel A'], ['B', 'vinkel B'], ['C', 'vinkel C'], ['D', 'vinkel D']],
+           vinkel3: [['A', 'vinkel A'], ['B', 'vinkel B'], ['C', 'vinkel C']],
+           spetsiga: [['A', 'den mindre spetsiga vinkeln'], ['B', 'den större spetsiga vinkeln']],
+           kortTriangel: [['A', 'den korta sidan'], ['B', 'den andra sidan'], ['C', 'den tredje sidan']],
+           rektangel: [['A', 'bredden'], ['B', 'längden']], korLang: [['A', 'kortsidan'], ['B', 'långsidan']],
+           x: [['X', 'x']] };
+function bl(id, uppgifter){ return { id: id, uppgifter: uppgifter }; }
 var BLANDADE = {
   1: { niva: 1, titel: 'Blandade uppgifter', antalPerBlad: 8, antalBlad: 6,
        vantar: 'Joachims dokument med de sex blandade bladen (åtta uppgifter per blad)',
-       blad: [] }
+       blad: [
+    bl('1', [
+      upp('vinklar', 'M1-1', { fraga: 'I en fyrhörning är vinkel B dubbelt så stor som vinkel A. Vinkel C är 24° mindre än vinkel A och vinkel D är 24° större än vinkel A. Hur stora är vinklarna?' },
+          M_.vinkel4, ['B = 2·A', 'C = A - 24', 'D = A + 24'], 'A + B + C + D = 360', 'grader', [72, 144, 48, 96]),
+      upp('delar', 'M1-2', { fraga: 'Isak har sex gånger så många klistermärken som Leo. Tillsammans har de 203 klistermärken. Hur många klistermärken har var och en?' },
+          [['L', 'Leo'], ['I', 'Isak']], ['I = 6·L'], 'L + I = 203', null, [29, 174]),
+      fo('M1-3', { fraga: 'Summan av tre på varandra följande heltal är 432. Vilka är talen?' }, 3, 1, 432),
+      upp('vinklar', 'M1-4', { fraga: 'I en rätvinklig triangel är den ena spetsiga vinkeln 12° större än den andra. Hur stora är de spetsiga vinklarna?' },
+          M_.spetsiga, ['B = A + 12'], 'A + B + 90 = 180', 'grader', [39, 51]),
+      upp('delar', 'M1-5', { fraga: 'Elias har tre gånger så många kort som Nora. Freja har 16 fler kort än Nora. Tillsammans har de 86 kort. Hur många kort har var och en?' },
+          [['N', 'Nora'], ['E', 'Elias'], ['F', 'Freja']], ['E = 3·N', 'F = N + 16'], 'N + E + F = 86', null, [14, 42, 30]),
+      ins('M1-6', { fraga: 'Om jag dividerar ett tal med 8 och sedan subtraherar 5 får jag 19. Vilket är talet?' }, 'T/8 - 5 = 19', 192),
+      upp('omkrets', 'M1-7', { fraga: 'En rektangel har omkretsen 120 cm. Långsidan är fem gånger så lång som kortsidan. Hur långa är sidorna?' },
+          M_.korLang, ['B = 5·A'], '2·A + 2·B = 120', 'cm', [10, 50]),
+      ins('M1-8', { fraga: 'Om man tar 6 gånger ett tal och lägger till 16 blir resultatet 52. Vilket är talet?' }, '6·T + 16 = 52', 6)
+    ]),
+    bl('2', [
+      upp('delar', 'M2-1', { fraga: 'Fyra burkar innehåller lika många kakor. Dessutom finns 11 kakor utanför. Totalt är det 43 kakor. Hur många kakor finns det i varje burk?' },
+          [['B', 'kakor i varje burk']], [], '4·B + 11 = 43', 'kakor', [8]),
+      upp('omkrets', 'M2-2', { fraga: 'En triangel har en kort sida. Den andra sidan är 4 cm längre än den korta, och den tredje sidan är 5 cm längre än den korta. Omkretsen är 30 cm. Hur långa är sidorna?' },
+          M_.kortTriangel, ['B = A + 4', 'C = A + 5'], 'A + B + C = 30', 'cm', [7, 11, 12]),
+      ins('M2-3', { fraga: 'Jag tänker på ett tal. Om jag multiplicerar talet med 8 och sedan subtraherar 38 får jag 130. Vilket tal tänker jag på?' }, '8·T - 38 = 130', 21),
+      upp('vinklar', 'M2-4', { fraga: 'En fyrhörning har två räta vinklar. Av de andra två vinklarna är den ena 12° större än den andra. Hur stora är de två vinklarna?' },
+          [['A', 'den mindre vinkeln'], ['B', 'den större vinkeln']], ['B = A + 12'], '90 + 90 + A + B = 360', 'grader', [84, 96]),
+      fo('M2-5', { fraga: 'Summan av två på varandra följande jämna tal är 182. Vilka är talen?' }, 2, 2, 182),
+      ins('M2-6', { fraga: 'Omar hade 250 kr i sin spargris. Sedan sparade han 25 kr i veckan. Till slut hade han 625 kr. Hur många veckor sparade Omar?' }, '250 + 25·T = 625', 15, 'veckor'),
+      upp('omkrets', 'M2-7', { fraga: 'En triangel har sidorna 12 cm, 13 cm och (x − 2) cm. Omkretsen är 31 cm. Vilket värde har x?' },
+          M_.x, [], '12 + 13 + (X - 2) = 31', null, [8]),
+      fo('M2-8', { fraga: 'En bok är uppslagen. Summan av de två sidnumren är 317. Vilka sidor är uppslagna?' }, 2, 1, 317)
+    ]),
+    bl('3', [
+      upp('delar', 'M3-1', { fraga: 'Två paket väger tillsammans 17 kg. Det ena paketet väger 1 kg mer än det andra. Hur mycket väger paketen?' },
+          [['A', 'det lättare paketet'], ['B', 'det tyngre paketet']], ['B = A + 1'], 'A + B = 17', 'kg', [8, 9]),
+      upp('vinklar', 'M3-2', { fraga: 'I en likbent triangel är toppvinkeln 21° större än var och en av basvinklarna. Hur stora är vinklarna?' },
+          [['A', 'den ena basvinkeln'], ['B', 'den andra basvinkeln'], ['C', 'toppvinkeln']], ['B = A', 'C = A + 21'], 'A + B + C = 180', 'grader', [53, 53, 74]),
+      fo('M3-3', { fraga: 'Summan av två på varandra följande heltal är 367. Vilka är talen?' }, 2, 1, 367),
+      upp('delar', 'M3-4', { fraga: 'Saga har 16 kr mer än Leo. Freja har 5 kr mindre än Leo. Tillsammans har de 359 kr. Hur mycket har var och en?' },
+          [['L', 'Leo'], ['S', 'Saga'], ['F', 'Freja']], ['S = L + 16', 'F = L - 5'], 'L + S + F = 359', 'kr', [116, 132, 111]),
+      ins('M3-5', { fraga: 'Om jag dividerar ett tal med 7 och sedan adderar 2 får jag 8. Vilket är talet?' }, 'T/7 + 2 = 8', 42),
+      upp('omkrets', 'M3-6', { fraga: 'En rektangel har omkretsen 30 m. Långsidan är fyra gånger så lång som kortsidan. Hur stor är rektangelns area?' },
+          M_.korLang, ['B = 4·A'], '2·A + 2·B = 30', 'm', [3, 12], { foljdfraga: AREA_M, facitFoljd: 36 }),
+      fo('M3-7', { fraga: 'Summan av två på varandra följande udda tal är 200. Vilka är talen?' }, 2, 2, 200),
+      upp('omkrets', 'M3-8', { fraga: 'En rektangel har omkretsen 152 cm. Bredden är 10 cm kortare än längden. Hur långa är sidorna?' },
+          M_.rektangel, ['B = A + 10'], '2·A + 2·B = 152', 'cm', [33, 43])
+    ]),
+    bl('4', [
+      upp('delar', 'M4-1', { fraga: 'Freja har fyra gånger så många kort som Viktor. Alva har 16 fler kort än Viktor. Tillsammans har de 94 kort. Hur många kort har var och en?' },
+          [['V', 'Viktor'], ['F', 'Freja'], ['A', 'Alva']], ['F = 4·V', 'A = V + 16'], 'V + F + A = 94', null, [13, 52, 29]),
+      fo('M4-2', { fraga: 'Summan av fyra på varandra följande heltal är 394. Vilka är talen?' }, 4, 1, 394),
+      upp('vinklar', 'M4-3', { fraga: 'I en rätvinklig triangel är den ena spetsiga vinkeln 46° större än den andra. Hur stora är de spetsiga vinklarna?' },
+          M_.spetsiga, ['B = A + 46'], 'A + B + 90 = 180', 'grader', [22, 68]),
+      ins('M4-4', { fraga: 'Om man tar 6 gånger ett tal och lägger till 8 blir resultatet 134. Vilket är talet?' }, '6·T + 8 = 134', 21),
+      upp('omkrets', 'M4-5', { fraga: 'En kvadrat har sidan (2x + 3) cm. Omkretsen är 92 cm. Vilket värde har x?' },
+          M_.x, [], '4·(2·X + 3) = 92', null, [10]),
+      upp('vinklar', 'M4-6', { fraga: 'I en fyrhörning är vinkel B dubbelt så stor som vinkel A. Vinkel C är 47° större än vinkel A och vinkel D är 48° större än vinkel A. Hur stora är vinklarna?' },
+          M_.vinkel4, ['B = 2·A', 'C = A + 47', 'D = A + 48'], 'A + B + C + D = 360', 'grader', [53, 106, 100, 101]),
+      ins('M4-7', { fraga: 'Om jag dividerar ett tal med 5 och sedan subtraherar 12 får jag 13. Vilket är talet?' }, 'T/5 - 12 = 13', 125),
+      upp('delar', 'M4-8', { fraga: 'Leo har sex gånger så många böcker som Sam. Tillsammans har de 105 böcker. Hur många böcker har var och en?' },
+          [['S', 'Sam'], ['L', 'Leo']], ['L = 6·S'], 'S + L = 105', null, [15, 90])
+    ]),
+    bl('5', [
+      upp('vinklar', 'M5-1', { fraga: 'I fyrhörningen ABCD är vinkel A 129°. Vinkel C är tre gånger så stor som vinkel B, och vinkel D är 1° större än vinkel B. Hur stora är vinklarna B, C och D?' },
+          [['B', 'vinkel B'], ['C', 'vinkel C'], ['D', 'vinkel D']], ['C = 3·B', 'D = B + 1'], '129 + B + C + D = 360', 'grader', [46, 138, 47]),
+      upp('omkrets', 'M5-2', { fraga: 'En triangel har en kort sida. Den andra sidan är 6 cm längre än den korta, och den tredje sidan är 10 cm längre än den korta. Omkretsen är 34 cm. Hur långa är sidorna?' },
+          M_.kortTriangel, ['B = A + 6', 'C = A + 10'], 'A + B + C = 34', 'cm', [6, 12, 16]),
+      upp('vinklar', 'M5-3', { fraga: 'I en triangel är vinkel B tre gånger så stor som vinkel A. Vinkel C är 50° större än vinkel A. Hur stora är vinklarna?' },
+          M_.vinkel3, ['B = 3·A', 'C = A + 50'], 'A + B + C = 180', 'grader', [26, 78, 76]),
+      ins('M5-4', { fraga: 'Jag tänker på ett tal. Om jag multiplicerar talet med 5 och sedan subtraherar 12 får jag 18. Vilket tal tänker jag på?' }, '5·T - 12 = 18', 6),
+      upp('delar', 'M5-5', { fraga: 'Moa är 4 år yngre än Elias. Tillsammans är de 62 år. Hur gamla är de?' },
+          [['M', 'Moa'], ['E', 'Elias']], ['M = E - 4'], 'M + E = 62', 'år', [29, 33]),
+      upp('omkrets', 'M5-6', { fraga: 'En triangel har sidorna 6 cm, 5 cm och (x − 1) cm. Omkretsen är 17 cm. Vilket värde har x?' },
+          M_.x, [], '6 + 5 + (X - 1) = 17', null, [7]),
+      ins('M5-7', { fraga: 'Leo delar sina kort i 4 lika stora högar. Sedan lägger han 2 kort till på en av högarna. Då innehåller den högen 9 kort. Hur många kort hade Leo från början?' }, 'T/4 + 2 = 9', 28, 'kort'),
+      fo('M5-8', { fraga: 'Tre hus står bredvid varandra på samma sida av en gata. Husnumren är udda tal som följer på varandra. Summan av husnumren är 261. Vilka nummer har husen?' }, 3, 2, 261)
+    ]),
+    bl('6', [
+      upp('vinklar', 'M6-1', { fraga: 'I en triangel är vinkel B 7° större än vinkel A. Vinkel C är 56° större än vinkel A. Hur stora är vinklarna?' },
+          M_.vinkel3, ['B = A + 7', 'C = A + 56'], 'A + B + C = 180', 'grader', [39, 46, 95]),
+      upp('omkrets', 'M6-2', { fraga: 'En rektangel har omkretsen 140 m. Bredden är 6 m kortare än längden. Hur långa är sidorna?' },
+          M_.rektangel, ['B = A + 6'], '2·A + 2·B = 140', 'm', [32, 38]),
+      fo('M6-3', { fraga: 'Summan av två på varandra följande heltal är 239. Vilka är talen?' }, 2, 1, 239),
+      upp('delar', 'M6-4', { fraga: 'Saga är 10 cm längre än Sam. Tillsammans är deras längd 292 cm. Hur långa är de?' },
+          [['S', 'Sam'], ['A', 'Saga']], ['A = S + 10'], 'S + A = 292', 'cm', [141, 151]),
+      ins('M6-5', { fraga: 'Maja tänker på ett tal. Hon dividerar det med 2, multiplicerar med 6 och subtraherar sedan 2. Hon får 10. Vilket tal tänkte Maja på?' }, '6·T/2 - 2 = 10', 4),
+      upp('omkrets', 'M6-6', { fraga: 'I en femhörning är alla sidor lika långa utom en. Den sidan är 5 cm längre än var och en av de andra. Omkretsen är 60 cm. Hur långa är sidorna?' },
+          [['S', 'en av de fyra lika långa sidorna'], ['A', 'den längre sidan']], ['A = S + 5'], '4·S + A = 60', 'cm', [11, 16]),
+      fo('M6-7', { fraga: 'Summan av två på varandra följande udda tal är 404. Vilka är talen?' }, 2, 2, 404),
+      upp('delar', 'M6-8', { fraga: 'Elias har 36 kr mer än Ali. Alva har 22 kr mindre än Ali. Tillsammans har de 257 kr. Hur mycket har var och en?' },
+          [['A', 'Ali'], ['E', 'Elias'], ['V', 'Alva']], ['E = A + 36', 'V = A - 22'], 'A + E + V = 257', 'kr', [81, 117, 59])
+    ])
+  ] }
 };
 // Postens konfiguration för en nivå, i komponentens form. Källtyperna = nivåns typer (de fem), numret = nästa
 // efter dem (Blad 6A, 6B, …).

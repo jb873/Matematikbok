@@ -19,9 +19,9 @@
         personnamnen bytta konsekvent, samma kön, rätt genitiv; A–D orörda
      9  blandade uppgifter (prob-blandade.js): postens form eller tonad med skäl; kön på en fixtur
    Negativ verifiering: --sabba facit | relation | test | rabatt | form | mening | genfacit | namn | genitiv |
-   blandade | blandko ska var och en fälla specen.
+   blandade | blandko | blandfacit ska var och en fälla specen.
 
-   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit|namn|genitiv|blandade|blandko]
+   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit|namn|genitiv|blandade|blandko|blandfacit]
         [--namnprov]  (skriver ut de genererade bladen med personer) */
 'use strict';
 const path = require('path');
@@ -84,7 +84,9 @@ function provaUppgift(u, utanNod){
   if(v.fel){ fall(u.id, 'varden: ' + v.fel); return; }
   MOD.nycklarAv(u).forEach(function(k, i){ if(!lika(v.varden[k], u.facit[i])) fall(u.id, 'del ' + k + ': modellen ger ' + v.varden[k] + ', dokumentet ' + u.facit[i]); });
   const lf = MOD.losningsforslag(u);
-  const res = lf && R.ratta(u, { uttryck: lf.uttryck, rader: [lf.ekvation].concat(lf.kedja), insattning: lf.insattning, svar: lf.svar });
+  const svar = lf && { uttryck: lf.uttryck, rader: [lf.ekvation].concat(lf.kedja), insattning: lf.insattning, svar: lf.svar };
+  if(svar && u.foljdfraga) svar.foljd = MOD.talStr(MOD.utvardera(u.foljdfraga.uttryck, v.varden)) + ' ' + u.foljdfraga.enhet;
+  const res = lf && R.ratta(u, svar);
   if(!res || res.status !== 'ratt') fall(u.id, 'lösningsförslaget rättas inte rätt');
 }
 
@@ -241,7 +243,7 @@ if(process.argv.indexOf('--namnprov') > 0) namnProv.forEach(function(s){ console
 //    bankens egna uppgifter (bara här i specen): ett blad i taget, nästa vid återkomst, ingen repris, stannar
 //    efter sista. Negativt: formfel i fixturen ska fångas.
 const PB = require(path.join(ROOT, 'js/motor/problemlosning/prob-blandade.js'));
-if(sabba === 'blandade') BANK.BLANDADE[1].vantar = null;
+if(sabba === 'blandade') BANK.BLANDADE[1].blad.pop();           // ett blad saknas (fem i stället för sex)
 if(sabba === 'blandko') PB.aktuellt = function(){ return 0; };   // kön står still: samma blad igen
 let blandadeStatus = '';
 (function(){
@@ -253,10 +255,27 @@ let blandadeStatus = '';
     if(PB.harBlad(cfg)) fall('blandade', 'tom post ska stå tonad');
     blandadeStatus = 'nivå 1 väntar på bladen (' + cfg.vantar + ') — posten tonad';
   } else {
+    // dokumentets facit per ruta ("Blandade uppgifter", Facit Test 1–6), i delarnas ordning; area i FOLJD
+    const FACIT = [
+      [[72, 144, 48, 96], [29, 174], [143, 144, 145], [39, 51], [14, 42, 30], [192], [10, 50], [6]],
+      [[8], [7, 11, 12], [21], [84, 96], [90, 92], [15], [8], [158, 159]],
+      [[8, 9], [53, 53, 74], [183, 184], [116, 132, 111], [42], [3, 12], [99, 101], [33, 43]],
+      [[13, 52, 29], [97, 98, 99, 100], [22, 68], [21], [10], [53, 106, 100, 101], [125], [15, 90]],
+      [[46, 138, 47], [6, 12, 16], [26, 78, 76], [6], [29, 33], [7], [28], [85, 87, 89]],
+      [[39, 46, 95], [32, 38], [119, 120], [141, 151], [4], [11, 16], [201, 203], [81, 117, 59]]];
+    const FOLJD = { 'p7-omkrets-M3-6': 36 };
+    if(sabba === 'blandfacit') BANK.BLANDADE[1].blad[3].uppgifter[1] = BANK.typ('foljd').blad.A[4];
     let n = 0;
-    PB.bladen(cfg).forEach(function(b){ b.uppgifter.forEach(function(u){
-      if(ids.has(u.id)) fall(u.id, 'id finns redan i banken'); provaUppgift(u); n++;
+    const sedda = new Set();
+    PB.bladen(cfg).forEach(function(b, bi){ b.uppgifter.forEach(function(u, ui){
+      if(ids.has(u.id) || sedda.has(u.id)) fall(u.id, 'id finns redan'); sedda.add(u.id); provaUppgift(u); n++;
       if(u.typ === 'instruktion' && u.form !== 'ekvation') fall(u.id, 'Följa instruktion ska lösas som ekvation (form)');
+      const f = (FACIT[bi] || [])[ui];
+      if(JSON.stringify(u.facit) !== JSON.stringify(f)) fall(b.titel + ' uppgift ' + (ui + 1), 'facit ' + JSON.stringify(u.facit) + ' ≠ dokumentets ' + JSON.stringify(f));
+      if(u.foljdfraga || FOLJD[u.id]){
+        const fv = u.foljdfraga ? MOD.utvardera(u.foljdfraga.uttryck, MOD.varden(u, MOD.grenarAv(u)[0]).varden) : null;
+        if(!lika(fv, FOLJD[u.id]) || !lika(u.facitFoljd, FOLJD[u.id])) fall(u.id, 'följdfrågan ' + fv + ' ≠ dokumentets ' + FOLJD[u.id]);
+      }
     }); });
     blandadeStatus = 'nivå 1: ' + cfg.blad.length + ' blad, ' + n + ' uppgifter rättas rätt';
   }
