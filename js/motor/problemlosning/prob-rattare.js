@@ -276,8 +276,168 @@ function ratta(u, svar){
   return { status: 'ratt', steg: null, gren: gren.id, losning: x, varden: sant.varden, per: per };
 }
 
+// ══ METOD-RÄTTAREN — PILOT (order 2026-11-23): bara typen "Flera personer och saker" (typ 'delar'). ══════
+// Rättar METODEN, inte en uppställning. Variabelvalet är fritt (Noah = x eller Ella = x). Bias: GODTA giltigt
+// arbete — ett felaktigt "fel" är värre än ett uteblivet. Ingen symbolisk motor: uppgiftens entydiga lösning
+// är känd ur modellen, och elevens rader prövas mot den.
+//   · Delarna        rättas INTE (elevens egen uppställning; svaret fångar en felaktig).
+//   · Ekvationen     godtas när den har en entydig lösning som är en av uppgiftens sanna delvärden (då är
+//                    elevens x någon av delarna), och inte redan är löst ("x = 12" är svaret, inte ekvationen).
+//   · Balansmetoden  giltig algebra: varje rad har samma lösning som raden ovanför, ingen upprepning, sista
+//                    raden x = tal, och minst så många rader som ekvationen kräver (samma regler som förut).
+//   · Sätt in värdet beräkningsrutan och värdet rättas mot elevens EGET x insatt i hennes eget uttryck.
+//   · Svaret         rätt tal och rätt enhet per del. Står en dels namn i svaret eller som radens namn knyts
+//                    svaret till den delen; annars godtas det för en del vars värde det har (en gång per del).
+// Ut: { status, steg, besked, ekvation:t/f/null, rader:[t/f/null per ifylld kedjerad], delrader:[{berakning,
+//       varde, svar, enhetSaknas}], foljd, x }. Ett omdöme null = obedömt (tom ruta, eller inget att pröva mot).
+// Inte inskriven i KONVENTIONER än (Joachim låser modellen när piloten känns rätt).
+var METOD_PILOT = { delar: true };
+function arMetodRattning(u){ return !!(u && METOD_PILOT[u.typ]); }
+
+function lika(a, b){ return a != null && b != null && Math.abs(a - b) < 1e-6; }
+function smaOrd(s){ return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+function ordFinns(text, ord){
+  if(!ord) return false;
+  var e = ord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp('(^|[^a-zåäö0-9])' + e + '([^a-zåäö0-9]|$)').test(text);
+}
+
+// svar = { rader:[{vl,hl}…] (rad 1 = ekvationen), delrader:[{ namn, uttryck, berakning|null, varde, svar }], foljd }
+function rattaMetod(u, svar){
+  svar = svar || {};
+  var opts = parOpts(u), ut = { status: 'fel', steg: null, besked: '', ekvation: null, rader: [], delrader: [], foljd: null, x: null };
+  function forstaFel(steg, besked){ if(!ut.steg){ ut.steg = steg; ut.besked = besked; } }
+
+  // Uppgiftens sanna delvärden (alla grenar): elevens x ska vara ett av dem.
+  var grenar = MOD.grenarAv(u), gren = null, sant = null, alla = [];
+  grenar.forEach(function(g){
+    var v = MOD.varden(u, g); if(v.fel) return;
+    if(!gren){ gren = g; sant = v.varden; }
+    Object.keys(v.varden).forEach(function(k){ alla.push(v.varden[k]); });
+  });
+  if(!sant) return { status: 'fel', steg: 'uppgift', besked: 'Uppgiften går inte att lösa entydigt.' };
+  function arSant(x){ return alla.some(function(v){ return lika(v, x); }); }
+
+  // ── EKVATIONEN + BALANSMETODEN ──
+  var rader = (svar.rader || []).filter(function(r){ return r && (!tom(r.vl) || !tom(r.hl)); });
+  var e0 = null, x = null, kedjaKlar = false;
+  if(!rader.length) forstaFel('ekvation', BESKED.ekvationOlaslig.hint);
+  else {
+    var r0 = rader[0];
+    e0 = (!tom(r0.vl) && !tom(r0.hl)) ? EP.parseEkvation(r0.vl, r0.hl, opts) : null;
+    if(!e0){ ut.ekvation = false; forstaFel('ekvation', BESKED.ekvationOlaslig.hint); }
+    else if(!EP.harUnikLosning(e0)){ ut.ekvation = false; e0 = null; forstaFel('ekvation', BESKED.ingenLosning.hint); }
+    else if(EP.arLost(r0.vl, r0.hl, opts)){ ut.ekvation = false; e0 = null; forstaFel('ekvation', BESKED.ekvationLost.hint); }
+    else {
+      ut.ekvation = arSant(EP.losningAv(e0));
+      if(!ut.ekvation) forstaFel('ekvation', BESKED.ekvationFel.hint);
+    }
+    // Kedjan: giltig algebra från elevens EGEN ekvation (också när ekvationen inte ger rätt lösning —
+    // räknandet bedöms för sig, ett tidigt fel straffas inte två gånger).
+    if(e0){
+      var forra = e0, bruten = false;
+      for(var i = 1; i < rader.length; i++){
+        var ri = rader[i];
+        var e = (!tom(ri.vl) && !tom(ri.hl)) ? EP.parseEkvation(ri.vl, ri.hl, opts) : null;
+        var b = !e ? BESKED.radOlaslig.hint
+              : !EP.sammaLosning(forra, e) ? BESKED.radFoljerEj.hint
+              : EP.upprepar(rader[i - 1], ri) ? BESKED.upprepning.hint : null;
+        if(b){ ut.rader[i] = false; forstaFel('balans', b); bruten = true; break; }
+        ut.rader[i] = true; forra = e;
+      }
+      var sista = rader[rader.length - 1];
+      if(!bruten){
+        if(rader.length < 2 || !EP.arLost(sista.vl, sista.hl, opts)) forstaFel('balans', BESKED.ejLost.hint);
+        else {
+          var minst = EP.minstaAntalRader(rader[0].vl, rader[0].hl, opts);
+          if(minst != null && rader.length < minst){ ut.rader[rader.length - 1] = false; forstaFel('balans', BESKED.forFaRader.hint); }
+          else kedjaKlar = true;
+        }
+      }
+      // ELEVENS x: sista radens värde när kedjan når x = tal, annars ekvationens lösning
+      x = (!bruten && rader.length >= 2 && EP.arLost(sista.vl, sista.hl, opts)) ? EP.losningAv(forra) : EP.losningAv(e0);
+    }
+  }
+  ut.rader[0] = ut.ekvation;
+  ut.x = x;
+
+  // ── SÄTT IN VÄRDET: elevens x i elevens eget uttryck ──
+  var delrader = svar.delrader || [];
+  delrader.forEach(function(d, i){
+    var o = { berakning: null, varde: null, svar: null, enhetSaknas: false };
+    var mal = (x != null && !tom(d.uttryck) && EP.parseSida(d.uttryck, opts)) ? EP.varde(d.uttryck, x, opts) : null;
+    [['berakning', d.berakning], ['varde', d.varde]].forEach(function(p){
+      if(p[1] == null || tom(p[1]) || mal == null) return;
+      var vr = vardeUr(p[1], opts);
+      o[p[0]] = !vr.fel && lika(vr.varde, mal);
+      if(!o[p[0]]) forstaFel('insattning', vr.fel === 'kedjebrott' ? BESKED.insattningKedja.hint : BESKED.insattningFel.hint);
+    });
+    ut.delrader[i] = o;
+  });
+
+  // ── FÖLJDFRÅGAN (om uppgiften har en) ──
+  if(u.foljdfraga && !tom(svar.foljd)){
+    var f = provaSvarsfalt(svar.foljd, MOD.utvardera(u.foljdfraga.uttryck, sant), u.foljdfraga.enhet, opts);
+    ut.foljd = !f; if(f) forstaFel('foljd', f.fel);
+  }
+
+  // ── SVARET: tal + enhet per del. Namn i svaret eller som radens namn knyter svaret till en del. ──
+  var svarDelar = (u.svarDelar || MOD.nycklarAv(u)).map(function(k){
+    var d = (u.delar || []).filter(function(x2){ return x2.nyckel === k; })[0];
+    return { k: k, namn: smaOrd(d && d.namn), v: sant[k], tagen: false };
+  });
+  function bunden(d){
+    var t = smaOrd(d.svar), n = smaOrd(d.namn);
+    var h = svarDelar.filter(function(p){ return p.namn && ordFinns(t, p.namn); });
+    if(h.length === 1) return h[0];
+    if(n){
+      h = svarDelar.filter(function(p){ return p.namn === n; }); if(h.length === 1) return h[0];
+      if(n.length === 1){ h = svarDelar.filter(function(p){ return p.namn.charAt(0) === n; }); if(h.length === 1) return h[0]; }
+    }
+    return null;
+  }
+  // Namnen ur svarstexten INNAN tal och enhet läses: "7A 25" är 25 (inte 7), och "kulor i varje påse 18"
+  // bär ingen enhet bara för att delens namn innehåller ordet. Delarnas namn och radens eget namn.
+  function utanNamn(d){
+    var t = smaOrd(d.svar), namnen = svarDelar.map(function(p){ return p.namn; }).concat([smaOrd(d.namn)])
+      .filter(Boolean).sort(function(a, b){ return b.length - a.length; });
+    namnen.forEach(function(n){
+      var e = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      t = t.replace(new RegExp('(^|[^a-zåäö0-9])' + e + '(?=[^a-zåäö0-9]|$)', 'g'), '$1 ');
+    });
+    return t.replace(/^[\s:=–-]+/, '').trim();
+  }
+  function provaDel(d, p, o){
+    var r = provaSvarsfalt(utanNamn(d), p.v, u.enhet, opts);
+    o.svar = !r; o.enhetSaknas = !!(r && r.enhetSaknas); p.tagen = true;
+    if(r) forstaFel('svar', r.fel);
+  }
+  var ifyllda = 0;
+  // först de svar som namnger sin del, sedan de övriga mot en ledig del med samma värde
+  [true, false].forEach(function(forstVarvet){
+    delrader.forEach(function(d, i){
+      if(tom(d.svar)) return;
+      var o = ut.delrader[i], p = bunden(d);
+      if(forstVarvet){ if(p){ ifyllda++; provaDel(d, p, o); } return; }
+      if(p || o.svar !== null) return;
+      ifyllda++;
+      var vr = vardeUr(utanNamn(d), opts);
+      var ledig = svarDelar.filter(function(q){ return !q.tagen && !vr.fel && lika(q.v, vr.varde); })[0];
+      if(ledig) provaDel(d, ledig, o);
+      else { o.svar = false; forstaFel('svar', vr.fel === 'kedjebrott' ? BESKED.insattningKedja.hint : BESKED.svarTalFel.hint); }
+    });
+  });
+  if(ifyllda < svarDelar.length) forstaFel('svar', BESKED.svarSaknas.hint);
+
+  var rattDelar = ut.delrader.every(function(o){ return o.berakning !== false && o.varde !== false && o.svar !== false; });
+  if(ut.ekvation === true && kedjaKlar && rattDelar && ut.foljd !== false && !ut.steg &&
+     (!u.foljdfraga || ut.foljd === true)) ut.status = 'ratt';
+  return ut;
+}
+
 var API = { ratta: ratta, BESKED: BESKED, provaUttryck: provaUttryck, provaEkvation: provaEkvation,
-            provaKedja: provaKedja, talUr: talUr, harEnhet: harEnhet };
+            provaKedja: provaKedja, talUr: talUr, harEnhet: harEnhet,
+            rattaMetod: rattaMetod, arMetodRattning: arMetodRattning, METOD_PILOT: METOD_PILOT };
 if(typeof window !== 'undefined') window.ProbRattare = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

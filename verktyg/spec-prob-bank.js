@@ -18,10 +18,11 @@
 
         personnamnen bytta konsekvent, samma kön, rätt genitiv; A–D orörda
      9  blandade uppgifter (prob-blandade.js): postens form eller tonad med skäl; kön på en fixtur
+    10  metod-rättaren (pilot, typ delar): varje giltigt variabelval rättas rätt; felaktigt arbete fångas
    Negativ verifiering: --sabba facit | relation | test | rabatt | form | mening | genfacit | namn | genitiv |
-   blandade | blandko | blandfacit ska var och en fälla specen.
+   blandade | blandko | blandfacit | metod ska var och en fälla specen.
 
-   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit|namn|genitiv|blandade|blandko|blandfacit]
+   Kör: node verktyg/spec-prob-bank.js [--sabba facit|relation|test|rabatt|form|mening|genfacit|namn|genitiv|blandade|blandko|blandfacit|metod]
         [--namnprov]  (skriver ut de genererade bladen med personer) */
 'use strict';
 const path = require('path');
@@ -309,6 +310,101 @@ let blandadeStatus = '';
   if(PB.bladen(fix)[0].titel !== 'Blad 6A · Blandade uppgifter' || PB.bladen(fix)[5].titel !== 'Blad 6F · Blandade uppgifter') fall('blandade', 'bladnamn ' + PB.bladen(fix)[0].titel);
 })();
 
+// 10 METOD-RÄTTAREN — PILOT (order 2026-11-23), bara typen "Flera personer och saker" (typ 'delar').
+//    Varje giltigt variabelval (varje del som kan vara x) på varje riktig uppgift — A–D, testen, blandade —
+//    ska rättas RÄTT; felaktig balansmetod, fel svar, svar utan enhet, ombytta svar, en ekvation med fel
+//    lösning, en felräknad beräkningsruta och ett uppställningsfel (fångas av svaret) ska rättas FEL.
+//    De andra typerna går den gamla vägen (arMetodRattning falskt).
+let metodStatus = '';
+(function(){
+  if(sabba === 'metod') delete R.METOD_PILOT.delar;
+  const ARU = function(t){ const s = String(t || '').replace(/\s+/g, ''); return !!s && !(/^[a-zåäö]$/i.test(s) || /^[−-]?\d+([.,]\d+)?$/.test(s)); };
+  function satt(uttr, x){ return String(uttr).replace(/(\d)\s*x/g, '$1·x').replace(/x/g, '(' + MOD.talStr(x) + ')'); }
+  const uppg = [];
+  BANK.BOKSTAVER.forEach(function(b){ BANK.typ('delar').blad[b].forEach(function(u){ uppg.push(u); }); });
+  BANK.TEST.forEach(function(te){ BANK.testBlad(te.id).uppgifter.forEach(function(u){ if(u && u.typ === 'delar') uppg.push(u); }); });
+  ((BANK.BLANDADE[1] || {}).blad || []).forEach(function(b){ b.uppgifter.forEach(function(u){ if(u.typ === 'delar') uppg.push(u); }); });
+  BANK.TYPER.forEach(function(t){ if(t.id !== 'delar' && R.arMetodRattning(t.blad.A[0])) fall('metod', t.id + ' går metodvägen — piloten gäller bara delar'); });
+  let val = 0, neg = 0;
+  function elevSvar(u, lf, opt){
+    opt = opt || {};
+    const nycklar = MOD.nycklarAv(u), namn = {}; u.delar.forEach(function(d){ namn[d.nyckel] = d.namn; });
+    let delrader = nycklar.map(function(k){
+      const v = lf.varden[k], ux = lf.uttryck[k];
+      return { namn: opt.utanNamn ? '' : namn[k], uttryck: ux, berakning: ARU(ux) ? satt(ux, lf.varden[lf.valdDel]) : null,
+               varde: MOD.talStr(v), svar: (opt.utanNamn ? '' : namn[k] + ' ') + MOD.talStr(v) + (u.enhet ? ' ' + u.enhet : '') };
+    });
+    if(opt.baklanges) delrader = delrader.reverse();
+    return { rader: [lf.ekvation].concat(lf.kedja).map(function(r){ return { vl: r.vl, hl: r.hl }; }), delrader: delrader };
+  }
+  uppg.forEach(function(u){
+    if(!R.arMetodRattning(u)){ fall(u.id, 'går inte metodvägen'); return; }
+    const gren = MOD.grenarAv(u)[0], nycklar = MOD.nycklarAv(u), sant = MOD.varden(u, gren).varden;
+    const S = nycklar.map(function(k){ return sant[k]; });
+    let giltiga = 0, forsta = null;
+    nycklar.forEach(function(k){
+      const lf = MOD.losningsforslag(u, gren, k);
+      if(!lf || lf.valdDel !== k) return;                // den delen kan inte vara x själv
+      giltiga++; if(!forsta) forsta = lf;
+      [{}, { baklanges: true }, { utanNamn: true, baklanges: true }].forEach(function(o){
+        const r = R.rattaMetod(u, elevSvar(u, lf, o)); val++;
+        if(r.status !== 'ratt') fall(u.id, 'x = ' + k + (o.baklanges ? ' (raderna baklänges)' : '') + (o.utanNamn ? ' (utan namn)' : '') + ': ' + r.status + ' i ' + r.steg + ' (' + r.besked + ')');
+      });
+    });
+    if(nycklar.length > 1 && giltiga < 2) fall(u.id, 'bara ' + giltiga + ' giltiga variabelval prövade');
+    if(!forsta) return;
+    function maste(namn2, svar, prov){ const r = R.rattaMetod(u, svar); neg++; if(!prov(r)) fall(u.id, 'fångas inte: ' + namn2 + ' → ' + JSON.stringify({ status: r.status, steg: r.steg, besked: r.besked })); }
+    let s;
+    // felaktig balansmetod: första balansraden räknad fel
+    s = elevSvar(u, forsta); s.rader[1].hl = String(MOD.talStr(Number(String(s.rader[1].hl).replace(',', '.')) + 1));
+    maste('fel balansrad', s, function(r){ return r.status === 'fel' && r.steg === 'balans' && r.rader[1] === false; });
+    // fel svar
+    s = elevSvar(u, forsta); s.delrader[0].svar = s.delrader[0].namn + ' ' + MOD.talStr(sant[nycklar[0]] + 1) + (u.enhet ? ' ' + u.enhet : '');
+    maste('fel svar', s, function(r){ return r.status === 'fel' && r.steg === 'svar' && r.delrader[0].svar === false; });
+    // svar utan enhet
+    if(u.enhet){
+      s = elevSvar(u, forsta); s.delrader[0].svar = s.delrader[0].namn + ' ' + MOD.talStr(sant[nycklar[0]]);
+      maste('svar utan enhet', s, function(r){ return r.status === 'fel' && r.delrader[0].svar === false && r.delrader[0].enhetSaknas; });
+    }
+    // ombytta svar (namnet står i svaret)
+    if(nycklar.length > 1 && !lika(sant[nycklar[0]], sant[nycklar[1]])){
+      s = elevSvar(u, forsta); const t0 = s.delrader[0].svar, t1 = s.delrader[1].svar;
+      s.delrader[0].svar = s.delrader[0].namn + ' ' + t1.slice(s.delrader[1].namn.length + 1);
+      s.delrader[1].svar = s.delrader[1].namn + ' ' + t0.slice(s.delrader[0].namn.length + 1);
+      maste('ombytta svar', s, function(r){ return r.status === 'fel' && r.steg === 'svar'; });
+    }
+    // ekvation med fel lösning (högerledet +1, om den lösningen inte råkar vara ett delvärde)
+    s = elevSvar(u, forsta); const e = s.rader[0], hl1 = Number(String(e.hl).replace(',', '.'));
+    if(isFinite(hl1)){
+      e.hl = MOD.talStr(hl1 + 1);
+      const ny = EP.parseEkvation(e.vl, e.hl, { variabel: 'x' }), xn = ny && EP.losningAv(ny);
+      if(ny && !S.some(function(v){ return lika(v, xn); })) maste('ekvation med fel lösning', s, function(r){ return r.status === 'fel' && r.ekvation === false; });
+    }
+    // felräknad beräkningsruta
+    s = elevSvar(u, forsta); const ib = s.delrader.findIndex(function(d){ return d.berakning; });
+    if(ib >= 0){ s.delrader[ib].berakning = '1 + 1'; maste('fel beräkning', s, function(r){ return r.status === 'fel' && r.delrader[ib].berakning === false; }); }
+  });
+  // UPPSTÄLLNINGSFEL SOM BARA SVARET FÅNGAR (A1: Ella = x − 6 när Noah = x — tecknet vänt).
+  // Ekvationen x + x − 6 = 30 har lösningen 18, som är ett delvärde (Ellas) — därför godtas ekvationen
+  // och kedjan; insättningen räknas mot elevens eget uttryck; svaret "Noah 18 år" fälls.
+  const a1 = BANK.typ('delar').blad.A[0];
+  const fel = R.rattaMetod(a1, { rader: [{ vl: 'x + x - 6', hl: '30' }, { vl: '2x', hl: '36' }, { vl: 'x', hl: '18' }],
+    delrader: [{ namn: 'Noah', uttryck: 'x', berakning: null, varde: '18', svar: 'Noah 18 år' },
+               { namn: 'Ella', uttryck: 'x - 6', berakning: '18 - 6', varde: '12', svar: 'Ella 12 år' }] });
+  neg++;
+  if(!(fel.status === 'fel' && fel.ekvation === true && fel.steg === 'svar' && fel.delrader[0].svar === false && fel.delrader[1].svar === false))
+    fall('metod A1', 'uppställningsfelet fångas inte av svaret: ' + JSON.stringify(fel));
+  // Noah = x och Ella = x på samma tal, uttryckligen
+  const noah = R.rattaMetod(a1, { rader: [{ vl: 'x + x + 6', hl: '30' }, { vl: '2x', hl: '24' }, { vl: 'x', hl: '12' }],
+    delrader: [{ namn: 'Noah', uttryck: 'x', berakning: null, varde: '12', svar: 'Noah 12 år' },
+               { namn: 'Ella', uttryck: 'x + 6', berakning: '12 + 6', varde: '18', svar: 'Ella 18 år' }] });
+  const ella = R.rattaMetod(a1, { rader: [{ vl: 'x - 6 + x', hl: '30' }, { vl: '2x', hl: '36' }, { vl: 'x', hl: '18' }],
+    delrader: [{ namn: 'Ella', uttryck: 'x', berakning: null, varde: '18', svar: 'Ella 18 år' },
+               { namn: 'Noah', uttryck: 'x - 6', berakning: '18 - 6', varde: '12', svar: 'Noah 12 år' }] });
+  if(noah.status !== 'ratt' || ella.status !== 'ratt') fall('metod A1', 'Noah = x: ' + noah.status + ' (' + noah.besked + '), Ella = x: ' + ella.status + ' (' + ella.besked + ')');
+  metodStatus = uppg.length + ' uppgifter, ' + val + ' giltiga lösningar (alla variabelval, raderna i två ordningar, med och utan namn) rättas rätt, ' + neg + ' felaktiga fångas';
+})();
+
 const antal = ids.size;
 if(brott.length){
   console.log('✗ spec-prob-bank: ' + brott.length + ' brott (' + antal + ' uppgifter)');
@@ -319,4 +415,5 @@ console.log('✓ spec-prob-bank: ' + antal + ' uppgifter — modellens facit = d
   + BANK.TEST.length + ' test à sex frågor (3.2 författad, facit som testdokumentet); ' + varianter + ' varianter A→B→C→D; '
   + genererade + ' genererade blad efter D (mening oförändrad, samma antal steg, rena tal, rättas rätt); '
   + namnBlad + ' av dem med personer, ' + namnBytta + ' namn bytta (konsekvent, samma kön, rätt genitiv); '
-  + 'blandade: ' + blandadeStatus + '; komponenten (fixtur 6 × 8): form, kö 6A→6F utan repris, stannar efter sjätte');
+  + 'blandade: ' + blandadeStatus + '; komponenten (fixtur 6 × 8): form, kö 6A→6F utan repris, stannar efter sjätte'
+  + '; metod-rättaren (pilot, delar): ' + metodStatus);

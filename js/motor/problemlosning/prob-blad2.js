@@ -321,6 +321,7 @@ function rensaUppgift(s){
   s.delRader.forEach(function(d){
     d.uttryckYta.classList.remove('ratt', 'fel');
     d.vardeYta.classList.remove('ratt', 'fel');
+    if(d.berakningYta) d.berakningYta.classList.remove('ratt', 'fel');
     d.svarYta.classList.remove('ratt', 'fel');
     d.svarStatus.textContent = '';
   });
@@ -346,6 +347,58 @@ function summaAv(s){
   s.kedja.forEach(function(r){ if(!K.tomRad(r)) v.push(radOmdome(r)); });
   return las_summa(v);
 }
+// ── METOD-RÄTTAREN — PILOT (order 2026-11-23): typen "Flera personer och saker" rättas på METODEN
+// (ProbRattare.rattaMetod): Delarna bedöms inte, ekvationen på sin lösning, balansmetoden som giltig algebra,
+// Sätt in värdet (beräkning + värde) mot elevens eget x, svaret på tal och enhet. Övriga typer: som förut.
+function arMetodState(s){ return !!(s && s.delRader && R && R.arMetodRattning && R.arMetodRattning(s.u)); }
+function metodRader(s){ return [s.ekvRad].concat(s.kedja).filter(function(r){ return !K.tomRad(r); }); }
+function berakningSyns(d){ return !!(d.berakningYta && !d.berakningYta.hidden); }
+function besvaradMetod(s){
+  if(metodRader(s).length) return true;
+  return s.delRader.some(function(d){
+    return [K.las(d.uttryckYta), K.las(d.vardeYta), K.las(d.svarYta), berakningSyns(d) ? K.las(d.berakningYta) : '']
+      .some(function(t){ return String(t).trim() !== ''; });
+  });
+}
+function kontrolleraMetod(s){
+  rensaUppgift(s);
+  if(!besvaradMetod(s)) return null;
+  var lista = metodRader(s);
+  var res = R.rattaMetod(s.u, {
+    rader: lista.map(K.radPar),
+    delrader: s.delRader.map(function(d){
+      return { namn: d.namn.value.trim(), uttryck: K.las(d.uttryckYta), berakning: berakningSyns(d) ? K.las(d.berakningYta) : null,
+               varde: K.las(d.vardeYta), svar: K.las(d.svarYta) };
+    }),
+    foljd: s.foljdYta ? K.las(s.foljdYta) : undefined
+  });
+  lista.forEach(function(r, i){ var o = res.rader && res.rader[i]; if(o === true || o === false) K.markera(r, o); });
+  function satt(el, o){ if(el && (o === true || o === false)) el.classList.add(o ? 'ratt' : 'fel'); }
+  s.delRader.forEach(function(d, i){
+    var o = (res.delrader || [])[i]; if(!o) return;
+    if(berakningSyns(d)) satt(d.berakningYta, o.berakning);
+    satt(d.vardeYta, o.varde); satt(d.svarYta, o.svar);
+    if(o.svar === true || o.svar === false) d.svarStatus.textContent = o.svar ? '✓' : '✗';
+  });
+  if(s.foljdYta){ satt(s.foljdYta, res.foljd); if(res.foljd != null) s.foljdStatus.textContent = res.foljd ? '✓' : '✗'; }
+  if(res.status === 'ratt'){ s.klarEl.classList.add('show'); logga(s.u.nod, 'ratt'); return 'ratt'; }
+  s.beskedEl.textContent = res.besked || '';
+  logga(s.u.nod, 'fel');
+  return 'fel';
+}
+// Totalen: varje bedömd ruta — Delarna räknas inte (de bedöms inte); beräkningsrutan räknas när den syns.
+function summaMetod(s){
+  var v = [];
+  s.delRader.forEach(function(d){
+    if(berakningSyns(d)) v.push(ytaOmdome(d.berakningYta));
+    v.push(ytaOmdome(d.vardeYta), ytaOmdome(d.svarYta));
+  });
+  if(s.foljdYta) v.push(ytaOmdome(s.foljdYta));
+  metodRader(s).forEach(function(r){ v.push(radOmdome(r)); });
+  var sum = las_summa(v); sum.obedomt = 0;        // tomma rutor är obesvarade, inte "steg 1 stämmer inte"
+  return sum;
+}
+
 function kontrollera(state, hintEl, sammanfEl){
   var klara = 0, besvarade = 0;
   state.forEach(function(s){
@@ -353,6 +406,12 @@ function kontrollera(state, hintEl, sammanfEl){
       var r1 = window.ProbBlad.kontrolleraUppgift(s);
       if(r1) besvarade++;
       if(r1 === 'ratt') klara++;
+      return;
+    }
+    if(arMetodState(s)){
+      var r2 = kontrolleraMetod(s);
+      if(r2) besvarade++;
+      if(r2 === 'ratt') klara++;
       return;
     }
     rensaUppgift(s);
@@ -435,7 +494,7 @@ function kontrollera(state, hintEl, sammanfEl){
   if(sammanfEl){
     var tot = 0, ratt = 0, obedomt = 0;
     state.forEach(function(s){
-      var E = arEkvationsState(s) ? window.ProbBlad : null;
+      var E = arEkvationsState(s) ? window.ProbBlad : arMetodState(s) ? { besvarad: besvaradMetod, summaAv: summaMetod } : null;
       if(!(E ? E.besvarad(s) : besvarad(s))) return;
       var v = E ? E.summaAv(s) : summaAv(s); tot += v.tot; ratt += v.ratt; obedomt += v.obedomt;
     });
