@@ -349,7 +349,9 @@ let metodStatus = '';
     const nycklar = MOD.nycklarAv(u), namn = {}; u.delar.forEach(function(d){ namn[d.nyckel] = d.namn; });
     let delrader = nycklar.map(function(k){
       const ux = lf.uttryck[k];
-      return { namn: opt.utanNamn ? '' : namn[k], uttryck: ux, berakning: ARU(ux) ? satt(ux, lf.varden[lf.valdDel]) : null,
+      const ins = ARU(ux) ? satt(ux, lf.varden[lf.valdDel]) : null;
+      return { namn: opt.utanNamn ? '' : namn[k], uttryck: ux,
+               berakning: ins && opt.berakningKedja ? ux + ' = ' + ins + ' = ' + MOD.talStr(lf.varden[k]) : ins,
                varde: MOD.talStr(lf.varden[k]) };
     });
     let ordning = (u.svarDelar || nycklar).slice();
@@ -366,7 +368,7 @@ let metodStatus = '';
       const lf = MOD.losningsforslag(u, gren, k);
       if(!lf || lf.valdDel !== k) return;                // den delen kan inte vara x själv
       giltiga++; if(!forsta) forsta = lf;
-      [{}, { form: 'mening', baklanges: true }, { form: 'varden', utanNamn: true, baklanges: true }, { form: 'gemensam' }, { form: 'tatt', baklanges: true }].forEach(function(o){
+      [{}, { form: 'mening', baklanges: true }, { form: 'varden', utanNamn: true, baklanges: true }, { form: 'gemensam', berakningKedja: true }, { form: 'tatt', baklanges: true }].forEach(function(o){
         const es = elevSvar(u, lf, o), r = R.rattaMetod(u, es); val++;
         if(r.status !== 'ratt') fall(u.id, 'x = ' + k + ' svaret "' + es.svar + '"' + (o.baklanges ? ' (raderna baklänges)' : '') + (o.utanNamn ? ' (utan namn)' : '') + ': ' + r.status + ' i ' + r.steg + ' (' + r.besked + ')');
       });
@@ -403,11 +405,11 @@ let metodStatus = '';
       s = elevSvar(u, forsta); s.svar = svarsrad(u, sant, fr.slice(0, -1), 'namn');
       maste('en del saknas', s, function(r){ return r.status === 'fel' && r.svar === false; });
     }
-    // fel enhet (en annan måttenhet efter talen) — bara där uppgiftens enhet är ett mått
-    if(['år', 'kr', 'kg', 'g', 'cm', 'm', 'km'].indexOf(u.enhet) >= 0){
+    // fel enhet (en annan måttenhet efter talen) — eget besked (order 2026-11-25)
+    if(u.enhet){
       const annan = u.enhet === 'kg' ? 'cm' : 'kg';
       s = elevSvar(u, forsta); s.svar = s.svar.split(' ' + u.enhet).join(' ' + annan);
-      maste('fel enhet (' + annan + ')', s, function(r){ return r.status === 'fel' && r.svar === false && r.enhetSaknas; });
+      maste('fel enhet (' + annan + ')', s, function(r){ return r.status === 'fel' && r.svar === false && r.enhetFel && !r.enhetSaknas && r.besked === R.BESKED.svarEnhetFel.hint; });
     }
     // ett påhittat extra tal (inte ett delvärde, inte i uppgiftens text)
     s = elevSvar(u, forsta); s.svar = s.svar + ' och 9999' + ENH(u);
@@ -417,11 +419,23 @@ let metodStatus = '';
     if(isFinite(hl1)){
       e.hl = MOD.talStr(hl1 + 1);
       const ny = EP.parseEkvation(e.vl, e.hl, { variabel: 'x' }), xn = ny && EP.losningAv(ny);
-      if(ny && !S.some(function(v){ return lika(v, xn); })) maste('ekvation med fel lösning', s, function(r){ return r.status === 'fel' && r.ekvation === false; });
+      if(ny && !S.some(function(v){ return lika(v, xn); })) maste('ekvation med fel lösning', s, function(r){ return r.status === 'fel' && r.ekvation === false && r.besked === R.BESKED.ekvationGerEj.hint; });
     }
     // felräknad beräkningsruta
     s = elevSvar(u, forsta); const ib = s.delrader.findIndex(function(d){ return d.berakning; });
     if(ib >= 0){ s.delrader[ib].berakning = '1 + 1'; maste('fel beräkning', s, function(r){ return r.status === 'fel' && r.delrader[ib].berakning === false; }); }
+    // INSÄTTNINGEN SKA SYNAS (order 2026-11-25): rätt värde utan insättning underkänns i beräkningsrutan —
+    // ett ensamt tal, uttrycket = värdet, och en annan uträkning med samma värde
+    if(ib >= 0){
+      const xv = forsta.varden[forsta.valdDel];
+      const dk = nycklar.find(function(k){ return forsta.uttryck[k] === s.delrader[ib].uttryck; }), dv = forsta.varden[dk];
+      const utanIns = [MOD.talStr(dv), s.delrader[ib].uttryck + ' = ' + MOD.talStr(dv)];
+      if(!lika(dv - 1, xv) && !lika(xv, 1)) utanIns.push(MOD.talStr(dv - 1) + ' + 1');
+      utanIns.forEach(function(t){
+        s = elevSvar(u, forsta); s.delrader[ib].berakning = t;
+        maste('beräkning utan insättning "' + t + '"', s, function(r){ return r.status === 'fel' && r.steg === 'insattning' && r.delrader[ib].berakning === false && r.delrader[ib].varde === true; });
+      });
+    }
   });
   // UPPSTÄLLNINGSFEL SOM BARA SVARET FÅNGAR (A1: Ella = x − 6 när Noah = x — tecknet vänt).
   // Ekvationen x + x − 6 = 30 har lösningen 18, som är ett delvärde (Ellas) — därför godtas ekvationen
@@ -441,7 +455,7 @@ let metodStatus = '';
     delrader: [{ namn: 'Ella', uttryck: 'x', berakning: null, varde: '18' },
                { namn: 'Noah', uttryck: 'x - 6', berakning: '18 - 6', varde: '12' }], svar: '12 och 18 år' });
   if(noah.status !== 'ratt' || ella.status !== 'ratt') fall('metod A1', 'Noah = x: ' + noah.status + ' (' + noah.besked + '), Ella = x: ' + ella.status + ' (' + ella.besked + ')');
-  metodStatus = uppg.length + ' uppgifter, ' + val + ' giltiga lösningar (alla variabelval, raderna i två ordningar, svaret på en rad i fem former, med och utan blanksteg före enheten) rättas rätt, ' + neg + ' felaktiga fångas';
+  metodStatus = uppg.length + ' uppgifter, ' + val + ' giltiga lösningar (alla variabelval, raderna i två ordningar, svaret på en rad i fem former, med och utan blanksteg före enheten, beräkningen som insättning och som kedja) rättas rätt, ' + neg + ' felaktiga fångas';
 })();
 
 const antal = ids.size;

@@ -159,7 +159,7 @@ var TYPER = [
       upp('delar', 'A5', { fraga: 'Moa har 15 kr mer än Leo. Vera har 10 kr mindre än Leo. Tillsammans har de 170 kr. Hur mycket har var och en?' },
           [['L', 'Leo'], ['M', 'Moa'], ['V', 'Vera']], ['M = L + 15', 'V = L - 10'], 'L + M + V = 170', 'kr', [55, 70, 45]),
       upp('delar', 'A6', { fraga: 'Ida har dubbelt så många klistermärken som Sam. Kim har 12 fler än Sam. Tillsammans har de 92 klistermärken. Hur många har var och en?' },
-          [['S', 'Sam'], ['I', 'Ida'], ['K', 'Kim']], ['I = 2·S', 'K = S + 12'], 'S + I + K = 92', null, [20, 40, 32])
+          [['S', 'Sam'], ['I', 'Ida'], ['K', 'Kim']], ['I = 2·S', 'K = S + 12'], 'S + I + K = 92', 'klistermärken', [20, 40, 32])
     ],
     B: [
       upp('delar', 'B1', { fraga: 'Liam är 4 år yngre än Saga. Tillsammans är de 26 år. Hur gamla är de?' },
@@ -167,11 +167,11 @@ var TYPER = [
       upp('delar', 'B2', { fraga: 'Hugo väger 8 kg mer än Alva. Tillsammans väger de 102 kg. Hur mycket väger var och en?' },
           [['A', 'Alva'], ['H', 'Hugo']], ['H = A + 8'], 'A + H = 102', 'kg', [47, 55]),
       upp('delar', 'B3', { fraga: 'Saga har 3 gånger så många böcker som Alma. Tillsammans har de 48 böcker. Hur många böcker har var och en?' },
-          [['A', 'Alma'], ['S', 'Saga']], ['S = 3·A'], 'A + S = 48', null, [12, 36]),
+          [['A', 'Alma'], ['S', 'Saga']], ['S = 3·A'], 'A + S = 48', 'böcker', [12, 36]),
       upp('delar', 'B4', { fraga: 'Tre lådor innehåller lika många böcker. Dessutom ligger 5 böcker på bordet. Totalt är det 50 böcker. Hur många böcker finns det i varje låda?' },
           [['L', 'böcker i varje låda']], [], '3·L + 5 = 50', 'böcker', [15]),
       upp('delar', 'B5', { fraga: 'I årskurs 7 finns tre klasser. 7B har 3 fler elever än 7A. 7C har 2 färre elever än 7A. Totalt går 76 elever i årskursen. Hur många elever går i varje klass?' },
-          [['A', '7A'], ['B', '7B'], ['C', '7C']], ['B = A + 3', 'C = A - 2'], 'A + B + C = 76', null, [25, 28, 23]),
+          [['A', '7A'], ['B', '7B'], ['C', '7C']], ['B = A + 3', 'C = A - 2'], 'A + B + C = 76', 'elever', [25, 28, 23]),
       upp('delar', 'B6', { fraga: 'En cykeltur har tre etapper. Den andra etappen är dubbelt så lång som den första. Den tredje etappen är 4 km kortare än den andra. Hela turen är 36 km. Hur långa är etapperna?' },
           [['A', 'första etappen'], ['B', 'andra etappen'], ['C', 'tredje etappen']], ['B = 2·A', 'C = B - 4'], 'A + B + C = 36', 'km', [8, 16, 12])
     ],
@@ -187,7 +187,7 @@ var TYPER = [
       upp('delar', 'C5', { fraga: 'Leo har 20 kr mer än Mia. Sam har 15 kr mindre än Mia. Tillsammans har de 245 kr. Hur mycket har var och en?' },
           [['M', 'Mia'], ['L', 'Leo'], ['S', 'Sam']], ['L = M + 20', 'S = M - 15'], 'M + L + S = 245', 'kr', [80, 100, 65]),
       upp('delar', 'C6', { fraga: 'Ella har tre gånger så många kort som Max. Ali har 8 fler än Max. Tillsammans har de 93 kort. Hur många kort har var och en?' },
-          [['M', 'Max'], ['E', 'Ella'], ['A', 'Ali']], ['E = 3·M', 'A = M + 8'], 'M + E + A = 93', null, [17, 51, 25])
+          [['M', 'Max'], ['E', 'Ella'], ['A', 'Ali']], ['E = 3·M', 'A = M + 8'], 'M + E + A = 93', 'kort', [17, 51, 25])
     ],
     D: [
       upp('delar', 'D1', { fraga: 'Nora är 7 år yngre än sin bror Adam. Tillsammans är de 33 år. Hur gamla är de?' },
@@ -199,7 +199,7 @@ var TYPER = [
       upp('delar', 'D4', { fraga: 'Fem påsar innehåller lika mycket godis. Dessutom ligger 120 g godis i en skål. Totalt finns 1 120 g godis. Hur mycket godis finns i varje påse?' },
           [['P', 'godis i varje påse']], [], '5·P + 120 = 1120', 'g', [200]),
       upp('delar', 'D5', { fraga: 'I årskurs 8 finns tre klasser. 8B har 4 fler elever än 8A. 8C har 3 färre elever än 8A. Totalt går 79 elever i årskursen. Hur många elever går i varje klass?' },
-          [['A', '8A'], ['B', '8B'], ['C', '8C']], ['B = A + 4', 'C = A - 3'], 'A + B + C = 79', null, [26, 30, 23]),
+          [['A', '8A'], ['B', '8B'], ['C', '8C']], ['B = A + 4', 'C = A - 3'], 'A + B + C = 79', 'elever', [26, 30, 23]),
       upp('delar', 'D6', { fraga: 'En stafett har tre sträckor. Den andra sträckan är dubbelt så lång som den första. Den tredje sträckan är 300 m kortare än den andra. Hela stafetten är 2 200 m. Hur långa är sträckorna?' },
           [['A', 'första sträckan'], ['B', 'andra sträckan'], ['C', 'tredje sträckan']], ['B = 2·A', 'C = B - 300'], 'A + B + C = 2200', 'm', [500, 1000, 700])
     ]

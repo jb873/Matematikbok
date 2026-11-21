@@ -42,7 +42,8 @@ var FORSOK = 600;        // dragningar per mall och blad innan mallen ges upp
 var TEXT_TAL = /(\d{1,3}(?: \d{3})+|\d+)(?:,(\d+))?(?![\dA-Za-zÅÄÖåäö]|,\d)/g;
 // ENHETSKLASSER: saker som räknas i styck hör till samma band (kulor, böcker, pennor, kakor — antal saker).
 // Övriga enheter är sin egen klass (cm och m har olika skala; år är år). Se ANTAGANDEN i leveransen.
-var ENHETSKLASS = { 'kulor': 'st', 'böcker': 'st', 'pennor': 'st', 'kakor': 'st' };
+var ENHETSKLASS = { 'kulor': 'st', 'böcker': 'st', 'pennor': 'st', 'kakor': 'st',
+                    'klistermärken': 'st', 'kort': 'st', 'elever': 'st' };   // de tre sista: enhet sedan order 2026-11-25
 function klass(enhet){ var e = enhet || ''; return ENHETSKLASS[e] || e; }
 function lasTal(s){ return parseFloat(String(s).replace(/ /g, '').replace(',', '.')); }
 function decimaler(v){ var s = String(Math.round(v * 1e6) / 1e6); var i = s.indexOf('.'); return i < 0 ? 0 : s.length - i - 1; }

@@ -49,7 +49,10 @@ var BESKED = {
   svarSaknas:     { hint: 'Alla delar ska ha ett svar.' },
   svarTalFel:     { hint: 'Fel värde.' },
   svarEnhetSaknas:{ hint: 'Talet är rätt – men enheten saknas.' },
-  foljdFel:       { hint: 'Värdet stämmer inte.' }
+  foljdFel:       { hint: 'Värdet stämmer inte.' },
+  // Bara metod-rättaren (pilot-typen); lydelserna är Joachims (order 2026-11-25). De andra typerna har kvar sina.
+  ekvationGerEj:  { hint: 'Ekvationen ger inte uppgiftens lösning.' },
+  svarEnhetFel:   { hint: 'Talet är rätt – men enheten är fel.' }
 };
 
 function tom(v){ return v == null || String(v).trim() === ''; }
@@ -285,7 +288,8 @@ function ratta(u, svar){
 //                    elevens x någon av delarna), och inte redan är löst ("x = 12" är svaret, inte ekvationen).
 //   · Balansmetoden  giltig algebra: varje rad har samma lösning som raden ovanför, ingen upprepning, sista
 //                    raden x = tal, och minst så många rader som ekvationen kräver (samma regler som förut).
-//   · Sätt in värdet beräkningsrutan och värdet rättas mot elevens EGET x insatt i hennes eget uttryck.
+//   · Sätt in värdet beräkningsrutan och värdet rättas mot elevens EGET x insatt i hennes eget uttryck;
+//                    beräkningsrutan ska dessutom visa insättningen ("12 + 6"), inte bara värdet (visarInsattning).
 //   · Svaret         EN rad för hela uppgiften (lasSvarsrad nedan): rätt tal och rätt enhet för varje del.
 //                    Står en dels namn vid talet knyts talet till den delen (ombytta svar fångas); annars
 //                    godtas det för en del vars värde det har (en gång per del).
@@ -297,6 +301,24 @@ var METOD_PILOT = { delar: true };
 function arMetodRattning(u){ return !!(u && METOD_PILOT[u.typ]); }
 
 function lika(a, b){ return a != null && b != null && Math.abs(a - b) < 1e-6; }
+// INSÄTTNINGEN I BERÄKNINGSRUTAN (order 2026-11-25): talet insatt för x, t.ex. "12 + 6" när delen är x + 6
+// och elevens x = 12. Ett led i rutan räknas som insättningen när det inte är ett ensamt tal och elevens x
+// står i det ("12 + 6", "12 + 6 = 18", "x + 6 = 12 + 6 = 18", "4·11"). Ett ensamt tal ("18", "x + 6 = 18")
+// eller en annan uträkning med samma värde ("10 + 8") är ingen insättning. Värdet prövas för sig (vardeUr).
+function visarInsattning(text, x, opts){
+  if(x == null) return false;
+  return String(text).split('=').some(function(led){
+    var l = led.replace(/−/g, '-').trim();
+    if(!l) return false;
+    var p = EP.parseSida(l, opts);
+    if(p && Math.abs(p.a) > 1e-9) return false;                                   // uttrycket självt, x + 6
+    var kompakt = l.replace(/(\d)[  ](?=\d{3}\b)/g, '$1').replace(/\s+/g, '');
+    if(/^-?\(?-?\d+(?:[.,]\d+)?\)?$/.test(kompakt)) return false;                // ett ensamt tal
+    var tal = (kompakt.match(/\d+(?:[.,]\d+)?/g) || []).map(function(t){ return parseFloat(t.replace(',', '.')); })
+              .concat(talenI(l).map(function(t){ return t.v; }));                 // också bråket "(11)/(5)"
+    return tal.some(function(v){ return lika(v, Math.abs(x)); });
+  });
+}
 function smaOrd(s){ return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
 // svar = { rader:[{vl,hl}…] (rad 1 = ekvationen), delrader:[{ namn, uttryck, berakning|null, varde }], svar:str, foljd }
 function rattaMetod(u, svar){
@@ -326,7 +348,7 @@ function rattaMetod(u, svar){
     else if(EP.arLost(r0.vl, r0.hl, opts)){ ut.ekvation = false; e0 = null; forstaFel('ekvation', BESKED.ekvationLost.hint); }
     else {
       ut.ekvation = arSant(EP.losningAv(e0));
-      if(!ut.ekvation) forstaFel('ekvation', BESKED.ekvationFel.hint);
+      if(!ut.ekvation) forstaFel('ekvation', BESKED.ekvationGerEj.hint);
     }
     // Kedjan: giltig algebra från elevens EGEN ekvation (också när ekvationen inte ger rätt lösning —
     // räknandet bedöms för sig, ett tidigt fel straffas inte två gånger).
@@ -362,11 +384,15 @@ function rattaMetod(u, svar){
   delrader.forEach(function(d, i){
     var o = { berakning: null, varde: null };
     var mal = (x != null && !tom(d.uttryck) && EP.parseSida(d.uttryck, opts)) ? EP.varde(d.uttryck, x, opts) : null;
+    var harX = mal != null && Math.abs(EP.parseSida(d.uttryck, opts).a) > 1e-9;
     [['berakning', d.berakning], ['varde', d.varde]].forEach(function(p){
       if(p[1] == null || tom(p[1]) || mal == null) return;
       var vr = vardeUr(p[1], opts);
       o[p[0]] = !vr.fel && lika(vr.varde, mal);
-      if(!o[p[0]]) forstaFel('insattning', vr.fel === 'kedjebrott' ? BESKED.insattningKedja.hint : BESKED.insattningFel.hint);
+      if(!o[p[0]]){ forstaFel('insattning', vr.fel === 'kedjebrott' ? BESKED.insattningKedja.hint : BESKED.insattningFel.hint); return; }
+      // Beräkningsrutan ska visa INSÄTTNINGEN (order 2026-11-25) — rätt värde räcker inte där.
+      // Beskedet är tomt tills Joachim godkänt en lydelse; rutan får sitt ✗.
+      if(p[0] === 'berakning' && harX && !visarInsattning(p[1], x, opts)){ o.berakning = false; forstaFel('insattning', ''); }
     });
     ut.delrader[i] = o;
   });
@@ -379,7 +405,7 @@ function rattaMetod(u, svar){
 
   // ── SVARET: EN rad för hela uppgiften (order 2026-11-24) — tal + enhet för varje del ──
   var sv = lasSvarsrad(u, svar.svar, sant);
-  ut.svar = sv.svar; ut.enhetSaknas = sv.enhetSaknas; ut.svarDelar = sv.delar;
+  ut.svar = sv.svar; ut.enhetSaknas = sv.enhetSaknas; ut.enhetFel = !!sv.enhetFel; ut.svarDelar = sv.delar;
   if(sv.svar === null) forstaFel('svar', BESKED.svarSaknas.hint);
   else if(!sv.svar) forstaFel('svar', sv.besked);
 
@@ -493,7 +519,8 @@ function lasSvarsrad(u, text, sant){
       var m2 = t.del && raw.slice(t.e).toLowerCase().match(/^\s*([a-zåäö°²]+)/);
       return !!(m2 && MATTENHETER.indexOf(m2[1]) >= 0 && egna.indexOf(m2[1]) < 0);
     });
-    if(annan || !tal.some(function(t){ return t.del && enhetDirektEfter(raw, t.e, u.enhet); })){
+    if(annan){ ut.svar = false; ut.enhetFel = true; ut.besked = BESKED.svarEnhetFel.hint; return ut; }
+    if(!tal.some(function(t){ return t.del && enhetDirektEfter(raw, t.e, u.enhet); })){
       ut.svar = false; ut.enhetSaknas = true; ut.besked = BESKED.svarEnhetSaknas.hint; return ut;
     }
   }

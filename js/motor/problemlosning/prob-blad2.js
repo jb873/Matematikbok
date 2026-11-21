@@ -514,7 +514,7 @@ function kontrollera(state, hintEl, sammanfEl){
   // en löst uppgift (✓ Löst!) = 1, nämnaren = antalet uppgifter i bladet. Rutorna rättas och markeras som förut.
   // Ett blandat blad (test, blandade) räknar rutor som förut: två måttenheter i samma total går inte ihop.
   if(sammanfEl && state.length && state.every(arMetodState)){
-    sammanfEl.textContent = 'Du fick ' + klara + ' av ' + state.length + ' rätt.';
+    sammanfEl.textContent = 'Du har löst ' + klara + ' av ' + state.length + ' uppgifter.';   // lydelsen: Joachim 2026-11-25
   } else if(sammanfEl){
     var tot = 0, ratt = 0, obedomt = 0;
     state.forEach(function(s){
