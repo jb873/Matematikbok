@@ -418,6 +418,11 @@ function talenI(s){
   return ut;
 }
 function rx(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+// Måttenheter som är FEL enhet om uppgiften har en annan ("44 kg" när svaret är i år). Bara mått — ord som
+// "elever" eller "kulor" efter ett tal är inget enhetsfel.
+var MATTENHETER = ['år', 'ar', 'kr', 'kronor', 'öre', 'kg', 'kilo', 'kilogram', 'g', 'gram', 'hg', 'mm', 'cm', 'dm', 'm',
+                   'meter', 'km', 'mil', 'l', 'liter', 'dl', 'cl', 'ml', 'st', 'stycken', 'h', 'min', 's', 'timmar',
+                   'minuter', 'sekunder', 'grader', 'grad', '°', 'cm2', 'cm²', 'm2', 'm²'];
 function enhetDirektEfter(raw, pos, enhet){
   var rest = raw.slice(pos).toLowerCase(), former = ENHETSORD[enhet] || [String(enhet).toLowerCase()];
   return former.some(function(e){ return new RegExp('^\\s*' + rx(String(e).toLowerCase()) + '(?![a-zåäö0-9])').test(rest); });
@@ -480,9 +485,17 @@ function lasSvarsrad(u, text, sant){
   if(fel){ ut.svar = false; ut.besked = BESKED.svarTalFel.hint; return ut; }
   if(fragar.some(function(k){ return !del[k].tagen; })){ ut.svar = false; ut.besked = BESKED.svarSaknas.hint; return ut; }
 
-  // 5 — enheten
-  if(u.enhet && !tal.some(function(t){ return t.del && enhetDirektEfter(raw, t.e, u.enhet); })){
-    ut.svar = false; ut.enhetSaknas = true; ut.besked = BESKED.svarEnhetSaknas.hint; return ut;
+  // 5 — enheten: direkt efter minst ett av talen, med eller utan blanksteg ("11 år" = "11år"); och inget
+  //     av delarnas tal får bära en ANNAN måttenhet ("44 kg" i en åldersuppgift) — fel enhet fångas.
+  if(u.enhet){
+    var egna = (ENHETSORD[u.enhet] || [String(u.enhet)]).map(function(e){ return String(e).toLowerCase(); });
+    var annan = tal.some(function(t){
+      var m2 = t.del && raw.slice(t.e).toLowerCase().match(/^\s*([a-zåäö°²]+)/);
+      return !!(m2 && MATTENHETER.indexOf(m2[1]) >= 0 && egna.indexOf(m2[1]) < 0);
+    });
+    if(annan || !tal.some(function(t){ return t.del && enhetDirektEfter(raw, t.e, u.enhet); })){
+      ut.svar = false; ut.enhetSaknas = true; ut.besked = BESKED.svarEnhetSaknas.hint; return ut;
+    }
   }
   ut.svar = true;
   return ut;

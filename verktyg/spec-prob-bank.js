@@ -315,9 +315,10 @@ let blandadeStatus = '';
 //    Varje giltigt variabelval (varje del som kan vara x) på varje riktig uppgift — A–D, testen, blandade —
 //    ska rättas RÄTT; felaktig balansmetod, fel svar, svar utan enhet, ombytta svar, en ekvation med fel
 //    lösning, en felräknad beräkningsruta och ett uppställningsfel (fångas av svaret) ska rättas FEL.
-//    SVARET PÅ EN RAD (order 2026-11-24): varje lösning prövas med svarsraden i fyra former — fri mening,
-//    namn + värde, bara värdena, gemensam enhet sist — och raderna/delarna i två ordningar. Fel tal, saknad
-//    enhet, ombytta svar (namnen står där), en saknad del och ett påhittat extra tal ska fångas.
+//    SVARET PÅ EN RAD (order 2026-11-24): varje lösning prövas med svarsraden i fem former — fri mening,
+//    namn + värde, bara värdena, gemensam enhet sist, enheten utan blanksteg ("11år") — och raderna/delarna i
+//    två ordningar. Fel tal, saknad enhet, fel enhet, ombytta svar (namnen står där), en saknad del och ett
+//    påhittat extra tal ska fångas.
 //    De andra typerna går den gamla vägen (arMetodRattning falskt).
 let metodStatus = '';
 (function(){
@@ -340,6 +341,7 @@ let metodStatus = '';
     if(form === 'mening') return lista(ordning.map(function(k){ return namn[k] + ' är ' + t(k) + ENH(u); }));
     if(form === 'varden') return lista(ordning.map(function(k){ return t(k) + ENH(u); }));
     if(form === 'gemensam') return lista(ordning.map(t)) + ENH(u);
+    if(form === 'tatt') return ordning.map(function(k){ return namn[k] + ' ' + t(k) + (u.enhet || ''); }).join(', ');
     return ordning.map(function(k){ return namn[k] + ' ' + t(k) + ENH(u); }).join(', ');
   }
   function elevSvar(u, lf, opt){
@@ -364,7 +366,7 @@ let metodStatus = '';
       const lf = MOD.losningsforslag(u, gren, k);
       if(!lf || lf.valdDel !== k) return;                // den delen kan inte vara x själv
       giltiga++; if(!forsta) forsta = lf;
-      [{}, { form: 'mening', baklanges: true }, { form: 'varden', utanNamn: true, baklanges: true }, { form: 'gemensam' }].forEach(function(o){
+      [{}, { form: 'mening', baklanges: true }, { form: 'varden', utanNamn: true, baklanges: true }, { form: 'gemensam' }, { form: 'tatt', baklanges: true }].forEach(function(o){
         const es = elevSvar(u, lf, o), r = R.rattaMetod(u, es); val++;
         if(r.status !== 'ratt') fall(u.id, 'x = ' + k + ' svaret "' + es.svar + '"' + (o.baklanges ? ' (raderna baklänges)' : '') + (o.utanNamn ? ' (utan namn)' : '') + ': ' + r.status + ' i ' + r.steg + ' (' + r.besked + ')');
       });
@@ -401,6 +403,12 @@ let metodStatus = '';
       s = elevSvar(u, forsta); s.svar = svarsrad(u, sant, fr.slice(0, -1), 'namn');
       maste('en del saknas', s, function(r){ return r.status === 'fel' && r.svar === false; });
     }
+    // fel enhet (en annan måttenhet efter talen) — bara där uppgiftens enhet är ett mått
+    if(['år', 'kr', 'kg', 'g', 'cm', 'm', 'km'].indexOf(u.enhet) >= 0){
+      const annan = u.enhet === 'kg' ? 'cm' : 'kg';
+      s = elevSvar(u, forsta); s.svar = s.svar.split(' ' + u.enhet).join(' ' + annan);
+      maste('fel enhet (' + annan + ')', s, function(r){ return r.status === 'fel' && r.svar === false && r.enhetSaknas; });
+    }
     // ett påhittat extra tal (inte ett delvärde, inte i uppgiftens text)
     s = elevSvar(u, forsta); s.svar = s.svar + ' och 9999' + ENH(u);
     maste('påhittat extra tal', s, function(r){ return r.status === 'fel' && r.svar === false; });
@@ -433,7 +441,7 @@ let metodStatus = '';
     delrader: [{ namn: 'Ella', uttryck: 'x', berakning: null, varde: '18' },
                { namn: 'Noah', uttryck: 'x - 6', berakning: '18 - 6', varde: '12' }], svar: '12 och 18 år' });
   if(noah.status !== 'ratt' || ella.status !== 'ratt') fall('metod A1', 'Noah = x: ' + noah.status + ' (' + noah.besked + '), Ella = x: ' + ella.status + ' (' + ella.besked + ')');
-  metodStatus = uppg.length + ' uppgifter, ' + val + ' giltiga lösningar (alla variabelval, raderna i två ordningar, svaret på en rad i fyra former) rättas rätt, ' + neg + ' felaktiga fångas';
+  metodStatus = uppg.length + ' uppgifter, ' + val + ' giltiga lösningar (alla variabelval, raderna i två ordningar, svaret på en rad i fem former, med och utan blanksteg före enheten) rättas rätt, ' + neg + ' felaktiga fångas';
 })();
 
 const antal = ids.size;
