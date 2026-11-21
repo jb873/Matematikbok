@@ -286,23 +286,19 @@ function ratta(u, svar){
 //   · Balansmetoden  giltig algebra: varje rad har samma lösning som raden ovanför, ingen upprepning, sista
 //                    raden x = tal, och minst så många rader som ekvationen kräver (samma regler som förut).
 //   · Sätt in värdet beräkningsrutan och värdet rättas mot elevens EGET x insatt i hennes eget uttryck.
-//   · Svaret         rätt tal och rätt enhet per del. Står en dels namn i svaret eller som radens namn knyts
-//                    svaret till den delen; annars godtas det för en del vars värde det har (en gång per del).
+//   · Svaret         EN rad för hela uppgiften (lasSvarsrad nedan): rätt tal och rätt enhet för varje del.
+//                    Står en dels namn vid talet knyts talet till den delen (ombytta svar fångas); annars
+//                    godtas det för en del vars värde det har (en gång per del).
 // Ut: { status, steg, besked, ekvation:t/f/null, rader:[t/f/null per ifylld kedjerad], delrader:[{berakning,
-//       varde, svar, enhetSaknas}], foljd, x }. Ett omdöme null = obedömt (tom ruta, eller inget att pröva mot).
+//       varde}], svar:t/f/null, enhetSaknas, svarDelar:{nyckel→t/f/null}, foljd, x }. Ett omdöme null =
+//       obedömt (tom ruta, eller inget att pröva mot).
 // Inte inskriven i KONVENTIONER än (Joachim låser modellen när piloten känns rätt).
 var METOD_PILOT = { delar: true };
 function arMetodRattning(u){ return !!(u && METOD_PILOT[u.typ]); }
 
 function lika(a, b){ return a != null && b != null && Math.abs(a - b) < 1e-6; }
 function smaOrd(s){ return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
-function ordFinns(text, ord){
-  if(!ord) return false;
-  var e = ord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp('(^|[^a-zåäö0-9])' + e + '([^a-zåäö0-9]|$)').test(text);
-}
-
-// svar = { rader:[{vl,hl}…] (rad 1 = ekvationen), delrader:[{ namn, uttryck, berakning|null, varde, svar }], foljd }
+// svar = { rader:[{vl,hl}…] (rad 1 = ekvationen), delrader:[{ namn, uttryck, berakning|null, varde }], svar:str, foljd }
 function rattaMetod(u, svar){
   svar = svar || {};
   var opts = parOpts(u), ut = { status: 'fel', steg: null, besked: '', ekvation: null, rader: [], delrader: [], foljd: null, x: null };
@@ -364,7 +360,7 @@ function rattaMetod(u, svar){
   // ── SÄTT IN VÄRDET: elevens x i elevens eget uttryck ──
   var delrader = svar.delrader || [];
   delrader.forEach(function(d, i){
-    var o = { berakning: null, varde: null, svar: null, enhetSaknas: false };
+    var o = { berakning: null, varde: null };
     var mal = (x != null && !tom(d.uttryck) && EP.parseSida(d.uttryck, opts)) ? EP.varde(d.uttryck, x, opts) : null;
     [['berakning', d.berakning], ['varde', d.varde]].forEach(function(p){
       if(p[1] == null || tom(p[1]) || mal == null) return;
@@ -381,63 +377,120 @@ function rattaMetod(u, svar){
     ut.foljd = !f; if(f) forstaFel('foljd', f.fel);
   }
 
-  // ── SVARET: tal + enhet per del. Namn i svaret eller som radens namn knyter svaret till en del. ──
-  var svarDelar = (u.svarDelar || MOD.nycklarAv(u)).map(function(k){
-    var d = (u.delar || []).filter(function(x2){ return x2.nyckel === k; })[0];
-    return { k: k, namn: smaOrd(d && d.namn), v: sant[k], tagen: false };
-  });
-  function bunden(d){
-    var t = smaOrd(d.svar), n = smaOrd(d.namn);
-    var h = svarDelar.filter(function(p){ return p.namn && ordFinns(t, p.namn); });
-    if(h.length === 1) return h[0];
-    if(n){
-      h = svarDelar.filter(function(p){ return p.namn === n; }); if(h.length === 1) return h[0];
-      if(n.length === 1){ h = svarDelar.filter(function(p){ return p.namn.charAt(0) === n; }); if(h.length === 1) return h[0]; }
-    }
-    return null;
-  }
-  // Namnen ur svarstexten INNAN tal och enhet läses: "7A 25" är 25 (inte 7), och "kulor i varje påse 18"
-  // bär ingen enhet bara för att delens namn innehåller ordet. Delarnas namn och radens eget namn.
-  function utanNamn(d){
-    var t = smaOrd(d.svar), namnen = svarDelar.map(function(p){ return p.namn; }).concat([smaOrd(d.namn)])
-      .filter(Boolean).sort(function(a, b){ return b.length - a.length; });
-    namnen.forEach(function(n){
-      var e = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      t = t.replace(new RegExp('(^|[^a-zåäö0-9])' + e + '(?=[^a-zåäö0-9]|$)', 'g'), '$1 ');
-    });
-    return t.replace(/^[\s:=–-]+/, '').trim();
-  }
-  function provaDel(d, p, o){
-    var r = provaSvarsfalt(utanNamn(d), p.v, u.enhet, opts);
-    o.svar = !r; o.enhetSaknas = !!(r && r.enhetSaknas); p.tagen = true;
-    if(r) forstaFel('svar', r.fel);
-  }
-  var ifyllda = 0;
-  // först de svar som namnger sin del, sedan de övriga mot en ledig del med samma värde
-  [true, false].forEach(function(forstVarvet){
-    delrader.forEach(function(d, i){
-      if(tom(d.svar)) return;
-      var o = ut.delrader[i], p = bunden(d);
-      if(forstVarvet){ if(p){ ifyllda++; provaDel(d, p, o); } return; }
-      if(p || o.svar !== null) return;
-      ifyllda++;
-      var vr = vardeUr(utanNamn(d), opts);
-      var ledig = svarDelar.filter(function(q){ return !q.tagen && !vr.fel && lika(q.v, vr.varde); })[0];
-      if(ledig) provaDel(d, ledig, o);
-      else { o.svar = false; forstaFel('svar', vr.fel === 'kedjebrott' ? BESKED.insattningKedja.hint : BESKED.svarTalFel.hint); }
-    });
-  });
-  if(ifyllda < svarDelar.length) forstaFel('svar', BESKED.svarSaknas.hint);
+  // ── SVARET: EN rad för hela uppgiften (order 2026-11-24) — tal + enhet för varje del ──
+  var sv = lasSvarsrad(u, svar.svar, sant);
+  ut.svar = sv.svar; ut.enhetSaknas = sv.enhetSaknas; ut.svarDelar = sv.delar;
+  if(sv.svar === null) forstaFel('svar', BESKED.svarSaknas.hint);
+  else if(!sv.svar) forstaFel('svar', sv.besked);
 
-  var rattDelar = ut.delrader.every(function(o){ return o.berakning !== false && o.varde !== false && o.svar !== false; });
-  if(ut.ekvation === true && kedjaKlar && rattDelar && ut.foljd !== false && !ut.steg &&
+  var rattDelar = ut.delrader.every(function(o){ return o.berakning !== false && o.varde !== false; });
+  if(ut.ekvation === true && kedjaKlar && rattDelar && ut.svar === true && ut.foljd !== false && !ut.steg &&
      (!u.foljdfraga || ut.foljd === true)) ut.status = 'ratt';
+  return ut;
+}
+
+// SVARSRADEN (order 2026-11-24): eleven skriver hela svaret på EN rad — fri mening eller bara värdena:
+//   "Noah är 12 år och Ella är 18 år" · "Noah 12 år, Ella 18 år" · "12 år och 18 år" · "12 och 18 år".
+// Läsningen:
+//   1  Delarnas namn hittas i raden (längsta först; "7A" och "kulor i varje påse" blir inga tal), och en
+//      ensam versal som är EN dels initial ("N = 12 år"). Namnen maskeras innan talen läses.
+//   2  Talen läses ur resten (decimalkomma, tusental "1 000").
+//   3  NAMN KNYTER ETT TAL till en del när raden är skriven namn-före-tal ("Noah är 12 år …") eller
+//      tal-före-namn ("12 år är Noah …") och precis ett namn står i talets lucka. Ett knutet tal med fel
+//      värde är fel — så fångas ombytta svar. Står inget namn vid talet godtas det för en ledig del med
+//      samma värde ("12 och 18 år").
+//   4  Varje del som frågan ber om ska ha sitt tal. Ett tal som inte är någon dels värde är fel — utom
+//      när det står i uppgiftens text (eleven upprepar "tillsammans 30 år").
+//   5  Enheten ska stå direkt efter minst ett av delarnas tal ("12 och 18 år", "Noah är 12 år och Ella 18").
+// Ut: { svar: true/false/null (tom), enhetSaknas, besked, delar:{nyckel→true/false/null} }.
+// Ett tal: decimalkomma, tusental ("1 000"), och bråk ("11/5", knappsatsens "(11)/(5)") — samma värde i
+// alla skrivsätt ger samma dom (§3), som i de andra svarsfälten.
+var TAL_ETT = '\\d{1,3}(?:[  ]\\d{3}(?!\\d))+(?:[.,]\\d+)?|\\d+(?:[.,]\\d+)?';
+var TAL_I_RAD = new RegExp('\\(?\\s*(' + TAL_ETT + ')\\s*\\)?(?:\\s*\\/\\s*\\(?\\s*(' + TAL_ETT + ')\\s*\\)?)?', 'g');
+function talenI(s){
+  var ut = [], m, tal = function(t){ return parseFloat(t.replace(/[  ]/g, '').replace(',', '.')); };
+  TAL_I_RAD.lastIndex = 0;
+  while((m = TAL_I_RAD.exec(s))){
+    var v = tal(m[1]); if(m[2] != null) v = v / tal(m[2]);
+    var slut = m.index + m[0].replace(/\s+$/, '').length;
+    ut.push({ v: v, s: m.index, e: slut });
+  }
+  return ut;
+}
+function rx(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function enhetDirektEfter(raw, pos, enhet){
+  var rest = raw.slice(pos).toLowerCase(), former = ENHETSORD[enhet] || [String(enhet).toLowerCase()];
+  return former.some(function(e){ return new RegExp('^\\s*' + rx(String(e).toLowerCase()) + '(?![a-zåäö0-9])').test(rest); });
+}
+function lasSvarsrad(u, text, sant){
+  var ut = { svar: null, enhetSaknas: false, besked: '', delar: {} };
+  var fragar = u.svarDelar || MOD.nycklarAv(u);
+  fragar.forEach(function(k){ ut.delar[k] = null; });
+  if(tom(text)) return ut;
+  var raw = String(text).replace(/−/g, '-'), lc = raw.toLowerCase(), mask = lc.split(''), traffar = [];
+
+  // 1 — namnen, längsta först; sedan initialer (versal, ensam, unik — inte "I", som är ett ord)
+  (u.delar || []).map(function(d){ return { k: d.nyckel, n: smaOrd(d.namn) }; }).filter(function(x){ return x.n; })
+    .sort(function(a, b){ return b.n.length - a.n.length; })
+    .forEach(function(x){
+      var re = new RegExp('(^|[^a-zåäö0-9])(' + rx(x.n).replace(/ /g, '\\s+') + ')(?=[^a-zåäö0-9]|$)', 'g'), m;
+      while((m = re.exec(lc))){
+        var s0 = m.index + m[1].length, e0 = s0 + m[2].length;
+        if(mask.slice(s0, e0).indexOf('§') < 0){ for(var i = s0; i < e0; i++) mask[i] = '§'; traffar.push({ k: x.k, s: s0 }); }
+        re.lastIndex = e0;
+      }
+    });
+  var initial = {};
+  (u.delar || []).forEach(function(d){ var c = String(d.namn || '').charAt(0); if(/[A-ZÅÄÖ]/.test(c) && c !== 'I') (initial[c] = initial[c] || []).push(d.nyckel); });
+  var reI = /(^|[^A-Za-zÅÄÖåäö0-9])([A-ZÅÄÖ])(?=[^A-Za-zÅÄÖåäö0-9]|$)/g, mi;
+  while((mi = reI.exec(raw))){
+    var s1 = mi.index + mi[1].length, ks = initial[mi[2]];
+    if(mask[s1] !== '§' && ks && ks.length === 1){ mask[s1] = '§'; traffar.push({ k: ks[0], s: s1 }); }
+    reI.lastIndex = s1 + 1;
+  }
+
+  // 2 — talen ur den maskerade raden
+  var tal = talenI(mask.join(''));
+  if(!tal.length){ ut.svar = false; ut.besked = BESKED.svarTalFel.hint; return ut; }
+
+  // 3 — vilket namn hör till vilket tal? Luckorna mellan talen; konventionen avgörs av första/sista luckan.
+  function iLucka(a, b){ var ks = []; traffar.forEach(function(t){ if(t.s >= a && t.s < b && ks.indexOf(t.k) < 0) ks.push(t.k); }); return ks; }
+  var lucka = [];
+  for(var g = 0; g <= tal.length; g++) lucka.push(iLucka(g ? tal[g - 1].e : 0, g < tal.length ? tal[g].s : Infinity));
+  var fore = lucka[0].length > 0, efter = !fore && lucka[tal.length].length > 0;
+  var del = {};
+  (u.delar || []).forEach(function(d){ del[d.nyckel] = { v: sant[d.nyckel], tagen: false }; });
+  var fel = false;
+  tal.forEach(function(t, i){
+    var ks = fore ? lucka[i] : efter ? lucka[i + 1] : [];
+    if(ks.length !== 1 || !del[ks[0]] || del[ks[0]].tagen) return;
+    del[ks[0]].tagen = true; t.del = ks[0]; t.ok = lika(t.v, del[ks[0]].v);
+    if(!t.ok) fel = true;
+  });
+  // fria tal: en ledig del med samma värde — de efterfrågade delarna först
+  var ordning = fragar.concat(Object.keys(del).filter(function(k){ return fragar.indexOf(k) < 0; }));
+  var iTexten = talenI(String(u.fraga || '')).map(function(t){ return t.v; });
+  tal.forEach(function(t){
+    if(t.del) return;
+    var k = ordning.filter(function(k2){ return !del[k2].tagen && lika(del[k2].v, t.v); })[0];
+    if(k){ del[k].tagen = true; t.del = k; t.ok = true; return; }
+    if(!iTexten.some(function(v){ return lika(v, t.v); })){ t.ok = false; fel = true; }   // 4 — inget delvärde
+  });
+  tal.forEach(function(t){ if(t.del && ut.delar.hasOwnProperty(t.del)) ut.delar[t.del] = t.ok; });
+  if(fel){ ut.svar = false; ut.besked = BESKED.svarTalFel.hint; return ut; }
+  if(fragar.some(function(k){ return !del[k].tagen; })){ ut.svar = false; ut.besked = BESKED.svarSaknas.hint; return ut; }
+
+  // 5 — enheten
+  if(u.enhet && !tal.some(function(t){ return t.del && enhetDirektEfter(raw, t.e, u.enhet); })){
+    ut.svar = false; ut.enhetSaknas = true; ut.besked = BESKED.svarEnhetSaknas.hint; return ut;
+  }
+  ut.svar = true;
   return ut;
 }
 
 var API = { ratta: ratta, BESKED: BESKED, provaUttryck: provaUttryck, provaEkvation: provaEkvation,
             provaKedja: provaKedja, talUr: talUr, harEnhet: harEnhet,
-            rattaMetod: rattaMetod, arMetodRattning: arMetodRattning, METOD_PILOT: METOD_PILOT };
+            rattaMetod: rattaMetod, arMetodRattning: arMetodRattning, METOD_PILOT: METOD_PILOT, lasSvarsrad: lasSvarsrad };
 if(typeof window !== 'undefined') window.ProbRattare = API;
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

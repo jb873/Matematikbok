@@ -194,6 +194,8 @@ function renderUppgift(kort, u, idx, opt){
   // delen är ett uttryck (18 + 12 = 30) — för x eller ett tal finns ingen. Beräkningsrutan rättas inte
   // (rättningen är oförändrad; modellen för flera giltiga lösningar är ett eget beslut). Utan valet: som förut.
   var arbetsyta = !!(opt && opt.arbetsyta);
+  // SVARET PÅ EN RAD (order 2026-11-24, pilot-typen): ett svarsfält för hela uppgiften i stället för ett per del.
+  var enRad = arMetodState({ u: u, delRader: [] });
   var delListaEl = document.createElement('div'); delListaEl.className = 'prob-delar' + (arbetsyta ? ' prob-rutnat' : ''); vk.appendChild(delListaEl);
   var insattListaEl = document.createElement('div'); insattListaEl.className = 'prob-insatt' + (arbetsyta ? ' prob-rutnat' : ''); hk.appendChild(insattListaEl);
   tva.appendChild(vk); tva.appendChild(hk); block.appendChild(tva);
@@ -232,21 +234,24 @@ function renderUppgift(kort, u, idx, opt){
     irad.appendChild(lika); irad.appendChild(vardeYta);
     insattListaEl.appendChild(irad);
 
-    // ── STEG 5: ett svarsfält per del, med elevens eget namn framför ──
-    var srad = document.createElement('div'); srad.className = 'prob-svarrad2';
-    var snamn = document.createElement('span'); snamn.className = 'prob-eko';
-    var svarYta = document.createElement('div'); svarYta.className = 'prob-svar sida';
-    svarYta.appendChild(K.textSeg({ vars: '', etikett: 'svar med enhet' }));
-    var sstatus = document.createElement('span'); sstatus.className = 'prob-svar-status';
-    srad.appendChild(snamn); srad.appendChild(svarYta); srad.appendChild(sstatus);
-    svarListaEl.appendChild(srad);
+    // ── STEG 5: ett svarsfält per del, med elevens eget namn framför (pilot-typen: EN rad, se svarRad) ──
+    var srad = null, snamn = null, svarYta = null, sstatus = null;
+    if(!enRad){
+      srad = document.createElement('div'); srad.className = 'prob-svarrad2';
+      snamn = document.createElement('span'); snamn.className = 'prob-eko';
+      svarYta = document.createElement('div'); svarYta.className = 'prob-svar sida';
+      svarYta.appendChild(K.textSeg({ vars: '', etikett: 'svar med enhet' }));
+      sstatus = document.createElement('span'); sstatus.className = 'prob-svar-status';
+      srad.appendChild(snamn); srad.appendChild(svarYta); srad.appendChild(sstatus);
+      svarListaEl.appendChild(srad);
+    }
 
     function speglaUttryck(){
       var t = K.las(uttryckYta);
       eko.textContent = t || '—';
       if(berakningYta){ var u2 = arUttryck(t); berakningYta.hidden = !u2; eko.hidden = u2; }
     }
-    function speglaNamn(){ snamn.textContent = namn.value.trim() || ('rad ' + (delRader.indexOf(post) + 1)); }
+    function speglaNamn(){ if(snamn) snamn.textContent = namn.value.trim() || ('rad ' + (delRader.indexOf(post) + 1)); }
     uttryckYta.addEventListener('input', speglaUttryck);
     namn.addEventListener('input', speglaNamn);
 
@@ -288,6 +293,16 @@ function renderUppgift(kort, u, idx, opt){
   var svarHuvud = document.createElement('div'); svarHuvud.className = 'prob-steg-rub'; svarHuvud.textContent = TEXT.svar.etikett;
   var svarListaEl = document.createElement('div'); svarListaEl.className = 'prob-svarlista';
   block.appendChild(svarHuvud); block.appendChild(svarListaEl);
+  var svarRad = null;
+  if(enRad){
+    svarRad = { rad: document.createElement('div'), yta: document.createElement('div'), status: document.createElement('span') };
+    svarRad.rad.className = 'prob-svarrad2 prob-svarrad-en';
+    svarRad.yta.className = 'prob-svar sida';
+    svarRad.yta.appendChild(K.textSeg({ vars: '', etikett: 'svar med enhet' }));
+    svarRad.status.className = 'prob-svar-status';
+    svarRad.rad.appendChild(svarRad.yta); svarRad.rad.appendChild(svarRad.status);
+    svarListaEl.appendChild(svarRad.rad);
+  }
 
   // knappen som lägger till delrader (raderna är INTE förtryckta)
   var delKnapp = document.createElement('button'); delKnapp.type = 'button'; delKnapp.className = 'mini-btn prob-nydel';
@@ -302,7 +317,8 @@ function renderUppgift(kort, u, idx, opt){
   kort.appendChild(block);
   nyDelRad();                       // EN rad att börja i; resten lägger eleven till
   return { u: u, delRader: delRader, ekvRad: ekvRad, kedja: kedja, klarEl: klar, beskedEl: besked, block: block,
-           foljdYta: foljdYta, foljdStatus: foljdStatus };
+           foljdYta: foljdYta, foljdStatus: foljdStatus,
+           svarYta: svarRad && svarRad.yta, svarStatus: svarRad && svarRad.status };
 }
 
 function steghuvudGrid(grid, text){
@@ -322,9 +338,9 @@ function rensaUppgift(s){
     d.uttryckYta.classList.remove('ratt', 'fel');
     d.vardeYta.classList.remove('ratt', 'fel');
     if(d.berakningYta) d.berakningYta.classList.remove('ratt', 'fel');
-    d.svarYta.classList.remove('ratt', 'fel');
-    d.svarStatus.textContent = '';
+    if(d.svarYta){ d.svarYta.classList.remove('ratt', 'fel'); d.svarStatus.textContent = ''; }
   });
+  if(s.svarYta){ s.svarYta.classList.remove('ratt', 'fel'); s.svarStatus.textContent = ''; }
   if(s.foljdYta){ s.foljdYta.classList.remove('ratt', 'fel'); s.foljdStatus.textContent = ''; }
   s.beskedEl.textContent = ''; s.klarEl.classList.remove('show');
 }
@@ -355,8 +371,9 @@ function metodRader(s){ return [s.ekvRad].concat(s.kedja).filter(function(r){ re
 function berakningSyns(d){ return !!(d.berakningYta && !d.berakningYta.hidden); }
 function besvaradMetod(s){
   if(metodRader(s).length) return true;
+  if(s.svarYta && String(K.las(s.svarYta)).trim() !== '') return true;
   return s.delRader.some(function(d){
-    return [K.las(d.uttryckYta), K.las(d.vardeYta), K.las(d.svarYta), berakningSyns(d) ? K.las(d.berakningYta) : '']
+    return [K.las(d.uttryckYta), K.las(d.vardeYta), berakningSyns(d) ? K.las(d.berakningYta) : '']
       .some(function(t){ return String(t).trim() !== ''; });
   });
 }
@@ -368,8 +385,9 @@ function kontrolleraMetod(s){
     rader: lista.map(K.radPar),
     delrader: s.delRader.map(function(d){
       return { namn: d.namn.value.trim(), uttryck: K.las(d.uttryckYta), berakning: berakningSyns(d) ? K.las(d.berakningYta) : null,
-               varde: K.las(d.vardeYta), svar: K.las(d.svarYta) };
+               varde: K.las(d.vardeYta) };
     }),
+    svar: s.svarYta ? K.las(s.svarYta) : '',
     foljd: s.foljdYta ? K.las(s.foljdYta) : undefined
   });
   lista.forEach(function(r, i){ var o = res.rader && res.rader[i]; if(o === true || o === false) K.markera(r, o); });
@@ -377,22 +395,23 @@ function kontrolleraMetod(s){
   s.delRader.forEach(function(d, i){
     var o = (res.delrader || [])[i]; if(!o) return;
     if(berakningSyns(d)) satt(d.berakningYta, o.berakning);
-    satt(d.vardeYta, o.varde); satt(d.svarYta, o.svar);
-    if(o.svar === true || o.svar === false) d.svarStatus.textContent = o.svar ? '✓' : '✗';
+    satt(d.vardeYta, o.varde);
   });
+  if(s.svarYta){ satt(s.svarYta, res.svar); if(res.svar === true || res.svar === false) s.svarStatus.textContent = res.svar ? '✓' : '✗'; }
   if(s.foljdYta){ satt(s.foljdYta, res.foljd); if(res.foljd != null) s.foljdStatus.textContent = res.foljd ? '✓' : '✗'; }
   if(res.status === 'ratt'){ s.klarEl.classList.add('show'); logga(s.u.nod, 'ratt'); return 'ratt'; }
   s.beskedEl.textContent = res.besked || '';
   logga(s.u.nod, 'fel');
   return 'fel';
 }
-// Totalen: varje bedömd ruta — Delarna räknas inte (de bedöms inte); beräkningsrutan räknas när den syns.
+// Totalen per RUTA (bara i ett blandat blad, se kontrollera): varje bedömd ruta — Delarna räknas inte (de bedöms inte); beräkningsrutan räknas när den syns.
 function summaMetod(s){
   var v = [];
   s.delRader.forEach(function(d){
     if(berakningSyns(d)) v.push(ytaOmdome(d.berakningYta));
-    v.push(ytaOmdome(d.vardeYta), ytaOmdome(d.svarYta));
+    v.push(ytaOmdome(d.vardeYta));
   });
+  if(s.svarYta) v.push(ytaOmdome(s.svarYta));
   if(s.foljdYta) v.push(ytaOmdome(s.foljdYta));
   metodRader(s).forEach(function(r){ v.push(radOmdome(r)); });
   var sum = las_summa(v); sum.obedomt = 0;        // tomma rutor är obesvarade, inte "steg 1 stämmer inte"
@@ -491,7 +510,12 @@ function kontrollera(state, hintEl, sammanfEl){
     logga(s.u.nod, 'fel');
   });
 
-  if(sammanfEl){
+  // POÄNG PER UPPGIFT (order 2026-11-24): består bladet bara av pilot-typen räknar totalen hela uppgifter —
+  // en löst uppgift (✓ Löst!) = 1, nämnaren = antalet uppgifter i bladet. Rutorna rättas och markeras som förut.
+  // Ett blandat blad (test, blandade) räknar rutor som förut: två måttenheter i samma total går inte ihop.
+  if(sammanfEl && state.length && state.every(arMetodState)){
+    sammanfEl.textContent = 'Du fick ' + klara + ' av ' + state.length + ' rätt.';
+  } else if(sammanfEl){
     var tot = 0, ratt = 0, obedomt = 0;
     state.forEach(function(s){
       var E = arEkvationsState(s) ? window.ProbBlad : arMetodState(s) ? { besvarad: besvaradMetod, summaAv: summaMetod } : null;
