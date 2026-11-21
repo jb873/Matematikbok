@@ -1,0 +1,16 @@
+/* karna-b-grund.css — BLADKÄRNANS GRUNDSTIL för sidor i det nya formatet: rutan (.ovn-in) och valknapparna
+   (.valruta-grid, .valruta-btn). Flyttad ordagrant ur ak7/k3/d1-algebraiska-uttryck/index.html (Joachim 2026-11-21).
+   De gamla sidorna bär fortfarande sina egna kopior och laddar INTE den här filen — de rörs inte.
+   Laddas efter ak7-k1blad-kanon.css och före sidans <style>. */
+
+.ovn-in{
+  width:90px;height:42px;text-align:center;
+  font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;
+  border:2px solid var(--c-rakna);border-radius:6px;
+  background:#fff;color:var(--c-rakna);outline:none;padding:0 6px;
+  font-feature-settings:'tnum';
+  transition:background .2s, border-color .2s, color .2s;
+}
+.valruta-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+.valruta-btn{font-family:var(--serif,'Cormorant Garamond');font-size:20px;font-weight:600;padding:10px 22px;cursor:pointer;border:2px solid var(--line,#e5e0d8);border-radius:10px;background:#fff;color:var(--ink,#12110f);transition:background .15s,border-color .15s,color .15s;}
+.valruta-btn:hover{border-color:var(--gold-lt,#c49a40);}

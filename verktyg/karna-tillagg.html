@@ -12,9 +12,10 @@
 <link rel="stylesheet" href="../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../js/motor/blad/ak7-k1blad-kanon.css">
 <link rel="stylesheet" href="../js/motor/keypad.css">
+<link rel="stylesheet" href="../js/motor/blad/karna-b-grund.css">
 <style>
-/* Sidans stil = ak7/k3/d1-algebraiska-uttryck/index.html, ordagrant (så att bladen ser ut som på d1),
-   plus två verktygsrader sist. */
+/* Sidans stil = ak7/k3/d1-algebraiska-uttryck/index.html, ordagrant (så att bladen ser ut som på d1) — UTOM
+   .ovn-in och valknapparna, som kommer ur js/motor/blad/karna-b-grund.css — plus två verktygsrader sist. */
 /* Sidspecifika + isärdrivna regler (kvar efter css-flytten 2026-09-19). Det delade ligger i ak7-delkapitel-kanon.css + ak7-k1blad-kanon.css, länkade ovan. */
 :root{
   --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
@@ -71,14 +72,6 @@
   color:var(--ink);margin-bottom:14px;
   letter-spacing:-.005em;
 }
-.ovn-in{
-  width:90px;height:42px;text-align:center;
-  font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;
-  border:2px solid var(--c-rakna);border-radius:6px;
-  background:#fff;color:var(--c-rakna);outline:none;padding:0 6px;
-  font-feature-settings:'tnum';
-  transition:background .2s, border-color .2s, color .2s;
-}
 /* Pulserande blink när rättning sker */@keyframes ovn-pulse{
   0%   { transform:scale(1);   }
   40%  { transform:scale(1.08);}
@@ -106,9 +99,6 @@
 }
 .ovn-ordna-in{width:56px;text-align:center;}
 .ovn-foljd-in{width:60px;text-align:center;}
-.valruta-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
-.valruta-btn{font-family:var(--serif,'Cormorant Garamond');font-size:20px;font-weight:600;padding:10px 22px;cursor:pointer;border:2px solid var(--line,#e5e0d8);border-radius:10px;background:#fff;color:var(--ink,#12110f);transition:background .15s,border-color .15s,color .15s;}
-.valruta-btn:hover{border-color:var(--gold-lt,#c49a40);}
 
 .verktyg-not{font:12px/1.4 Georgia,serif;color:#7a6e65;margin:2px 0 0 4px;}
 .verktyg-huvud{max-width:920px;margin:18px auto 0;padding:0 20px;font:14px/1.5 Georgia,serif;color:var(--ink-soft);}

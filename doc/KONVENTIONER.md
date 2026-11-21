@@ -141,6 +141,9 @@ MOMENT-SIDA (elevens arbetssida)
 - Två flikar utan undertext: "Arbeta med området" / "Mina kunskaper".
 - Vänsterspalt moment-först. Dagens träning + Test UNDER momenten. Badge FRAMFÖR namnet.
 - Mittensektion, ordning: Uppgifter → Föreläsningar → Metodträning.
+- **Funktionen bor i** `js/motor/arbetsyta/momentsida.js` (märket, de fällbara sektionerna, ramen med momenten och
+  Dagens träning + Test) och `momentsida.css` — delade av delkapitlens momentsidor; sidan äger bara sitt innehåll
+  (utbrutet ur problemlösningens momentsida 2026-11-21, bara en flytt).
 
 HORISONT-BADGES (härleds, taggas inte för hand)
 Varje nod/moment bär årskurs (7/8/9) OCH roll (karna/breddning/fordjupning).
@@ -184,6 +187,10 @@ UPPGIFTSDOKUMENT (ett per blad)
 Fält: Del · Moment · Blad (nr + ev. bokstav) · Årskurs (7/8/9) ·
 Roll (kärna/breddning/fordjupning) · Metod-etikett (namnger, §4) ·
 Takregel golv/tak · Antal (mastery-tröskel) · uppgifter + facit per ruta (§K-K).
+
+BLADKÄRNANS GRUNDSTIL på nya sidor: rutan (`.ovn-in`) och valknapparna (`.valruta-grid`, `.valruta-btn`) bor i
+`js/motor/blad/karna-b-grund.css` (flyttad ordagrant ur d1-sidan 2026-11-21). De gamla sidorna bär sina egna kopior och
+laddar inte filen.
 
 Vad vaktar den: — mestadels ny UI utan grind; byggs och verifieras per pilot.
 

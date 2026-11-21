@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/navram/navram.css">
+<link rel="stylesheet" href="../../../js/motor/arbetsyta/momentsida.css">
 <style>
 :root{
   --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
@@ -22,58 +23,7 @@
   --cinzel:'Cinzel', 'Times New Roman', serif;
   --body:'Source Serif 4', Georgia, serif;
 }
-/* SLIMMAT SIDHUVUD på elevnivå — den stora heron hör till kapitelsidan. */
-.nf-huvud{max-width:1180px;margin:0 auto;padding:18px 28px 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
-.nf-huvud h1{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);margin:0;}
-.nf-huvud .nf-kapitel{font-family:var(--cinzel);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
-/* TVÅ FLIKAR UTAN UNDERTEXT: ramens undertexter (.nr-mini, .nr-sub) visas inte i det nya formatet. */
-.nr-lager .nr-mini, .nr-mrad .nr-sub{display:none;}
-/* HORISONT-BADGE framför namnet: bokstaven bär, färgen förstärker. Ingen teckenförklaring.
-   BOKENS CHIP (order 2026-11-21): samma form och toner som kapitelsidornas statuschip (.card-badge i
-   js/kapitel/navsida.css) — diskret ljus ton, ingen mörk solid. Nu = "Öppet"-tonen (blå), FF = "Kommer
-   senare"-tonen (grå), F = "Prov"-tonen (guld), R = bokens grön i samma styrka. Färgvalet väntar på Joachims
-   godkännande. */
-.hz, .nf-chip{display:inline-block;font-family:var(--cinzel);font-size:10px;font-weight:500;letter-spacing:.1em;
-  text-transform:uppercase;padding:3px 8px;border-radius:2px;line-height:1.3;vertical-align:middle;}
-.hz{margin-right:8px;}
-.hz-nu{background:rgba(27,75,138,.1);color:var(--blue);}
-.hz-ff, .nf-chip.soon{background:var(--paper-dk);color:var(--ink-faint);}
-.hz-f{background:rgba(154,114,40,.12);color:var(--gold);}
-.hz-r{background:rgba(45,106,79,.1);color:var(--green);}
-/* "Kommer senare" i en rad i vänsterspalten: till höger, som på kapitelsidans kort. */
-.nr-rad .nf-chip{float:right;margin-left:8px;padding:2px 8px;}
-.nr-rad .nr-t:has(.nf-chip){display:flex;align-items:center;justify-content:space-between;}
-.nr-rad .nr-t:has(.nf-chip) .nf-chip{float:none;}
-/* Vänsterspaltens rader och bladkorten i bokens papperston (kapitelsidans .nav-card), inte vitt. Ramens
-   delade stil (js/motor/navram/navram.css) bär #fff — den rättas här på sidan; den delade filen är orörd. */
-.nr-rad{background:var(--paper-lt);}
-/* Dagens träning + Test UNDER momenten — en egen grupp, avskild från momenten. */
-.nr-spalt .nr-grp + .nr-grp{margin-top:14px;padding-top:12px;border-top:1px solid var(--paper-dk);}
-/* MITTENSEKTIONEN: Uppgifter → Föreläsningar → Metodträning */
-.nf-sek{margin:0 0 24px;}
-.nf-sek-h{font-family:var(--cinzel);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;}
-.nf-lista{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none;}
-.nf-blad{display:flex;align-items:baseline;gap:10px;padding:11px 14px;border:1px solid var(--paper-dk);border-radius:4px;
-  background:var(--paper-lt);color:var(--ink);text-decoration:none;font-family:var(--serif);font-size:18px;
-  transition:box-shadow .18s, transform .18s, border-color .18s;}
-a.nf-blad:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateX(3px);border-color:rgba(0,0,0,.12);}
-.nf-blad .nf-nr{font-family:var(--cinzel);font-size:13px;letter-spacing:.04em;color:var(--ink-soft);min-width:58px;}
-.nf-blad.is-kommer{color:var(--ink-faint);background:var(--paper-lt);cursor:default;}
-/* FÄLLBARA SEKTIONER (order 2026-11-21): rubriken är sidans egen (.nf-sek-h) och är knappen; chevronen är
-   ramens (▸/▾, .nr-chev som i vänsterspalten). Ihopfälld sektion = bara rubriken. */
-.nf-fall{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:2px 0;margin:0;cursor:pointer;
-  font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;}
-.nf-fall:hover{color:var(--ink-soft);}
-.nf-fall:focus-visible{outline:2px solid var(--gold-lt);outline-offset:3px;border-radius:3px;}
-.nf-sek-h .nr-chev{color:var(--ink-faint);font-size:11px;width:10px;}
-.nf-sek-body[hidden]{display:none;}
-.nf-sek.is-stangd{margin-bottom:12px;}
-.nf-sek.is-stangd .nf-sek-h{margin-bottom:0;}
-.nf-trad{width:100%;height:560px;border:1px solid var(--paper-dk);border-radius:8px;margin-top:10px;background:#fff;}
-.nr-karta-frame{width:100%;height:760px;border:0;}
-/* Föreläsningsmodulens yta i mittensektionen: vänsterställd, utan modulens egen sidmarginal. */
-.nf-forel .forel-wrap{max-width:none;margin:0;padding:0;}
-.nf-forel .lecture-list{max-width:none;margin:0;padding:0;}   /* kanonens kortlista bär egen sidmarginal */
+/* Momentsidans formgivning (skalet): js/motor/arbetsyta/momentsida.css. */
 </style>
 </head>
 <body>
@@ -120,9 +70,13 @@ a.nf-blad:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateX(3px);
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/problemlosning/prob-bank-ak7.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/arbetsyta/momentsida.js"></script>
 <script>
+/* MOMENTSIDAN: skalet (js/motor/arbetsyta/momentsida.js) bär märket, de fällbara sektionerna och ramen;
+   här står problemlösningens innehåll — nivåerna, bladen ur banken, blandade och testen. */
 (function(){
 'use strict';
+var M = window.Momentsida, el = M.el;
 var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
 
@@ -140,60 +94,12 @@ var MOMENT = [
   { titel: 'Nivå 4', ff: true, kommer: true }
 ];
 
-// Taxonomin bär ingen årskurs per nod, bara arskursRelevans {ak7:'mal', …}. Årskursen = första år med 'mal'.
-function nod(id){ return TAX.filter(function(n){ return n.id === id; })[0] || null; }
-function arUrNod(n){
-  var r = (n && n.arskursRelevans) || {};
-  for(var a = 7; a <= 9; a++) if(r['ak' + a] === 'mal') return a;
-  for(var b = 7; b <= 9; b++) if(r['ak' + b]) return b;
-  return null;
-}
-function horisontFor(m){
-  if(m.ff) return '<span class="hz hz-ff">FF</span>';
-  var ar = m.ar, roll = m.roll;
-  if(m.blad){   // härleds: lägsta årskurs bland bladens noder; kärna om någon nod är kärna
-    var noder = m.blad.map(function(b){ return nod(b.nod); }).filter(Boolean);
-    ar = Math.min.apply(null, noder.map(arUrNod).filter(function(x){ return x; }));
-    roll = noder.some(function(n){ return n.roll === 'karna'; }) ? 'karna' : (noder[0] && noder[0].roll);
-  }
-  return badge(ar, roll);
-}
-/* HORISONT-BADGEN (KONVENTIONER, nov 2026): doc-år = elevens + kärna → 7/8/9 (Nu); doc-år = elevens +
-   fördjupning → F; doc-år > elevens → FF; doc-år < elevens → R. */
-function badge(ar, roll){
-  if(!ar) return '';
-  if(ar > ELEVENS_AR) return '<span class="hz hz-ff">FF</span>';
-  if(ar < ELEVENS_AR) return '<span class="hz hz-r">R</span>';
-  if(roll === 'fordjupning') return '<span class="hz hz-f">F</span>';
-  return '<span class="hz hz-nu">' + ar + '</span>';
-}
-
 var scen = document.getElementById('scen-moment');
-function el(tagg, klass, text){ var e = document.createElement(tagg); if(klass) e.className = klass; if(text != null) e.textContent = text; return e; }
-
-/* FÄLLBAR SEKTION (order 2026-11-21): rubriken fäller ut/in sektionens innehåll. Läget sparas INTE — vid
-   inträde gäller öppen-värdet som anges här. vidForstaOppning körs första gången sektionen öppnas. */
-function sektion(rubrik, oppen, vidForstaOppning){
-  var s = el('section', 'nf-sek'), h = el('h2', 'nf-sek-h'), kn = el('button', 'nf-fall');
-  kn.type = 'button';
-  var chev = el('span', 'nr-chev'); chev.setAttribute('aria-hidden', 'true');
-  kn.appendChild(chev); kn.appendChild(document.createTextNode(rubrik)); h.appendChild(kn); s.appendChild(h);
-  var body = el('div', 'nf-sek-body'); s.appendChild(body);
-  var oppnad = false;
-  function satt(o){
-    kn.setAttribute('aria-expanded', o ? 'true' : 'false'); chev.textContent = o ? '▾' : '▸';
-    body.hidden = !o; s.classList.toggle('is-stangd', !o);
-    if(o && !oppnad){ oppnad = true; if(vidForstaOppning) vidForstaOppning(body); }
-  }
-  kn.addEventListener('click', function(){ satt(kn.getAttribute('aria-expanded') !== 'true'); });
-  scen.appendChild(s);
-  return { body: body, satt: satt };
-}
 
 function visaMoment(m){
   scen.innerHTML = '';
   // Ordning och inträdesläge: Uppgifter ÖPPEN, Föreläsningar och Metodträning ihopfällda.
-  var S1 = sektion('Uppgifter', false), S2 = sektion('Föreläsningar', false), S3 = sektion('Metodträning', false, function(body){
+  var S1 = M.sektion(scen, 'Uppgifter'), S2 = M.sektion(scen, 'Föreläsningar'), S3 = M.sektion(scen, 'Metodträning', function(body){
     // METODTRÄNING — färdighetsträningens träd (kartans komponent, KartaMotor), fälls ut under rubriken.
     var trad = el('iframe', 'nf-trad'); trad.title = 'Metodträning'; trad.src = 'metodtraning.html'; body.appendChild(trad);
   });
@@ -226,7 +132,7 @@ function visaMoment(m){
 }
 
 var moment = MOMENT.map(function(m){
-  return { titel: horisontFor(m) + m.titel, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
+  return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
 });
 
 /* TEST — de två testen ur Joachims dokument ("blandade uppgifter 1 och 2"), ur banken. Samma lista som
@@ -242,24 +148,11 @@ function visaTest(){
   s.appendChild(l); scen.appendChild(s);
 }
 
-/* VÄNSTERSPALTEN, moment-först: momenten, och UNDER dem Dagens träning + Test. Dagens träning finns inte
-   byggd för Problemlösning — den står utan länk. */
-var ram = window.NavRam && window.NavRam.montera({
-  vard: document.getElementById('navram'),
-  arbeta: [ { rubrik: 'Problemlösning', grupper: [
-    { rubrik: null, varianter: moment },
-    { rubrik: null, varianter: [ { titel: 'Dagens träning<span class="nf-chip soon">Kommer senare</span>', kommer: true },
-                                 { titel: 'Test', valj: visaTest } ] }
-  ] } ],
+M.montera({
+  vard: document.getElementById('navram'), rubrik: 'Problemlösning', moment: moment, test: visaTest,
   mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
-          { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ],
-  niva: null
+          { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ]
 });
-if(ram){
-  var s = document.getElementById('scen-moment'); s.classList.add('is-on'); ram.ytaArbeta.appendChild(s);
-  ['mv-kunskapslage', 'mv-sjalvskattning'].forEach(function(id){ var e = document.getElementById(id); if(e) ram.ytaMina.appendChild(e); });
-  var hall = document.getElementById('scener'); if(hall) hall.remove();
-}
 })();
 </script>
 <script src="../../../js/elevfeedback.js" defer></script>
