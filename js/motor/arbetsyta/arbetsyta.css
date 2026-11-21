@@ -1,3 +1,4 @@
+@import url('tillbaka.css');   /* ← Tillbaka: delad med momentsidan (momentsida.css importerar samma fil) */
 /* arbetsyta.css — UPPGIFTSSIDANS SKAL (doc/KONVENTIONER.md "Uppgiftssidan (arbetsytan)"), delat av alla
  uppgiftssidor i det nya formatet. Utbrutet ordagrant ur ak7/k3/d5-problemlosning-nyformat/uppgift.html
  (Joachim 2026-11-21: "bara en flytt"). Färgens tokens (:root) står kvar i varje sida, som på delkapitelsidorna.
@@ -6,11 +7,7 @@
 /* ── UPPGIFTSSIDAN (ARBETSYTAN) — doc/KONVENTIONER.md "Uppgiftssidan (arbetsytan)" (2026-11-22).
    Slimmat sidhuvud + Tillbaka, inget hjältehuvud. Färgen är bokens tokens (:root i sidan = delkapitelsidornas,
    ordagrant). Kalkylatorn till höger; under den Kontrollera, Börja om och Tipsa på samma rad. ── */
-.nf-topp{padding:16px 28px 0;}
-.nf-tillbaka{display:inline-flex;align-items:center;gap:6px;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--ink-soft);text-decoration:none;border:1px solid var(--paper-dk);border-radius:8px;
-  padding:8px 14px;background:var(--paper-lt);}
-.nf-tillbaka:hover{border-color:var(--gold-lt);color:var(--ink);}
+/* Tillbaka (.nf-topp, .nf-tillbaka): tillbaka.css, importerad överst — delad med momentsidan. */
 /* FULL BREDD: bladet vänsterställt över hela sidan (plats för flera mellanled) — kanonens .ovn-wrap
    (max 920 px, centrerad) och bladets eget .prob-kort-mått släpps här. */
 .nf-yta .ovn-wrap{max-width:none;margin:0;padding:8px 0 12px;}

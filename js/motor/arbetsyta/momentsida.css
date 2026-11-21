@@ -1,3 +1,4 @@
+@import url('tillbaka.css');   /* ← Tillbaka (delad med uppgiftssidan) */
 /* momentsida.css — MOMENTSIDANS SKAL (doc/KONVENTIONER.md "Arbetssidan — moment-sida, horisont och uppgiftssida"),
  delat av delkapitlens momentsidor i det nya formatet. Utbrutet ordagrant ur ak7/k3/d5-problemlosning-nyformat/
  index.html (Joachim 2026-11-21: "bara en flytt"). Färgens tokens (:root) står kvar i varje sida.
@@ -55,3 +56,7 @@ a.nf-blad:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateX(3px);
 /* Föreläsningsmodulens yta i mittensektionen: vänsterställd, utan modulens egen sidmarginal. */
 .nf-forel .forel-wrap{max-width:none;margin:0;padding:0;}
 .nf-forel .lecture-list{max-width:none;margin:0;padding:0;}   /* kanonens kortlista bär egen sidmarginal */
+
+/* SEKTION SOM INTE FINNS ÄN (Joachim 2026-11-21: Föreläsningar "Kommer senare", inte klickbar): rubriken utan
+   knapp och chevron, nedtonad, med märket. Momentsida.sektionKommer. */
+.nf-sek.is-kommer .nf-sek-h{display:flex;align-items:center;gap:10px;color:var(--ink-faint);}

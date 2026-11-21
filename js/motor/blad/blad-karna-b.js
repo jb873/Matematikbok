@@ -400,6 +400,16 @@ function sidSumma(sidor){
 // inget att skilja den från. Funktionen finns för att regeln ska gälla varje radtyp, också de som
 // skrivs i morgon — förr stod utskriften på tjugo ställen.
 function lbl(b){ return b ? '<span class="ovn-label">' + b + ')</span>' : ''; }
+/* FRÅGAN PÅ EGEN RAD — MED BOKSTAVEN (KONVENTIONER: "a) b) bara vid deluppgifter, också de på raden"; Joachim
+   2026-11-21). Rader vars fråga står på en egen rad ovanför rutorna (talföljd, beräkningsraden med avskrift, lucka,
+   berakna) lade frågan i en ruta med full bredd — bokstaven blev ensam på raden ovanför. Nu står bokstaven och
+   frågan i samma rad. Utan bokstav: frågan ritas exakt som förut. */
+function fragaPaRaden(html, bokstav, fragaHtml){
+  var l = bokstav ? lbl(bokstav) : '';
+  if(!l || html.slice(-l.length) !== l) return html + '<span class="ovn-text" style="flex-basis:100%;">' + fragaHtml + '</span>';
+  return html.slice(0, -l.length) + '<div style="flex-basis:100%;display:flex;align-items:baseline;gap:10px;">' + l
+    + '<span class="ovn-text">' + fragaHtml + '</span></div>';
+}
 /* ── TILLÄGG 2026-11-21 (order "Tolka och teckna uttryck", Joachims beslut (a)–(g) + avskriftsrutan).
    Alla är FRIVILLIGA: utan sin flagga i bladets data ritas och rättas varje rad exakt som förut. ── */
 // (b, c) EN UTTRYCKSRUTA i en radtyp som annars tar tal (talföljd, tallinje): samma data-uttryck-rättning
@@ -426,7 +436,7 @@ function radMedLogg(radHtml, rad, grupp){
    val och flerval, där eleven klickar, och inte figurer. Ordning: första förekomst. Används av sidan med
    AK8_UI.keypadBokstaver; ett blad som inte frågas efter sina bokstäver påverkas inte. */
 function bladBokstaver(blad){
-  var ut = [], KLICK = { valruta: 1, val: 1, flerval: 1, svgfigur: 1, figur: 1 };
+  var ut = [], KLICK = { valruta: 1, paraihop: 1, val: 1, flerval: 1, svgfigur: 1, figur: 1 };
   function ta(t){ (String(t == null ? '' : t).match(/[a-zåäö]/g) || []).forEach(function(c){ if(ut.indexOf(c) < 0) ut.push(c); }); }
   ((blad && blad.grupper) || []).forEach(function(gr){ (gr.rader || []).forEach(function(r){
     if(KLICK[r.typ]) return;
@@ -435,6 +445,8 @@ function bladBokstaver(blad){
   }); });
   return ut.join('');
 }
+// Ett ensamt tal (heltal eller decimaltal, ev. negativt) — inget räknetecken, ingen bokstav.
+function ensamtTal(t){ return /^\s*[−-]?\s*\d+(?:[.,]\d+)?\s*$/.test(String(t == null ? '' : t)); }
 // Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
 function visaTal(t){
   var s = String(t).replace('.', ',');
@@ -1045,7 +1057,7 @@ function bladHTML(blad){
         html += lbl(bokstav);
         /* (b) TILLÄGG: rad.fraga står före följden; rad.uttryckSvar gör de tomma rutorna till uttrycksrutor
            ("n, n + 1, n + 2"), givna termer visas som matematik; rad.fortsatt === false tar bort ", …". */
-        if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
+        if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
         html += '<span class="ovn-foljd-led">';
         rad.termer.forEach(function(t, k){
           if(k>0) html += '<span class="ovn-foljd-komma">,</span>';
@@ -1446,16 +1458,49 @@ function bladHTML(blad){
         html += '</div></div>';
       } else if(rad.typ === 'valruta'){
         // Välj rätt uttryck bland alternativ (kan ha flera rätta). Valfri SVG ovanför.
+        /* BOKSTAVEN PÅ FRÅGANS RAD (KONVENTIONER: "a) b) bara vid deluppgifter, också de på raden"; Joachim
+           2026-11-21). Förr stod bokstaven ensam på en rad ovanför frågan, eftersom frågan och knapparna ligger i
+           en kolumn med full bredd. Nu flyttas den in i kolumnen, före frågan (eller före knapparna när frågan
+           saknas). Utan bokstav ritas raden exakt som förut. */
+        var _vb = bokstav ? lbl(bokstav) : '';
+        if(_vb && html.slice(-_vb.length) === _vb) html = html.slice(0, -_vb.length); else _vb = '';
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
-        html += '<span class="ovn-text" style="min-width:160px;">' + (rad.fraga||'') + '</span>';
         var ratta = (rad.ratt || []).join('|');
         var flera = rad.flera ? '1' : '';
-        html += '<div class="valruta-grid" data-ratt="' + encodeURIComponent(ratta) + '" data-flera="' + flera + '">';
+        var _vg = '<div class="valruta-grid" data-ratt="' + encodeURIComponent(ratta) + '" data-flera="' + flera + '">';
         rad.alt.forEach(function(a){
-          html += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + a + '</button>';
+          _vg += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + a + '</button>';
         });
-        html += '</div></div>';
+        _vg += '</div>';
+        if(!_vb){
+          html += '<span class="ovn-text" style="min-width:160px;">' + (rad.fraga||'') + '</span>' + _vg;
+        } else if(rad.fraga){
+          html += '<div style="display:flex;align-items:baseline;gap:10px;">' + _vb + '<span class="ovn-text" style="min-width:160px;">' + rad.fraga + '</span></div>' + _vg;
+        } else {
+          html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' + _vb + _vg + '</div>';
+        }
+        html += '</div>';
+      } else if(rad.typ === 'paraihop'){
+        /* PARA IHOP (TILLÄGG, Joachim 2026-11-21: "Para-ihop är EN deluppgift"). En rad = en deluppgift med EN
+           bokstav (ingen alls om den är gruppens enda, K-A). Valfri fråga (bokstaven står på dess rad),
+           meningarna (rad.meningar: "A. …", "B. …") under varandra, sedan varje post (rad.par: {fraga, ratt}) med
+           bokstavsknapparna (rad.alt) på samma rad. Varje post rättas och loggas som en valruta. */
+        var _pb = bokstav ? lbl(bokstav) : '';
+        if(_pb && html.slice(-_pb.length) === _pb) html = html.slice(0, -_pb.length); else _pb = '';
+        html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
+        if(rad.fraga) html += '<div style="display:flex;align-items:baseline;gap:10px;">' + _pb + '<span class="ovn-text">' + rad.fraga + '</span></div>';
+        else if(_pb) html += _pb;
+        if(rad.meningar) html += '<div class="ovn-text" style="line-height:1.8;">' + rad.meningar.join('<br>') + '</div>';
+        rad.par.forEach(function(pp){
+          html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;"><span class="ovn-text" style="min-width:240px;">' + pp.fraga + '</span>'
+            + '<div class="valruta-grid" data-ratt="' + encodeURIComponent([].concat(pp.ratt).join('|')) + '" data-flera="">';
+          rad.alt.forEach(function(a){
+            html += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + a + '</button>';
+          });
+          html += '</div></div>';
+        });
+        html += '</div>';
       } else if(rad.typ === 'flerled'){
         // Horisontell likhetskedja: uppgift = [insättning] = [förenkling] = [svar]
         // led-objekt: {accept:[...], visa:'...'} ; sista ledet {svar:tal}
@@ -1465,7 +1510,7 @@ function bladHTML(blad){
              ("200 + 60 · 5") — det insatta uttrycket står aldrig tryckt. Rutan rättas på FORM som kedjans led
              (data-form, jamforForm: faktorer och termer får byta ordning). Uttrycket med variabeln får stå
              tryckt (rad.vansterText), på egen rad ovanför kedjan; rad.fraga likaså. */
-          if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
+          if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
           if(rad.vansterHtml || rad.vansterText) html += '<span class="ovn-text ovn-num" style="flex-basis:100%;">' + (rad.vansterHtml || matteUt(rad.vansterText)) + '</span>';
           var _av = rad.avskrift, _avacc = (_av.accept || [_av.visa]).join('|');
           html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(_avacc)
@@ -1505,7 +1550,7 @@ function bladHTML(blad){
         // text innehåller '__' där luckan ska sitta. FLERA LUCKOR (d3 del 2, "▢ suddgummin och ▢
         // anteckningsböcker"): svar är då en lista, en per lucka, och varje ruta bär sitt eget facit.
         var bitar = rad.text.split('__'), _lsv = [].concat(rad.svar);
-        if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
+        if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
         bitar.forEach(function(b, bi){
           if(b !== '') html += '<span class="ovn-text ovn-num">' + b + '</span>';
           if(bi < bitar.length - 1) html += '<input class="ovn-in lucka" data-svar="' + _lsv[Math.min(bi, _lsv.length - 1)]
@@ -1516,7 +1561,7 @@ function bladHTML(blad){
            Beräkna-kedjans — ersätt variabeln med talet, räkna, svaret. Ersättningsledet byggs
            mekaniskt ur uttrycket med samma funktion som K-B:s kedja; "+ led" ger ett steg till. */
         var _rb = insattningsFacit(rad.uttryck, rad.x);
-        if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
+        if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
         html += '<div class="ovn-berakna">';
         html += '<input class="ovn-in bred" data-insatt="' + encodeURIComponent(_rb)
           + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + rad.svar
@@ -1586,7 +1631,9 @@ function bladHTML(blad){
 
   html += '<div class="ovn-kontroll-rad">'
     + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
-    + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'
+    /* "Börja om" (KONVENTIONER, uppgiftssidan; Joachim 2026-11-21): kärnans default matchar standarden ordagrant —
+       förr "Återställ", som drev isär från problemlösningens "Börja om". */
+    + '<button type="button" class="ovn-aterstall" data-action="reset">Börja om</button>'
     + (kanNyttBlad(blad) ? '<button type="button" class="ovn-aterstall" data-action="nytt-blad">↻ Nytt blad med andra tal</button>' : '')
   + '</div>';
 
@@ -2055,6 +2102,10 @@ function bygg_blad(rotEl, blad){
         ok = jamforUttryck(_uv, godk)
           || godk.some(function(g){ return jamforForenkla(_uv, g); })
           || godk.some(function(g){ return jamforFler(_uv, g); });
+        /* UTTRYCKSFORMEN (KONVENTIONER, Joachim 2026-11-21): där facit är ett UTTRYCK godtas inte det uträknade
+           värdet — "37" för "25 + 12" underkänns. Samma princip som "redan löst godtas inte": formen är det
+           uppgiften tränar. Ett ensamt tal godtas bara där facit självt är ett ensamt tal. */
+        if(ok && ensamtTal(_uv) && !godk.some(ensamtTal)) ok = false;
       } else if(inp.dataset.form !== undefined){
         ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
       } else if(inp.dataset.text !== undefined){

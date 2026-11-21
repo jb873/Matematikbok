@@ -41,6 +41,7 @@
   </div>
 </nav>
 
+<div class="nf-topp"><a class="nf-tillbaka" id="nf-tillbaka" href="../../../ak7-k3.html">← Tillbaka</a></div>
 <header class="nf-huvud">
   <span class="nf-kapitel">Algebra</span>
   <h1>Problemlösning</h1>
@@ -70,6 +71,7 @@
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/problemlosning/prob-bank-ak7.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
 <script src="../../../js/motor/arbetsyta/momentsida.js"></script>
 <script>
 /* MOMENTSIDAN: skalet (js/motor/arbetsyta/momentsida.js) bär märket, de fällbara sektionerna och ramen;
@@ -79,6 +81,8 @@
 var M = window.Momentsida, el = M.el;
 var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
+// TILLBAKA (Joachim 2026-11-21, KONVENTIONER): till sidan man kom från (?retur=), annars kapitelsidan.
+if(window.Arbetsyta) window.Arbetsyta.retur();
 
 /* ── BLADEN (åk7, Nivå 1): de fem typerna ur banken (js/motor/problemlosning/prob-bank-ak7.js), med
    Joachims namn. Varje typ har Blad A och B; växeln sitter på uppgiftssidan. ── */

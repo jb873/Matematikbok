@@ -1,0 +1,8 @@
+/* tillbaka.css — "← TILLBAKA" överst på sidorna i det nya formatet: uppgiftssidan (arbetsyta.css) och momentsidan
+   (momentsida.css) importerar båda den här filen. Flyttad ordagrant ur arbetsyta.css (Joachim 2026-11-21: Tillbaka
+   också på momentsidan, i d1 och problemlösningen). Retur-adressen: Arbetsyta.retur (arbetsyta.js). */
+.nf-topp{padding:16px 28px 0;}
+.nf-tillbaka{display:inline-flex;align-items:center;gap:6px;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-soft);text-decoration:none;border:1px solid var(--paper-dk);border-radius:8px;
+  padding:8px 14px;background:var(--paper-lt);}
+.nf-tillbaka:hover{border-color:var(--gold-lt);color:var(--ink);}

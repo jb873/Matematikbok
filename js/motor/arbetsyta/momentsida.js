@@ -12,6 +12,7 @@
                                                      noder (lägsta årskurs; kärna om någon nod är kärna); annars
                                                      m.ar + m.roll.
      Momentsida.sektion(scen, rubrik, vidForstaOppning)   en fällbar sektion sist i scenen → { body, satt(öppen) }.
+     Momentsida.sektionKommer(scen, rubrik)          en sektion som inte finns än: rubriken + "Kommer senare", inte klickbar.
      Momentsida.el(tagg, klass, text)                ett element.
      Momentsida.montera({ vard, rubrik, moment, test, mina })
                                                      ramen: moment = [{ titel (html), kommer, valj }], test = valj
@@ -69,6 +70,15 @@ function sektion(scen, rubrik, vidForstaOppning){
   return { body: body, satt: satt };
 }
 
+/* SEKTION SOM INTE FINNS ÄN (Joachim 2026-11-21): rubriken med märket "Kommer senare" — ingen knapp, inget
+   innehåll, inte klickbar. Samma märke som Dagens träning i ramen. */
+function sektionKommer(scen, rubrik){
+  var s = el('section', 'nf-sek is-stangd is-kommer'), h = el('h2', 'nf-sek-h');
+  h.appendChild(el('span', null, rubrik)); h.appendChild(el('span', 'nf-chip soon', 'Kommer senare'));
+  s.appendChild(h); scen.appendChild(s);
+  return s;
+}
+
 /* VÄNSTERSPALTEN, moment-först: momenten, och UNDER dem Dagens träning + Test. Dagens träning är inte byggd
    för något delkapitel ännu — den står utan länk, med "Kommer senare". Vyerna byggs i #scener och flyttas in i
    ramens ytor (samma mönster som piloten ak7/k1/d1). */
@@ -92,5 +102,5 @@ function montera(o){
   return { scen: scen, ram: ram };
 }
 
-window.Momentsida = { horisont: horisont, badge: badge, sektion: sektion, el: el, montera: montera };
+window.Momentsida = { horisont: horisont, badge: badge, sektion: sektion, sektionKommer: sektionKommer, el: el, montera: montera };
 })();

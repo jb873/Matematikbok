@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Algebra · Algebraiska uttryck</title>
+<!-- MOMENTSIDAN för k3 Del 1 Algebraiska uttryck i det nya formatet — doc/KONVENTIONER.md, "Arbetssidan — moment-sida,
+     horisont och uppgiftssida (nov 2026)". Byggd BREDVID den gamla sidan (../d1-algebraiska-uttryck/), som är orörd.
+     Skalet: js/motor/arbetsyta/momentsida.js. Utkast för Joachims granskning. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
+<link rel="stylesheet" href="../../../js/motor/arbetsyta/momentsida.css">
+<style>
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+/* Momentsidans formgivning (skalet): js/motor/arbetsyta/momentsida.css. */
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="../../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7-k3.html">Kapitel 3</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Algebraiska uttryck</span>
+  </div>
+</nav>
+
+<div class="nf-topp"><a class="nf-tillbaka" id="nf-tillbaka" href="../../../ak7-k3.html">← Tillbaka</a></div>
+<header class="nf-huvud">
+  <span class="nf-kapitel">Algebra</span>
+  <h1>Algebraiska uttryck</h1>
+</header>
+
+<div id="navram"></div>
+
+<!-- Vyerna byggs här och flyttas in i ramens ytor (samma mönster som problemlösningens momentsida). -->
+<div id="scener" hidden>
+  <div class="nr-scen" id="scen-moment"></div>
+  <div class="nr-mview is-on" id="mv-kunskapslage">
+    <iframe class="nr-karta-frame" id="karta-frame" title="Kunskapsläge" loading="lazy"
+            src="../kunskapslage/index.html?embed=1"></iframe>
+  </div>
+  <div class="nr-mview" id="mv-sjalvskattning">
+    <iframe class="nr-karta-frame" id="sjalv-frame" title="Självskattning" loading="lazy"
+            src="../kunskapslage/index.html?embed=1&amp;tab=sjalv"></iframe>
+  </div>
+</div>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Algebraiska uttryck</span>
+</footer>
+
+<script src="../../../js/data/k3-taxonomi.js"></script>
+<script src="../../../js/data/k3-fardiga-test.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
+<script src="../../../js/motor/arbetsyta/momentsida.js"></script>
+<script>
+/* MOMENTSIDAN: skalet (js/motor/arbetsyta/momentsida.js) bär märket, de fällbara sektionerna och ramen; här står
+   delkapitlets innehåll — momenten, bladen och testet. Tillbaka: Arbetsyta.retur (?retur=, annars kapitelsidan). */
+(function(){
+'use strict';
+var M = window.Momentsida, el = M.el;
+var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
+var ELEVENS_AR = 7;
+var DATA = window.BLAD_K3_D1_TOLKA;
+if(window.Arbetsyta) window.Arbetsyta.retur();
+
+/* ── MOMENTEN (Joachims beslut 2026-11-21): tre moment i den här ordningen, märket 7 på alla tre.
+   Tolka och teckna uttryck har blad 1–3 (A och B på uppgiftssidan). Prioriteringsregeln (fyra blad i två nivåer)
+   och Räkna med uttryck är inte byggda — de står som "Kommer senare". ── */
+var MOMENT = [
+  { titel: 'Tolka och teckna uttryck', ar: 7, roll: 'karna', bladen: DATA ? DATA.MOMENT.blad : [] },
+  { titel: 'Prioriteringsregeln', ar: 7, roll: 'karna', kommer: true },
+  { titel: 'Räkna med uttryck', ar: 7, roll: 'karna', kommer: true }
+];
+
+var scen = document.getElementById('scen-moment');
+
+function visaMoment(m){
+  scen.innerHTML = '';
+  // Ordning och inträdesläge som problemlösningens momentsida: Uppgifter ÖPPEN; Föreläsningar och Metodträning
+  // finns inte än för d1 — rubriken med "Kommer senare", inte klickbar.
+  var S1 = M.sektion(scen, 'Uppgifter');
+  M.sektionKommer(scen, 'Föreläsningar');
+  M.sektionKommer(scen, 'Metodträning');
+  // UPPGIFTER — ett blad per rad; Blad A/B väljs med växeln på uppgiftssidan
+  var l1 = el('div', 'nf-lista');
+  m.bladen.forEach(function(b){
+    var a = el('a', 'nf-blad');
+    a.href = 'uppgift.html?blad=' + b.nr + 'A';
+    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel));
+    l1.appendChild(a);
+  });
+  S1.body.appendChild(l1);
+  S1.satt(true);
+}
+
+var moment = MOMENT.map(function(m){
+  return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
+});
+
+/* TEST — d1:s befintliga test (Joachim: "peka på d1:s test tills vidare"): de färdiga delkapitel-testen ur
+   js/data/k3-fardiga-test.js, samma lista och samma inbäddade prov som den gamla sidans Test-flik. */
+function visaTest(){
+  scen.innerHTML = '';
+  // Testlistan bär sin egen rubrik "Test" (renderTestFlik) — ingen sektionsrubrik till.
+  var s = el('section', 'nf-sek'), panel = el('div', 'nf-test'); s.appendChild(panel); scen.appendChild(s);
+  if(window.K3_FARDIGA) window.K3_FARDIGA.renderTestFlik(panel, 'k3d1', '../../../ak7-k3-ram.html');
+}
+
+M.montera({
+  vard: document.getElementById('navram'), rubrik: 'Algebraiska uttryck', moment: moment, test: visaTest,
+  mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
+          { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ]
+});
+})();
+</script>
+<script src="../../../js/elevfeedback.js" defer></script>
+</body>
+</html>

@@ -28,11 +28,12 @@ function tallinje(n, x, steg, rutor){
   return { typ: 'tallinje', min: -0.5, max: n + 0.5, streck: s, vars: 'x',
            rutor: rutor.map(function(r){ return { v: r[0], svar: r[1] }; }) };
 }
-// Para ihop: meningarna A–D står i en ruta ovanför; eleven väljer bokstav per person.
-function meningar(rader){
-  return figur('<div class="ovn-text" style="text-align:left;line-height:1.8;">' + rader.join('<br>') + '</div>');
-}
+// Para ihop (kärnans radtyp paraihop): EN deluppgift. Meningarna A–D under varandra, sedan varje person med
+// bokstavsknapparna; par = [[fråga, rätt bokstav], …].
 var ABCD = ['A', 'B', 'C', 'D'];
+function paraIhop(fraga, meningar, par){
+  return { typ: 'paraihop', fraga: fraga, meningar: meningar, alt: ABCD, par: par.map(function(x){ return { fraga: x[0], ratt: x[1] }; }) };
+}
 function prislista(varor){
   // Fyra lappar på rad är bredare än figurernas tak (.af-svg max 300 px) — då blev texten oläsligt liten.
   // Prislistan får sin naturliga bredd (viewBox), aldrig mer.
@@ -246,11 +247,8 @@ BLAD['3A'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3A
     ]),
     // [tolka – GG intro, HH 609]
     g('Farmor Greta är g år. Para ihop varje persons ålder med rätt mening. Svara med bokstav.', TOLKA, [
-      meningar(['A. 3 år äldre än farmor', 'B. en sjättedel så gammal som farmor', 'C. 2 år yngre än farmor', 'D. 30 år yngre än farmor']),
-      val('Pappa Lars är (g − 30) år.', ABCD, 'D'),
-      val('Farfar Bo är (g + 3) år.', ABCD, 'A'),
-      val('Barnbarnet Elsa är (g/6) år.', ABCD, 'B'),
-      val('Gretas syster Ulla är (g − 2) år.', ABCD, 'C')
+      paraIhop('', ['A. 3 år äldre än farmor', 'B. en sjättedel så gammal som farmor', 'C. 2 år yngre än farmor', 'D. 30 år yngre än farmor'],
+               [['Pappa Lars är (g − 30) år.', 'D'], ['Farfar Bo är (g + 3) år.', 'A'], ['Barnbarnet Elsa är (g/6) år.', 'B'], ['Gretas syster Ulla är (g − 2) år.', 'C']])
     ]),
     // [tolka – II 30a]
     g('Omar betalar (3a + 2b) kr. Vad köper han?', TOLKA, [
@@ -299,12 +297,9 @@ BLAD['3B'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3B
     ]),
     // [tolka – GG intro, HH 609]
     g('Mamma Karin är k år.', TOLKA, [
-      meningar(['Para ihop varje person med rätt mening. Svara med bokstav.',
-                'A. en tredjedel så gammal som mamma', 'B. 29 år yngre än mamma', 'C. 2 år äldre än mamma', 'D. 26 år äldre än mamma']),
-      val('Pappa är (k + 2) år.', ABCD, 'C'),
-      val('Mormor är (k + 26) år.', ABCD, 'D'),
-      val('Dottern är (k/3) år.', ABCD, 'A'),
-      val('Sonen är (k − 29) år.', ABCD, 'B'),
+      paraIhop('Para ihop varje person med rätt mening. Svara med bokstav.',
+               ['A. en tredjedel så gammal som mamma', 'B. 29 år yngre än mamma', 'C. 2 år äldre än mamma', 'D. 26 år äldre än mamma'],
+               [['Pappa är (k + 2) år.', 'C'], ['Mormor är (k + 26) år.', 'D'], ['Dottern är (k/3) år.', 'A'], ['Sonen är (k − 29) år.', 'B']]),
       { typ: 'lucka', fraga: 'Hur mycket äldre är mormor än pappa?', text: '__ år', svar: 24 }
     ]),
     // [tolka – II 24, 30a, HH 615]
