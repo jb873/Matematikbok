@@ -1,0 +1,6 @@
+/* karna-b-talfoljd.css — UPPGIFTSTYPEN TALFÖLJD i bladkärnan (blad-karna-b.js, radtyp talfoljd): rutorna där
+   eleven skriver nästa tal eller uttryck. Flyttad ordagrant ur ak7/k3/d1-algebraiska-uttryck/index.html (Joachim
+   2026-11-21). Talföljdens övriga regler (.ovn-foljd-rad/-led/-tal/-komma) står sedan tidigare i ak7-k1blad-kanon.css.
+   De gamla sidorna bär sin egen kopia och laddar INTE den här filen. Laddas efter karna-b-grund.css. */
+
+.ovn-foljd-in{width:60px;text-align:center;}

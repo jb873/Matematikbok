@@ -1,5 +1,9 @@
-/* karna-b-grund.css — BLADKÄRNANS GRUNDSTIL för sidor i det nya formatet: rutan (.ovn-in) och valknapparna
-   (.valruta-grid, .valruta-btn). Flyttad ordagrant ur ak7/k3/d1-algebraiska-uttryck/index.html (Joachim 2026-11-21).
+/* karna-b-grund.css — BLADKÄRNANS GRUNDSTIL för sidor i det nya formatet: det som är lika för ALLA uppgiftstyper —
+   rutan (.ovn-in), valknapparna (.valruta-grid, .valruta-btn), uppgiftsrubriken (.ovn-grupp-rubrik), rättningens
+   animationer (ovn-pulse, ovn-mark-in, konfetti-fall — använda av ak7-delkapitel-kanon.css) och knappsatsens
+   bråkknapp (.kp-kbrak…). Flyttad ordagrant ur ak7/k3/d1-algebraiska-uttryck/index.html (Joachim 2026-11-21).
+   En regel som bara gäller EN uppgiftstyp hör inte hit utan i typens egen delade fil (karna-b-<typ>.css,
+   t.ex. karna-b-talfoljd.css).
    De gamla sidorna bär fortfarande sina egna kopior och laddar INTE den här filen — de rörs inte.
    Laddas efter ak7-k1blad-kanon.css och före sidans <style>. */
 
@@ -14,3 +18,32 @@
 .valruta-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
 .valruta-btn{font-family:var(--serif,'Cormorant Garamond');font-size:20px;font-weight:600;padding:10px 22px;cursor:pointer;border:2px solid var(--line,#e5e0d8);border-radius:10px;background:#fff;color:var(--ink,#12110f);transition:background .15s,border-color .15s,color .15s;}
 .valruta-btn:hover{border-color:var(--gold-lt,#c49a40);}
+
+/* Uppgiftsrubriken */
+.ovn-grupp-rubrik{
+  font-family:'Source Serif 4',Georgia,serif;
+  font-size:21px;font-weight:700;
+  color:var(--ink);margin-bottom:14px;
+  letter-spacing:-.005em;
+}
+
+/* Rättningens animationer: pulsen när en rad rättas, bocken/krysset, konfettin */
+@keyframes ovn-pulse{
+  0%   { transform:scale(1);   }
+  40%  { transform:scale(1.08);}
+  100% { transform:scale(1);   }
+}
+@keyframes ovn-mark-in{
+  from{ transform:scale(0); opacity:0; }
+  to  { transform:scale(1); opacity:1; }
+}
+@keyframes konfetti-fall{
+  0%   { transform:translateY(0) rotate(0deg);   opacity:1; }
+  100% { transform:translateY(110vh) rotate(720deg); opacity:1; }
+}
+
+/* Knappsatsens bråkknapp (ikonen ritas av ak8-blad-ui.js) */
+.kp-kbrakbtn{color:var(--navy);}
+.kp-kbrak{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1.5px;}
+.kp-kbrak-f{width:13px;height:7px;border:1.4px solid currentColor;border-radius:2px;}
+.kp-kbrak-l{width:18px;height:2.5px;background:currentColor;}

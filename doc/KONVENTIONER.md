@@ -188,9 +188,13 @@ Fält: Del · Moment · Blad (nr + ev. bokstav) · Årskurs (7/8/9) ·
 Roll (kärna/breddning/fordjupning) · Metod-etikett (namnger, §4) ·
 Takregel golv/tak · Antal (mastery-tröskel) · uppgifter + facit per ruta (§K-K).
 
-BLADKÄRNANS GRUNDSTIL på nya sidor: rutan (`.ovn-in`) och valknapparna (`.valruta-grid`, `.valruta-btn`) bor i
-`js/motor/blad/karna-b-grund.css` (flyttad ordagrant ur d1-sidan 2026-11-21). De gamla sidorna bär sina egna kopior och
-laddar inte filen.
+BLADKÄRNANS GRUNDSTIL på nya sidor: det som gäller ALLA uppgiftstyper — rutan (`.ovn-in`), valknapparna
+(`.valruta-grid`, `.valruta-btn`), uppgiftsrubriken (`.ovn-grupp-rubrik`), rättningens animationer (`ovn-pulse`,
+`ovn-mark-in`, `konfetti-fall`) och knappsatsens bråkknapp (`.kp-kbrak…`) — bor i `js/motor/blad/karna-b-grund.css`.
+En regel som bara gäller EN uppgiftstyp läggs i typens egen delade fil, `js/motor/blad/karna-b-<typ>.css` (t.ex.
+`karna-b-talfoljd.css`), inte i grundfilen; sidan laddar typfilerna för de typer dess blad använder. Inga kopior i
+sidans `<style>`. (Flyttat ordagrant ur d1-sidan 2026-11-21, Joachims beslut.) De gamla sidorna bär sina egna kopior och
+laddar inte filerna.
 
 Vad vaktar den: — mestadels ny UI utan grind; byggs och verifieras per pilot.
 
