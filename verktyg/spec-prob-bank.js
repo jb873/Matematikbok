@@ -374,6 +374,15 @@ let metodStatus = '';
       });
     });
     if(nycklar.length > 1 && giltiga < 2) fall(u.id, 'bara ' + giltiga + ' giltiga variabelval prövade');
+    // SAKER SOM RÄKNAS I ANTAL: "st" godtas i stället för ordet (Joachim 2026-11-25)
+    if(['kulor', 'böcker', 'pennor', 'kakor', 'klistermärken', 'kort', 'elever'].indexOf(u.enhet) >= 0 && forsta){
+      ['namn', 'gemensam', 'tatt'].forEach(function(form){
+        const es = elevSvar(u, forsta, { form: form });
+        es.svar = form === 'tatt' ? es.svar.split(u.enhet).join('st') : es.svar.split(' ' + u.enhet).join(' st'); val++;
+        const r = R.rattaMetod(u, es);
+        if(r.status !== 'ratt') fall(u.id, 'svaret "' + es.svar + '": ' + r.status + ' (' + r.besked + ')');
+      });
+    }
     if(!forsta) return;
     function maste(namn2, svar, prov){ const r = R.rattaMetod(u, svar); neg++; if(!prov(r)) fall(u.id, 'fångas inte: ' + namn2 + ' → ' + JSON.stringify({ status: r.status, steg: r.steg, besked: r.besked })); }
     let s;
@@ -429,11 +438,11 @@ let metodStatus = '';
     if(ib >= 0){
       const xv = forsta.varden[forsta.valdDel];
       const dk = nycklar.find(function(k){ return forsta.uttryck[k] === s.delrader[ib].uttryck; }), dv = forsta.varden[dk];
-      const utanIns = [MOD.talStr(dv), s.delrader[ib].uttryck + ' = ' + MOD.talStr(dv)];
+      const utanIns = ['', MOD.talStr(dv), s.delrader[ib].uttryck + ' = ' + MOD.talStr(dv)];   // '' = tom ruta: fel (Joachim 2026-11-25)
       if(!lika(dv - 1, xv) && !lika(xv, 1)) utanIns.push(MOD.talStr(dv - 1) + ' + 1');
       utanIns.forEach(function(t){
         s = elevSvar(u, forsta); s.delrader[ib].berakning = t;
-        maste('beräkning utan insättning "' + t + '"', s, function(r){ return r.status === 'fel' && r.steg === 'insattning' && r.delrader[ib].berakning === false && r.delrader[ib].varde === true; });
+        maste('beräkning utan insättning "' + t + '"', s, function(r){ return r.status === 'fel' && r.steg === 'insattning' && r.delrader[ib].berakning === false && r.delrader[ib].varde === true && r.besked === R.BESKED.insattningSaknas.hint; });
       });
     }
   });
@@ -455,7 +464,7 @@ let metodStatus = '';
     delrader: [{ namn: 'Ella', uttryck: 'x', berakning: null, varde: '18' },
                { namn: 'Noah', uttryck: 'x - 6', berakning: '18 - 6', varde: '12' }], svar: '12 och 18 år' });
   if(noah.status !== 'ratt' || ella.status !== 'ratt') fall('metod A1', 'Noah = x: ' + noah.status + ' (' + noah.besked + '), Ella = x: ' + ella.status + ' (' + ella.besked + ')');
-  metodStatus = uppg.length + ' uppgifter, ' + val + ' giltiga lösningar (alla variabelval, raderna i två ordningar, svaret på en rad i fem former, med och utan blanksteg före enheten, beräkningen som insättning och som kedja) rättas rätt, ' + neg + ' felaktiga fångas';
+  metodStatus = uppg.length + ' uppgifter, ' + val + ' giltiga lösningar (alla variabelval, raderna i två ordningar, svaret på en rad i fem former, med och utan blanksteg före enheten, beräkningen som insättning och som kedja, "st" för saker i antal) rättas rätt, ' + neg + ' felaktiga fångas';
 })();
 
 const antal = ids.size;

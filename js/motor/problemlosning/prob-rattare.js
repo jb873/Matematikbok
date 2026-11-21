@@ -52,7 +52,8 @@ var BESKED = {
   foljdFel:       { hint: 'Värdet stämmer inte.' },
   // Bara metod-rättaren (pilot-typen); lydelserna är Joachims (order 2026-11-25). De andra typerna har kvar sina.
   ekvationGerEj:  { hint: 'Ekvationen ger inte uppgiftens lösning.' },
-  svarEnhetFel:   { hint: 'Talet är rätt – men enheten är fel.' }
+  svarEnhetFel:   { hint: 'Talet är rätt – men enheten är fel.' },
+  insattningSaknas:{ hint: 'Visa insättningen – skriv talet i stället för x.' }
 };
 
 function tom(v){ return v == null || String(v).trim() === ''; }
@@ -151,7 +152,11 @@ function provaKedja(u, rader){
 var ENHETSORD = {
   'år': ['år', 'ar'], 'kr': ['kr', 'kronor', 'kronor.'], 'kg': ['kg', 'kilo', 'kilogram'],
   'cm': ['cm'], 'm': ['m', 'meter'], 'dl': ['dl'], 'st': ['st', 'stycken'],
-  'grader': ['grader', 'grad', '°'], 'cm²': ['cm2', 'cm²', 'kvadratcentimeter'], 'm²': ['m2', 'm²', 'kvadratmeter']
+  'grader': ['grader', 'grad', '°'], 'cm²': ['cm2', 'cm²', 'kvadratcentimeter'], 'm²': ['m2', 'm²', 'kvadratmeter'],
+  // Saker som räknas i antal: ordet självt eller "st" (Joachim 2026-11-25). Finns bara i pilot-typen.
+  'kulor': ['kulor', 'st', 'stycken'], 'böcker': ['böcker', 'st', 'stycken'], 'pennor': ['pennor', 'st', 'stycken'],
+  'kakor': ['kakor', 'st', 'stycken'], 'klistermärken': ['klistermärken', 'st', 'stycken'],
+  'kort': ['kort', 'st', 'stycken'], 'elever': ['elever', 'st', 'stycken']
 };
 // Talet i ett svar: "30 kg", "Calle är 30 kg", "3/4 kg" och det byggda bråket "(3)/(4) kg" ska alla
 // ge samma värde — två skrivsätt får aldrig ge olika utfall. Enhetsorden plockas bort, sedan prövas
@@ -386,13 +391,17 @@ function rattaMetod(u, svar){
     var mal = (x != null && !tom(d.uttryck) && EP.parseSida(d.uttryck, opts)) ? EP.varde(d.uttryck, x, opts) : null;
     var harX = mal != null && Math.abs(EP.parseSida(d.uttryck, opts).a) > 1e-9;
     [['berakning', d.berakning], ['varde', d.varde]].forEach(function(p){
-      if(p[1] == null || tom(p[1]) || mal == null) return;
+      if(p[1] == null || mal == null) return;
+      // Beräkningsrutan ska visa INSÄTTNINGEN (order 2026-11-25) — en TOM beräkningsruta är fel (Joachim
+      // 2026-11-25), och rätt värde räcker inte där. Den tomma värderutan är som förut obedömd.
+      if(tom(p[1])){
+        if(p[0] === 'berakning' && harX){ o.berakning = false; forstaFel('insattning', BESKED.insattningSaknas.hint); }
+        return;
+      }
       var vr = vardeUr(p[1], opts);
       o[p[0]] = !vr.fel && lika(vr.varde, mal);
       if(!o[p[0]]){ forstaFel('insattning', vr.fel === 'kedjebrott' ? BESKED.insattningKedja.hint : BESKED.insattningFel.hint); return; }
-      // Beräkningsrutan ska visa INSÄTTNINGEN (order 2026-11-25) — rätt värde räcker inte där.
-      // Beskedet är tomt tills Joachim godkänt en lydelse; rutan får sitt ✗.
-      if(p[0] === 'berakning' && harX && !visarInsattning(p[1], x, opts)){ o.berakning = false; forstaFel('insattning', ''); }
+      if(p[0] === 'berakning' && harX && !visarInsattning(p[1], x, opts)){ o.berakning = false; forstaFel('insattning', BESKED.insattningSaknas.hint); }
     });
     ut.delrader[i] = o;
   });
