@@ -76,6 +76,8 @@ Den här filen är kontraktet. Varje chatt och varje Code-pass som rör mattebok
 | **Varje ruta i en rad markeras för sig.** | `AK8_UI.markeraRutor` (`res.per`) | `verktyg/flerruts-grind.js` |
 | **Svarsformen är bindande** (blandad / bråk / decimal / enklaste) och står i data per grupp. | `Likhetsrattare.finalStatus` | `verktyg/svarform-koll.js` |
 
+**Problemlösning räknar poängen per uppgift.** Där räknar totalen lösta uppgifter, inte rutor — men varje ruta rättas och markeras fortfarande var för sig. Se **Problemlösning — rättning (metod-rättning)**.
+
 **K-K:s fyra fall** är samma princip i fyra lägen: likhet → rutan efter tecknet · ritat streck → rutan på strecket · fritt svar på en rad → `Svar:` högerställt · fritt svar med flerradig fråga → samma par på egen rad under frågan. Etiketten är en, aldrig två.
 
 **K-K fall 3 och 4 gäller inte en rad som bär en bildruta eller figur.** Där bor rutan inne i bildens omslutning, efter frågetexten, och den placeringen är uppgiftens egen. Ett `Svar:` framför bilden slet isär uppgiften live (prislappsuppgifterna i åttans algebra): etiketten hamnade före bilden och rutan 631 px bort, utanför en 390 px skärm. Referensen för rätt placering är commit 810655b, före K-K. Avgränsningen är densamma som K-E gör mot uppställningens kolumnrutor — **en regel som är rätt för de flesta fall undantas där ytan är annorlunda** — och den vaktas av `brytning-grind.js` (`--sabba bilduppgift`), som fäller en bild-uppgift vars svarsrad bär bilden.
@@ -203,10 +205,28 @@ Vad vaktar den: — mestadels ny UI utan grind; byggs och verifieras per pilot.
 | **Kalkylatorn till höger. Under den, på samma rad: Kontrollera, Börja om och Tipsa** — aldrig över tangenterna. Bladet går inte in under kalkylatorn. Den delade knappsatsen ändras inte; placeringen är sidans. | sidans CSS och `placera()` | **—** |
 | **Figurer för geometri är SVG** (eget pass). **Funktionella bilder stannar, dekorativa går.** | `svg-algebrafigur.js` | **—** |
 
-Inte med här (eget beslut senare): rättningsmodellen för flera giltiga lösningar. Tills dess rättas
-beräkningsrutan i Sätt in värdet inte.
+Rättningsmodellen för flera giltiga lösningar: se **Problemlösning — rättning (metod-rättning)** nedan.
 
 Vad vaktar den: — ny UI utan grind; verifieras per pilot med mätprober (båda vyportarna).
+
+---
+
+## Problemlösning — rättning (metod-rättning)
+
+*Joachim, nov 2026.* Rättaren kontrollerar **metoden**, inte en viss uppställning. Det finns flera giltiga
+lösningar på samma uppgift, och alla ska godtas.
+
+| Konvention | Funktionen bor i | Vad vaktar den |
+|---|---|---|
+| **Fritt variabelval.** Eleven väljer själv vilken storhet som är x; valet är aldrig fel. | `ProbRattare.rattaMetod` | `verktyg/spec-prob-bank.js` (metod-rättaren: varje giltigt variabelval prövas) |
+| **Ekvationen** godtas om den har en entydig lösning som är ett av uppgiftens rätta värden. En redan löst ekvation ("x = 12") godtas inte. | `ProbRattare.rattaMetod` | `verktyg/spec-prob-bank.js` |
+| **Balansmetoden är giltig algebra:** varje rad har samma lösning som raden ovanför, ingen rad upprepar den förra, sista raden är x = tal, och det finns minst så många rader som ekvationen kräver. | `ProbRattare.rattaMetod` (via `EkvParser`) | `verktyg/spec-prob-bank.js` |
+| **Sätt in värdet:** beräkningsrutan visar insättningen (talet insatt för x), inte bara resultatet, och rättas mot elevens eget x. Tom ruta = uppgiften inte löst. | `ProbRattare.rattaMetod` · `visarInsattning` | `verktyg/spec-prob-bank.js` |
+| **Svaret skrivs på EN rad** och rättas på tal + enhet. Namn vid talet binder värdet till personen (ombytta svar fångas); annars godtas värdet för rätt person. Enhet med eller utan blanksteg; "st" godtas som antalsenhet; fel måttenhet fångas. | `ProbRattare.lasSvarsrad` | `verktyg/spec-prob-bank.js` |
+| **Delarna** är elevens egen uppställning och rättas inte mot en mall; svaret fångar uppställningsfel. | `ProbRattare.rattaMetod` | `verktyg/spec-prob-bank.js` (uppställningsfelet i A1 fångas av svaret) |
+| **Poäng per uppgift:** "Du har löst X av Y uppgifter" räknar lösta uppgifter (hela kedjan rätt), inte rutor. Gäller typen överallt: blad, test, blandade och drill. | `ProbBlad2` (totalen i `kontrollera`) | **—** mätt med prober, ingen grind |
+
+Hör ihop med §3: för problemlösning räknas poängen per uppgift, men varje ruta rättas fortfarande var för sig.
 
 ---
 
