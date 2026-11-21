@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bladkärnan · tilläggen (a)–(g) + avskriftsrutan</title>
+<!-- FÖRHANDSVISNING (verktyg, ingen elevsida): ett exempel per tillägg i blad-karna-b.js och svg-algebrafigur.js
+     (order "Tolka och teckna uttryck", steg 2, 2026-11-21). Exemplen är ur Joachims dokument
+     "tolka-teckna-uttryck-ak7-v2" där det går. Kärnan, rättningen och knappsatsen är de riktiga.
+     Under varje uppgift: vilken nod varje rad loggar till (tillägg e) — en verktygsrad, inte elevtext. -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../js/motor/blad/ak7-delkapitel-kanon.css">
+<link rel="stylesheet" href="../js/motor/blad/ak7-k1blad-kanon.css">
+<link rel="stylesheet" href="../js/motor/keypad.css">
+<style>
+/* Sidans stil = ak7/k3/d1-algebraiska-uttryck/index.html, ordagrant (så att bladen ser ut som på d1),
+   plus två verktygsrader sist. */
+/* Sidspecifika + isärdrivna regler (kvar efter css-flytten 2026-09-19). Det delade ligger i ak7-delkapitel-kanon.css + ak7-k1blad-kanon.css, länkade ovan. */
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+/* Variabler som motorns CSS refererar till (.ovn-in, .ovn-sammanf.delvis, .ovn-in.enhet.correct m.fl.) men som saknades
+   i den här sidfamiljen — bråksidorna fick dem 2025, k1-sidorna aldrig: .ovn-in hade INGEN kant här (border: none).
+   Samma block som i bråksidorna. Rättat 2026-09-20. */
+:root{
+  --c-rakna:#16a34a;
+  --success:#16a34a; --success-bg:#dcfce7;
+  --error:#dc2626;   --error-bg:#fee2e2;
+  --bg-warm:#f3ecdd;
+  --mono:'Source Serif 4',Georgia,serif;
+  --rod:#b23b2e; --rod-lt:#c0392b;
+  --las:#9a9388;
+}
+
+.placeholder-note{
+  display:flex;gap:13px;align-items:flex-start;
+  background:var(--paper-dk);border-radius:5px;padding:15px 17px;
+  font-size:13px;color:var(--ink-soft);line-height:1.6;
+}
+.placeholder-note .pn-icon{font-size:17px;flex-shrink:0;}
+/* ── FLIKRAD (delkapitlets undersidor) ── */.tab-row{
+  max-width:920px;margin:0 auto;padding:28px 28px 0;
+  display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;
+  border-bottom:1px solid var(--paper-dk);
+  -webkit-overflow-scrolling:touch;
+}
+.tab-btn{
+  flex-shrink:0;
+  font-family:var(--cinzel);font-size:12px;font-weight:500;letter-spacing:.06em;
+  color:var(--ink-faint);background:none;border:none;cursor:pointer;
+  padding:13px 17px;border-bottom:3px solid transparent;
+  transition:color .15s, border-color .15s;white-space:nowrap;
+}
+@keyframes panelIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.ovn-grupp-rubrik{
+  font-family:'Source Serif 4',Georgia,serif;
+  font-size:21px;font-weight:700;
+  color:var(--ink);margin-bottom:14px;
+  letter-spacing:-.005em;
+}
+.ovn-in{
+  width:90px;height:42px;text-align:center;
+  font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;
+  border:2px solid var(--c-rakna);border-radius:6px;
+  background:#fff;color:var(--c-rakna);outline:none;padding:0 6px;
+  font-feature-settings:'tnum';
+  transition:background .2s, border-color .2s, color .2s;
+}
+/* Pulserande blink när rättning sker */@keyframes ovn-pulse{
+  0%   { transform:scale(1);   }
+  40%  { transform:scale(1.08);}
+  100% { transform:scale(1);   }
+}
+@keyframes ovn-mark-in{
+  from{ transform:scale(0); opacity:0; }
+  to  { transform:scale(1); opacity:1; }
+}
+/* Skärmtangentbord – samma stil som öva-delen */
+/* Delad AK8_UI-keypad (migrerad från egen .ovn-keypad). ALLTID fixed nedtill; keypad-clearance.js
+   sätter mätt body-padding. Universella nav-paletten (--paper-lt m.fl.) finns i sidans :root. */
+.kp-kbrakbtn{color:var(--navy);}
+.kp-kbrak{display:inline-flex;flex-direction:column;align-items:center;line-height:1;gap:1.5px;}
+.kp-kbrak-f{width:13px;height:7px;border:1.4px solid currentColor;border-radius:2px;}
+.kp-kbrak-l{width:18px;height:2.5px;background:currentColor;}
+@keyframes konfetti-fall{
+  0%   { transform:translateY(0) rotate(0deg);   opacity:1; }
+  100% { transform:translateY(110vh) rotate(720deg); opacity:1; }
+}
+@media print{
+  .topnav,.hero,.tab-row,.lecture-list,.lecture-player,footer,
+    .keypad,.ovn-keypad,.ovn-kontroll-rad,.ovn-skriv-ut,
+    .konfetti-lager,.ovn-mark{display:none !important;}
+}
+.ovn-ordna-in{width:56px;text-align:center;}
+.ovn-foljd-in{width:60px;text-align:center;}
+.valruta-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+.valruta-btn{font-family:var(--serif,'Cormorant Garamond');font-size:20px;font-weight:600;padding:10px 22px;cursor:pointer;border:2px solid var(--line,#e5e0d8);border-radius:10px;background:#fff;color:var(--ink,#12110f);transition:background .15s,border-color .15s,color .15s;}
+.valruta-btn:hover{border-color:var(--gold-lt,#c49a40);}
+
+.verktyg-not{font:12px/1.4 Georgia,serif;color:#7a6e65;margin:2px 0 0 4px;}
+.verktyg-huvud{max-width:920px;margin:18px auto 0;padding:0 20px;font:14px/1.5 Georgia,serif;color:var(--ink-soft);}
+body{background:var(--paper);}
+</style>
+</head>
+<body>
+<div class="verktyg-huvud">
+  <strong>Förhandsvisning — tilläggen i bladkärnan.</strong> Varje grupp visar ett tillägg; rubriken säger vilket.
+  Fyll i, tryck Kontrollera. Raden under varje uppgift (grå) visar vilken nod raderna loggar till.
+</div>
+<div class="ovn-wrap" id="sheet-tillagg"></div>
+
+<script src="../js/mastery-karna.js"></script>
+<script src="../js/mastery-k3.js"></script>
+<script src="../js/motor/alg-brak.js"></script>
+<script src="../js/motor/blad/ak8-blad-ui.js"></script>
+<script src="../js/motor/blad/blad-karna-b.js"></script>
+<script src="../js/motor/figur/svg-algebrafigur.js"></script>
+<script>
+(function(){
+  var F = window.SvgAlgebraFigur;
+  var TOLKA = 'alg-tolka:begrepp', SKRIVA = 'alg-skriva:kommunikation', BERAKNA = 'alg-berakna:rakna';
+  function g(rubrik, nod, rader){ return { rubrik: rubrik, logg: nod, loggStore: 'k3', rader: rader }; }
+  var streck = function(n){ var s = []; for(var i = 0; i <= n; i++) s.push({ v: i }); return s; };
+  var tl1 = streck(8); tl1[3].etikett = 'x'; tl1[4].etikett = 'x + 1';
+  var tl2 = streck(7); tl2[1].etikett = 'x'; tl2[2].etikett = 'x + 2';
+
+  var BLAD = { titel: 'Tilläggen i bladkärnan', grupper: [
+    g('(a) Text efter rutan — 1A nr 7. En vecka har 7 dagar. Fyll i ett uttryck.', SKRIVA, [
+      { typ: 'uttryck', fraga: 'v veckor har', efter: 'dagar.', svar: '7 · v', accept: ['7·v'], vars: 'v' },
+      { typ: 'uttryck', fraga: 'v veckor och 3 dagar är', efter: 'dagar.', svar: '7 · v + 3', accept: ['7·v+3'], vars: 'v' }
+    ]),
+    g('(b) Uttryck i talföljden — 2A nr 6. Tre tal följer varandra. Det minsta talet är n. Fyll i de två andra talen.', SKRIVA, [
+      { typ: 'talfoljd', termer: ['n', null, null], facit: [null, 'n + 1', 'n + 2'], uttryckSvar: true, fortsatt: false, vars: 'n' }
+    ]),
+    g('(b) med fråga — 2B nr 6a. Fyll i.', SKRIVA, [
+      { typ: 'talfoljd', fraga: 'Tre jämna tal följer varandra. Det minsta är n.', termer: ['n', null, null], facit: [null, 'n + 2', 'n + 4'],
+        uttryckSvar: true, fortsatt: false, vars: 'n' }
+    ]),
+    g('(c) Tallinje med uttryck — 2A nr 5. Fyll i uttrycken som ska stå i rutorna.', SKRIVA, [
+      { typ: 'tallinje', min: -0.5, max: 8.5, streck: tl1, vars: 'x',
+        rutor: [{ v: 0, svar: 'x − 3', accept: ['x-3'] }, { v: 5, svar: 'x + 2', accept: ['x+2'] }, { v: 7, svar: 'x + 4', accept: ['x+4'] }] }
+    ]),
+    g('(c) steg 2 — 2B nr 5. Fyll i uttrycken som ska stå i rutorna.', SKRIVA, [
+      { typ: 'tallinje', min: -0.5, max: 7.5, streck: tl2, vars: 'x',
+        rutor: [{ v: 0, svar: 'x − 2', accept: ['x-2'] }, { v: 4, svar: 'x + 6', accept: ['x+6'] }, { v: 6, svar: 'x + 10', accept: ['x+10'] }] }
+    ]),
+    g('(d) Sträcka utan total — 2A nr 4. Vilket uttryck visar hela sträckans längd?', SKRIVA, [
+      { typ: 'svgfigur', svg: F.strackfigur({ delar: [{ text: 'x cm' }, { text: '5 cm' }, { text: 'x cm' }] }) },
+      { typ: 'valruta', fraga: '', alt: ['x + 5', 'x + 5 + x', '5x'], ratt: ['x + 5 + x'] }
+    ]),
+    g('(e) Nod per rad — 1B nr 8. Leo har 200 kr. Han sparar 60 kr i månaden.', SKRIVA, [
+      { typ: 'uttryck', fraga: 'Fyll i ett uttryck för hur mycket han har efter m månader:', svar: '200 + 60 · m', accept: ['200+60·m'], vars: 'm' },
+      { typ: 'flerled', logg: BERAKNA, fraga: 'Hur mycket har han efter 5 månader? Skriv uttrycket med 5 i stället för m och räkna i flera led. Börja med multiplikationen.',
+        avskrift: { visa: '200 + 60 · 5', accept: ['200+60·5'] }, led: [{ visa: '200 + 300', accept: ['200+300'] }, { svar: 500 }], enhet: 'kr' }
+    ]),
+    g('(f) Tecknet ½ — Ella delar x pärlor lika i 2 burkar (x/2, ½x och 0,5x godkänns).', SKRIVA, [
+      { typ: 'uttryck', fraga: 'I varje burk ligger', efter: 'pärlor.', svar: 'x/2', accept: ['x/2'], vars: 'x', halv: true }
+    ]),
+    g('(g) Prislistan som prislappar — 1A. Använd prislistan. Fyll i ett uttryck för vad det kostar.', SKRIVA, [
+      { typ: 'svgfigur', svg: F.prislappar({ varor: [{ namn: 'Smörgås', pris: '25 kr' }, { namn: 'Bulle', pris: '10 kr' }, { namn: 'Mjölk', pris: '8 kr' }, { namn: 'Saft', pris: '12 kr' }] }) },
+      { typ: 'uttryck', fraga: '4 bullar och 2 mjölk:', svar: '4 · 10 + 2 · 8', accept: ['4·10+2·8'] }
+    ]),
+    g('Avskriftsrutan — 1A nr 1b. Ida betalar (2 · 10 + 8) kr. Hur mycket betalar hon? Skriv av uttrycket och räkna i flera led. Börja med multiplikationen.', BERAKNA, [
+      { typ: 'flerled', avskrift: { visa: '2 · 10 + 8', accept: ['2·10+8'] }, led: [{ visa: '20 + 8', accept: ['20+8'] }, { svar: 28 }], enhet: 'kr' }
+    ]),
+    g('Avskriftsrutan med uttrycket tryckt — 1B nr 8b (variabeluttrycket får stå tryckt, det insatta inte).', BERAKNA, [
+      { typ: 'flerled', vansterText: '200 + 60 · m', avskrift: { visa: '200 + 60 · 5', accept: ['200+60·5'] }, led: [{ visa: '200 + 300', accept: ['200+300'] }, { svar: 500 }], enhet: 'kr' }
+    ]),
+    g('Avskriftsrutan, ett led — 2A nr 8b. Beräkna omkretsen när x = 4. Skriv uttrycket med 4 i stället för x och räkna i flera led.', BERAKNA, [
+      { typ: 'flerled', avskrift: { visa: '4 + 4 + 7', accept: ['4+4+7'] }, led: [{ svar: 15 }], enhet: 'cm' }
+    ])
+  ] };
+  var rot = document.getElementById('sheet-tillagg');
+  bygg_blad(rot, BLAD);
+  // Verktygsrad per uppgift: vilken nod varje rad loggar till (radens egen, annars gruppens)
+  [].forEach.call(rot.querySelectorAll('.ovn-grupp'), function(gr){
+    var noder = [].map.call(gr.querySelectorAll('.ovn-rad:not(.ovn-figurrad)'), function(r, i){
+      var n = r.getAttribute('data-logg') || gr.getAttribute('data-logg');
+      return String.fromCharCode(97 + i) + ') ' + n + (r.getAttribute('data-logg') ? ' (radens egen)' : '');
+    });
+    var p = document.createElement('div'); p.className = 'verktyg-not'; p.textContent = 'Loggar till: ' + noder.join(' · ');
+    gr.appendChild(p);
+  });
+})();
+</script>
+<script src="../js/motor/keypad-clearance.js"></script>
+</body>
+</html>

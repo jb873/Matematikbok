@@ -266,5 +266,8 @@ input.alg-ruta{width:100%;}
   border-bottom:1.5px solid var(--paper-dk,#ede6d6);}
 .monster-tabell tr:last-child td{border-bottom:none;}
 .monster-tabell .ovn-in{width:48px;text-align:center;}
+/* Tallinjen med uttrycksrutor på strecken (bladkärnans tillägg (c), 2026-11-21): rutan är kort som golv och växer (K-E) —
+   en bred ruta täcker grannstrecket och dess etikett. Matchar bara den nya tallinjens rutor. */
+.ovn-tallinje-ruta .ovn-in{width:56px;text-align:center;}
 .ovn-oppenfoljd{flex-wrap:wrap;}
 .ovn-oppen-in{width:76px;text-align:center;}

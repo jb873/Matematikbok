@@ -622,6 +622,9 @@
 
     rot.querySelectorAll('.ovn-rad, .ak8-rad').forEach(function(rad){
       if(rad.querySelector('.ovn-svarsrad')) return;                       // redan gjord
+      /* RUTAN MITT I MENINGEN ("v veckor har ▢ dagar."): ingen "Svar:" — rutan står på sin plats i texten, som
+         K-K:s ritade streck. Bara rader som bladkärnan märkt så (tillägg (a), 2026-11-21); andra rader rörs inte. */
+      if(rad.hasAttribute('data-svar-i-meningen')) return;
       if((rad.textContent || '').indexOf('=') >= 0) return;                // har likhetstecken
       /* BILD-UPPGIFT: egen placering. Rutan bor inne i bildens omslutning, efter frågetexten,
          och där ska den stå — så såg sidan ut före K-K (810655b). Klättringen nedan steg upp

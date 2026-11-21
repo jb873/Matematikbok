@@ -400,6 +400,27 @@ function sidSumma(sidor){
 // inget att skilja den från. Funktionen finns för att regeln ska gälla varje radtyp, också de som
 // skrivs i morgon — förr stod utskriften på tjugo ställen.
 function lbl(b){ return b ? '<span class="ovn-label">' + b + ')</span>' : ''; }
+/* ── TILLÄGG 2026-11-21 (order "Tolka och teckna uttryck", Joachims beslut (a)–(g) + avskriftsrutan).
+   Alla är FRIVILLIGA: utan sin flagga i bladets data ritas och rättas varje rad exakt som förut. ── */
+// (b, c) EN UTTRYCKSRUTA i en radtyp som annars tar tal (talföljd, tallinje): samma data-uttryck-rättning
+// som radtypen 'uttryck' (jamforFler — likvärdiga uttryck godkänns). svar = facit, accept = fler former.
+function uttrycksRuta(svar, accept, vars, halv, klass, stil){
+  var acc = (accept || [svar]).join('|');
+  return '<input class="ovn-in' + (klass ? ' ' + klass : '') + '" data-uttryck="' + encodeURIComponent(acc)
+    + '" data-kp="uttryck" data-vars="' + (vars || 'x') + '" data-visa="' + minusUt(svar) + '"'
+    + (halv ? ' data-halv="1"' : '') + (stil ? ' style="' + stil + '"' : '') + ' inputmode="text" autocomplete="off">';
+}
+// (f) TECKNET ½ som 1/2, bara i en ruta som bär data-halv: "½x" = (1/2)x, "3½" = (3 + 1/2).
+function halvUt(v){ return String(v).replace(/(\d+)\s*½/g, '($1+1/2)').replace(/½/g, '(1/2)'); }
+// (e) RADENS EGEN NOD: rad.logg (+ rad.loggStore, annars gruppens) läggs på radens yttersta element. Loggningen
+// söker redan närmaste data-logg — raden först, gruppen sedan — så a-delen kan mata en nod och b-delen en annan.
+function radMedLogg(radHtml, rad, grupp){
+  if(!rad.logg || !/^<div[\s>]/.test(radHtml)) return radHtml;
+  var forsta = radHtml.slice(0, radHtml.indexOf('>') + 1);
+  if(/ data-logg=/.test(forsta)) return radHtml;                       // raden bär redan sin nod (problem)
+  var store = rad.loggStore || grupp.loggStore;
+  return '<div data-logg="' + rad.logg + '"' + (store ? ' data-logg-store="' + store + '"' : '') + radHtml.slice(4);
+}
 // Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
 function visaTal(t){
   var s = String(t).replace('.', ',');
@@ -612,6 +633,11 @@ function bladHTML(blad){
     // (Joachims granskning 2026-10-04). Figurrader bär inget svar och räknas inte med.
     var _delar = grupp.rader.filter(function(r){ return r.typ !== 'figur' && r.typ !== 'svgfigur'; }).length;
     grupp.rader.forEach(function(rad){
+      var _radStart = html.length;
+      radHTML(rad);
+      if(rad.logg) html = html.slice(0, _radStart) + radMedLogg(html.slice(_radStart), rad, grupp);   // (e)
+    });
+    function radHTML(rad){
       // En figurrad bär inget svar — den hör till uppgiften och ska inte ta en bokstav, annars
       // hoppar deluppgifterna över a) varje gång en figur står först.
       if(rad.typ !== 'figur') radNummer++;
@@ -1003,22 +1029,55 @@ function bladHTML(blad){
       if(rad.typ === 'talfoljd'){
         html += '<div class="ovn-rad ovn-foljd-rad" data-rad="' + radNummer + '">';
         html += lbl(bokstav);
+        /* (b) TILLÄGG: rad.fraga står före följden; rad.uttryckSvar gör de tomma rutorna till uttrycksrutor
+           ("n, n + 1, n + 2"), givna termer visas som matematik; rad.fortsatt === false tar bort ", …". */
+        if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
         html += '<span class="ovn-foljd-led">';
         rad.termer.forEach(function(t, k){
           if(k>0) html += '<span class="ovn-foljd-komma">,</span>';
           if(t === null){
-            html += '<input class="ovn-in ovn-foljd-in" data-svar="' + rad.facit[k] + '" inputmode="text" autocomplete="off">';
+            if(rad.uttryckSvar) html += uttrycksRuta(rad.facit[k], rad.accept && rad.accept[k], rad.vars, rad.halv, 'ovn-foljd-in');
+            else html += '<input class="ovn-in ovn-foljd-in" data-svar="' + rad.facit[k] + '" inputmode="text" autocomplete="off">';
           } else {
-            html += '<span class="ovn-text ovn-num ovn-foljd-tal">' + visaTal(t) + '</span>';
+            html += '<span class="ovn-text ovn-num ovn-foljd-tal">' + (rad.uttryckSvar ? matteUt(t) : visaTal(t)) + '</span>';
           }
         });
-        html += '<span class="ovn-foljd-komma">, …</span>';
+        if(rad.fortsatt !== false) html += '<span class="ovn-foljd-komma">, …</span>';
         html += '</span>';
         html += '</div>';
         return;
       }
       // (ur k1-d1, flyttat till kärnan 2026-09-19)
       // Tallinje: SVG med pilar A/B/C, eleven skriver vad varje pil pekar på
+      /* (c) TILLÄGG: rad.rutor = [{ v, svar, accept }] ger en tallinje där rutorna står PÅ strecken, under
+         linjen, där etiketterna står — "x", "x + 1" och tomma rutor att fylla med uttryck. Strecken är jämna
+         steg (rad.streck: { v, etikett }); etiketterna är matematik (minus som −). Rutorna är vanliga
+         uttrycksrutor (data-uttryck): kärnans slinga rättar, räknar och loggar dem. Utan rad.rutor ritas
+         tallinjen som förut, med pilar och talsvar. */
+      if(rad.typ === 'tallinje' && rad.rutor){
+        var TW = 620, TH = 92, tx0 = 30, tx1 = 590, ty = 30, tmn = rad.min, tmx = rad.max;
+        var tpx = function(v){ return tx0 + (v - tmn) / (tmx - tmn) * (tx1 - tx0); };
+        html += '<div class="ovn-rad ovn-tallinje-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:flex-start;gap:10px;">';
+        html += lbl(bokstav);
+        if(rad.fraga) html += '<span class="ovn-text">' + brakUt(rad.fraga) + '</span>';
+        var ts = '<svg viewBox="0 0 ' + TW + ' ' + TH + '" width="' + TW + '" height="' + TH + '" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;">';
+        ts += '<line x1="' + tx0 + '" y1="' + ty + '" x2="' + tx1 + '" y2="' + ty + '" stroke="#333" stroke-width="2"/>';
+        ts += '<polygon points="' + tx1 + ',' + ty + ' ' + (tx1 - 9) + ',' + (ty - 4) + ' ' + (tx1 - 9) + ',' + (ty + 4) + '" fill="#333"/>';
+        rad.streck.forEach(function(t){
+          var x = tpx(t.v);
+          ts += '<line x1="' + x + '" y1="' + (ty - 8) + '" x2="' + x + '" y2="' + (ty + 8) + '" stroke="#333" stroke-width="2"/>';
+          if(t.etikett !== undefined) ts += '<text x="' + x + '" y="' + (ty + 32) + '" text-anchor="middle" font-size="17" fill="#333">' + minusUt(t.etikett) + '</text>';
+        });
+        ts += '</svg>';
+        html += '<div class="alg-bild ovn-tallinje-yta" style="position:relative;width:' + TW + 'px;max-width:100%;">' + ts;
+        rad.rutor.forEach(function(r){
+          html += '<span class="ovn-tallinje-ruta" style="position:absolute;left:' + (tpx(r.v) / TW * 100).toFixed(3) + '%;top:'
+            + ((ty + 12) / TH * 100).toFixed(3) + '%;transform:translateX(-50%);display:inline-flex;align-items:center;white-space:nowrap;">'
+            + uttrycksRuta(r.svar, r.accept, rad.vars, rad.halv) + '</span>';
+        });
+        html += '</div></div>';
+        return;
+      }
       if(rad.typ === 'tallinje'){
         html += '<div class="ovn-rad ovn-tallinje-rad" data-rad="' + radNummer + '" style="flex-direction:column;align-items:flex-start;gap:10px;">';
         html += lbl(bokstav);
@@ -1055,7 +1114,8 @@ function bladHTML(blad){
       }
       // räkna om bokstav per grupp
       html += '<div class="ovn-rad" data-rad="' + radNummer + '"'
-        + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '') + '>';
+        + (rad.mellanled === 'nej' ? ' data-mellanled-nej="1"' : '')
+        + (rad.typ === 'uttryck' && rad.efter !== undefined ? ' data-svar-i-meningen="1"' : '') + '>';   // (a)
       html += lbl(bokstav);
       if(rad.typ === 'uppstallning'){
         // INGEN TYST ÅTERGÅNG (beslut 2026-10-08): kan raden inte ritas som uppställning ska det
@@ -1093,13 +1153,17 @@ function bladHTML(blad){
         if(rad.likhet){
           html += '<span class="ovn-text ovn-num">' + rad.fraga + '</span>';
           html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
+        } else if(rad.efter !== undefined){
+          // (a) TILLÄGG: rutan MITT I meningen ("v veckor har ▢ dagar."): frågan flyter inte ut, texten efter följer rutan.
+          html += '<span class="ovn-text">' + brakUt(rad.fraga) + '</span>';
         } else {
           html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
         }
         var acceptU = (rad.accept || [rad.svar]).join('|');
         html += '<input class="ovn-in bred" data-uttryck="' + encodeURIComponent(acceptU)
           + '" data-kp="uttryck" data-vars="' + varsAv(rad)
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
+          + '" data-visa="' + rad.svar + '"' + (rad.halv ? ' data-halv="1"' : '') + ' inputmode="text" autocomplete="off">';
+        if(rad.efter) html += '<span class="ovn-text">' + brakUt(rad.efter) + '</span>';   // (a)
       } else if(rad.typ === 'parentes'){
         /* PARENTES: uttrycket = mellanled = svar. Mellanledet rättas mot UTTRYCKET av
            MellanledRattare (samma termer, parenteserna borttagna, tecknen bytta efter minus),
@@ -1382,12 +1446,25 @@ function bladHTML(blad){
         // Horisontell likhetskedja: uppgift = [insättning] = [förenkling] = [svar]
         // led-objekt: {accept:[...], visa:'...'} ; sista ledet {svar:tal}
         // Stöd för bråk i visat uttryck via rad.vansterHtml (annars rad.vansterText).
-        html += '<span class="ovn-text ovn-num">' + (rad.vansterHtml || rad.vansterText) + '</span>';
+        if(rad.avskrift){
+          /* AVSKRIFTSRUTAN (TILLÄGG, Joachim 2026-11-21): eleven skriver SJÄLV av uttrycket med talet insatt
+             ("200 + 60 · 5") — det insatta uttrycket står aldrig tryckt. Rutan rättas på FORM som kedjans led
+             (data-form, jamforForm: faktorer och termer får byta ordning). Uttrycket med variabeln får stå
+             tryckt (rad.vansterText), på egen rad ovanför kedjan; rad.fraga likaså. */
+          if(rad.fraga) html += '<span class="ovn-text" style="flex-basis:100%;">' + brakUt(rad.fraga) + '</span>';
+          if(rad.vansterHtml || rad.vansterText) html += '<span class="ovn-text ovn-num" style="flex-basis:100%;">' + (rad.vansterHtml || matteUt(rad.vansterText)) + '</span>';
+          var _av = rad.avskrift, _avacc = (_av.accept || [_av.visa]).join('|');
+          html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(_avacc)
+            + '" data-visa="' + _av.visa + '" inputmode="text" autocomplete="off" style="min-width:96px;">';
+        } else {
+          html += '<span class="ovn-text ovn-num">' + (rad.vansterHtml || rad.vansterText) + '</span>';
+        }
         html += '<span class="ovn-text" style="margin:0 3px;">=</span>';
         rad.led.forEach(function(led, li){
           var arSvar = (li === rad.led.length - 1);
           if(arSvar){
             html += '<input class="ovn-in" data-svar="' + led.svar + '" inputmode="decimal" autocomplete="off" style="min-width:70px;">';
+            if(rad.avskrift && rad.enhet) html += '<span class="ovn-text">' + rad.enhet + '</span>';   // enheten efter svaret ("28 kr")
           } else {
             var acc = (led.accept || [led.visa]).join('|');
             html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(acc)
@@ -1481,7 +1558,7 @@ function bladHTML(blad){
           + '" inputmode="decimal" autocomplete="off">';
       }
       html += '</div>';
-    });
+    }
     html += '</div>';
     radNummer = 0; // bokstäver räknas om per grupp
   });
@@ -1960,9 +2037,10 @@ function bygg_blad(rotEl, blad){
         if(_ro.besked) _besked = _ro.besked;
       } else if(inp.dataset.uttryck !== undefined){
         var godk = decodeURIComponent(inp.dataset.uttryck).split('|');
-        ok = jamforUttryck(inp.value, godk)
-          || godk.some(function(g){ return jamforForenkla(inp.value, g); })
-          || godk.some(function(g){ return jamforFler(inp.value, g); });
+        var _uv = inp.dataset.halv ? halvUt(inp.value) : inp.value;          // (f) ½ bara där bladet ber om det
+        ok = jamforUttryck(_uv, godk)
+          || godk.some(function(g){ return jamforForenkla(_uv, g); })
+          || godk.some(function(g){ return jamforFler(_uv, g); });
       } else if(inp.dataset.form !== undefined){
         ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
       } else if(inp.dataset.text !== undefined){

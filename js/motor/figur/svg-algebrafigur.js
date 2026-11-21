@@ -181,7 +181,11 @@
   function strackfigur(o){
     var delar = o.delar || [], n = delar.length;
     var w = 320, h = 104, x0 = 26, xs = w - 26, y = 62, bredd = (xs - x0) / Math.max(n, 1);
-    var s2 = svgStart(w, h, o.alt || ('Str\u00e4cka ' + o.helhet + ' delad i ' + n + ' delar'));
+    // (d) TILLÄGG 2026-11-21: utan o.helhet ritas ingen helhetslinje ("x cm, 5 cm och x cm" — eleven tecknar
+    // helheten själv). Med o.helhet ritas figuren exakt som förut.
+    var harHel = o.helhet != null && o.helhet !== '';
+    var s2 = svgStart(w, h, o.alt || (harHel ? ('Str\u00e4cka ' + o.helhet + ' delad i ' + n + ' delar') : ('Str\u00e4cka delad i ' + n + ' delar')));
+    if(harHel)
     s2 += '<line class="af-matt" x1="' + x0 + '" y1="28" x2="' + xs + '" y2="28"/>'
        +  '<line class="af-matt" x1="' + x0 + '" y1="22" x2="' + x0 + '" y2="34"/>'
        +  '<line class="af-matt" x1="' + xs + '" y1="22" x2="' + xs + '" y2="34"/>'
