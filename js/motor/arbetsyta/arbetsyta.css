@@ -18,14 +18,15 @@
 /* KALKYLATORN TILL HÖGER (KONVENTIONER, arbetsytan): knappsatsen står fast i högerkanten, och bladet lämnar
    en kolumn fri för den (--nf-hoger mäts i Arbetsyta.placera, arbetsyta.js) — bladet går aldrig in under knappsatsen. Under
    knappsatsen: Kontrollera, Börja om och Tipsa på EN rad, aldrig över tangenterna. Bredden följer knapparna.
-   Bara sidans CSS och placering: den delade knappsatsen, bladets knapprad och Tipsa (elevfeedback.js) är orörda. */
-#prob-keypad{left:auto;right:20px;bottom:86px;width:max-content;max-width:calc(100vw - 40px);border:1px solid var(--paper-dk);
+   Skalets klasser .nf-kalkylator/.nf-knapprad sätts av Arbetsyta.placera, så att bladkärnans knappsats och knapprad
+   formges på samma sätt som problemlösningens (#prob-keypad, .actions). Bara sidans CSS och placering: den delade knappsatsen, bladets knapprad och Tipsa (elevfeedback.js) är orörda. */
+#prob-keypad,.nf-kalkylator{left:auto;right:20px;bottom:86px;width:max-content;max-width:calc(100vw - 40px);border:1px solid var(--paper-dk);
   border-radius:12px;box-shadow:0 6px 22px rgba(15,30,46,.14);}
 @media (min-width:641px){ .nf-yta,.nf-verktyg,.nf-film{margin-right:var(--nf-hoger,0px);} }
 /* En namnruta (Delarnas vänstra, data-nokeypad — ett namngivande ord, §4) har rätt INGEN knappsats. Här döljs
    den på sin plats i stället för att tas bort: inget annat på sidan flyttar sig (Kontrollera, rutorna). */
-#prob-keypad.keypad-hidden{display:flex !important;visibility:hidden;}
-.nf-yta .prob-kort .actions{position:fixed;z-index:101;margin:0;}
+#prob-keypad.keypad-hidden,.nf-kalkylator.keypad-hidden{display:flex !important;visibility:hidden;}
+.nf-yta .prob-kort .actions,.nf-knapprad{position:fixed;z-index:101;margin:0;}
 /* Växeln Blad A/B (kanonens .blad-nav) och "Föreläsning" på en rad överst; filmen fälls ut under raden. */
 .nf-verktyg{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 28px 0;}
 .nf-yta .blad-nav{max-width:none;margin:0;padding:0;}
@@ -44,9 +45,9 @@
 .nf-film .forel-wrap{max-width:820px;margin:0;padding:12px 0 4px;}
 .nf-film .lecture-list{max-width:none;margin:0;padding:0;}   /* kanonens kortlista bär egen sidmarginal */
 @media (max-width:640px){
-  #prob-keypad{left:0;right:0;bottom:0;max-width:none;border-radius:0;}
-  .nf-yta .prob-kort .actions{position:static;}
+  #prob-keypad,.nf-kalkylator{left:0;right:0;bottom:0;max-width:none;border-radius:0;}
+  .nf-yta .prob-kort .actions,.nf-knapprad{position:static;}
 }
 
 /* Bladens formgivning: js/motor/problemlosning/prob-blad.css (delad med ramens drill). */
-@media print{ .topnav,.nf-topp,.keypad,.actions,footer{display:none !important;} }
+@media print{ .topnav,.nf-topp,.keypad,.actions,.nf-knapprad,footer{display:none !important;} }

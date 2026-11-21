@@ -421,6 +421,20 @@ function radMedLogg(radHtml, rad, grupp){
   var store = rad.loggStore || grupp.loggStore;
   return '<div data-logg="' + rad.logg + '"' + (store ? ' data-logg-store="' + store + '"' : '') + radHtml.slice(4);
 }
+/* BLADETS BOKSTÄVER (TILLÄGG, Joachim 2026-11-21: knappsatsen visar bladets egna bokstäver, ur bladets data).
+   Bokstäverna i facit för de rutor eleven SKRIVER i (uttryck, talföljd, tallinje, lucka …) — inte valrutor,
+   val och flerval, där eleven klickar, och inte figurer. Ordning: första förekomst. Används av sidan med
+   AK8_UI.keypadBokstaver; ett blad som inte frågas efter sina bokstäver påverkas inte. */
+function bladBokstaver(blad){
+  var ut = [], KLICK = { valruta: 1, val: 1, flerval: 1, svgfigur: 1, figur: 1 };
+  function ta(t){ (String(t == null ? '' : t).match(/[a-zåäö]/g) || []).forEach(function(c){ if(ut.indexOf(c) < 0) ut.push(c); }); }
+  ((blad && blad.grupper) || []).forEach(function(gr){ (gr.rader || []).forEach(function(r){
+    if(KLICK[r.typ]) return;
+    ta(r.vars); ta(r.svar); (r.accept || []).forEach(ta); (r.facit || []).forEach(ta);
+    (r.rutor || []).forEach(function(x){ ta(x.svar); (x.accept || []).forEach(ta); });
+  }); });
+  return ut.join('');
+}
 // Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
 function visaTal(t){
   var s = String(t).replace('.', ',');
@@ -2256,6 +2270,15 @@ function bygg_blad(rotEl, blad){
       if(_ng && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(grid, _sg, _ng, ok);
     }
     // Rätta valruta-grids (välj rätt uttryck, ev. flera rätta)
+    /* TEXTALTERNATIV (rättat 2026-11-21, "Tolka och teckna uttryck"): ett alternativ med ord ("x korvar och y
+       glassar") jämförs ordagrant. Förr gick allt genom uttrycksjämförelsen, och jamforUttryck sorterar tecknen
+       i varje term — två meningar med samma bokstäver ("x glassar och y korvar") blev då lika och ett fel val
+       godkändes. Uttryck och tal (inga ord: högst två bokstäver i följd) jämförs som förut, så "4 · x" = "4·x". */
+    function valSamma(v, r){
+      if(String(v).replace(/\s+/g, ' ').trim() === String(r).replace(/\s+/g, ' ').trim()) return true;
+      if(/[a-zA-ZåäöÅÄÖ]{3,}/.test(v + ' ' + r)) return false;
+      return jamforUttryck(v, [r]) || jamforFler(v, r);
+    }
     rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
       if(blad.stegvis){ var gg = grid.closest('.ovn-grupp'); if(gg && gg.classList.contains('steg-dold')) return; }
       totalt++;
@@ -2265,7 +2288,7 @@ function bygg_blad(rotEl, blad){
       grid.querySelectorAll('.valruta-btn').forEach(function(b){
         b.classList.remove('correct','wrong');
         var bv = decodeURIComponent(b.dataset.val);
-        var arRatt = ratta.some(function(r){ return jamforUttryck(bv,[r]) || jamforFler(bv,r); });
+        var arRatt = ratta.some(function(r){ return valSamma(bv, r); });
         if(b.classList.contains('is-vald')){
           valda.push(bv);
           b.classList.add(arRatt ? 'correct' : 'wrong');
@@ -2274,7 +2297,7 @@ function bygg_blad(rotEl, blad){
         }
       });
       // rätt om: valt minst ett, och alla valda är rätta, och (om ej flera) exakt ett valt
-      var allaValdaRatt = valda.length>0 && valda.every(function(v){ return ratta.some(function(r){ return jamforUttryck(v,[r])||jamforFler(v,r); }); });
+      var allaValdaRatt = valda.length>0 && valda.every(function(v){ return ratta.some(function(r){ return valSamma(v, r); }); });
       var antalRatta = ratta.length;
       var ok = allaValdaRatt && (flera ? valda.length===antalRatta : valda.length===1);
       if(ok) ratt++;

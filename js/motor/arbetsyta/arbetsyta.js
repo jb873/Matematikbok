@@ -77,9 +77,13 @@ function film(o){
    o.keypad = sidans knappsats, o.knapprader = väljaren för bladets knapprader. */
 function placera(o){
   var kp = o.keypad, SEL = o.knapprader;
+  /* Skalets klasser (arbetsyta.css): knappsatsen och knappraderna formges av skalet oavsett vilken bladkomponent
+     som ritat dem — problemlösningens #prob-keypad/.actions och bladkärnans #ovn-keypad-shared/.ovn-kontroll-rad. */
+  kp.classList.add('nf-kalkylator');
   var LUFT = 10, KANT = 20;
   function placera(){
     var akt = document.querySelectorAll(SEL);
+    Array.prototype.forEach.call(akt, function(a){ a.classList.add('nf-knapprad'); });
     if(innerWidth <= 640){            // telefon: knappsatsen över hela bredden, knappraden i flödet (CSS:en)
       kp.style.bottom = ''; kp.style.right = ''; Array.prototype.forEach.call(akt, function(a){ a.style.right = ''; a.style.bottom = ''; });
       document.documentElement.style.removeProperty('--nf-hoger'); return;

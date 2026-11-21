@@ -524,6 +524,21 @@
       + '</div>';
     return html + '</div>';
   }
+  /* BLADETS BOKSTÄVER PÅ KNAPPSATSEN (TILLÄGG, Joachim 2026-11-21): knappsatsen visar bladets egna bokstäver,
+     tagna ur bladets data (bladBokstaver i blad-karna-b.js). Variabelknapparna byter etikett och data-key —
+     knapparna läser data-key när de trycks — och de som blir över döljs. Utan anrop: de sex vanliga, som förut.
+     Fler bokstäver än platser är ett fel i bladet, inte något som tyst klipps bort. */
+  function keypadBokstaver(kp, bokstaver){
+    if(!kp) return;
+    var lista = [];
+    String(bokstaver || '').split('').forEach(function(c){ if(/[a-zåäö]/.test(c) && lista.indexOf(c) < 0) lista.push(c); });
+    var knappar = kp.querySelectorAll('.kp-key.varkey');
+    if(lista.length > knappar.length) throw new Error('KNAPPSATSEN: bladet har ' + lista.length + ' bokstäver (' + lista.join(' ') + '), knappsatsen ' + knappar.length + ' platser');
+    Array.prototype.forEach.call(knappar, function(b, i){
+      var v = lista[i]; b.style.display = v ? '' : 'none';
+      if(v){ b.setAttribute('data-key', v); b.textContent = v; }
+    });
+  }
   function printKnappHTML(){ return '<button type="button" class="ovn-skriv-ut" data-print>↗ Skriv ut bladet</button>'; }
 
   // ── RESULTAT-MARKERING (✓/✗ + puls) + CLEAR-ON-EDIT ──
@@ -1127,7 +1142,7 @@
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledPar: ledPar, smalaRutor: smalaRutor, mattextUt: mattextUt, svarsPlats: svarsPlats,
     ledWrap: ledWrap, kedjaRadHTML: kedjaRadHTML, kedjaCeller: kedjaCeller,
-    keypadHTML: keypadHTML, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
+    keypadHTML: keypadHTML, keypadBokstaver: keypadBokstaver, printKnappHTML: printKnappHTML, bindSheet: bindSheet,
     markera: markera, rensaRad: rensaRad, besvarad: besvarad
   };
 })();

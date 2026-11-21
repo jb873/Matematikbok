@@ -215,8 +215,13 @@ Vad vaktar den: — mestadels ny UI utan grind; byggs och verifieras per pilot.
 | **Sätt in värdet: vänster beräkningsruta BARA när delen är ett uttryck** — eleven räknar ut, t.ex. `18 + 12 = 30`. För x eller ett tal finns ingen vänsterruta (`x = 18`). | `ProbBlad2` (`arUttryck`, beräkningsrutan under `arbetsyta`) | **—** |
 | **Kalkylatorn till höger. Under den, på samma rad: Kontrollera, Börja om och Tipsa** — aldrig över tangenterna. Bladet går inte in under kalkylatorn. Den delade knappsatsen ändras inte; placeringen är sidans. | skalet: `arbetsyta.css` och `Arbetsyta.placera` (`js/motor/arbetsyta/arbetsyta.js`) | **—** |
 | **Figurer för geometri är SVG** (eget pass). **Funktionella bilder stannar, dekorativa går.** | `svg-algebrafigur.js` | **—** |
+| **Knappsatsen visar bladets egna bokstäver**, tagna ur bladets data (facit för de rutor eleven skriver i) — inte alltid x y a b c n. Byter med växeln Blad A/B. Fler bokstäver än knappsatsens sex platser är ett fel i bladet. *Joachim 2026-11-21.* | `bladBokstaver(blad)` i `blad-karna-b.js` · `AK8_UI.keypadBokstaver(kp, bokstäver)` i `ak8-blad-ui.js` · anropet i sidans `vidVisa` | **—** rök-vakten per blad (bokstäverna mot facit) |
+| **Skalet formger knappsatsen och knappraden oavsett bladkomponent:** `Arbetsyta.placera` sätter `.nf-kalkylator` och `.nf-knapprad` — problemlösningens `#prob-keypad`/`.actions` och bladkärnans `#ovn-keypad-shared`/`.ovn-kontroll-rad` får samma regler. | `arbetsyta.js` (`placera`) · `arbetsyta.css` | **—** |
 
 Rättningsmodellen för flera giltiga lösningar: se **Problemlösning — rättning (metod-rättning)** nedan.
+
+Andra uppgiftssidan i formatet: `ak7/k3/d1-algebraiska-uttryck-nyformat/uppgift.html` (momentet Tolka och teckna uttryck,
+blad 1A–3B ur `js/motor/blad/blad-k3-d1-tolka.js`, ritade av bladkärnan).
 
 Vad vaktar den: — ny UI utan grind; verifieras per pilot med mätprober (båda vyportarna).
 
