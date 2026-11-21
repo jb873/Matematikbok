@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
 <link rel="stylesheet" href="../../../js/motor/keypad.css">
 <link rel="stylesheet" href="../../../js/motor/problemlosning/prob-blad.css">
+<link rel="stylesheet" href="../../../js/motor/arbetsyta/arbetsyta.css">
 <style>
 :root{
   --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
@@ -33,53 +34,7 @@
   --las:#9a9388;
 }
 
-/* ── UPPGIFTSSIDAN (ARBETSYTAN) — doc/KONVENTIONER.md "Uppgiftssidan (arbetsytan)" (2026-11-22).
-   Slimmat sidhuvud + Tillbaka, inget hjältehuvud. Färgen är bokens tokens (:root ovan = delkapitelsidornas,
-   ordagrant). Kalkylatorn till höger; under den Kontrollera, Börja om och Tipsa på samma rad. ── */
-.nf-topp{padding:16px 28px 0;}
-.nf-tillbaka{display:inline-flex;align-items:center;gap:6px;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--ink-soft);text-decoration:none;border:1px solid var(--paper-dk);border-radius:8px;
-  padding:8px 14px;background:var(--paper-lt);}
-.nf-tillbaka:hover{border-color:var(--gold-lt);color:var(--ink);}
-/* FULL BREDD: bladet vänsterställt över hela sidan (plats för flera mellanled) — kanonens .ovn-wrap
-   (max 920 px, centrerad) och bladets eget .prob-kort-mått släpps här. */
-.nf-yta .ovn-wrap{max-width:none;margin:0;padding:8px 0 12px;}
-.nf-yta .prob-kort{max-width:none;margin:0;}
-/* KALKYLATORN TILL HÖGER (KONVENTIONER, arbetsytan): knappsatsen står fast i högerkanten, och bladet lämnar
-   en kolumn fri för den (--nf-hoger mäts i placera() nedan) — bladet går aldrig in under knappsatsen. Under
-   knappsatsen: Kontrollera, Börja om och Tipsa på EN rad, aldrig över tangenterna. Bredden följer knapparna.
-   Bara sidans CSS och placering: den delade knappsatsen, bladets knapprad och Tipsa (elevfeedback.js) är orörda. */
-#prob-keypad{left:auto;right:20px;bottom:86px;width:max-content;max-width:calc(100vw - 40px);border:1px solid var(--paper-dk);
-  border-radius:12px;box-shadow:0 6px 22px rgba(15,30,46,.14);}
-@media (min-width:641px){ .nf-yta,.nf-verktyg,.nf-film{margin-right:var(--nf-hoger,0px);} }
-/* En namnruta (Delarnas vänstra, data-nokeypad — ett namngivande ord, §4) har rätt INGEN knappsats. Här döljs
-   den på sin plats i stället för att tas bort: inget annat på sidan flyttar sig (Kontrollera, rutorna). */
-#prob-keypad.keypad-hidden{display:flex !important;visibility:hidden;}
-.nf-yta .prob-kort .actions{position:fixed;z-index:101;margin:0;}
-/* Växeln Blad A/B (kanonens .blad-nav) och "Föreläsning" på en rad överst; filmen fälls ut under raden. */
-.nf-verktyg{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 28px 0;}
-.nf-yta .blad-nav{max-width:none;margin:0;padding:0;}
-/* VÄXELN NEDTONAD: rubriken är typen; Blad A/B är ett val på sidan, inte sidans namn. Kanonens knapp, i
-   bokens svaga toner (ingen mörk solid för det valda bladet). */
-#nf-bladnav{gap:4px;}
-#nf-bladnav .blad-nav-btn{font-size:11.5px;padding:6px 11px;gap:7px;background:transparent;border-color:transparent;color:var(--ink-faint);}
-#nf-bladnav .blad-nav-btn:hover{border-color:var(--paper-dk);color:var(--ink-soft);}
-#nf-bladnav .blad-nav-btn .blad-nav-nr{width:18px;height:18px;font-size:10px;}
-#nf-bladnav .blad-nav-btn.is-active{background:var(--paper-dk);border-color:var(--paper-dk);color:var(--ink-soft);box-shadow:none;}
-#nf-bladnav .blad-nav-btn.is-active .blad-nav-nr{background:var(--paper-lt);color:var(--ink-soft);}
-/* hidden ska gälla i verktygsraden: kanonens .blad-nav-btn sätter display och slog annars ut attributet
-   (filmknappen syntes på testen utan film; "Nästa blad" efter sista blandade bladet). */
-.nf-verktyg [hidden]{display:none;}
-.nf-film{padding:0 28px;}
-.nf-film .forel-wrap{max-width:820px;margin:0;padding:12px 0 4px;}
-.nf-film .lecture-list{max-width:none;margin:0;padding:0;}   /* kanonens kortlista bär egen sidmarginal */
-@media (max-width:640px){
-  #prob-keypad{left:0;right:0;bottom:0;max-width:none;border-radius:0;}
-  .nf-yta .prob-kort .actions{position:static;}
-}
-
-/* Bladens formgivning: js/motor/problemlosning/prob-blad.css (delad med ramens drill). */
-@media print{ .topnav,.nf-topp,.keypad,.actions,footer{display:none !important;} }
+/* Skalets formgivning (arbetsytan): js/motor/arbetsyta/arbetsyta.css. Bladens: prob-blad.css. */
 </style>
 </head>
 <body>
@@ -107,16 +62,17 @@
   <section class="nf-film" id="nf-film" hidden></section>
 </main>
 
+<script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
 <script>
+/* SKALET (js/motor/arbetsyta/arbetsyta.js): retur-adress, monteringar, växel, Föreläsning, placering —
+   delat av uppgiftssidorna. */
 /* ── VAD SOM VISAS: ?typ=<typ>&blad=A|B (ett uppgiftsblad) eller ?test=test1|test2 (ett test).
    Uppgifterna kommer ur banken (js/motor/problemlosning/prob-bank-ak7.js); sidan väljer bara vilka.
-   Tillbaka går till sidan man kom från: en relativ retur-adress, annars arbetssidan. ── */
+   Tillbaka går till sidan man kom från: en relativ retur-adress, annars arbetssidan (Arbetsyta.retur). ── */
 (function(){
-  var q = new URLSearchParams(location.search);
+  var q = window.Arbetsyta.retur();
   window.NF_VAL = { typ: q.get('typ') || q.get('blad'), blad: (q.get('blad') || '').toUpperCase(), test: q.get('test'),
                     blandade: q.get('blandade') };
-  var retur = q.get('retur');
-  if(retur && !/^[a-z][a-z0-9+.\-]*:|^\/|^\\/i.test(retur.replace(/[\u0000- ]/g, ''))) document.getElementById('nf-tillbaka').href = retur;
 })();
 </script>
 
@@ -151,7 +107,8 @@
   var BANK = window.ProbBankAk7, val = window.NF_VAL, yta = document.getElementById('nf-yta');
   var nav = document.getElementById('nf-bladnav'), gk = document.getElementById('nf-genomgang'), film = document.getElementById('nf-film');
   if(!BANK) return;
-  function montering(id){ var m = document.createElement('div'); m.className = 'ovn-wrap nf-mount'; m.id = id; yta.appendChild(m); return m; }
+  var AY = window.Arbetsyta;
+  function montering(id){ return AY.montering(yta, id); }
   // ARBETSYTAN (KONVENTIONER "Uppgiftssidan (arbetsytan)"): bladkomponentens egna val — numrering 'tal'
   // ("1." på frågans rad, som i boken) och arbetsyta (mindre rutor som växer, likhetstecknen under varandra,
   // beräkningsrutan i Sätt in värdet). Utan dem ritar komponenten som förut (ramens drill).
@@ -183,37 +140,17 @@
 
   var typ = BANK.typ(val.typ) || BANK.TYPER[0];
   document.title = 'Matematik · Algebra · Problemlösning · ' + typ.titel;
-  var mounts = {}, knappar = {};
-  BANK.UPPGIFTSBLAD.forEach(function(b){
-    var m = montering('nf-sheet-' + typ.id + '-' + b); m.setAttribute('data-blad', b);
-    BANK.rita(m, medNummer(BANK.blad(typ.id, b)), typ.form);
-    mounts[b] = m;
-    var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'blad-nav-btn'; kn.setAttribute('role', 'tab');
-    kn.innerHTML = '<span class="blad-nav-nr">' + b + '</span>Blad ' + b;   // växeln: "Blad A", "Blad B"
-    kn.addEventListener('click', function(){ visa(b); });
-    nav.appendChild(kn); knappar[b] = kn;
-  });
-  function visa(b){
-    Object.keys(mounts).forEach(function(k){
-      mounts[k].hidden = (k !== b);
-      knappar[k].classList.toggle('is-active', k === b); knappar[k].setAttribute('aria-selected', k === b ? 'true' : 'false');
-    });
-    window.NF_BLAD = typ.id + '-' + b;
-    try { history.replaceState(null, '', '?typ=' + typ.id + '&blad=' + b + (new URLSearchParams(location.search).get('retur') ? '&retur=' + encodeURIComponent(new URLSearchParams(location.search).get('retur')) : '')); } catch(e){}
-  }
-  visa(mounts[val.blad] ? val.blad : BANK.UPPGIFTSBLAD[0]);
+  AY.vaxel({ nav: nav, yta: yta, varianter: BANK.UPPGIFTSBLAD, start: val.blad,
+    id: function(b){ return 'nf-sheet-' + typ.id + '-' + b; },
+    rita: function(m, b){ BANK.rita(m, medNummer(BANK.blad(typ.id, b)), typ.form); },
+    vidVisa: function(b){
+      window.NF_BLAD = typ.id + '-' + b;
+      try { history.replaceState(null, '', '?typ=' + typ.id + '&blad=' + b + (new URLSearchParams(location.search).get('retur') ? '&retur=' + encodeURIComponent(new URLSearchParams(location.search).get('retur')) : '')); } catch(e){}
+    } });
 
-  /* FÖRELÄSNING (knappen hette "Visa genomgång" till 2026-11-22): typens film ur föreläsningsregistret (nyckeln ak7-k3-d5). Föreläsningsmodulens egen
-     yta — YouTube laddas först när eleven klickar play (noll nätväg tills dess). */
+  /* FÖRELÄSNING: typens film ur föreläsningsregistret (nyckeln ak7-k3-d5), via skalet (Arbetsyta.film). */
   var F = window.FOREL, f = F && F.videorFor('ak7-k3-d5').filter(function(x){ return x.id === typ.film; })[0];
-  if(f && F.renderFilmer){
-    gk.hidden = false;
-    gk.addEventListener('click', function(){
-      var oppen = gk.getAttribute('aria-expanded') === 'true';
-      if(!oppen && !film.firstChild) F.renderFilmer(film, [f]);
-      film.hidden = oppen; gk.setAttribute('aria-expanded', oppen ? 'false' : 'true'); gk.classList.toggle('is-active', !oppen);
-    });
-  }
+  AY.film({ knapp: gk, yta: film, video: f });
 })();
 </script>
 
@@ -221,43 +158,8 @@
 <script>
 (function(){
   var kp = window.ProbBankAk7 && ProbBankAk7.knappsats(); if(!kp) return;
-  /* KALKYLATORN TILL HÖGER, KNAPPRADEN UNDER (KONVENTIONER, arbetsytan). Nederst i högerkanten: EN rad med
-     bladets egen knapprad (Kontrollera, Börja om) och Tipsa (elevfeedback.js, som står kvar på sin egen plats
-     — knappraden ställs till vänster om den, mitt för den i höjd). Knappsatsen står ovanför raden, högerkant mot
-     Tipsas högerkant. Bladet lämnar en kolumn fri för båda (--nf-hoger). Allt mäts mot de renderade rutorna
-     (knappsatsen behåller sin plats också när en namnruta döljer den). Komponenterna är oförändrade. */
-  var LUFT = 10, KANT = 20;
-  function placera(){
-    var akt = document.querySelectorAll('.nf-yta .prob-kort .actions');
-    if(innerWidth <= 640){            // telefon: knappsatsen över hela bredden, knappraden i flödet (CSS:en)
-      kp.style.bottom = ''; kp.style.right = ''; Array.prototype.forEach.call(akt, function(a){ a.style.right = ''; a.style.bottom = ''; });
-      document.documentElement.style.removeProperty('--nf-hoger'); return;
-    }
-    var fb = document.querySelector('.feedback-knapp'), fr = fb ? fb.getBoundingClientRect() : null;
-    var hoger = fr ? (innerWidth - fr.right) : KANT;                       // radens och knappsatsens högerkant
-    var radH = fr ? fr.height : 0, radBotten = fr ? (innerHeight - fr.bottom) : KANT;
-    var radTopp = innerHeight - radBotten - radH, radVanster = fr ? fr.left : innerWidth - KANT;
-    Array.prototype.forEach.call(akt, function(a){
-      var h = a.offsetHeight, w = a.offsetWidth;
-      if(!h) return;                                    // bladet som inte visas (växeln): ingen ruta att mäta
-      var hgr = fr ? (innerWidth - fr.left + LUFT) : KANT;
-      var btn = fr ? Math.round(radBotten + (radH - h) / 2) : KANT;
-      a.style.right = Math.round(hgr) + 'px'; a.style.bottom = btn + 'px';
-      if(!fr){ radH = h; radTopp = innerHeight - KANT - h; }
-      radTopp = Math.min(radTopp, innerHeight - btn - h);
-      radVanster = Math.min(radVanster, innerWidth - hgr - w);
-    });
-    kp.style.right = Math.round(hoger) + 'px';
-    kp.style.bottom = Math.round(innerHeight - radTopp + LUFT) + 'px';
-    var kr = kp.getBoundingClientRect();
-    document.documentElement.style.setProperty('--nf-hoger', Math.round(innerWidth - Math.min(kr.left, radVanster) + 8) + 'px');
-  }
-  placera(); window.addEventListener('resize', placera);
-  if(window.ResizeObserver) new ResizeObserver(placera).observe(kp);
-  // nya blad (Börja om, blandade) och växeln Blad A/B (hidden på monteringen) → mät om
-  new MutationObserver(placera).observe(document.getElementById('nf-yta'), { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
-  // Tipsa-knappen (elevfeedback.js, defer) kommer efter: mät om när den finns.
-  window.addEventListener('load', function(){ setTimeout(placera, 0); });
+  // Kalkylatorn till höger, knappraden under (KONVENTIONER, arbetsytan): Arbetsyta.placera.
+  window.Arbetsyta.placera({ keypad: kp, knapprader: '.nf-yta .prob-kort .actions' });
 })();
 </script>
 

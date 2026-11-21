@@ -1,0 +1,52 @@
+/* arbetsyta.css — UPPGIFTSSIDANS SKAL (doc/KONVENTIONER.md "Uppgiftssidan (arbetsytan)"), delat av alla
+ uppgiftssidor i det nya formatet. Utbrutet ordagrant ur ak7/k3/d5-problemlosning-nyformat/uppgift.html
+ (Joachim 2026-11-21: "bara en flytt"). Färgens tokens (:root) står kvar i varje sida, som på delkapitelsidorna.
+ Laddas EFTER bladets egen CSS och FÖRE sidans <style>. */
+
+/* ── UPPGIFTSSIDAN (ARBETSYTAN) — doc/KONVENTIONER.md "Uppgiftssidan (arbetsytan)" (2026-11-22).
+   Slimmat sidhuvud + Tillbaka, inget hjältehuvud. Färgen är bokens tokens (:root i sidan = delkapitelsidornas,
+   ordagrant). Kalkylatorn till höger; under den Kontrollera, Börja om och Tipsa på samma rad. ── */
+.nf-topp{padding:16px 28px 0;}
+.nf-tillbaka{display:inline-flex;align-items:center;gap:6px;font-family:var(--cinzel);font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-soft);text-decoration:none;border:1px solid var(--paper-dk);border-radius:8px;
+  padding:8px 14px;background:var(--paper-lt);}
+.nf-tillbaka:hover{border-color:var(--gold-lt);color:var(--ink);}
+/* FULL BREDD: bladet vänsterställt över hela sidan (plats för flera mellanled) — kanonens .ovn-wrap
+   (max 920 px, centrerad) och bladets eget .prob-kort-mått släpps här. */
+.nf-yta .ovn-wrap{max-width:none;margin:0;padding:8px 0 12px;}
+.nf-yta .prob-kort{max-width:none;margin:0;}
+/* KALKYLATORN TILL HÖGER (KONVENTIONER, arbetsytan): knappsatsen står fast i högerkanten, och bladet lämnar
+   en kolumn fri för den (--nf-hoger mäts i Arbetsyta.placera, arbetsyta.js) — bladet går aldrig in under knappsatsen. Under
+   knappsatsen: Kontrollera, Börja om och Tipsa på EN rad, aldrig över tangenterna. Bredden följer knapparna.
+   Bara sidans CSS och placering: den delade knappsatsen, bladets knapprad och Tipsa (elevfeedback.js) är orörda. */
+#prob-keypad{left:auto;right:20px;bottom:86px;width:max-content;max-width:calc(100vw - 40px);border:1px solid var(--paper-dk);
+  border-radius:12px;box-shadow:0 6px 22px rgba(15,30,46,.14);}
+@media (min-width:641px){ .nf-yta,.nf-verktyg,.nf-film{margin-right:var(--nf-hoger,0px);} }
+/* En namnruta (Delarnas vänstra, data-nokeypad — ett namngivande ord, §4) har rätt INGEN knappsats. Här döljs
+   den på sin plats i stället för att tas bort: inget annat på sidan flyttar sig (Kontrollera, rutorna). */
+#prob-keypad.keypad-hidden{display:flex !important;visibility:hidden;}
+.nf-yta .prob-kort .actions{position:fixed;z-index:101;margin:0;}
+/* Växeln Blad A/B (kanonens .blad-nav) och "Föreläsning" på en rad överst; filmen fälls ut under raden. */
+.nf-verktyg{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 28px 0;}
+.nf-yta .blad-nav{max-width:none;margin:0;padding:0;}
+/* VÄXELN NEDTONAD: rubriken är typen; Blad A/B är ett val på sidan, inte sidans namn. Kanonens knapp, i
+   bokens svaga toner (ingen mörk solid för det valda bladet). */
+#nf-bladnav{gap:4px;}
+#nf-bladnav .blad-nav-btn{font-size:11.5px;padding:6px 11px;gap:7px;background:transparent;border-color:transparent;color:var(--ink-faint);}
+#nf-bladnav .blad-nav-btn:hover{border-color:var(--paper-dk);color:var(--ink-soft);}
+#nf-bladnav .blad-nav-btn .blad-nav-nr{width:18px;height:18px;font-size:10px;}
+#nf-bladnav .blad-nav-btn.is-active{background:var(--paper-dk);border-color:var(--paper-dk);color:var(--ink-soft);box-shadow:none;}
+#nf-bladnav .blad-nav-btn.is-active .blad-nav-nr{background:var(--paper-lt);color:var(--ink-soft);}
+/* hidden ska gälla i verktygsraden: kanonens .blad-nav-btn sätter display och slog annars ut attributet
+   (filmknappen syntes på testen utan film; "Nästa blad" efter sista blandade bladet). */
+.nf-verktyg [hidden]{display:none;}
+.nf-film{padding:0 28px;}
+.nf-film .forel-wrap{max-width:820px;margin:0;padding:12px 0 4px;}
+.nf-film .lecture-list{max-width:none;margin:0;padding:0;}   /* kanonens kortlista bär egen sidmarginal */
+@media (max-width:640px){
+  #prob-keypad{left:0;right:0;bottom:0;max-width:none;border-radius:0;}
+  .nf-yta .prob-kort .actions{position:static;}
+}
+
+/* Bladens formgivning: js/motor/problemlosning/prob-blad.css (delad med ramens drill). */
+@media print{ .topnav,.nf-topp,.keypad,.actions,footer{display:none !important;} }
