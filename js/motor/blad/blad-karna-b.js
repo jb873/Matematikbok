@@ -461,6 +461,17 @@ function rakneOperationer(t){
 function uttryckTalen(t){
   return (String(t).replace(/(\d)\s+(?=\d)/g, '$1').match(/\d+(?:[.,]\d+)?/g) || []).map(function(x){ return parseFloat(x.replace(',', '.')); });
 }
+/* EN FAKTORISERING HAR INGEN FAKTOR 1 (KONVENTIONER §3, Joachim 2026-11-22): där facit är en produkt av tal
+   ("6·6", "2·2·2·7") är talet självt gånger 1 den triviala formen, inte en faktorisering — "1·36" och "36·1"
+   underkänns. Skälet är avsiktligt detta (talet självt / 1 är ingen faktorisering), inte att 36 saknas i facit. */
+function trivialFaktorisering(svar, godkanda){
+  function produkt(t){ var s = String(t).replace(/\s/g, '').replace(/[x×*]/gi, '·'); return /^\d+(?:[.,]\d+)?(?:·\d+(?:[.,]\d+)?)+$/.test(s) ? s : null; }
+  if(!godkanda.some(produkt)) return false;
+  var s = produkt(svar); if(!s) return false;
+  var f = s.split('·').map(function(x){ return parseFloat(x.replace(',', '.')); });
+  var varde = f.reduce(function(a, b){ return a * b; }, 1);
+  return f.some(function(x){ return x === 1 || x === varde; });
+}
 function utraknat(svar, godkanda){
   var tal = godkanda.filter(taluttryck);
   if(!tal.length) return false;
@@ -2129,7 +2140,9 @@ function bygg_blad(rotEl, blad){
            värdet — "37" för "25 + 12" underkänns. Samma princip som "redan löst godtas inte": formen är det
            uppgiften tränar. Ett ensamt tal godtas bara där facit självt är ett ensamt tal. */
         if(ok && ensamtTal(_uv) && !godk.some(ensamtTal)) ok = false;
-        // ...och inte heller delvis: en operation ur ett tecknat taluttryck får inte vara uträknad ("40 + 16").
+        // Där facit är en produkt: talet självt gånger 1 är ingen faktorisering ("1·36") — prövas först, det är skälet.
+        if(ok && trivialFaktorisering(_uv, godk)) ok = false;
+        // ...och inte heller delvis uträknat: en operation ur ett tecknat taluttryck får inte vara uträknad ("40 + 16").
         if(ok && utraknat(_uv, godk)) ok = false;
       } else if(inp.dataset.form !== undefined){
         ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
