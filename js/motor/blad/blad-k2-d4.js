@@ -271,7 +271,7 @@
       html += '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
-      + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button></div>'
+      + '<button type="button" class="ovn-aterstall" data-action="reset">Börja om</button></div>'
       + '<div class="ovn-sammanf" data-sammanf style="display:none;"></div>';
     html += '</div>';
     // FAS3: delad AK8_UI-keypad (surfplatta kunde inte svara utan den). Fixed nedtill; keypad-clearance sköter marginalen.
@@ -298,7 +298,7 @@
         };
       });
     });
-    // Kontrollera / Återställ
+    // Kontrollera / Börja om
     var kn = mount.querySelector('[data-action="kontroll"]'); if(kn) kn.onclick = function(){ kontrollera(mount); };
     var rn = mount.querySelector('[data-action="reset"]'); if(rn) rn.onclick = function(){ render(); };
     // Villkors-validering (öppna uppgifter)

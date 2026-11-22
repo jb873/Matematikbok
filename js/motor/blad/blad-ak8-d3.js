@@ -269,7 +269,7 @@
       html += '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
-      + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
+      + '<button class="ovn-aterstall" data-reset>Börja om</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
     html += AK8_UI.keypadHTML({ ops:[',', '−'] });
     mount.innerHTML = html;

@@ -147,7 +147,7 @@
       html += '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
-      + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button></div>'
+      + '<button type="button" class="ovn-aterstall" data-action="reset">Börja om</button></div>'
       + '<div class="ovn-sammanf" data-sammanf style="display:none;"></div>';
     html += '</div>';
     if(window.AK8_UI && AK8_UI.keypadHTML) html += AK8_UI.keypadHTML();

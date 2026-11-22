@@ -495,7 +495,7 @@ function bladHTML(blad){
   html += '<div class="ovn-wrap" style="padding-top:0;">';
   html += '<div class="ovn-kontroll-rad">'
     + '<button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button>'
-    + '<button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'
+    + '<button type="button" class="ovn-aterstall" data-action="reset">Börja om</button>'
     + (blad.kanGenerera ? '<button type="button" class="ovn-aterstall" data-action="nytt-blad">↻ Nytt blad med andra tal</button>' : '')
     + '</div>';
 

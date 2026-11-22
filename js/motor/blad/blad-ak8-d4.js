@@ -439,7 +439,7 @@
     // Numrering (grupp N. + rad a/b/c) via delade AK8_UI.
     blad.uppg.forEach(function(g, gi){ html += '<div class="ovn-grupp"' + AK8_UI.gruppAttr(g) + '>' + AK8_UI.renderGrupp(g, gi + 1, renderRad) + '</div>'; });
     html += '<div class="ovn-kontroll-rad"><button class="ovn-kontroll" data-kontroll>Kontrollera</button>'
-      + '<button class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div>'
+      + '<button class="ovn-aterstall" data-reset>Börja om</button>' + AK8_UI.printKnappHTML() + '</div>'
       + '<div class="ovn-sammanf" data-sammanf hidden></div></div>';
     html += AK8_UI.keypadHTML({ builders:true, ops:['+', '−', '·', '/', ','] });   // delad keypad (, för decimalkoefficienter)
     mount.innerHTML = html;

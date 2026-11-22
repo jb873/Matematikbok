@@ -1885,7 +1885,7 @@ function bygg_blad(rotEl, blad){
     });
   });
 
-  // Kontroll / Återställ / Skriv ut
+  // Kontroll / Börja om / Skriv ut
   var forstaForsoket = true; // 0-1 fel på första försöket -> nytt blad
   rotEl.querySelector('[data-action="kontroll"]').addEventListener('click', function(){
     var ratt = 0, totalt = 0;

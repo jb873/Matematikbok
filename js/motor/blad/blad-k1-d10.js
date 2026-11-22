@@ -912,7 +912,7 @@ function renderTallinjeDok(){
     // DET nämnar-grinden letar efter. Utan det hoppade grinden över bladet och skrev "ingen
     // Kontrollera-knapp" — och det var därför facit-läckan ovan kunde leva ouppdagad.
     + '<button type="button" class="ovn-kontroll" data-action="kontroll" data-tl-kontroll>Kontrollera</button>'
-    + '<button type="button" class="ovn-aterstall" data-tl-reset>Återställ</button>'
+    + '<button type="button" class="ovn-aterstall" data-tl-reset>Börja om</button>'
     + '</div>';
   // `data-sammanf` är plattformens attribut för bladets "X av Y"-summering, och det är DÄR
   // nämnar-grinden läser nämnaren. Bladet bar bara sitt egna data-tl-sammanf, så grinden fick

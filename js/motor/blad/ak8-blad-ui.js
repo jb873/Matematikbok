@@ -833,7 +833,7 @@
     svarsPlats(mount);
     ledPar(mount);
     smalaRutor(mount);
-    // Åter-bind (Återställ → renderBlad → bindSheet på SAMMA mount): ta bort förra bindningens mount-lyssnare
+    // Åter-bind (Börja om → renderBlad → bindSheet på SAMMA mount): ta bort förra bindningens mount-lyssnare
     // först. Förr staplades de → efter tre återställningar avslöjade ett "+ led"-klick flera led, och
     // focusin/keydown kördes flera gånger. Keypad-knapparna är nya element per render och binds om ändå.
     if(mount.__ak8lyss){ mount.__ak8lyss.forEach(function(l){ mount.removeEventListener(l[0], l[1], l[2]); }); }
@@ -1046,7 +1046,7 @@
 
   // ── renderSheet — HELA bladets omslag som ETT kontrakt (FAS 2). ──
   // Emitterar exakt den form varje åk8-blad har: .ovn-sheet + h2 + .ovn-grupp×N (renderGrupp: numrering
-  // N. + a/b/c) + kontrollrad (Kontrollera / Återställ / ev. extra knappar / Skriv ut) + .ovn-sammanf + keypad,
+  // N. + a/b/c) + kontrollrad (Kontrollera / Börja om / ev. extra knappar / Skriv ut) + .ovn-sammanf + keypad,
   // och kör bindSheet. Ett blad som monteras här KAN inte utelämna omslaget eller rubriken — det var luckan i
   // dk11 (html började med '' i st f '<div class="ovn-sheet"><h2>…'). Utseendet kommer ur ak8-blad-kanon.css.
   //   grupper[i]: { rubrik, rader, logg? }   logg → data-logg på .ovn-grupp (mastery per grupp)
@@ -1060,7 +1060,7 @@
       html += '<div class="ovn-grupp"' + gruppAttr(g) + '>' + renderGrupp(g, gi + 1, renderRad) + '</div>';
     });
     html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button>'
-      + '<button type="button" class="ovn-aterstall" data-reset>' + (opts.resetLabel || 'Återställ') + '</button>';
+      + '<button type="button" class="ovn-aterstall" data-reset>' + (opts.resetLabel || 'Börja om') + '</button>';
     (opts.knappar || []).forEach(function(k){ html += '<button type="button" class="ovn-aterstall" ' + k.attr + '>' + k.text + '</button>'; });
     if(opts.print !== false) html += printKnappHTML();
     html += '</div><div class="ovn-sammanf" data-sammanf hidden></div></div>';

@@ -468,7 +468,7 @@
     h+='<div class="ovn-wrap" style="padding-top:0;">';
     // DELAD AK8_UI-keypad (migrerad från inline .ovn-keypad).
     h+=AK8_UI.keypadHTML();
-    h+='<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Återställ</button>'+(blad.genererare?'<button type="button" class="ovn-aterstall" data-action="nyttblad">↻ Nytt blad</button>':'')+'</div>';
+    h+='<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-action="kontroll">Kontrollera</button><button type="button" class="ovn-aterstall" data-action="reset">Börja om</button>'+(blad.genererare?'<button type="button" class="ovn-aterstall" data-action="nyttblad">↻ Nytt blad</button>':'')+'</div>';
     h+='<div class="ovn-sammanf" data-sammanf style="display:none;"></div></div></div>';
     rotEl.innerHTML=h;
 

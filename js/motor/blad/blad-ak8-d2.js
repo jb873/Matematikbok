@@ -312,7 +312,7 @@
       });
       html += '</div>';
     });
-    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Återställ</button>' + AK8_UI.printKnappHTML() + '</div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
+    html += '<div class="ovn-kontroll-rad"><button type="button" class="ovn-kontroll" data-kontroll>Kontrollera</button><button type="button" class="ovn-aterstall" data-reset>Börja om</button>' + AK8_UI.printKnappHTML() + '</div><div class="ovn-sammanf" data-sammanf style="display:none;"></div></div>';
     html += AK8_UI.keypadHTML({ ops:['+', '−', '·', '/'] });
     mount.innerHTML = html;
     // interaktioner
