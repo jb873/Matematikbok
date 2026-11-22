@@ -70,6 +70,7 @@
 <script src="../../../js/data/k3-taxonomi.js"></script>
 <script src="../../../js/data/k3-fardiga-test.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d1-prio.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -82,7 +83,7 @@
 var M = window.Momentsida, el = M.el;
 var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
-var DATA = window.BLAD_K3_D1_TOLKA;
+var DATA = window.BLAD_K3_D1_TOLKA, PRIO = window.BLAD_K3_D1_PRIO;
 if(window.Arbetsyta) window.Arbetsyta.retur();
 
 /* ── MOMENTEN (Joachims beslut 2026-11-21): tre moment i den här ordningen, märket 7 på alla tre.
@@ -90,8 +91,8 @@ if(window.Arbetsyta) window.Arbetsyta.retur();
    och Räkna med uttryck är inte byggda — de står som "Kommer senare". ── */
 var MOMENT = [
   { titel: 'Tolka och teckna uttryck', ar: 7, roll: 'karna', bladen: DATA ? DATA.MOMENT.blad : [],
-    niva: DATA ? { prefix: DATA.MOMENT.nivaPrefix, id: DATA.MOMENT.nivaId } : null },
-  { titel: 'Prioriteringsregeln', ar: 7, roll: 'karna', kommer: true },
+    id: 'tolka', niva: DATA ? { prefix: DATA.MOMENT.nivaPrefix, id: DATA.MOMENT.nivaId } : null },
+  { titel: 'Prioriteringsregeln', ar: 7, roll: 'karna', id: 'prio', bladen: PRIO ? PRIO.MOMENT.blad : [] },
   { titel: 'Räkna med uttryck', ar: 7, roll: 'karna', kommer: true }
 ];
 
@@ -108,10 +109,13 @@ function visaMoment(m){
   // SPÄRREN (NivaRad, §3): ett blad som inte är nått står med 🔒, utan länk — samma tecken som nivåraden, ingen text.
   var l1 = el('div', 'nf-lista');
   m.bladen.forEach(function(b){
+    // Ett blad som inte är byggt färdigt (b.kommer) står med "Kommer senare", som en sektion som inte finns än.
     var oppet = !window.NivaRad || !m.niva || window.NivaRad.nadd(m.niva.prefix, m.niva.id, b.nr);
-    var a = el(oppet ? 'a' : 'span', 'nf-blad' + (oppet ? '' : ' is-locked'));
-    if(oppet) a.href = 'uppgift.html?blad=' + b.nr + 'A'; else a.setAttribute('aria-disabled', 'true');
-    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel + (oppet ? '' : ' 🔒')));
+    var a = el(oppet && !b.kommer ? 'a' : 'span', 'nf-blad' + (b.kommer ? ' is-kommer' : oppet ? '' : ' is-locked'));
+    if(oppet && !b.kommer) a.href = 'uppgift.html?' + (m.id !== 'tolka' ? 'moment=' + m.id + '&' : '') + 'blad=' + b.nr + 'A';
+    else a.setAttribute('aria-disabled', 'true');
+    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel + (oppet || b.kommer ? '' : ' 🔒')));
+    if(b.kommer) a.appendChild(el('span', 'nf-chip soon', 'Kommer senare'));
     l1.appendChild(a);
   });
   S1.body.appendChild(l1);
@@ -138,6 +142,13 @@ M.montera({
   mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
           { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ]
 });
+/* ?moment=<id> (Tillbaka från ett moments uppgiftssida): öppna DET momentet i stället för det första, så eleven
+   kommer tillbaka dit hen var. Utan parametern som förut. */
+try {
+  var mid = new URLSearchParams(location.search).get('moment');
+  var mm = MOMENT.filter(function(x){ return x.id === mid && !x.kommer; })[0];
+  if(mm){ var knapp = [].filter.call(document.querySelectorAll('.nr-rad'), function(b){ return !b.disabled && b.textContent.indexOf(mm.titel) >= 0; })[0]; if(knapp) knapp.click(); }
+} catch(e){}
 })();
 </script>
 <script src="../../../js/elevfeedback.js" defer></script>

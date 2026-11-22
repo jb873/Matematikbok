@@ -68,8 +68,9 @@
   <span>Algebraiska uttryck</span>
 </footer>
 
-<!-- MASTERY (k3-store) -->
+<!-- MASTERY (k3-store; k1-storen för Prioriteringsregeln, vars nod har sin hemvist i k1) -->
 <script src="../../../js/mastery-karna.js"></script>
+<script src="../../../js/mastery.js"></script>
 <script src="../../../js/mastery-k3.js"></script>
 <!-- MOTOR: bladkärnan och dess UI, som d1:s gamla sida -->
 <script src="../../../js/motor/alg-brak.js"></script>
@@ -77,17 +78,23 @@
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d1-prio.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
 
 <script>
-/* ── VAD SOM VISAS: ?blad=<nr><variant>, t.ex. ?blad=2B. Bladen kommer ur datafilen; sidan väljer bara vilket.
+/* ── VAD SOM VISAS: ?moment=<id>&blad=<nr><variant>, t.ex. ?moment=prio&blad=2B. Utan moment: Tolka och teckna
+   uttryck (så gamla länkar ?blad=2B fungerar som förut). Bladen kommer ur datafilen; sidan väljer bara vilket.
    Skalet (Arbetsyta) bär Tillbaka, växeln, Föreläsning och placeringen av knappsatsen och knappraden.
    Knappsatsen (bladkärnans delade, #ovn-keypad-shared) visar det synliga bladets egna bokstäver. ── */
 (function(){
-  var AY = window.Arbetsyta, DATA = window.BLAD_K3_D1_TOLKA;
+  var AY = window.Arbetsyta;
   var q = AY.retur();
+  var MOMENTEN = { tolka: window.BLAD_K3_D1_TOLKA, prio: window.BLAD_K3_D1_PRIO };
+  var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'tolka', DATA = MOMENTEN[momentId];
+  // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet (tolka är momentsidans första och öppnas ändå).
+  if(!q.get('retur') && momentId !== 'tolka') document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;
   var yta = document.getElementById('nf-yta'), nav = document.getElementById('nf-bladnav');
   if(!DATA || !window.bygg_blad) return;
   var m = /^(\d)([A-Za-z])?$/.exec(q.get('blad') || '') || [];
@@ -95,15 +102,15 @@
   var start = (m[2] || 'A').toUpperCase(), data = {}, MO = DATA.MOMENT, NR = window.NivaRad;
   /* SPÄRREN (NivaRad, KONVENTIONER §3): en direktlänk till ett låst blad öppnar inte bladet — den skickar till
      momentsidan (dit Tillbaka leder), där eleven ser låset i sitt sammanhang: Blad 1–2 öppna, Blad 3 🔒. */
-  if(NR && !NR.nadd(MO.nivaPrefix, MO.nivaId, info.nr)){ location.replace(document.getElementById('nf-tillbaka').href); return; }
-  document.title = 'Matematik · Algebra · Tolka och teckna uttryck · ' + info.titel;
+  if(NR && MO.nivaPrefix && !NR.nadd(MO.nivaPrefix, MO.nivaId, info.nr)){ location.replace(document.getElementById('nf-tillbaka').href); return; }
+  document.title = 'Matematik · Algebra · ' + MO.titel + ' · ' + (info.titel || 'Blad ' + info.nr);
   AY.vaxel({ nav: nav, yta: yta, varianter: DATA.MOMENT.varianter, start: start,
     id: function(b){ return 'sheet-' + info.nr + b; },
     rita: function(mnt, b){
       data[b] = DATA.blad(info.nr + b);
       // Varje Kontrollera: rätta rutor av alla → NivaRad, som låser upp nästa blad när kravet nås (80 % på rutor).
       data[b].onResultat = function(ratt, totalt){
-        if(NR) NR.klarade(MO.nivaPrefix, MO.nivaId, info.nr, MO.blad.length, ratt, totalt, MO.nivaKrav);
+        if(NR && MO.nivaPrefix) NR.klarade(MO.nivaPrefix, MO.nivaId, info.nr, MO.blad.length, ratt, totalt, MO.nivaKrav);
       };
       window.bygg_blad(mnt, data[b]);
     },
@@ -111,7 +118,7 @@
       window.NF_BLAD = info.nr + b;
       var kp = document.getElementById('ovn-keypad-shared');
       if(kp && window.AK8_UI && AK8_UI.keypadBokstaver) AK8_UI.keypadBokstaver(kp, window.bladBokstaver(data[b]));
-      try { var r = q.get('retur'); history.replaceState(null, '', '?blad=' + info.nr + b + (r ? '&retur=' + encodeURIComponent(r) : '')); } catch(e){}
+      try { var r = q.get('retur'); history.replaceState(null, '', '?' + (momentId !== 'tolka' ? 'moment=' + momentId + '&' : '') + 'blad=' + info.nr + b + (r ? '&retur=' + encodeURIComponent(r) : '')); } catch(e){}
     } });
   /* FÖRELÄSNING: bladfilmen är dold tills en film finns (Joachims beslut) — skalet visar knappen först då. */
   AY.film({ knapp: document.getElementById('nf-genomgang'), yta: document.getElementById('nf-film'), video: null });

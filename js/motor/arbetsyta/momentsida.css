@@ -41,6 +41,7 @@
 a.nf-blad:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateX(3px);border-color:rgba(0,0,0,.12);}
 .nf-blad .nf-nr{font-family:var(--cinzel);font-size:13px;letter-spacing:.04em;color:var(--ink-soft);min-width:58px;}
 .nf-blad.is-kommer,.nf-blad.is-locked{color:var(--ink-faint);background:var(--paper-lt);cursor:default;}   /* is-locked: NivaRad-spärren (§3) */
+.nf-blad .nf-chip{margin-left:auto;align-self:center;}   /* ett blad som inte är färdigbyggt: "Kommer senare" till höger */
 /* FÄLLBARA SEKTIONER (order 2026-11-21): rubriken är sidans egen (.nf-sek-h) och är knappen; chevronen är
    ramens (▸/▾, .nr-chev som i vänsterspalten). Ihopfälld sektion = bara rubriken. */
 .nf-fall{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:2px 0;margin:0;cursor:pointer;

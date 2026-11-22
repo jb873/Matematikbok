@@ -204,9 +204,76 @@ function jamforForm(a, godkanda){
     var termer=s.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';});
     return termer.map(normTerm).sort().join('+');
   }
+  /* PARENTESER OCH BRÅK (2026-11-22, Prioriteringsregeln): "faktorer och termer får byta ordning" gäller på
+     VARJE nivå — inuti en parentes också ("5·(4+3)" = "5·(3+4)", "(6+9)/5" = "(9+6)/5"). Ett bråk håller sina
+     platser (täljare/nämnare byter inte), "4·15/6" = "(4·15)/6" (en parentes kring en ren produkt grupperar
+     inget), "18:6" = "18/6" (K-H2). Den gamla jämförelsen står kvar: svaret godkänns om NÅGON av dem säger lika,
+     så ingenting som godkändes förut underkänns. Går uttrycket inte att läsa (obalanserad parentes) gäller den gamla. */
+  function forbered(x){
+    return String(x).toLowerCase().replace(/[×*x]/g,'·').replace(/:/g,'/').replace(/\s/g,'').replace(/−/g,'-').replace(/,/g,'.')
+      .replace(/([0-9a-z)])\(/g,'$1·(').replace(/\)([0-9a-z(])/g,')·$1');          // 5(3+4) = 5·(3+4)
+  }
+  function summaLista(s){                       // → [[tecken, {num, den}], …] eller null
+    var termer = [], buf = '', tecken = '+', djup = 0;
+    for(var i = 0; i < s.length; i++){
+      var c = s[i];
+      if(c === '(') djup++;
+      else if(c === ')'){ djup--; if(djup < 0) return null; }
+      if(djup === 0 && (c === '+' || c === '-')){
+        if(buf === ''){ if(c === '-') tecken = (tecken === '-' ? '+' : '-'); continue; }   // förtecken
+        if(/[·\/]/.test(s[i - 1])){ buf += c; continue; }                                  // "3·-2": talets tecken
+        termer.push([tecken, buf]); buf = ''; tecken = c; continue;
+      }
+      buf += c;
+    }
+    if(djup !== 0 || buf === '') return null;
+    termer.push([tecken, buf]);
+    var ut = [];
+    for(var k = 0; k < termer.length; k++){ var t = termObj(termer[k][1]); if(!t) return null; ut.push([termer[k][0], t]); }
+    return ut;
+  }
+  function termObj(t){                          // produkt/kvot på toppnivå → { num:[…], den:[…] }
+    var num = [], den = [], buf = '', op = '·', djup = 0;
+    function lagg(){
+      if(buf === '') return false;
+      var f = faktor(buf); if(!f) return false;
+      var mal = op === '/' ? den : num, mot = op === '/' ? num : den;
+      if(f.num){ f.num.forEach(function(x){ mal.push(x); }); f.den.forEach(function(x){ mot.push(x); }); } else mal.push(f.s);
+      buf = ''; return true;
+    }
+    for(var i = 0; i < t.length; i++){
+      var c = t[i];
+      if(c === '(') djup++; else if(c === ')') djup--;
+      if(djup === 0 && (c === '·' || c === '/')){ if(!lagg()) return null; op = c; continue; }
+      buf += c;
+    }
+    if(!lagg()) return null;
+    return { num: num, den: den };
+  }
+  function faktor(f){
+    var neg = '';
+    if(f[0] === '-'){ neg = '-'; f = f.slice(1); }
+    if(f[0] === '(' && f[f.length - 1] === ')'){
+      var d = 0, hel = true;
+      for(var i = 0; i < f.length - 1; i++){ if(f[i] === '(') d++; else if(f[i] === ')') d--; if(d === 0){ hel = false; break; } }
+      if(hel){
+        var lista = summaLista(f.slice(1, -1)); if(!lista) return null;
+        // En parentes kring EN term utan tecken grupperar inget: (4·15) är 4·15.
+        if(lista.length === 1 && lista[0][0] === '+' && !neg) return { num: lista[0][1].num, den: lista[0][1].den };
+        return { s: neg + '(' + summaText(lista) + ')' };
+      }
+    }
+    if(/[()]/.test(f)) return null;
+    return { s: neg + f };
+  }
+  function termText(o){ return o.num.slice().sort().join('·') + (o.den.length ? '/' + o.den.slice().sort().join('·') : ''); }
+  function summaText(lista){ return lista.map(function(p){ return (p[0] === '-' ? '-' : '') + termText(p[1]); }).sort().join('+'); }
+  function struktur(x){ var s = forbered(x); if(s === '') return null; var l = summaLista(s); return l ? summaText(l) : null; }
+
   var na=norm(a);
   if(na==='') return false;
-  return godkanda.some(function(g){return norm(g)===na;});
+  var sa = struktur(a);
+  return godkanda.some(function(g){ if(norm(g)===na) return true; var sg = struktur(g); return sa !== null && sg !== null && sa === sg; });
 }
 // (hjälpare ur k1-d3, flyttade till kärnan 2026-09-19)
 // MINUSTECKEN I MATEMATISK TEXT: − (U+2212), inte bindestreck (-) och inte tankstreck (–).
@@ -1554,7 +1621,10 @@ function bladHTML(blad){
              (data-form, jamforForm: faktorer och termer får byta ordning). Uttrycket med variabeln får stå
              tryckt (rad.vansterText), på egen rad ovanför kedjan; rad.fraga likaså. */
           if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
-          if(rad.vansterHtml || rad.vansterText) html += '<span class="ovn-text ovn-num" style="flex-basis:100%;">' + (rad.vansterHtml || matteUt(rad.vansterText)) + '</span>';
+          /* Utan fråga ÄR det tryckta uttrycket uppgiftstexten ("Beräkna. a) 4 + 3 · 6") — bokstaven på dess rad
+             (KONVENTIONER: bokstaven på samma rad som uppgiftstexten). Med fråga som förut, på egen rad under. */
+          if(!rad.fraga && (rad.vansterHtml || rad.vansterText)) html = fragaPaRaden(html, bokstav, '<span class="ovn-num">' + (rad.vansterHtml || matteUt(rad.vansterText)) + '</span>');
+          else if(rad.vansterHtml || rad.vansterText) html += '<span class="ovn-text ovn-num" style="flex-basis:100%;">' + (rad.vansterHtml || matteUt(rad.vansterText)) + '</span>';
           var _av = rad.avskrift, _avacc = (_av.accept || [_av.visa]).join('|');
           html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(_avacc)
             + '" data-visa="' + _av.visa + '" inputmode="text" autocomplete="off" style="min-width:96px;">';
