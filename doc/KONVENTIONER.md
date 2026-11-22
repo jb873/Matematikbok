@@ -149,7 +149,10 @@ MOMENT-SIDA (elevens arbetssida)
   *Joachim 2026-11-21.*
 - Mittensektion, ordning: Uppgifter → Föreläsningar → Metodträning.
 - En sektion som inte finns än (t.ex. Föreläsningar utan film) står med rubriken och "Kommer senare" och är inte
-  klickbar (`Momentsida.sektionKommer`). *Joachim 2026-11-21.*
+  klickbar (`Momentsida.sektionKommer`). *Joachim 2026-11-21.* Detsamma gäller ett MOMENT utan innehåll än (t.ex.
+  Prioriteringsregeln, Räkna med uttryck): grått, inte klickbart, och samma "Kommer senare"-etikett som Dagens
+  träning — inte bara grått. Det är inte byggt, inte trasigt: rök-vakten ska förvänta det, inte flagga det.
+  *Joachim 2026-11-22.*
 - **Funktionen bor i** `js/motor/arbetsyta/momentsida.js` (märket, de fällbara sektionerna, ramen med momenten och
   Dagens träning + Test) och `momentsida.css` — delade av delkapitlens momentsidor; sidan äger bara sitt innehåll
   (utbrutet ur problemlösningens momentsida 2026-11-21, bara en flytt).

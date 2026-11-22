@@ -24,8 +24,8 @@
 .hz-r{background:rgba(45,106,79,.1);color:var(--green);}
 /* "Kommer senare" i en rad i vänsterspalten: till höger, som på kapitelsidans kort. */
 .nr-rad .nf-chip{float:right;margin-left:8px;padding:2px 8px;}
-.nr-rad .nr-t:has(.nf-chip){display:flex;align-items:center;justify-content:space-between;}
-.nr-rad .nr-t:has(.nf-chip) .nf-chip{float:none;}
+.nr-rad .nr-t:has(.nf-chip){display:flex;align-items:center;flex-wrap:wrap;row-gap:4px;}   /* får inte etiketten plats flyttar den ner, den sticker inte ut */
+.nr-rad .nr-t:has(.nf-chip) .nf-chip{float:none;white-space:nowrap;flex:none;margin-left:auto;}   /* "Kommer senare" bryts inte i den smala spalten */
 /* Vänsterspaltens rader och bladkorten i bokens papperston (kapitelsidans .nav-card), inte vitt. Ramens
    delade stil (js/motor/navram/navram.css) bär #fff — den rättas här i momentsidans skal; navram.css är orörd. */
 .nr-rad{background:var(--paper-lt);}

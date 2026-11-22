@@ -119,7 +119,9 @@ function visaMoment(m){
 }
 
 var moment = MOMENT.map(function(m){
-  return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
+  // Ett moment utan innehåll än står med samma "Kommer senare" som Dagens träning (inte bara grått).
+  return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel + (m.kommer ? '<span class="nf-chip soon">Kommer senare</span>' : ''),
+           kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
 });
 
 /* TEST — d1:s befintliga test (Joachim: "peka på d1:s test tills vidare"): de färdiga delkapitel-testen ur
