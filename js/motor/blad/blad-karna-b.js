@@ -65,6 +65,7 @@ function jamforMellan(a, b){
   function norm(x){
     return String(x).toLowerCase()
       .replace(/[x×*]/g, '·')
+      .replace(/:/g, '/')                       // : = division (K-H2)
       .replace(/\u2212/g, '-')
       .replace(/[\s=]/g, '')
       .replace(',', '.');
@@ -78,12 +79,19 @@ function jamforUttryck(a, godkanda){
     var neg = false;
     if(t[0] === '+'){ t = t.slice(1); }
     else if(t[0] === '-'){ neg = true; t = t.slice(1); }
-    var ch = t.split('').sort().join('');
-    return (neg ? '-' : '') + ch;
+    /* FAKTORER, INTE TECKEN (2026-11-22): förr sorterades termens TECKEN, så "92" = "29" och "4/y" = "y/4" —
+       "x + 92" godkändes för "x + 29". Nu: talen hålls hela, bokstäverna får byta plats (3x = x·3), och en term
+       med division behåller sin ordning (division byter inte plats). Övriga tecken (parenteser, ^) som förr. */
+    if(t.indexOf('/') >= 0) return (neg ? '-' : '') + t;
+    var tal = (t.match(/\d+(?:\.\d+)?/g) || []).sort();
+    var bok = (t.match(/[a-zåäö]/g) || []).sort();
+    var rest = t.replace(/\d+(?:\.\d+)?/g, '').replace(/[a-zåäö·]/g, '').split('').sort().join('');
+    return (neg ? '-' : '') + tal.join('·') + '|' + bok.join('') + (rest ? '|' + rest : '');
   }
   function norm(x){
     var s = String(x).toLowerCase()
-      .replace(/[·×*]/g, '')
+      .replace(/[·×*]/g, '·')                   // gångertecknet står kvar som avgränsare mellan faktorerna
+      .replace(/:/g, '/')                       // : = division (K-H2)
       .replace(/\s/g, '')
       .replace(/\u2212/g, '-')
       .replace(/,/g, '.');
@@ -107,7 +115,7 @@ function jamforText(a, godkanda){
 function forenklaKanon(uttryck){
   if(uttryck == null) return null;
   var s = String(uttryck).toLowerCase()
-    .replace(/\u2212/g, '-').replace(/[×]/g, '*').replace(/·/g, '*')
+    .replace(/\u2212/g, '-').replace(/[×]/g, '*').replace(/·/g, '*').replace(/:/g, '/')   // : = division (K-H2)
     .replace(/\s/g, '').replace(/,/g, '.');
   if(s === '') return null;
   var vm = s.match(/[a-z]/);
@@ -139,7 +147,7 @@ function jamforForenkla(a, facit){
 function forenklaFler(uttryck){
   if(uttryck == null) return null;
   var s = String(uttryck).toLowerCase()
-    .replace(/\u2212/g,'-').replace(/[×]/g,'*').replace(/·/g,'*')
+    .replace(/\u2212/g,'-').replace(/[×]/g,'*').replace(/·/g,'*').replace(/:/g,'/')   // : = division (K-H2)
     .replace(/\s/g,'').replace(/,/g,'.');
   if(s === '') return null;
   // vilka variabler förekommer?
@@ -191,7 +199,7 @@ function jamforForm(a, godkanda){
     return (neg?'-':'') + faktorer.join('·');
   }
   function norm(x){
-    var s=String(x).toLowerCase().replace(/[×*x]/g,'·').replace(/\s/g,'').replace(/\u2212/g,'-').replace(/,/g,'.');
+    var s=String(x).toLowerCase().replace(/[×*x]/g,'·').replace(/:/g,'/').replace(/\s/g,'').replace(/\u2212/g,'-').replace(/,/g,'.');
     if(s==='') return '';
     var termer=s.replace(/-/g,'+-').split('+').filter(function(t){return t!=='';});
     return termer.map(normTerm).sort().join('+');
@@ -493,7 +501,7 @@ function harDubbelMinus(fraga){ return /[−–-]\s*\(\s*[−–-]/.test(String(
 // Värde-utvärderare (+ − · / parenteser, unärt minus, alla minus-varianter) — ingen eval. Omskrivningen
 // rättas på VÄRDE, så en giltig men annorlunda skriven form ('8 + 6', '14') godtas. Speglar blad-ak8-d2.
 function evalUttryck(str){
-  var s = String(str).replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/÷/g,'/').replace(/,/g,'.').replace(/\s+/g,'');
+  var s = String(str).replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/[÷:]/g,'/')   /* : = division (K-H2) */.replace(/,/g,'.').replace(/\s+/g,'');
   if(s === '' || !/^[-+*/().0-9]+$/.test(s)) return NaN;
   var i = 0;
   function expr(){ var v = term(); while(s[i]==='+'||s[i]==='-'){ var o=s[i++]; var t=term(); v = o==='+'?v+t:v-t; } return v; }
@@ -532,6 +540,7 @@ function prioEval(uttryck){
   if(uttryck == null) return null;
   var e = String(uttryck)
     .replace(/[x×]/g, '*')
+    .replace(/:/g, '/')                       // : = division (K-H2)
     .replace(/\u00b7/g, '*')
     .replace(/\u2212/g, '-')
     .replace(/\s/g, '')

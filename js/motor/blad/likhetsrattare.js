@@ -49,7 +49,7 @@
     var toks = [];
     Array.prototype.forEach.call(expr.children, function(ch){
       if(ch.classList.contains('ak8-exprtxt')){
-        var s = ch.value.replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(/[·×]/g, '*').replace(/÷/g, '/').replace(/,/g, '.'), i = 0;
+        var s = ch.value.replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(/[·×]/g, '*').replace(/[÷:]/g, '/').replace(/,/g, '.'), i = 0;   // : = division (K-H2)
         while(i < s.length){
           var c = s[i];
           if(c === '+' || c === '-' || c === '*' || c === '/'){ toks.push({ op: c }); i++; }

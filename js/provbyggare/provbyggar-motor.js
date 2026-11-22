@@ -668,7 +668,7 @@ document.addEventListener('click', (e) => {
 // Används av mellanled-num-led så en OMSKRIVNING ('17 + 8', '−7 + 8') värde-rättas som i öva-bladet;
 // ett rent tal ('25') evalueras till sig självt → bakåtkompatibelt för befintliga mellanled-num-generatorer.
 function pbEvalArith(str){
-  var s = String(str).replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/÷/g,'/').replace(/,/g,'.').replace(/\s+/g,'');
+  var s = String(str).replace(/[−–—]/g,'-').replace(/[·×]/g,'*').replace(/[÷:]/g,'/')   /* : = division (K-H2) */.replace(/,/g,'.').replace(/\s+/g,'');
   if(s === '' || !/^[-+*/().0-9]+$/.test(s)) return NaN;
   var i = 0;
   function expr(){ var v = term(); while(s[i]==='+'||s[i]==='-'){ var o=s[i++]; var t=term(); v = o==='+'?v+t:v-t; } return v; }

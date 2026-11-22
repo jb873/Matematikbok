@@ -236,7 +236,7 @@
      krav: 'kravt' | 'frivilligt'. Tom rad vid 'frivilligt' → {status:'hoppat'} (varken rätt, fel
      eller räknad i nämnaren). Tom rad vid 'kravt' → {status:'tom'}, som behandlas som obesvarad. */
   function grade(elev, uttryck, krav){
-    var txt = (elev == null ? '' : String(elev)).trim();
+    var txt = (elev == null ? '' : String(elev)).trim().replace(/:/g, '/');   // : = division (K-H2)
     if(txt === '') return { status: krav === 'frivilligt' ? 'hoppat' : 'tom' };
 
     if(/[()]/.test(txt)) return { status: 'fel', fall: 'parentes', besked: BESKED.parentes };
