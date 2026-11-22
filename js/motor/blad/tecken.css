@@ -1,0 +1,12 @@
+/* tecken.css — TECKENRUTAN, DELAD (utbruten 2026-11-22, Joachims beslut: "bryt ut den till kärnan som delad komponent").
+   Knapparna med ett val i taget (.ak8-chip) och rutan som håller dem (.ak8-teckenslot). Flyttade ORDAGRANT ur
+   ak8-blad-kanon.css, som importerar den här filen — åttans sidor får samma regler som förut. Bladkärnans radtyp
+   'tecken' (blad-karna-b.js) och dess sidor laddar filen direkt. Logiken: AK8_UI.teckenKnappar / AK8_UI.bindTecken. */
+.ak8-chip{ font-family:var(--serif); font-size:18px; min-width:40px; background:#fff; border:1.5px solid var(--paper-dk); border-radius:8px; padding:5px 12px; margin:0 3px; cursor:pointer; }
+.ak8-chip.sel{ border-color:var(--navy); background:rgba(15,30,46,.06); }
+.ak8-chip.ratt{ border-color:#2f7d4f; background:rgba(47,125,79,.14); }
+.ak8-chip.fel{ border-color:#c0392b; background:rgba(192,57,43,.12); }
+.ak8-teckenslot{ display:inline-flex; flex-wrap:wrap; gap:6px; }
+/* Bladkärnans teckenruta (.ovn-tecken): kärnans sidor definierar --serif som rubriktypsnittet (Cormorant), där + − ·
+   blir små. Tecknen får kärnans brödtext (--body), som svarsrutorna. Gäller bara kärnan — åttans rutor saknar .ovn-tecken. */
+.ovn-tecken .ak8-chip{ font-family:var(--body); }

@@ -222,7 +222,7 @@
     }
     if(r.typ === 'tecken'){
       CHECKS.push(function(el){ var s = el.querySelector('.ak8-chip.sel'); return { ok: !!s && s.dataset.val === r.ratt, facit: r.ratt, chip:true }; });
-      var chips = r.alt.map(function(a){ return '<button type="button" class="ak8-chip" data-val="' + a + '">' + a + '</button>'; }).join('');
+      var chips = AK8_UI.teckenKnappar(r.alt);   // delad teckenruta (AK8_UI, tecken.css)
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga + '</span><span class="ak8-svar" data-idx="' + idx + '"><span class="ak8-teckenslot">' + chips + '</span></span></div>';
     }
     if(r.typ === 'valjflera'){
@@ -287,9 +287,7 @@
       };
     });
     // tecken: enkel-val chip. valjflera: växla-val.
-    mount.querySelectorAll('.ak8-teckenslot').forEach(function(slot){
-      slot.querySelectorAll('.ak8-chip').forEach(function(chip){ chip.onclick = function(){ slot.querySelectorAll('.ak8-chip').forEach(function(c){ c.classList.toggle('sel', c === chip); }); }; });
-    });
+    AK8_UI.bindTecken(mount, '.ak8-teckenslot .ak8-chip', false);   // delad teckenruta (AK8_UI)
     mount.querySelectorAll('.ak8-vf').forEach(function(b){ b.onclick = function(){ b.classList.toggle('sel'); }; });
     mount.querySelector('[data-kontroll]').onclick = function(){ kontrollera(mount); };
     mount.querySelector('[data-reset]').onclick = function(){ CHECKS = []; renderBlad(mount, blad); };

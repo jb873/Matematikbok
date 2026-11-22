@@ -223,7 +223,7 @@
     }
     if(r.typ === 'tecken'){
       CHECKS.push(function(el){ var v = el.querySelector('.ak8-chip.sel'); return { ok: !!v && v.dataset.val === unesc(r.ratt), facit: r.ratt, chip:true }; });
-      var chips = r.alt.map(function(a){ return '<button type="button" class="ak8-chip" data-val="' + a + '">' + a + '</button>'; }).join('');
+      var chips = AK8_UI.teckenKnappar(r.alt);   // delad teckenruta (AK8_UI, tecken.css)
       return '<div class="ak8-rad"><span class="ak8-q">' + r.fraga.replace('___', '<span class="ak8-svar ak8-teckenslot" data-idx="' + idx + '">' + chips + '</span>') + '</span></div>';
     }
     if(r.typ === 'ordna'){
@@ -316,7 +316,7 @@
     html += AK8_UI.keypadHTML({ ops:['+', '−', '·', '/'] });
     mount.innerHTML = html;
     // interaktioner
-    mount.querySelectorAll('.ak8-teckenslot .ak8-chip, .ak8-ekvslot .ak8-chip').forEach(function(ch){ ch.onclick = function(){ if(ch.className.indexOf('ratt') > -1 || ch.className.indexOf('fel') > -1) return; ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.remove('sel'); }); ch.classList.add('sel'); }; });
+    AK8_UI.bindTecken(mount, '.ak8-teckenslot .ak8-chip, .ak8-ekvslot .ak8-chip', true);   // delad teckenruta; rättad knapp tar inga fler klick
     /* DELAD bindning. Den egna kopian tog bort numret utan att flytta ned de följande, så en
        avmarkering kunde lämna hål i numreringen (1, 3, 4). */
     AK8_UI.bindOrdna(mount, { klass:'ak8-ordna', altKlass:'ak8-tal', nrKlass:'ak8-ordnr' });

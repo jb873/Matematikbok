@@ -12,7 +12,21 @@
   'use strict';
 
   // ── numerik (samma normalisering som motorerna) ──
-  function pNum(s){ if(s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.'); return s === '' ? NaN : parseFloat(s); }   // FAS1: även en-/em-dash, ej bara U+2212
+  /* TALRUTAN LÄSER TALET — OCH BARA TALET (Joachim 2026-11-22). Förr parseFloat: den slutar läsa vid första tecken
+     som inte hör till talet, så "22+1" lästes som 22 och "5.5 + 1" som 5,5 — en räkning efter talet godkändes.
+     Nu: talet läses helt; efter det får bara en ENHET stå ("28 kr" → 28, "5 år" → 5, "60 km/h", "25 %", "12 cm²").
+     Allt annat efter talet (+1, · 2, = 5, ², kr + 5) gör rutan oläslig = fel. Delad: alla talrutor går hit. */
+  var ENHET_EFTER = /^[a-zåäö%°‰][a-zåäö%°‰²³\/.]*$/i;
+  function pNum(s){
+    if(s == null) return NaN;
+    s = String(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.');   // FAS1: även en-/em-dash, ej bara U+2212
+    if(s === '') return NaN;
+    var m = /^[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/i.exec(s);
+    if(!m) return NaN;
+    var rest = s.slice(m[0].length);
+    if(rest !== '' && !ENHET_EFTER.test(rest)) return NaN;
+    return parseFloat(m[0]);
+  }
   /* TUSENTALSMELLANSLAG: 1 400 är samma tal som 1400, och båda skrivsätten ska godtas —
      "flera skrivsätt, samma värde" (doc/KONVENTIONER.md §3). Bara mellanslag MELLAN TVÅ SIFFROR
      tas bort, så att mellanslag kring räknetecken (3 · 4, autoSpace) och decimalkomma (6,8) är
@@ -31,7 +45,14 @@
   function pInt(s){
     if(s == null) return NaN;
     var t = avTusental(s).replace(/[\s ]/g, '').replace(/[−–—]/g, '-').replace(',', '.');
-    return t === '' ? NaN : parseInt(t, 10);
+    if(t === '') return NaN;
+    /* TALRUTAN LÄSER TALET (Joachim 2026-11-22, som pNum): en räkning efter talet gör rutan oläslig ("8+1" lästes som
+       8). En decimaldel läses bort som förut (parseInt-semantiken: "1.5" → 1) och en enhet efter talet godtas. */
+    var m = /^[-+]?\d+/.exec(t);
+    if(!m) return NaN;
+    var rest = t.slice(m[0].length).replace(/^\.\d*/, '');
+    if(rest !== '' && !ENHET_EFTER.test(rest)) return NaN;
+    return parseInt(m[0], 10);
   }
   // Aritmetik-utvärderare (byte-identisk med mellanleds-motorn): + − · / parenteser.
   function evalArith(s){
@@ -1119,6 +1140,26 @@
     });
   }
 
+  /* ── TECKENRUTAN (delad, utbruten ur åttans d2/d3 2026-11-22 — Joachims beslut) ──────────────────────
+     Knappar med ett val i taget (.ak8-chip i en .ak8-teckenslot): välj rätt tecken, platsvärde eller ord. Var förr
+     en kopia i varje motor (blad-ak8-d2 och -d3); nu ETT ställe, som även bladkärnans radtyp 'tecken' använder.
+     Stilen: tecken.css. Rättningen bor kvar hos anroparen (motorns CHECKS, kärnans kontroll-slinga).
+       teckenKnappar(alt)          → knapparnas HTML, en per alternativ (data-val = alternativet)
+       bindTecken(rot, valjare, vakt) → ett val i taget bland syskonknapparna; vakt = rättad knapp (ratt/fel) tar
+                                     inga fler klick (d2:s beteende; d3 och kärnan utan vakt). */
+  function teckenKnappar(alt){
+    return (alt || []).map(function(a){ return '<button type="button" class="ak8-chip" data-val="' + a + '">' + a + '</button>'; }).join('');
+  }
+  function bindTecken(rot, valjare, vakt){
+    if(!rot) return;
+    rot.querySelectorAll(valjare).forEach(function(ch){
+      ch.onclick = function(){
+        if(vakt && (ch.className.indexOf('ratt') > -1 || ch.className.indexOf('fel') > -1)) return;
+        ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.toggle('sel', o === ch); });
+      };
+    });
+  }
+
   /* Elevens ordning som index-lista. Tom lista = inget valt (obesvarat, inte fel). */
   function ordnaVald(radEl, opts){
     var o = opts || {};
@@ -1133,7 +1174,7 @@
   }
 
   window.AK8_UI = {
-    ordnaHTML: ordnaHTML, bindOrdna: bindOrdna, ordnaVald: ordnaVald,
+    ordnaHTML: ordnaHTML, bindOrdna: bindOrdna, ordnaVald: ordnaVald, teckenKnappar: teckenKnappar, bindTecken: bindTecken,
     enDeluppgiftUtanBokstav: enDeluppgiftUtanBokstav,
     gruppAttr: gruppAttr,
     pNum: pNum, pInt: pInt, avTusental: avTusental, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,

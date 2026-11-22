@@ -511,7 +511,7 @@ function radMedLogg(radHtml, rad, grupp){
    val och flerval, där eleven klickar, och inte figurer. Ordning: första förekomst. Används av sidan med
    AK8_UI.keypadBokstaver; ett blad som inte frågas efter sina bokstäver påverkas inte. */
 function bladBokstaver(blad){
-  var ut = [], KLICK = { valruta: 1, paraihop: 1, val: 1, flerval: 1, svgfigur: 1, figur: 1 };
+  var ut = [], KLICK = { valruta: 1, paraihop: 1, val: 1, flerval: 1, svgfigur: 1, figur: 1, tecken: 1 };
   function ta(t){ (String(t == null ? '' : t).match(/[a-zåäö]/g) || []).forEach(function(c){ if(ut.indexOf(c) < 0) ut.push(c); }); }
   ((blad && blad.grupper) || []).forEach(function(gr){ (gr.rader || []).forEach(function(r){
     if(KLICK[r.typ]) return;
@@ -842,8 +842,19 @@ function bladHTML(blad){
       if(rad.typ === 'prioKedja'){
         html += '<div class="ovn-rad" data-rad="' + radNummer + '">';
         html += lbl(bokstav);
-        html += '<div class="ovn-berakna">';
-        html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        if(rad.avskrift){
+          /* AVSKRIFT I PRIOKEDJAN (TILLÄGG, Joachim 2026-11-22, Prioriteringsregeln): uttrycket står tryckt på
+             bokstavens rad; eleven skriver av det i en egen ruta (rättas på FORM, som beräkningsradens avskrift) och
+             räknar sedan kedjan — varje led på VÄRDE, som förut. Utan rad.avskrift ritas raden exakt som förut. */
+          html = fragaPaRaden(html, bokstav, '<span class="ovn-num">' + matteUt(rad.vansterText) + '</span>');
+          html += '<div class="ovn-berakna">';
+          var _pkAv = rad.avskrift, _pkacc = (_pkAv.accept || [_pkAv.visa]).join('|');
+          html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(_pkacc) + '" data-visa="' + _pkAv.visa
+            + '" inputmode="text" autocomplete="off" style="min-width:96px;">';
+        } else {
+          html += '<div class="ovn-berakna">';
+          html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
+        }
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
         html += '<input class="ovn-in bred" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '" inputmode="text" autocomplete="off">';
         html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
@@ -1659,6 +1670,17 @@ function bladHTML(blad){
         html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="0" inputmode="decimal" autocomplete="off" style="width:80px;">';
         html += '<span class="ovn-text">och</span>';
         html += '<input class="ovn-in" data-tvatal="' + rad.tal.join(',') + '" data-pos="1" inputmode="decimal" autocomplete="off" style="width:80px;">';
+      } else if(rad.typ === 'tecken'){
+        /* TECKENRUTAN (TILLÄGG, Joachim 2026-11-22, Prioriteringsregeln "sätt in +, − eller · i rutorna"): åttans
+           teckenruta, utbruten till delad komponent (AK8_UI.teckenKnappar/bindTecken, tecken.css). text har '___' där
+           rutorna står; ratt = det rätta tecknet per ruta. Varje ruta rättas som en valruta (en ruta = ett svar). */
+        var _tbit = rad.text.split('___'), _trat = [].concat(rad.ratt), _ttxt = '';
+        _tbit.forEach(function(b, bi){
+          if(b !== '') _ttxt += b;
+          if(bi < _tbit.length - 1) _ttxt += '<span class="ak8-teckenslot ovn-tecken" data-ratt="' + encodeURIComponent(_trat[Math.min(bi, _trat.length - 1)]) + '">'
+            + AK8_UI.teckenKnappar(rad.alt) + '</span>';
+        });
+        html += '<span class="ovn-text ovn-num" style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;">' + _ttxt + '</span>';
       } else if(rad.typ === 'lucka'){
         // text innehåller '__' där luckan ska sitta. FLERA LUCKOR (d3 del 2, "▢ suddgummin och ▢
         // anteckningsböcker"): svar är då en lista, en per lucka, och varje ruta bär sitt eget facit.
@@ -1984,6 +2006,13 @@ function bygg_blad(rotEl, blad){
     });
   });
 
+  // TECKENRUTAN (tillägg 2026-11-22): delad bindning; ett nytt val tar bort förra rättningens markering i rutan.
+  if(window.AK8_UI && AK8_UI.bindTecken && rotEl.querySelector('.ovn-tecken')){
+    AK8_UI.bindTecken(rotEl, '.ovn-tecken .ak8-chip', false);
+    rotEl.querySelectorAll('.ovn-tecken .ak8-chip').forEach(function(ch){
+      ch.addEventListener('click', function(){ ch.parentNode.querySelectorAll('.ak8-chip').forEach(function(o){ o.classList.remove('ratt', 'fel'); }); });
+    });
+  }
   rotEl.querySelectorAll('.valruta-grid').forEach(function(grid){
     var flera = grid.dataset.flera === '1';
     grid.querySelectorAll('.valruta-btn').forEach(function(btn){
@@ -2471,6 +2500,20 @@ function bygg_blad(rotEl, blad){
       if(ok) ratt++;
       if(valda.length) loggaGrid(grid, ok);
     });
+    /* TECKENRUTAN (tillägg 2026-11-22): varje ruta är ett svar, som en valruta. Ingen vald knapp = obesvarad
+       (räknas i nämnaren, ingen markering). Fel val: det valda blir rött och det rätta grönt, som valrutan. */
+    rotEl.querySelectorAll('.ovn-tecken').forEach(function(slot){
+      if(blad.stegvis){ var gg = slot.closest('.ovn-grupp'); if(gg && gg.classList.contains('steg-dold')) return; }
+      totalt++;
+      var _tr = decodeURIComponent(slot.dataset.ratt), _tv = slot.querySelector('.ak8-chip.sel');
+      slot.querySelectorAll('.ak8-chip').forEach(function(c){ c.classList.remove('ratt', 'fel'); });
+      if(!_tv) return;
+      var _tok = _tv.dataset.val === _tr;
+      _tv.classList.add(_tok ? 'ratt' : 'fel');
+      if(!_tok) slot.querySelectorAll('.ak8-chip').forEach(function(c){ if(c.dataset.val === _tr) c.classList.add('ratt'); });
+      if(_tok) ratt++;
+      loggaGrid(slot, _tok);
+    });
     /* ORDNA MED KLICK: hela raden är ETT svar. Ingen vald ruta = obesvarad, och obesvarat är
        varken rätt eller fel — men räknas i nämnaren, uppgiften finns kvar att göra. */
     rotEl.querySelectorAll('.ovn-ordnaklick').forEach(function(rad){
@@ -2671,6 +2714,7 @@ function bygg_blad(rotEl, blad){
       inp.classList.remove('correct','wrong','just-checked');
     });
     rotEl.querySelectorAll('.valruta-btn').forEach(function(b){ b.classList.remove('is-vald','correct','wrong'); });
+    rotEl.querySelectorAll('.ovn-tecken .ak8-chip').forEach(function(c){ c.classList.remove('sel', 'ratt', 'fel'); });   // teckenrutan
     rotEl.querySelectorAll('.ovn-fasit, .ovn-mark').forEach(function(f){ f.remove(); });
     // Nollställ flervalsknappar – ta bort vald, rätt och fel
     rotEl.querySelectorAll('.ovn-val-grid').forEach(function(grid){

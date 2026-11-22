@@ -2170,5 +2170,11 @@
  "js/motor/blad/gen-ak8-alg1.js": [
   "fraga | Skriv ett uttryck för vad alla tre kostar",
   "fraga | hon får {}dubbelt{} gånger{} så många"
+ ],
+ "js/motor/blad/blad-k3-d1-prio.js": [
+  "rubrik | Beräkna.",
+  "rubrik | Gör så att likheten stämmer. I a och b sätter du in +, − eller · i rutorna. I c sätter du ut en parentes.",
+  "rubrik | Vilket tal ska stå i rutan för att likheten ska stämma?",
+  "titel | Prioriteringsregeln"
  ]
 }
