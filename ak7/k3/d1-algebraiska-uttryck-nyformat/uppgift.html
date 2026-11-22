@@ -77,6 +77,7 @@
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
+<script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
 
@@ -91,11 +92,21 @@
   if(!DATA || !window.bygg_blad) return;
   var m = /^(\d)([A-Za-z])?$/.exec(q.get('blad') || '') || [];
   var info = DATA.MOMENT.blad.filter(function(b){ return String(b.nr) === m[1]; })[0] || DATA.MOMENT.blad[0];
-  var start = (m[2] || 'A').toUpperCase(), data = {};
+  var start = (m[2] || 'A').toUpperCase(), data = {}, MO = DATA.MOMENT, NR = window.NivaRad;
+  /* SPÄRREN (NivaRad, KONVENTIONER §3): en direktlänk till ett låst blad öppnar inte bladet — den skickar till
+     momentsidan (dit Tillbaka leder), där eleven ser låset i sitt sammanhang: Blad 1–2 öppna, Blad 3 🔒. */
+  if(NR && !NR.nadd(MO.nivaPrefix, MO.nivaId, info.nr)){ location.replace(document.getElementById('nf-tillbaka').href); return; }
   document.title = 'Matematik · Algebra · Tolka och teckna uttryck · ' + info.titel;
   AY.vaxel({ nav: nav, yta: yta, varianter: DATA.MOMENT.varianter, start: start,
     id: function(b){ return 'sheet-' + info.nr + b; },
-    rita: function(mnt, b){ data[b] = DATA.blad(info.nr + b); window.bygg_blad(mnt, data[b]); },
+    rita: function(mnt, b){
+      data[b] = DATA.blad(info.nr + b);
+      // Varje Kontrollera: rätta rutor av alla → NivaRad, som låser upp nästa blad när kravet nås (80 % på rutor).
+      data[b].onResultat = function(ratt, totalt){
+        if(NR) NR.klarade(MO.nivaPrefix, MO.nivaId, info.nr, MO.blad.length, ratt, totalt, MO.nivaKrav);
+      };
+      window.bygg_blad(mnt, data[b]);
+    },
     vidVisa: function(b){
       window.NF_BLAD = info.nr + b;
       var kp = document.getElementById('ovn-keypad-shared');

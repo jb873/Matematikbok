@@ -85,11 +85,17 @@
   }
 
   /* Klarade eleven steget? Då är NÄSTA steg nått. Anropas ur bladets resultat-hook. Returnerar
-     numret på det som låstes upp, eller null — så anroparen kan ge besked utan att gissa. */
-  function klarade(prefix, bladId, niva, antalSteg, ratt, totalt){
+     numret på det som låstes upp, eller null — så anroparen kan ge besked utan att gissa.
+     KRAVET är valbart (Joachim 2026-11-22, "Tolka och teckna uttryck"): krav = { andel: 0.8 } betyder
+     minst den andelen rätta RUTOR (ratt/totalt räknas på rutor, inte på uppgifter). Utan krav gäller
+     dagens regel oförändrad: högst två fel. Varianter av samma steg (Blad 2A, 2B) delar bladId, så
+     vilken som helst av dem låser upp nästa steg. */
+  function klarade(prefix, bladId, niva, antalSteg, ratt, totalt, krav){
     if(!(totalt > 0)) return null;
     if(niva >= (antalSteg || 2)) return null;
-    if((totalt - ratt) > 2) return null;          // samma krav som förr: högst två fel
+    if(krav && typeof krav.andel === 'number'){
+      if(ratt / totalt < krav.andel) return null;  // valbart krav: andel rätta rutor
+    } else if((totalt - ratt) > 2) return null;   // samma krav som förr: högst två fel
     var nasta = niva + 1;
     lsSet(nyckel(prefix, bladId, nasta), '1');
     return nasta;

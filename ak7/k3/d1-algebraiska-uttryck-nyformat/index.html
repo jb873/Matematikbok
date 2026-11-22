@@ -70,6 +70,7 @@
 <script src="../../../js/data/k3-taxonomi.js"></script>
 <script src="../../../js/data/k3-fardiga-test.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
+<script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
 <script src="../../../js/motor/arbetsyta/momentsida.js"></script>
@@ -88,7 +89,8 @@ if(window.Arbetsyta) window.Arbetsyta.retur();
    Tolka och teckna uttryck har blad 1–3 (A och B på uppgiftssidan). Prioriteringsregeln (fyra blad i två nivåer)
    och Räkna med uttryck är inte byggda — de står som "Kommer senare". ── */
 var MOMENT = [
-  { titel: 'Tolka och teckna uttryck', ar: 7, roll: 'karna', bladen: DATA ? DATA.MOMENT.blad : [] },
+  { titel: 'Tolka och teckna uttryck', ar: 7, roll: 'karna', bladen: DATA ? DATA.MOMENT.blad : [],
+    niva: DATA ? { prefix: DATA.MOMENT.nivaPrefix, id: DATA.MOMENT.nivaId } : null },
   { titel: 'Prioriteringsregeln', ar: 7, roll: 'karna', kommer: true },
   { titel: 'Räkna med uttryck', ar: 7, roll: 'karna', kommer: true }
 ];
@@ -102,12 +104,14 @@ function visaMoment(m){
   var S1 = M.sektion(scen, 'Uppgifter');
   M.sektionKommer(scen, 'Föreläsningar');
   M.sektionKommer(scen, 'Metodträning');
-  // UPPGIFTER — ett blad per rad; Blad A/B väljs med växeln på uppgiftssidan
+  // UPPGIFTER — ett blad per rad; Blad A/B väljs med växeln på uppgiftssidan.
+  // SPÄRREN (NivaRad, §3): ett blad som inte är nått står med 🔒, utan länk — samma tecken som nivåraden, ingen text.
   var l1 = el('div', 'nf-lista');
   m.bladen.forEach(function(b){
-    var a = el('a', 'nf-blad');
-    a.href = 'uppgift.html?blad=' + b.nr + 'A';
-    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel));
+    var oppet = !window.NivaRad || !m.niva || window.NivaRad.nadd(m.niva.prefix, m.niva.id, b.nr);
+    var a = el(oppet ? 'a' : 'span', 'nf-blad' + (oppet ? '' : ' is-locked'));
+    if(oppet) a.href = 'uppgift.html?blad=' + b.nr + 'A'; else a.setAttribute('aria-disabled', 'true');
+    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel + (oppet ? '' : ' 🔒')));
     l1.appendChild(a);
   });
   S1.body.appendChild(l1);

@@ -334,7 +334,11 @@ BLAD['3B'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3B
 
 /* MOMENTET: tre blad med varianterna A och B (KONVENTIONER: "Blad 1A" utan mellanslag). Bladen byggs när de
    hämtas (figurerna behöver SvgAlgebraFigur, som laddas före den här filen). */
+/* SPÄRREN (steg 5, Joachim 2026-11-22): bladen är NivaRad:s steg — blad 1 och 2 alltid öppna (§3), blad 3 öppnas
+   vid minst 80 % rätta rutor på blad 2, variant A eller B (varianterna delar nivaId). Nyckeln är NivaRad:s egen:
+   k3d1_naddNiva3_tolka. */
 var MOMENT = { titel: 'Tolka och teckna uttryck', varianter: ['A', 'B'],
+  nivaPrefix: 'k3d1', nivaId: 'tolka', nivaKrav: { andel: 0.8 },
   blad: [ { nr: 1, titel: 'Per styck och per gång' }, { nr: 2, titel: 'Mer, mindre och delar' }, { nr: 3, titel: 'Blandade uppgifter' } ] };
 
 window.BLAD_K3_D1_TOLKA = {
