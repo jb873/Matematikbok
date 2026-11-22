@@ -447,6 +447,29 @@ function bladBokstaver(blad){
 }
 // Ett ensamt tal (heltal eller decimaltal, ev. negativt) — inget räknetecken, ingen bokstav.
 function ensamtTal(t){ return /^\s*[−-]?\s*\d+(?:[.,]\d+)?\s*$/.test(String(t == null ? '' : t)); }
+/* DELVIS UTRÄKNAT (KONVENTIONER §3, Joachim 2026-11-22): där facit är ett TECKNAT TALUTTRYCK (inga bokstäver,
+   inte ett ensamt tal) godtas den tecknade formen med termer och faktorer i valfri ordning ("2·8 + 4·10",
+   "10·4 + 8·2" för "4·10 + 2·8"). Ett svar som har samma värde men där en operation ur facit är uträknad
+   underkänns — helt ("56") eller delvis ("40 + 16", "4·10 + 16"). Uträknad = färre räkneoperationer än facit,
+   eller ett tal som inte står i facit. Annan likvärdig form med facits egna tal godtas som förut ("2·2·9" bland
+   faktoriseringarna av 36). Facit med bokstäver berörs inte. */
+function taluttryck(t){ t = String(t == null ? '' : t); return !/[a-zåäö]/i.test(t) && !ensamtTal(t) && /\d/.test(t); }
+function rakneOperationer(t){
+  var s = String(t).replace(/\s/g, '').replace(/−/g, '-').replace(/[x×*]/gi, '·');
+  return (s.match(/[+·\/:]/g) || []).length + (s.match(/[\d)]-/g) || []).length + (s.match(/[\d)]\(|\)\d/g) || []).length;
+}
+function uttryckTalen(t){
+  return (String(t).replace(/(\d)\s+(?=\d)/g, '$1').match(/\d+(?:[.,]\d+)?/g) || []).map(function(x){ return parseFloat(x.replace(',', '.')); });
+}
+function utraknat(svar, godkanda){
+  var tal = godkanda.filter(taluttryck);
+  if(!tal.length) return false;
+  var utanParentes = String(svar).replace(/\(([^()+\-−]*)\)/g, '$1');      // (4·10) + (2·8) → 4·10 + 2·8
+  if(jamforForm(utanParentes, tal)) return false;                                // den tecknade formen, valfri ordning
+  if(rakneOperationer(svar) < Math.min.apply(null, tal.map(rakneOperationer))) return true;
+  var finns = {}; tal.forEach(function(g){ uttryckTalen(g).forEach(function(x){ finns[x] = 1; }); });
+  return uttryckTalen(svar).some(function(x){ return !finns[x]; });
+}
 // Visa ett tal med snyggt minustecken (− = U+2212) och decimalkomma
 function visaTal(t){
   var s = String(t).replace('.', ',');
@@ -2106,6 +2129,8 @@ function bygg_blad(rotEl, blad){
            värdet — "37" för "25 + 12" underkänns. Samma princip som "redan löst godtas inte": formen är det
            uppgiften tränar. Ett ensamt tal godtas bara där facit självt är ett ensamt tal. */
         if(ok && ensamtTal(_uv) && !godk.some(ensamtTal)) ok = false;
+        // ...och inte heller delvis: en operation ur ett tecknat taluttryck får inte vara uträknad ("40 + 16").
+        if(ok && utraknat(_uv, godk)) ok = false;
       } else if(inp.dataset.form !== undefined){
         ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
       } else if(inp.dataset.text !== undefined){
