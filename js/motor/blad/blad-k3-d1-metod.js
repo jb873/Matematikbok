@@ -1,7 +1,7 @@
 /* blad-k3-d1-metod.js — METODTRÄNINGENS BANKER I DEL 1 (åk 7, k3 Del 1 Algebraiska uttryck): Tolka (T1–T6), Teckna
    (K1–K7) och Räkna (R1–R6). Källa: doc/innehall/k3-d1-metodtraning.md (Joachims banker, facit kontrollräknat). Texten
    ordagrant; "Börja med multiplikationen." står kvar — instruktioner hör hemma i färdighetsträningen (Joachim 2026-11-24).
-   Varje bank är ett löv i metodträningens träd (momentsidan) med bank: 'k3d1:<löv>'. Ramens drill
+   Varje bank är ett löv i metodträningens träd (momentsidan) med bank: 'k3d1:<löv>'. Drillen (js/motor/arbetsyta/drill.html; i ramen likadant)
    (js/motor/ovamer/k3-forfattad-kalla.js, källan 'k3d1') serverar en uppgift i taget, i bankens ordning ("Nytt blad" =
    nästa uppgift), ritad med bladkärnan (bygg_blad) och de befintliga uppgiftstyperna (blad-k3-d1-typer.js).
    Bankens gemensamma instruktion ("Para ihop …", "Ringa in …", "Skriv av uttrycket …") står som bladets inledande rad.
@@ -332,7 +332,7 @@ var FORMAGA = { T: 'BEGREPP', K: 'KOMMUNIKATION', R: 'RAKNA' };
 /* TRÄDET för momentsidan (Momentsida.metodtraning): rot → Tolka, Teckna, Räkna → löven med bankernas id. */
 function trad(){
   return { rot: { id: 'nf-d1', namn: 'Algebraiska uttryck' }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
-    prefKey: 'k3.d1.nyformat.pref.v1', utfalld: ['nf-d1'], ram: 'ak7-k3-ram.html', rotNamn: 'Algebra', orsakFramtid: 'åk 8',
+    prefKey: 'k3.d1.nyformat.pref.v1', utfalld: ['nf-d1'], rotNamn: 'Algebra', orsakFramtid: 'åk 8',
     kategorier: KAT.map(function(k){
       return { id: 'nf-d1-' + k.id, namn: k.namn, lov: ORDNING.filter(function(id){ return BANK[id].kat === k.id; }).map(function(id){
         return { id: 'nf-d1-' + id, namn: BANK[id].namn, nod: BANK[id].nod, formaga: FORMAGA[k.id], bank: 'k3d1:' + id };

@@ -74,31 +74,49 @@ function sektion(scen, rubrik, vidForstaOppning){
 }
 
 /* SEKTION SOM INTE FINNS ÄN (Joachim 2026-11-21): rubriken med märket "Kommer senare" — ingen knapp, inget
-   innehåll, inte klickbar. Samma märke som Dagens träning i ramen. */
+   innehåll, inte klickbar. Samma märke som Dagens träning i ramen. SAMMA RUBRIK som de fällbara (Joachim 2026-11-24):
+   samma utseende och samma linje — pilens plats står kvar (osynlig), och rubriken är bara inte klickbar. */
 function sektionKommer(scen, rubrik){
-  var s = el('section', 'nf-sek is-stangd is-kommer'), h = el('h2', 'nf-sek-h');
-  h.appendChild(el('span', null, rubrik)); h.appendChild(el('span', 'nf-chip soon', 'Kommer senare'));
-  s.appendChild(h); scen.appendChild(s);
+  var s = el('section', 'nf-sek is-stangd is-kommer'), h = el('h2', 'nf-sek-h'), f = el('span', 'nf-fall is-av');
+  var chev = el('span', 'nr-chev', '▸'); chev.setAttribute('aria-hidden', 'true');
+  f.appendChild(chev); f.appendChild(document.createTextNode(rubrik)); f.appendChild(el('span', 'nf-chip soon', 'Kommer senare'));
+  h.appendChild(f); s.appendChild(h); scen.appendChild(s);
   return s;
 }
 
 /* METODTRÄNING (KONVENTIONER "Arbetssidan", METODTRÄNING — Joachim 2026-11-24; flyttad ur d5:s momentsida och
    metodtraning.html). Rubriken fäller ut trädet: kartans komponent (KartaMotor) i en iframe med den delade sidan
    metodtrad.html bredvid den här filen. Sidan lämnar bara datan: { rot, kategorier: [{ id, namn, lov: [{ id, namn,
-   bank, nod }] }], prefKey, ram, … }. Ett löv med bank är klickbart och öppnar ramens drill; ett löv utan bank står
-   utan länk. Utan ett enda löv står rubriken med "Kommer senare". Ger sektionen ({ body, satt }) eller null. */
+   bank, nod }] }], prefKey, … }. Ett löv med bank är klickbart och öppnar drillen som en EGEN SIDA (drill.html, hela
+   fönstret, uppgiftssidans upplägg; Tillbaka = returAdress(): momentsidan med samma moment och Metodträning utfälld);
+   ett löv utan bank står utan länk. Trädet visas i full höjd utan egen scroll: metodtrad.html sätter ramens höjd
+   efter innehållet (Joachim 2026-11-24). Utan ett enda löv står rubriken med "Kommer senare". Ger sektionen eller null. */
 var TRAD_SIDA = (function(){
   var s = document.currentScript && document.currentScript.src;
   return s ? s.replace(/momentsida\.js(\?[^#]*)?(#.*)?$/, 'metodtrad.html') : 'metodtrad.html';
 })();
+var AKTUELLT = null, METOD_SEK = null;   // momentet som visas och dess Metodträning-sektion
 function metodtraning(scen, data){
   var harLov = !!(data && (data.kategorier || []).some(function(k){ return (k.lov || []).length > 0; }));
-  if(!harLov){ sektionKommer(scen, 'Metodträning'); return null; }
-  return sektion(scen, 'Metodträning', function(body){
+  if(!harLov){ sektionKommer(scen, 'Metodträning'); METOD_SEK = null; return null; }
+  var sek = sektion(scen, 'Metodträning', function(body){
     var trad = el('iframe', 'nf-trad'); trad.title = 'Metodträning';
+    trad.setAttribute('scrolling', 'no');   // ingen egen scroll: höjden följer trädet (metodtrad.html)
     trad.__metod = data;            // läses av metodtrad.html (frameElement.__metod), också efter en retur
     trad.src = TRAD_SIDA; body.appendChild(trad);
   });
+  METOD_SEK = sek;
+  return sek;
+}
+/* TILLBAKA FRÅN DRILLEN: momentsidan med samma moment (?moment=<id>) och Metodträning utfälld (?metod=1); sidans
+   egen ?retur= (vart momentsidans Tillbaka leder) följer med. Läses av metodtrad.html när ett löv öppnas. */
+function returAdress(){
+  var u = new URL(location.href), p = new URLSearchParams(), r = u.searchParams.get('retur');
+  if(AKTUELLT) p.set('moment', AKTUELLT);
+  p.set('metod', '1');
+  if(r) p.set('retur', r);
+  u.hash = ''; u.search = '?' + p.toString();
+  return u.href;
 }
 
 /* TEST (KONVENTIONER "Arbetssidan", TEST — Joachim 2026-11-24; flyttad ur d5:s momentsida). Joachims författade
@@ -122,11 +140,18 @@ function montera(o){
   var scen = document.getElementById('scen-moment');
   // TEST: sidans författade test (o.tester), listade av skalet. Inga test → "Kommer senare".
   var tester = (o.tester || []).filter(function(t){ return t && t.id; });
-  var visaTest = tester.length ? function(){ visaTester(scen, tester, o.testAdress); } : null;
+  var visaTest = tester.length ? function(){ AKTUELLT = null; METOD_SEK = null; visaTester(scen, tester, o.testAdress); } : null;
+  // MOMENTEN: skalet minns vilket som visas (m.id, annars m<nr>) — för ?moment= och drillens Tillbaka.
+  var momentId = (o.moment || []).map(function(m, i){ return m.id || ('m' + (i + 1)); });
+  var varianter = (o.moment || []).map(function(m, i){
+    var c = {}; Object.keys(m).forEach(function(k){ c[k] = m[k]; });
+    if(m.valj) c.valj = function(){ AKTUELLT = momentId[i]; METOD_SEK = null; return m.valj.apply(this, arguments); };
+    return c;
+  });
   var ram = window.NavRam && window.NavRam.montera({
     vard: o.vard,
     arbeta: [ { rubrik: o.rubrik, grupper: [
-      { rubrik: null, varianter: o.moment },
+      { rubrik: null, varianter: varianter },
       /* Test utan författade test (Joachim 2026-11-24): samma rad som Dagens träning — märket, ingen länk. */
       { rubrik: null, varianter: [ { titel: 'Dagens träning<span class="nf-chip soon">Kommer senare</span>', kommer: true },
                                    visaTest ? { titel: 'Test', valj: visaTest }
@@ -140,9 +165,23 @@ function montera(o){
     (o.mina || []).forEach(function(v){ var e = document.getElementById(v.vy); if(e) ram.ytaMina.appendChild(e); });
     var hall = document.getElementById('scener'); if(hall) hall.remove();
   }
+  /* ?moment=<id> öppnar det momentet (uppgiftssidans och drillens Tillbaka leder dit); ?metod=1 fäller ut dess
+     Metodträning och visar den. Utan parametrarna som förut. */
+  try {
+    var q = new URLSearchParams(location.search), mid = q.get('moment'), ix = momentId.indexOf(mid);
+    if(ix >= 0 && o.moment[ix].valj && !o.moment[ix].kommer && AKTUELLT !== mid){
+      var rader = document.querySelectorAll('.nr-rad'); if(rader[ix] && !rader[ix].disabled) rader[ix].click();
+    }
+    if(q.get('metod') === '1' && METOD_SEK){
+      METOD_SEK.satt(true);
+      var sekEl = METOD_SEK.body.parentNode;
+      setTimeout(function(){ var r = document.documentElement, sb = r.style.scrollBehavior; r.style.scrollBehavior = 'auto';
+        sekEl.scrollIntoView({ block: 'start' }); r.style.scrollBehavior = sb; }, 0);
+    }
+  } catch(e){}
   return { scen: scen, ram: ram };
 }
 
 window.Momentsida = { horisont: horisont, badge: badge, sektion: sektion, sektionKommer: sektionKommer, el: el, montera: montera,
-                      metodtraning: metodtraning };
+                      metodtraning: metodtraning, returAdress: returAdress };
 })();

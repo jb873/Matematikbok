@@ -100,10 +100,10 @@ var MOMENT = [
 
 /* ── METODTRÄNINGENS LÖV (flyttat ur metodtraning.html 2026-11-24; trädet bor i momentsida.js): Problemlösning →
    de fem typerna → deras sex varianter, ur banken. Varje variant är ett löv med en FÖRFATTAD BANK,
-   'prob-ak7:<typ>/<variant>', som ramens drill serverar (js/motor/ovamer/k3-forfattad-kalla.js). Samma id:n och
+   'prob-ak7:<typ>/<variant>', som drillsidan serverar (js/motor/arbetsyta/drill.html; källan i k3-forfattad-kalla.js). Samma id:n och
    samma pref-nyckel som förut. ── */
 var METOD = { rot: { id: 'nf-prob', namn: 'Problemlösning' }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
-  prefKey: 'k3.prob.nyformat.pref.v1', utfalld: ['nf-prob'], ram: 'ak7-k3-ram.html', rotNamn: 'Algebra', orsakFramtid: 'åk 8',
+  prefKey: 'k3.prob.nyformat.pref.v1', utfalld: ['nf-prob'], rotNamn: 'Algebra', orsakFramtid: 'åk 8',
   kategorier: (BANK ? BANK.TYPER : []).map(function(t){
     return { id: 'nf-prob-' + t.id, namn: t.titel, lov: t.varianter.map(function(v, i){
       return { id: 'nf-prob-' + t.id + '-v' + (i + 1), namn: v.titel, nod: t.nod, formaga: 'PROBLEM', bank: 'prob-ak7:' + t.id + '/' + (i + 1) };

@@ -133,7 +133,7 @@ function visaMoment(m){
 var moment = MOMENT.map(function(m){
   // Ett moment utan innehåll än står med samma "Kommer senare" som Dagens träning (inte bara grått).
   return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel + (m.kommer ? '<span class="nf-chip soon">Kommer senare</span>' : ''),
-           kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
+           id: m.id, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
 });
 
 /* TEST: Joachims sex författade test (TESTER ovan), listade av skalet och öppnade på uppgiftssidan (?test=<id>).
@@ -143,13 +143,8 @@ M.montera({
   mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
           { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ]
 });
-/* ?moment=<id> (Tillbaka från ett moments uppgiftssida): öppna DET momentet i stället för det första, så eleven
-   kommer tillbaka dit hen var. Utan parametern som förut. */
-try {
-  var mid = new URLSearchParams(location.search).get('moment');
-  var mm = MOMENT.filter(function(x){ return x.id === mid && !x.kommer; })[0];
-  if(mm){ var knapp = [].filter.call(document.querySelectorAll('.nr-rad'), function(b){ return !b.disabled && b.textContent.indexOf(mm.titel) >= 0; })[0]; if(knapp) knapp.click(); }
-} catch(e){}
+/* ?moment=<id> och ?metod=1 (Tillbaka från uppgiftssidan och från metodträningens drill): skalet öppnar momentet
+   och fäller ut Metodträning (Momentsida.montera). */
 })();
 </script>
 <script src="../../../js/elevfeedback.js" defer></script>

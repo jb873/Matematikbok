@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Metodträning</title>
+<!-- METODTRÄNINGENS DRILL SOM EGEN SIDA (KONVENTIONER "Arbetssidan", METODTRÄNING; Joachim 2026-11-24). Ett klick på
+     ett löv i trädet (metodtrad.html) öppnar den här sidan i hela fönstret: ?bank=<källa>:<löv>&retur=<momentsidan>.
+     Upplägget är uppgiftssidans (js/motor/arbetsyta/): slimmat sidhuvud med "← Tillbaka" (Arbetsyta.retur — tillbaka
+     till momentsidan med samma moment och Metodträning utfälld), knappsatsen till höger och Kontrollera under den
+     (Arbetsyta.placera). Ingen meny från ramen och ingen "Till kunskapsläget". Bankerna och deras rendering är
+     källornas egna, ur registret i js/motor/ovamer/k3-forfattad-kalla.js (window.ForfattadKalla) — samma som ramens
+     drill. "Nytt blad" = nästa uppgift i banken; finns ingen står knappen inte. Ingen nätväg. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/keypad.css">
+<link rel="stylesheet" href="../../../js/motor/arbetsyta/arbetsyta.css">
+<style>
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+  --c-rakna:#16a34a;
+  --success:#16a34a; --success-bg:#dcfce7;
+  --error:#dc2626;   --error-bg:#fee2e2;
+  --bg-warm:#f3ecdd;
+  --mono:'Source Serif 4',Georgia,serif;
+  --rod:#b23b2e; --rod-lt:#c0392b;
+  --las:#9a9388;
+}
+/* Skalets formgivning (arbetsytan): arbetsyta.css. Bladens: källans egna filer (laddas med källan). */
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span id="fk-ar">Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="../../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a id="fk-arskurs" href="../../../ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a id="fk-kapitel" href="../../../ak7-k3.html">Kapitel 3</a>
+    <span class="crumb-sep">›</span>
+    <a id="fk-delkapitel" href="../../../ak7-k3.html"></a>
+  </div>
+</nav>
+
+<div class="nf-topp"><a class="nf-tillbaka" id="nf-tillbaka" href="../../../ak7-k3.html">← Tillbaka</a></div>
+<main class="nf-yta" id="nf-yta">
+  <!-- "Nytt blad" står där växeln står på uppgiftssidan (som "Nästa blad" i problemlösningens blandade). -->
+  <div class="nf-verktyg" id="nf-verktyg"></div>
+</main>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span id="fk-fot">Metodträning</span>
+</footer>
+
+<script src="../../../js/mastery-karna.js"></script>
+<script src="../../../js/mastery.js"></script>
+<script src="../../../js/mastery-k3.js"></script>
+<script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
+<script>window.FK_EGEN_SIDA = true;</script>
+<script src="../../../js/motor/ovamer/k3-forfattad-kalla.js"></script>
+<script>
+(function(){
+  var ROT = '../../../', FK = window.ForfattadKalla, AY = window.Arbetsyta;
+  var q = AY.retur();
+  if(!FK) return;
+  var b = FK.delaBank(q.get('bank')), K = b.K;
+  if(!K) return;
+  var D = K.delkapitel || {};
+  // Utan ?retur=: Tillbaka till delkapitlets momentsida. Brödsmulan: årskurs › kapitel › delkapitlet.
+  if(!q.get('retur') && D.adress) document.getElementById('nf-tillbaka').href = ROT + D.adress;
+  var dk = document.getElementById('fk-delkapitel'); dk.textContent = D.namn || ''; if(D.adress) dk.href = ROT + D.adress;
+  if(D.arskurs){ document.getElementById('fk-ar').textContent = 'Åk ' + D.arskurs; var ak = document.getElementById('fk-arskurs'); ak.textContent = 'Årskurs ' + D.arskurs; ak.href = ROT + 'ak' + D.arskurs + '.html'; }
+  if(D.arskurs && D.kapitel){ var kk = document.getElementById('fk-kapitel'); kk.textContent = 'Kapitel ' + D.kapitel; kk.href = ROT + 'ak' + D.arskurs + '-k' + D.kapitel + '.html'; }
+  document.getElementById('fk-fot').textContent = D.namn || 'Metodträning';
+
+  var yta = document.getElementById('nf-yta'), verktyg = document.getElementById('nf-verktyg');
+  // ELEVTEXT som fält (elevtext-låset ser fältnamnen): samma ord som ramens drill.
+  var TEXT = { nytt: { titel: 'Nytt blad' } };
+  var nytt = document.createElement('button'); nytt.type = 'button'; nytt.className = 'blad-nav-btn fk-nytt-blad';
+  nytt.textContent = TEXT.nytt.titel; nytt.setAttribute('data-action', 'nytt-blad'); nytt.hidden = true;
+  verktyg.appendChild(nytt);
+  var mount = document.createElement('div'); mount.className = K.montering || 'ovn-wrap nf-mount'; mount.id = 'nf-drill';
+  mount.setAttribute('data-bank', q.get('bank'));
+  yta.appendChild(mount);
+
+  // Källans stilar FÖRE skalets (arbetsyta.css), som på uppgiftssidan — annars skriver t.ex. keypad.css över
+  // skalets placering av knappsatsen. En fil som redan är länkad laddas inte igen.
+  var skal = document.querySelector('link[href$="arbetsyta/arbetsyta.css"]');
+  (K.css || []).forEach(function(h){
+    var finns = [].some.call(document.querySelectorAll('link[rel=stylesheet]'), function(l){ return l.getAttribute('href') === ROT + h; });
+    if(finns) return;
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = ROT + h;
+    if(skal) skal.parentNode.insertBefore(l, skal); else document.head.appendChild(l);
+  });
+  FK.laddaSkript((K.krav || []).concat(K.skript || []).map(function(s){ return ROT + s; }), function(ok){
+    var kalla = ok ? K.hamta(b.ref) : null;
+    if(!kalla || !kalla.instanser || !kalla.instanser.length) return;
+    document.title = 'Matematik · ' + (D.namn ? D.namn + ' · ' : '') + 'Metodträning · ' + kalla.titel;
+    function instans(i){ return kalla.nasta ? kalla.nasta(i) : (kalla.instanser[i] || null); }
+    var nu = 0, onskad = (q.get('blad') || '').toUpperCase();
+    for(var s = 0; s < 60 && onskad; s++){ var x = instans(s); if(!x) break; if(x.bokstav === onskad){ nu = s; break; } }
+    function visa(i){
+      nu = i;
+      var inst = instans(i);
+      kalla.rita(mount, K.arbetsyta ? K.arbetsyta(inst.blad) : inst.blad);
+      mount.setAttribute('data-blad', inst.bokstav);
+      nytt.hidden = !instans(i + 1);                 // inget nästa blad → ingen knapp
+      try { var u = new URLSearchParams(location.search); u.set('blad', inst.bokstav); history.replaceState(null, '', '?' + u.toString()); } catch(e){}
+    }
+    nytt.addEventListener('click', function(){
+      if(!instans(nu + 1)) return;
+      visa(nu + 1);
+      var r = document.documentElement, sb = r.style.scrollBehavior; r.style.scrollBehavior = 'auto'; window.scrollTo(0, 0); r.style.scrollBehavior = sb;
+    });
+    visa(nu);
+    var kp = K.knappsats && K.knappsats();
+    if(kp) AY.placera({ keypad: kp, knapprader: K.knapprader || '.nf-yta .ovn-kontroll-rad' });
+    // Bladet öppnas överst (som uppgiftssidan): ingen fokus-rullning ned.
+    var r0 = document.documentElement; r0.style.scrollBehavior = 'auto'; window.scrollTo(0, 0); r0.style.scrollBehavior = '';
+  });
+})();
+</script>
+<script src="../../../js/motor/keypad-clearance.js"></script>
+<script src="../../../js/elevfeedback.js" defer></script>
+</body>
+</html>

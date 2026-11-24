@@ -3,7 +3,10 @@
 
    Renderar varje momentsida i nytt format (ak*\/**\/*-nyformat/index.html) i en riktig webbläsare och FÄLLER om:
      TRÄD      Metodträningens träd saknas under något moment (rubriken är inte fällbar, ingen iframe, inget träd),
-               eller trädet har inga klickbara löv. Ett klickbart löv ska öppna en författad bank (ramens ?bank=…).
+               eller trädet har inga klickbara löv. Ett klickbart löv ska öppna en författad bank (?bank=…).
+     KLICK     Ett klick på ett löv laddar något i trädets ruta (Joachim 2026-11-24: drillen öppnas som en egen sida i
+               hela fönstret). Klicket görs på riktigt; navigeringen fångas med webbläsarens Navigation API och stoppas,
+               så att grinden ser VAR den skulle hamna: i rutan = brott; ingenstans i hela fönstret = brott.
      TEST      Test leder till något annat än författade test: varje länk i Test-vyn ska vara uppgift.html?test=<id>,
                och sidan den öppnar ska visa just det testet (rubriken = länkens titel — ingen tyst reserv).
                Test som "Kommer senare" (inga författade test) är tillåtet.
@@ -17,7 +20,8 @@
      lov     trädets löv utan bank (inga klickbara löv)
      test    Test-länkarna till ramens färdiga test
      gammal  en länk till delkapitlets gamla sida
-   KÖR:  node verktyg/momentsida-grind.js [--sida <delsträng>] [--injicera trad|lov|test|gammal]
+     ruta    lövens länkar öppnas i trädets ruta (target tas bort — det gamla felet)
+   KÖR:  node verktyg/momentsida-grind.js [--sida <delsträng>] [--injicera trad|lov|test|gammal|ruta]
    Exit 1 vid brott. Ingen nätväg, ingen fil i repot ändras. */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
@@ -47,6 +51,11 @@ const PRE = `(function(){
   var oe = console.error; console.error = function(){ try { window.__fel.push('console.error: ' + [].map.call(arguments, String).join(' ').slice(0, 200)); } catch(x){} return oe.apply(console, arguments); };
   if(window === window.top){ try { localStorage.clear(); } catch(e){} }
   var INJ = ${JSON.stringify(INJ || '')};
+  if(INJ === 'ruta' && window !== window.top){   // i trädets ruta: lövens target tas bort, så att de öppnas i rutan
+    var tabort = function(){ Array.prototype.forEach.call(document.querySelectorAll('a[target]'), function(a){ a.removeAttribute('target'); }); };
+    new MutationObserver(tabort).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['target'] });
+    return;
+  }
   if(!INJ || window !== window.top) return;
   var M;
   Object.defineProperty(window, 'Momentsida', { configurable: true, get: function(){ return M; }, set: function(v){
@@ -92,6 +101,18 @@ async function PROBE(){
     var lov = [].slice.call(d.querySelectorAll('a.lov-lank[href]'));
     m.trad = 'ok'; m.lov = lov.length;
     lov.forEach(function(a){ var h = abs(a); m.lovLankar.push(h); ut.lankar.push({ var: m.namn + ' / trädet', text: txt(a).slice(0, 40), href: h }); });
+    // KLICK PÅ ETT LÖV: var hamnar det? Navigeringen fångas (Navigation API) och stoppas — i rutan och i hela fönstret.
+    if(lov[0]){
+      var fang = { ruta: null, topp: null }, av = [];
+      [[fr.contentWindow, 'ruta'], [window, 'topp']].forEach(function(p){
+        try { if(p[0].navigation){ var h = function(e){ fang[p[1]] = e.destination.url; if(e.cancelable) e.preventDefault(); }; p[0].navigation.addEventListener('navigate', h); av.push(function(){ p[0].navigation.removeEventListener('navigate', h); }); } } catch(e){}
+      });
+      var fore = ''; try { fore = fr.contentWindow.location.href; } catch(e){}
+      lov[0].click(); await v(900);
+      av.forEach(function(f){ f(); });
+      var efter = ''; try { efter = fr.contentWindow.location.href; } catch(e){ efter = '(okänd)'; }
+      m.klick = { lov: txt(lov[0]).slice(0, 40), ruta: fang.ruta, topp: fang.topp, rutanBytt: efter !== fore, navApi: !!window.navigation };
+    }
     try { (fr.contentWindow.__fel || []).forEach(function(f){ ut.fel.push('trädet: ' + f); }); } catch(e){}
     ut.moment.push(m);
   }
@@ -148,6 +169,11 @@ SIDOR.forEach(sida => {
     if(m.trad !== 'ok') brott.push('TRÄD: ' + m.namn + ' — ' + m.trad);
     else if(!m.lov) brott.push('TRÄD: ' + m.namn + ' — inga klickbara löv');
     m.lovLankar.forEach(h => { let q; try { q = new URL(h).searchParams.get('bank'); } catch(e){} if(!q) brott.push('TRÄD: ' + m.namn + ' — ett löv öppnar inte en författad bank: ' + h); });
+    if(m.klick){
+      if(!m.klick.navApi) brott.push('KLICK: webbläsaren saknar Navigation API — klicket kan inte mätas');
+      else if(m.klick.ruta || m.klick.rutanBytt) brott.push('KLICK: ' + m.namn + ' — "' + m.klick.lov + '" laddar något i trädets ruta (' + (m.klick.ruta || 'rutan bytte sida') + ')');
+      else if(!m.klick.topp) brott.push('KLICK: ' + m.namn + ' — "' + m.klick.lov + '" öppnar ingenting i hela fönstret');
+    } else if(m.trad === 'ok' && m.lov) brott.push('KLICK: ' + m.namn + ' — klicket på ett löv kunde inte göras');
   });
   if(Array.isArray(u.test)){
     if(!u.test.length) brott.push('TEST: Test-vyn har inga test (inga författade test → "Kommer senare")');

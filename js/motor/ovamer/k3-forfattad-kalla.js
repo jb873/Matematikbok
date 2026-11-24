@@ -21,12 +21,12 @@
    En källa registreras i KALLOR nedan: vilka filer den behöver och hur instanserna hämtas. */
 (function(){
   'use strict';
-  var q; try { q = new URLSearchParams(location.search); } catch(e){ return; }
-  var bank = q.get('bank');
-  if(!bank) return;                                   // ← inget bank-läge: ramen är orörd
-
-  var ELEVENS_AR = 7;                                 // ak7-k3-ram.html är sjuans kapitel 3-ram
-
+  /* REGISTRET DELAS (Joachim 2026-11-24): metodträningens drill öppnas som en egen sida med uppgiftssidans upplägg
+     (js/motor/arbetsyta/drill.html). Den sidan använder samma källor härifrån (window.ForfattadKalla) och sätter
+     window.FK_EGEN_SIDA före laddningen, så att ramens bankläge nedan inte körs där. Sökvägarna är från sajtens rot.
+     Per källa, för drillsidan: krav = filer ramen redan bär men en egen sida måste ladda; delkapitel = sidan
+     Tillbaka och brödsmulan leder till; knapprader = bladkomponentens knapprad (Arbetsyta.placera); arbetsyta(b) =
+     bladet i uppgiftssidans form. */
   var KALLOR = {
     // Problemlösning åk7 (js/motor/problemlosning/prob-bank-ak7.js): referens '<typ>/<variant>'
     'prob-ak7': {
@@ -37,7 +37,12 @@
                'js/motor/problemlosning/prob-blad.js', 'js/motor/problemlosning/prob-blad2.js',
                'js/motor/problemlosning/prob-bank-ak7.js'],
       hamta: function(ref){ return window.ProbBankAk7 && window.ProbBankAk7.drillKalla(ref); },
-      knappsats: function(){ return window.ProbBankAk7 && window.ProbBankAk7.knappsats(); }
+      knappsats: function(){ return window.ProbBankAk7 && window.ProbBankAk7.knappsats(); },
+      krav: ['js/motor/blad/ak8-blad-ui.js', 'js/motor/figur/svg-algebrafigur.js', 'js/data/band-ak8-alg1.js', 'js/motor/blad/gen-ak8-alg1.js'],
+      delkapitel: { namn: 'Problemlösning', adress: 'ak7/k3/d5-problemlosning-nyformat/index.html', arskurs: 7, kapitel: 3 },
+      knapprader: '.nf-yta .prob-kort .actions',
+      // Uppgiftssidans form (som d5:s uppgift.html): "1." på frågans rad och arbetsytans rutor.
+      arbetsyta: function(b){ var c = {}; Object.keys(b || {}).forEach(function(k){ c[k] = b[k]; }); c.numrering = 'tal'; c.arbetsyta = true; return c; }
     },
     /* Del 1 Algebraiska uttryck åk7, metodträningens banker (js/motor/blad/blad-k3-d1-metod.js, Joachim 2026-11-24):
        referens = lövet ('T1' … 'R6'). Ritas med bladkärnan (bygg_blad) — samma komponent och samma uppgiftstyper som
@@ -53,19 +58,14 @@
           + '.fk-drill .fk-d1-blad{max-width:900px;margin:18px auto 0;padding:0 28px;}',
       skript: ['js/mastery.js', 'js/motor/blad/blad-karna-b.js', 'js/motor/blad/blad-k3-d1-typer.js', 'js/motor/blad/blad-k3-d1-metod.js'],
       hamta: function(ref){ return window.BLAD_K3_D1_METOD && window.BLAD_K3_D1_METOD.drillKalla(ref); },
-      knappsats: function(){ return document.getElementById('ovn-keypad-shared'); }
+      knappsats: function(){ return document.getElementById('ovn-keypad-shared'); },
+      krav: ['js/motor/alg-brak.js', 'js/motor/blad/ak8-blad-ui.js', 'js/motor/figur/svg-algebrafigur.js'],
+      delkapitel: { namn: 'Algebraiska uttryck', adress: 'ak7/k3/d1-algebraiska-uttryck-nyformat/index.html', arskurs: 7, kapitel: 3 },
+      knapprader: '.nf-yta .ovn-kontroll-rad',
+      montering: 'nf-mount'          // källans rita lägger själv bladet i en ny .ovn-wrap per blad
     }
   };
 
-  // ELEVTEXT som fält (elevtext-låset ser fältnamnen). Joachim sätter ordalydelsen.
-  var TEXT = { nytt: { titel: 'Nytt blad' } };
-
-  var CSS = ''
-    + '.fk-drill .prob-kort{max-width:none;margin:0;padding:6px 28px 18px;}'
-    + '.fk-nytt{display:flex;justify-content:flex-start;margin:4px 28px 24px;}';
-
-  function nar(fn){ if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
-  function tillOversikt(){ if(typeof window.renderOversikt === 'function') window.renderOversikt(); }
   function laddaCss(href){ var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); }
   function laddaSkript(lista, klar){
     var i = 0;
@@ -76,9 +76,31 @@
       document.body.appendChild(s);
     })();
   }
+  // 'k3d1:T1' → { kallId: 'k3d1', ref: 'T1', K: källan }
+  function delaBank(bank){
+    var p = String(bank || '').indexOf(':');
+    var kallId = p > 0 ? bank.slice(0, p) : bank, ref = p > 0 ? bank.slice(p + 1) : '';
+    return { kallId: kallId, ref: ref, K: KALLOR[kallId] || null };
+  }
+  window.ForfattadKalla = { KALLOR: KALLOR, delaBank: delaBank, laddaCss: laddaCss, laddaSkript: laddaSkript };
+  if(window.FK_EGEN_SIDA) return;                     // drillsidan: registret räcker
 
-  var p = bank.indexOf(':'), kallId = p > 0 ? bank.slice(0, p) : bank, ref = p > 0 ? bank.slice(p + 1) : '';
-  var K = KALLOR[kallId];
+  var q; try { q = new URLSearchParams(location.search); } catch(e){ return; }
+  var bank = q.get('bank');
+  if(!bank) return;                                   // ← inget bank-läge: ramen är orörd
+
+  var ELEVENS_AR = 7;                                 // ak7-k3-ram.html är sjuans kapitel 3-ram
+
+  // ELEVTEXT som fält (elevtext-låset ser fältnamnen). Joachim sätter ordalydelsen.
+  var TEXT = { nytt: { titel: 'Nytt blad' } };
+
+  var CSS = ''
+    + '.fk-drill .prob-kort{max-width:none;margin:0;padding:6px 28px 18px;}'
+    + '.fk-nytt{display:flex;justify-content:flex-start;margin:4px 28px 24px;}';
+
+  function nar(fn){ if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
+  function tillOversikt(){ if(typeof window.renderOversikt === 'function') window.renderOversikt(); }
+  var _b = delaBank(bank), ref = _b.ref, K = _b.K;
 
   nar(function(){
     if(!K){ tillOversikt(); return; }

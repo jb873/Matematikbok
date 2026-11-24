@@ -8,12 +8,15 @@
      ak7/k3/d5-problemlosning-nyformat/metodtraning.html. Kartans komponent (js/karta/karta-motor.js + karta.css),
      visad i en iframe under rubriken "Metodträning" på momentsidan. Sidan har ingen egen data: momentsidan
      (Momentsida.metodtraning i momentsida.js) lägger trädets data på iframen (frameElement.__metod) — rot,
-     kategorier och löv med bankernas id. Ett löv med bank länkar till ramens drill (?bank=…), ett löv utan bank
-     står utan länk. Ingen nätväg. -->
+     kategorier och löv med bankernas id. Ett löv med bank öppnar drillen som en EGEN SIDA i hela fönstret
+     (drill.html bredvid den här filen, target _top) med Tillbaka till momentsidan, samma moment och Metodträning
+     utfälld (Momentsida.returAdress) — aldrig något i trädets ruta. Ett löv utan bank står utan länk. Trädet visas i
+     full höjd utan egen scroll: sidan sätter ramens höjd efter innehållet (Joachim 2026-11-24). Ingen nätväg. -->
 <link rel="stylesheet" href="../../../fonts/fonts.css">
 <link rel="stylesheet" href="../../karta/karta.css">
 <style>
   .wrap{padding-top:14px;}
+  html,body{overflow:hidden;}   /* ingen egen scroll i rutan: ramen får trädets höjd */
 </style>
 </head>
 <body>
@@ -36,7 +39,7 @@
 <script>
 (function(){
   /* DATAN ur momentsidan: { rot:{id,namn}, kategorier:[{id,namn,lov:[{id,namn,bank,nod,formaga}]}],
-     arskursRelevans, arskurs, prefKey, utfalld, ram (från sajtens rot), rotNamn, orsakFramtid }. */
+     arskursRelevans, arskurs, prefKey, utfalld, rotNamn, orsakFramtid }. */
   var D = null;
   try { D = window.frameElement && window.frameElement.__metod; } catch(e){}
   if(!D || !window.KartaMotor) return;
@@ -56,7 +59,40 @@
   // Första besöket: de grenar sidan anger är utfällda (elevens eget val minns sedan av kartan, under prefKey).
   try { if(!localStorage.getItem(D.prefKey)) localStorage.setItem(D.prefKey, JSON.stringify({ mal: 'allt', expanded: D.utfalld || [D.rot.id] })); } catch(e){}
   window.KartaMotor.montera({ taxonomi: { noder: NODER }, mastery: window.MasteryK3, arskurs: D.arskurs || 'ak7', minNiva: null,
-    prefKey: D.prefKey, ramPath: '../../../' + D.ram, rotNamn: D.rotNamn, orsakFramtid: D.orsakFramtid });
+    prefKey: D.prefKey, ramPath: 'drill.html', rotNamn: D.rotNamn, orsakFramtid: D.orsakFramtid });
+
+  /* LÖVEN ÖPPNAR DRILLEN SOM EN EGEN SIDA: drill.html?bank=…&retur=<momentsidan>, i hela fönstret (target _top).
+     Retur är relativ från drillsidan (Arbetsyta.retur godtar bara relativa adresser); drillsidan ligger bredvid den
+     här filen, tre nivåer under sajtens rot. Kartan ritar om grenarna när de fälls — länkarna rättas efter varje
+     ritning. */
+  var ROT = new URL('../../../', location.href).href;
+  function returRel(){
+    var a = null; try { a = window.parent && window.parent.Momentsida && window.parent.Momentsida.returAdress(); } catch(e){}
+    return a && a.indexOf(ROT) === 0 ? '../../../' + a.slice(ROT.length) : null;
+  }
+  function lankar(){
+    var r = returRel();
+    Array.prototype.forEach.call(document.querySelectorAll('a.lov-lank[href]'), function(a){
+      var u; try { u = new URL(a.getAttribute('href'), location.href); } catch(e){ return; }
+      var bank = u.searchParams.get('bank'); if(!bank) return;
+      var h = 'drill.html?bank=' + encodeURIComponent(bank) + (r ? '&retur=' + encodeURIComponent(r) : '');
+      if(a.getAttribute('href') !== h) a.setAttribute('href', h);
+      if(a.target !== '_top') a.target = '_top';
+    });
+  }
+  // FULL HÖJD: ramen (iframen på momentsidan) får innehållets höjd, så att trädet inte scrollar i rutan.
+  var wrap = document.querySelector('.wrap');
+  function hojd(){
+    var fe = null; try { fe = window.frameElement; } catch(e){}
+    if(!fe || !wrap) return;
+    var h = Math.ceil(wrap.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(document.body).marginBottom) || 0) + 2);
+    if(Math.abs((parseFloat(fe.style.height) || 0) - h) > 1) fe.style.height = h + 'px';
+  }
+  function efterRitning(){ lankar(); hojd(); }
+  efterRitning();
+  new MutationObserver(efterRitning).observe(document.getElementById('cols'), { childList: true, subtree: true });
+  if(window.ResizeObserver) new ResizeObserver(hojd).observe(wrap);
+  window.addEventListener('load', hojd);
 })();
 </script>
 </body>

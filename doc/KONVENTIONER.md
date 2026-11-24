@@ -195,7 +195,7 @@ METODTRÄNING = färdighetsträningens träd (INTE platta chips)
   kapitel (Algebra) → avsnitt (Ekvationer) → bladet.
 - Horisonten filtrerar trädet (R/Nu/F/FF) — samma mekanism som kartans
   "Godkänt (kärna)/Allt" roll-filter. En variant har inga siffror/underrubriker,
-  den är en mängd uppgifter att träna. Mastery-färg visar status. Klick → drill bredvid.
+  den är en mängd uppgifter att träna. Mastery-färg visar status. Ett klick på ett löv öppnar drillen som en egen sida med uppgiftssidans upplägg (← Tillbaka till momentsidan med Metodträning utfälld, knappsatsen till höger). Trädet visas i full höjd utan egen scroll. Joachim 2026-11-24.
 - Innehållet är FÖRFATTAT, inte genererat ur taxonomins noder: varje löv har en författad bank, som
   problemlösningens (`bank: 'prob-ak7:<typ>/<variant>'`, serverad av `js/motor/ovamer/k3-forfattad-kalla.js`).
   *Joachim 2026-11-22.*

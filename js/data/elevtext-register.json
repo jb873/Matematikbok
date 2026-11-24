@@ -2283,5 +2283,9 @@
   "titel | Test 5",
   "titel | Test 6"
  ],
- "js/motor/blad/blad-k3-d1-tolka.js": []
+ "js/motor/blad/blad-k3-d1-tolka.js": [],
+ "js/motor/ovamer/k3-forfattad-kalla.js": [
+  "namn | Algebraiska uttryck",
+  "namn | Problemlösning"
+ ]
 }
