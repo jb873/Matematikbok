@@ -38,6 +38,8 @@ var R_BERAKNA = { rubrik: 'Beräkna.' }.rubrik;
 var R_RUTAN = { rubrik: 'Vilket tal ska stå i rutan för att likheten ska stämma?' }.rubrik;
 /* Bladraden överst (kärnans fält blad.intro). Blad 1:s rad godkänd av Joachim 2026-11-24. */
 var INTRO_1 = { intro: 'Skriv av uttrycket och visa ett mellanled i varje uppgift.' }.intro;
+/* Blad 2:s rad (bladfilens): "i varje beräkning" — uppgift 3 är ingen beräkning. Godkänd av Joachim 2026-11-24. */
+var INTRO_2 = { intro: 'Skriv av uttrycket och visa mellanled i varje beräkning.' }.intro;
 var BLAD = {};
 
 /* ── BLAD 1A ── "Skriv av uttrycket och visa ett mellanled i varje uppgift." */
@@ -69,7 +71,7 @@ BLAD['1B'] = function(){ return { titel: TITEL, intro: INTRO_1, dokument: dok('1
 var GOR_LIKHET = { rubrik: 'Gör så att likheten stämmer. I a och b sätter du in +, − eller · i rutorna. I c sätter du ut en parentes.' }.rubrik;
 
 /* ── BLAD 2A ── "Skriv av uttrycket och visa mellanled i varje beräkning." */
-BLAD['2A'] = function(){ return { titel: TITEL, dokument: dok('2A', 'kärna', 'tak'), grupper: [
+BLAD['2A'] = function(){ return { titel: TITEL, intro: INTRO_2, dokument: dok('2A', 'kärna', 'tak'), grupper: [
   // [2.2 exempel 4, Grundkurs exempel 2] — Joachims klartext
   g(R_BERAKNA, [
     berakna('5 · (3 + 4) + 12/3', ['5 · 7 + 4', '35 + 4'], 39),
@@ -90,7 +92,7 @@ BLAD['2A'] = function(){ return { titel: TITEL, dokument: dok('2A', 'kärna', 't
 ] }; };
 
 /* ── BLAD 2B ── */
-BLAD['2B'] = function(){ return { titel: TITEL, dokument: dok('2B', 'kärna', 'tak'), grupper: [
+BLAD['2B'] = function(){ return { titel: TITEL, intro: INTRO_2, dokument: dok('2B', 'kärna', 'tak'), grupper: [
   // [2.2 exempel 4, Grundkurs exempel 2] — Joachims klartext
   g(R_BERAKNA, [
     berakna('4 · (2 + 5) + 15/3', ['4 · 7 + 5', '28 + 5'], 33),

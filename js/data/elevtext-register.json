@@ -2173,6 +2173,7 @@
  ],
  "js/motor/blad/blad-k3-d1-prio.js": [
   "intro | Skriv av uttrycket och visa ett mellanled i varje uppgift.",
+  "intro | Skriv av uttrycket och visa mellanled i varje beräkning.",
   "rubrik | Beräkna.",
   "rubrik | Gör så att likheten stämmer. I a och b sätter du in +, − eller · i rutorna. I c sätter du ut en parentes.",
   "rubrik | Vilket tal ska stå i rutan för att likheten ska stämma?",

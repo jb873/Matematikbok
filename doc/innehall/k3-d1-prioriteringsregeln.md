@@ -68,6 +68,8 @@ Facit: a) [24 | 4] = 6
        c) [48 | 8] + [60 | 10] = 6 + 6 = 12
 ```
 
+Ersatt 2026-11-22: meningen 'Mellanled rättas på form som övriga flerled' gäller inte längre. Prioriteringsuppgifter rättas med prioKedjan, på värde (KONVENTIONER §3). Bara avskriften rättas på form.
+
 ## Ur bladfilerna (klartextdelarna, ordagrant)
 
 ### Blad 1A
