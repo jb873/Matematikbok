@@ -81,6 +81,9 @@
 <script src="../../../js/motor/figur/svg-tallinje.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-samma.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-negativa.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-typer.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-siffer.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-tillampning.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -92,13 +95,14 @@
 (function(){
   var AY = window.Arbetsyta;
   var q = AY.retur();
-  var MOMENTEN = { samma: window.BLAD_K3_D3_SAMMA, negativa: window.BLAD_K3_D3_NEGATIVA };
+  var MOMENTEN = { samma: window.BLAD_K3_D3_SAMMA, negativa: window.BLAD_K3_D3_NEGATIVA, siffer: window.BLAD_K3_D3_SIFFER,
+                   tillampning: window.BLAD_K3_D3_TILLAMPNING };
   var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'samma', DATA = MOMENTEN[momentId];
   // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet.
   if(!q.get('retur')) document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;
   var yta = document.getElementById('nf-yta'), nav = document.getElementById('nf-bladnav');
   if(!DATA || !window.bygg_blad) return;
-  var m = /^(\d)([A-Za-z])?$/.exec(q.get('blad') || '') || [];
+  var m = /^(\d+)([A-Za-z])?$/.exec(q.get('blad') || '') || [];
   var info = DATA.MOMENT.blad.filter(function(b){ return String(b.nr) === m[1]; })[0] || DATA.MOMENT.blad[0];
   var start = (m[2] || 'A').toUpperCase(), data = {}, MO = DATA.MOMENT, NR = window.NivaRad;
   /* SPÄRREN (NivaRad, KONVENTIONER §3, som i Tolka och teckna): en direktlänk till ett låst blad — eller ett blad som

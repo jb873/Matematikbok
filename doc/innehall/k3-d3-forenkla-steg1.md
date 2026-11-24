@@ -15,7 +15,7 @@ Källa: Joachims klartext 2026-11-24, ordagrant. Facit kontrollräknat 2026-11-2
 
 Från steg 2 avslutas varje blad med en uppgift där eleven förenklar först och beräknar sedan.
 
-Fördelning på moment och blad (Joachim 2026-11-24; varje blad i variant A och B): moment 1 Samma variabel – Blad 1 = steg 1 (upprepad addition), Blad 2 = steg 2 plus och minus, Blad 3 = steg 2 gånger och delat · moment 2 Negativa tal – Blad 1–3 = steg 3 · moment 3 Siffertermer och två variabler – Kommer senare · moment 4 Negativa termer och tillämpning – Kommer senare.
+Fördelning på moment och blad (Joachim 2026-11-24; varje blad i variant A och B): moment 1 Samma variabel – Blad 1 = steg 1 (upprepad addition), Blad 2 = steg 2 plus och minus, Blad 3 = steg 2 gånger och delat · moment 2 Negativa tal – Blad 1–3 = steg 3 · moment 3 Siffertermer och två variabler – Blad 1–2 = steg 4, Blad 3–4 = steg 5, Blad 5–6 = steg 6 · moment 4 Negativa termer och tillämpning – Blad 1–2 = steg 7, Blad 3–4 = steg 8.
 
 ## Steg 1: upprepad addition blir koefficient
 

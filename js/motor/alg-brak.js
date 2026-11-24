@@ -232,8 +232,45 @@
     nollterm:        'Rätt värde – men en term är noll och ska strykas.',
     koefficient1:    'Rätt värde – men koefficienten 1 skrivs inte ut: skriv x, inte 1x.',
     parentes:        'Rätt värde – men ett förenklat uttryck skrivs utan parentes.',
+    ordning:         'Rätt värde – skriv svaret i bokstavsordning.',
     tecken:          'Kunde inte tolka svaret.'
   };
+
+  /* ORDNING I FÖRENKLADE SVAR (KONVENTIONER §3, Joachim 2026-11-24): bokstavsordning med siffertermen sist
+     (6x + 2y + 5). Enda undantaget: blir den första variabeltermen negativ får svaret börja med en positiv term
+     (−20x + 56 eller 56 − 20x). Termernas nycklar: bokstäverna i termen (sorterade, med exponent); siffertermen sist. */
+  function termOrdning(str){
+    var s = utanUpphojt('' + str).replace(/[−–—]/g, '-').replace(/[·×]/g, '*').replace(/,(\d)/g, '.$1').replace(/\s+/g, '');
+    if(s === '' || /[()]/.test(s)) return null;
+    var termer = [], cur = '', i;
+    for(i = 0; i < s.length; i++){
+      var c = s[i];
+      if((c === '+' || c === '-') && i > 0 && !/[*\/^]/.test(s[i - 1])){ if(cur) termer.push(cur); cur = (c === '-' ? '-' : ''); }
+      else if((c === '+' || c === '-') && i === 0){ cur = (c === '-' ? '-' : ''); }
+      else cur += c;
+    }
+    if(cur) termer.push(cur);
+    return termer.map(function(t){
+      var neg = t[0] === '-', b = (t.replace(/\^\d+/g, '').match(/[a-z]/g) || []).sort().join('');
+      return { neg: neg, nyckel: b || '￿', konst: !b };
+    });
+  }
+  function ordningOk(str){
+    var t = termOrdning(str);
+    if(!t || t.length < 2) return true;
+    var kanon = t.slice().sort(function(p, q){ return p.nyckel < q.nyckel ? -1 : p.nyckel > q.nyckel ? 1 : 0; });
+    function lika(a, b){ if(a.length !== b.length) return false; for(var k = 0; k < a.length; k++) if(a[k].nyckel !== b[k].nyckel) return false; return true; }
+    if(lika(t, kanon)) return true;
+    // Undantaget: första variabeltermen negativ → en positiv term får stå först, resten i ordning.
+    var forstaVar = kanon.filter(function(x){ return !x.konst; })[0];
+    if(forstaVar && forstaVar.neg && !t[0].neg){
+      var rest = kanon.filter(function(x){ return x !== t[0] && x.nyckel !== t[0].nyckel; });
+      if(lika(t.slice(1), rest)) return true;
+    }
+    return false;
+  }
+  // Brott bara när facit självt följer regeln (ett facit i annan ordning rättas som förut).
+  function ordningsBrott(elev, facit){ return ordningOk(facit) && !ordningOk(elev); }
 
   // Gradera ETT förenklat uttryck (en ruta) mot ett facit-uttryck.
   //   → { status:'ratt'|'form'|'fel', form:<kod>, besked:<text> }.  Samma två lägen som bråkrättningen.
@@ -246,6 +283,8 @@
     if(!pointEqual(e, f)) return { status: 'fel' };
     var form = polyForm(elev, opts);
     if(form.fel) return { status: 'form', form: form.fel, besked: FORMBESKED[form.fel] || FORMBESKED.tecken };
+    // Ordningen (KONVENTIONER §3): rätt värde i annan ordning → beskedet. opts.ordning === false stänger av.
+    if(opts.ordning !== false && ordningsBrott(elev, facit)) return { status: 'form', form: 'ordning', besked: FORMBESKED.ordning };
     return { status: 'ratt' };
   }
   // Öppet svar: uttrycket ska ha EXAKT n termer och förenklas till målet (C2). Formen granskas INTE —

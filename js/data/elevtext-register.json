@@ -2329,5 +2329,51 @@
   "rubrik | Vilket tal ska stå i rutan?",
   "rubrik | Välj rätt svar.",
   "titel | Negativa tal"
+ ],
+ "js/motor/blad/blad-k3-d3-typer.js": [
+  "etikett | Beräkna",
+  "etikett | {}Beräkna",
+  "rubrik | Förenkla först och beräkna sedan värdet när {}.",
+  "rubrik | Förenkla.",
+  "rubrik | Skriv ett uttryck för omkretsen och förenkla det.",
+  "rubrik | Välj det förenklade uttrycket."
+ ],
+ "js/motor/blad/blad-k3-d3-siffer.js": [
+  "fraga | Lådornas sammanlagda vikt.",
+  "fraga | Omkretsen.",
+  "namn | Låda",
+  "rubrik | Förenkla. Skriv svaret i bokstavsordning.",
+  "rubrik | Förenkla. Skriv svaret i ordningen x-term, y-term, sifferterm.",
+  "rubrik | Lägg ihop varje sorts variabel för sig.",
+  "rubrik | Ringa in alla variabeltermer.",
+  "rubrik | Skriv ett uttryck för omkretsen eller längden och förenkla det.",
+  "rubrik | Skriv ett uttryck och förenkla det.",
+  "titel | Siffertermer och två variabler",
+  "titel | Två variabler",
+  "titel | Två variabler och siffertermer",
+  "titel | Variabeltermer och siffertermer"
+ ],
+ "js/motor/blad/blad-k3-d3-tillampning.js": [
+  "fraga | Skriv ett uttryck för hela sträckans längd och förenkla det:",
+  "fraga | Skriv ett uttryck för omkretsen och förenkla det:",
+  "fraga | Skriv och förenkla ett uttryck för hur mycket lådorna väger tillsammans:",
+  "fraga | Skriv och förenkla ett uttryck för summan av de tre talen:",
+  "fraga | Vilka uttryck visar hur mycket lådorna väger tillsammans? Ringa in alla som stämmer.",
+  "namn | Linjal",
+  "namn | Penna",
+  "namn | Suddgummi",
+  "rubrik | En bulle kostar b kr och en kaffe kostar (b + 8) kr. Skriv och förenkla ett uttryck för priset för",
+  "rubrik | En stol kostar s kr. Ett bord kostar (4s + 50) kr.",
+  "rubrik | En vuxenbiljett kostar v kr och en barnbiljett b kr.",
+  "rubrik | Ett äpple kostar a kr och en banan kostar b kr.",
+  "rubrik | Skriv och förenkla ett uttryck för hur mycket",
+  "rubrik | Skriv och förenkla ett uttryck för priset för",
+  "rubrik | Tre jämna tal följer varandra. Det minsta talet är n.",
+  "rubrik | Tre tal följer varandra. Det minsta talet är n.",
+  "titel | Decimaltal",
+  "titel | Decimaltal och negativa x-termer",
+  "titel | Negativa termer och tillämpning",
+  "titel | Negativa x-termer",
+  "titel | Tillämpning"
  ]
 }
