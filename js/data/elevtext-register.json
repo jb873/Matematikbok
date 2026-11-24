@@ -2296,13 +2296,15 @@
   "namn | Blad",
   "namn | Förenkla uttryck",
   "rubrik | Förenkla uttryck",
-  "titel | Förenkla och teckna",
   "titel | Kunskapsläge",
+  "titel | Negativa tal",
+  "titel | Negativa termer och tillämpning",
   "titel | Samma variabel",
   "titel | Siffertermer och två variabler",
   "titel | Självskattning",
   "titel | {}<span class=\"nf-chip soon\">Kommer senare</span>{}",
-  "titel | {}Förenkla och teckna",
+  "titel | {}Negativa tal",
+  "titel | {}Negativa termer och tillämpning",
   "titel | {}Samma variabel",
   "titel | {}Siffertermer och två variabler"
  ],
@@ -2320,5 +2322,12 @@
   "titel | Plus och minus",
   "titel | Samma variabel",
   "titel | Upprepad addition"
+ ],
+ "js/motor/blad/blad-k3-d3-negativa.js": [
+  "rubrik | Beräkna.",
+  "rubrik | Beräkna. Visa mellanled.",
+  "rubrik | Vilket tal ska stå i rutan?",
+  "rubrik | Välj rätt svar.",
+  "titel | Negativa tal"
  ]
 }

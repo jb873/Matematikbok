@@ -70,6 +70,7 @@
 
 <script src="../../../js/data/k3-taxonomi.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-samma.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-negativa.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -82,21 +83,23 @@
 var M = window.Momentsida, el = M.el;
 var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
-var SAMMA = window.BLAD_K3_D3_SAMMA;
+var SAMMA = window.BLAD_K3_D3_SAMMA, NEGATIVA = window.BLAD_K3_D3_NEGATIVA;
 if(window.Arbetsyta) window.Arbetsyta.retur();
 
-/* ── MOMENTEN (Joachim 2026-11-24, KONVENTIONER "Arbetssidan" MOMENT OCH BLAD): tre moment, märket 7 på alla, högst tre
-   blad per moment (A och B). Avsnittets åtta steg fördelas på bladen:
-     1 Samma variabel                  Blad 1 steg 1 (upprepad addition) · Blad 2 steg 2 plus och minus · Blad 3 steg 2 gånger och delat
-     2 Siffertermer och två variabler  Blad 1 steg 3 (negativa tal) · Blad 2 steg 4 · Blad 3 steg 5
-     3 Förenkla och teckna             Blad 1 steg 6 · Blad 2 steg 7 · Blad 3 steg 8
-   Byggt: moment 1, Blad 1A och 1B. Blad som inte är byggda står som "Kommer senare"; moment 2 och 3 likaså.
-   Elevtexten godkänd av Joachim. ── */
+/* ── MOMENTEN (Joachim 2026-11-24, KONVENTIONER "Arbetssidan" MOMENT OCH BLAD): fyra moment, märket 7 på alla. Avsnittets
+   steg fördelas på bladen (A och B):
+     1 Samma variabel                   Blad 1 steg 1 · Blad 2 steg 2 plus och minus · Blad 3 steg 2 gånger och delat
+     2 Negativa tal                     Blad 1–3 steg 3 (repetition)
+     3 Siffertermer och två variabler   "Kommer senare"
+     4 Negativa termer och tillämpning  "Kommer senare"
+   Spärren (NivaRad, §3): Blad 1 och 2 alltid öppna, Blad 3 vid 80 % på Blad 2. Elevtexten godkänd av Joachim. ── */
 var MOMENT = [
   { id: 'samma', titel: { titel: 'Samma variabel' }.titel, ar: 7, roll: 'karna', bladen: SAMMA ? SAMMA.MOMENT.blad : [],
     niva: SAMMA ? { prefix: SAMMA.MOMENT.nivaPrefix, id: SAMMA.MOMENT.nivaId } : null },
+  { id: 'negativa', titel: { titel: 'Negativa tal' }.titel, ar: 7, roll: 'karna', bladen: NEGATIVA ? NEGATIVA.MOMENT.blad : [],
+    niva: NEGATIVA ? { prefix: NEGATIVA.MOMENT.nivaPrefix, id: NEGATIVA.MOMENT.nivaId } : null },
   { id: 'siffer', titel: { titel: 'Siffertermer och två variabler' }.titel, ar: 7, roll: 'karna', kommer: true },
-  { id: 'teckna', titel: { titel: 'Förenkla och teckna' }.titel, ar: 7, roll: 'karna', kommer: true }
+  { id: 'tillampning', titel: { titel: 'Negativa termer och tillämpning' }.titel, ar: 7, roll: 'karna', kommer: true }
 ];
 
 /* METODTRÄNING (KONVENTIONER "Arbetssidan"): trädet med momenten som kategorier och deras blad som löv. Inga banker är

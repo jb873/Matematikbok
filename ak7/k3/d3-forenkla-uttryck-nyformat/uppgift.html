@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../../../js/motor/blad/karna-b-grund.css">
 <link rel="stylesheet" href="../../../js/motor/blad/karna-b-talfoljd.css">
 <link rel="stylesheet" href="../../../js/motor/blad/tecken.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak8-blad-ui.css">   <!-- tallinjens stil (tl-*) -->
 <link rel="stylesheet" href="../../../js/motor/keypad.css">
 <link rel="stylesheet" href="../../../js/motor/arbetsyta/arbetsyta.css">
 <style>
@@ -77,7 +78,9 @@
 <script src="../../../js/motor/blad/blad-karna-b.js"></script>
 <script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
 <script src="../../../js/motor/mellanled-rattare.js"></script>
+<script src="../../../js/motor/figur/svg-tallinje.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-samma.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-negativa.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -89,7 +92,7 @@
 (function(){
   var AY = window.Arbetsyta;
   var q = AY.retur();
-  var MOMENTEN = { samma: window.BLAD_K3_D3_SAMMA };
+  var MOMENTEN = { samma: window.BLAD_K3_D3_SAMMA, negativa: window.BLAD_K3_D3_NEGATIVA };
   var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'samma', DATA = MOMENTEN[momentId];
   // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet.
   if(!q.get('retur')) document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;
