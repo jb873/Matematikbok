@@ -1379,7 +1379,7 @@ function bladHTML(blad){
            "rätt svar: undefined" för varje fel svar på raden. */
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
           + '" data-kp="uttryck" data-vars="' + _pv + '" data-visa="' + minusUt(rad.svar)
-          + (rad.brak ? '" data-tillat-brak="1' : '')
+          + (rad.brak ? '" data-tillat-brak="1' : '') + (rad.tillatEtta ? '" data-tillat-etta="1' : '')
           + '" inputmode="text" autocomplete="off">';
         if(_px) html += ledKnappar() + '</div>';
         /* VALFRI VARDERUTA: uppgiften kan bade be om forenkling och om vardet for ett givet x.
@@ -1394,7 +1394,7 @@ function bladHTML(blad){
           html += '<span class="ovn-text">' + _bv.etikett + '</span>';
           html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar)
             + '" data-kp="uttryck" data-vars="' + (rad.vars || 'x') + '" data-visa="' + minusUt(rad.svar)
-            + '" inputmode="text" autocomplete="off">';
+            + '"' + (rad.tillatEtta ? ' data-tillat-etta="1"' : '') + ' inputmode="text" autocomplete="off">';
           html += '<span class="ovn-text">=</span>';
           html += '<input class="ovn-in bred" data-insatt="' + encodeURIComponent(_bins)
             + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + _bv.svar
@@ -1505,7 +1505,7 @@ function bladHTML(blad){
           html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
         }
         html += '<input class="ovn-in bred" data-forenkla="' + encodeURIComponent(rad.svar) + '" data-kp="uttryck" data-vars="' + (rad.vars || 'xy')
-          + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off"' + (rad.placeholder ? '' : '') + '>';   // ingen platshållartext (Joachim)
+          + '" data-visa="' + rad.svar + '"' + (rad.tillatEtta ? ' data-tillat-etta="1"' : '') + ' inputmode="text" autocomplete="off"' + (rad.placeholder ? '' : '') + '>';   // ingen platshållartext (Joachim)
       } else if(rad.typ === 'omkrets'){
         // OMKRETS UR FIGUR: figuren (SVG ur svg-algebrafigur.js) + ett förenklat uttryck som svar.
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
@@ -2252,7 +2252,10 @@ function bygg_blad(rotEl, blad){
         // → räknas som fel, men beskedet talar om VAD som är kvar att göra (samma två lägen som bråken).
         /* data-tillat-brak: svaret FÅR innehålla ett bråk. "1 − 4b/5" är ett färdigt uttryck, inte
            en orörd division — regeln "räkna ut divisionen" gäller 28x/2, inte 4b/5. */
-        var _rfo = inp.dataset.tillatBrak ? { tillatBrak: true } : undefined;
+        /* data-tillat-etta (Joachim 2026-11-24, d3 steg 2: "likvärdiga svar godkänns, t.ex. 1y = y"): koefficienten 1
+           utskriven godtas. Utan attributet som förut. */
+        var _rfo = (inp.dataset.tillatBrak || inp.dataset.tillatEtta)
+          ? { tillatBrak: !!inp.dataset.tillatBrak, tillatEtta: !!inp.dataset.tillatEtta } : undefined;
         var _rf = window.AlgBrak ? window.AlgBrak.gradePoly(inp.value, decodeURIComponent(inp.dataset.forenkla), _rfo) : { status: 'fel' };
         ok = _rf.status === 'ratt';
         if(_rf.status === 'form') _besked = _rf.besked;

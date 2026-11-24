@@ -2310,9 +2310,14 @@
   "etikett | Beräkna",
   "etikett | {}Beräkna",
   "rubrik | Fyll i ett uttryck för omkretsen och förenkla det.",
+  "rubrik | Förenkla först och beräkna sedan värdet när {} = {}.",
   "rubrik | Förenkla uttrycket.",
+  "rubrik | Förenkla.",
   "rubrik | Skriv summan som ett kortare uttryck.",
+  "rubrik | Välj det förenklade uttrycket.",
   "rubrik | Välj det uttryck som betyder samma sak.",
+  "titel | Gånger och delat",
+  "titel | Plus och minus",
   "titel | Samma variabel",
   "titel | Upprepad addition"
  ]
