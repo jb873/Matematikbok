@@ -1,3 +1,5 @@
+PLACERING (beslut 2026-11-24): steg 2 ligger i moment 1 "Samma variabel". Klartextens Blad 1A/1B (plus och minus) blir Blad 2A/2B. Klartextens Blad 2A/2B (gånger och delat) blir Blad 3A/3B. Blad 3 öppnas vid 80 % på Blad 2.
+
 # Förenkla uttryck åk 7 – steg 2: samma variabel
 
 Blad 1 tränar plus och minus, blad 2 gånger och delat. Inga negativa svar än, de kommer efter repetitionen av negativa tal (steg 3). Uppgift 5 på varje blad är en uppgift där eleven förenklar först och beräknar sedan.
