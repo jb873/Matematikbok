@@ -36,10 +36,10 @@ function paraIhop(fraga, meningar, par){
   return { typ: 'paraihop', fraga: fraga, meningar: meningar, alt: ABCD, par: par.map(function(x){ return { fraga: x[0], ratt: x[1] }; }) };
 }
 /* PRISLISTAN är prislisteraden (bladkärnans blad.remsa, Joachim 2026-11-24): på en rad överst, och den följer med
-   medan eleven rullar genom uppgifterna som använder den (tom = sista sådana uppgiften). "Använd prislistan." står
-   under raden, som i dokumentet. Förut en bild (SvgAlgebraFigur.prislappar) i bladets exempelruta. */
-var ANVAND = { intro: 'Använd prislistan.' }.intro;   // fält som elevtext-låset ser
-function prislista(varor, tom){ return { varor: varor, tom: tom, text: ANVAND }; }
+   medan eleven rullar genom uppgifterna som använder den (tom = sista sådana uppgiften). Förut en bild
+   (SvgAlgebraFigur.prislappar) i bladets exempelruta. Dokumentets "Använd prislistan." visas inte — raden säger
+   redan "Prislista" (Joachim 2026-11-24). */
+function prislista(varor, tom){ return { varor: varor, tom: tom }; }
 // Uppgiftsdokumentets fält (KONVENTIONER "UPPGIFTSDOKUMENT (ett per blad)"; ordern §2).
 function dok(blad, roll, tak){
   return { del: 'Del 1 Algebraiska uttryck', moment: 'Tolka och teckna uttryck', blad: blad, arskurs: 7, roll: roll,

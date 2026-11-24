@@ -549,3 +549,5 @@ Likvärdiga uttryck godkänns överallt, till exempel 10x för 10 · x, och ofö
 ```
 
 Ändrat 2026-11-24: meningen 'Börja med multiplikationen.' visas inte för eleven (inga hjälptexter i öva) — 1A uppgift 1b, 1B 1b, 1B 8b, 2B 8b, 3A 7b, 3A 8b, 3B 7b och 3B 8b. Klartexten står kvar ordagrant.
+
+Ändrat 2026-11-24: meningen 'Använd prislistan.' (1A och 1B) visas inte för eleven — prislisteraden säger redan "Prislista". Klartexten står kvar ordagrant.
