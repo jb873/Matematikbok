@@ -14,9 +14,12 @@
      Momentsida.sektion(scen, rubrik, vidForstaOppning)   en fällbar sektion sist i scenen → { body, satt(öppen) }.
      Momentsida.sektionKommer(scen, rubrik)          en sektion som inte finns än: rubriken + "Kommer senare", inte klickbar.
      Momentsida.el(tagg, klass, text)                ett element.
-     Momentsida.montera({ vard, rubrik, moment, test, mina })
-                                                     ramen: moment = [{ titel (html), kommer, valj }], test = valj
-                                                     för Test, mina = ramens Mina kunskaper-vyer. Ger { scen, ram }.
+     Momentsida.metodtraning(scen, data)             Metodträningens sektion med trädet (data: rot, kategorier, löv
+                                                     med bankernas id). Utan löv: rubriken med "Kommer senare".
+     Momentsida.montera({ vard, rubrik, moment, tester, testAdress, mina })
+                                                     ramen: moment = [{ titel (html), kommer, valj }], tester =
+                                                     [{ id, titel }] (författade; Test listar dem, inga → "Kommer
+                                                     senare"), mina = ramens Mina kunskaper-vyer. Ger { scen, ram }.
    Ingen nätväg. */
 (function(){
 'use strict';
@@ -79,20 +82,55 @@ function sektionKommer(scen, rubrik){
   return s;
 }
 
+/* METODTRÄNING (KONVENTIONER "Arbetssidan", METODTRÄNING — Joachim 2026-11-24; flyttad ur d5:s momentsida och
+   metodtraning.html). Rubriken fäller ut trädet: kartans komponent (KartaMotor) i en iframe med den delade sidan
+   metodtrad.html bredvid den här filen. Sidan lämnar bara datan: { rot, kategorier: [{ id, namn, lov: [{ id, namn,
+   bank, nod }] }], prefKey, ram, … }. Ett löv med bank är klickbart och öppnar ramens drill; ett löv utan bank står
+   utan länk. Utan ett enda löv står rubriken med "Kommer senare". Ger sektionen ({ body, satt }) eller null. */
+var TRAD_SIDA = (function(){
+  var s = document.currentScript && document.currentScript.src;
+  return s ? s.replace(/momentsida\.js(\?[^#]*)?(#.*)?$/, 'metodtrad.html') : 'metodtrad.html';
+})();
+function metodtraning(scen, data){
+  var harLov = !!(data && (data.kategorier || []).some(function(k){ return (k.lov || []).length > 0; }));
+  if(!harLov){ sektionKommer(scen, 'Metodträning'); return null; }
+  return sektion(scen, 'Metodträning', function(body){
+    var trad = el('iframe', 'nf-trad'); trad.title = 'Metodträning';
+    trad.__metod = data;            // läses av metodtrad.html (frameElement.__metod), också efter en retur
+    trad.src = TRAD_SIDA; body.appendChild(trad);
+  });
+}
+
+/* TEST (KONVENTIONER "Arbetssidan", TEST — Joachim 2026-11-24; flyttad ur d5:s momentsida). Joachims författade
+   test, listade här och öppnade på uppgiftssidan (?test=<id>). Aldrig länkar till gamla test eller provbyggaren.
+   tester = [{ id, titel }]. */
+function visaTester(scen, tester, adress){
+  scen.innerHTML = '';
+  var s = el('section', 'nf-sek'); s.appendChild(el('h2', 'nf-sek-h', 'Test'));
+  var l = el('div', 'nf-lista');
+  tester.forEach(function(t){
+    var a = el('a', 'nf-blad'); a.href = (adress || 'uppgift.html?test=') + encodeURIComponent(t.id);
+    a.appendChild(el('span', null, t.titel)); l.appendChild(a);
+  });
+  s.appendChild(l); scen.appendChild(s);
+}
+
 /* VÄNSTERSPALTEN, moment-först: momenten, och UNDER dem Dagens träning + Test. Dagens träning är inte byggd
    för något delkapitel ännu — den står utan länk, med "Kommer senare". Vyerna byggs i #scener och flyttas in i
    ramens ytor (samma mönster som piloten ak7/k1/d1). */
 function montera(o){
   var scen = document.getElementById('scen-moment');
+  // TEST: sidans författade test (o.tester), listade av skalet. Inga test → "Kommer senare".
+  var tester = (o.tester || []).filter(function(t){ return t && t.id; });
+  var visaTest = tester.length ? function(){ visaTester(scen, tester, o.testAdress); } : null;
   var ram = window.NavRam && window.NavRam.montera({
     vard: o.vard,
     arbeta: [ { rubrik: o.rubrik, grupper: [
       { rubrik: null, varianter: o.moment },
-      /* Test utan o.test (Joachim 2026-11-24, d1: "visa Kommer senare tills mina sex test är byggda"): samma rad
-         som Dagens träning — märket, ingen länk. Med o.test som förut. */
+      /* Test utan författade test (Joachim 2026-11-24): samma rad som Dagens träning — märket, ingen länk. */
       { rubrik: null, varianter: [ { titel: 'Dagens träning<span class="nf-chip soon">Kommer senare</span>', kommer: true },
-                                   o.test ? { titel: 'Test', valj: o.test }
-                                          : { titel: 'Test<span class="nf-chip soon">Kommer senare</span>', kommer: true } ] }
+                                   visaTest ? { titel: 'Test', valj: visaTest }
+                                            : { titel: 'Test<span class="nf-chip soon">Kommer senare</span>', kommer: true } ] }
     ] } ],
     mina: o.mina,
     niva: null
@@ -105,5 +143,6 @@ function montera(o){
   return { scen: scen, ram: ram };
 }
 
-window.Momentsida = { horisont: horisont, badge: badge, sektion: sektion, sektionKommer: sektionKommer, el: el, montera: montera };
+window.Momentsida = { horisont: horisont, badge: badge, sektion: sektion, sektionKommer: sektionKommer, el: el, montera: montera,
+                      metodtraning: metodtraning };
 })();

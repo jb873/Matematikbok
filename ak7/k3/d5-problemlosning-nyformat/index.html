@@ -98,15 +98,24 @@ var MOMENT = [
   { titel: 'Nivå 4', ff: true, kommer: true }
 ];
 
+/* ── METODTRÄNINGENS LÖV (flyttat ur metodtraning.html 2026-11-24; trädet bor i momentsida.js): Problemlösning →
+   de fem typerna → deras sex varianter, ur banken. Varje variant är ett löv med en FÖRFATTAD BANK,
+   'prob-ak7:<typ>/<variant>', som ramens drill serverar (js/motor/ovamer/k3-forfattad-kalla.js). Samma id:n och
+   samma pref-nyckel som förut. ── */
+var METOD = { rot: { id: 'nf-prob', namn: 'Problemlösning' }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
+  prefKey: 'k3.prob.nyformat.pref.v1', utfalld: ['nf-prob'], ram: 'ak7-k3-ram.html', rotNamn: 'Algebra', orsakFramtid: 'åk 8',
+  kategorier: (BANK ? BANK.TYPER : []).map(function(t){
+    return { id: 'nf-prob-' + t.id, namn: t.titel, lov: t.varianter.map(function(v, i){
+      return { id: 'nf-prob-' + t.id + '-v' + (i + 1), namn: v.titel, nod: t.nod, formaga: 'PROBLEM', bank: 'prob-ak7:' + t.id + '/' + (i + 1) };
+    }) };
+  }) };
 var scen = document.getElementById('scen-moment');
 
 function visaMoment(m){
   scen.innerHTML = '';
   // Ordning och inträdesläge: Uppgifter ÖPPEN, Föreläsningar och Metodträning ihopfällda.
-  var S1 = M.sektion(scen, 'Uppgifter'), S2 = M.sektion(scen, 'Föreläsningar'), S3 = M.sektion(scen, 'Metodträning', function(body){
-    // METODTRÄNING — färdighetsträningens träd (kartans komponent, KartaMotor), fälls ut under rubriken.
-    var trad = el('iframe', 'nf-trad'); trad.title = 'Metodträning'; trad.src = 'metodtraning.html'; body.appendChild(trad);
-  });
+  // METODTRÄNING — trädet bor i skalet (Momentsida.metodtraning); sidan lämnar löven med bankernas id (METOD nedan).
+  var S1 = M.sektion(scen, 'Uppgifter'), S2 = M.sektion(scen, 'Föreläsningar'), S3 = M.metodtraning(scen, METOD);
   // UPPGIFTER — ett blad per typ; Blad A/B väljs med växeln på uppgiftssidan
   var l1 = el('div', 'nf-lista');
   m.blad.forEach(function(b){
@@ -132,28 +141,18 @@ function visaMoment(m){
   S2.body.parentNode.classList.add('nf-forel');
   var p2 = el('div'); S2.body.appendChild(p2);
   if(window.FOREL) window.FOREL.renderFlik(p2, 'ak7-k3-d5');
-  S1.satt(true); S2.satt(false); S3.satt(false);
+  S1.satt(true); S2.satt(false); if(S3) S3.satt(false);
 }
 
 var moment = MOMENT.map(function(m){
   return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
 });
 
-/* TEST — de två testen ur Joachims dokument ("blandade uppgifter 1 och 2"), ur banken. Samma lista som
-   bladen; testet öppnas på uppgiftssidan. */
-function visaTest(){
-  scen.innerHTML = '';
-  var s = el('section', 'nf-sek'); s.appendChild(el('h2', 'nf-sek-h', 'Test'));
-  var l = el('div', 'nf-lista');
-  (BANK ? BANK.TEST : []).forEach(function(t){
-    var a = el('a', 'nf-blad'); a.href = 'uppgift.html?test=' + encodeURIComponent(t.id);
-    a.appendChild(el('span', null, t.titel)); l.appendChild(a);
-  });
-  s.appendChild(l); scen.appendChild(s);
-}
-
+/* TEST — de två testen ur Joachims dokument ("blandade uppgifter 1 och 2"), ur banken. Skalet listar dem;
+   testet öppnas på uppgiftssidan (?test=<id>). */
 M.montera({
-  vard: document.getElementById('navram'), rubrik: 'Problemlösning', moment: moment, test: visaTest,
+  vard: document.getElementById('navram'), rubrik: 'Problemlösning', moment: moment,
+  tester: (BANK ? BANK.TEST : []).map(function(t){ return { id: t.id, titel: t.titel }; }),
   mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
           { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ]
 });

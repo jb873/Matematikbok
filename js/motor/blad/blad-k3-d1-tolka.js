@@ -35,15 +35,11 @@ var ABCD = ['A', 'B', 'C', 'D'];
 function paraIhop(fraga, meningar, par){
   return { typ: 'paraihop', fraga: fraga, meningar: meningar, alt: ABCD, par: par.map(function(x){ return { fraga: x[0], ratt: x[1] }; }) };
 }
-function prislista(varor){
-  // Fyra lappar på rad är bredare än figurernas tak (.af-svg max 300 px) — då blev texten oläsligt liten.
-  // Prislistan får sin naturliga bredd (viewBox), aldrig mer.
-  var svg = F().prislappar({ varor: varor.map(function(v){ return { namn: v[0], pris: v[1] }; }) });
-  var w = (/viewBox="0 0 (\d+)/.exec(svg) || [])[1];
-  if(w) svg = svg.replace('<svg class="af-svg"', '<svg class="af-svg" style="max-width:' + w + 'px"');
-  return '<div class="alg-bild">' + svg + '</div>'
-    + '<div style="margin-top:8px;">Använd prislistan.</div>';
-}
+/* PRISLISTAN är prislisteraden (bladkärnans blad.remsa, Joachim 2026-11-24): på en rad överst, och den följer med
+   medan eleven rullar genom uppgifterna som använder den (tom = sista sådana uppgiften). "Använd prislistan." står
+   under raden, som i dokumentet. Förut en bild (SvgAlgebraFigur.prislappar) i bladets exempelruta. */
+var ANVAND = { intro: 'Använd prislistan.' }.intro;   // fält som elevtext-låset ser
+function prislista(varor, tom){ return { varor: varor, tom: tom, text: ANVAND }; }
 // Uppgiftsdokumentets fält (KONVENTIONER "UPPGIFTSDOKUMENT (ett per blad)"; ordern §2).
 function dok(blad, roll, tak){
   return { del: 'Del 1 Algebraiska uttryck', moment: 'Tolka och teckna uttryck', blad: blad, arskurs: 7, roll: roll,
@@ -56,7 +52,7 @@ var BLAD = {};
 
 /* ── BLAD 1A – Per styck och per gång ── */
 BLAD['1A'] = function(){ return { titel: 'Per styck och per gång', dokument: dok('1A', 'kärna', 'golv'),
-  exempel: prislista([['Smörgås', '25 kr'], ['Bulle', '10 kr'], ['Mjölk', '8 kr'], ['Saft', '12 kr']]),
+  remsa: prislista([['Smörgås', '25 kr'], ['Bulle', '10 kr'], ['Mjölk', '8 kr'], ['Saft', '12 kr']], 6),   // uppgift 1–6 använder listan
   grupper: [
     // [tolka och beräkna – mall 1]
     g('Ida betalar (2 · 10 + 8) kr.', TOLKA, [
@@ -98,7 +94,7 @@ BLAD['1A'] = function(){ return { titel: 'Per styck och per gång', dokument: do
 
 /* ── BLAD 1B – Per styck och per gång ── */
 BLAD['1B'] = function(){ return { titel: 'Per styck och per gång', dokument: dok('1B', 'kärna', 'golv'),
-  exempel: prislista([['Korv', '20 kr'], ['Glass', '15 kr'], ['Chips', '18 kr'], ['Läsk', '12 kr']]),
+  remsa: prislista([['Korv', '20 kr'], ['Glass', '15 kr'], ['Chips', '18 kr'], ['Läsk', '12 kr']], 7),   // uppgift 1–7 använder listan
   grupper: [
     // [tolka och beräkna – mall 1]
     g('Noah betalar (20 + 2 · 15 + 18) kr.', TOLKA, [

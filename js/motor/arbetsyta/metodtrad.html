@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metodträning</title>
+<!-- METODTRÄNINGENS TRÄD, DELAT (KONVENTIONER "Arbetssidan", METODTRÄNING; Joachim 2026-11-24). Flyttat ur
+     ak7/k3/d5-problemlosning-nyformat/metodtraning.html. Kartans komponent (js/karta/karta-motor.js + karta.css),
+     visad i en iframe under rubriken "Metodträning" på momentsidan. Sidan har ingen egen data: momentsidan
+     (Momentsida.metodtraning i momentsida.js) lägger trädets data på iframen (frameElement.__metod) — rot,
+     kategorier och löv med bankernas id. Ett löv med bank länkar till ramens drill (?bank=…), ett löv utan bank
+     står utan länk. Ingen nätväg. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../karta/karta.css">
+<style>
+  .wrap{padding-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meter" id="meter"></div>
+  <div class="controls">
+    <span class="seg" id="mal-seg">
+      <button data-mal="godkant">Godkänt (kärna)</button>
+      <button data-mal="allt">Allt</button>
+    </span>
+    <span class="controls-note" id="scope-note"></span>
+  </div>
+  <div class="karta"><div class="cols" id="cols"></div></div>
+  <p class="privacy" id="privacy"></p>
+</div>
+
+<script src="../../mastery-karna.js"></script>
+<script src="../../mastery-k3.js"></script>
+<script src="../../karta/karta-motor.js"></script>
+<script>
+(function(){
+  /* DATAN ur momentsidan: { rot:{id,namn}, kategorier:[{id,namn,lov:[{id,namn,bank,nod,formaga}]}],
+     arskursRelevans, arskurs, prefKey, utfalld, ram (från sajtens rot), rotNamn, orsakFramtid }. */
+  var D = null;
+  try { D = window.frameElement && window.frameElement.__metod; } catch(e){}
+  if(!D || !window.KartaMotor) return;
+  var AR = D.arskursRelevans || { ak7: 'mal' }, NODER = [];
+  NODER.push({ id: D.rot.id, namn: D.rot.namn, parent: null, niva: 'omrade', arskursRelevans: AR, roll: 'karna',
+               formaga: null, generator: null, grupp: 'algebra', implemented: true });
+  (D.kategorier || []).forEach(function(k){
+    NODER.push({ id: k.id, namn: k.namn, parent: D.rot.id, niva: 'deldoman', arskursRelevans: AR,
+                 roll: 'karna', formaga: null, generator: null, visning: null });
+    (k.lov || []).forEach(function(l){
+      var n = { id: l.id, namn: l.namn, parent: k.id, niva: 'lovnod', arskursRelevans: AR, roll: 'karna',
+                formaga: l.formaga || 'PROBLEM', generator: null, nod: l.nod };
+      if(l.bank) n.bank = l.bank;   // utan bank: lövet står utan länk (kartans regel)
+      NODER.push(n);
+    });
+  });
+  // Första besöket: de grenar sidan anger är utfällda (elevens eget val minns sedan av kartan, under prefKey).
+  try { if(!localStorage.getItem(D.prefKey)) localStorage.setItem(D.prefKey, JSON.stringify({ mal: 'allt', expanded: D.utfalld || [D.rot.id] })); } catch(e){}
+  window.KartaMotor.montera({ taxonomi: { noder: NODER }, mastery: window.MasteryK3, arskurs: D.arskurs || 'ak7', minNiva: null,
+    prefKey: D.prefKey, ramPath: '../../../' + D.ram, rotNamn: D.rotNamn, orsakFramtid: D.orsakFramtid });
+})();
+</script>
+</body>
+</html>

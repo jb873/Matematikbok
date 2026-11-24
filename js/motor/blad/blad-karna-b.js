@@ -411,6 +411,8 @@ function talUt(v){
 var SKRIV_BESKED = { genvag: { hint: 'Det där är det förenklade svaret. Skriv först uttrycket som det ser ut innan du räknar ihop det.' } };
 // Priokedjans och lästalskedjans genväg (ett ensamt tal i ledets ruta). Joachims ordalydelse 2026-10-09.
 var PRIO_BESKED = { genvag: { hint: 'Det där är svaret. Skriv ett led där bara en del av räkningen är gjord.' } };
+// Prislisteradens etikett (blad.remsa). Elevtext — Joachim 2026-11-24 ("bygg den enligt ditt förslag").
+var REMSA_TEXT = { rubrik: { etikett: 'Prislista' } };
 
 // PARENTESGRUPPERNA PÅ TOPPNIVÅ, i den ordning de står: "40 - (x + 3) - (2x - 1)" ger
 // ["x + 3", "2x - 1"], "40 - (x + 3 + 2x - 1)" ger ["x + 3 + 2x - 1"]. Nästlade parenteser räknas
@@ -752,7 +754,19 @@ function bladHTML(blad){
   }
 
   var radNummer = 0;
+  /* PRISLISTERADEN (blad.remsa, Joachim 2026-11-24 — förslaget "prislistan på en rad som följer med"): { varor:
+     [[namn, pris], …], tom: sista uppgiften som använder listan, text: valfri rad under }. Listan står på EN rad
+     överst och stannar under toppmenyn (position:sticky) medan eleven rullar genom uppgifterna 1–tom; efter den
+     följer den inte med. Raden och uppgifterna 1–tom ligger i en gemensam yta (.ovn-remsa-omr) som håller den.
+     Utan blad.remsa ritas bladet exakt som förut. Formgivning: karna-b-grund.css. */
+  var _remsa = blad.remsa && blad.remsa.varor && blad.remsa.varor.length ? blad.remsa : null;
+  var _remsaTom = _remsa ? Math.max(1, Math.min(_remsa.tom || blad.grupper.length, blad.grupper.length)) : 0;
   blad.grupper.forEach(function(grupp, gi){
+    if(_remsa && gi === 0){
+      html += '<div class="ovn-remsa-omr"><div class="ovn-remsa" role="note"><span class="ovn-remsa-rub">' + REMSA_TEXT.rubrik.etikett + '</span>'
+        + _remsa.varor.map(function(v){ return '<span class="ovn-remsa-lapp">' + v[0] + '<b>' + v[1] + '</b></span>'; }).join('')
+        + '</div>' + (_remsa.text ? '<div class="ovn-remsa-text">' + _remsa.text + '</div>' : '');
+    }
     // data-logg (valfritt) märker en grupp vars besvarade rutor ska matas till mastery.
     // Utan data-logg loggas ingenting (opt-in) — de fyra äldre bladen rörs inte.
     // loggarEj: gruppen loggar INTE, och skälet står i markupen. En frånvaro säger inget —
@@ -1690,10 +1704,19 @@ function bladHTML(blad){
         // anteckningsböcker"): svar är då en lista, en per lucka, och varje ruta bär sitt eget facit.
         var bitar = rad.text.split('__'), _lsv = [].concat(rad.svar);
         if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
+        /* LUCKAN I EN TÄLJARE (tillägg 2026-11-24, metodträningens R2 nr 5 "[□ | 4] + 3 = 8"): direkt efter luckan
+           "/<tal>" → luckan står som täljare i ett staplat bråk med talet som nämnare (K-H). Annars som förut. */
         bitar.forEach(function(b, bi){
+          var _ln = bi > 0 ? /^\/(\d+)/.exec(b) : null;
+          if(_ln) b = b.slice(_ln[0].length);
           if(b !== '') html += '<span class="ovn-text ovn-num">' + b + '</span>';
-          if(bi < bitar.length - 1) html += '<input class="ovn-in lucka" data-svar="' + _lsv[Math.min(bi, _lsv.length - 1)]
-            + '" inputmode="decimal" autocomplete="off">';
+          if(bi < bitar.length - 1){
+            var _lin = '<input class="ovn-in lucka" data-svar="' + _lsv[Math.min(bi, _lsv.length - 1)]
+              + '" inputmode="decimal" autocomplete="off">';
+            var _nast = /^\/(\d+)/.exec(bitar[bi + 1] || '');
+            html += _nast ? '<span class="ovn-brak ovn-lucka-brak"><span class="ovn-brak-taljare">' + _lin
+              + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare">' + _nast[1] + '</span></span>' : _lin;
+          }
         });
       } else if(rad.typ === 'berakna'){
         /* BERÄKNA PÅ ETT GIVET UTTRYCK (d3 del 2, Lina): uttrycket står i uppgiften, och kedjan är
@@ -1758,6 +1781,7 @@ function bladHTML(blad){
       html += '</div>';
     }
     html += '</div>';
+    if(_remsa && gi === _remsaTom - 1) html += '</div>';   // prislisteradens yta slutar efter sista uppgiften som använder den
     radNummer = 0; // bokstäver räknas om per grupp
   });
 

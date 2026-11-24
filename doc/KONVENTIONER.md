@@ -142,6 +142,12 @@ Två rader stod här till 2026-10-01 och står inte kvar: *ny sida in i grindarn
 
 ## Arbetssidan — moment-sida, horisont och uppgiftssida (nov 2026)
 
+REFERENSSIDA: En ny momentsida byggs som d5-problemlosning-nyformat. Allt som skiljer sig är ett fel tills Joachim har godkänt skillnaden.
+METODTRÄNING: Rubriken under Föreläsningar fäller ut trädet. Trädet har kategorier och löv. Varje löv med författad bank är klickbart och öppnar drillen, och ett löv utan bank står utan länk. Funktionen bor i momentsida.js, och sidan lämnar bara löven och bankernas id.
+TEST: Test är Joachims författade test, listade på momentsidan och öppnade på uppgiftssidan (?test=<id>). Aldrig länkar till gamla test eller provbyggaren. Funktionen bor i momentsida.js. Finns inga författade test står Test med 'Kommer senare'.
+INNEHÅLL: Allt Joachim har författat ligger i doc/innehall/ innan det byggs. En order hänvisar till filen där, aldrig till en chatt.
+Joachim 2026-11-24.
+
 Pilot: algebra åk7 + procent åk8/9. Ombyggnad av delade delkapitel-skal.js
 verifieras av delkapitel-grind.js innan elever lutar sig mot det.
 
@@ -192,8 +198,7 @@ METODTRÄNING = färdighetsträningens träd (INTE platta chips)
   den är en mängd uppgifter att träna. Mastery-färg visar status. Klick → drill bredvid.
 - Innehållet är FÖRFATTAT, inte genererat ur taxonomins noder: varje löv har en författad bank, som
   problemlösningens (`bank: 'prob-ak7:<typ>/<variant>'`, serverad av `js/motor/ovamer/k3-forfattad-kalla.js`).
-  Finns inget författat innehåll står Metodträning med rubriken och "Kommer senare" (`Momentsida.sektionKommer`)
-  tills det finns. *Joachim 2026-11-22.*
+  *Joachim 2026-11-22.*
 - INGET parallellt träd byggs — återanvänd komponenten (A1/Regel 0).
 
 UPPGIFTSSIDA (övningssida) — preciserad i sektionen **Uppgiftssidan (arbetsytan)** nedan

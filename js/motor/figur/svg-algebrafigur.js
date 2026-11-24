@@ -127,8 +127,11 @@
 
   function rektangel(o){
     var w = 260, h = 140, x0 = 60, y0 = 34, bw = 140, bh = 74;
+    // TILLÄGG 2026-11-24 (metodträningen K7 nr 3, "en kvadrat där varje sida är s cm"): o.kvadrat ritar lika långa
+    // sidor. Utan o.kvadrat exakt som förut.
+    if(o.kvadrat){ w = 210; h = 150; x0 = 62; y0 = 26; bw = 92; bh = 92; }
     var pts = [[x0, y0], [x0 + bw, y0], [x0 + bw, y0 + bh], [x0, y0 + bh]];
-    return figur(pts, [o.bredd, o.hojd, '', ''], o, w, h, 'Rektangel med sidorna ' + o.bredd + ' och ' + o.hojd);
+    return figur(pts, [o.bredd, o.hojd, '', ''], o, w, h, o.kvadrat ? 'Kvadrat med sidan ' + o.bredd : 'Rektangel med sidorna ' + o.bredd + ' och ' + o.hojd);
   }
   // Fyrhörning: rak botten, lodräta sidor av olika höjd (formen i bokens uppgift) — topp, höger, botten, vänster.
   function fyrhorning(o){
@@ -138,8 +141,11 @@
   }
   function triangel(o){
     var w = 220, h = 150, cx = 110, top = 24, yB = 116, halv = 34;
+    // TILLÄGG 2026-11-24 (metodträningen K7 nr 4, "en liksidig triangel där varje sida är a cm"): o.liksidig ritar
+    // tre lika långa sidor (halva basen = höjden / √3). Utan o.liksidig exakt som förut.
+    if(o.liksidig){ halv = Math.round((yB - top) / Math.sqrt(3)); }
     var pts = [[cx, top], [cx + halv, yB], [cx - halv, yB]];
-    return figur(pts, [o.ben, o.bas, o.ben], o, w, h, 'Likbent triangel med benen ' + o.ben + ' och basen ' + o.bas);
+    return figur(pts, [o.ben, o.bas, o.ben], o, w, h, (o.liksidig ? 'Liksidig triangel med sidan ' + o.ben : 'Likbent triangel med benen ' + o.ben + ' och basen ' + o.bas));
   }
   // Femhörning: oregelbunden (som bokens), sidorna i ordning från övre vänstra hörnet medurs.
   function femhorning(o){

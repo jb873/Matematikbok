@@ -38,6 +38,22 @@
                'js/motor/problemlosning/prob-bank-ak7.js'],
       hamta: function(ref){ return window.ProbBankAk7 && window.ProbBankAk7.drillKalla(ref); },
       knappsats: function(){ return window.ProbBankAk7 && window.ProbBankAk7.knappsats(); }
+    },
+    /* Del 1 Algebraiska uttryck åk7, metodträningens banker (js/motor/blad/blad-k3-d1-metod.js, Joachim 2026-11-24):
+       referens = lövet ('T1' … 'R6'). Ritas med bladkärnan (bygg_blad) — samma komponent och samma uppgiftstyper som
+       bladen; kärnan monterar sin egen delade knappsats. Stilen är uppgiftssidans (kanon + kärnans typfiler) med
+       uppgiftssidans färger, som ramen saknar; den laddas bara i det här bankläget. Mastery: k3-storen och, för
+       prioriteringsregeln, k1-storen (mastery.js). */
+    'k3d1': {
+      css: ['js/motor/blad/ak7-delkapitel-kanon.css', 'js/motor/blad/ak7-k1blad-kanon.css', 'js/motor/blad/karna-b-grund.css',
+            'js/motor/blad/karna-b-talfoljd.css', 'js/motor/blad/tecken.css', 'js/motor/keypad.css'],
+      stil: ':root{--navy:#0f1e2e;--navy-mid:#1a3045;--blue:#1b4b8a;--blue-lt:#2560a8;--green:#2d6a4f;'
+          + "--body:'Source Serif 4',Georgia,serif;--c-rakna:#16a34a;--rod:#b23b2e;--rod-lt:#c0392b;--las:#9a9388;}"
+          + ".fk-drill{--mono:'Source Serif 4',Georgia,serif;}"
+          + '.fk-drill .fk-d1-blad{max-width:900px;margin:18px auto 0;padding:0 28px;}',
+      skript: ['js/mastery.js', 'js/motor/blad/blad-karna-b.js', 'js/motor/blad/blad-k3-d1-typer.js', 'js/motor/blad/blad-k3-d1-metod.js'],
+      hamta: function(ref){ return window.BLAD_K3_D1_METOD && window.BLAD_K3_D1_METOD.drillKalla(ref); },
+      knappsats: function(){ return document.getElementById('ovn-keypad-shared'); }
     }
   };
 
@@ -67,7 +83,7 @@
   nar(function(){
     if(!K){ tillOversikt(); return; }
     K.css.forEach(laddaCss);
-    var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+    var st = document.createElement('style'); st.textContent = CSS + (K.stil || ''); document.head.appendChild(st);
     laddaSkript(K.skript, function(ok){
       var kalla = ok ? K.hamta(ref) : null;
       if(!kalla || !kalla.instanser || !kalla.instanser.length || kalla.arskurs > ELEVENS_AR){ tillOversikt(); return; }
