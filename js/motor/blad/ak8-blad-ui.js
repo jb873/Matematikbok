@@ -555,6 +555,8 @@
     String(bokstaver || '').split('').forEach(function(c){ if(/[a-zåäö]/.test(c) && lista.indexOf(c) < 0) lista.push(c); });
     var knappar = kp.querySelectorAll('.kp-key.varkey');
     if(lista.length > knappar.length) throw new Error('KNAPPSATSEN: bladet har ' + lista.length + ' bokstäver (' + lista.join(' ') + '), knappsatsen ' + knappar.length + ' platser');
+    // Rättaren läser samma bokstäver (Joachim 2026-11-24): förenkla-rättaren (AlgBrak) tolkar bladets egna variabler.
+    if(window.AlgBrak && window.AlgBrak.bokstaver) window.AlgBrak.bokstaver(lista);
     Array.prototype.forEach.call(knappar, function(b, i){
       var v = lista[i]; b.style.display = v ? '' : 'none';
       if(v){ b.setAttribute('data-key', v); b.textContent = v; }

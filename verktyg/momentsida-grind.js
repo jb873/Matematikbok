@@ -2,8 +2,10 @@
    METODTRÄNING, TEST).
 
    Renderar varje momentsida i nytt format (ak*\/**\/*-nyformat/index.html) i en riktig webbläsare och FÄLLER om:
-     TRÄD      Metodträningens träd saknas under något moment (rubriken är inte fällbar, ingen iframe, inget träd),
-               eller trädet har inga klickbara löv. Ett klickbart löv ska öppna en författad bank (?bank=…).
+     TRÄD      Metodträningen saknas under något moment, eller ett träd visas (rubriken fällbar) som saknas, inte
+               ritas eller har inga klickbara löv. Ett klickbart löv ska öppna en författad bank (?bank=…). En
+               Metodträning som står med "Kommer senare" godtas — så står den när inget löv har en bank (Joachim
+               2026-11-24).
      KLICK     Ett klick på ett löv laddar något i trädets ruta (Joachim 2026-11-24: drillen öppnas som en egen sida i
                hela fönstret). Klicket görs på riktigt; navigeringen fångas med webbläsarens Navigation API och stoppas,
                så att grinden ser VAR den skulle hamna: i rutan = brott; ingenstans i hela fönstret = brott.
@@ -16,8 +18,8 @@
      JS-FEL    konsolfel eller filer som inte laddas.
 
    NEGATIV VERIFIERING: --injicera <fel> lägger in felet i sidan (före sidans skript) och grinden ska då fälla:
-     trad    Metodträningen utan löv (rubriken blir "Kommer senare", inget träd)
-     lov     trädets löv utan bank (inga klickbara löv)
+     trad    Metodträningen saknas helt under momenten
+     lov     ett träd visas fast inget löv har en bank (inga klickbara löv)
      test    Test-länkarna till ramens färdiga test
      gammal  en länk till delkapitlets gamla sida
      ruta    lövens länkar öppnas i trädets ruta (target tas bort — det gamla felet)
@@ -60,8 +62,13 @@ const PRE = `(function(){
   var M;
   Object.defineProperty(window, 'Momentsida', { configurable: true, get: function(){ return M; }, set: function(v){
     M = v;
-    if(INJ === 'trad'){ v.metodtraning = function(scen){ v.sektionKommer(scen, 'Metodträning'); return null; }; }
-    if(INJ === 'lov'){ var mt = v.metodtraning; v.metodtraning = function(scen, d){ var k = JSON.parse(JSON.stringify(d)); (k.kategorier || []).forEach(function(c){ (c.lov || []).forEach(function(l){ delete l.bank; }); }); return mt(scen, k); }; }
+    if(INJ === 'trad'){ v.metodtraning = function(){ return null; }; }
+    if(INJ === 'lov'){
+      // Trädet ritas ändå (förbi skalets "Kommer senare"): samma iframe och samma trädsida, men inga banker.
+      var sida = [].map.call(document.querySelectorAll('script[src]'), function(x){ return x.src; }).filter(function(x){ return /momentsida\.js/.test(x); })[0];
+      v.metodtraning = function(scen, d){ var k = JSON.parse(JSON.stringify(d || { kategorier: [] })); (k.kategorier || []).forEach(function(c){ (c.lov || []).forEach(function(l){ delete l.bank; }); });
+        return v.sektion(scen, 'Metodträning', function(body){ var fr = document.createElement('iframe'); fr.className = 'nf-trad'; fr.__metod = k; fr.src = (sida || '').replace(/momentsida\.js.*$/, 'metodtrad.html'); body.appendChild(fr); }); };
+    }
     if(INJ === 'test' || INJ === 'gammal'){ var mo = v.montera; v.montera = function(o){
       if(INJ === 'test') o.testAdress = '../../../ak7-k3-ram.html?view=test-fardigt&del=';
       var r = mo(o);
@@ -87,6 +94,7 @@ async function PROBE(){
     var sek = [].filter.call(scen.querySelectorAll('.nf-sek'), function(s){ return /Metodträning/.test(txt(s.querySelector('.nf-sek-h'))); })[0];
     if(!sek){ m.trad = 'ingen Metodträning-rubrik'; ut.moment.push(m); continue; }
     var kn = sek.querySelector('button.nf-fall');
+    if(!kn && sek.classList.contains('is-kommer') && /Kommer senare/.test(txt(sek.querySelector('.nf-sek-h')))){ m.trad = 'kommer'; ut.moment.push(m); continue; }
     if(!kn){ m.trad = 'rubriken är inte fällbar (' + txt(sek.querySelector('.nf-sek-h')) + ')'; ut.moment.push(m); continue; }
     if(kn.getAttribute('aria-expanded') !== 'true') kn.click();
     await v(1800);
@@ -166,6 +174,7 @@ SIDOR.forEach(sida => {
   const brott = [];
   if(!u.moment.length) brott.push('TRÄD: inga moment att öppna');
   u.moment.forEach(m => {
+    if(m.trad === 'kommer') return;                       // "Kommer senare": inget träd att mäta (godtas)
     if(m.trad !== 'ok') brott.push('TRÄD: ' + m.namn + ' — ' + m.trad);
     else if(!m.lov) brott.push('TRÄD: ' + m.namn + ' — inga klickbara löv');
     m.lovLankar.forEach(h => { let q; try { q = new URL(h).searchParams.get('bank'); } catch(e){} if(!q) brott.push('TRÄD: ' + m.namn + ' — ett löv öppnar inte en författad bank: ' + h); });
@@ -189,7 +198,7 @@ SIDOR.forEach(sida => {
   const sedda = {};
   u.lankar.forEach(l => { const g = arGammal(l.href); const n = l.href + '|' + g; if(g && !sedda[n]){ sedda[n] = 1; brott.push('GAMMAL: ' + l.var + ' — "' + l.text + '" → ' + g); } });
   if(u.fel && u.fel.length) brott.push('JS-FEL: ' + u.fel.join(' | '));
-  const lovSum = u.moment.map(m => m.namn.replace(/^\S*\d(?=\D)/, '') + ' ' + m.lov + ' löv').join(', ');
+  const lovSum = u.moment.map(m => m.namn.replace(/^\S*\d(?=\D)/, '') + ' ' + (m.trad === 'kommer' ? 'Metodträning: Kommer senare' : m.lov + ' löv')).join(', ');
   const testSum = Array.isArray(u.test) ? u.test.length + ' test' : 'Test: Kommer senare';
   if(brott.length){ fel++; console.log('✗ ' + sida + '  (' + lovSum + '; ' + testSum + ')'); brott.forEach(b => console.log('    ' + b)); }
   else console.log('✓ ' + sida + '  (' + lovSum + '; ' + testSum + ')');

@@ -13,6 +13,17 @@
   // uppgifter, och 'z' skrivs dessutom lätt så att det ser ut som en tvåa.
   var VARS = ['x', 'y', 'a', 'b', 'c', 'n'];
   var NOLLKEY = VARS.map(function(){ return 0; }).join(',');   // nyckel-ariteten följer VARS (förr hårdkodad '0,0,0,0')
+  /* BLADETS EGNA BOKSTÄVER (Joachim 2026-11-24, d3 steg 1: s, h, z): rättaren läser bladets bokstäver — samma källa som
+     knappsatsen (bladBokstaver → AK8_UI.keypadBokstaver, som anropar bokstaver()). De sex ovan är grunden när inget
+     blad har angett några (sidor som inte sätter knappsatsens bokstäver rättas exakt som förut). En ny bokstav läggs
+     sist, och nyckelns aritet följer med; polynom byggs vid rättningen, efter att bladen har ritats. */
+  function bokstaver(lista){
+    String(Array.isArray(lista) ? lista.join('') : (lista || '')).split('').forEach(function(c){
+      if(/^[a-z]$/.test(c) && VARS.indexOf(c) < 0) VARS.push(c);
+    });
+    NOLLKEY = VARS.map(function(){ return 0; }).join(',');
+    return VARS.slice();
+  }
 
   // ── Rational ──
   function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t; } return a || 1; }
@@ -314,7 +325,7 @@
   }
 
   var API = { gradeOmkrets: gradeOmkrets, OMKRETSBESKED: OMKRETSBESKED, termerAv: termerAv, sammaTermer: sammaTermer,
-              parse: parse, pointEqual: pointEqual, grade: grade, gradePoly: gradePoly, gradeSidor: gradeSidor, gradeOppet: gradeOppet, polyForm: polyForm, termAntal: termAntal, utanUpphojt: utanUpphojt, _rf: { rf: rf, rfDiv: rfDiv, pEval: pEval, pIsConst: pIsConst }, VARS: VARS };
+              parse: parse, pointEqual: pointEqual, grade: grade, gradePoly: gradePoly, gradeSidor: gradeSidor, gradeOppet: gradeOppet, polyForm: polyForm, termAntal: termAntal, bokstaver: bokstaver, utanUpphojt: utanUpphojt, _rf: { rf: rf, rfDiv: rfDiv, pEval: pEval, pIsConst: pIsConst }, VARS: VARS };
   if(typeof window !== 'undefined') window.AlgBrak = API;
   if(typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

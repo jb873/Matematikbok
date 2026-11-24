@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Algebra · Förenkla uttryck</title>
+<!-- MOMENTSIDAN för k3 Del 3 Förenkla uttryck i det nya formatet — doc/KONVENTIONER.md, "Arbetssidan" (REFERENSSIDA:
+     byggd som d5-problemlosning-nyformat). Byggd BREDVID den gamla sidan (../d3-forenkla-uttryck/), som står kvar orörd
+     och länkad från kapitelsidan tills alla åtta stegen är byggda (Joachim 2026-11-24). Skalet:
+     js/motor/arbetsyta/momentsida.js. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
+<link rel="stylesheet" href="../../../js/motor/arbetsyta/momentsida.css">
+<style>
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+/* Momentsidans formgivning (skalet): js/motor/arbetsyta/momentsida.css. */
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="../../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7-k3.html">Kapitel 3</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Förenkla uttryck</span>
+  </div>
+</nav>
+
+<div class="nf-topp"><a class="nf-tillbaka" id="nf-tillbaka" href="../../../ak7-k3.html">← Tillbaka</a></div>
+<header class="nf-huvud">
+  <span class="nf-kapitel">Algebra</span>
+  <h1>Förenkla uttryck</h1>
+</header>
+
+<div id="navram"></div>
+
+<!-- Vyerna byggs här och flyttas in i ramens ytor (samma mönster som problemlösningens momentsida). -->
+<div id="scener" hidden>
+  <div class="nr-scen" id="scen-moment"></div>
+  <div class="nr-mview is-on" id="mv-kunskapslage">
+    <iframe class="nr-karta-frame" id="karta-frame" title="Kunskapsläge" loading="lazy"
+            src="../kunskapslage/index.html?embed=1"></iframe>
+  </div>
+  <div class="nr-mview" id="mv-sjalvskattning">
+    <iframe class="nr-karta-frame" id="sjalv-frame" title="Självskattning" loading="lazy"
+            src="../kunskapslage/index.html?embed=1&amp;tab=sjalv"></iframe>
+  </div>
+</div>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Förenkla uttryck</span>
+</footer>
+
+<script src="../../../js/data/k3-taxonomi.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-samma.js"></script>
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
+<script src="../../../js/motor/arbetsyta/momentsida.js"></script>
+<script>
+/* MOMENTSIDAN: skalet (js/motor/arbetsyta/momentsida.js) bär märket, de fällbara sektionerna, Metodträningens träd,
+   Test och ramen; här står delkapitlets innehåll — momenten, bladen och trädets löv. */
+(function(){
+'use strict';
+var M = window.Momentsida, el = M.el;
+var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
+var ELEVENS_AR = 7;
+var SAMMA = window.BLAD_K3_D3_SAMMA;
+if(window.Arbetsyta) window.Arbetsyta.retur();
+
+/* ── MOMENTEN (Joachim 2026-11-24, KONVENTIONER "Arbetssidan" MOMENT OCH BLAD): tre moment, märket 7 på alla, högst tre
+   blad per moment (A och B). Avsnittets åtta steg fördelas på bladen:
+     1 Samma variabel                  Blad 1 steg 1 (upprepad addition) · Blad 2 steg 2 plus och minus · Blad 3 steg 2 gånger och delat
+     2 Siffertermer och två variabler  Blad 1 steg 3 (negativa tal) · Blad 2 steg 4 · Blad 3 steg 5
+     3 Förenkla och teckna             Blad 1 steg 6 · Blad 2 steg 7 · Blad 3 steg 8
+   Byggt: moment 1, Blad 1A och 1B. Blad som inte är byggda står som "Kommer senare"; moment 2 och 3 likaså.
+   Elevtexten godkänd av Joachim. ── */
+var MOMENT = [
+  { id: 'samma', titel: { titel: 'Samma variabel' }.titel, ar: 7, roll: 'karna', bladen: SAMMA ? SAMMA.MOMENT.blad : [],
+    niva: SAMMA ? { prefix: SAMMA.MOMENT.nivaPrefix, id: SAMMA.MOMENT.nivaId } : null },
+  { id: 'siffer', titel: { titel: 'Siffertermer och två variabler' }.titel, ar: 7, roll: 'karna', kommer: true },
+  { id: 'teckna', titel: { titel: 'Förenkla och teckna' }.titel, ar: 7, roll: 'karna', kommer: true }
+];
+
+/* METODTRÄNING (KONVENTIONER "Arbetssidan"): trädet med momenten som kategorier och deras blad som löv. Inga banker är
+   författade än — ett löv utan bank står utan länk (Joachim 2026-11-24). Lövens nod: alg-samla:rakna (k3-taxonomins
+   "Förenkla uttryck"). */
+var METOD = { rot: { id: 'nf-d3', namn: 'Förenkla uttryck' }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
+  prefKey: 'k3.d3.nyformat.pref.v1', utfalld: ['nf-d3'], rotNamn: 'Algebra', orsakFramtid: 'åk 8',
+  kategorier: MOMENT.map(function(m){
+    return { id: 'nf-d3-' + m.id, namn: m.titel, lov: [1, 2, 3].map(function(nr){
+      return { id: 'nf-d3-' + m.id + '-' + nr, namn: 'Blad ' + nr, nod: 'alg-samla:rakna', formaga: 'RAKNA' }; }) };
+  }) };
+
+var scen = document.getElementById('scen-moment');
+
+function visaMoment(m){
+  scen.innerHTML = '';
+  // Som referenssidan: Uppgifter ÖPPEN, Föreläsningar ("Kommer senare" — ingen film än) och Metodträning ihopfälld.
+  var S1 = M.sektion(scen, 'Uppgifter');
+  M.sektionKommer(scen, 'Föreläsningar');
+  var S3 = M.metodtraning(scen, METOD);
+  // UPPGIFTER — ett blad per rad; Blad A/B väljs med växeln på uppgiftssidan. Som Tolka och teckna: ett blad som inte
+  // är byggt står med "Kommer senare"; SPÄRREN (NivaRad, §3) — ett blad som inte är nått står med 🔒, utan länk.
+  var l1 = el('div', 'nf-lista');
+  m.bladen.forEach(function(b){
+    var oppet = !window.NivaRad || !m.niva || window.NivaRad.nadd(m.niva.prefix, m.niva.id, b.nr);
+    var a = el(oppet && !b.kommer ? 'a' : 'span', 'nf-blad' + (b.kommer ? ' is-kommer' : oppet ? '' : ' is-locked'));
+    if(oppet && !b.kommer) a.href = 'uppgift.html?moment=' + m.id + '&blad=' + b.nr + 'A';
+    else a.setAttribute('aria-disabled', 'true');
+    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel + (oppet || b.kommer ? '' : ' 🔒')));
+    if(b.kommer) a.appendChild(el('span', 'nf-chip soon', 'Kommer senare'));
+    l1.appendChild(a);
+  });
+  S1.body.appendChild(l1);
+  S1.satt(true); if(S3) S3.satt(false);
+}
+
+var moment = MOMENT.map(function(m){
+  // Ett moment utan innehåll än står med "Kommer senare", grått och utan länk.
+  return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel + (m.kommer ? '<span class="nf-chip soon">Kommer senare</span>' : ''),
+           id: m.id, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
+});
+
+/* TEST: inga författade test än → skalet visar Test med "Kommer senare". */
+M.montera({
+  vard: document.getElementById('navram'), rubrik: 'Förenkla uttryck', moment: moment, tester: [],
+  mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
+          { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ]
+});
+})();
+</script>
+<script src="../../../js/elevfeedback.js" defer></script>
+</body>
+</html>

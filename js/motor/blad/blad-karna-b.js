@@ -1330,6 +1330,9 @@ function bladHTML(blad){
           + '" data-visa="' + rad.svar + '"' + (rad.halv ? ' data-halv="1"' : '') + ' inputmode="text" autocomplete="off">';
         if(rad.efter) html += '<span class="ovn-text">' + brakUt(rad.efter) + '</span>';   // (a)
       } else if(rad.typ === 'parentes'){
+        /* FRÅGETEXT (tillägg 2026-11-24, d3 steg 1 nr 5b "Förenkla först … och beräkna sedan värdet när x = 6."):
+           valfri rad.fraga står på bokstavens rad, som på luckan och beräkningsraden. Utan fraga som förut. */
+        if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
         /* PARENTES: uttrycket = mellanled = svar. Mellanledet rättas mot UTTRYCKET av
            MellanledRattare (samma termer, parenteserna borttagna, tecknen bytta efter minus),
            slutsvaret av AlgBrak.gradePoly via data-forenkla — alltså ärvd värde+form-rättning.

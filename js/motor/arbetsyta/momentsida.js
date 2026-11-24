@@ -90,15 +90,16 @@ function sektionKommer(scen, rubrik){
    bank, nod }] }], prefKey, … }. Ett löv med bank är klickbart och öppnar drillen som en EGEN SIDA (drill.html, hela
    fönstret, uppgiftssidans upplägg; Tillbaka = returAdress(): momentsidan med samma moment och Metodträning utfälld);
    ett löv utan bank står utan länk. Trädet visas i full höjd utan egen scroll: metodtrad.html sätter ramens höjd
-   efter innehållet (Joachim 2026-11-24). Utan ett enda löv står rubriken med "Kommer senare". Ger sektionen eller null. */
+   efter innehållet (Joachim 2026-11-24). Har inget löv en bank står Metodträning med "Kommer senare", på samma sätt
+   som Test (Joachim 2026-11-24). Ger sektionen eller null. */
 var TRAD_SIDA = (function(){
   var s = document.currentScript && document.currentScript.src;
   return s ? s.replace(/momentsida\.js(\?[^#]*)?(#.*)?$/, 'metodtrad.html') : 'metodtrad.html';
 })();
 var AKTUELLT = null, METOD_SEK = null;   // momentet som visas och dess Metodträning-sektion
 function metodtraning(scen, data){
-  var harLov = !!(data && (data.kategorier || []).some(function(k){ return (k.lov || []).length > 0; }));
-  if(!harLov){ sektionKommer(scen, 'Metodträning'); METOD_SEK = null; return null; }
+  var harBank = !!(data && (data.kategorier || []).some(function(k){ return (k.lov || []).some(function(l){ return !!l.bank; }); }));
+  if(!harBank){ sektionKommer(scen, 'Metodträning'); METOD_SEK = null; return null; }
   var sek = sektion(scen, 'Metodträning', function(body){
     var trad = el('iframe', 'nf-trad'); trad.title = 'Metodträning';
     trad.setAttribute('scrolling', 'no');   // ingen egen scroll: höjden följer trädet (metodtrad.html)

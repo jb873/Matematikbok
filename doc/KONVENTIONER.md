@@ -147,6 +147,7 @@ METODTRÄNING: Rubriken under Föreläsningar fäller ut trädet. Trädet har ka
 TEST: Test är Joachims författade test, listade på momentsidan och öppnade på uppgiftssidan (?test=<id>). Aldrig länkar till gamla test eller provbyggaren. Funktionen bor i momentsida.js. Finns inga författade test står Test med 'Kommer senare'.
 INNEHÅLL: Allt Joachim har författat ligger i doc/innehall/ innan det byggs. En order hänvisar till filen där, aldrig till en chatt.
 Joachim 2026-11-24.
+MOMENT OCH BLAD: Ett moment har högst tre blad (Blad 1–3, var och ett i variant A och B). Ett avsnitts stegring fördelas på bladen, inte på fler moment, så att vänsterspalten är kort också när åttans och nians fördjupning läggs till. Joachim 2026-11-24.
 
 Pilot: algebra åk7 + procent åk8/9. Ombyggnad av delade delkapitel-skal.js
 verifieras av delkapitel-grind.js innan elever lutar sig mot det.
@@ -199,6 +200,7 @@ METODTRÄNING = färdighetsträningens träd (INTE platta chips)
 - Innehållet är FÖRFATTAT, inte genererat ur taxonomins noder: varje löv har en författad bank, som
   problemlösningens (`bank: 'prob-ak7:<typ>/<variant>'`, serverad av `js/motor/ovamer/k3-forfattad-kalla.js`).
   *Joachim 2026-11-22.*
+- Har inget löv en bank står Metodträning med 'Kommer senare', på samma sätt som Test. Joachim 2026-11-24.
 - INGET parallellt träd byggs — återanvänd komponenten (A1/Regel 0).
 
 UPPGIFTSSIDA (övningssida) — preciserad i sektionen **Uppgiftssidan (arbetsytan)** nedan

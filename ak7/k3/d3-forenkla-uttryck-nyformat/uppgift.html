@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Algebra · Förenkla uttryck</title>
+<!-- UPPGIFTSSIDAN för k3 Del 3 Förenkla uttryck i det nya formatet (doc/KONVENTIONER.md "Uppgiftssidan (arbetsytan)"),
+     byggd som d1:s. Ett blad per sida, Blad A/B som växel: ?moment=samma&blad=1A. Bladen: js/motor/blad/ (en fil per
+     moment), ritade av bladkärnan (blad-karna-b.js). Skalet: js/motor/arbetsyta/. Den gamla d3-sidan rörs inte. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-k1blad-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/blad/karna-b-grund.css">
+<link rel="stylesheet" href="../../../js/motor/blad/karna-b-talfoljd.css">
+<link rel="stylesheet" href="../../../js/motor/blad/tecken.css">
+<link rel="stylesheet" href="../../../js/motor/keypad.css">
+<link rel="stylesheet" href="../../../js/motor/arbetsyta/arbetsyta.css">
+<style>
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+  --c-rakna:#16a34a;
+  --success:#16a34a; --success-bg:#dcfce7;
+  --error:#dc2626;   --error-bg:#fee2e2;
+  --bg-warm:#f3ecdd;
+  --mono:'Source Serif 4',Georgia,serif;
+  --rod:#b23b2e; --rod-lt:#c0392b;
+  --las:#9a9388;
+}
+/* Skalets formgivning (arbetsytan): js/motor/arbetsyta/arbetsyta.css. Bladkärnans: karna-b-grund.css + typfilerna. */
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="../../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7-k3.html">Kapitel 3</a>
+    <span class="crumb-sep">›</span>
+    <a href="index.html">Förenkla uttryck</a>
+  </div>
+</nav>
+
+<div class="nf-topp"><a class="nf-tillbaka" id="nf-tillbaka" href="index.html">← Tillbaka</a></div>
+<main class="nf-yta" id="nf-yta">
+  <!-- Blad A/B som växel (kanonens bladnavigering) + "Föreläsning" (dold tills en film finns). -->
+  <div class="nf-verktyg" id="nf-verktyg">
+    <div class="blad-nav" id="nf-bladnav" role="tablist" aria-label="Bladets varianter"></div>
+    <button type="button" class="blad-nav-btn nf-genomgang" id="nf-genomgang" aria-expanded="false" hidden>Föreläsning</button>
+  </div>
+  <section class="nf-film" id="nf-film" hidden></section>
+</main>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Förenkla uttryck</span>
+</footer>
+
+<!-- MASTERY (k3-store) -->
+<script src="../../../js/mastery-karna.js"></script>
+<script src="../../../js/mastery.js"></script>
+<script src="../../../js/mastery-k3.js"></script>
+<!-- MOTOR: bladkärnan och dess UI -->
+<script src="../../../js/motor/alg-brak.js"></script>
+<script src="../../../js/motor/blad/ak8-blad-ui.js"></script>
+<script src="../../../js/motor/blad/blad-karna-b.js"></script>
+<script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
+<script src="../../../js/motor/mellanled-rattare.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-samma.js"></script>
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/data/forelasningar.js"></script>
+<script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
+
+<script>
+/* ── VAD SOM VISAS: ?moment=<id>&blad=<nr><variant>, t.ex. ?moment=samma&blad=1B. Bladen kommer ur datafilen;
+   sidan väljer bara vilket. Skalet (Arbetsyta) bär Tillbaka, växeln, Föreläsning och placeringen av knappsatsen och
+   knappraden. Knappsatsen (bladkärnans delade, #ovn-keypad-shared) visar det synliga bladets egna bokstäver. ── */
+(function(){
+  var AY = window.Arbetsyta;
+  var q = AY.retur();
+  var MOMENTEN = { samma: window.BLAD_K3_D3_SAMMA };
+  var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'samma', DATA = MOMENTEN[momentId];
+  // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet.
+  if(!q.get('retur')) document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;
+  var yta = document.getElementById('nf-yta'), nav = document.getElementById('nf-bladnav');
+  if(!DATA || !window.bygg_blad) return;
+  var m = /^(\d)([A-Za-z])?$/.exec(q.get('blad') || '') || [];
+  var info = DATA.MOMENT.blad.filter(function(b){ return String(b.nr) === m[1]; })[0] || DATA.MOMENT.blad[0];
+  var start = (m[2] || 'A').toUpperCase(), data = {}, MO = DATA.MOMENT, NR = window.NivaRad;
+  /* SPÄRREN (NivaRad, KONVENTIONER §3, som i Tolka och teckna): en direktlänk till ett låst blad — eller ett blad som
+     inte är byggt — öppnar inte bladet; den skickar till momentsidan, där eleven ser läget i sitt sammanhang. */
+  if(info.kommer || (NR && MO.nivaPrefix && !NR.nadd(MO.nivaPrefix, MO.nivaId, info.nr))){ location.replace(document.getElementById('nf-tillbaka').href); return; }
+  document.title = 'Matematik · Algebra · Förenkla uttryck · ' + MO.titel + ' · ' + (info.titel || 'Blad ' + info.nr);
+  AY.vaxel({ nav: nav, yta: yta, varianter: MO.varianter, start: start,
+    id: function(b){ return 'sheet-' + info.nr + b; },
+    rita: function(mnt, b){
+      data[b] = DATA.blad(info.nr + b);
+      // Varje Kontrollera: rätta rutor av alla → NivaRad, som låser upp nästa blad när kravet nås (80 % på rutor).
+      data[b].onResultat = function(ratt, totalt){
+        if(NR && MO.nivaPrefix) NR.klarade(MO.nivaPrefix, MO.nivaId, info.nr, MO.blad.length, ratt, totalt, MO.nivaKrav);
+      };
+      window.bygg_blad(mnt, data[b]);
+    },
+    vidVisa: function(b){
+      window.NF_BLAD = info.nr + b;
+      var kp = document.getElementById('ovn-keypad-shared');
+      if(kp && window.AK8_UI && AK8_UI.keypadBokstaver) AK8_UI.keypadBokstaver(kp, window.bladBokstaver(data[b]));
+      try { var r = q.get('retur'); history.replaceState(null, '', '?moment=' + momentId + '&blad=' + info.nr + b + (r ? '&retur=' + encodeURIComponent(r) : '')); } catch(e){}
+    } });
+  /* FÖRELÄSNING: dold tills en film finns. */
+  AY.film({ knapp: document.getElementById('nf-genomgang'), yta: document.getElementById('nf-film'), video: null });
+  var kp = document.getElementById('ovn-keypad-shared');
+  if(kp) AY.placera({ keypad: kp, knapprader: '.nf-yta .ovn-kontroll-rad' });
+})();
+</script>
+
+<script src="../../../js/motor/keypad-clearance.js"></script>
+<script src="../../../js/elevfeedback.js" defer></script>
+</body>
+</html>
