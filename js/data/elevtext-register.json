@@ -2172,9 +2172,39 @@
   "fraga | hon får {}dubbelt{} gånger{} så många"
  ],
  "js/motor/blad/blad-k3-d1-prio.js": [
+  "intro | Skriv av uttrycket och visa ett mellanled i varje uppgift.",
   "rubrik | Beräkna.",
   "rubrik | Gör så att likheten stämmer. I a och b sätter du in +, − eller · i rutorna. I c sätter du ut en parentes.",
   "rubrik | Vilket tal ska stå i rutan för att likheten ska stämma?",
   "titel | Prioriteringsregeln"
+ ],
+ "js/motor/blad/blad-k3-d1-rakna.js": [
+  "fraga | 20 − x har värdet 12.",
+  "fraga | 2x − 3 har värdet 11.",
+  "fraga | 30 − 2x har värdet 20.",
+  "fraga | 3x + 4 har värdet 19.",
+  "fraga | 4x + 3 har värdet 27.",
+  "fraga | x/2 + 4 har värdet 9.",
+  "intro | Skriv av uttrycket, sätt in talen och räkna i flera led.",
+  "intro | Skriv av uttrycket, sätt in talet och räkna i flera led.",
+  "rubrik | Beräkna uttrycket 2a + 7 när",
+  "rubrik | Beräkna uttrycket 4b − 3 när",
+  "rubrik | Beräkna uttryckets värde när a = 4 och b = 3.",
+  "rubrik | Beräkna uttryckets värde när a = 6 och b = 4.",
+  "rubrik | Beräkna uttryckets värde när x = 1,5.",
+  "rubrik | Beräkna uttryckets värde när x = 2,5.",
+  "rubrik | Beräkna uttryckets värde när x = 3.",
+  "rubrik | Beräkna uttryckets värde när x = 4.",
+  "rubrik | Beräkna uttryckets värde när x = 5 och y = 2.",
+  "rubrik | Beräkna uttryckets värde när x = 5.",
+  "rubrik | Beräkna uttryckets värde när x = 6 och y = 3.",
+  "rubrik | Beräkna uttryckets värde när x = 6.",
+  "rubrik | Beräkna uttryckets värde när x = 7.",
+  "rubrik | Beräkna uttryckets värde när x = 8.",
+  "rubrik | Beräkna uttryckets värde när x = 9.",
+  "rubrik | Beräkna uttryckets värde när y = 12.",
+  "rubrik | Beräkna uttryckets värde när y = 8.",
+  "rubrik | Vilket värde på x ger uttrycket rätt värde? Välj.",
+  "titel | Räkna med uttryck"
  ]
 }

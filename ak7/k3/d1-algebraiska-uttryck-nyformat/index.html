@@ -71,6 +71,7 @@
 <script src="../../../js/data/k3-fardiga-test.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-prio.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d1-rakna.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -83,17 +84,18 @@
 var M = window.Momentsida, el = M.el;
 var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
-var DATA = window.BLAD_K3_D1_TOLKA, PRIO = window.BLAD_K3_D1_PRIO;
+var DATA = window.BLAD_K3_D1_TOLKA, PRIO = window.BLAD_K3_D1_PRIO, RAKNA = window.BLAD_K3_D1_RAKNA;
 if(window.Arbetsyta) window.Arbetsyta.retur();
 
 /* ── MOMENTEN (Joachims beslut 2026-11-21): tre moment i den här ordningen, märket 7 på alla tre.
    Tolka och teckna uttryck har blad 1–3 (A och B på uppgiftssidan). Prioriteringsregeln (fyra blad i två nivåer)
-   och Räkna med uttryck är inte byggda — de står som "Kommer senare". ── */
+   och Räkna med uttryck är inte byggda — de står som "Kommer senare". Sedan dess byggda: Prioriteringsregeln
+   (2026-11-22) och Räkna med uttryck (2026-11-24), två blad var, ingen spärr (§3). ── */
 var MOMENT = [
   { titel: 'Tolka och teckna uttryck', ar: 7, roll: 'karna', bladen: DATA ? DATA.MOMENT.blad : [],
     id: 'tolka', niva: DATA ? { prefix: DATA.MOMENT.nivaPrefix, id: DATA.MOMENT.nivaId } : null },
   { titel: 'Prioriteringsregeln', ar: 7, roll: 'karna', id: 'prio', bladen: PRIO ? PRIO.MOMENT.blad : [] },
-  { titel: 'Räkna med uttryck', ar: 7, roll: 'karna', kommer: true }
+  { titel: 'Räkna med uttryck', ar: 7, roll: 'karna', id: 'rakna', bladen: RAKNA ? RAKNA.MOMENT.blad : [] }
 ];
 
 var scen = document.getElementById('scen-moment');

@@ -3,7 +3,7 @@
 Innehållsdokument för bladen 1A, 1B, 2A och 2B. Källa: **Joachims klartext (2026-11-22)**, ordagrant nedan.
 Joachim har kontrollräknat alla facit.
 
-Byggs i `js/motor/blad/blad-k3-d1-rakna.js` (när bygget är beslutat).
+Byggs i `js/motor/blad/blad-k3-d1-rakna.js`.
 
 ## Klartext från Joachim (ordagrant)
 
@@ -85,3 +85,5 @@ Facit:
    b) (6 + 8) + (5 · 3 − 4) = 14 + (15 − 4) = 14 + 11 = 25
    c) 50 − (3 · 6 − 3) = 50 − (18 − 3) = 50 − 15 = 35
 ```
+
+Ändrat 2026-11-24: meningarna 'Börja med multiplikationen.' och 'Räkna först ut parentesen/parenteserna.' visas inte för eleven (inga hjälptexter i öva). Klartexten står kvar ordagrant.

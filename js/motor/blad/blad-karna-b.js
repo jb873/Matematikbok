@@ -856,7 +856,11 @@ function bladHTML(blad){
           html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         }
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
-        html += '<input class="ovn-in bred" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '" inputmode="text" autocomplete="off">';
+        /* FRIVILLIGT FÖRSTA LED (rad.ledFrivilligt, Joachim 2026-11-24, Räkna med uttryck): på en rad med bara en
+           räkneoperation finns inget led mellan avskriften och svaret. Den befintliga regeln "frivilligt mellanled"
+           (data-krav="frivilligt"): tomt led är varken fel eller räknat; ifyllt rättas det som vanligt. */
+        html += '<input class="ovn-in bred" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '"'
+          + (rad.ledFrivilligt ? ' data-krav="frivilligt"' : '') + ' inputmode="text" autocomplete="off">';
         html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
         html += '<input class="ovn-in bred ovn-led-extra" data-prioled="' + rad.svar + '" data-visa="' + rad.led + '" inputmode="text" autocomplete="off" hidden>';
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';

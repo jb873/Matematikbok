@@ -36,10 +36,12 @@ var TITEL = 'Prioriteringsregeln';
    kända fält, inte funktionsargument. Godkända av Joachim 2026-11-22 ("de är dina egna uppgiftstexter"). */
 var R_BERAKNA = { rubrik: 'Beräkna.' }.rubrik;
 var R_RUTAN = { rubrik: 'Vilket tal ska stå i rutan för att likheten ska stämma?' }.rubrik;
+/* Bladraden överst (kärnans fält blad.intro). Blad 1:s rad godkänd av Joachim 2026-11-24. */
+var INTRO_1 = { intro: 'Skriv av uttrycket och visa ett mellanled i varje uppgift.' }.intro;
 var BLAD = {};
 
 /* ── BLAD 1A ── "Skriv av uttrycket och visa ett mellanled i varje uppgift." */
-BLAD['1A'] = function(){ return { titel: TITEL, dokument: dok('1A', 'kärna', 'golv'), grupper: [
+BLAD['1A'] = function(){ return { titel: TITEL, intro: INTRO_1, dokument: dok('1A', 'kärna', 'golv'), grupper: [
   // [Grundkurs 1, 2.2 2031]
   g(R_BERAKNA, [ berakna('4 + 3 · 6', ['4 + 18'], 22), berakna('5 · 7 + 2', ['35 + 2'], 37), berakna('(6 + 2) · 3', ['8 · 3'], 24) ]),
   // [Grundkurs 2, 2.2 2032]
@@ -51,7 +53,7 @@ BLAD['1A'] = function(){ return { titel: TITEL, dokument: dok('1A', 'kärna', 'g
 ] }; };
 
 /* ── BLAD 1B ── */
-BLAD['1B'] = function(){ return { titel: TITEL, dokument: dok('1B', 'kärna', 'golv'), grupper: [
+BLAD['1B'] = function(){ return { titel: TITEL, intro: INTRO_1, dokument: dok('1B', 'kärna', 'golv'), grupper: [
   // [Grundkurs 1, 2.2 2031]
   g(R_BERAKNA, [ berakna('5 + 4 · 7', ['5 + 28'], 33), berakna('8 · 3 + 6', ['24 + 6'], 30), berakna('(7 + 3) · 4', ['10 · 4'], 40) ]),
   // [Grundkurs 2, 2.2 2032]

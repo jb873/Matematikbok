@@ -80,6 +80,7 @@
 <script src="../../../js/motor/figur/svg-algebrafigur.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-prio.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d1-rakna.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -92,7 +93,7 @@
 (function(){
   var AY = window.Arbetsyta;
   var q = AY.retur();
-  var MOMENTEN = { tolka: window.BLAD_K3_D1_TOLKA, prio: window.BLAD_K3_D1_PRIO };
+  var MOMENTEN = { tolka: window.BLAD_K3_D1_TOLKA, prio: window.BLAD_K3_D1_PRIO, rakna: window.BLAD_K3_D1_RAKNA };
   var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'tolka', DATA = MOMENTEN[momentId];
   // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet (tolka är momentsidans första och öppnas ändå).
   if(!q.get('retur') && momentId !== 'tolka') document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;
