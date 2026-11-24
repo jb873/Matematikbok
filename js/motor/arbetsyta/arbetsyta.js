@@ -33,11 +33,12 @@ function montering(yta, id){ var m = document.createElement('div'); m.className 
 // VÄXELN: kanonens bladnavigering (.blad-nav-btn), nedtonad i arbetsyta.css. o.rita(m, variant) ritar bladet
 // i sin montering; o.vidVisa(variant) låter sidan sätta det som hör till den (NF_BLAD, adressen).
 function vaxel(o){
-  var mounts = {}, knappar = {};
+  var mounts = {}, knappar = {}, fokus = {}, y0 = window.pageYOffset || 0;
   var etikett = o.etikett || function(b){ return 'Blad ' + b; };
   o.varianter.forEach(function(b){
     var m = montering(o.yta, o.id(b)); m.setAttribute('data-blad', b);
     o.rita(m, b);
+    var akt = document.activeElement; fokus[b] = (akt && m.contains(akt)) ? akt : null;   // bladets egen första ruta
     mounts[b] = m;
     var kn = document.createElement('button'); kn.type = 'button'; kn.className = 'blad-nav-btn'; kn.setAttribute('role', 'tab');
     kn.innerHTML = '<span class="blad-nav-nr">' + b + '</span>' + etikett(b);   // växeln: "Blad A", "Blad B"
@@ -51,7 +52,18 @@ function vaxel(o){
     });
     if(o.vidVisa) o.vidVisa(b);
   }
-  visa(mounts[o.start] ? o.start : o.varianter[0]);
+  var forst = mounts[o.start] ? o.start : o.varianter[0];
+  visa(forst);
+  /* ETT BLAD ÖPPNAS HÖGST UPP (Joachim 2026-11-24). Varianterna ritas efter varandra medan alla syns, och bladkärnan
+     fokuserar varje blads första ruta när det byggs. Den sista variantens ruta (längst ned) fick fokus, och sidan
+     rullade mjukt dit (html{scroll-behavior:smooth}) innan varianten doldes. Här: fokus tillbaka till det visade
+     bladets första ruta UTAN att rulla, och sidan står kvar där den stod före bygget, alltså överst. */
+  var rot = document.documentElement, sb = rot.style.scrollBehavior;
+  rot.style.scrollBehavior = 'auto';
+  if(fokus[forst]){ try { fokus[forst].focus({ preventScroll: true }); } catch(e){} }
+  else if(document.activeElement && document.activeElement.closest && document.activeElement.closest('.nf-mount[hidden]')) document.activeElement.blur();
+  window.scrollTo(0, y0);
+  rot.style.scrollBehavior = sb;
   return visa;
 }
 

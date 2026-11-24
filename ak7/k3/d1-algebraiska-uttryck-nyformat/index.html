@@ -68,7 +68,6 @@
 </footer>
 
 <script src="../../../js/data/k3-taxonomi.js"></script>
-<script src="../../../js/data/k3-fardiga-test.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-tolka.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-prio.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d1-rakna.js"></script>
@@ -130,17 +129,10 @@ var moment = MOMENT.map(function(m){
            kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
 });
 
-/* TEST — d1:s befintliga test (Joachim: "peka på d1:s test tills vidare"): de färdiga delkapitel-testen ur
-   js/data/k3-fardiga-test.js, samma lista och samma inbäddade prov som den gamla sidans Test-flik. */
-function visaTest(){
-  scen.innerHTML = '';
-  // Testlistan bär sin egen rubrik "Test" (renderTestFlik) — ingen sektionsrubrik till.
-  var s = el('section', 'nf-sek'), panel = el('div', 'nf-test'); s.appendChild(panel); scen.appendChild(s);
-  if(window.K3_FARDIGA) window.K3_FARDIGA.renderTestFlik(panel, 'k3d1', '../../../ak7-k3-ram.html');
-}
-
+/* TEST: "Kommer senare" tills Joachims sex test är byggda (Joachim 2026-11-24: länka inte till det gamla "Skapa ditt
+   eget test"). Skalet ritar raden som Dagens träning när test saknas. Tidigare: k3-fardiga-test.js (renderTestFlik). */
 M.montera({
-  vard: document.getElementById('navram'), rubrik: 'Algebraiska uttryck', moment: moment, test: visaTest,
+  vard: document.getElementById('navram'), rubrik: 'Algebraiska uttryck', moment: moment, test: null,
   mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
           { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ]
 });

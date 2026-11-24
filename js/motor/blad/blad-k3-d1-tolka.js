@@ -1,6 +1,7 @@
 /* blad-k3-d1-tolka.js — MOMENTET "TOLKA OCH TECKNA UTTRYCK" (åk 7, k3 Del 1 Algebraiska uttryck): blad 1A–3B.
-   Källa: Joachims dokument "Tolka och teckna uttryck åk 7 – uppgiftsblad, version 2". Frågetexter, tal och facit
-   ordagrant; förlagan [inom hakparentes] står bara här i kommentaren, aldrig för eleven. Figurtexten (inom
+   Källa: Joachims dokument "Tolka och teckna uttryck åk 7 – uppgiftsblad, version 2" (doc/innehall/k3-d1-tolka-och-teckna.md).
+   Frågetexter, tal och facit ordagrant, utom meningen "Börja med multiplikationen." (inga hjälptexter i öva, Joachim
+   2026-11-24); förlagan [inom hakparentes] står bara här i kommentaren, aldrig för eleven. Figurtexten (inom
    parentes i dokumentet) visas inte — figuren ritas (js/motor/figur/svg-algebrafigur.js).
    Bladen ritas av bladkärnan (blad-karna-b.js, bygg_blad) på uppgiftssidan ak7/k3/d1-algebraiska-uttryck-nyformat/uppgift.html.
    Mastery: varje uppgift loggar till sin kategori (ordern §6) i MasteryK3 (k3.algebra.mastery.v1):
@@ -60,7 +61,7 @@ BLAD['1A'] = function(){ return { titel: 'Per styck och per gång', dokument: do
     // [tolka och beräkna – mall 1]
     g('Ida betalar (2 · 10 + 8) kr.', TOLKA, [
       val('Vad har hon köpt?', ['2 bullar och 1 mjölk', '1 bulle och 2 mjölk', '2 smörgåsar och 1 mjölk'], '2 bullar och 1 mjölk'),
-      berakna('Hur mycket betalar hon? Skriv av uttrycket och räkna i flera led. Börja med multiplikationen.', '2 · 10 + 8', ['20 + 8'], 28, 'kr')
+      berakna('Hur mycket betalar hon? Skriv av uttrycket och räkna i flera led.', '2 · 10 + 8', ['20 + 8'], 28, 'kr')
     ]),
     // [tolka – mall 2]
     g('Omar betalar med en 50-lapp. Beräkningen 50 − 3 · 12 = 14 visar hur mycket han får tillbaka. Vad har han köpt?', TOLKA, [
@@ -103,7 +104,7 @@ BLAD['1B'] = function(){ return { titel: 'Per styck och per gång', dokument: do
     g('Noah betalar (20 + 2 · 15 + 18) kr.', TOLKA, [
       val('Vad har han köpt?', ['en korv, två glassar och en påse chips', 'två korvar, en glass och en påse chips', 'en korv, en glass och två påsar chips'],
           'en korv, två glassar och en påse chips'),
-      berakna('Hur mycket betalar han? Skriv av uttrycket och räkna i flera led. Börja med multiplikationen.', '20 + 2 · 15 + 18', ['20 + 30 + 18'], 68, 'kr')
+      berakna('Hur mycket betalar han? Skriv av uttrycket och räkna i flera led.', '20 + 2 · 15 + 18', ['20 + 30 + 18'], 68, 'kr')
     ]),
     // [tolka – mall 2]
     g('Mira köper korv och betalar med en 200-lapp. Beräkningen är 200 − 4 · 20 = 120. Vad betyder talet 120?', TOLKA, [
@@ -133,7 +134,7 @@ BLAD['1B'] = function(){ return { titel: 'Per styck och per gång', dokument: do
     // [teckna och beräkna – HH 607]
     g('Leo har 200 kr. Han sparar 60 kr i månaden.', TECKNA, [
       utt('Fyll i ett uttryck för hur mycket han har efter m månader:', '200 + 60 · m', 'm'),
-      berakna('Hur mycket har han efter 5 månader? Skriv uttrycket med 5 i stället för m och räkna i flera led. Börja med multiplikationen.',
+      berakna('Hur mycket har han efter 5 månader? Skriv uttrycket med 5 i stället för m och räkna i flera led.',
               '200 + 60 · 5', ['200 + 300'], 500, 'kr')
     ])
   ] }; };
@@ -224,7 +225,7 @@ BLAD['2B'] = function(){ return { titel: 'Mer, mindre och delar', dokument: dok(
       figur(F().rektangel({ bredd: 'x + 2 cm', hojd: 'x cm' })),
       flera('Vilka uttryck visar rektangelns omkrets? Ringa in alla som stämmer.', ['x + x + 2 + x + x + 2', '4 · x + 4', 'x + x + 2', '2x + 2'],
             ['x + x + 2 + x + x + 2', '4 · x + 4']),
-      berakna('Beräkna omkretsen när x = 8 med uttrycket 4 · x + 4. Skriv uttrycket med 8 i stället för x och räkna i flera led. Börja med multiplikationen.',
+      berakna('Beräkna omkretsen när x = 8 med uttrycket 4 · x + 4. Skriv uttrycket med 8 i stället för x och räkna i flera led.',
               '4 · 8 + 4', ['32 + 4'], 36, 'cm')
     ])
   ] }; };
@@ -268,13 +269,13 @@ BLAD['3A'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3A
     g('', TECKNA, [
       figur(F().rektangel({ bredd: 's cm', hojd: '3 cm' })),
       flera('Vilka uttryck visar rektangelns omkrets? Ringa in alla som stämmer.', ['s + 3 + s + 3', '2 · s + 6', 's + 3', '3s'], ['s + 3 + s + 3', '2 · s + 6']),
-      berakna('Beräkna omkretsen när s = 7 med uttrycket 2 · s + 6. Skriv uttrycket med 7 i stället för s och räkna i flera led. Börja med multiplikationen.',
+      berakna('Beräkna omkretsen när s = 7 med uttrycket 2 · s + 6. Skriv uttrycket med 7 i stället för s och räkna i flera led.',
               '2 · 7 + 6', ['14 + 6'], 20, 'cm')
     ]),
     // [teckna och beräkna – HH 607]
     g('Nora har 150 kr. Hon sparar 40 kr i veckan.', TECKNA, [
       utt('Fyll i ett uttryck för hur mycket hon har efter v veckor:', '150 + 40 · v', 'v'),
-      berakna('Hur mycket har hon efter 6 veckor? Skriv uttrycket med 6 i stället för v och räkna i flera led. Börja med multiplikationen.',
+      berakna('Hur mycket har hon efter 6 veckor? Skriv uttrycket med 6 i stället för v och räkna i flera led.',
               '150 + 40 · 6', ['150 + 240'], 390, 'kr')
     ])
   ] }; };
@@ -321,13 +322,13 @@ BLAD['3B'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3B
     g('', TECKNA, [
       figur(F().rektangel({ bredd: 'x + 4 cm', hojd: 'x cm' })),
       utt('Fyll i ett uttryck för rektangelns omkrets:', 'x + x + 4 + x + x + 4', 'x'),
-      berakna('Beräkna omkretsen när x = 6 med uttrycket 4 · x + 8. Skriv uttrycket med 6 i stället för x och räkna i flera led. Börja med multiplikationen.',
+      berakna('Beräkna omkretsen när x = 6 med uttrycket 4 · x + 8. Skriv uttrycket med 6 i stället för x och räkna i flera led.',
               '4 · 6 + 8', ['24 + 8'], 32, 'cm')
     ]),
     // [teckna och beräkna – HH 607, H kap 5 A22b]
     g('Ett ljus är 30 cm långt. Det brinner ner 2 cm i timmen.', TECKNA, [
       utt('Fyll i ett uttryck för ljusets längd efter t timmar:', '30 − 2 · t', 't'),
-      berakna('Hur långt är ljuset efter 8 timmar? Skriv uttrycket med 8 i stället för t och räkna i flera led. Börja med multiplikationen.',
+      berakna('Hur långt är ljuset efter 8 timmar? Skriv uttrycket med 8 i stället för t och räkna i flera led.',
               '30 − 2 · 8', ['30 − 16'], 14, 'cm')
     ])
   ] }; };

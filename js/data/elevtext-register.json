@@ -2207,5 +2207,8 @@
   "rubrik | Beräkna uttryckets värde när y = 8.",
   "rubrik | Vilket värde på x ger uttrycket rätt värde? Välj.",
   "titel | Räkna med uttryck"
+ ],
+ "js/motor/arbetsyta/momentsida.js": [
+  "titel | Test<span class=\"nf-chip soon\">Kommer senare</span>"
  ]
 }

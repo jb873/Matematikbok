@@ -88,8 +88,11 @@ function montera(o){
     vard: o.vard,
     arbeta: [ { rubrik: o.rubrik, grupper: [
       { rubrik: null, varianter: o.moment },
+      /* Test utan o.test (Joachim 2026-11-24, d1: "visa Kommer senare tills mina sex test är byggda"): samma rad
+         som Dagens träning — märket, ingen länk. Med o.test som förut. */
       { rubrik: null, varianter: [ { titel: 'Dagens träning<span class="nf-chip soon">Kommer senare</span>', kommer: true },
-                                   { titel: 'Test', valj: o.test } ] }
+                                   o.test ? { titel: 'Test', valj: o.test }
+                                          : { titel: 'Test<span class="nf-chip soon">Kommer senare</span>', kommer: true } ] }
     ] } ],
     mina: o.mina,
     niva: null
