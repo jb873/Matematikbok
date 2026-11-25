@@ -866,7 +866,12 @@ function bladHTML(blad){
           html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(_pkacc) + '" data-visa="' + _pkAv.visa
             + '" inputmode="text" autocomplete="off" style="min-width:96px;">';
         } else {
-          html += '<div class="ovn-berakna">';
+          /* BOKSTAVEN PÅ UTTRYCKETS RAD (K-A, uppgiftssidan; Joachim 2026-11-25): kedjan är full bredd och
+             bröts under bokstaven, som blev ensam ovanför uttrycket. Nu står bokstaven först i kedjan. Utan
+             bokstav exakt som förut. */
+          var _pl = bokstav ? lbl(bokstav) : '';
+          if(_pl && html.slice(-_pl.length) === _pl) html = html.slice(0, -_pl.length); else _pl = '';
+          html += '<div class="ovn-berakna">' + _pl;
           html += '<span class="ovn-text ovn-num">' + rad.vansterText + '</span>';
         }
         html += '<span class="ovn-text" style="margin:0 4px;">=</span>';
@@ -1444,9 +1449,21 @@ function bladHTML(blad){
         /* mellanled:'nej' på raden = MEDVETET inget led, även om gruppen kräver det: ledet vore en
            kopia av svaret (7(x + 4) → 7x + 28). Flaggan räknas ur uttrycket i datan (d3 del 2). */
         if(_km === 'nej') _km = null;
+        /* BOKSTAVEN PÅ FRÅGANS RAD (K-A, uppgiftssidan: "a) b) … också de på raden"; Joachim 2026-11-25): med
+           frågetext stod bokstaven ensam ovanför kolumnen. Nu flyttas den in på frågans rad (under en eventuell
+           figur). Utan fråga men med figur står bokstaven BREDVID figuren, i höjd med dess överkant (Joachims beslut
+           samma dag). Utan bokstav ritas raden exakt som förut. */
+        var _kl = ((rad.fraga || rad.svg) && bokstav) ? lbl(bokstav) : '';
+        if(_kl && html.slice(-_kl.length) === _kl) html = html.slice(0, -_kl.length); else _kl = '';
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
-        if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
-        if(rad.fraga) html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
+        if(rad.svg) html += (_kl && !rad.fraga)
+          ? '<div style="display:flex;align-items:flex-start;gap:10px;">' + _kl
+            + '<div class="alg-bild" style="flex:1;min-width:0;">' + rad.svg + '</div></div>'
+          : '<div class="alg-bild">' + rad.svg + '</div>';
+        if(rad.fraga) html += _kl
+          ? '<div style="display:flex;align-items:baseline;gap:10px;">' + _kl
+            + '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span></div>'
+          : '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
         /* EXTRA LED (rad.extraLed): som parentesraden — det obligatoriska ledet rättas efter regeln,
            och "+ led" lägger ett valfritt steg FÖRE det. Inte den fria kedjan: där rättas även det
            första ledet bara på värde. */
@@ -1576,9 +1593,14 @@ function bladHTML(blad){
           + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
       } else if(rad.typ === 'bild'){
         // SVG-bild + uttrycks- eller numeriskt svar
+        /* BOKSTAVEN PÅ FRÅGANS RAD (K-A, uppgiftssidan; Joachim 2026-11-25): med frågetext stod bokstaven ensam
+           ovanför bilden och frågan. Nu står den först på frågans rad, under bilden. Utan fråga eller utan bokstav
+           exakt som förut. */
+        var _bl = (rad.fraga && bokstav) ? lbl(bokstav) : '';
+        if(_bl && html.slice(-_bl.length) === _bl) html = html.slice(0, -_bl.length); else _bl = '';
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         html += '<div class="alg-bild">' + rad.svg + '</div>';
-        html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' + _bl;
         html += '<span class="ovn-text">' + (rad.fraga||'') + '</span>';
         if(rad.svarTyp === 'uttryck' && rad.sidor){
           // OMKRETS UR FIGUREN: kedjeruta (uppställning = förenkling), som omkrets-raden.

@@ -131,7 +131,7 @@ BLAD['4B'] = function(){ return { titel: 'Tillämpning', grupper: [
   g({ rubrik: 'En vuxenbiljett kostar v kr och en barnbiljett b kr.' }.rubrik, [
     utt('Fyll i vad 2 vuxenbiljetter och 3 barnbiljetter kostar:', '2v + 3b', 'bv'),
     skriv('Familjen Ali köper 2 vuxenbiljetter och 3 barnbiljetter. Familjen Berg köper 1 vuxenbiljett och 2 barnbiljetter. Skriv och förenkla ett uttryck för vad familjerna betalar tillsammans:',
-          '2v + 3b + v + 2b', '3v + 5b', 'bv'),
+          '2v + 3b + v + 2b', '5b + 3v', 'bv'),
     berakna('Beräkna vad de betalar tillsammans när v = 120 och b = 80.', '3v + 5b', { v: 120, b: 80 }, 760, 'bv', 'kr') ]),
   // [E 78c]
   g('', [ lador([['Blå låda', '3x kg'], ['Blå låda', 'x kg'], ['Röd låda', 'y kg'], ['Röd låda', '2y kg'], ['Låda', '12 kg']]),

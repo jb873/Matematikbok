@@ -136,3 +136,5 @@ Likvärdiga svar godkänns, till exempel 6 + 2x för 2x + 6. Vid beräkning: det
 3. a) 5x   b) 2y   c) −4
 4. a) A   b) C   c) A
 5. a) 6y − 8; 6 · 6 − 8 = 36 − 8 = 28   b) 3y − 7; 3 · 6 − 7 = 18 − 7 = 11
+
+Ändrat 2026-11-24: facittextens '6 + 2x för 2x + 6 godkänns' gäller inte längre. Förenklade svar skrivs i bokstavsordning med siffertermen sist (KONVENTIONER §3).

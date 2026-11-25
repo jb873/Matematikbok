@@ -5,7 +5,7 @@
  * förenkla" med plats bara för svaret. En nedskriven regel stoppar den som inte vet; en grind
  * stoppar regressionen. Den här grinden är den andra halvan.
  *
- * TRE BEN, alla mätta i den renderade sidan:
+ * FYRA BEN, alla mätta i den renderade sidan:
  *
  *   BOKSTAV   (K-A) en grupp med EXAKT EN svarsbärande rad får inte rendera någon a)-etikett.
  *             Flera rader → bokstäverna ska finnas, och vara a, b, c … i ordning.
@@ -14,6 +14,10 @@
  *             svarsrutor i en .ovn-berakna, och varje ruta måste bära sitt eget facit i markupen.
  *             En ruta utan facit kan ingen grind fylla, och då mäts uppgiften aldrig.
  *
+ *   EGEN RAD  (K-A, uppgiftssidan: "a) b) … också de på raden") en deluppgiftsbokstav får inte stå
+ *             ensam på en rad: något av radens innehåll (fråga, uttryck, ruta, val, figur) måste dela
+ *             rad med bokstaven. Joachim 2026-11-25: K-C med frågetext hade bokstaven ovanför frågan.
+ *
  *   TVÅRUTOR  (K-C) en uppgift vars rubrik eller frågetext säger "skriv ett uttryck … och
  *             förenkla" måste ha minst två svarsrutor per deluppgift — uttrycket och det
  *             förenklade. Mellanledsrutan räknas inte in i de två: den är ett tredje steg.
@@ -21,10 +25,15 @@
  * VAD GRINDEN INTE AVGÖR: om texten är rätt formulerad. Den läser rubriken för att veta vilken
  * SORTS uppgift det är, och mäter sedan formen. Ordalydelsen är Joachims.
  *
- * KÖR:  node verktyg/uppgift-grind.js [--sida <delsträng>] [--lista]
+ * KÖR:  node verktyg/uppgift-grind.js [--sida <delsträng>] [--lista] [--viewport WxH, standard 1366x768]
  *       --sabba bokstav   sätter dit en a)-etikett på en ensam deluppgift  → BOKSTAV måste fälla
  *       --sabba berakna   tar bort kedjans led                             → BERÄKNA måste fälla
  *       --sabba rutor     tar bort den andra rutan i en skriv-och-förenkla → TVÅRUTOR måste fälla
+ *       --sabba egenrad   lägger en bokstav på en egen rad                 → EGEN RAD måste fälla
+ *
+ * SIDORNA: delkapitlens sidor (Sidor.blad()) och UPPGIFTSSIDORNA i nytt format (…-nyformat/uppgift.html):
+ * varje moment, blad och variant (?moment=…&blad=…) och varje författat test (?test=…), lästa ur sidans
+ * egna datafiler. Låsta nivåer öppnas med NivaRad:s egen nyckel innan sidan ritas (omgivningen ställs in).
  * Exit 1 vid brott. Ingen nätväg, ingen fil ändras. */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), { spawnSync } = require('child_process');
@@ -40,6 +49,8 @@ const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
 const PROBE = `(function(){
   var SABBA = ${JSON.stringify(SABBA)};
+  // Uppgiftssidorna i nytt format mäts bara av EGEN RAD: de tre äldre benen mäter samma sidor som förut.
+  var BARA_EGENRAD = !!window.__BARA_EGENRAD;
   var ut = { onerr: window.__onerr || null, grupper: 0, brott: [], noter: [] };
 
   function synlig(e){ return !e.hidden && !e.closest('[hidden]') && e.getClientRects().length > 0; }
@@ -106,6 +117,13 @@ const PROBE = `(function(){
     }
   }
 
+  if(SABBA === 'egenrad' && !ut.__egenradSabbad){
+    var lab0 = Array.prototype.filter.call(g.querySelectorAll('.ovn-rad .ovn-label'), function(e){
+      return synlig(e) && /^[a-z\\u00e5\\u00e4\\u00f6]\\s*\\)$/i.test((e.textContent || '').trim()); })[0];
+    if(lab0){ lab0.style.display = 'block'; lab0.style.flexBasis = '100%'; lab0.style.width = '100%';
+      ut.__egenradSabbad = true; ut.noter.push('SABBA: lade bokstaven "' + lab0.textContent.trim() + '" p\\u00e5 en egen rad'); }
+  }
+
     ut.grupper++;
     var rubrik = (g.querySelector('.ovn-grupp-rubrik') || {}).textContent || '';
     var rader = Array.prototype.filter.call(g.querySelectorAll('.ovn-rad'), synlig);
@@ -128,17 +146,46 @@ const PROBE = `(function(){
     // "en rad, sju bokstäver" och fällde 70 gånger över boken, allihop fel. Antalet deluppgifter
     // är det STÖRSTA av svarsbärande rader och bokstäver.
     var delar = Math.max(barande.length, etiketter.length);
-    if(delar <= 1 && etiketter.length > 0){
+    if(!BARA_EGENRAD && delar <= 1 && etiketter.length > 0){
       ut.brott.push('BOKSTAV i ' + namn + ': en enda deluppgift men bokstavsetikett \\u2014 '
         + 'bokstaven skiljer deluppgifter \\u00e5t, och h\\u00e4r finns inget att skilja');
     }
+
+    // ── K-A, uppgiftssidan: EGEN RAD ───────────────────────────────────────────────────────
+    // Bokstaven står på frågans rad (Joachim 2026-11-25). Ensam på sin rad = inget synligt innehåll i raden
+    // delar höjd med bokstaven. FÄLLER när raden närmast under bokstaven BÖRJAR med frågan (frågetext eller
+    // uttrycket, .ovn-text/.ovn-num, längst till vänster på den raden — inte det som råkar stå högst: en ruta är
+    // högre än texten bredvid och skulle annars dölja frågan). Under en figur, rutor eller valknappar fälls den
+    // inte (Joachims beslut: benet gäller bokstaven ovanför frågan) — de räknas och skrivs ut som not.
+    etiketter.forEach(function(e){
+      var rad = e.closest('.ovn-rad') || g, lr = e.getBoundingClientRect();
+      var innehall = Array.prototype.filter.call(rad.querySelectorAll('input, .ovn-text, .ovn-num, svg, .valruta-btn, '
+        + '.ovn-flerval-btn, .ak8-chip, button, .brak, select, textarea'), function(x){
+        return x !== e && !e.contains(x) && !x.contains(e) && synlig(x); });
+      var paRaden = innehall.some(function(x){ var r = x.getBoundingClientRect();
+        return Math.min(r.bottom, lr.bottom) - Math.max(r.top, lr.top) > 2; });
+      if(!innehall.length || paRaden) return;
+      var nedan = innehall.filter(function(x){ return x.getBoundingClientRect().top >= lr.bottom - 2; })
+        .sort(function(a, b){ return a.getBoundingClientRect().top - b.getBoundingClientRect().top; });
+      var forst = nedan[0] && nedan[0].getBoundingClientRect();
+      var under = !forst ? null : nedan.filter(function(x){ var r = x.getBoundingClientRect();
+          return Math.min(r.bottom, forst.bottom) - Math.max(r.top, forst.top) > 2; })
+        .sort(function(a, b){ return a.getBoundingClientRect().left - b.getBoundingClientRect().left; })[0];
+      var sort = !under ? 'annat' : (under.closest('svg') ? 'figur' : (under.tagName === 'INPUT' || under.tagName === 'SELECT' || under.tagName === 'TEXTAREA' ? 'rutor'
+        : (under.closest('button, .valruta-btn, .ovn-flerval-btn, .ak8-chip') ? 'val' : (under.closest('.ovn-text, .ovn-num') ? 'fraga' : 'annat'))));
+      if(sort === 'fraga'){
+        ut.brott.push('EGEN RAD i ' + namn + ': bokstaven "' + (e.textContent || '').trim() + '" st\\u00e5r ensam ovanf\\u00f6r fr\\u00e5gan \\u2014 '
+          + kort(under.textContent) + ' (bokstaven ska st\\u00e5 p\\u00e5 fr\\u00e5gans rad)');
+      } else { ut.ensam = ut.ensam || {}; ut.ensam[sort] = (ut.ensam[sort] || 0) + 1;
+        if(window.__EGENRAD_ALLA) ut.noter.push('ensam bokstav ' + (e.textContent || '').trim() + ' ovanf\\u00f6r ' + sort + ' i ' + namn); }
+    });
 
     // ── K-B: BERÄKNA ───────────────────────────────────────────────────────────────────────
     // UTLÖSAREN ÄR "SÄTT IN VÄRDE", inte ordet "beräkna". Halva boken har rubriker som "Beräkna"
     // eller "Beräkna med talsorterna var för sig" för ren räkning, och de ska inte ha en kedja —
     // mitt första ben fällde 41 sådana. K-B gäller när ett VÄRDE sätts in i ett uttryck, vilket
     // rubriken säger med en variabeltilldelning: "beräkna värdet när x = 3".
-    if(/ber\\u00e4kna/i.test(rubrik) && /\\b[a-z]\\s*=\\s*\\(?-?\\d/i.test(rubrik)){
+    if(!BARA_EGENRAD && /ber\\u00e4kna/i.test(rubrik) && /\\b[a-z]\\s*=\\s*\\(?-?\\d/i.test(rubrik)){
       var kedjor = Array.prototype.filter.call(g.querySelectorAll('.ovn-berakna'), synlig);
       if(!kedjor.length){
         ut.brott.push('BER\\u00c4KNA i ' + namn + ': rubriken s\\u00e4ger ber\\u00e4kna, men ingen kedja finns '
@@ -165,7 +212,7 @@ const PROBE = `(function(){
     // ── K-C: TVÅRUTOR ──────────────────────────────────────────────────────────────────────
     // Uppgiftstypen känns igen på "skriv ... uttryck ... förenkla" i rubriken ELLER i radens
     // frågetext — problemen bär texten på raden, omkretsuppgifterna i rubriken.
-    rader.forEach(function(r, ri){
+    if(!BARA_EGENRAD) rader.forEach(function(r, ri){
       var fraga = (r.querySelector('.ovn-text') || {}).textContent || '';
       var text = rubrik + ' ' + fraga;
       // VERBET, inte adjektivet. "Skriv ett uttryck … och förenkla det" är två steg; "Skriv ett
@@ -188,25 +235,68 @@ const PROBE = `(function(){
 const TMP = path.join(os.tmpdir(), 'uppgiftgrind-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);
 
+/* UPPGIFTSSIDORNA I NYTT FORMAT: momenten och testen läses ur sidans egna datafiler (MOMENTEN-kartan och
+   BLAD_*_TEST.TESTER), så ett nytt blad eller test mäts utan att listan här ändras. */
+function uppgiftsSidor(){
+  const ut = [], vm = require('vm');
+  const hitta = d => fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).reduce((u, e) => {
+    const r = d + '/' + e.name;
+    if(e.isDirectory() && e.name !== 'Arkiv') return u.concat(hitta(r));
+    if(/-nyformat\/uppgift\.html$/.test(r)) u.push(r);
+    return u; }, []);
+  ['ak7', 'ak8', 'ak9'].filter(a => fs.existsSync(path.join(ROOT, a))).forEach(a => hitta(a).forEach(sida => {
+    const html = fs.readFileSync(path.join(ROOT, sida), 'utf8');
+    const karta = /MOMENTEN\s*=\s*\{([^}]*)\}/.exec(html);
+    const test = /window\.(BLAD_\w+_TEST)\b/.exec(html);
+    if(!karta && !test) return;
+    const ctx = {}; ctx.window = ctx; ctx.document = {}; vm.createContext(ctx);
+    (html.match(/<script src="[^"]*js\/motor\/blad\/blad-[^"]+\.js"/g) || []).forEach(t => {
+      const fil = path.resolve(path.dirname(path.join(ROOT, sida)), /src="([^"]+)"/.exec(t)[1]);
+      try { vm.runInContext(fs.readFileSync(fil, 'utf8'), ctx, { filename: fil }); } catch(e){}
+    });
+    (karta ? karta[1].match(/(\w+)\s*:\s*window\.(\w+)/g) || [] : []).forEach(par => {
+      const m = /(\w+)\s*:\s*window\.(\w+)/.exec(par), M = ctx[m[2]] && ctx[m[2]].MOMENT;
+      if(!M) return;
+      M.blad.filter(b => !b.kommer).forEach(b => (M.varianter || ['']).forEach(v =>
+        ut.push(sida + '?moment=' + m[1] + '&blad=' + b.nr + v)));
+    });
+    if(test && ctx[test[1]]) (ctx[test[1]].TESTER || []).forEach(t => ut.push(sida + '?test=' + t.id));
+  }));
+  return ut;
+}
+/* NivaRad:s nyckel <prefix>_naddNiva<n>_<id> för varje moment på sidan, satt innan sidans spärr läser den. */
+const PRE_LAS = path.join(os.tmpdir(), 'uppgiftgrind-pre-' + process.pid + '.js');
+fs.writeFileSync(PRE_LAS, "window.__BARA_EGENRAD = true; (function(){ var v; Object.defineProperty(window, 'NivaRad', { configurable: true,"
+  + " get: function(){ return v; }, set: function(x){ v = x; Object.keys(window).forEach(function(k){"
+  + " var M = /^BLAD_/.test(k) && window[k] && window[k].MOMENT; if(!M || !M.nivaPrefix) return;"
+  + " for(var n = 2; n <= M.blad.length; n++) try { localStorage.setItem(M.nivaPrefix + '_naddNiva' + n + '_' + M.nivaId, '1'); } catch(e){} }); } }); })();");
+
+/* VYPORTEN: elevens skärm, den smalare av de två mätstorlekarna (KONVENTIONER: 1366 × 768 och 1536 × 864). I
+   cdp-kor:s standardfönster (900 px) bryts långa frågor bredvid knappsatsen, och EGEN RAD mätte då en skärm ingen har.
+   --viewport WxH väljer en annan. */
+const VY = (i => i >= 0 ? args[i + 1] : '1366x768')(args.indexOf('--viewport'));
 let fel = 0, grupper = 0, sidor = 0;
-console.log('UPPGIFT-GRIND — K-A bokstav · K-B beräkna-kedjan · K-C två rutor'
+console.log('UPPGIFT-GRIND — K-A bokstav · K-A egen rad · K-B beräkna-kedjan · K-C två rutor'
   + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
 
-Sidor.blad().forEach(sida => {
+const UPPG = uppgiftsSidor();
+Sidor.blad().concat(UPPG).forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
-  MP.forsok(sida);
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
-    '--vanta-pa', 'blad', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
+  const ny = UPPG.indexOf(sida) >= 0, fil = sida.split('?')[0], fraga = sida.slice(fil.length);
+  if(!ny) MP.forsok(sida);
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, fil)) + fraga, TMP,
+    '--vanta-pa', 'blad', '--timeout', '60000', '--viewport', VY].concat(ny ? ['--pre', PRE_LAS] : []), { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!u){ console.log('? ' + sida + ': inget svar'); return; }
   const namn = sida.replace(/\/index\.html$/, '');
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + namn + ': JS-fel ' + u.onerr.slice(0, 2).join(' | ')); }
 
-  MP.rakna(sida, u.grupper || 1);
-  MP.varde(sida, 'uppgift', { grupper: u.grupper, brott: u.brott.length });
+  if(!ny){ MP.rakna(sida, u.grupper || 1); MP.varde(sida, 'uppgift', { grupper: u.grupper, brott: u.brott.length }); }
+  else if(!u.grupper){ fel++; console.log('\u2717 ' + sida + ': inga uppgifter ritade (sp\u00e4rren eller en tappad fil)'); return; }
   sidor++; grupper += u.grupper;
   (u.noter || []).forEach(n => console.log('   ' + n));
+  if(u.ensam) console.log('   \u00b7 ' + sida + ': bokstav ensam ovanf\u00f6r ' + Object.keys(u.ensam).map(k => u.ensam[k] + ' ' + k).join(', ') + ' (f\u00e4lls inte)');
   if(u.brott.length){
     fel += u.brott.length;
     console.log('✗ ' + namn + ' (' + u.brott.length + '):\n     ' + u.brott.slice(0, 6).join('\n     ')
@@ -215,7 +305,7 @@ Sidor.blad().forEach(sida => {
     console.log('✓ ' + namn + ' (' + u.grupper + ' uppgifter)');
   }
 });
-try { fs.unlinkSync(TMP); } catch(e){}
+try { fs.unlinkSync(TMP); fs.unlinkSync(PRE_LAS); } catch(e){}
 
 fel += MP.granska();
 console.log('\n' + (fel ? '✗ UPPGIFT-GRIND RÖD (' + fel + ')' : '✓ UPPGIFT-GRIND GRÖN')

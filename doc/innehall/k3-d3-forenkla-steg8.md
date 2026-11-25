@@ -154,3 +154,5 @@ Likvärdiga svar godkänns, till exempel termerna i annan ordning och oförenkla
 3. a) 2v + 3b   b) 2v + 3b + v + 2b = 3v + 5b   c) 3 · 120 + 5 · 80 = 360 + 400 = 760 kr
 4. a) 3x + x + y + 2y + 12 = 4x + 3y + 12   b) 4 · 2,5 + 3 · 4 + 12 = 10 + 12 + 12 = 34 kg
 5. a) 4s + 50 + s + s + s + s = 8s + 50   b) 8 · 300 + 50 = 2400 + 50 = 2450 kr
+
+Ändrat 2026-11-25: klartextens Blad 2B nr 3b (Blad 4B) facit skrivs "5b + 3v" (bokstavsordning, KONVENTIONER §3), och ordningen kontrolleras som på övriga rutor. Klartexten står kvar ordagrant.
