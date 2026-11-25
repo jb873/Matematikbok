@@ -63,8 +63,36 @@
       delkapitel: { namn: 'Algebraiska uttryck', adress: 'ak7/k3/d1-algebraiska-uttryck-nyformat/index.html', arskurs: 7, kapitel: 3 },
       knapprader: '.nf-yta .ovn-kontroll-rad',
       montering: 'nf-mount'          // källans rita lägger själv bladet i en ny .ovn-wrap per blad
+    },
+    /* Del 3 Förenkla uttryck åk7, metodträningens banker (js/motor/blad/blad-k3-d3-metod.js, Joachim 2026-11-25): referens
+       = lövet ('P1' … 'P7', och grenarna 1–4). Byggd som k3d1: banken i en fil, ritad med bladkärnan och d3:s uppgiftstyper
+       (blad-k3-d3-typer.js, samma som bladen). Räknelöven har nya tal efter banken (nya-tal.js, se kroken nedan).
+       Mastery: k3-storen och, för negativa tal, k1-storen (mastery.js). */
+    'k3d3': {
+      css: ['js/motor/blad/ak7-delkapitel-kanon.css', 'js/motor/blad/ak7-k1blad-kanon.css', 'js/motor/blad/karna-b-grund.css',
+            'js/motor/blad/karna-b-talfoljd.css', 'js/motor/blad/tecken.css', 'js/motor/blad/ak8-blad-ui.css', 'js/motor/keypad.css'],
+      stil: ':root{--navy:#0f1e2e;--navy-mid:#1a3045;--blue:#1b4b8a;--blue-lt:#2560a8;--green:#2d6a4f;'
+          + "--body:'Source Serif 4',Georgia,serif;--c-rakna:#16a34a;--rod:#b23b2e;--rod-lt:#c0392b;--las:#9a9388;}"
+          + ".fk-drill{--mono:'Source Serif 4',Georgia,serif;}"
+          + '.fk-drill .fk-d1-blad{max-width:900px;margin:18px auto 0;padding:0 28px;}',
+      skript: ['js/mastery.js', 'js/motor/blad/blad-karna-b.js', 'js/motor/mellanled-rattare.js', 'js/motor/figur/svg-tallinje.js',
+               'js/motor/blad/blad-k3-d3-typer.js', 'js/motor/ovamer/nya-tal.js', 'js/motor/blad/blad-k3-d3-metod.js'],
+      hamta: function(ref){ return window.BLAD_K3_D3_METOD && window.BLAD_K3_D3_METOD.drillKalla(ref); },
+      knappsats: function(){ return document.getElementById('ovn-keypad-shared'); },
+      krav: ['js/motor/alg-brak.js', 'js/motor/blad/ak8-blad-ui.js', 'js/motor/figur/svg-algebrafigur.js'],
+      delkapitel: { namn: 'Förenkla uttryck', adress: 'ak7/k3/d3-forenkla-uttryck-nyformat/index.html', arskurs: 7, kapitel: 3 },
+      knapprader: '.nf-yta .ovn-kontroll-rad',
+      montering: 'nf-mount'
     }
   };
+  /* NYA TAL EFTER BANKEN (KONVENTIONER, METODTRÄNING; Joachim 2026-11-25): ett löv som bär `mall` (mallarna, lövets
+     talregler och hur ett blad byggs) får sin nasta(i) av den delade mekanismen i js/motor/ovamer/nya-tal.js — banken
+     först, sedan samma form med nya tal. Källan anger bara data; ingen källa bygger en egen generator. Ett löv utan
+     `mall` (valuppgifter, ringa in, tolka, teckna, tillämpning) serverar bara sina författade uppgifter. */
+  Object.keys(KALLOR).forEach(function(id){
+    var K = KALLOR[id], h = K.hamta;
+    K.hamta = function(ref){ var k = h(ref); return (k && k.mall && !k.nasta && window.NyaTal) ? window.NyaTal.medNasta(k) : k; };
+  });
 
   function laddaCss(href){ var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); }
   function laddaSkript(lista, klar){

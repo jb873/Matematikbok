@@ -1,4 +1,5 @@
-/* blad-k3-d3-test.js — TESTEN I FÖRENKLA UTTRYCK (åk 7, k3 d3): test 1–6.
+/* blad-k3-d3-test.js — TESTEN I FÖRENKLA UTTRYCK (åk 7, k3 d3): test 1–6, och test 7–8 (fördjupningen Parenteser,
+   doc/innehall/k3-d3-fordjupning-metod-test.md — se TEST 7 nedan).
    Källa: doc/innehall/k3-d3-test.md (Joachims test 2026-11-25, facit kontrollräknat; test 6 nr 8a "5b + 3v" i
    bokstavsordning). Uppgifter, tal och facit ordagrant; hakparentesen (vilket steg uppgiften liknar) står bara här.
    Samma komponenter som bladen uppgiften liknar (blad-k3-d3-typer.js och moment 2:s): förenkla-rutan med ordningsregeln
@@ -171,7 +172,66 @@ TEST.test6 = function(){ return { titel: 'Test 6', grupper: [
     berakna('Beräkna vad de betalar tillsammans när v = 110 och b = 70.', '5b + 3v', { v: 110, b: 70 }, 680, 'bv', 'kr') ])
 ] }; };
 
-var TESTER = [1, 2, 3, 4, 5, 6].map(function(n){ return { id: 'test' + n, titel: 'Test ' + n }; });
+/* ── TEST 7 (grund) och TEST 8 (svår) — moment 5 Parenteser, fördjupning (märket F). Källa:
+   doc/innehall/k3-d3-fordjupning-metod-test.md (Joachim 2026-11-25, facit kontrollräknat; "Förenkla." står kvar på
+   uppgifterna med bara tal, rutan rättar på värde). Samma komponenter som fördjupningsbladen (T.parentes): radtypen
+   parentes med MellanledRattare (obligatoriskt led vid minus, frivilligt vid plus och siffra), K-B och K-C med figur.
+   Mastery: alg-forenkla-parentes:rakna (plus/minus framför), alg-multiplicera-parentes:rakna (siffra framför),
+   alg-forenkla-parentes:problem (tillämpningen). Inga hjälptexter. ── */
+var PT = T.parentes, pp = PT.p, pfb = PT.fb, psk = PT.sk;
+var P_RAKNA = 'alg-forenkla-parentes:rakna', P_MULT = 'alg-multiplicera-parentes:rakna', P_PROBLEM = 'alg-forenkla-parentes:problem';
+function mult(r){ r.logg = P_MULT; return r; }        // raden loggar till multiplicera-noden (gruppen till sin egen)
+var P_OMK = { fraga: 'Skriv ett uttryck för omkretsen med parentes och förenkla det:' }.fraga;
+TEST.test7 = function(){ return { titel: 'Test 7', grupper: [
+  // [Steg 1]
+  PT.g(R.forenkla, P_RAKNA, [ pp('2x + (4x + 3)', '6x + 3'), pp('(3a - 2) + 5a', '8a - 2'), pp('6 + (2y - 1)', '2y + 5') ]),
+  // [Steg 2]
+  PT.g(R.forenkla, P_RAKNA, [ pp('30 - (14 + 6)', '10'), pp('8x - (3x + 5)', '5x - 5'), pp('7a - (2a - 4)', '5a + 4') ]),
+  // [Steg 3]
+  PT.g(R.forenkla, P_RAKNA, [ pp('(5x + 2) + (x + 4)', '6x + 6'), pp('(9a + 3) - (4a + 1)', '5a + 2'), pp('(3y + 6) - (y - 2) + (y - 5)', '3y + 3') ]),
+  // [Steg 4]
+  PT.g(R.forenkla, P_MULT, [ pp('3(6 + 2)', '24'), pp('4(x + 3)', '4x + 12'), pp('2(5a - 1) + a', '11a - 2') ]),
+  // [Steg 5]
+  PT.g(R.forenkla, P_MULT, [ pp('2(x + 3) + (4x - 1)', '6x + 5'), pp('3(a + 1) + 2(a - 2)', '5a - 1'), pp('4(y + 2) - (y + 3) + 1', '3y + 6') ]),
+  // [Steg 2–5]
+  PT.g(R.valj, P_RAKNA, [ val('(7x + 4) − (3x − 2):', ['4x + 2', '4x + 6', '10x + 2'], '4x + 6'),
+                          mult(val('3(x + 5):', ['3x + 15', '3x + 5', 'x + 15'], '3x + 15')),
+                          mult(val('2(a − 4) + a:', ['3a − 4', '2a − 8', '3a − 8'], '3a − 8')) ]),
+  // [Steg 1–5 nr 5]
+  PT.g(RR.fbv, P_RAKNA, [ pfb('när x = 4', '(6x + 2) - (x - 3)', '5x + 5', 4, 25), mult(pfb('när x = 2', '3(x + 4) + 2x', '5x + 12', 2, 22)) ]),
+  // [Steg 6]
+  PT.g('', P_PROBLEM, [ psk(P_OMK, '2(x + 3) + 2 · 5', '2x + 16', rekt('x + 3', '5')),
+                        berakna('Beräkna värdet när x = 4.', '2x + 16', 4, 24, 'x', 'cm') ])
+] }; };
+TEST.test8 = function(){ return { titel: 'Test 8', grupper: [
+  // [Steg 1]
+  PT.g(R.forenkla, P_RAKNA, [ pp('5x + (3x - 2y) + y', '8x - y'), pp('(4a - 3b + 2) + a + b', '5a - 2b + 2'), pp('x + (7x - 4y + 1) - 3', '8x - 4y - 2') ]),
+  // [Steg 2]
+  PT.g(R.forenkla, P_RAKNA, [ pp('45 - (18 - 6)', '33'), pp('9x + 2y - (4x - 3y + 5)', '5x + 5y - 5'), pp('12a - (5a + 2b) + 3b', '7a + b') ]),
+  // [Steg 3]
+  PT.g(R.forenkla, P_RAKNA, [ pp('(4x + 3y) - (x - 2y) + (2x - 5y)', '5x'), pp('(8a - 1) - (3a + 4) - (a - 6)', '4a + 1'),
+                              pp('15 - (2x + 7) + (5x - 3) - (x + 4)', '2x + 1') ]),
+  // [Steg 4]
+  PT.g(R.forenkla, P_MULT, [ pp('7(9 - 4)', '35'), pp('3(2x - 4y + 1)', '6x - 12y + 3'), pp('2(3a + b) + 4(a - 2b)', '10a - 6b') ]),
+  // [Steg 5]
+  PT.g(R.forenkla, P_MULT, [ pp('3(2x + 1) - (x - 5) + 2(x - 3) + 4', '7x + 6'), pp('2(a + 3b) + 3(a - b) - (2a + b) + 5', '3a + 2b + 5'),
+                             pp('x + 4(2x - 1) - (3x + 2) + 2(y + 1)', '6x + 2y - 4') ]),
+  // [Steg 2–5]
+  PT.g(R.valj, P_RAKNA, [ val('(5a − 2b) − (a − 4b):', ['4a − 6b', '4a + 2b', '6a + 2b'], '4a + 2b'),
+                          mult(val('2(3x − 4) + (x + 5):', ['7x − 3', '7x + 1', '6x − 3'], '7x − 3')),
+                          mult(val('4(y + 2) − (2y − 3) + y:', ['3y + 5', '5y + 11', '3y + 11'], '3y + 11')) ]),
+  // [Steg 1–5 nr 5]
+  PT.g(RR.fbv, P_MULT, [ pfb('när x = 3 och y = 2', '2(3x + y) - (x - 2y) + 3', '5x + 4y + 3', { x: 3, y: 2 }, 26),
+                         pfb('när x = 4', '4(x + 2) + 3(x - 1) - (2x + 5)', '5x', 4, 20) ]),
+  // [Steg 6]
+  PT.g({ rubrik: 'Familjen Ek köper 3 biljetter för (v + 20) kr styck. Familjen Lind köper 2 biljetter för (v − 5) kr styck.' }.rubrik, P_PROBLEM, [
+    psk('Skriv ett uttryck för vad familjerna betalar tillsammans och förenkla det:', '3(v + 20) + 2(v - 5)', '5v + 50'),
+    berakna('Beräkna värdet när v = 90.', '5v + 50', 90, 500, 'v', 'kr') ])
+] }; };
+
+/* Testlistan: test 7 och 8 är fördjupning (moment 5 Parenteser) — momentsidan sätter märket F framför namnet. */
+var TESTER = [1, 2, 3, 4, 5, 6, 7, 8].map(function(n){ var t = { id: 'test' + n, titel: 'Test ' + n };
+  if(n >= 7){ t.ar = 7; t.roll = 'fordjupning'; } return t; });
 
 window.BLAD_K3_D3_TEST = {
   TESTER: TESTER,

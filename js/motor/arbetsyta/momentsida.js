@@ -129,6 +129,8 @@ function visaTester(scen, tester, adress){
   var l = el('div', 'nf-lista');
   tester.forEach(function(t){
     var a = el('a', 'nf-blad'); a.href = (adress || 'uppgift.html?test=') + encodeURIComponent(t.id);
+    // Märket FRAMFÖR namnet, som på momenten (t.marke = sidans horisont-märke, t.ex. F för ett fördjupningstest).
+    if(t.marke) a.insertAdjacentHTML('beforeend', t.marke);
     a.appendChild(el('span', null, t.titel)); l.appendChild(a);
   });
   s.appendChild(l); scen.appendChild(s);

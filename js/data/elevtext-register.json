@@ -2286,6 +2286,7 @@
  "js/motor/blad/blad-k3-d1-tolka.js": [],
  "js/motor/ovamer/k3-forfattad-kalla.js": [
   "namn | Algebraiska uttryck",
+  "namn | Förenkla uttryck",
   "namn | Problemlösning",
   "titel | Nytt blad"
  ],
@@ -2293,8 +2294,6 @@
   "titel | Nytt blad"
  ],
  "ak7/k3/d3-forenkla-uttryck-nyformat/index.html": [
-  "namn | Blad",
-  "namn | Förenkla uttryck",
   "rubrik | Förenkla uttryck",
   "titel | Kunskapsläge",
   "titel | Negativa tal",
@@ -2379,6 +2378,7 @@
   "titel | Tillämpning"
  ],
  "js/motor/blad/blad-k3-d3-test.js": [
+  "fraga | Skriv ett uttryck för omkretsen med parentes och förenkla det:",
   "fraga | Skriv ett uttryck för omkretsen och förenkla det:",
   "fraga | Skriv och förenkla ett uttryck för hur mycket lådorna väger tillsammans:",
   "namn | Linjal",
@@ -2386,6 +2386,7 @@
   "namn | Suddgummi",
   "rubrik | Beräkna.",
   "rubrik | En vuxenbiljett kostar v kr och en barnbiljett b kr. Familjen Ek köper 2 vuxenbiljetter och 4 barnbiljetter. Familjen Lind köper 1 vuxenbiljett och 1 barnbiljett.",
+  "rubrik | Familjen Ek köper 3 biljetter för (v + 20) kr styck. Familjen Lind köper 2 biljetter för (v − 5) kr styck.",
   "rubrik | Förenkla uttrycket och beräkna sedan värdet när {}.",
   "rubrik | Förenkla uttrycket och beräkna sedan värdet.",
   "rubrik | Ringa in alla variabeltermer.",
@@ -2399,11 +2400,11 @@
   "titel | Test 3",
   "titel | Test 4",
   "titel | Test 5",
-  "titel | Test 6"
+  "titel | Test 6",
+  "titel | Test 7",
+  "titel | Test 8"
  ],
  "js/motor/blad/blad-k3-d3-parenteser.js": [
-  "etikett | Beräkna",
-  "etikett | {}Beräkna",
   "fraga | Skriv ett uttryck för hur mycket hon har kvar och förenkla det.",
   "fraga | Skriv ett uttryck för hur mycket lådorna väger tillsammans och förenkla det.",
   "fraga | Skriv ett uttryck för omkretsen med parentes och förenkla det.",
@@ -2425,5 +2426,31 @@
   "titel | Plus framför parentes",
   "titel | Siffra framför parentes",
   "titel | Tillämpning"
+ ],
+ "js/motor/blad/blad-k3-d3-metod.js": [
+  "fraga | Skriv ett uttryck för hur mycket han har kvar och förenkla det.",
+  "fraga | Skriv ett uttryck för hur mycket hon har kvar och förenkla det.",
+  "fraga | Skriv ett uttryck för hur mycket lådorna väger tillsammans och förenkla det.",
+  "fraga | Skriv ett uttryck för omkretsen med parentes och förenkla det.",
+  "fraga | Skriv ett uttryck för omkretsen med parenteser och förenkla det.",
+  "namn | Flera parenteser med plus och minus",
+  "namn | Flera parenteser med siffra framför, blandat",
+  "namn | Förenkla först och beräkna sedan",
+  "namn | Förenkla uttryck",
+  "namn | Minus framför parentes",
+  "namn | Parenteser",
+  "namn | Plus framför parentes",
+  "namn | Siffra framför parentes",
+  "namn | Tillämpning: teckna med parentes",
+  "rubrik | Beräkna.",
+  "rubrik | En tröja kostar (t + 50) kr och en mössa 90 kr. Lisa köper 2 tröjor och en mössa.",
+  "rubrik | Ett gymkort kostar (m + 100) kr per månad. Dessutom betalar man en startavgift på 200 kr. Nora har gymkort i 3 månader.",
+  "rubrik | Ett paket kostar (x + 8) kr. Ali köper 5 paket.",
+  "rubrik | Familjen Ek köper 4 biljetter för (v + 15) kr styck. Familjen Lind köper 3 biljetter för (v − 10) kr styck.",
+  "rubrik | Förenkla uttrycket och beräkna sedan värdet när",
+  "rubrik | Förenkla.",
+  "rubrik | Mira har (4x + 30) kr. Hon köper en bok för (x + 20) kr.",
+  "rubrik | Sam har (x + 40) kr. Han köper en bok för (x − 15) kr.",
+  "rubrik | Välj det förenklade uttrycket."
  ]
 }

@@ -18,43 +18,11 @@
 'use strict';
 var T = window.K3D3_TYPER; if(!T) return;
 var F = T.F, val = T.val, berakna = T.berakna, lador = T.lador;
+/* Parentesradernas hjälpfunktioner bor i blad-k3-d3-typer.js (T.parentes) — samma för bladen och metodträningens drill.
+   Mellanledets krav: T.parentes.krav (se där). */
+var PT = T.parentes, g = PT.g, p = PT.p, fb = PT.fb, sk = PT.sk;
 var NOD_RAKNA = 'alg-forenkla-parentes:rakna', NOD_MULT = 'alg-multiplicera-parentes:rakna',
     NOD_PROBLEM = 'alg-forenkla-parentes:problem';
-
-function ML(){ return window.MellanledRattare; }
-// Kravet ur uttrycket: inget led (kopia av svaret) → 'nej'; minus framför en parentes → 'kravt'; annars 'frivilligt'.
-function krav(u){
-  var m = ML(), k = m && m.kravAv(u);
-  if(!k) return 'nej';
-  return m.grupper(u).some(function(x){ return x.parentes && x.tecken === '-'; }) ? 'kravt' : 'frivilligt';
-}
-// Bokstäverna i uttrycket (för rutans data-vars); en rad med bara tal får x.
-function vars(u){
-  var v = (String(u).match(/[a-z]/g) || []).filter(function(c, i, a){ return a.indexOf(c) === i; }).sort().join('');
-  return v || 'x';
-}
-// Gruppen: rubrik, nod, k3-storen; gruppens mellanledsflagga ur raderna (den som mellanledsvakten läser), som i åttan.
-function g(rubrik, nod, rader){
-  var gr = { rubrik: rubrik, logg: nod, loggStore: 'k3', rader: rader };
-  if(rader.some(function(r){ return r.mellanled === 'kravt'; })) gr.mellanled = 'kravt';
-  return gr;
-}
-function p(uttryck, svar){
-  return { typ: 'parentes', uttryck: uttryck, svar: svar, vars: vars(uttryck + ' ' + svar), mellanled: krav(uttryck), tillatEtta: true };
-}
-// Förenkla och beräkna: frågan ("när x = 4") på bokstavens rad, sedan uttrycket med mellanled och svar, sedan K-B-kedjan.
-function fb(fraga, uttryck, forenklat, x, svar){
-  var r = p(uttryck, forenklat);
-  r.fraga = fraga;
-  r.varde = { etikett: { etikett: 'Beräkna' }.etikett, x: x, svar: svar };
-  return r;
-}
-// K-C: skriv uttrycket (rättas på värde; ett redan förenklat svar underkänns), ev. mellanled, förenkla. Figur valfri.
-function sk(fraga, skriv, svar, svg){
-  var r = { typ: 'skrivforenkla', fraga: fraga, skriv: skriv, svar: svar, vars: vars(skriv), mellanled: krav(skriv) };
-  if(svg) r.svg = svg;
-  return r;
-}
 function rekt(b, h){ return F().rektangel({ bredd: b + ' cm', hojd: h + ' cm' }); }
 function lada(vikt, antal){ var ut = []; for(var i = 0; i < antal; i++) ut.push(['Låda', vikt]); return ut; }
 

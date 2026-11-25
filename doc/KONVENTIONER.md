@@ -202,6 +202,7 @@ METODTRÄNING = färdighetsträningens träd (INTE platta chips)
   problemlösningens (`bank: 'prob-ak7:<typ>/<variant>'`, serverad av `js/motor/ovamer/k3-forfattad-kalla.js`).
   *Joachim 2026-11-22.*
 - Har inget löv en bank står Metodträning med 'Kommer senare', på samma sätt som Test. Joachim 2026-11-24.
+- NYA TAL EFTER BANKEN: I ett räknelöv är de författade uppgifterna mallar. Drillen serverar först banken i ordning. Därefter ger 'Nytt blad' en uppgift med samma form som en mall (samma antal termer, samma räknesätt, samma svarsform) och nya tal inom mallarnas band: talen håller sig inom lövets talregler och mellan bankens minsta och största. Aldrig svårare än banken; svårare = nästa författade nivå (takregeln). Valuppgifter, ringa in och löv där sammanhanget bär uppgiften (tolka, teckna, tillämpning) har bara författade uppgifter. Joachim 2026-11-25.
 - INGET parallellt träd byggs — återanvänd komponenten (A1/Regel 0).
 
 UPPGIFTSSIDA (övningssida) — preciserad i sektionen **Uppgiftssidan (arbetsytan)** nedan

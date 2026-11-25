@@ -128,7 +128,12 @@ async function PROBE(){
   if(t && !t.disabled){
     t.click(); await v(400);
     var sc = document.getElementById('scen-moment');
-    ut.test = [].map.call(sc.querySelectorAll('a[href]'), function(a){ return { text: txt(a), href: abs(a) }; });
+    // Testets NAMN jämförs med testsidans titel — horisont-märket framför namnet (F för fördjupningstesten, Joachim
+    // 2026-11-25) hör inte till namnet.
+    ut.test = [].map.call(sc.querySelectorAll('a[href]'), function(a){
+      var c = a.cloneNode(true); [].forEach.call(c.querySelectorAll('.hz'), function(h){ h.remove(); });
+      var hz = a.querySelector('.hz');
+      return { text: txt(c), marke: hz ? txt(hz) : '', href: abs(a) }; });
     ut.test.forEach(function(x){ ut.lankar.push({ var: 'Test', text: x.text, href: x.href }); });
   } else ut.test = 'kommer';
   ut.fel = ut.fel.concat(window.__fel || []);

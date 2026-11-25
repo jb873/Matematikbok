@@ -47,10 +47,11 @@
   NODER.push({ id: D.rot.id, namn: D.rot.namn, parent: null, niva: 'omrade', arskursRelevans: AR, roll: 'karna',
                formaga: null, generator: null, grupp: 'algebra', implemented: true });
   (D.kategorier || []).forEach(function(k){
+    // En gren eller ett löv kan bära sin roll (fördjupningsgrenen Parenteser i d3, Joachim 2026-11-25): kartans märke.
     NODER.push({ id: k.id, namn: k.namn, parent: D.rot.id, niva: 'deldoman', arskursRelevans: AR,
-                 roll: 'karna', formaga: null, generator: null, visning: null });
+                 roll: k.roll || 'karna', formaga: null, generator: null, visning: null });
     (k.lov || []).forEach(function(l){
-      var n = { id: l.id, namn: l.namn, parent: k.id, niva: 'lovnod', arskursRelevans: AR, roll: 'karna',
+      var n = { id: l.id, namn: l.namn, parent: k.id, niva: 'lovnod', arskursRelevans: AR, roll: l.roll || 'karna',
                 formaga: l.formaga || 'PROBLEM', generator: null, nod: l.nod };
       if(l.bank) n.bank = l.bank;   // utan bank: lövet står utan länk (kartans regel)
       NODER.push(n);
