@@ -130,6 +130,12 @@
     // TILLÄGG 2026-11-24 (metodträningen K7 nr 3, "en kvadrat där varje sida är s cm"): o.kvadrat ritar lika långa
     // sidor. Utan o.kvadrat exakt som förut.
     if(o.kvadrat){ w = 210; h = 150; x0 = 62; y0 = 26; bw = 92; bh = 92; }
+    // TILLÄGG 2026-11-25 (d3-testen, "y + 2 cm" och "2x cm" klipptes i kanten): en lång etikett på högra sidan får
+    // plats — ytan breddas bara då. Bredden uppmätt i 15 px kursiv: ≈ 8,2 px per tecken, mellanslag hälften, m och w
+    // en och en halv, plus 3 px marginal. En etikett som redan ryms ritas exakt som förut.
+    var rum = w - (x0 + bw + 16), behov = String(o.hojd || '').split('').reduce(function(s, c){
+      return s + (c === ' ' ? 0.5 : (c === 'm' || c === 'w' ? 1.5 : 1)); }, 0) * 8.2 + 3;
+    if(behov > rum) w += Math.ceil(behov - rum);
     var pts = [[x0, y0], [x0 + bw, y0], [x0 + bw, y0 + bh], [x0, y0 + bh]];
     return figur(pts, [o.bredd, o.hojd, '', ''], o, w, h, o.kvadrat ? 'Kvadrat med sidan ' + o.bredd : 'Rektangel med sidorna ' + o.bredd + ' och ' + o.hojd);
   }

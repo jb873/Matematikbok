@@ -2375,5 +2375,28 @@
   "titel | Negativa termer och tillämpning",
   "titel | Negativa x-termer",
   "titel | Tillämpning"
+ ],
+ "js/motor/blad/blad-k3-d3-test.js": [
+  "fraga | Skriv ett uttryck för omkretsen och förenkla det:",
+  "fraga | Skriv och förenkla ett uttryck för hur mycket lådorna väger tillsammans:",
+  "namn | Linjal",
+  "namn | Penna",
+  "namn | Suddgummi",
+  "rubrik | Beräkna.",
+  "rubrik | En vuxenbiljett kostar v kr och en barnbiljett b kr. Familjen Ek köper 2 vuxenbiljetter och 4 barnbiljetter. Familjen Lind köper 1 vuxenbiljett och 1 barnbiljett.",
+  "rubrik | Förenkla uttrycket och beräkna sedan värdet när {}.",
+  "rubrik | Förenkla uttrycket och beräkna sedan värdet.",
+  "rubrik | Ringa in alla variabeltermer.",
+  "rubrik | Skriv summan som ett kortare uttryck.",
+  "rubrik | Vilket tal ska stå i rutan?",
+  "rubrik | Välj det uttryck som betyder samma sak.",
+  "rubrik | Välj rätt svar.",
+  "titel | Test",
+  "titel | Test 1",
+  "titel | Test 2",
+  "titel | Test 3",
+  "titel | Test 4",
+  "titel | Test 5",
+  "titel | Test 6"
  ]
 }

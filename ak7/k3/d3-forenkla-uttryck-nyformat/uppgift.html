@@ -84,6 +84,7 @@
 <script src="../../../js/motor/blad/blad-k3-d3-typer.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-siffer.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-tillampning.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-test.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -95,6 +96,25 @@
 (function(){
   var AY = window.Arbetsyta;
   var q = AY.retur();
+  /* TEST (?test=test1 … test6, KONVENTIONER "Arbetssidan", TEST): Joachims författade test (blad-k3-d3-test.js),
+     ett blad utan växel — som d1:s test. Tillbaka: momentsidan. */
+  var TESTEN = window.BLAD_K3_D3_TEST;
+  if(q.get('test') && TESTEN && window.bygg_blad){
+    var tb = TESTEN.test(q.get('test')) || TESTEN.test('test1');
+    var nav0 = document.getElementById('nf-bladnav'); if(nav0) nav0.hidden = true;
+    document.title = 'Matematik · Algebra · Förenkla uttryck · ' + tb.titel;
+    AY.vaxel({ nav: nav0, yta: document.getElementById('nf-yta'), varianter: [''], start: '',
+      id: function(){ return 'sheet-' + q.get('test'); }, etikett: function(){ return tb.titel; },
+      rita: function(mnt){ window.bygg_blad(mnt, tb); },
+      vidVisa: function(){
+        window.NF_BLAD = q.get('test');
+        var kp = document.getElementById('ovn-keypad-shared');
+        if(kp && window.AK8_UI && AK8_UI.keypadBokstaver) AK8_UI.keypadBokstaver(kp, window.bladBokstaver(tb));
+      } });
+    var kpT = document.getElementById('ovn-keypad-shared');
+    if(kpT) AY.placera({ keypad: kpT, knapprader: '.nf-yta .ovn-kontroll-rad' });
+    return;
+  }
   var MOMENTEN = { samma: window.BLAD_K3_D3_SAMMA, negativa: window.BLAD_K3_D3_NEGATIVA, siffer: window.BLAD_K3_D3_SIFFER,
                    tillampning: window.BLAD_K3_D3_TILLAMPNING };
   var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'samma', DATA = MOMENTEN[momentId];
