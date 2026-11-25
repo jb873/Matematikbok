@@ -74,6 +74,7 @@
 <script src="../../../js/motor/blad/blad-k3-d3-typer.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-siffer.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-tillampning.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-parenteser.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-test.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
@@ -88,7 +89,7 @@ var M = window.Momentsida, el = M.el;
 var TAX = (window.K3_TAXONOMI && window.K3_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
 var SAMMA = window.BLAD_K3_D3_SAMMA, NEGATIVA = window.BLAD_K3_D3_NEGATIVA, SIFFER = window.BLAD_K3_D3_SIFFER,
-    TILLAMPNING = window.BLAD_K3_D3_TILLAMPNING;
+    TILLAMPNING = window.BLAD_K3_D3_TILLAMPNING, PARENTESER = window.BLAD_K3_D3_PARENTESER;
 if(window.Arbetsyta) window.Arbetsyta.retur();
 
 /* ── MOMENTEN (Joachim 2026-11-24, KONVENTIONER "Arbetssidan" MOMENT OCH BLAD): fyra moment, märket 7 på alla. Avsnittets
@@ -97,6 +98,7 @@ if(window.Arbetsyta) window.Arbetsyta.retur();
      2 Negativa tal                     Blad 1–3 steg 3 (repetition)
      3 Siffertermer och två variabler   Blad 1–2 steg 4 · Blad 3–4 steg 5 · Blad 5–6 steg 6
      4 Negativa termer och tillämpning  Blad 1–2 steg 7 · Blad 3–4 steg 8
+     5 Parenteser (fördjupning, märke F; Joachim 2026-11-25)  Blad 1–6 = steg 1–6 i k3-d3-fordjupning-parenteser.md
    Spärren (NivaRad, §3): Blad 1 och 2 alltid öppna, varje blad från Blad 3 vid 80 % på bladet före. Elevtexten godkänd
    av Joachim. ── */
 var MOMENT = [
@@ -107,17 +109,20 @@ var MOMENT = [
   { id: 'siffer', titel: { titel: 'Siffertermer och två variabler' }.titel, ar: 7, roll: 'karna', bladen: SIFFER ? SIFFER.MOMENT.blad : [],
     niva: SIFFER ? { prefix: SIFFER.MOMENT.nivaPrefix, id: SIFFER.MOMENT.nivaId } : null },
   { id: 'tillampning', titel: { titel: 'Negativa termer och tillämpning' }.titel, ar: 7, roll: 'karna', bladen: TILLAMPNING ? TILLAMPNING.MOMENT.blad : [],
-    niva: TILLAMPNING ? { prefix: TILLAMPNING.MOMENT.nivaPrefix, id: TILLAMPNING.MOMENT.nivaId } : null }
+    niva: TILLAMPNING ? { prefix: TILLAMPNING.MOMENT.nivaPrefix, id: TILLAMPNING.MOMENT.nivaId } : null },
+  { id: 'parenteser', titel: { titel: 'Parenteser' }.titel, ar: 7, roll: 'fordjupning', bladen: PARENTESER ? PARENTESER.MOMENT.blad : [],
+    niva: PARENTESER ? { prefix: PARENTESER.MOMENT.nivaPrefix, id: PARENTESER.MOMENT.nivaId } : null,
+    nod: 'alg-forenkla-parentes:rakna' }
 ];
 
 /* METODTRÄNING (KONVENTIONER "Arbetssidan"): trädet med momenten som kategorier och deras blad som löv. Inga banker är
    författade än — ett löv utan bank står utan länk (Joachim 2026-11-24). Lövens nod: alg-samla:rakna (k3-taxonomins
-   "Förenkla uttryck"). */
+   "Förenkla uttryck"); momentet Parenteser: alg-forenkla-parentes:rakna (m.nod). */
 var METOD = { rot: { id: 'nf-d3', namn: 'Förenkla uttryck' }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
   prefKey: 'k3.d3.nyformat.pref.v1', utfalld: ['nf-d3'], rotNamn: 'Algebra', orsakFramtid: 'åk 8',
   kategorier: MOMENT.map(function(m){
     return { id: 'nf-d3-' + m.id, namn: m.titel, lov: [1, 2, 3].map(function(nr){
-      return { id: 'nf-d3-' + m.id + '-' + nr, namn: 'Blad ' + nr, nod: 'alg-samla:rakna', formaga: 'RAKNA' }; }) };
+      return { id: 'nf-d3-' + m.id + '-' + nr, namn: 'Blad ' + nr, nod: m.nod || 'alg-samla:rakna', formaga: 'RAKNA' }; }) };
   }) };
 
 var scen = document.getElementById('scen-moment');

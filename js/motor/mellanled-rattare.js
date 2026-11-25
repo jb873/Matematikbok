@@ -210,6 +210,15 @@
         });
         return;
       }
+      /* EN PRODUKT AV BARA TAL utan parentes ("2 · 3" i 2(x + 5) + 2 · 3, sjuans fördjupning 2026-11-25): ledet visar
+         produkten uträknad, som produkterna ur en parentes. Förut lästes "2·3" som termen 23. Åttans uttryck har ingen
+         sådan grupp (sökt 2026-11-25), så deras facit är oförändrat. */
+      if(!g.parentes && /^\d+(?:,\d+)?(?:[·*×]\d+(?:,\d+)?)+$/.test(g.text)){
+        var _pr = g.text.split(/[·*×]/).reduce(function(a, b){ return a * parseFloat(b.replace(',', '.')); }, 1);
+        var _pn = kanon(String(Math.round(_pr * 1e9) / 1e9).replace('.', ','));
+        ut.push(g.tecken === '-' ? vand(_pn) : _pn);
+        return;
+      }
       var inre = ab.termerAv(g.text);
       inre.forEach(function(t){
         var n = kanon(t);

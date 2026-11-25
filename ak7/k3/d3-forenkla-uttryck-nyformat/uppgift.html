@@ -84,6 +84,7 @@
 <script src="../../../js/motor/blad/blad-k3-d3-typer.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-siffer.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-tillampning.js"></script>
+<script src="../../../js/motor/blad/blad-k3-d3-parenteser.js"></script>
 <script src="../../../js/motor/blad/blad-k3-d3-test.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
@@ -116,7 +117,7 @@
     return;
   }
   var MOMENTEN = { samma: window.BLAD_K3_D3_SAMMA, negativa: window.BLAD_K3_D3_NEGATIVA, siffer: window.BLAD_K3_D3_SIFFER,
-                   tillampning: window.BLAD_K3_D3_TILLAMPNING };
+                   tillampning: window.BLAD_K3_D3_TILLAMPNING, parenteser: window.BLAD_K3_D3_PARENTESER };
   var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'samma', DATA = MOMENTEN[momentId];
   // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet.
   if(!q.get('retur')) document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;
