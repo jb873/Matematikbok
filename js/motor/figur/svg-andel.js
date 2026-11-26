@@ -16,7 +16,16 @@
   function fyllOk(f, i){ return f.indexOf(i) > -1; }
 
   // ── DELAD FIGUR ──
-  function delRuta(rows, cols, fyllda){ var W=120,H=120,cw=W/cols,ch=H/rows,s=''; for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){var i=r*cols+c; s+='<rect x="'+(c*cw).toFixed(1)+'" y="'+(r*ch).toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+ch.toFixed(1)+'" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,W,H); }
+  /* FÄRGGRUPPER (Joachim 2026-11-26, procent åk7 Blad 1 nr 2): fyllda får också vara en lista med grupper,
+     [{ antal: 1, farg: 'bla' }, { antal: 9, farg: 'rod' }, { antal: 40, farg: 'gron' }] — grupperna fylls i ordning,
+     rad för rad, och resten blir vit. Färgerna är modulens egna (ingen ny färg). En lista med index ritas som förut. */
+  var FARG = { bla: C_FILL, rod: C_RED, gron: C_GREEN };
+  function fargAv(fyllda, i){
+    if(!fyllda.length || typeof fyllda[0] !== 'object') return fyllOk(fyllda, i) ? C_FILL : C_PAPER;
+    for(var g = 0, n = 0; g < fyllda.length; g++){ n += fyllda[g].antal; if(i < n) return FARG[fyllda[g].farg] || C_PAPER; }
+    return C_PAPER;
+  }
+  function delRuta(rows, cols, fyllda){ var W=120,H=120,cw=W/cols,ch=H/rows,s='',sw=2; for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){var i=r*cols+c; s+='<rect x="'+(c*cw).toFixed(1)+'" y="'+(r*ch).toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+ch.toFixed(1)+'" fill="'+fargAv(fyllda,i)+'" stroke="'+C_LINE+'" stroke-width="'+sw+'"/>';} return svg(s,W,H); }
   function delKryss(fyllda){ var tri=['0,0 120,0 60,60','120,0 120,120 60,60','120,120 0,120 60,60','0,120 0,0 60,60'],s=''; tri.forEach(function(p,i){s+='<polygon points="'+p+'" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';}); return svg(s,120,120); }
   function delAtta(fyllda){ var b=[[60,0],[120,0],[120,60],[120,120],[60,120],[0,120],[0,60],[0,0]],s=''; for(var i=0;i<8;i++){var p=b[i],q=b[(i+1)%8]; s+='<polygon points="60,60 '+p[0]+','+p[1]+' '+q[0]+','+q[1]+'" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,120,120); }
   function delCirkel(n, fyllda){ var cx=60,cy=60,r=56,s=''; for(var i=0;i<n;i++){var a0=-Math.PI/2+i*2*Math.PI/n,a1=-Math.PI/2+(i+1)*2*Math.PI/n,x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1),L=(a1-a0)>Math.PI?1:0; s+='<path d="M'+cx+','+cy+' L'+x0.toFixed(2)+','+y0.toFixed(2)+' A'+r+','+r+' 0 '+L+' 1 '+x1.toFixed(2)+','+y1.toFixed(2)+' Z" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,120,120); }

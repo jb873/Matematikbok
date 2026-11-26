@@ -33,12 +33,15 @@ const opt = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null
 const BARA = opt('--sida'), INJ = opt('--injicera');
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
-// Momentsidorna i nytt format: varje <katalog>-nyformat/index.html under ak7, ak8, ak9.
+/* Momentsidorna i nytt format: varje <katalog>/index.html under ak7, ak8, ak9 som bygger på skalet (laddar
+   js/motor/arbetsyta/momentsida.js) — funktionen, inte namnet. Förr bara kataloger med namnet <x>-nyformat; en
+   momentsida utan gammal sida bredvid (ak7/k4/d1-procent, 2026-11-26) fick då inget mått (V9). */
+function arMomentsida(fil){ try { return /js\/motor\/arbetsyta\/momentsida\.js/.test(fs.readFileSync(fil, 'utf8')); } catch(e){ return false; } }
 function hitta(dir, ut){
   fs.readdirSync(dir, { withFileTypes: true }).forEach(d => {
     if(!d.isDirectory() || d.name === 'node_modules' || d.name.startsWith('.')) return;
     const p = path.join(dir, d.name);
-    if(/-nyformat$/.test(d.name) && fs.existsSync(path.join(p, 'index.html'))) ut.push(path.relative(ROOT, path.join(p, 'index.html')).replace(/\\/g, '/'));
+    if(arMomentsida(path.join(p, 'index.html'))) ut.push(path.relative(ROOT, path.join(p, 'index.html')).replace(/\\/g, '/'));
     hitta(p, ut);
   });
   return ut;
@@ -158,7 +161,8 @@ function kor(url, probe){
 
 // GAMLA SIDOR: för varje <x>-nyformat finns <x>/ i gammalt format. Plus ramens generatordrillar, färdiga test och
 // provbyggaren (allt i ramen utan ?bank=), och de färdiga testens egna sidor.
-const GAMLA = SIDOR.map(s => path.posix.dirname(s).replace(/-nyformat$/, '') + '/');
+// (Bara för <x>-nyformat — en momentsida utan gammal sida bredvid, som ak7/k4/d1-procent, har ingen.)
+const GAMLA = SIDOR.filter(s => /-nyformat\/index\.html$/.test(s)).map(s => path.posix.dirname(s).replace(/-nyformat$/, '') + '/');
 function arGammal(href){
   let u; try { u = new URL(href); } catch(e){ return null; }
   const p = decodeURIComponent(u.pathname).replace(/\\/g, '/');

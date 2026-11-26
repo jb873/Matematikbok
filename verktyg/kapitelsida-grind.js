@@ -35,7 +35,7 @@ const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 
 // Kapitelsidorna: en sida per kapitel, den som listar delkapitlen.
 const SIDOR = [
-  'ak7-k1.html', 'ak7-k2.html', 'ak7-k3.html',
+  'ak7-k1.html', 'ak7-k2.html', 'ak7-k3.html', 'ak7-k4.html',
   'ak8/k1/index.html', 'ak8/k2/index.html', 'ak9/k1/index.html'
 ];
 // Kapiteldata som inte får bära ett handsatt status-fält.

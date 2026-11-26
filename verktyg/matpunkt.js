@@ -82,9 +82,11 @@ const SKAL = [
   /* MOMENTSIDORNA I NYTT FORMAT (Joachim 2026-11-26): momentsidan listar momenten, bladen och testen men har inga
    * uppgifter själv — uppgifterna står på uppgiftssidan och i drillen, som mäts var för sig. Brytningens och
    * notationens enhet (rad, ruta, uttryck) finns därför inte på sidan. Sidan i nytt format heter "<fil> @<vy>"
-   * (niva-las-upp.js), så raden träffar med `monster`; beviset är skalet, som måste stå i sidans källa. */
-  { verktyg: 'brytning-grind.js', monster: /-nyformat\/index\.html @\d+x\d+$/, bevis: 'js/motor/arbetsyta/momentsida.js', skal: 'inga uppgifter på momentsidan' },
-  { verktyg: 'notation-grind.js', monster: /-nyformat\/index\.html @\d+x\d+$/, bevis: 'js/motor/arbetsyta/momentsida.js', skal: 'inga uppgifter på momentsidan' }
+   * (niva-las-upp.js), så raden träffar med `monster`; beviset är skalet, som måste stå i sidans källa.
+   * 2026-11-26: mönstret gäller varje index.html i nytt format, inte bara <x>-nyformat — en momentsida utan gammal
+   * sida bredvid (ak7/k4/d1-procent) upptäcks på skalet (niva-las-upp.js), och beviset prövar samma sak här. */
+  { verktyg: 'brytning-grind.js', monster: /\/index\.html @\d+x\d+$/, bevis: 'js/motor/arbetsyta/momentsida.js', skal: 'inga uppgifter på momentsidan' },
+  { verktyg: 'notation-grind.js', monster: /\/index\.html @\d+x\d+$/, bevis: 'js/motor/arbetsyta/momentsida.js', skal: 'inga uppgifter på momentsidan' }
 ];
 
 /* Träffar en SKAL- eller ETIKETT-rad sidan? Med `sida`: samma sökväg. Med `motor`: sidans källa

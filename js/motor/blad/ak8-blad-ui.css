@@ -66,6 +66,7 @@
 .tl-svg{ width:100%; height:auto; overflow:visible; }
 .tl-axis, .tl-tick{ stroke:var(--ink); stroke-width:1.6; fill:none; } .tl-arrow{ fill:var(--ink); }
 .tl-label{ fill:var(--ink-soft); font-family:var(--serif); font-size:13px; text-anchor:middle; }
+.tl-radnamn{ fill:var(--ink-soft); font-family:var(--serif); font-size:15px; text-anchor:start; }   /* tallinjen med tre rader (SvgTallinje, rader) */
 .tl-pt{ fill:var(--gold); stroke:#fff; stroke-width:1; } .tl-pt-namn{ fill:var(--navy); font-family:var(--serif); font-weight:700; font-size:15px; text-anchor:middle; }
 .ak8-tl-rad{ display:flex; gap:22px; flex-wrap:wrap; align-items:center; }
 .ak8-tl-svar{ display:inline-flex; align-items:center; gap:3px; font-size:18px; }

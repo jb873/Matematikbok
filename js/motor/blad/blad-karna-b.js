@@ -310,6 +310,47 @@ function matteUt(s){ return brakUt(minusUt(s)); }
 window.BLAD_MINUS_UT = minusUt;   // figurmodulen och minus-grinden använder samma funktion
 window.BLAD_BRAK_UT = brakUt;
 
+/* FORMRUTAN (Joachim 2026-11-26, procent åk7 moment 1: "flerled får en form per led … varje led rättas på värde
+   och form"). En ruta i en kedja eller en tabell, { form, svar }:
+     brak         bråk med samma värde (likvärdiga bråk godtas) — staplad ruta, svar '3/4'
+     enklaste     bråket i enklaste form — staplad ruta, bara paret svar ('3/4') godtas
+     hundradelar  bråket med nämnaren 100 — staplad ruta, bara paret svar ('75/100') godtas
+     decimal      ett decimaltal (inte bråk, inte procent) med svarets värde — svar 0.75
+     procent      talet före tecknet % (tecknet står efter rutan) — svar 75
+   De staplade rutorna är bråksvarets (brakSvarB): täljare över nämnare, en evidens per bråk (nämnarrutan). */
+function formRuta(f){
+  if(f.form === 'brak' || f.form === 'enklaste' || f.form === 'hundradelar'){
+    var p = String(f.svar).split('/');
+    var attr = f.form === 'brak' ? ' data-brakvarde="' + (parseFloat(p[0]) / parseFloat(p[1])) + '"'
+                                 : ' data-brakpar="' + encodeURIComponent(f.svar) + '"';
+    return '<span class="ovn-brak brak-svar-frak">'
+      + '<input class="ovn-in brak-cell"' + attr + ' data-brakdel="t" data-visa="' + f.svar + '" inputmode="numeric" autocomplete="off" aria-label="täljare">'
+      + '<span class="ovn-brak-strecket"></span>'
+      + '<input class="ovn-in brak-cell"' + attr + ' data-brakdel="n" data-visa="' + f.svar + '" inputmode="numeric" autocomplete="off" aria-label="nämnare">'
+      + '</span>';
+  }
+  var ruta = '<input class="ovn-in" data-pform="' + f.form + '" data-svar="' + f.svar + '" data-visa="' + String(f.svar).replace('.', ',')
+    + '" inputmode="decimal" autocomplete="off">';
+  return f.form === 'procent' ? '<span class="ovn-procentruta">' + ruta + '<span class="ovn-text"> %</span></span>' : ruta;
+}
+// Formrutans rättning: värdet OCH formen. Decimal: ett tal med decimalkomma (eller punkt). Procent: talet, % får stå.
+function formRutaOk(inp){
+  var s = String(inp.value).replace(/(\d)\s+(?=\d)/g, '$1').replace(/−/g, '-').trim();
+  if(inp.dataset.pform === 'procent') s = s.replace(/\s*%$/, '');
+  if(!/^-?\d+(?:[.,]\d+)?$/.test(s)) return false;
+  return Math.abs(parseFloat(s.replace(',', '.')) - parseFloat(inp.dataset.svar)) < 1e-9;
+}
+// Bråk med värde (likvärdiga godtas): båda rutorna ifyllda → kvoten; en ruta → att den kan höra till ett sådant bråk.
+function brakVardeOk(inp){
+  var v = parseFloat(inp.dataset.brakvarde), fr = inp.closest('.ovn-brak');
+  function tal(d){ var e = fr.querySelector('[data-brakdel="' + d + '"]'), x = String(e ? e.value : '').trim(); return /^\d+$/.test(x) ? parseInt(x, 10) : null; }
+  var t = tal('t'), n = tal('n'), mitt = inp.dataset.brakdel === 't' ? t : n;
+  if(mitt === null || mitt === 0) return false;
+  if(t !== null && n !== null) return Math.abs(t / n - v) < 1e-9;
+  var k = inp.dataset.brakdel === 't' ? mitt / v : mitt * v;
+  return Math.abs(k - Math.round(k)) < 1e-9 && Math.round(k) > 0;
+}
+
 // GENVÄGEN I SKRIVA-RUTAN. Ska ett redan förenklat uttryck godtas där uppställningen var uppgiften?
 // 'godtas' = dagens läge, varje uttryck med rätt värde godkänns. 'underkanns' = ett uttryck med
 // lika få termer som facitet är slutsvaret, inte uppställningen, och faller.
@@ -1166,6 +1207,22 @@ function bladHTML(blad){
 
       // TABELL: "fyll i tabellen". Tomma celler är vanliga svarsrutor — de rättas, räknas och
       // loggas av kärnans slinga, så tabellen behöver ingen egen rättning.
+      /* TABELL MED FORMRUTOR (TILLÄGG, Joachim 2026-11-26, procent åk7 moment 1): rad.matris = raderna, varje cell
+         en text (matematik, bråk staplas) eller en formruta { form, svar, bokstav? } — samma ruta som formkedjan.
+         rad.huvud = 'rad' (första raden är rubriker) eller 'kolumn' (första kolumnen). Utan matris: som förut. */
+      if(rad.typ === 'tabell' && rad.matris){
+        html += '<div class="ovn-rad ovn-tabellrad" data-rad="' + radNummer + '">' + lbl(bokstav);
+        html += '<table class="monster-tabell ovn-formtabell"><tbody>';
+        rad.matris.forEach(function(rr, ri){
+          html += '<tr>' + rr.map(function(c, ci){
+            var th = (rad.huvud === 'rad' && ri === 0) || (rad.huvud === 'kolumn' && ci === 0);
+            var inner = (c && typeof c === 'object') ? lbl(c.bokstav) + formRuta(c) : matteUt(String(c));
+            return th ? '<th>' + inner + '</th>' : '<td>' + inner + '</td>';
+          }).join('') + '</tr>';
+        });
+        html += '</tbody></table></div>';
+        return;
+      }
       if(rad.typ === 'tabell'){
         html += '<div class="ovn-rad ovn-tabellrad" data-rad="' + radNummer + '">';
         html += lbl(bokstav);
@@ -1618,6 +1675,7 @@ function bladHTML(blad){
             + '" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off">';
         } else {
           html += '<input class="ovn-in" data-svar="' + rad.svar + '" inputmode="decimal" autocomplete="off">';
+          if(rad.enhet) html += '<span class="ovn-text">' + rad.enhet + '</span>';   // (2026-11-26) "▢ %"
         }
         html += '</div></div>';
       } else if(rad.typ === 'valruta'){
@@ -1632,11 +1690,15 @@ function bladHTML(blad){
         if(rad.svg) html += '<div class="alg-bild">' + rad.svg + '</div>';
         var ratta = (rad.ratt || []).join('|');
         var flera = rad.flera ? '1' : '';
+        /* MATTE (TILLÄGG 2026-11-26, procent åk7): rad.matte = true ritar frågan och alternativen som matematik
+           (bråken staplade, K-H). Värdet som rättas (data-val) är datans text, som förut. Utan flaggan som förut. */
+        var _vm = rad.matte ? matteUt : function(x){ return x; };
         var _vg = '<div class="valruta-grid" data-ratt="' + encodeURIComponent(ratta) + '" data-flera="' + flera + '">';
         rad.alt.forEach(function(a){
-          _vg += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + a + '</button>';
+          _vg += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + _vm(a) + '</button>';
         });
         _vg += '</div>';
+        if(rad.matte && rad.fraga) rad = Object.assign({}, rad, { fraga: matteUt(rad.fraga) });
         if(!_vb){
           html += '<span class="ovn-text" style="min-width:160px;">' + (rad.fraga||'') + '</span>' + _vg;
         } else if(rad.fraga){
@@ -1652,12 +1714,14 @@ function bladHTML(blad){
            bokstavsknapparna (rad.alt) på samma rad. Varje post rättas och loggas som en valruta. */
         var _pb = bokstav ? lbl(bokstav) : '';
         if(_pb && html.slice(-_pb.length) === _pb) html = html.slice(0, -_pb.length); else _pb = '';
+        // rad.matte (TILLÄGG 2026-11-26, procent åk7): meningarna och posterna som matematik (bråken staplade).
+        var _pm = rad.matte ? matteUt : function(x){ return x; };
         html += '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">';
         if(rad.fraga) html += '<div style="display:flex;align-items:baseline;gap:10px;">' + _pb + '<span class="ovn-text">' + rad.fraga + '</span></div>';
         else if(_pb) html += _pb;
-        if(rad.meningar) html += '<div class="ovn-text" style="line-height:1.8;">' + rad.meningar.join('<br>') + '</div>';
+        if(rad.meningar) html += '<div class="ovn-text" style="line-height:1.8;">' + rad.meningar.map(_pm).join('<br>') + '</div>';
         rad.par.forEach(function(pp){
-          html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;"><span class="ovn-text" style="min-width:240px;">' + pp.fraga + '</span>'
+          html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;"><span class="ovn-text" style="min-width:240px;">' + _pm(pp.fraga) + '</span>'
             + '<div class="valruta-grid" data-ratt="' + encodeURIComponent([].concat(pp.ratt).join('|')) + '" data-flera="">';
           rad.alt.forEach(function(a){
             html += '<button type="button" class="valruta-btn" data-val="' + encodeURIComponent(a) + '">' + a + '</button>';
@@ -1665,6 +1729,23 @@ function bladHTML(blad){
           html += '</div></div>';
         });
         html += '</div>';
+      } else if(rad.typ === 'flerled' && (rad.led || []).some(function(l){ return l.form || l.text != null; })){
+        /* FORMKEDJAN (TILLÄGG, Joachim 2026-11-26, procent åk7 moment 1): flerled med en FORM PER LED —
+           "12/16 = 3/4 = 0,75 = 75 %". Varje led är en formruta (formRuta: bråk, enklaste form, hundradelar,
+           decimalform, procentform) eller en given text ({ text: '75 %' }). Kedjan börjar med rad.vansterText (givet,
+           staplat) eller med första ledet; led.tecken = '≈' i stället för '=' före ledet (tredjedelar). Valfritt:
+           rad.etikett före kedjan ("blå:"), rad.svg — figuren ovanför kedjan. Utan form/text i leden: som förut. */
+        var _fk = '', _fforst = true;
+        if(rad.etikett) _fk += '<span class="ovn-text">' + matteUt(rad.etikett) + '</span>';
+        if(rad.vansterText != null){ _fk += '<span class="ovn-text ovn-num">' + matteUt(rad.vansterText) + '</span>'; _fforst = false; }
+        rad.led.forEach(function(l){
+          if(!_fforst) _fk += '<span class="ovn-text" style="margin:0 3px;">' + (l.tecken || '=') + '</span>';
+          _fforst = false;
+          _fk += l.text != null ? '<span class="ovn-text ovn-num">' + matteUt(l.text) + '</span>' : formRuta(l);
+        });
+        if(rad.svg) html += '<div style="display:flex;flex-direction:column;gap:10px;"><div class="alg-bild">' + rad.svg + '</div>'
+          + '<div class="ovn-formkedja" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;">' + _fk + '</div></div>';
+        else html += _fk;
       } else if(rad.typ === 'flerled'){
         // Horisontell likhetskedja: uppgift = [insättning] = [förenkling] = [svar]
         // led-objekt: {accept:[...], visa:'...'} ; sista ledet {svar:tal}
@@ -1698,6 +1779,12 @@ function bladHTML(blad){
             html += '<span class="ovn-text" style="margin:0 3px;">=</span>';
           }
         });
+      } else if(rad.typ === 'text' && rad.enhet){
+        /* ENHETEN EFTER RUTAN (TILLÄGG 2026-11-26, procent åk7: "Hur många procent …? ▢ %"): rutan och enheten i
+           samma omslutning, så att K-K:s svarspar tar med enheten. En kort talruta (K-E). Utan enhet som förut. */
+        html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
+        html += '<span class="ovn-enhetsruta"><input class="ovn-in" data-svar="' + rad.svar
+          + '" inputmode="decimal" autocomplete="off"><span class="ovn-text"> ' + rad.enhet + '</span></span>';
       } else if(rad.typ === 'text'){
         html += '<span class="ovn-text" style="flex:1;min-width:160px;">' + brakUt(rad.fraga) + '</span>';
         html += '<input class="ovn-in bred" data-svar="' + rad.svar
@@ -2004,7 +2091,7 @@ function bygg_blad(rotEl, blad){
   // blad använder). Golvet är rutans EGEN css-bredd, så tomma rutor ser ut precis som förut.
   // Rutor med bara ett tal (data-svar) rörs inte: de ska hålla sin form i uppställningar och rutnät.
   // OBS: rutnätens rutor (pyramid, magisk kvadrat) står UTANFÖR — de ska hålla sin form i rutnätet.
-  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-prioled],.ovn-in[data-fritext],.ovn-in[data-mellanuttryck],.ovn-in[data-forlled],.ovn-in[data-forlbrak],.ovn-in[data-forlprod],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
+  var VAXER = '.ovn-in[data-forenkla]:not(.alg-ruta),.ovn-in[data-omkrets],.ovn-in[data-skriv],.ovn-in[data-likben],.ovn-in[data-likbas],.ovn-in[data-insatt],.ovn-in[data-mellanvarde],.ovn-in[data-prioled],.ovn-in[data-fritext],.ovn-in[data-mellanuttryck],.ovn-in[data-forlled],.ovn-in[data-forlbrak],.ovn-in[data-forlprod],.ovn-in[data-oppet],.ovn-in[data-uttryck],.ovn-in[data-sida],.ovn-in[data-form],.ovn-in[data-text],.ovn-in[data-mellan],.ovn-in[data-parentesmellan],.ovn-in[data-oms],.ovn-in.ovn-ordna-in,.ovn-in.ovn-tabellruta,.ovn-in.ovn-oppen-in,.ovn-in[data-pform]';   /* tabellcell och öppen följd: måttet är golv */   /* ordna-rutan: 56 px klippte fyrsiffriga tal */
   // Listan är kärnans EGEN utsaga om vilka rutor som ska växa, och ytkontraktet läser den här
   // i stället för att gissa: en ruta som medvetet hålls fast (uppställningens data-svar) ska inte
   // fällas för att den inte växer, och en som ska växa ska inte slippa undan.
@@ -2397,6 +2484,12 @@ function bygg_blad(rotEl, blad){
         var _plRakning = /[+\-−·*x×\/:()]/.test(_plUtanTecken);
         ok = _plVarde && _plRakning;
         if(_plVarde && !_plRakning) _besked = PRIO_BESKED.genvag.hint;
+      } else if(inp.dataset.pform !== undefined){
+        // FORMRUTAN (2026-11-26): decimalform eller procentform — värdet och formen (formRutaOk).
+        ok = formRutaOk(inp);
+      } else if(inp.dataset.brakvarde !== undefined){
+        // BRÅK MED VÄRDE (formrutan 'brak', 2026-11-26): likvärdiga bråk godtas (brakVardeOk).
+        ok = brakVardeOk(inp);
       } else if(inp.dataset.brakdel !== undefined){
         // STAPLAT BRÅKSVAR: rutan rättas mot paren, med grannrutan som villkor när den är ifylld.
         var _bp = decodeURIComponent(inp.dataset.brakpar).split('|').map(function(p){ return p.split('/'); });
@@ -2475,6 +2568,7 @@ function bygg_blad(rotEl, blad){
         else if(inp.dataset.vl !== undefined) facit = 'ledet ska bli ' + String(parseFloat(inp.dataset.vl)).replace('.', ',');
         else if(inp.dataset.prioled !== undefined) facit = inp.dataset.visa;   // ett korrekt led, t.ex. 2 + 12
         else if(inp.dataset.brakdel !== undefined) facit = inp.dataset.visa;   // bråket, staplat av matteUt
+        else if(inp.dataset.pform !== undefined) facit = inp.dataset.visa;     // formrutan (decimal/procent)
         else if(inp.dataset.omkrets !== undefined) facit = inp.dataset.visa;   // "3x + 5x + 4x = 12x"
         else if(inp.dataset.skriv !== undefined) facit = inp.dataset.visa;    // uppställningen
         else if(inp.dataset.likben !== undefined || inp.dataset.likbas !== undefined) facit = inp.dataset.visa;

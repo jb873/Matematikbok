@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Kapitel 4</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="js/kapitel/navsida.css">
+<link rel="stylesheet" href="js/fot/kapitel-fot.css">
+</head>
+<body>
+
+<script src="js/kapitel/kapitel-lista.js"></script>
+<script src="js/kapitel/kapitelsida.js"></script>
+<script src="js/fot/kapitel-fot.js"></script>
+<script>
+// SJUANS KAPITEL 4 PROCENT — kapitelsidan som DATA på den delade renderaren (Joachim 2026-11-26).
+// Statusen härleds ur fil; inget status-fält. Delkapitel 1 Procent i nytt format; Problemlösning och Plugg till
+// prov har ingen fil än och står tonade ("Kommer senare"). Korten saknar undertext tills Joachim har skrivit den.
+// Foten: kunskapsläge, test och självskattning finns inte än för kapitel 4 — modulens standard, "kommer".
+Kapitelsida.montera({
+  arskurs: 7,
+  kapitel: 4,
+  arskursSida: 'ak7.html',
+  titel: '{Procent}',
+  ingress: 'Välj ett delkapitel för att komma till dess föreläsningar och övningar.',
+  delkapitel: [
+    { nr:1, titel:'Procent', fil:'ak7/k4/d1-procent/index.html', typ:'avsnitt' },
+    { nr:2, titel:'Problemlösning', fil:null, typ:'avsnitt' },
+    { nr:3, titel:'Plugg till prov', fil:null, typ:'prov' }
+  ],
+  fot: {}
+});
+</script>
+
+<script src="js/elevfeedback.js" defer></script>
+</body>
+</html>

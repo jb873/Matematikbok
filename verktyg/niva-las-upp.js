@@ -142,10 +142,14 @@ function nyformatSidor(){
   if(_cache) return _cache;
   const fs = require('fs'), path = require('path'), os = require('os'), { spawnSync } = require('child_process');
   const ROOT = path.join(__dirname, '..');
+  /* En momentsida i nytt format är en index.html som bygger på skalet (laddar js/motor/arbetsyta/momentsida.js) —
+     funktionen, inte namnet. Förr bara <x>-nyformat/index.html; en momentsida utan gammal sida bredvid
+     (ak7/k4/d1-procent, 2026-11-26) mättes då inte (V9). */
+  const arMomentsida = r => { try { return /js\/motor\/arbetsyta\/momentsida\.js/.test(fs.readFileSync(path.join(ROOT, r), 'utf8')); } catch(e){ return false; } };
   const hitta = d => fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).reduce((u, e) => {
     const r = d + '/' + e.name;
     if(e.isDirectory() && !/^(Arkiv|\.)/.test(e.name)) return u.concat(hitta(r));
-    if(/-nyformat\/index\.html$/.test(r)) u.push(r);
+    if(/\/index\.html$/.test(r) && arMomentsida(r)) u.push(r);
     return u; }, []);
   const tmp = path.join(os.tmpdir(), 'nyformat-' + process.pid);
   fs.writeFileSync(tmp + '-pre.js', nyPre); fs.writeFileSync(tmp + '-upptack.js', UPPTACK);
@@ -171,7 +175,10 @@ function nyformatSidor(){
 // Grindens jobb: gamla sidor (utan dem i nytt format) i grindens vy, sedan nytt format × NY_VYER.
 function jobb(lista, vy, args){
   const bara = (args || []).includes('--nyformat'), ny = /-nyformat\/|js\/motor\/arbetsyta\/drill\.html/;
-  const ut = bara ? [] : lista.filter(s => !ny.test(s)).map(s => ({ sida: s, fil: s, fraga: '', vy: vy, ny: false }));
+  // Momentsidornas kataloger (också de utan -nyformat i namnet): deras sidor mäts bara som nytt format, inte två gånger.
+  const nyDir = nyformatSidor().filter(s => /index\.html$/.test(s.fil) && !s.fraga).map(s => s.fil.replace(/index\.html$/, ''));
+  const arNy = s => ny.test(s) || nyDir.some(d => s.indexOf(d) === 0);
+  const ut = bara ? [] : lista.filter(s => !arNy(s)).map(s => ({ sida: s, fil: s, fraga: '', vy: vy, ny: false }));
   nyformatSidor().forEach(s => NY_VYER.forEach(v => ut.push({ sida: s.fil + s.fraga + ' @' + v, fil: s.fil, fraga: s.fraga, vy: v, ny: true,
     upptacktFel: s.upptacktFel })));
   return ut;

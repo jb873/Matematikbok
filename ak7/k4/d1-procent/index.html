@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik · Procent · Procent</title>
+<!-- MOMENTSIDAN för kapitel 4 Procent, Del 1 Procent (åk 7) — byggd som referenssidan
+     (ak7/k3/d5-problemlosning-nyformat; doc/KONVENTIONER.md "Arbetssidan — moment-sida, horisont och uppgiftssida").
+     Skalet: js/motor/arbetsyta/momentsida.js. Joachim 2026-11-26: sju moment, moment 1 med Blad 1–5 (variant A). -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="../../../js/motor/blad/ak7-delkapitel-kanon.css">
+<link rel="stylesheet" href="../../../js/motor/navram/navram.css">
+<link rel="stylesheet" href="../../../js/motor/arbetsyta/momentsida.css">
+<style>
+:root{
+  --ink:#12110f; --ink-soft:#3d3630; --ink-faint:#7a6e65;
+  --paper:#f6f1e8; --paper-lt:#faf7f1; --paper-dk:#ede6d6;
+  --navy:#0f1e2e; --navy-mid:#1a3045;
+  --gold:#9a7228; --gold-lt:#c49a40;
+  --blue:#1b4b8a; --blue-lt:#2560a8;
+  --green:#2d6a4f;
+  --serif:'Cormorant Garamond', Georgia, serif;
+  --cinzel:'Cinzel', 'Times New Roman', serif;
+  --body:'Source Serif 4', Georgia, serif;
+}
+/* Momentsidans formgivning (skalet): js/motor/arbetsyta/momentsida.css. */
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">Matematik<span class="nav-sep">·</span><span>Åk 7</span></div>
+  <div class="nav-crumbs">
+    <a href="../../../index.html">Matematikbok</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7.html">Årskurs 7</a>
+    <span class="crumb-sep">›</span>
+    <a href="../../../ak7-k4.html">Kapitel 4</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">Procent</span>
+  </div>
+</nav>
+
+<div class="nf-topp"><a class="nf-tillbaka" id="nf-tillbaka" href="../../../ak7-k4.html">← Tillbaka</a></div>
+<header class="nf-huvud">
+  <span class="nf-kapitel">Procent</span>
+  <h1>Procent</h1>
+</header>
+
+<div id="navram"></div>
+
+<!-- Vyerna byggs här och flyttas in i ramens ytor (samma mönster som referenssidan). Kapitel 4 har ännu ingen
+     kunskapslägessida — Mina kunskaper har inga vyer än. -->
+<div id="scener" hidden>
+  <div class="nr-scen" id="scen-moment"></div>
+</div>
+
+<footer>
+  <div>Digitalt läromedel i matematik</div>
+  <span>Procent</span>
+</footer>
+
+<script src="../../../js/data/k2-taxonomi.js"></script>
+<script src="../../../js/motor/figur/svg-andel.js"></script>
+<script src="../../../js/motor/figur/svg-tallinje.js"></script>
+<script src="../../../js/motor/blad/blad-k4-d1-procent.js"></script>
+<script src="../../../js/motor/blad/nivarad.js"></script>
+<script src="../../../js/motor/navram/navram.js"></script>
+<script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
+<script src="../../../js/motor/arbetsyta/momentsida.js"></script>
+<script>
+/* MOMENTSIDAN: skalet (js/motor/arbetsyta/momentsida.js) bär märket, de fällbara sektionerna och ramen; här står
+   delkapitlets innehåll — momenten och bladen. Tillbaka: Arbetsyta.retur (?retur=, annars kapitelsidan). */
+(function(){
+'use strict';
+var M = window.Momentsida, el = M.el;
+var TAX = (window.K2_TAXONOMI && window.K2_TAXONOMI.noder) || [];
+var ELEVENS_AR = 7;
+var BYTA = window.BLAD_K4_D1_PROCENT;
+if(window.Arbetsyta) window.Arbetsyta.retur();
+
+/* ── MOMENTEN (Joachim 2026-11-26): sju moment. 1–4 hör till sjuan (märket 7), 5–7 till åttan (märket F i sjuan).
+   Moment 1 har Blad 1–5 (variant A); moment 2–7 står som "Kommer senare". Föreläsningar, Metodträning, Dagens
+   träning och Test står som "Kommer senare" tills innehållet finns. ── */
+var MOMENT = [
+  { titel: 'Procent och byta form', ar: 7, roll: 'karna', id: 'byta', bladen: BYTA ? BYTA.MOMENT.blad : [],
+    niva: BYTA ? { prefix: BYTA.MOMENT.nivaPrefix, id: BYTA.MOMENT.nivaId } : null },
+  { titel: 'Andelen', ar: 7, roll: 'karna', id: 'andelen', kommer: true },
+  { titel: 'Delen', ar: 7, roll: 'karna', id: 'delen', kommer: true },
+  { titel: 'Det hela', ar: 7, roll: 'karna', id: 'hela', kommer: true },
+  { titel: 'Andel, del och hela med miniräknare', ar: 7, roll: 'fordjupning', id: 'miniraknare', kommer: true },
+  { titel: 'Förändring', ar: 7, roll: 'fordjupning', id: 'forandring', kommer: true },
+  { titel: 'Procentenheter och jämförelser', ar: 7, roll: 'fordjupning', id: 'procentenheter', kommer: true }
+];
+
+var scen = document.getElementById('scen-moment');
+
+function visaMoment(m){
+  scen.innerHTML = '';
+  // Ordning och inträdesläge som referenssidan: Uppgifter ÖPPEN, Föreläsningar och Metodträning "Kommer senare".
+  var S1 = M.sektion(scen, 'Uppgifter');
+  M.sektionKommer(scen, 'Föreläsningar');
+  M.metodtraning(scen, null);
+  // UPPGIFTER — ett blad per rad. SPÄRREN (NivaRad, §3): ett blad som inte är nått står med 🔒, utan länk.
+  var l1 = el('div', 'nf-lista');
+  m.bladen.forEach(function(b){
+    var oppet = !window.NivaRad || !m.niva || window.NivaRad.nadd(m.niva.prefix, m.niva.id, b.nr);
+    var a = el(oppet && !b.kommer ? 'a' : 'span', 'nf-blad' + (b.kommer ? ' is-kommer' : oppet ? '' : ' is-locked'));
+    if(oppet && !b.kommer) a.href = 'uppgift.html?blad=' + b.nr + 'A';
+    else a.setAttribute('aria-disabled', 'true');
+    a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel + (oppet || b.kommer ? '' : ' 🔒')));
+    if(b.kommer) a.appendChild(el('span', 'nf-chip soon', 'Kommer senare'));
+    l1.appendChild(a);
+  });
+  S1.body.appendChild(l1);
+  S1.satt(true);
+}
+
+var moment = MOMENT.map(function(m){
+  // Ett moment utan innehåll än står med samma "Kommer senare" som Dagens träning (inte bara grått).
+  return { titel: M.horisont(m, TAX, ELEVENS_AR) + m.titel + (m.kommer ? '<span class="nf-chip soon">Kommer senare</span>' : ''),
+           id: m.id, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
+});
+
+// TEST: inga författade test än → skalet skriver "Kommer senare".
+M.montera({ vard: document.getElementById('navram'), rubrik: 'Procent', moment: moment, tester: [], mina: [] });
+})();
+</script>
+<script src="../../../js/elevfeedback.js" defer></script>
+</body>
+</html>
