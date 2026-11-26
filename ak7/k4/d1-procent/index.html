@@ -73,6 +73,7 @@
 <script src="../../../js/motor/figur/svg-tallinje.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-procent.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-test.js"></script>
+<script src="../../../js/motor/blad/blad-k4-d1-andelen.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-metod.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
@@ -86,7 +87,7 @@
 var M = window.Momentsida, el = M.el;
 var TAX = (window.K4_TAXONOMI && window.K4_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
-var BYTA = window.BLAD_K4_D1_PROCENT;
+var BYTA = window.BLAD_K4_D1_PROCENT, ANDEL = window.BLAD_K4_D1_ANDELEN;
 /* METODTRÄNING och TEST (KONVENTIONER "Arbetssidan"): sidan lämnar bara datan — trädets löv med bankernas id
    (blad-k4-d1-metod.js) och de författade testen (blad-k4-d1-test.js). Skalet (momentsida.js) bär resten. */
 var METOD = window.BLAD_K4_D1_METOD ? window.BLAD_K4_D1_METOD.trad() : null;
@@ -95,11 +96,12 @@ if(window.Arbetsyta) window.Arbetsyta.retur();
 
 /* ── MOMENTEN (Joachim 2026-11-26): sju moment. 1–4 hör till sjuan (märket 7), 5–7 till åttan (märket F i sjuan).
    Moment 1 har Blad 1–5 (varianterna A och B), Metodträningen (grenen Procent och byta form, B1–B7) och Test 1;
-   moment 2–7 står som "Kommer senare". Föreläsningar och Dagens träning står som "Kommer senare". ── */
+   moment 2 Andelen har Blad 1–6 (variant A, 2026-11-26); moment 3–7 står som "Kommer senare". Föreläsningar och Dagens träning står som "Kommer senare". ── */
 var MOMENT = [
   { titel: 'Procent och byta form', ar: 7, roll: 'karna', id: 'byta', bladen: BYTA ? BYTA.MOMENT.blad : [],
     niva: BYTA ? { prefix: BYTA.MOMENT.nivaPrefix, id: BYTA.MOMENT.nivaId } : null },
-  { titel: 'Andelen', ar: 7, roll: 'karna', id: 'andelen', kommer: true },
+  { titel: 'Andelen', ar: 7, roll: 'karna', id: 'andelen', bladen: ANDEL ? ANDEL.MOMENT.blad : [],
+    niva: ANDEL ? { prefix: ANDEL.MOMENT.nivaPrefix, id: ANDEL.MOMENT.nivaId } : null },
   { titel: 'Delen', ar: 7, roll: 'karna', id: 'delen', kommer: true },
   { titel: 'Det hela', ar: 7, roll: 'karna', id: 'hela', kommer: true },
   { titel: 'Andel, del och hela med miniräknare', ar: 7, roll: 'fordjupning', id: 'miniraknare', kommer: true },
@@ -120,7 +122,7 @@ function visaMoment(m){
   m.bladen.forEach(function(b){
     var oppet = !window.NivaRad || !m.niva || window.NivaRad.nadd(m.niva.prefix, m.niva.id, b.nr);
     var a = el(oppet && !b.kommer ? 'a' : 'span', 'nf-blad' + (b.kommer ? ' is-kommer' : oppet ? '' : ' is-locked'));
-    if(oppet && !b.kommer) a.href = 'uppgift.html?blad=' + b.nr + 'A';
+    if(oppet && !b.kommer) a.href = 'uppgift.html?' + (m.id !== 'byta' ? 'moment=' + m.id + '&' : '') + 'blad=' + b.nr + 'A';
     else a.setAttribute('aria-disabled', 'true');
     a.appendChild(el('span', 'nf-nr', 'Blad ' + b.nr)); a.appendChild(el('span', null, b.titel + (oppet || b.kommer ? '' : ' 🔒')));
     if(b.kommer) a.appendChild(el('span', 'nf-chip soon', 'Kommer senare'));

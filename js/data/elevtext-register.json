@@ -2632,5 +2632,33 @@
   "rubrik | Skriv procenten i hundradelar, i enklaste form och i decimalform.",
   "rubrik | Välj rätt alternativ.",
   "titel | Test 1"
+ ],
+ "js/motor/blad/blad-k4-d1-andelen.js": [
+  "etikett | 1 elev",
+  "etikett | 10 elever",
+  "etikett | 3 elever",
+  "etikett | 3 eller fler",
+  "etikett | 6 elever",
+  "etikett | Antal syskon",
+  "fraga | Hur många procent av eleverna är flickor?",
+  "fraga | I vilken klass är andelen som cyklar störst?",
+  "fraga | På vilket prov lyckades Kim bäst?",
+  "fraga | Vad är fel?",
+  "fraga | Vem var bäst?",
+  "fraga | {}9 av 20?{}Alva:",
+  "intro | Hur många procent är …",
+  "intro | Välj rätt alternativ.",
+  "rubrik | Blandat",
+  "rubrik | Enklaste form",
+  "rubrik | Förkorta",
+  "rubrik | Förlänga",
+  "titel | \"x av y\"",
+  "titel | Andelen",
+  "titel | Byta enhet och tid",
+  "titel | Delen läggs ihop eller är det som är kvar",
+  "titel | Det hela räknas ut först",
+  "titel | Jämföra och hitta felet",
+  "titel | Lästal",
+  "vansterText | Andelen"
  ]
 }

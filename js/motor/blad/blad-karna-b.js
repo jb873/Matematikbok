@@ -317,20 +317,25 @@ window.BLAD_BRAK_UT = brakUt;
      hundradelar  bråket med nämnaren 100 — staplad ruta, bara paret svar ('75/100') godtas
      decimal      ett decimaltal (inte bråk, inte procent) med svarets värde — svar 0.75
      procent      talet före tecknet % (tecknet står efter rutan) — svar 75
-   De staplade rutorna är bråksvarets (brakSvarB): täljare över nämnare, en evidens per bråk (nämnarrutan). */
+     exakt        (Joachim 2026-11-26, procent moment 2) bråket exakt som det står — delen genom det hela, rättas på
+                  form: 48/600 godkänns, 8/100 inte — staplad ruta, bara paret svar godtas
+   De staplade rutorna är bråksvarets (brakSvarB): täljare över nämnare, en evidens per bråk (nämnarrutan).
+   VALFRITT LED (f.valfri, Joachim 2026-11-26): rutan får lämnas tom — den befintliga regeln "frivilligt mellanled"
+   (data-krav="frivilligt"): tom är den varken fel eller räknad i nämnaren; ifylld rättas den som vanligt. */
 function formRuta(f){
-  if(f.form === 'brak' || f.form === 'enklaste' || f.form === 'hundradelar'){
+  var fri = f.valfri ? ' data-krav="frivilligt"' : '';
+  if(f.form === 'brak' || f.form === 'enklaste' || f.form === 'hundradelar' || f.form === 'exakt'){
     var p = String(f.svar).split('/');
     var attr = f.form === 'brak' ? ' data-brakvarde="' + (parseFloat(p[0]) / parseFloat(p[1])) + '"'
                                  : ' data-brakpar="' + encodeURIComponent(f.svar) + '"';
     return '<span class="ovn-brak brak-svar-frak">'
-      + '<input class="ovn-in brak-cell"' + attr + ' data-brakdel="t" data-visa="' + f.svar + '" inputmode="numeric" autocomplete="off" aria-label="täljare">'
+      + '<input class="ovn-in brak-cell"' + attr + fri + ' data-brakdel="t" data-visa="' + f.svar + '" inputmode="numeric" autocomplete="off" aria-label="täljare">'
       + '<span class="ovn-brak-strecket"></span>'
-      + '<input class="ovn-in brak-cell"' + attr + ' data-brakdel="n" data-visa="' + f.svar + '" inputmode="numeric" autocomplete="off" aria-label="nämnare">'
+      + '<input class="ovn-in brak-cell"' + attr + fri + ' data-brakdel="n" data-visa="' + f.svar + '" inputmode="numeric" autocomplete="off" aria-label="nämnare">'
       + '</span>';
   }
   var ruta = '<input class="ovn-in" data-pform="' + f.form + '" data-svar="' + f.svar + '" data-visa="' + String(f.svar).replace('.', ',')
-    + '" inputmode="decimal" autocomplete="off">';
+    + '"' + fri + ' inputmode="decimal" autocomplete="off">';
   return f.form === 'procent' ? '<span class="ovn-procentruta">' + ruta + '<span class="ovn-text"> %</span></span>' : ruta;
 }
 // Formrutans rättning: värdet OCH formen. Decimal: ett tal med decimalkomma (eller punkt). Procent: talet, % får stå.

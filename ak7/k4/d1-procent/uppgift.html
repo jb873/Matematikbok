@@ -79,17 +79,22 @@
 <script src="../../../js/motor/figur/svg-tallinje.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-procent.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-test.js"></script>
+<script src="../../../js/motor/blad/blad-k4-d1-andelen.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
 
 <script>
-/* ── VAD SOM VISAS: ?blad=<nr><variant>, t.ex. ?blad=3A. Bladen kommer ur datafilen; sidan väljer bara vilket.
+/* ── VAD SOM VISAS: ?moment=<id>&blad=<nr><variant>, t.ex. ?moment=andelen&blad=3A. Utan moment: Procent och byta
+   form (så länkarna ?blad=2B fungerar som förut). Bladen kommer ur datafilen; sidan väljer bara vilket.
    Skalet (Arbetsyta) bär Tillbaka, växeln, Föreläsning och placeringen av knappsatsen och knappraden. ── */
 (function(){
   var AY = window.Arbetsyta;
   var q = AY.retur();
-  var DATA = window.BLAD_K4_D1_PROCENT;
+  var MOMENTEN = { byta: window.BLAD_K4_D1_PROCENT, andelen: window.BLAD_K4_D1_ANDELEN };
+  var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'byta', DATA = MOMENTEN[momentId];
+  // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet.
+  if(!q.get('retur') && momentId !== 'byta') document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;
   var yta = document.getElementById('nf-yta'), nav = document.getElementById('nf-bladnav');
   if(!DATA || !window.bygg_blad) return;
   /* TEST (?test=test1, KONVENTIONER "Arbetssidan", TEST): Joachims författade test (blad-k4-d1-test.js), ett blad utan
@@ -136,7 +141,7 @@
       window.NF_BLAD = info.nr + b;
       var kp = document.getElementById('ovn-keypad-shared');
       if(kp && window.AK8_UI && AK8_UI.keypadBokstaver) AK8_UI.keypadBokstaver(kp, window.bladBokstaver(data[b]));
-      try { var r = q.get('retur'); history.replaceState(null, '', '?blad=' + info.nr + b + (r ? '&retur=' + encodeURIComponent(r) : '')); } catch(e){}
+      try { var r = q.get('retur'); history.replaceState(null, '', '?' + (momentId !== 'byta' ? 'moment=' + momentId + '&' : '') + 'blad=' + info.nr + b + (r ? '&retur=' + encodeURIComponent(r) : '')); } catch(e){}
     } });
   /* FÖRELÄSNING: bladfilmen är dold tills en film finns — skalet visar knappen först då. */
   AY.film({ knapp: document.getElementById('nf-genomgang'), yta: document.getElementById('nf-film'), video: null });
