@@ -14,6 +14,13 @@ Varje punkt säger vad som brister, var det mättes och när.
   tallinjen med tre rader (`SvgTallinje.linje` med `rader`, procent Blad 1 nr 3) står på sidans bakgrund, och
   `--sabba kontrast` blir grön där. 2026-11-26 (`verktyg/figur-grind.js`).
 
+## Metodträningen
+
+- [ ] **Trädets löv får aldrig färg av elevens arbete.** `js/motor/arbetsyta/metodtrad.html` ritar trädet med
+  KartaMotor och k3-storen (`MasteryK3`), och kartan läser evidensen på trädets egna löv-id (`nf-d3-P1`, `nf-k4d1-B2`).
+  Drillerna loggar på taxonomins noder (`alg-…`, `proc-…`), och kapitel 4 i k4-storen. Löven står därför röda vad
+  eleven än gör — i k3 och k4. Mätt i koden 2026-11-26 (`karta-motor.js`: `matris[node.id]`; lövets `nod` läses inte).
+
 ## Sidorna
 
 - [ ] **87 bokstäver ovanför rutor och 22 ovanför figurer.** 87 deluppgiftsbokstäver står ensamma ovanför en rad som
