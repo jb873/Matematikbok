@@ -39,8 +39,9 @@ const OMFANG = ['js/motor/blad/blad-k1-d10.js',
   'js/motor/problemlosning/prob-blad4.js', 'js/motor/problemlosning/prob-blad5.js',
   'js/motor/blad/blad-ak8-alg1.js', 'js/motor/blad/blad-ak8-parentes.js', 'js/motor/blad/blad-ak8-mult-parentes.js',
   'js/data/ak8-ekv1.js',
-  'ak7/k3/d1-algebraiska-uttryck/index.html', 'ak7/k3/d2-monster/index.html', 'ak7/k3/d3-forenkla-uttryck/index.html',
-  'ak7/k3/d4-ekvationer/index.html', 'ak7/k3/d5-problemlosning/index.html', 'ak7/k3/d7-pluggtillprov/index.html',
+  // (ak7/k3/d1-algebraiska-uttryck, d3-forenkla-uttryck och d5-problemlosning: olänkade gamla sidor, mäts inte —
+  //  KONVENTIONER, Joachim 2026-11-26.)
+  'ak7/k3/d2-monster/index.html', 'ak7/k3/d4-ekvationer/index.html', 'ak7/k3/d7-pluggtillprov/index.html',
   'ak8/k2/d1-algebraiska-uttryck/index.html', 'ak8/k2/d3-parentes/index.html', 'ak8/k2/d5-ekvationer-steg1/index.html'];
 // KÄND SKULD (Joachim 2026-10-26): sjuans k3 d7 är taluppfattningens kopia och byggs om senare.
 // Instruktionerna där rapporteras, men fäller inte. En NY instruktion i filen fäller som vanligt.

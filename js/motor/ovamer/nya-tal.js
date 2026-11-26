@@ -162,11 +162,51 @@ function dra(rnd, lo, hi, dec, inteEtt){
 }
 
 /* EN NY UPPGIFT ur mallen m. Ger { uttryck, svar, x, vardeSvar } eller null om försöket bryter mot reglerna. */
+function bandFor(B, t){ return (t.dec && B.roll[t.roll + '.' + t.dec]) || B.roll[t.roll]; }
+function sgd(a, b){ return b ? sgd(b, a % b) : a; }
+// En multipel av d i bandet [lo, hi] (aldrig 0 eller 1), eller null.
+function multipel(rnd, lo, hi, d){
+  var a = Math.max(1, Math.ceil(lo / d)), z = Math.floor(hi / d), ut = [];
+  for(var k = a; k <= z; k++) if(k * d > 1) ut.push(k * d);
+  return ut.length ? ut[Math.floor(rnd() * ut.length)] : null;
+}
+/* DELBAR (mallens egen talregel, Joachim 2026-11-26 — R1 "(5 · 12)/4 + (3 · 14)/7"): divisionen går alltid jämnt.
+   Nämnaren väljs först och sedan en täljare som är en multipel av den: ett tal som täljare blir en multipel av
+   nämnaren; en täljare "(a · b)" får a fritt och b som en multipel av nämnaren / sgd(a, nämnaren). Allt inom bandet.
+   Ger { index → värde } för talen regeln satte, eller null om bandet inte rymmer någon sådan täljare. */
+function delbaraTal(m, tl, B, rnd){
+  var satt = {}, s = m.uttryck;
+  for(var j = 0; j < tl.length; j++){
+    var t = tl[j]; if(t.dec || !/\/\s*$/.test(s.slice(0, t.i))) continue;   // bara heltalsnämnare efter /
+    var bn = bandFor(B, t); if(!bn) return null;
+    var d = dra(rnd, bn[0], bn[1], 0, true); if(d === null) return null;
+    satt[j] = d;
+    var fore = s.slice(0, t.i).replace(/\s*\/\s*$/, '');
+    if(/\)$/.test(fore)){                                                  // täljaren är en parentes
+      var djup = 0, start = -1;
+      for(var c = fore.length - 1; c >= 0; c--){ if(fore[c] === ')') djup++; else if(fore[c] === '('){ djup--; if(!djup){ start = c; break; } } }
+      var inne = tl.map(function(x, k){ return k; }).filter(function(k){ return tl[k].i > start && tl[k].i < fore.length; });
+      if(inne.length !== 2 || !/^\(\s*\d+\s*·\s*\d+\s*\)$/.test(fore.slice(start))) continue;   // bara "(a · b)"
+      var ta = tl[inne[0]], tb = tl[inne[1]], ba = bandFor(B, ta), bb = bandFor(B, tb); if(!ba || !bb) return null;
+      var a = dra(rnd, ba[0], ba[1], 0, true); if(a === null) return null;
+      var b = multipel(rnd, bb[0], bb[1], d / sgd(a, d)); if(b === null) return null;
+      satt[inne[0]] = a; satt[inne[1]] = b;
+    } else {                                                                // täljaren är ett tal
+      var k0 = j - 1; if(k0 < 0 || tl[k0].i + tl[k0].n !== fore.length) continue;
+      var bt = bandFor(B, tl[k0]); if(!bt) return null;
+      var n = multipel(rnd, bt[0], bt[1], d); if(n === null) return null;
+      satt[k0] = n;
+    }
+  }
+  return satt;
+}
 function forsok(m, B, rnd, extra){
   var tl = talIMall(m.uttryck), s = m.uttryck;
+  var satt = m.delbar ? delbaraTal(m, tl, B, rnd) : {};
+  if(!satt) return null;
   for(var j = tl.length - 1; j >= 0; j--){
-    var t = tl[j], bb = (t.dec && B.roll[t.roll + '.' + t.dec]) || B.roll[t.roll]; if(!bb) return null;
-    var v = dra(rnd, bb[0], bb[1], t.dec, t.roll !== 'konst' || t.vidMult);
+    var t = tl[j], bb = bandFor(B, t); if(!bb) return null;
+    var v = (j in satt) ? satt[j] : dra(rnd, bb[0], bb[1], t.dec, t.roll !== 'konst' || t.vidMult);
     if(v === null) return null;
     s = s.slice(0, t.i) + talUt(v) + s.slice(t.i + t.n);
   }

@@ -420,12 +420,13 @@ const PROBE7 = `(function(){
 })()`;
 const BLADSIDOR = Sidor.alla();   // sanningsmängden ur verktyg/sidor.js (V9)
 const SIDOR8 = BLADSIDOR.filter(p => p.indexOf('ak8/k1/') === 0).map(p => [p, PROBE8]);
-const SIDOR7 = BLADSIDOR.filter(p => /^(ak7|ak8\/k2)\//.test(p) && p !== 'ak7/k3/d5-problemlosning/index.html').map(p => [p, PROBE7]);
-if(Sidor.lista(args, SIDOR8.concat(SIDOR7).map(x => x[0]).concat(['ak7/k3/d5-problemlosning/index.html']))) process.exit(0);
+const SIDOR7 = BLADSIDOR.filter(p => /^(ak7|ak8\/k2)\//.test(p)).map(p => [p, PROBE7]);
+/* Gamla d5-sidan (ak7/k3/d5-problemlosning) mättes förut med PROBE_D5. Den är en olänkad gammal sida och mäts inte
+   av grindarna (KONVENTIONER, Joachim 2026-11-26; Sidor.GAMLA). PROBE_D5 står kvar men används inte. */
+if(Sidor.lista(args, SIDOR8.concat(SIDOR7).map(x => x[0]))) process.exit(0);
 let fel = 0, provade = 0;
 console.log('FLERRUTS-GRIND — sista rutan rätt, övriga fel: raden får inte bli ✓; tallinje/talföljd/hopp visar status per ruta\n');
-const SIDOR_D5 = [['ak7/k3/d5-problemlosning/index.html', PROBE_D5]];
-SIDOR8.concat(SIDOR7).concat(SIDOR_D5).forEach(([sida, probe]) => {
+SIDOR8.concat(SIDOR7).forEach(([sida, probe]) => {
   if(BARA && sida.indexOf(BARA) < 0) return;
   MP.forsok(sida);
   const tmp = path.join(os.tmpdir(), 'flerruts-' + process.pid + '.js'), pre = path.join(os.tmpdir(), 'flerruts-pre-' + process.pid + '.js');

@@ -111,8 +111,9 @@
 .prob-kort .prob-figur .af-under{font-family:var(--body);font-size:14px;fill:var(--ink-soft,#3d3630);}
 
 /* FÖLJDFRÅGAN: arean är ingen ekvationsrad utan en multiplikation — egen rad mellan
-   balansmetoden och svaret, med sin etikett framför rutan. */
-.prob-kort .prob-foljdrad{display:flex;align-items:center;gap:10px;margin:10px 0 4px;}
+   balansmetoden och svaret, med sin etikett framför rutan. K-K (Joachim 2026-11-26): etiketten och rutan är ett
+   par, högerställt som bladkärnans "Svar:"/ruta — stegformens undantag gäller bara stegen. */
+.prob-kort .prob-foljdrad{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:10px 0 4px;}
 .prob-kort .prob-foljd-etikett{font-family:var(--cinzel,'Cinzel');font-size:13px;letter-spacing:.04em;color:var(--ink-faint);min-width:64px;}
 .prob-kort .prob-foljd{display:inline-flex;align-items:center;min-height:40px;background:#fff;
   border:2px solid var(--paper-dk);border-radius:8px;padding:2px 12px;min-width:160px;}

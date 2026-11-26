@@ -12,6 +12,8 @@ En konvention som bara finns som en kopia i en redan byggd fil ärvs inte. Näst
 
 Grindarna körs **en i taget** — parallell körning ger CDP-timeouts.
 
+Olänkade gamla sidor mäts inte av grindarna; de står kvar som arkiv tills de tas bort. Joachim 2026-11-26.
+
 **Kolumnen "Vad vaktar den" är ärlig.** Står det ett verktyg finns ett prov som fäller när regeln bryts. Står det `—` finns ingen mätning, och regeln bärs bara av att någon minns den. **En tom cell är en TODO, inte ett klartecken.** Den ska skava.
 
 ---

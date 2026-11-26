@@ -440,8 +440,10 @@ const PROBE_D5 = `(function(){
 
 const BLADSIDOR = Sidor.alla();   // sanningsmängden ur verktyg/sidor.js (V9)
 const SIDOR8 = BLADSIDOR.filter(p => p.indexOf('ak8/k1/') === 0);
-const SIDOR7 = BLADSIDOR.filter(p => /^(ak7|ak8\/k2)\//.test(p) && p !== 'ak7/k3/d5-problemlosning/index.html');
-if(Sidor.lista(args, SIDOR8.concat(SIDOR7, ['ak7/k3/d5-problemlosning/index.html']))) process.exit(0);
+const SIDOR7 = BLADSIDOR.filter(p => /^(ak7|ak8\/k2)\//.test(p));
+/* Gamla d5-sidan (ak7/k3/d5-problemlosning) mättes förut med PROBE_D5. Den är en olänkad gammal sida och mäts inte
+   av grindarna (KONVENTIONER, Joachim 2026-11-26; Sidor.GAMLA). PROBE_D5 står kvar men används inte. */
+if(Sidor.lista(args, SIDOR8.concat(SIDOR7))) process.exit(0);
 const TMP = path.join(os.tmpdir(), 'namnare-' + process.pid);
 function kor(sida, probe, seed){
   const pf = TMP + '-probe.js', pre = TMP + '-pre.js'; fs.writeFileSync(pf, probe); fs.writeFileSync(pre, PRE(seed));
@@ -472,27 +474,6 @@ SIDOR8.forEach(sida => {
       console.log((brott.length ? '✗ ' : '✓ ') + sida.replace('ak8/k1/', '') + (SEEDS > 1 ? ' s' + k : '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + b.synligaSvar + ' · fyllda ' + b.fyllda + (b.ejTackta ? ' · ej täckta ' + b.ejTackta : '') + (brott.length ? '\n     ' + brott.join('\n     ') : ''));
     });
   }
-});
-// d5: problemlösningens blad (egna ruttyper)
-['ak7/k3/d5-problemlosning/index.html'].forEach(sida => {
-  if(BARA && !sida.includes(BARA)) return;
-  MP.forsok(sida);
-  const u = kor(sida, PROBE_D5, 0x2F6E2B1);
-  if(!u.blad || !u.blad.length){ fel++; console.log('✗ ' + sida + ': inga blad mätta — ' + (u.err || 'bladen hittades inte')); return; }
-  if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel — ' + u.onerr.join(' · ')); }
-  MP.rakna(sida, u.blad.length);
-  u.blad.forEach(b => {
-    blad++;
-    const brott = [];
-    if(b.ingenKnapp) brott.push('ingen Kontrollera-knapp');
-    if(b.dolda) brott.push(b.dolda + ' dolda svarsenheter');
-    if(b.namnare == null) brott.push('ingen "X av Y"-summering');
-    else if(b.namnare !== b.enheter) brott.push('nämnaren ' + b.namnare + ' ≠ ' + b.enheter + ' synliga svarsenheter');
-    else if(b.ratt !== b.namnare) brott.push('allt fyllt ur modellen men ' + b.ratt + ' av ' + b.namnare);
-    MP.varde(sida, b.blad, { ratt: b.ratt, namnare: b.namnare });   // V11
-    if(brott.length){ fel++; console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + brott.join(' · ')); }
-    else console.log('✓ ' + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad + ': ' + b.ratt + '/' + b.namnare + ' · synliga ' + b.enheter + ' (' + b.ytor + ' rutor + ' + b.rader + ' rader)');
-  });
 });
 
 SIDOR7.forEach(sida => {

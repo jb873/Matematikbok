@@ -220,7 +220,10 @@ const PROBE = `(function(){
       if(sr){ sr.remove(); ut.noter.push('SABBA (prob): tog bort svarets etikett'); } }
     // svarsplats: rubriken "Svar" flyttas under svarsrutan — stegformen bruten, undantaget får inte dölja det.
     if(SABBA === 'svarsplats'){ var sp = Array.prototype.filter.call(sh.querySelectorAll('.prob-steg-rub'), function(e){ return synlig(e) && /^Svar/.test(kort(e.textContent)); })[0];
-      if(sp){ sp.style.position = 'relative'; sp.style.top = '60px'; ut.noter.push('SABBA (prob): flyttade rubriken "Svar" under svarsrutan'); } }
+      if(sp){ sp.style.position = 'relative'; sp.style.top = '60px'; ut.noter.push('SABBA (prob): flyttade rubriken "Svar" under svarsrutan'); }
+      // … och följdfrågans par ("Area: ▢") tillbaka till vänsterkanten — K-K:s högerställning ska fälla.
+      var fp = Array.prototype.filter.call(sh.querySelectorAll('.prob-foljdrad'), synlig)[0];
+      if(fp){ fp.style.justifyContent = 'flex-start'; ut.noter.push('SABBA (prob): flyttade följdfrågans par till vänsterkanten'); } }
 
     // ── K-J: numret i frågans typografi ──
     Array.prototype.forEach.call(sh.querySelectorAll('.uppg-nr, .uppg-etikett'), function(lbl){

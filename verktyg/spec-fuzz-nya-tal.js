@@ -26,11 +26,11 @@
      NY        uppgiften (uttrycket och insättningsvärdet) är inte en av bankens och upprepar inte någon av de tio
                föregående
      SLUT      drillen tar inte slut: varje nasta(i) ger ett blad
-     MALLAR    (rapport, inte brott) en mall som ibland inte ger någon giltig uppgift efter 20 000 dragningar — mallen
-               väljs först med lika stor chans (nya-tal.js), och drillen tar då nästa mall
+     MALL      en vald mall som inte ger någon giltig uppgift efter 20 000 dragningar är ett brott — mallen väljs först
+               med lika stor chans (nya-tal.js); --mallar skriver ut hur ofta varje mall valdes
    Raderna mäts efter typ: parentesraden (uttryck), förenkla-rutan (fraga), talrutan ("4 − 9 = __"), saknat tal
    ("5 − __ = −3": uträkningen med svaret insatt), prioKedjan (vansterText och facitLed).
-   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form|led|egen|avskrift förstör de
+   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form|led|egen|avskrift|mall|delbar förstör de
    nya uppgifterna efter mekanismen, och fuzzen ska då fälla med benets namn.
    KÖR:  node verktyg/spec-fuzz-nya-tal.js [--n 300] [--lov P2] [--sabba …]     Exit 1 vid brott. Ingen nätväg. */
 'use strict';
@@ -152,6 +152,10 @@ KALLOR.forEach(K => {
     if(!k || !k.mall){ console.log('  · ' + K.id + ':' + id + ' — bara författade uppgifter (ingen mall)'); return; }
     k = NT.medNasta(k);
     const M = k.mall, R = M.regler || {}, n = k.instanser.length;
+    // --sabba mall: lövets första mall kan aldrig ge en giltig uppgift — benet MALL måste fälla.
+    if(SABBA === 'mall'){ const ex = M.extra, m0 = M.mallar[0]; M.extra = (ny, mm) => mm === m0 ? false : (ex ? ex(ny, mm) : true); }
+    // --sabba delbar: mallarnas egna talregel tas bort (R1 "(5 · 12)/4 + (3 · 14)/7") — utan den ska MALL fälla.
+    if(SABBA === 'delbar') M.mallar.forEach(mm => { delete mm.delbar; });
     /* BANKEN (d1): bankens egna avskrifter och led följer av samma räkning som de nya uppgifterna får — annars bygger
        mekanismen leden på ett annat sätt än Joachims facit. */
     if(MOD.rakna){
@@ -294,15 +298,18 @@ KALLOR.forEach(K => {
     }
     console.log((ok === N ? '✓ ' : '✗ ') + K.id + ':' + id + ' — ' + ok + '/' + N + ' nya uppgifter håller (bank ' + n + ', ' + M.mallar.length + ' mallar; band '
       + Object.keys(bandB).map(r => r + ' ' + bandB[r].join('–')).join(', ') + ')');
-    /* MALLAR UTAN UPPGIFT (Joachim 2026-11-26): mekanismen väljer mallen först, med lika stor chans; en mall som inte
-       ger någon giltig uppgift efter många dragningar rapporteras här (statistik.tomma i nya-tal.js). Rapport, inte
-       brott: mallen är Joachims, och bandet är bankens. */
+    /* MALL (Joachim 2026-11-26: "Fuzzen blir röd om en mall inte ger någon giltig uppgift"): mekanismen väljer mallen
+       först, med lika stor chans; varje gång en vald mall inte ger någon giltig uppgift efter 20 000 dragningar
+       (statistik.tomma i nya-tal.js) är ett brott. Varje mall ska också ha valts minst en gång. */
     const St = k.statistik;
-    if(St) St.tomma.forEach((t, j) => { if(t > 0) MALLAR.push(K.id + ':' + id + ' mall ' + (j + 1) + ' "' + M.mallar[j].uttryck + '": vald ' + St.val[j]
-      + ' gånger, ' + t + ' av dem utan giltig uppgift efter 20 000 dragningar'); });
+    if(St) St.tomma.forEach((t, j) => {
+      if(t > 0) brot('MALL', id, j + 1, 'mallen "' + M.mallar[j].uttryck + '" valdes ' + St.val[j] + ' gånger, ' + t + ' av dem utan giltig uppgift efter 20 000 dragningar');
+      if(!St.val[j]) brot('MALL', id, j + 1, 'mallen "' + M.mallar[j].uttryck + '" valdes aldrig på ' + N + ' nya uppgifter');
+      MALLAR.push(K.id + ':' + id + ' mall ' + String(j + 1).padStart(2) + ' ' + M.mallar[j].uttryck.padEnd(26) + ' vald ' + St.val[j] + ', utan uppgift ' + t);
+    });
   });
 });
-if(MALLAR.length){ console.log('\n  ⚠ MALLAR SOM INTE ALLTID GER EN UPPGIFT (' + MALLAR.length + ') — drillen tar då nästa mall:'); MALLAR.forEach(t => console.log('      ' + t)); }
+if(MALLAR.length && args.includes('--mallar')){ console.log('\n  MALLARNA (valda, utan uppgift):'); MALLAR.forEach(t => console.log('      ' + t)); }
 Object.keys(brott).forEach(ben => { console.log('\n  ✗ ' + ben + ' (' + brott[ben].length + ')'); brott[ben].slice(0, 4).forEach(t => console.log('      ' + t)); });
 console.log('\n' + (fel ? '✗ SPEC-FUZZ NYA TAL RÖD (' + fel + ')' : '✓ SPEC-FUZZ NYA TAL GRÖN') + ' · ' + prov + ' nya uppgifter prövade');
 process.exit(fel ? 1 : 0);

@@ -13,6 +13,7 @@
  *              Det är den mängd V9 mäts mot.
  *   blad()   — det svepen öppnar: delkapitlens index.html + åttans k1-blad + nians öva-blad.
  *   allaHtml() — varje .html i repot utom Arkiv (tonad-svepet mäter CSS, inte blad).
+ *   GAMLA    — olänkade gamla sidor: ingen av mängderna tar med dem (KONVENTIONER, 2026-11-26).
  *
  * En bladsida känns igen på TVÅ sätt, och mängden är unionen — se noten vid MOTOR. Det andra
  * sättet (allt i bladmapparna utom namngivna undantag) gör att en NY motor kommer in av sig
@@ -29,6 +30,11 @@ const ROOT = path.join(__dirname, '..');
    bladmapparna, och syns bara för mönstret. Elva motorfiler (sjuans blad-k1-d*, blad-ak8-alg1,
    blad-ak8-kvrot) står utanför mönstret och syns bara för mappen. Att välja en av vägarna hade
    tappat sidor åt ena eller andra hållet. */
+/* OLÄNKADE GAMLA SIDOR (KONVENTIONER: "Olänkade gamla sidor mäts inte av grindarna; de står kvar som arkiv tills de tas
+   bort. Joachim 2026-11-26."). Sidorna i nytt format ersätter dem; ingen sida länkar hit. Filerna står kvar orörda — de
+   tas bara ur mängderna nedan, och därmed ur varje grinds sidlista. */
+const GAMLA = new Set(['ak7/k3/d1-algebraiska-uttryck/index.html', 'ak7/k3/d3-forenkla-uttryck/index.html',
+  'ak7/k3/d5-problemlosning/index.html']);
 const MOTOR = /blad-karna|ak8-blad-ui|blad-k2-d|blad-k3-d|blad-ak8-d|ProbBlad|AK9_OVA/;
 const MOTORMAPP = ['js/motor/blad', 'js/motor/problemlosning', 'js/motor/ekvationer-balans'];
 
@@ -87,7 +93,7 @@ function alla(){
     const s = fs.readFileSync(p, 'utf8');
     if(MOTOR.test(s) || motorer.some(f => s.indexOf(f) >= 0)) ut.push(rel(p));
   }));
-  return ut.sort();
+  return ut.filter(p => !GAMLA.has(p)).sort();
 }
 
 /* Det svepen öppnar. Samma form som de fyra kopiorna hade, men utan att räkna upp sidorna:
@@ -107,10 +113,10 @@ function blad(){
     if(!fs.existsSync(d)) return;
     fs.readdirSync(d).filter(f => /\.html$/.test(f) && f !== 'index.html').forEach(f => ut.push(kap + '/' + f));
   });
-  return ut.sort();
+  return ut.filter(p => !GAMLA.has(p)).sort();
 }
 
-function allaHtml(){ return htmlUnder(ROOT).map(rel).sort(); }
+function allaHtml(){ return htmlUnder(ROOT).map(rel).filter(p => !GAMLA.has(p)).sort(); }
 
 /* --lista i varje verktyg: skriver verktygets egen sidmängd och slutar. Det är så
    sidlist-grinden läser mängden — ur verktygets egen kod, inte ur dess källtext. */
@@ -120,7 +126,7 @@ function lista(args, mangd){
   return true;
 }
 
-module.exports = { alla, blad, allaHtml, lista, motorfiler, MOTOR, MOTORMAPP, EJ_MOTOR, ROOT };
+module.exports = { alla, blad, allaHtml, lista, motorfiler, MOTOR, MOTORMAPP, EJ_MOTOR, GAMLA, ROOT };
 
 if(require.main === module){
   const a = process.argv.slice(2);

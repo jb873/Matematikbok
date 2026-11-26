@@ -337,6 +337,9 @@ BANK.R6 = { kat: 'R', namn: 'Vilket x ger värdet?', nod: BERAKNA, intro: { intr
    räknesteg i taget) och de enkla bråken, sedan alla multiplikationer och divisioner på en gång, sist summan.
    Exempel ur banken: 3 · (4 + 5) + 20/5 → 3 · 9 + 4 → 27 + 4;  (3 · 5 − 1) − (5 + 2) → (15 − 1) − 7 → 14 − 7. */
 BANK.R1.regler = {}; BANK.R1.mallTyp = 'prio';
+/* Mallens egna talregler (Joachim 2026-11-26): i "(5 · 12)/4 + (3 · 14)/7" väljs nämnaren först och sedan en täljare som
+   är en multipel av den, så att divisionen alltid går jämnt inom bandet (delbar i nya-tal.js). */
+BANK.R1.delbar = ['(5 · 12)/4 + (3 · 14)/7'];
 BANK.R3.regler = {}; BANK.R3.mallTyp = 'satt';
 BANK.R4.regler = {}; BANK.R4.mallTyp = 'satt';
 BANK.R5.regler = {}; BANK.R5.mallTyp = 'satt';
@@ -429,7 +432,11 @@ function narText(x, bokstav){
 function mallAv(b, x){
   var rad = x.rader[0];
   if(!rad || rad.typ !== 'prioKedja') return null;
-  if(b.mallTyp === 'prio') return { uttryck: rad.vansterText, typ: 'prio', antalLed: rad.facitLed.length };
+  if(b.mallTyp === 'prio'){
+    var mp = { uttryck: rad.vansterText, typ: 'prio', antalLed: rad.facitLed.length };
+    if((b.delbar || []).indexOf(rad.vansterText) >= 0) mp.delbar = true;
+    return mp;
+  }
   var m = /när ((?:[a-z] = \d+(?:,\d+)?(?: och )?)+)\./.exec(x.rubrik); if(!m) return null;
   var par = m[1].split(' och ').map(function(p){ var q = p.split(' = '); return [q[0], parseFloat(q[1].replace(',', '.'))]; });
   var xv = par.length === 1 ? par[0][1] : par.reduce(function(o, p){ o[p[0]] = p[1]; return o; }, {});

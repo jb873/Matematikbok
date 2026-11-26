@@ -345,24 +345,7 @@ function rensaUppgift(s){
   s.beskedEl.textContent = ''; s.klarEl.classList.remove('show');
 }
 
-// Svarsenheterna i EN uppgift: uttryck + insättning + svar per delrad, ekvationsraden och varje
-// IFYLLD kedjerad. En tom extra kedjerad är en erbjuden rad, inte en svarsenhet.
-// En enhet är BEDÖMD när den bär ett omdöme. Det som inte prövats räknas varken upp eller ned.
-function ytaOmdome(el){ return el.classList.contains('ratt') ? 1 : el.classList.contains('fel') ? 0 : null; }
-function radOmdome(r){ return r.vlWrap.classList.contains('rad-ok') ? 1 : r.vlWrap.classList.contains('rad-fel') ? 0 : null; }
-function las_summa(delar){
-  var tot = 0, ratt = 0, obedomt = 0;
-  delar.forEach(function(v){ if(v === null) obedomt++; else { tot++; ratt += v; } });
-  return { tot: tot, ratt: ratt, obedomt: obedomt };
-}
-function summaAv(s){
-  var v = [];
-  s.delRader.forEach(function(d){ v.push(ytaOmdome(d.uttryckYta), ytaOmdome(d.vardeYta), ytaOmdome(d.svarYta)); });
-  if(s.foljdYta) v.push(ytaOmdome(s.foljdYta));
-  v.push(radOmdome(s.ekvRad));
-  s.kedja.forEach(function(r){ if(!K.tomRad(r)) v.push(radOmdome(r)); });
-  return las_summa(v);
-}
+// (Totalen per ruta — summaAv, summaMetod och deras hjälpare — togs bort 2026-11-26: totalen räknas per uppgift.)
 // ── METOD-RÄTTAREN — PILOT (order 2026-11-23): typen "Flera personer och saker" rättas på METODEN
 // (ProbRattare.rattaMetod): Delarna bedöms inte, ekvationen på sin lösning, balansmetoden som giltig algebra,
 // Sätt in värdet (beräkning + värde) mot elevens eget x, svaret på tal och enhet. Övriga typer: som förut.
@@ -403,19 +386,6 @@ function kontrolleraMetod(s){
   s.beskedEl.textContent = res.besked || '';
   logga(s.u.nod, 'fel');
   return 'fel';
-}
-// Totalen per RUTA (bara i ett blandat blad, se kontrollera): varje bedömd ruta — Delarna räknas inte (de bedöms inte); beräkningsrutan räknas när den syns.
-function summaMetod(s){
-  var v = [];
-  s.delRader.forEach(function(d){
-    if(berakningSyns(d)) v.push(ytaOmdome(d.berakningYta));
-    v.push(ytaOmdome(d.vardeYta));
-  });
-  if(s.svarYta) v.push(ytaOmdome(s.svarYta));
-  if(s.foljdYta) v.push(ytaOmdome(s.foljdYta));
-  metodRader(s).forEach(function(r){ v.push(radOmdome(r)); });
-  var sum = las_summa(v); sum.obedomt = 0;        // tomma rutor är obesvarade, inte "steg 1 stämmer inte"
-  return sum;
 }
 
 function kontrollera(state, hintEl, sammanfEl){
@@ -510,20 +480,12 @@ function kontrollera(state, hintEl, sammanfEl){
     logga(s.u.nod, 'fel');
   });
 
-  // POÄNG PER UPPGIFT (order 2026-11-24): består bladet bara av pilot-typen räknar totalen hela uppgifter —
-  // en löst uppgift (✓ Löst!) = 1, nämnaren = antalet uppgifter i bladet. Rutorna rättas och markeras som förut.
-  // Ett blandat blad (test, blandade) räknar rutor som förut: två måttenheter i samma total går inte ihop.
-  if(sammanfEl && state.length && state.every(arMetodState)){
+  // POÄNG PER UPPGIFT (order 2026-11-24; KONVENTIONER, Problemlösning: "Gäller typen överallt: blad, test, blandade
+  // och drill"): totalen räknar hela uppgifter — en löst uppgift (✓ Löst!) = 1, nämnaren = antalet uppgifter i bladet,
+  // vilken form uppgiften än har. Rutorna rättas och markeras som förut. Förr räknade ett blandat blad (test, blandade)
+  // och de andra typernas blad rutor; Joachim 2026-11-26: per uppgift också där.
+  if(sammanfEl && state.length){
     sammanfEl.textContent = 'Du har löst ' + klara + ' av ' + state.length + ' uppgifter.';   // lydelsen: Joachim 2026-11-25
-  } else if(sammanfEl){
-    var tot = 0, ratt = 0, obedomt = 0;
-    state.forEach(function(s){
-      var E = arEkvationsState(s) ? window.ProbBlad : arMetodState(s) ? { besvarad: besvaradMetod, summaAv: summaMetod } : null;
-      if(!(E ? E.besvarad(s) : besvarad(s))) return;
-      var v = E ? E.summaAv(s) : summaAv(s); tot += v.tot; ratt += v.ratt; obedomt += v.obedomt;
-    });
-    sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.'
-                          + (obedomt ? ' ' + TEXT.obedomt.hint : '');
   }
   if(!besvarade){ hintEl.className = 'global-hint'; hintEl.textContent = ''; return; }
   if(klara === state.length){ hintEl.className = 'global-hint ok'; hintEl.textContent = TEXT.allaRatt.hint; }

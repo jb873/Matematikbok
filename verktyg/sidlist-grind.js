@@ -120,7 +120,17 @@ VERKTYG.forEach(v => {
 //     Ett undantag för en fil som bytt namn är ett tyst hål: allt den filen bär blir oräknat.
 console.log('\nMOTORER');
 const sidtext = alla.map(p => fs.readFileSync(path.join(ROOT, p), 'utf8'));
-const oladdade = Sidor.motorfiler().filter(m => !sidtext.some(s => s.indexOf('/' + m.fil) >= 0));
+/* ARKIV (KONVENTIONER: "Olänkade gamla sidor mäts inte av grindarna; de står kvar som arkiv tills de tas bort." Joachim
+   2026-11-26): en motorfil som bara de gamla sidorna (Sidor.GAMLA) laddar är arkiv, inte död kod — den skrivs ut, men
+   fäller inte. Den försvinner med sidan. */
+const gamlaText = [...(Sidor.GAMLA || [])].filter(p => fs.existsSync(path.join(ROOT, p))).map(p => fs.readFileSync(path.join(ROOT, p), 'utf8'));
+const ejRaknade = Sidor.motorfiler().filter(m => !sidtext.some(s => s.indexOf('/' + m.fil) >= 0));
+const arkiv = ejRaknade.filter(m => gamlaText.some(s => s.indexOf('/' + m.fil) >= 0));
+const oladdade = ejRaknade.filter(m => arkiv.indexOf(m) < 0);
+if(arkiv.length){
+  console.log('  · ' + arkiv.length + ' motorfil(er) laddas bara av olänkade gamla sidor (arkiv, mäts inte):');
+  arkiv.forEach(m => console.log('      ' + m.mapp + '/' + m.fil));
+}
 if(oladdade.length){
   F(oladdade.length + ' motorfil(er) laddas av ingen räknad bladsida — död kod, eller en sida som glömt sitt skript');
   oladdade.forEach(m => console.log('      ' + m.mapp + '/' + m.fil));

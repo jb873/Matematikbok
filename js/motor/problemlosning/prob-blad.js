@@ -231,11 +231,11 @@ function kontrollera(state, hintEl, sammanfEl){
     if(r) besvarade++;
     if(r === 'ratt') klara++;
   });
-  if(sammanfEl){
-    var tot = 0, ratt = 0, obedomt = 0;
-    state.forEach(function(s){ if(!besvarad(s)) return; var v = summaAv(s); tot += v.tot; ratt += v.ratt; obedomt += v.obedomt; });
-    sammanfEl.textContent = 'Du fick ' + ratt + ' av ' + tot + ' rätt.'
-                          + (obedomt ? ' ' + TEXT.obedomt.hint : '');
+  /* POÄNG PER UPPGIFT (KONVENTIONER, Problemlösning: "Gäller typen överallt: blad, test, blandade och drill"; Joachim
+     2026-11-26): en löst uppgift = 1, nämnaren = antalet uppgifter i bladet — samma total och lydelse som ProbBlad2.
+     Förr räknade ekvationsformens blad rutor. Rutorna rättas och markeras som förut. */
+  if(sammanfEl && state.length){
+    sammanfEl.textContent = 'Du har löst ' + klara + ' av ' + state.length + ' uppgifter.';   // lydelsen: Joachim 2026-11-25
   }
   if(!besvarade){ hintEl.className = 'global-hint'; hintEl.textContent = ''; return; }
   if(klara === state.length){ hintEl.className = 'global-hint ok'; hintEl.textContent = TEXT.allaRatt.hint; }
