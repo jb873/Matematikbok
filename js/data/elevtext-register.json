@@ -2515,8 +2515,10 @@
   "titel | Delen",
   "titel | Det hela",
   "titel | Förändring",
+  "titel | Kunskapsläge",
   "titel | Procent och byta form",
   "titel | Procentenheter och jämförelser",
+  "titel | Självskattning",
   "titel | {}<span class=\"nf-chip soon\">Kommer senare</span>{}"
  ],
  "js/motor/blad/blad-k4-d1-procent.js": [

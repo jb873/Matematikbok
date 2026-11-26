@@ -17,7 +17,8 @@
 // SJUANS KAPITEL 4 PROCENT — kapitelsidan som DATA på den delade renderaren (Joachim 2026-11-26).
 // Statusen härleds ur fil; inget status-fält. Delkapitel 1 Procent i nytt format; Problemlösning och Plugg till
 // prov har ingen fil än och står tonade ("Kommer senare"). Korten saknar undertext tills Joachim har skrivit den.
-// Foten: kunskapsläge, test och självskattning finns inte än för kapitel 4 — modulens standard, "kommer".
+// Foten (Joachim 2026-11-26): som kapitel 2 — Kunskapsläge till kartan och Självskattning till dess flik på
+// kunskapslägessidan (ak7/k4/kunskapslage). Skapa test står kvar som "kommer" (ingen ram, ingen provbyggare).
 Kapitelsida.montera({
   arskurs: 7,
   kapitel: 4,
@@ -29,7 +30,10 @@ Kapitelsida.montera({
     { nr:2, titel:'Problemlösning', fil:null, typ:'avsnitt' },
     { nr:3, titel:'Plugg till prov', fil:null, typ:'prov' }
   ],
-  fot: {}
+  fot: {
+    kunskapslage:   { href: 'ak7/k4/kunskapslage/index.html', status: 'live' },
+    sjalvskattning: { href: 'ak7/k4/kunskapslage/index.html?tab=sjalv', status: 'live' }
+  }
 });
 </script>
 

@@ -49,10 +49,18 @@
 
 <div id="navram"></div>
 
-<!-- Vyerna byggs här och flyttas in i ramens ytor (samma mönster som referenssidan). Kapitel 4 har ännu ingen
-     kunskapslägessida — Mina kunskaper har inga vyer än. -->
+<!-- Vyerna byggs här och flyttas in i ramens ytor (samma mönster som referenssidan). Mina kunskaper: kapitel 4:s
+     kunskapslägessida (karta och självskattning), som kapitel 3:s momentsidor. -->
 <div id="scener" hidden>
   <div class="nr-scen" id="scen-moment"></div>
+  <div class="nr-mview is-on" id="mv-kunskapslage">
+    <iframe class="nr-karta-frame" id="karta-frame" title="Kunskapsläge" loading="lazy"
+            src="../kunskapslage/index.html?embed=1"></iframe>
+  </div>
+  <div class="nr-mview" id="mv-sjalvskattning">
+    <iframe class="nr-karta-frame" id="sjalv-frame" title="Självskattning" loading="lazy"
+            src="../kunskapslage/index.html?embed=1&amp;tab=sjalv"></iframe>
+  </div>
 </div>
 
 <footer>
@@ -123,7 +131,9 @@ var moment = MOMENT.map(function(m){
 });
 
 // TEST: inga författade test än → skalet skriver "Kommer senare".
-M.montera({ vard: document.getElementById('navram'), rubrik: 'Procent', moment: moment, tester: [], mina: [] });
+M.montera({ vard: document.getElementById('navram'), rubrik: 'Procent', moment: moment, tester: [],
+  mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
+          { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ] });
 })();
 </script>
 <script src="../../../js/elevfeedback.js" defer></script>
