@@ -326,6 +326,154 @@ BANK.R6 = { kat: 'R', namn: 'Vilket x ger värdet?', nod: BERAKNA, intro: { intr
   xv('50 − 4x har värdet 18.', ['x = 8', 'x = 9', 'x = 32'], 'x = 8')
 ]; } };
 
+/* ═════════ NYA TAL EFTER BANKEN (KONVENTIONER, METODTRÄNING; Joachim 2026-11-26) ═════════
+   Räknelöven R1, R3, R4 och R5: de författade uppgifterna är mallar, och den delade mekanismen (js/motor/ovamer/nya-tal.js,
+   via källregistret) ger efter banken nya uppgifter med samma form och nya tal inom bankens band. R2 (saknat tal eller
+   tecken) har bara författade uppgifter. Klartexten (k3-d1-metodtraning.md) har inga talregler per löv: bandet är bankens
+   minsta–största per roll. Därtill, som i banken: varje beräknat värde är positivt (0 bara ur en faktor 0), har högst
+   så många decimaler som mallens tal (divisionen går jämnt), och är inte större än bankens största. En mall med x = 0
+   behåller x = 0 (det är uppgiftens poäng).
+   AVSKRIFT OCH LED räknas ur den nya uppgiften på samma sätt som bankens facit: först parenteserna (det innersta ett
+   räknesteg i taget) och de enkla bråken, sedan alla multiplikationer och divisioner på en gång, sist summan.
+   Exempel ur banken: 3 · (4 + 5) + 20/5 → 3 · 9 + 4 → 27 + 4;  (3 · 5 − 1) − (5 + 2) → (15 − 1) − 7 → 14 − 7. */
+BANK.R1.regler = {}; BANK.R1.mallTyp = 'prio';
+BANK.R3.regler = {}; BANK.R3.mallTyp = 'satt';
+BANK.R4.regler = {}; BANK.R4.mallTyp = 'satt';
+BANK.R5.regler = {}; BANK.R5.mallTyp = 'satt';
+
+function talUt(v){ return String(Math.round(v * 1e9) / 1e9).replace('.', ','); }
+function decAv(v){ return (String(Math.round(v * 1e9) / 1e9).split('.')[1] || '').length; }
+/* Ett räkneuttryck med bara tal: summa = [{ op, f: [{ op, v }] }] där v är { tal } eller { par: summa }. */
+function lasRakna(s){
+  var t = String(s).match(/\d+(?:,\d+)?|[+\-−·\/()]/g) || [], i = 0;
+  function summa(){
+    var ut = [{ op: '+', f: term() }];
+    while(t[i] === '+' || t[i] === '−' || t[i] === '-'){ var op = t[i++] === '+' ? '+' : '−'; ut.push({ op: op, f: term() }); }
+    return ut;
+  }
+  function term(){
+    var ut = [{ op: null, v: faktor() }];
+    while(t[i] === '·' || t[i] === '/'){ var op = t[i++]; ut.push({ op: op, v: faktor() }); }
+    return ut;
+  }
+  function faktor(){
+    var x = t[i++];
+    if(x === '('){ var s2 = summa(); if(t[i++] !== ')') throw new Error('parentes'); return { par: s2 }; }
+    if(/^\d/.test(x || '')) return { tal: parseFloat(x.replace(',', '.')) };
+    throw new Error('oväntat ' + x);
+  }
+  var r = summa(); if(i < t.length) throw new Error('rest'); return r;
+}
+function skrivRakna(s){
+  return s.map(function(it, k){
+    var ft = it.f.map(function(x, j){
+      var v = x.v.par ? '(' + skrivRakna(x.v.par) + ')' : talUt(x.v.tal);
+      return j === 0 ? v : (x.op === '·' ? ' · ' : '/') + v;
+    }).join('');
+    return k === 0 ? ft : ' ' + it.op + ' ' + ft;
+  }).join('');
+}
+function harPar(s){ return s.some(function(it){ return it.f.some(function(x){ return !!x.v.par; }); }); }
+function ettTal(s){ return s.length === 1 && s[0].f.length === 1 && !s[0].f[0].v.par ? s[0].f[0].v.tal : null; }
+/* ETT STEG. varden samlar varje uträknat värde (för kontrollerna); noll = ett 0 som inte kommer ur en faktor 0. */
+function steg(s, varden){
+  function termVarde(f){
+    var v = f[0].v.tal, harNoll = v === 0;
+    for(var j = 1; j < f.length; j++){ harNoll = harNoll || f[j].v.tal === 0; v = f[j].op === '·' ? v * f[j].v.tal : v / f[j].v.tal; }
+    v = Math.round(v * 1e9) / 1e9; varden.push({ v: v, ok0: harNoll }); return v;
+  }
+  function niva(s2){                                    // en nivå utan parenteser: först · och /, sedan summan
+    if(s2.some(function(it){ return it.f.length > 1; }))
+      return s2.map(function(it){ return { op: it.op, f: it.f.length > 1 ? [{ op: null, v: { tal: termVarde(it.f) } }] : it.f }; });
+    var v = 0; s2.forEach(function(it){ v += (it.op === '−' ? -1 : 1) * it.f[0].v.tal; });
+    v = Math.round(v * 1e9) / 1e9; varden.push({ v: v, ok0: false });
+    return [{ op: '+', f: [{ op: null, v: { tal: v } }] }];
+  }
+  function parSteg(s2){
+    return s2.map(function(it){
+      var f = it.f.map(function(x){
+        if(!x.v.par) return { op: x.op, v: x.v, gammal: true };
+        var inre = harPar(x.v.par) ? parSteg(x.v.par) : niva(x.v.par), t2 = ettTal(inre);
+        return { op: x.op, v: t2 !== null ? { tal: t2 } : { par: inre } };
+      });
+      // Ett enkelt bråk (tal/tal, båda tal redan före steget) räknas i samma steg som parenteserna.
+      for(var j = f.length - 1; j >= 1; j--){
+        if(f[j].op === '/' && f[j].gammal && f[j - 1].gammal && !f[j].v.par && !f[j - 1].v.par){
+          var q = termVarde([{ op: null, v: f[j - 1].v }, { op: '/', v: f[j].v }]);
+          f.splice(j - 1, 2, { op: f[j - 1].op, v: { tal: q } });
+        }
+      }
+      return { op: it.op, f: f.map(function(x){ return { op: x.op, v: x.v }; }) };
+    });
+  }
+  return harPar(s) ? parSteg(s) : niva(s);
+}
+/* LEDEN för ett räkneuttryck: { led: [text …] (utan svaret), svar, varden }. */
+function ledAv(text){
+  var s = lasRakna(text), led = [], varden = [];
+  for(var n = 0; n < 12 && ettTal(s) === null; n++){ s = steg(s, varden); if(ettTal(s) === null) led.push(skrivRakna(s)); }
+  return { led: led, svar: ettTal(s), varden: varden };
+}
+/* AVSKRIFTEN: uttrycket med talen insatta — "4x + 3" och x = 5 → "4 · 5 + 3". */
+function avskriftAv(uttryck, x){
+  function v(k){ return talUt(typeof x === 'object' ? x[k] : x); }
+  return String(uttryck).replace(/(\d)\s*([a-z])/gi, function(_, d, k){ return d + ' · ' + v(k); })
+    .replace(/[a-z]/gi, function(k){ return v(k); });
+}
+// "x = 6", "a = 6 och b = 9" — variablerna i rubrikens ordning.
+function narText(x, bokstav){
+  if(typeof x !== 'object') return bokstav + ' = ' + talUt(x);
+  return Object.keys(x).map(function(k){ return k + ' = ' + talUt(x[k]); }).join(' och ');
+}
+// Mallen ur en författad uppgift (rubriken bär värdet: "Beräkna 4x + 3 när x = 5. Börja med multiplikationen.").
+function mallAv(b, x){
+  var rad = x.rader[0];
+  if(!rad || rad.typ !== 'prioKedja') return null;
+  if(b.mallTyp === 'prio') return { uttryck: rad.vansterText, typ: 'prio', antalLed: rad.facitLed.length };
+  var m = /när ((?:[a-z] = \d+(?:,\d+)?(?: och )?)+)\./.exec(x.rubrik); if(!m) return null;
+  var par = m[1].split(' och ').map(function(p){ var q = p.split(' = '); return [q[0], parseFloat(q[1].replace(',', '.'))]; });
+  var xv = par.length === 1 ? par[0][1] : par.reduce(function(o, p){ o[p[0]] = p[1]; return o; }, {});
+  return { uttryck: rad.vansterText, typ: rad.ledFrivilligt ? 'en' : 'satt', x: xv, bokstav: par[0][0], rubrik: x.rubrik, nar: m[1],
+           antalLed: rad.facitLed.length };
+}
+// Högst antal decimaler bland mallens tal och värden.
+function mallDec(m){
+  var d = (m.uttryck.match(/\d+(?:,\d+)?/g) || []).map(function(t){ return (t.split(',')[1] || '').length; });
+  (m.x == null ? [] : typeof m.x === 'object' ? Object.keys(m.x).map(function(k){ return m.x[k]; }) : [m.x]).forEach(function(v){ d.push(decAv(v)); });
+  return Math.max.apply(null, d.concat([0]));
+}
+/* KONTROLLEN (lövets extra): avskrift och led räknas, och den nya uppgiften håller bankens villkor. */
+function raknaExtra(maxVarde){
+  return function(ny, m){
+    var av = m.typ === 'prio' ? ny.uttryck : avskriftAv(ny.uttryck, ny.x), r;
+    try { r = ledAv(av); } catch(e){ return false; }
+    if(r.svar === null || r.led.length !== m.antalLed) return false;
+    var dec = mallDec(m);
+    if(r.varden.some(function(x){ return x.v < 0 || (x.v === 0 && !x.ok0) || decAv(x.v) > dec || x.v > maxVarde; })) return false;
+    // Gånger eller delat med 1 — i avskriften eller i ett led (6 · (4 − 3) → 6 · 1) — och bråket a/a är andra uppgifter än bankens.
+    function aa(t){ return (t.match(/\d+(?:,\d+)?\/\d+(?:,\d+)?/g) || []).some(function(q){ var p = q.split('/'); return p[0] === p[1]; }); }
+    if([av].concat(r.led).some(function(t){ return /(^|[^\d,])1 ·|· 1(?![\d,])|\/1(?![\d,])|(^|[^\d,])1\//.test(t) || aa(t); })) return false;
+    // Ett svar som är ett heltal i mallen förblir ett heltal (20,5 − 3 · 4,5 = 7).
+    if(m.svarV === Math.round(m.svarV) && r.svar !== Math.round(r.svar)) return false;
+    ny.avskrift = av; ny.led = r.led; ny.varde = r.svar;
+    return true;
+  };
+}
+// Bladet för en ny uppgift ur mallen: samma typ, samma rubrik med de nya talen.
+function byggRakna(b){
+  return function(ny, m){
+    var rader, rubrik = '';
+    if(m.typ === 'prio') rader = [prio(ny.uttryck, ny.led, ny.varde)];
+    else {
+      rubrik = m.rubrik.replace(m.uttryck, ny.uttryck).replace('när ' + m.nar + '.', 'när ' + narText(ny.x, m.bokstav) + '.');
+      rader = [m.typ === 'en' ? enOp(ny.uttryck, ny.avskrift, ny.varde) : sattIn(ny.uttryck, ny.avskrift, ny.led, ny.varde)];
+    }
+    var blad = { titel: b.namn, grupper: [T.g(rubrik, b.nod, rader)] };
+    if(b.intro) blad.intro = b.intro;
+    return blad;
+  };
+}
+
 var ORDNING = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6'];
 var FORMAGA = { T: 'BEGREPP', K: 'KOMMUNIKATION', R: 'RAKNA' };
 
@@ -352,7 +500,7 @@ function drillKalla(ref){
     if(x.varor) blad.remsa = T.remsa(x.varor, 1);
     return { bokstav: bladBokstav(i), blad: blad };
   });
-  return { arskurs: 7, titel: b.namn, instanser: instanser,
+  var kalla = { arskurs: 7, titel: b.namn, instanser: instanser,
     rita: function(mount, blad){
       // Ett nytt blad i en ny montering: bygg_blad binder sina lyssnare på monteringen.
       mount.innerHTML = ''; var m = document.createElement('div'); m.className = 'ovn-wrap fk-d1-blad'; mount.appendChild(m);
@@ -361,8 +509,18 @@ function drillKalla(ref){
       var kp = document.getElementById('ovn-keypad-shared');
       if(kp && window.AK8_UI && AK8_UI.keypadBokstaver && window.bladBokstaver) AK8_UI.keypadBokstaver(kp, window.bladBokstaver(blad));
     } };
+  // Räknelöven: mallarna, bankens största beräknade värde och hur ett nytt blad byggs (nya-tal.js gör resten).
+  if(b.regler){
+    var mallar = uppg.map(function(x){ return mallAv(b, x); }).filter(Boolean), maxV = 0;
+    mallar.forEach(function(m){ var r = ledAv(m.typ === 'prio' ? m.uttryck : avskriftAv(m.uttryck, m.x));
+      m.svarV = r.svar; r.varden.forEach(function(x){ maxV = Math.max(maxV, x.v); }); });
+    if(mallar.length) kalla.mall = { ref: 'k3d1:' + ref, mallar: mallar, regler: b.regler, extra: raknaExtra(maxV), bygg: byggRakna(b) };
+  }
+  return kalla;
 }
 
 window.BLAD_K3_D1_METOD = { ORDNING: ORDNING, trad: trad, drillKalla: drillKalla,
+  // För spec-fuzzen: att bankens egna avskrifter och led följer av samma räkning (BANKEN).
+  rakna: { ledAv: ledAv, avskriftAv: avskriftAv, mallAv: function(id, x){ return mallAv(BANK[id], x); } },
   bank: function(id){ var b = BANK[id]; return b ? { id: id, kat: b.kat, namn: b.namn, nod: b.nod, intro: b.intro, uppg: b.uppg() } : null; } };
 })();

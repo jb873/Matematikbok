@@ -2498,5 +2498,8 @@
   "rubrik | Välj det förenklade uttrycket.",
   "rubrik | Välj det uttryck som betyder samma sak som 4a.",
   "rubrik | Välj rätt svar."
+ ],
+ "js/karta/sjalvskattning.js": [
+  "namn | {}<span class=\"sj-f\" title=\"fördjupning\">F</span>{}"
  ]
 }

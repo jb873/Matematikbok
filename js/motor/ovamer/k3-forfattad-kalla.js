@@ -56,7 +56,9 @@
           + "--body:'Source Serif 4',Georgia,serif;--c-rakna:#16a34a;--rod:#b23b2e;--rod-lt:#c0392b;--las:#9a9388;}"
           + ".fk-drill{--mono:'Source Serif 4',Georgia,serif;}"
           + '.fk-drill .fk-d1-blad{max-width:900px;margin:18px auto 0;padding:0 28px;}',
-      skript: ['js/mastery.js', 'js/motor/blad/blad-karna-b.js', 'js/motor/blad/blad-k3-d1-typer.js', 'js/motor/blad/blad-k3-d1-metod.js'],
+      // nya-tal.js: räknelöven R1, R3–R5 har nya tal efter banken (kroken nedan; Joachim 2026-11-26).
+      skript: ['js/mastery.js', 'js/motor/blad/blad-karna-b.js', 'js/motor/blad/blad-k3-d1-typer.js', 'js/motor/ovamer/nya-tal.js',
+               'js/motor/blad/blad-k3-d1-metod.js'],
       hamta: function(ref){ return window.BLAD_K3_D1_METOD && window.BLAD_K3_D1_METOD.drillKalla(ref); },
       knappsats: function(){ return document.getElementById('ovn-keypad-shared'); },
       krav: ['js/motor/alg-brak.js', 'js/motor/blad/ak8-blad-ui.js', 'js/motor/figur/svg-algebrafigur.js'],

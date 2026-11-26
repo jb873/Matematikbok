@@ -303,7 +303,7 @@
     function dataRad(r){
       var ids = r.nod ? [].concat(r.nod) : [];
       var ev = ids.length ? Math.min.apply(null, ids.map(evidensK2)) : null;
-      return { id:r.id, namn:r.text + (r.fordjupning ? ' <span class="sj-stjarna" title="fördjupning">★</span>' : ''),
+      return { id:r.id, namn:(r.fordjupning ? '<span class="sj-f" title="fördjupning">F</span>' : '') + r.text,
         evidens:ev, kalla:'data', vantar: !!(r.delad && ids.length) };
     }
     function renderData(){
@@ -360,9 +360,9 @@
         var rader = raderFor(omr);
         if(!rader.length) return;
         var rollup = rollupSkattad(rader);
-        var stjarna = omr.roll === 'fordjupning' ? ' <span class="sj-stjarna" title="fördjupning">★</span>' : '';
+        var fBadge = omr.roll === 'fordjupning' ? '<span class="sj-f" title="fördjupning">F</span>' : '';   // badgen F framför namnet (KONVENTIONER), inte ★
         html += '<section class="sj-grupp"><div class="sj-grupp-rubrik">'
-          + gruppDot(rollup) + '<span class="sj-grupp-namn">' + omr.namn + stjarna + '</span></div>';
+          + gruppDot(rollup) + '<span class="sj-grupp-namn">' + fBadge + omr.namn + '</span></div>';
         rader.forEach(function(r){ html += radHtml(r, {}); });
         html += '</section>';
       });

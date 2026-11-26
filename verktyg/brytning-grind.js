@@ -28,11 +28,16 @@
           Rutan i meningen (luckmening, "Han är ▢ år."; Joachim 2026-11-26) är meningens lucka: rutan står
           där, på samma rad och tätt intill orden före och efter — ingen "Svar:" (--sabba luckmening).
 
+     PROBLEMLÖSNINGEN (ProbBlad/ProbBlad2, .prob-kort; Joachim 2026-11-26): samma ben mäts på problemlösningens
+          enheter — huvuduppgiften .prob-uppg, kedjans rader i rutnätet och stegens rader, numret mot frågan.
+          Se matProb nedan för hur varje ben översätts (K-E mäts inte där: rutorna bär inget facit i sidan).
+          Sabotagen streck, grupp, bokstavsstil, par och svarsetikett verkar också där.
+
      K-L  Kedjan bryts inte vid Chromebook-bredd (Joachim 2026-10-26): en rad med flera led och
           likhetstecken mellan dem står på EN rad vid 1366 × 768 och 1536 × 864 — svaret hamnar aldrig
           på nästa rad. Mäts bara vid de bredderna, på sidor där telefonvyn hittade kedjor.
 
-   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar|kedja|luckmening]
+   Kör:  node verktyg/brytning-grind.js [--sida d3] [--alla] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar|kedja|luckmening]
          --sabba återskapar felet regeln finns för → benet MÅSTE fälla. Ett motprov som inte kan
          fälla bevisar ingenting.
 
@@ -55,6 +60,7 @@ const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
    det). 390 px är vyn felet syns i; K-E och K-F är breddoberoende och mäts lika gärna där.
    --vy <bredd>x<höjd> byter mått för en egen körning. */
 const VY = (i => i >= 0 ? args[i + 1] : '390x844')(args.indexOf('--vy'));
+const ALLA = args.includes('--alla');   // skriv ut VARJE brott, inte bara de fyra första per blad
 
 const PRE = `(function(){ var s = 0x2F6E2B1; Math.random = function(){ s |= 0; s = s + 0x6D2B79F5 | 0; var t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   window.__onerr = []; window.addEventListener('error', function(e){ window.__onerr.push(e.message + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno); }); try { localStorage.clear(); } catch(e){} })();`;
@@ -161,7 +167,160 @@ const PROBE = `(function(){
     return null;
   }
 
+  /* PROBLEMLÖSNINGENS ARK (ProbBlad/ProbBlad2; Joachim 2026-11-26: "mät problemlösningens rader på samma sätt som
+     bladkärnans"). Samma ben, mätta på problemlösningens enheter:
+       ark = .prob-kort · huvuduppgift = .prob-uppg · rad = kedjans rad i rutnätet (vänsterled = högerled) och
+       stegens rader (.prob-delrad, .prob-insattrad, .prob-svarrad/.prob-svarrad2, .prob-foljdrad) · ruta = varje
+       synlig input · bokstav = numret (.uppg-nr, .uppg-etikett) mot frågans text (.prob-fraga).
+     K-F a  ingen vågrät linje INNE I huvuduppgiften — under en rad eller vid en stegrubrik. Rutornas egna ramar
+            (.sida, input) och knapparna är inga linjer.
+     K-F b  linje ovanför varje huvuduppgift utom den första, med kontrast minst 2,0 mot arket.
+     K-D    raden slutar inte med ett ensamt "=": vänsterled, tecken och högerled på samma linje.
+     K-E    mäts inte: rutorna bär inget facit i sidan (se nedan), och bladkärnans K-E dömer en ruta mot sitt facit.
+     K-J    numret i frågans typografi (familj, minst 60 % av storleken, ljushet inom 0,10).
+     K-K    likhet → rutan DIREKT efter tecknet (samma linje, högst 24 px). Fritt svar → etiketten ("Svar",
+            följdfrågans etikett) och rutan som ETT par på samma linje, och paret högerställt — bladkärnans fall 3.
+     Rättar inget: grinden rapporterar. Sabotagen (streck, grupp, bokstavsstil, par, svarsetikett) verkar också
+     här, så att varje ben kan fällas. */
+  var PROB_RAD = '.prob-delrad, .prob-insattrad, .prob-svarrad, .prob-svarrad2, .prob-foljdrad';
+  function synligaBarn(r){ return Array.prototype.filter.call(r.children, synlig); }
+  // En rad i ett rutnät kan vara display:contents (ingen egen ruta) — den finns om något barn syns.
+  function radSyns(r){ return synlig(r) || synligaBarn(r).length > 0; }
+  function linjerAv(els){
+    var linjer = [];
+    els.forEach(function(c){ var cr = c.getBoundingClientRect(), l = linjer[linjer.length - 1];
+      if(!l || Math.abs(l.top - cr.top) > 6) linjer.push({ top: cr.top, items: [c] }); else l.items.push(c); });
+    return linjer;
+  }
+  function mitten(r){ return (r.top + r.bottom) / 2; }
+  function beskriv(e){ return (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\\s+/)[0] : e.tagName.toLowerCase())
+    + (kort(e.textContent) ? ' "' + kort(e.textContent).slice(0, 20) + '"' : ''); }
+  function gridRader(g){
+    return Array.prototype.filter.call(g.children, function(c){ return c.classList.contains('eq-vl') && synlig(c); })
+      .map(function(vl){ var eq = vl.nextElementSibling, hl = eq && eq.nextElementSibling;
+        return { vl: vl, eq: eq && eq.classList.contains('eq-eq') ? eq : null, hl: hl && hl.classList.contains('eq-hl') ? hl : null }; });
+  }
+  function matProb(namn, sh){
+    var variant = ((sh.parentElement && sh.parentElement.id) || '').match(/-([A-Z])$/);   // nf-sheet-<typ>-A: bladets variant i namnet
+    var b = { blad: namn + (variant ? ' ' + variant[1] : ''), rader: 0, grupper: 0, rutor: 0, bokstaver: 0, svarMedLikhet: 0, svarFritt: 0, brott: [] };
+    var bak = bakgrund(sh);
+    var uppg = Array.prototype.filter.call(sh.querySelectorAll('.prob-uppg'), synlig);
+
+    /* SABOTAGEN — samma namn som bladkärnans, samma fel. */
+    var forstaGrid = function(){ var g = sh.querySelector('.prob-uppg .eq-grid'); return g ? gridRader(g)[0] : null; };
+    if(SABBA === 'streck'){ var gs = forstaGrid(); if(gs){ gs.vl.style.borderBottom = '1px dotted rgb(237,230,214)'; ut.noter.push('SABBA (prob): satte en linje under en kedjerad'); } }
+    if(SABBA === 'grupp' && uppg[1]){ uppg[1].style.borderTop = 'none'; ut.noter.push('SABBA (prob): tog bort strecket ovanför huvuduppgift 2'); }
+    if(SABBA === 'bokstavsstil'){ var nb = Array.prototype.filter.call(sh.querySelectorAll('.uppg-nr, .uppg-etikett'), synlig)[0];
+      if(nb){ nb.style.fontFamily = 'Cinzel, serif'; nb.style.fontSize = '11px'; nb.style.color = 'rgb(122,110,101)'; ut.noter.push('SABBA (prob): gav numret eget typsnitt och liten grå ton'); } }
+    if(SABBA === 'par'){ var gp = forstaGrid(); if(gp && gp.hl){ gp.hl.style.gridColumn = '1 / -1'; ut.noter.push('SABBA (prob): flyttade högerledet till en egen rad'); } }
+    if(SABBA === 'svarsetikett'){ var sr = Array.prototype.filter.call(sh.querySelectorAll('.prob-steg-rub'), function(e){ return synlig(e) && /^Svar/.test(kort(e.textContent)); })[0];
+      if(sr){ sr.remove(); ut.noter.push('SABBA (prob): tog bort svarets etikett'); } }
+
+    // ── K-J: numret i frågans typografi ──
+    Array.prototype.forEach.call(sh.querySelectorAll('.uppg-nr, .uppg-etikett'), function(lbl){
+      if(!synlig(lbl)) return;
+      var fr = lbl.closest('.prob-fraga') || (lbl.parentElement && lbl.parentElement.querySelector('.prob-fraga'));
+      if(!fr) return;
+      b.bokstaver++;
+      var rs = getComputedStyle(fr), ls = getComputedStyle(lbl);
+      var rF = rs.fontFamily.split(',')[0].replace(/["']/g, '').trim(), lF = ls.fontFamily.split(',')[0].replace(/["']/g, '').trim();
+      var rS = parseFloat(rs.fontSize), lS = parseFloat(ls.fontSize), dL = lum(blanda(ls.color, bak)) - lum(blanda(rs.color, bak));
+      if(lF !== rF) b.brott.push('K-J ANNAT TYPSNITT: numret "' + kort(lbl.textContent) + '" ar ' + lF + ' medan fragan ar ' + rF);
+      else if(lS < rS * 0.6) b.brott.push('K-J FOR LITEN: numret ar ' + Math.round(lS) + ' px mot fragans ' + Math.round(rS) + ' px');
+      else if(Math.abs(dL) > 0.10) b.brott.push('K-J FOR LJUS: numrets ton ligger ' + (Math.round(100 * dL) / 100) + ' fran fragans i ljushet (kravs 0,10)');
+    });
+
+    uppg.forEach(function(u, ui){
+      b.grupper++;
+      // ── K-F b ──
+      if(ui > 0){
+        var k = kant(u, 'Top');
+        if(!k) b.brott.push('K-F SAKNAD AVDELARE MELLAN HUVUDUPPGIFTER: uppgift ' + (ui + 1) + ' har ingen linje ovanfor sig');
+        else { var c = kontrast(delar(bak).slice(0, 3), blanda(k.farg, bak));
+          if(c < MIN_KONTRAST) b.brott.push('K-F AVDELAREN SYNS INTE: uppgift ' + (ui + 1) + ' har kontrast ' + c + ' mot arket (kravs ' + MIN_KONTRAST + ')'); }
+      }
+      // ── K-F a: ingen vågrät linje inne i uppgiften (en ram runt en ruta eller knapp är ingen linje) ──
+      Array.prototype.forEach.call(u.querySelectorAll('*'), function(e){
+        if(!synlig(e) || e.matches('input, button, .sida, svg, svg *') || e.closest('.sida, svg, .prob-figur')) return;
+        if(kant(e, 'Left') || kant(e, 'Right')) return;      // en ram, inte en linje
+        ['Top', 'Bottom'].forEach(function(s){
+          var kk = kant(e, s);
+          if(kk) b.brott.push('K-F LINJE INNE I HUVUDUPPGIFTEN: ' + beskriv(e) + ' har en linje ' + (s === 'Top' ? 'ovanfor' : 'under') + ' sig (' + kk.bredd + ' px)');
+        });
+      });
+      // ── Kedjans rader i rutnätet: K-D (inget ensamt "=") och K-K (rutan direkt efter tecknet) ──
+      Array.prototype.forEach.call(u.querySelectorAll('.eq-grid'), function(g){
+        gridRader(g).forEach(function(r){
+          if(!r.eq || !r.hl) return;
+          b.rader++; b.svarMedLikhet++;
+          var txt = kort(r.vl.textContent + ' = ' + r.hl.textContent) || '(tom rad)';
+          var l = linjerAv([r.vl, r.eq, r.hl].filter(synlig));
+          if(l.length > 1 && l[0].items[l[0].items.length - 1] === r.eq)
+            b.brott.push('K-D RADEN SLUTAR MED ETT ENSAMT "=": kedjeraden ' + txt.slice(0, 22) + ' bryter efter tecknet');
+          var er = r.eq.getBoundingClientRect(), hr = (r.hl.querySelector('.sida') || r.hl).getBoundingClientRect();
+          if(Math.abs(mitten(er) - mitten(hr)) > hr.height / 2 || hr.left - er.right > 24)
+            b.brott.push('K-K RUTAN STAR INTE EFTER LIKHETSTECKNET: kedjeraden ' + txt.slice(0, 22) + ' (' + Math.round(hr.left - er.right) + ' px efter tecknet, '
+              + Math.round(Math.abs(mitten(er) - mitten(hr))) + ' px i hojd)');
+        });
+      });
+      // ── Stegens rader ──
+      Array.prototype.forEach.call(u.querySelectorAll(PROB_RAD), function(r){
+        if(!radSyns(r)) return;
+        b.rader++;
+        var barn = synligaBarn(r), txt = kort(r.textContent) || '(tom rad)';
+        // K-D
+        var l = linjerAv(barn);
+        l.forEach(function(li, i){ if(i === l.length - 1) return;
+          var s = li.items[li.items.length - 1];
+          if(kort(s.textContent) === '=' && !(s.querySelector && s.querySelector('input')))
+            b.brott.push('K-D RADEN SLUTAR MED ETT ENSAMT "=": "' + txt.slice(0, 22) + '"'); });
+        // K-K likhet: rutan direkt efter "="
+        var lika = barn.filter(function(c){ return kort(c.textContent) === '=' && !c.querySelector('input'); })[0];
+        if(lika){
+          b.svarMedLikhet++;
+          var efter = lika.nextElementSibling; while(efter && !synlig(efter)) efter = efter.nextElementSibling;
+          if(efter && (efter.matches('input') || efter.querySelector('input'))){
+            var a = lika.getBoundingClientRect(), e2 = efter.getBoundingClientRect();
+            if(Math.abs(mitten(a) - mitten(e2)) > e2.height / 2 || e2.left - a.right > 24)
+              b.brott.push('K-K RUTAN STAR INTE EFTER LIKHETSTECKNET: "' + txt.slice(0, 26) + '" (' + Math.round(e2.left - a.right) + ' px)');
+          }
+          return;
+        }
+        // K-K fritt svar: svarsraden och följdfrågan
+        if(!r.matches('.prob-svarrad, .prob-svarrad2, .prob-foljdrad')) return;
+        b.svarFritt++;
+        var ruta = r.querySelector('.sida') || r.querySelector('input');
+        if(!ruta || !synlig(ruta)) return;
+        var et = r.querySelector('.prob-foljd-etikett');
+        if(!et){                                             // svarets etikett: stegrubriken "Svar" före raden/listan
+          var n = r.closest('.prob-svarlista') || r;
+          for(var p = n.previousElementSibling; p; p = p.previousElementSibling){
+            if(!synlig(p)) continue;
+            if(p.classList.contains('prob-steg-rub')){ if(/^Svar/.test(kort(p.textContent))) et = p; break; }
+            break;
+          }
+        }
+        if(!et){ b.brott.push('K-K FRITT SVAR UTAN "Svar": "' + txt.slice(0, 30) + '"'); return; }
+        var etR = et.getBoundingClientRect(), ruR = ruta.getBoundingClientRect();
+        if(Math.abs(mitten(etR) - mitten(ruR)) > ruR.height / 2)
+          b.brott.push('K-K ETIKETTEN OCH RUTAN ISAR: "' + kort(et.textContent).slice(0, 14) + '" star ' + Math.round(mitten(ruR) - mitten(etR))
+            + ' px ovanfor rutan — fall 3: etiketten och rutan ar ett par pa samma rad');
+        var radR = (r.closest('.prob-uppg') || r).getBoundingClientRect();
+        if(radR.right - ruR.right > 24)
+          b.brott.push('K-K FRITT SVAR EJ HOGERSTALLT: "' + txt.slice(0, 22) + '" har ' + Math.round(radR.right - ruR.right) + ' px luft till uppgiftens hogerkant');
+      });
+      /* RUTORNA räknas. K-E mäts INTE här: bladkärnans K-E dömer en ruta mot sitt facit ("kort svar" = facit ryms i
+         den smala rutans golv) och hoppar över en ruta utan facit i sidan — problemlösningens rutor bär inget (facit
+         räknas ur villkoren i rättaren). En min-width är rutans golv (§3: "måttet är ett golv"), inte en fast bredd. */
+      Array.prototype.forEach.call(u.querySelectorAll('input'), function(inp){
+        if(synlig(inp) && inp.type !== 'hidden' && inp.type !== 'button') b.rutor++;
+      });
+    });
+    ut.blad.push(b);
+  }
+
   function matSheet(namn, sh){
+    if(sh.classList.contains('prob-kort')) return matProb(namn, sh);
     var b = { blad: namn, rader: 0, grupper: 0, rutor: 0, bokstaver: 0, svarMedLikhet: 0, svarFritt: 0, brott: [] };
     var bak = bakgrund(sh);
 
@@ -562,7 +721,7 @@ const PROBE = `(function(){
   var sedda = [];
   (nav.length ? nav : [null]).forEach(function(knapp){
     if(knapp){ if(knapp.disabled) return; knapp.click(); }
-    Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet, .eq-kort'), function(sh){
+    Array.prototype.forEach.call(document.querySelectorAll('.ovn-sheet, .ak8-sheet, .eq-kort, .prob-kort'), function(sh){
       if(sedda.indexOf(sh) >= 0 || !synlig(sh)) return;
       sedda.push(sh);
       var vard = sh.parentElement || sh;
@@ -575,7 +734,7 @@ const PROBE = `(function(){
       }
       /* NYTT BLAD (2026-11-10): varje steg mäts också efter "Nytt blad" — bladet byggs om, så arket letas
          upp på nytt per tryck (sh är då ett löst element). */
-      function nuSh(){ return vard.querySelector('.ovn-sheet, .ak8-sheet, .eq-kort') || sh; }
+      function nuSh(){ return vard.querySelector('.ovn-sheet, .ak8-sheet, .eq-kort, .prob-kort') || sh; }
       function medNytt(namn){ nyttVarv(vard, function(i){ matSheet(namn.slice(0, 24) + ' nytt ' + i, nuSh()); }); }
       var steg = stegKnappar().length;
       if(steg < 2){ matSheet(namnNu(0), sh); medNytt(namnNu(0)); return; }
@@ -625,8 +784,8 @@ NY.jobb(Sidor.alla(), VY, args).forEach(j => {
     console.log((b.brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad
       + ': ' + b.rader + ' rader, ' + b.grupper + ' uppgifter, ' + b.rutor + ' rutor, '
       + b.bokstaver + ' bokstäver, ' + b.svarMedLikhet + '=/' + b.svarFritt + ' fria svar' + (b.svarBild ? ' · ' + b.svarBild + ' bild-uppgifter' : '') + (b.svarLucka ? ' · ' + b.svarLucka + ' luckmeningar' : '')
-      + (b.brott.length ? '\n     ' + b.brott.slice(0, 4).join('\n     ')
-         + (b.brott.length > 4 ? '\n     … och ' + (b.brott.length - 4) + ' till' : '') : ''));
+      + (b.brott.length ? '\n     ' + b.brott.slice(0, ALLA ? b.brott.length : 4).join('\n     ')
+         + (!ALLA && b.brott.length > 4 ? '\n     … och ' + (b.brott.length - 4) + ' till' : '') : ''));
   });
   // K-U VID CHROMEBOOK (Joachim 2026-10-08: skärmen som räknas, 1366 × 768 och 1536 × 864). Bara
   // sidor som laddar uppställningens yta — en läsning av filen — och bara K-U räknas här: övriga

@@ -6,7 +6,7 @@
    förståelsemål) — speglar hela lärandet, inte bara öva (det är testets regel).
    Fält: id = belief-nyckel (stabil — byt aldrig, då tappar eleven sin skattning) · text · nod = evidensnod
    i K1_TAXONOMI (lista → svagaste) · delad:true = noden är grövre än raden (delad-evidens, ingen falsk
-   bekräftelse) · utan nod = ren skattning · fordjupning:true = ★ · bygg = byggbehov (visas inte för eleven).
+   bekräftelse) · utan nod = ren skattning · fordjupning:true = badgen F · bygg = byggbehov (visas inte för eleven).
    Läses av js/karta/sjalvskattning.js (config.rader). GDPR: ren data, inget nät. */
 window.K1_SJALVSKATTNING = {
   delkapitel: [
@@ -72,7 +72,7 @@ window.K1_SJALVSKATTNING = {
       ] }
     ] },
     // d3: dokumentets Negativa tal-block = delkapitlet (negativa tal skattas här, inte i räknesätten).
-    // Mult/div + flera faktorer tränas i d3:s Fördjupning-flik → ★.
+    // Mult/div + flera faktorer tränas i d3:s Fördjupning-flik → F.
     { del: 'd3', titel: 'Negativa tal', rader: [
       { id: 'sj-d3-motsatta',       text: 'Kan talens motsatta tal', nod: 'neg-begrepp:begrepp', delad: true },
       { id: 'sj-d3-storleksordna',  text: 'Kan storleksordna tal som är både positiva och negativa', nod: 'neg-begrepp:begrepp', delad: true },

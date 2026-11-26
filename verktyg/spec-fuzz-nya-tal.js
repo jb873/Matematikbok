@@ -17,12 +17,18 @@
      EGEN      lövets egna talregler ur klartexten (k3-d3-metodtraning.md): N1 talen −15–25; N3 talet i rutan
                −10–15; N5 faktorerna 2–9, vid division nämnaren och kvoten 2–9; F5/F6 divisionen går jämnt;
                M5 värdet 0 eller positivt
+     d1 (k3d1: R1 tal, R3–R5 insättning; Joachim 2026-11-26):
+     AVSKRIFT  avskriften är uttrycket med talen insatta (räknat här: 4x → 4 · 5) och har svarets värde; rubriken bär
+               uttrycket ("Beräkna 4x + 3 när x = 5.")
+     LED       lika många led som mallen, varje led har svarets värde och ett räknesteg mindre, sista ledet ett steg
+     EGEN      inget gånger eller delat med 1; svaret har högst mallens decimaler (divisionen går jämnt)
+     BANKEN    bankens egna avskrifter och led följer av samma räkning som de nya uppgifternas
      NY        uppgiften (uttrycket och insättningsvärdet) är inte en av bankens och upprepar inte någon av de tio
                föregående
      SLUT      drillen tar inte slut: varje nasta(i) ger ett blad
    Raderna mäts efter typ: parentesraden (uttryck), förenkla-rutan (fraga), talrutan ("4 − 9 = __"), saknat tal
    ("5 − __ = −3": uträkningen med svaret insatt), prioKedjan (vansterText och facitLed).
-   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form|led|egen förstör de
+   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form|led|egen|avskrift förstör de
    nya uppgifterna efter mekanismen, och fuzzen ska då fälla med benets namn.
    KÖR:  node verktyg/spec-fuzz-nya-tal.js [--n 300] [--lov P2] [--sabba …]     Exit 1 vid brott. Ingen nätväg. */
 'use strict';
@@ -40,7 +46,8 @@ const AB = window.AlgBrak, ML = window.MellanledRattare, NT = window.NyaTal;
 AB.bokstaver('abnstvxyz');
 /* KÄLLORNA med räknelöv: modulen och hur den hämtar ett löv. En ny källa (t.ex. d1:s) läggs till här. */
 const KALLOR = [
-  { id: 'k3d3', filer: ['motor/blad/blad-k3-d3-typer.js', 'motor/blad/blad-k3-d3-metod.js'], mod: () => window.BLAD_K3_D3_METOD }
+  { id: 'k3d3', filer: ['motor/blad/blad-k3-d3-typer.js', 'motor/blad/blad-k3-d3-metod.js'], mod: () => window.BLAD_K3_D3_METOD },
+  { id: 'k3d1', filer: ['motor/blad/blad-k3-d1-typer.js', 'motor/blad/blad-k3-d1-metod.js'], mod: () => window.BLAD_K3_D1_METOD }
 ];
 
 const m = s => String(s).replace(/−/g, '-');
@@ -83,9 +90,21 @@ function egnaLed(u){
 }
 const evalTal = u => Function('return ' + m(u).replace(/·/g, '*').replace(/,/g, '.').replace(/(\d)\s*\(/g, '$1*(').replace(/\)\s*\(/g, ')*('))();
 /* RADEN mätt efter typ → { U: uttrycket, S: svaret, x, vardeSvar, ruta: talet i rutan (saknat tal) }. */
-function las(rad){
+/* d1:s insättning: värdet står i rubriken ("Beräkna 4x + 3 när x = 5.", "… när a = 6 och b = 9."). */
+function xUrRubrik(r){
+  const t = /när ((?:[a-z] = \d+(?:,\d+)?(?: och )?)+)\./.exec(r || ''); if(!t) return null;
+  const par = t[1].split(' och ').map(p => p.split(' = '));
+  return par.length === 1 ? tal(par[0][1]) : par.reduce((o, p) => (o[p[0]] = tal(p[1]), o), {});
+}
+function las(rad, g, kalla){
   if(rad.typ === 'parentes') return { U: rad.uttryck, S: rad.svar, x: rad.varde && rad.varde.x, vardeSvar: rad.varde && rad.varde.svar };
   if(rad.typ === 'forenkla') return { U: rad.fraga, S: rad.svar };
+  // d1:s räkning (R1 tal, R3–R5 insättning): avskriften och leden efter prioriteringsregeln.
+  if(rad.typ === 'prioKedja' && kalla === 'k3d1'){
+    const L = { U: rad.vansterText, S: tUt(rad.svar), led: rad.facitLed, avskrift: rad.avskrift && rad.avskrift.visa, d1: true };
+    if(/[a-z]/i.test(rad.vansterText)){ L.x = xUrRubrik(g.rubrik); L.vardeSvar = rad.svar; L.rubrik = g.rubrik; }
+    return L;
+  }
   if(rad.typ === 'prioKedja') return { U: rad.vansterText, S: tUt(rad.svar), led: rad.facitLed };
   if(rad.typ === 'lucka'){
     if(/ = __$/.test(rad.text)) return { U: rad.text.replace(/ = __$/, ''), S: tUt(rad.svar) };
@@ -102,6 +121,17 @@ const EGEN = {
   F6: L => !/,/.test(L.S) || 'divisionen går inte jämnt',
   M5: L => L.vardeSvar >= 0 || 'värdet ' + L.vardeSvar + ' är negativt'
 };
+/* d1:s räknelöv (k3-d1-metodtraning.md har inga talregler per löv): som i banken — inget gånger eller delat med 1, och
+   svaret har högst så många decimaler som mallens tal (divisionen går jämnt). */
+const D1_EGEN = L => {
+  const ett = [L.avskrift].concat(L.led || []).find(t => /(^|[^\d,])1 ·|· 1(?![\d,])|\/1(?![\d,])|(^|[^\d,])1\//.test(t));
+  if(ett) return 'gånger eller delat med 1 i "' + ett + '"';
+  const aa = [L.avskrift].concat(L.led || []).find(t => (t.match(/\d+(?:,\d+)?\/\d+(?:,\d+)?/g) || []).some(q => q.split('/')[0] === q.split('/')[1]));
+  if(aa) return 'bråket a/a i "' + aa + '"';
+  const dec = (String(L.S).split(',')[1] || '').length;
+  return dec <= (L.D || 0) || 'svaret ' + L.S + ' har fler decimaler än mallens (' + (L.D || 0) + ')';
+};
+['R1', 'R3', 'R4', 'R5'].forEach(id => { EGEN[id] = D1_EGEN; });
 function ledText(u){ return ML.facitTermer(u).join(' + ').replace(/\+ -/g, '- '); }
 function minusForeParentes(u){ return ML.grupper(u).some(g => g.parentes && g.tecken === '-'); }
 
@@ -119,6 +149,18 @@ KALLOR.forEach(K => {
     if(!k || !k.mall){ console.log('  · ' + K.id + ':' + id + ' — bara författade uppgifter (ingen mall)'); return; }
     k = NT.medNasta(k);
     const M = k.mall, R = M.regler || {}, n = k.instanser.length;
+    /* BANKEN (d1): bankens egna avskrifter och led följer av samma räkning som de nya uppgifterna får — annars bygger
+       mekanismen leden på ett annat sätt än Joachims facit. */
+    if(MOD.rakna){
+      MOD.bank(id).uppg.forEach((x, i) => {
+        const rad = x.rader[0], mm = MOD.rakna.mallAv(id, x);
+        if(!mm){ brot('BANKEN', id, i + 1, 'ingen mall ur uppgiften'); return; }
+        const av = mm.typ === 'prio' ? mm.uttryck : MOD.rakna.avskriftAv(mm.uttryck, mm.x), r = MOD.rakna.ledAv(av);
+        if(av !== rad.avskrift.visa) brot('BANKEN', id, i + 1, 'avskriften ' + av + ' ≠ bankens ' + rad.avskrift.visa);
+        if(JSON.stringify(r.led) !== JSON.stringify(rad.facitLed) || Math.abs(r.svar - rad.svar) > 1e-9)
+          brot('BANKEN', id, i + 1, 'leden ' + JSON.stringify(r.led) + ' = ' + r.svar + ' ≠ bankens ' + JSON.stringify(rad.facitLed) + ' = ' + rad.svar);
+      });
+    }
     // Bankens band och största svar — mätt ur mallarna.
     const bandB = {}; let maxSvar = 0, maxVarde = 0;
     M.mallar.forEach(mm => {
@@ -139,7 +181,7 @@ KALLOR.forEach(K => {
       let inst = k.nasta(i);
       if(!inst){ brot('SLUT', id, i, 'nasta gav inget blad'); continue; }
       inst = JSON.parse(JSON.stringify(inst));
-      const g = inst.blad.grupper[0], rad = g.rader[0], L = las(rad);
+      const g = inst.blad.grupper[0], rad = g.rader[0], L = las(rad, g, K.id);
       if(!L){ brot('FORM', id, i, 'okänd radtyp ' + rad.typ); continue; }
       const x = L.x;
       // ── SABOTAGE (efter mekanismen) ──
@@ -148,7 +190,8 @@ KALLOR.forEach(K => {
       if(SABBA === 'mellanled' && rad.mellanled === 'kravt') rad.mellanled = 'frivilligt';
       if(SABBA === 'form' && i % 7 === 0) L.U = L.U.replace(/\+/, '-');
       if(SABBA === 'led' && L.led) L.led = [L.S];
-      if(SABBA === 'egen' && EGEN[id]){ if(id === 'N3') L.ruta = 17; else if(id === 'M5') L.vardeSvar = -1; else if(/^F/.test(id)) L.S = L.S + ',5'; else L.U = L.U.replace(/\d+/, '41'); }
+      if(SABBA === 'egen' && EGEN[id]){ if(id === 'N3') L.ruta = 17; else if(id === 'M5') L.vardeSvar = -1; else if(/^F/.test(id)) L.S = L.S + ',5'; else if(L.d1) L.S = tUt(tal(m(L.S)) + 0.037); else L.U = L.U.replace(/\d+/, '41'); }
+      if(SABBA === 'avskrift' && L.d1) L.avskrift = L.avskrift.replace(/\d+/, d => String(+d + 1));
       const U = L.U, S = L.S, vardeSvar = L.vardeSvar;
       let lyckat = true; const b = (ben, t) => { lyckat = false; brot(ben, id, i, t + '  [' + U + ' = ' + S + ']'); };
       // TALREGEL och BAND
@@ -164,9 +207,25 @@ KALLOR.forEach(K => {
       // Flera mallar kan ha samma form (−5 + 11 och −9 + 4): svarsformen ska vara någon av deras.
       const sig = signatur(U), mis = sigs.map((x, j) => x === sig ? j : -1).filter(j => j >= 0);
       if(!mis.length) b('FORM', 'ingen mall har formen ' + sig);
+      else if(L.d1 && x != null){
+        // Insättningen: svaret är ett tal — samma tecken som mallens värde, och ett heltal om mallens är ett heltal.
+        const vm = mis.map(j => insatt(M.mallar[j].uttryck, M.mallar[j].x));
+        if(!vm.some(v => (v > 0) === (vardeSvar > 0) && (v !== Math.round(v) || vardeSvar === Math.round(vardeSvar)))) b('FORM', 'värdets form ' + vardeSvar + ' ≠ mallarnas ' + vm.join('/'));
+      }
       else if(!mis.some(j => svarsform(S) === svarsform(NT.svarAv(NT.poly(M.mallar[j].uttryck))))) b('FORM', 'svarsformen ' + svarsform(S) + ' ≠ mallarnas');
+      // AVSKRIFT (d1): uttrycket med talen insatta, räknat här, och med svarets värde
+      if(L.d1){
+        const egen = x == null ? U : m(U).replace(/(\d)\s*([a-z])/gi, (_, d, k) => d + ' · ' + tUt(typeof x === 'object' ? x[k] : x))
+          .replace(/[a-z]/gi, k => tUt(typeof x === 'object' ? x[k] : x)).replace(/-/g, '−');
+        if(L.avskrift !== egen) b('AVSKRIFT', 'avskriften "' + L.avskrift + '" ≠ "' + egen + '"');
+        let va = NaN; try { va = evalTal(L.avskrift); } catch(e){}
+        if(!(Math.abs(va - tal(m(S))) < 1e-9)) b('AVSKRIFT', 'avskriften har värdet ' + va + ', svaret ' + S);
+        if(x != null && L.rubrik.indexOf('Beräkna ' + U + ' när ') !== 0) b('FORM', 'rubriken bär inte uttrycket: ' + L.rubrik);
+      }
       // FACIT (rena tal: värdet räknat här; uttryck: AlgBrak och rättaren)
-      if(!/[a-z]/i.test(U)){
+      if(L.d1){ /* insättningen prövas nedan (x) och i AVSKRIFT; R1 är rena tal */ if(!/[a-z]/i.test(U)){ let v; try { v = evalTal(U); } catch(e){ b('FACIT', 'otolkbart: ' + e.message); }
+        if(v !== undefined && Math.abs(v - tal(m(S))) > 1e-9) b('FACIT', 'värdet ' + v + ' ≠ svaret ' + S); } }
+      else if(!/[a-z]/i.test(U)){
         let v; try { v = evalTal(U); } catch(e){ b('FACIT', 'otolkbart: ' + e.message); }
         if(v !== undefined && Math.abs(v - tal(m(S))) > 1e-9) b('FACIT', 'värdet ' + v + ' ≠ svaret ' + S);
       } else {
@@ -185,10 +244,29 @@ KALLOR.forEach(K => {
       }
       if(x != null && Math.abs(insatt(U, x) - vardeSvar) > 1e-9) b('FACIT', 'insättningen ' + insatt(U, x) + ' ≠ ' + vardeSvar);
       // SVÅRARE
-      talIText(S).forEach(v => { if(v > maxSvar) b('SVÅRARE', 'talet ' + v + ' i svaret > bankens ' + maxSvar); });
+      // (d1:s insättning: svaret är värdet, och det prövas mot bankens största värde nedan.)
+      if(!(L.d1 && x != null)) talIText(S).forEach(v => { if(v > maxSvar) b('SVÅRARE', 'talet ' + v + ' i svaret > bankens ' + maxSvar); });
       if(x != null && (vardeSvar < 0 || (vardeSvar === 0 && !bankNoll) || vardeSvar > maxVarde)) b('SVÅRARE', 'värdet ' + vardeSvar + ' (bankens största ' + maxVarde + ', ska vara positivt)');
+      // LED (d1): lika många led som mallen, varje led har värdet, varje led ett räknesteg kortare, sista ledet ett steg
+      if(L.d1){
+        const ops = t => (String(t).match(/[·\/]| [+−] /g) || []).length;
+        const antal = mis.length ? M.mallar[mis[0]].antalLed : null, kedja = [L.avskrift].concat(L.led || []);
+        if((L.led || []).length !== antal) b('LED', (L.led || []).length + ' led, mallen har ' + antal);
+        (L.led || []).forEach(l => { let v = NaN; try { v = evalTal(l); } catch(e){} if(!(Math.abs(v - tal(m(S))) < 1e-9)) b('LED', 'ledet ' + l + ' har inte svarets värde'); });
+        for(let q = 1; q < kedja.length; q++) if(!(ops(kedja[q]) < ops(kedja[q - 1]))) b('LED', 'ledet ' + kedja[q] + ' räknar inget');
+        // Sista ledet räknas i ETT steg: ingen parentes, och bara en prioritetsnivå kvar ("50 − 28 + 3", "12 · 5").
+        const sista = kedja[kedja.length - 1];
+        if(antal > 0 && (/[()]/.test(sista) || (/[·\/]/.test(sista) && / [+−] /.test(sista)))) b('LED', 'sista ledet ' + sista + ' räknas inte i ett steg');
+        // D och heltal: mallarna med samma form (flera kan ha den: 40 − 6 · 5 och 20,5 − 3 · 4,5) — EGEN och FORM
+        const decAv = mm => Math.max(0, ...(mm.uttryck.match(/\d+(?:,\d+)?/g) || []).map(t => (t.split(',')[1] || '').length),
+          ...(mm.x == null ? [] : (typeof mm.x === 'object' ? Object.values(mm.x) : [mm.x])).map(v => (String(v).split('.')[1] || '').length));
+        const sv = tal(m(S)), passar = mis.filter(j => { const mm = M.mallar[j], vm = x == null ? evalTal(mm.uttryck) : insatt(mm.uttryck, mm.x);
+          return vm !== Math.round(vm) || sv === Math.round(sv); });
+        if(mis.length && !passar.length) b('FORM', 'svaret ' + S + ' är inte ett heltal fast mallens är det');
+        L.D = Math.max(0, ...(passar.length ? passar : mis).map(j => decAv(M.mallar[j])));
+      }
       // LED (prioKedjan)
-      if(rad.typ === 'prioKedja'){
+      else if(rad.typ === 'prioKedja'){
         const egna = egnaLed(U);
         if(!egna || JSON.stringify(egna) !== JSON.stringify(L.led)) b('LED', 'facits led ' + JSON.stringify(L.led) + ' ≠ ' + JSON.stringify(egna));
         (L.led || []).forEach(l => { let v = NaN; try { v = evalTal(l); } catch(e){} if(!(Math.abs(v - evalTal(U)) < 1e-9)) b('LED', 'ledet ' + l + ' har inte uttryckets värde'); });

@@ -13,7 +13,8 @@
      faktor  talet framför en parentes          koef  talet framför en bokstav          konst  övriga tal
      varde   insättningsvärdet (x)
    Bandet = lövets talregel ∩ [bankens minsta, bankens största] för rollen. En koefficient eller faktor blir aldrig 1
-   (den skrivs inte ut — då vore formen en annan) och inget tal blir 0.
+   (den skrivs inte ut — då vore formen en annan), inte heller ett tal intill · eller / (gånger 1 är en annan uppgift),
+   och inget tal blir 0. Ett insättningsvärde behåller sina decimaler; x = 0 i mallen förblir 0 (2026-11-26, d1).
    SAMMA SVARSFORM: det förenklade svaret har samma termer med samma tecken som mallens svar. En parentes med bara tal
    behåller sitt tecken (17 − (8 − 3) blir aldrig 17 − (3 − 8)).
    ALDRIG SVÅRARE: inget tal i svaret, och inget beräknat värde, är större (till beloppet) än bankens största.
@@ -110,7 +111,9 @@ function talIMall(s){
     var efter = s.slice(m.index + m[0].length).replace(/^\s+/, '')[0] || '';
     var fore = s.slice(0, m.index);
     if(/[a-zåäö\d,]$/i.test(fore)) continue;                // del av något annat (säkerhetsnät)
-    ut.push({ i: m.index, n: m[0].length, v: tal(m[0]), dec: (m[0].split(',')[1] || '').length,
+    // Ett tal intill · eller / multipliceras eller divideras: blir det 1 är uppgiften en annan (3 · (x + 2) → 1 · (x + 2)).
+    var vidMult = /[·\/]\s*$/.test(fore) || efter === '·' || efter === '/';
+    ut.push({ i: m.index, n: m[0].length, v: tal(m[0]), dec: (m[0].split(',')[1] || '').length, vidMult: vidMult,
               roll: efter === '(' ? 'faktor' : /[a-zåäö]/i.test(efter) ? 'koef' : 'konst' });
   }
   return ut;
@@ -122,6 +125,7 @@ function talParenteser(s){
   return ut;
 }
 function vardenAv(x){ return x == null ? [] : (typeof x === 'object' ? Object.keys(x).map(function(k){ return tal(x[k]); }) : [tal(x)]); }
+function decAv(v){ return (String(rund(tal(v))).split('.')[1] || '').length; }
 
 /* ── SLUMPEN, sådd med lövet och bladnumret ───────────────────────────────────────────────── */
 function hash(s){ var h = 2166136261; for(var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
@@ -134,7 +138,8 @@ function band(mall){
   function in_(roll, v){ var x = b[roll] || (b[roll] = [Infinity, -Infinity]); x[0] = Math.min(x[0], v); x[1] = Math.max(x[1], v); }
   mall.mallar.forEach(function(m){
     talIMall(m.uttryck).forEach(function(t){ in_(t.roll, t.v); if(t.dec) in_(t.roll + '.' + t.dec, t.v); });
-    vardenAv(m.x).forEach(function(v){ in_('varde', v); });
+    // x = 0 behålls som det är (forsok) och dras aldrig — det räknas inte in i bandet för de andra värdena.
+    vardenAv(m.x).forEach(function(v){ if(v === 0) return; in_('varde', v); if(decAv(v)) in_('varde.' + decAv(v), v); });
     var p = poly(m.uttryck);
     Object.keys(p).forEach(function(k){ maxSvar = Math.max(maxSvar, Math.abs(p[k])); });
     if(m.x != null) maxVarde = Math.max(maxVarde, Math.abs(varde(p, m.x)));
@@ -161,7 +166,7 @@ function forsok(m, B, rnd, extra){
   var tl = talIMall(m.uttryck), s = m.uttryck;
   for(var j = tl.length - 1; j >= 0; j--){
     var t = tl[j], bb = (t.dec && B.roll[t.roll + '.' + t.dec]) || B.roll[t.roll]; if(!bb) return null;
-    var v = dra(rnd, bb[0], bb[1], t.dec, t.roll !== 'konst');
+    var v = dra(rnd, bb[0], bb[1], t.dec, t.roll !== 'konst' || t.vidMult);
     if(v === null) return null;
     s = s.slice(0, t.i) + talUt(v) + s.slice(t.i + t.n);
   }
@@ -173,9 +178,12 @@ function forsok(m, B, rnd, extra){
   if(tp.some(function(v, k){ return (v > 0) !== (tm[k] > 0) || v === 0; })) return null;
   var ny = { uttryck: s, svar: svarAv(p) };
   if(m.x != null){
-    var bv = B.roll.varde;
-    if(typeof m.x === 'object'){ ny.x = {}; Object.keys(m.x).forEach(function(k){ ny.x[k] = dra(rnd, bv[0], bv[1], 0, false); }); }
-    else ny.x = dra(rnd, bv[0], bv[1], 0, false);
+    /* Insättningsvärdet: ett decimaltal förblir ett decimaltal med lika många decimaler (d1 R5: x = 3,5), ur bankens
+       band för decimalvärdena; x = 0 i mallen förblir 0 — att sätta in 0 är den uppgiftens poäng (d1 R3). */
+    var dx = function(v){ v = tal(v); if(v === 0) return 0; var d = decAv(v), bv = (d && B.roll['varde.' + d]) || B.roll.varde;
+      return dra(rnd, bv[0], bv[1], d, false); };
+    if(typeof m.x === 'object'){ ny.x = {}; Object.keys(m.x).forEach(function(k){ ny.x[k] = dx(m.x[k]); }); }
+    else ny.x = dx(m.x);
     if(vardenAv(ny.x).some(function(v){ return v === null; })) return null;
     ny.vardeSvar = varde(p, ny.x);
     var vm = varde(pm, m.x), vn = ny.vardeSvar;
