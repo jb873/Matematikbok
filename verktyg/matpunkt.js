@@ -116,16 +116,11 @@ const ETIKETT = [
   { sida: 'ak9/k1/rakna-med-brak-fordjupning.html', etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
   { sida: 'ak9/k1/rakna-med-brak-ova.html',         etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
   { sida: 'ak9/k1/tal-och-berakna-ova.html',        etikett: 'väntar genomgång', skal: 'nians struktur inte genomtänkt än — städas när nian arbetas igenom' },
-  /* d4 och d5 bygger uppgiftsytan som rutnät (eq-grid, prob-uppg) med .seg-text-rutor — mätt
-     2026-10-05: noll .ovn-sheet, noll .ovn-rad, noll .ovn-in på båda sidorna. K-D och K-E har
-     ingen motsvarighet där; K-F har det, och om strecket ska gälla rutnäten är Joachims beslut.
-     BESLUTAT för balansmetodens kedja (Joachim 2026-10-21): K-F gäller. Kedjan ritar sina grupper
-     som .eq-grupp, och brytnings- och notationsgrinden mäter .eq-kort — raden för kedjan är borta.
-     Problemlösningens rutnät (prob-uppg) är inte en del av det beslutet och står kvar. */
-  { sida: 'ak7/k3/d5-problemlosning/index.html',    etikett: 'väntar beslut', skal: 'egen rutnätsyta (prob-uppg) utan .ovn-sheet — K-F på rutnäten väntar på besked' },
-  /* d5:s DRILLBANKER i nytt format (Joachim 2026-11-26: behåller "väntar beslut"): drillen ritar problemlösningens
-     uppgifter med samma rutnätsyta som d5 — samma beslut som raden ovan. */
-  { monster: /drill\.html\?bank=prob-ak7%3A[^ ]* @\d+x\d+$/, etikett: 'väntar beslut', skal: 'problemlösningens drillbanker: samma rutnätsyta (prob-uppg) utan bladkärnans rader — K-F på rutnäten väntar på besked' }
+  /* d4 och d5 bygger uppgiftsytan som rutnät (eq-grid, prob-uppg). BESLUTAT för balansmetodens kedja (Joachim
+     2026-10-21): K-F gäller, och kedjans rad är borta. BESLUTAT för problemlösningen (Joachim 2026-11-26): stegformen
+     (KONVENTIONER, Problemlösning) är ett godkänt undantag från K-F och K-K, strecket mellan uppgifterna följer K-F,
+     och brytningsgrinden mäter problemlösningens ark (.prob-kort). Etiketterna "väntar beslut" för d5 och d5:s
+     drillbanker togs bort då. */
 ];
 
 /* Räckvidden, utskriven i stället för tyst utelämnad. V14 gäller grindar vars mätenhet är

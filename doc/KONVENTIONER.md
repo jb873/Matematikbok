@@ -288,6 +288,8 @@ Samma princip i bladkärnans uttrycksrutor: där facit är ett uttryck godtas in
 
 Hör ihop med §3: för problemlösning räknas poängen per uppgift, men varje ruta rättas fortfarande var för sig.
 
+PROBLEMLÖSNINGENS STEGFORM: Uppgiften löses i Joachims steg (Delarna, Sätt in värdet, Balansmetoden, Svar). Stegrubrikerna med sina linjer och 'Svar' som sista stegets rubrik ovanför rutan är stegformen och ett godkänt undantag från K-F och K-K. Strecket MELLAN uppgifterna följer K-F. Joachim 2026-11-26.
+
 ---
 
 ## Delade plattformsregler — kanoniserade i alla ämnen

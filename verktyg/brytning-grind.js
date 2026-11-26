@@ -178,10 +178,13 @@ const PROBE = `(function(){
      K-D    raden slutar inte med ett ensamt "=": vänsterled, tecken och högerled på samma linje.
      K-E    mäts inte: rutorna bär inget facit i sidan (se nedan), och bladkärnans K-E dömer en ruta mot sitt facit.
      K-J    numret i frågans typografi (familj, minst 60 % av storleken, ljushet inom 0,10).
-     K-K    likhet → rutan DIREKT efter tecknet (samma linje, högst 24 px). Fritt svar → etiketten ("Svar",
-            följdfrågans etikett) och rutan som ETT par på samma linje, och paret högerställt — bladkärnans fall 3.
-     Rättar inget: grinden rapporterar. Sabotagen (streck, grupp, bokstavsstil, par, svarsetikett) verkar också
-     här, så att varje ben kan fällas. */
+     K-K    likhet → rutan DIREKT efter tecknet (samma linje, högst 24 px). Fritt svar → etiketten (följdfrågans
+            etikett) och rutan som ETT par på samma linje, och paret högerställt — bladkärnans fall 3.
+     STEGFORMEN (KONVENTIONER, Problemlösning; Joachim 2026-11-26) är ett godkänt undantag från K-F och K-K:
+            stegrubrikernas linjer fälls inte, och svarsrutan under stegrubriken "Svar" mäts inte som par eller
+            högerställd. Rubriken måste finnas och stå ovanför rutan. Strecket MELLAN uppgifterna följer K-F.
+     Rättar inget: grinden rapporterar. Sabotagen (streck, grupp, bokstavsstil, par, svarsetikett, svarsplats) verkar
+     också här, så att varje ben kan fällas. */
   var PROB_RAD = '.prob-delrad, .prob-insattrad, .prob-svarrad, .prob-svarrad2, .prob-foljdrad';
   function synligaBarn(r){ return Array.prototype.filter.call(r.children, synlig); }
   // En rad i ett rutnät kan vara display:contents (ingen egen ruta) — den finns om något barn syns.
@@ -215,6 +218,9 @@ const PROBE = `(function(){
     if(SABBA === 'par'){ var gp = forstaGrid(); if(gp && gp.hl){ gp.hl.style.gridColumn = '1 / -1'; ut.noter.push('SABBA (prob): flyttade högerledet till en egen rad'); } }
     if(SABBA === 'svarsetikett'){ var sr = Array.prototype.filter.call(sh.querySelectorAll('.prob-steg-rub'), function(e){ return synlig(e) && /^Svar/.test(kort(e.textContent)); })[0];
       if(sr){ sr.remove(); ut.noter.push('SABBA (prob): tog bort svarets etikett'); } }
+    // svarsplats: rubriken "Svar" flyttas under svarsrutan — stegformen bruten, undantaget får inte dölja det.
+    if(SABBA === 'svarsplats'){ var sp = Array.prototype.filter.call(sh.querySelectorAll('.prob-steg-rub'), function(e){ return synlig(e) && /^Svar/.test(kort(e.textContent)); })[0];
+      if(sp){ sp.style.position = 'relative'; sp.style.top = '60px'; ut.noter.push('SABBA (prob): flyttade rubriken "Svar" under svarsrutan'); } }
 
     // ── K-J: numret i frågans typografi ──
     Array.prototype.forEach.call(sh.querySelectorAll('.uppg-nr, .uppg-etikett'), function(lbl){
@@ -242,6 +248,8 @@ const PROBE = `(function(){
       // ── K-F a: ingen vågrät linje inne i uppgiften (en ram runt en ruta eller knapp är ingen linje) ──
       Array.prototype.forEach.call(u.querySelectorAll('*'), function(e){
         if(!synlig(e) || e.matches('input, button, .sida, svg, svg *') || e.closest('.sida, svg, .prob-figur')) return;
+        // STEGFORMEN: stegrubrikernas linjer är ett godkänt undantag från K-F (KONVENTIONER, Problemlösning, 2026-11-26).
+        if(e.classList.contains('prob-steg-rub')) return;
         if(kant(e, 'Left') || kant(e, 'Right')) return;      // en ram, inte en linje
         ['Top', 'Bottom'].forEach(function(s){
           var kk = kant(e, s);
@@ -302,6 +310,14 @@ const PROBE = `(function(){
         }
         if(!et){ b.brott.push('K-K FRITT SVAR UTAN "Svar": "' + txt.slice(0, 30) + '"'); return; }
         var etR = et.getBoundingClientRect(), ruR = ruta.getBoundingClientRect();
+        /* STEGFORMEN (KONVENTIONER, Problemlösning; Joachim 2026-11-26): "Svar" som sista stegets rubrik OVANFÖR rutan
+           är ett godkänt undantag från K-K — paret på samma rad och högerställningen gäller inte. Det som fälls är en
+           svarsruta vars stegrubrik inte står ovanför den. Följdfrågans etikett (i raden) mäts som förut. */
+        if(et.classList.contains('prob-steg-rub')){
+          if(etR.bottom > ruR.top + 2)
+            b.brott.push('K-K SVAR-RUBRIKEN STAR INTE OVANFOR RUTAN: "' + txt.slice(0, 22) + '" — stegformen har rubriken "Svar" ovanfor svarsrutan');
+          return;
+        }
         if(Math.abs(mitten(etR) - mitten(ruR)) > ruR.height / 2)
           b.brott.push('K-K ETIKETTEN OCH RUTAN ISAR: "' + kort(et.textContent).slice(0, 14) + '" star ' + Math.round(mitten(ruR) - mitten(etR))
             + ' px ovanfor rutan — fall 3: etiketten och rutan ar ett par pa samma rad');

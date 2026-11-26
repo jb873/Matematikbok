@@ -202,17 +202,29 @@ function medNasta(kalla){
   // En uppgift är densamma om uttrycket och insättningsvärdet är desamma (x + x + x + x när x = 8 och x = 5 är två).
   function nyckel(x){ return x.uttryck.replace(/\s+/g, '') + (x.x != null ? '|' + JSON.stringify(x.x) : ''); }
   M.mallar.forEach(function(m){ sett[nyckel(m)] = 1; });
+  /* MALLEN FÖRST (Joachim 2026-11-26): varje blad väljer en mall med lika stor chans för varje mall i banken och drar
+     sedan tal tills en uppgift inom bandet hittas. Förr provades mallarna i tur och ordning med 400 dragningar var, och
+     en mall som sällan ger en giltig uppgift hoppades över — den kom nästan aldrig (R1:s "(5 · 12)/4 + (3 · 14)/7": 0
+     av 300). Ger en mall ingen uppgift efter DRAG dragningar tas nästa mall i bankens ordning, så att drillen inte tar
+     slut; det räknas i statistik.tomma och rapporteras av spec-fuzzen. */
+  var DRAG = 20000, S = kalla.statistik = { val: [], drag: [], tomma: [] };
+  M.mallar.forEach(function(){ S.val.push(0); S.drag.push(0); S.tomma.push(0); });
   function ny(i){
     if(i in cache) return cache[i];
     var senaste = [];
     for(var j = Math.max(n, i - 10); j < i; j++){ var f = ny(j); if(f) senaste.push(nyckel(f)); }
-    var rnd = slump(hash(String(M.ref) + ':' + i)), res = null;
-    for(var k = 0; k < M.mallar.length && !res; k++){
-      var m = M.mallar[(i - n + k) % M.mallar.length];
-      for(var f2 = 0; f2 < 400 && !res; f2++){
-        var x = forsok(m, B, rnd, M.extra);
-        if(x && !sett[nyckel(x)] && senaste.indexOf(nyckel(x)) < 0){ x.mall = (i - n + k) % M.mallar.length; res = x; }
+    var rnd = slump(hash(String(M.ref) + ':' + i)), res = null, L = M.mallar.length;
+    var forst = Math.floor(rnd() * L);                          // lika stor chans för varje mall
+    for(var k = 0; k < L && !res; k++) res = dra1((forst + k) % L);   // k > 0 bara om mallen inte gav någon uppgift
+    function dra1(idx){
+      S.val[idx]++;
+      for(var f2 = 0; f2 < DRAG; f2++){
+        S.drag[idx]++;
+        var x = forsok(M.mallar[idx], B, rnd, M.extra);
+        if(x && !sett[nyckel(x)] && senaste.indexOf(nyckel(x)) < 0){ x.mall = idx; return x; }
       }
+      S.tomma[idx]++;
+      return null;
     }
     return (cache[i] = res);
   }
