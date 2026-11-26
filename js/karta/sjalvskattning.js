@@ -187,7 +187,7 @@
       // (t.ex. likhetstecknet, loggat av prob-rutan → MasteryK2). Utan flaggan (sjuan) = null,
       // dvs ren belief-rad → byte-identiskt. Åttan skickar den → evidensen visas bredvid.
       var rader = FORMAGA_ROWS.map(function(f){ return { id:f.id, namn:f.namn, roll:'karna', evidens: config.formagaEvidens ? evidensK2(f.id) : null, kalla:'formaga', formaga:f.formaga, omrade:f.omrade, beliefOnly: !config.formagaEvidens }; });
-      TAX.filter(function(n){ return n.niva === 'lovnod' && arFormaga(n); }).forEach(function(n){
+      TAX.filter(function(n){ return n.niva === 'lovnod' && arFormaga(n) && !arKommerLov(n); }).forEach(function(n){
         var sc = scopeAv(n, PREF); if(!sc.inScope) return;
         var omr = omradeAv(n);
         rader.push({ id:n.id, namn:(n.visning && n.visning.titel) || n.namn, roll:n.roll, evidens: evidensK2(n.id), kalla:'k2',
@@ -200,9 +200,12 @@
     // Förmåge-noderna (KOMMUNIKATION/PROBLEM) exkluderas här — de bor i förmåge-dimensionen.
     // En grov lövnod med VARIANTER expanderas till en rad per variant (belief finare än evidens):
     // varianterna delar förälderns evidensfärg tills drillen splittras (metod-medveten rättning).
+    /* KOMMER-LÖV (Joachim 2026-11-26): ett löv märkt visning.kommer (en plats utan innehåll än) visas INTE i
+       självskattningen — det finns inget att skatta sig på. Kartan visar det som "kommer" som förut. Gäller alla kapitel. */
+    function arKommerLov(n){ return !!(n && n.visning && n.visning.kommer); }
     function raderFor(omr){
       var rader = [];
-      TAX.filter(function(n){ return n.niva === 'lovnod' && omradeAv(n) === omr && !arFormaga(n); }).forEach(function(n){
+      TAX.filter(function(n){ return n.niva === 'lovnod' && omradeAv(n) === omr && !arFormaga(n) && !arKommerLov(n); }).forEach(function(n){
         if(VARIANT_AGA[n.id]) return;   // väg-1-kategorinod → renderas via VARIANTER, inte som platt rad
         var sc = scopeAv(n, PREF); if(!sc.inScope) return;
         // OBS: ingen deeplink. Självskattningen leder ALDRIG till en drill (belief ≠ evidens-väg).

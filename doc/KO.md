@@ -27,14 +27,6 @@ Varje punkt säger vad som brister, var det mättes och när.
   c och d ("63 = ___ · ___ · 7", "150 = 2 · 3 · ___ · ___"): likheten pekar på strecken, men rutan står efter
   meningen. Mätt 2026-11-26.
 
-## Beslut som väntar
-
-- [ ] **Självskattningen visar "kommer"-löv som vanliga rader.** Kartan visar ett löv med `visning.kommer` som
-  "kommer", men självskattningen (`js/karta/sjalvskattning.js`, delad) listar det med Kan/Osäker/Kan ej: kapitel 4:s
-  Andelen, Delen och Det hela, och kapitel 3:s nio kommer-löv. Att ändra modulen ändrar också kapitel 3:s
-  självskattning. Joachims beslut: ska självskattningen visa kommer-löv som "Kommer senare" (eller inte alls)?
-  Mätt 2026-11-26 på `ak7/k4/kunskapslage/index.html?tab=sjalv`.
-
 ## Äldre kö (Joachim 2026-11-10/11: "Behåll i kön och gör inte nu")
 
 Flyttad hit ur chattens minne 2026-11-26. Inte ommätt sedan dess.
