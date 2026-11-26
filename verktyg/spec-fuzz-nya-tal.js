@@ -21,8 +21,9 @@
      AVSKRIFT  avskriften är uttrycket med talen insatta (räknat här: 4x → 4 · 5) och har svarets värde; rubriken bär
                uttrycket ("Beräkna 4x + 3 när x = 5.")
      LED       lika många led som mallen, varje led har svarets värde och ett räknesteg mindre, sista ledet ett steg
-     EGEN      inget gånger eller delat med 1; svaret har högst mallens decimaler (divisionen går jämnt); i "(a · b)/n"
-               är en faktor som är en multipel av nämnaren minst dubbelt så stor (aldrig lika med nämnaren)
+     EGEN      inget gånger eller delat med 1; svaret har högst mallens decimaler (divisionen går jämnt)
+     DELNING   (alla löv) varje division går jämnt, täljaren är minst dubbelt så stor som nämnaren, och en faktor i
+               täljaren som är en multipel av nämnaren är det också (Joachim 2026-11-26)
      BANKEN    bankens egna avskrifter och led följer av samma räkning som de nya uppgifternas
      NY        uppgiften (uttrycket och insättningsvärdet) är inte en av bankens och upprepar inte någon av de tio
                föregående
@@ -131,16 +132,42 @@ const D1_EGEN = L => {
   if(ett) return 'gånger eller delat med 1 i "' + ett + '"';
   const aa = [L.avskrift].concat(L.led || []).find(t => (t.match(/\d+(?:,\d+)?\/\d+(?:,\d+)?/g) || []).some(q => q.split('/')[0] === q.split('/')[1]));
   if(aa) return 'bråket a/a i "' + aa + '"';
-  /* DELBAR (Joachim 2026-11-26): en faktor i täljaren "(a · b)/n" som är en multipel av nämnaren är minst dubbelt så
-     stor som nämnaren (som i banken: 12 = 3 · 4, 14 = 2 · 7) — en faktor lika med nämnaren fälls. */
-  for(const q of m(L.U).matchAll(/\((\d+) · (\d+)\)\s*\/\s*(\d+)/g)){
-    const n = +q[3], f = [+q[1], +q[2]].find(v => v % n === 0 && v < 2 * n);
-    if(f !== undefined) return 'faktorn ' + f + ' är lika med nämnaren i "' + q[0] + '"';
-  }
   const dec = (String(L.S).split(',')[1] || '').length;
   return dec <= (L.D || 0) || 'svaret ' + L.S + ' har fler decimaler än mallens (' + (L.D || 0) + ')';
 };
 ['R1', 'R3', 'R4', 'R5'].forEach(id => { EGEN[id] = D1_EGEN; });
+/* DELNING (Joachim 2026-11-26): varje division går jämnt, och faktorn är minst dubbelt så stor som nämnaren. Mätt här
+   ur texten (d1: avskriften, talen insatta; d3: uppgiften): nämnaren är talet eller parentesen efter "/", täljaren
+   parentesen eller termen före. Täljaren "6x" → koefficienten; annars täljarens värde. Kravet: en multipel av
+   nämnaren, minst 2 · |nämnaren|, och ett tal i täljaren intill · som är en multipel av nämnaren är det också. */
+function delningsbrott(T){
+  const s = m(T);
+  for(let i = 0; i < s.length; i++){
+    if(s[i] !== '/') continue;
+    let e = i; while(e > 0 && s[e - 1] === ' ') e--;
+    let a = e;
+    if(s[e - 1] === ')'){ let dj = 0; for(a = e - 1; a >= 0; a--){ if(s[a] === ')') dj++; else if(s[a] === '(' && !--dj) break; } }
+    else while(a > 0 && /[0-9a-z,]/i.test(s[a - 1])) a--;
+    let b = i + 1; while(s[b] === ' ') b++;
+    let z = b;
+    if(s[b] === '('){ let dj = 0; for(; z < s.length; z++){ if(s[z] === '(') dj++; else if(s[z] === ')' && !--dj){ z++; break; } } }
+    else while(z < s.length && /[0-9a-z,]/i.test(s[z])) z++;
+    const tText = s.slice(a, e), nText = s.slice(b, z);
+    if(/[a-z]/i.test(nText) || /,/.test(nText + tText)) continue;
+    const D = evalTal(nText);
+    let N;
+    if(/[a-z]/i.test(tText)){ const k = /^(\d+)[a-z]$/i.exec(tText); if(!k) continue; N = +k[1]; }
+    else N = evalTal(tText);
+    const vis = '"' + tText + '/' + nText + '"';
+    if(N % D !== 0) return 'divisionen ' + vis + ' går inte jämnt';
+    if(Math.abs(N) < 2 * Math.abs(D)) return 'täljaren i ' + vis + ' är inte minst dubbelt så stor som nämnaren';
+    for(const f of tText.matchAll(/\d+/g)){
+      const fore = tText.slice(0, f.index).trim(), efter = tText.slice(f.index + f[0].length).trim();
+      if((/·$/.test(fore) || /^·/.test(efter)) && +f[0] % D === 0 && +f[0] < 2 * Math.abs(D)) return 'faktorn ' + f[0] + ' är lika med nämnaren i ' + vis;
+    }
+  }
+  return null;
+}
 function ledText(u){ return ML.facitTermer(u).join(' + ').replace(/\+ -/g, '- '); }
 function minusForeParentes(u){ return ML.grupper(u).some(g => g.parentes && g.tecken === '-'); }
 
@@ -161,9 +188,9 @@ KALLOR.forEach(K => {
     const M = k.mall, R = M.regler || {}, n = k.instanser.length;
     // --sabba mall: lövets första mall kan aldrig ge en giltig uppgift — benet MALL måste fälla.
     if(SABBA === 'mall'){ const ex = M.extra, m0 = M.mallar[0]; M.extra = (ny, mm) => mm === m0 ? false : (ex ? ex(ny, mm) : true); }
-    // --sabba delbar: mallarnas egna talregel tas bort (R1 "(5 · 12)/4 + (3 · 14)/7") — utan den ska MALL fälla.
-    if(SABBA === 'delbar') M.mallar.forEach(mm => { delete mm.delbar; });
-    // --sabba lika: mekanismen får låta en faktor vara lika med nämnaren ("(3 · 8)/8") — benet EGEN måste fälla.
+    // --sabba delbar: divisionsregeln stängs av i mekanismen (nya tal dras fritt) — DELNING (och MALL) ska fälla.
+    if(SABBA === 'delbar') NT.delbar = false;
+    // --sabba lika: mekanismen får låta en faktor vara lika med nämnaren ("(3 · 8)/8") — benet DELNING måste fälla.
     if(SABBA === 'lika') NT.delbarMinst = 1;
     /* BANKEN (d1): bankens egna avskrifter och led följer av samma räkning som de nya uppgifterna får — annars bygger
        mekanismen leden på ett annat sätt än Joachims facit. */
@@ -287,6 +314,8 @@ KALLOR.forEach(K => {
         if(!egna || JSON.stringify(egna) !== JSON.stringify(L.led)) b('LED', 'facits led ' + JSON.stringify(L.led) + ' ≠ ' + JSON.stringify(egna));
         (L.led || []).forEach(l => { let v = NaN; try { v = evalTal(l); } catch(e){} if(!(Math.abs(v - evalTal(U)) < 1e-9)) b('LED', 'ledet ' + l + ' har inte uttryckets värde'); });
       }
+      // DELNING (varje division, alla löv)
+      { const r = delningsbrott(L.d1 ? L.avskrift : U); if(r) b('DELNING', r); }
       // EGEN (lövets egna talregler)
       if(EGEN[id]){ const r = EGEN[id](Object.assign({}, L, { U: U, S: S, vardeSvar: vardeSvar })); if(r !== true) b('EGEN', r); }
       // MELLANLED

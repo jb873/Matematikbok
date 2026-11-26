@@ -163,58 +163,108 @@ function dra(rnd, lo, hi, dec, inteEtt){
 
 /* EN NY UPPGIFT ur mallen m. Ger { uttryck, svar, x, vardeSvar } eller null om försöket bryter mot reglerna. */
 function bandFor(B, t){ return (t.dec && B.roll[t.roll + '.' + t.dec]) || B.roll[t.roll]; }
-function sgd(a, b){ return b ? sgd(b, a % b) : a; }
-/* En multipel av d i bandet [lo, hi] (aldrig 0 eller 1), eller null. Är talet också en multipel av nämnaren n ska
-   det vara minst NyaTal.delbarMinst · n (Joachim 2026-11-26: "minst dubbelt så stor som nämnaren", som i banken:
-   12 = 3 · 4, 14 = 2 · 7) — aldrig lika med nämnaren. */
-function multipel(rnd, lo, hi, d, n){
-  var a = Math.max(1, Math.ceil(lo / d)), z = Math.floor(hi / d), ut = [];
-  for(var k = a; k <= z; k++) if(k * d > 1 && !forLiten(k * d, n)) ut.push(k * d);
-  return ut.length ? ut[Math.floor(rnd() * ut.length)] : null;
+
+/* ── DIVISIONERNA GÅR JÄMNT (Joachim 2026-11-26; allmän regel, förr R1:s mallflagga "delbar") ────────────────
+   Varje division i en mall — a/n, (a · b)/n och bråket [täljare | nämnare] ("6x/2", "(−28)/(−7)", "(7 + 11)/3",
+   "x/3 + 5", "42/(10 − 4)") — väljer NÄMNAREN FÖRST och sedan TÄLJAREN som en multipel av den, inom bandet:
+     · alla tal (och insättningsvärdet) dras först; nämnarens värde räknas ut
+     · sedan väljs täljarens sista heltal (eller insättningsvärdet, när täljaren bara är en bokstav) bland bandets tal,
+       så att täljaren blir en multipel av nämnaren:
+         koefficienten framför bokstaven ("6x/2": 6)              → koefficienten är en multipel av nämnaren
+         annars täljarens värde (med insättningsvärdet insatt)   → värdet är en multipel av nämnaren
+     · FAKTORN ÄR MINST DUBBELT SÅ STOR SOM NÄMNAREN (som i R1: 12 = 3 · 4, 14 = 2 · 7): täljaren (koefficienten eller
+       värdet) är minst NyaTal.delbarMinst · |nämnaren|, och en faktor i täljaren ("(a · b)/n") som är en multipel av
+       nämnaren är det också — aldrig lika med nämnaren.
+     · m.tak (lövets tak för de beräknade värdena, om källan ger det): täljarens värde går inte över det.
+   Ryms ingen sådan täljare i bandet ger försöket null (nya tal dras). En nämnare med decimaler, en täljare med
+   decimaler eller med flera bokstäver lämnas utan regeln. */
+var DELNINGAR = {};
+function vansterOm(s, i){                                  // täljarens [start, slut) före snedstrecket på plats i
+  var e = i; while(e > 0 && s[e - 1] === ' ') e--;
+  if(s[e - 1] === ')'){ for(var c = e - 1, dj = 0; c >= 0; c--){ if(s[c] === ')') dj++; else if(s[c] === '(' && !--dj) return [c, e]; } return null; }
+  var a = e; while(a > 0 && /[0-9a-zåäö,]/i.test(s[a - 1])) a--;
+  return a < e ? [a, e] : null;
 }
-function forLiten(v, n){ return v % n === 0 && v < NyaTal.delbarMinst * n; }
-/* DELBAR (mallens egen talregel, Joachim 2026-11-26 — R1 "(5 · 12)/4 + (3 · 14)/7"): divisionen går alltid jämnt.
-   Nämnaren väljs först och sedan en täljare som är en multipel av den: ett tal som täljare blir en multipel av
-   nämnaren; en täljare "(a · b)" får a fritt och b som en multipel av nämnaren / sgd(a, nämnaren). Allt inom bandet.
-   Ger { index → värde } för talen regeln satte, eller null om bandet inte rymmer någon sådan täljare. */
-function delbaraTal(m, tl, B, rnd){
-  var satt = {}, s = m.uttryck;
-  for(var j = 0; j < tl.length; j++){
-    var t = tl[j]; if(t.dec || !/\/\s*$/.test(s.slice(0, t.i))) continue;   // bara heltalsnämnare efter /
-    var bn = bandFor(B, t); if(!bn) return null;
-    var d = dra(rnd, bn[0], bn[1], 0, true); if(d === null) return null;
-    satt[j] = d;
-    var fore = s.slice(0, t.i).replace(/\s*\/\s*$/, '');
-    if(/\)$/.test(fore)){                                                  // täljaren är en parentes
-      var djup = 0, start = -1;
-      for(var c = fore.length - 1; c >= 0; c--){ if(fore[c] === ')') djup++; else if(fore[c] === '('){ djup--; if(!djup){ start = c; break; } } }
-      var inne = tl.map(function(x, k){ return k; }).filter(function(k){ return tl[k].i > start && tl[k].i < fore.length; });
-      if(inne.length !== 2 || !/^\(\s*\d+\s*·\s*\d+\s*\)$/.test(fore.slice(start))) continue;   // bara "(a · b)"
-      var ta = tl[inne[0]], tb = tl[inne[1]], ba = bandFor(B, ta), bb = bandFor(B, tb); if(!ba || !bb) return null;
-      var a = dra(rnd, ba[0], ba[1], 0, true); if(a === null || forLiten(a, d)) return null;
-      // m.delbarMax (lövets tak för värdena, om det finns): a · b dras inte över det — kontrollen fäller dem ändå.
-      var hiB = m.delbarMax ? Math.min(bb[1], Math.floor(m.delbarMax / a)) : bb[1];
-      var b = multipel(rnd, bb[0], hiB, d / sgd(a, d), d); if(b === null) return null;
-      satt[inne[0]] = a; satt[inne[1]] = b;
-    } else {                                                                // täljaren är ett tal
-      var k0 = j - 1; if(k0 < 0 || tl[k0].i + tl[k0].n !== fore.length) continue;
-      var bt = bandFor(B, tl[k0]); if(!bt) return null;
-      var n = multipel(rnd, bt[0], bt[1], d, d); if(n === null) return null;
-      satt[k0] = n;
-    }
+function hogerOm(s, i){                                    // nämnarens [start, slut) efter snedstrecket
+  var a = i + 1; while(s[a] === ' ') a++;
+  if(s[a] === '('){ for(var c = a, dj = 0; c < s.length; c++){ if(s[c] === '(') dj++; else if(s[c] === ')' && !--dj) return [a, c + 1]; } return null; }
+  var e = a; while(e < s.length && /[0-9a-zåäö,]/i.test(s[e])) e++;
+  return e > a ? [a, e] : null;
+}
+function delningar(s, tl){
+  if(DELNINGAR[s]) return DELNINGAR[s];
+  var ut = [];
+  function inne(sp){ return tl.map(function(t, k){ return k; }).filter(function(k){ return tl[k].i >= sp[0] && tl[k].i < sp[1]; }); }
+  for(var i = 0; i < s.length; i++){
+    if(s[i] !== '/') continue;
+    var t = vansterOm(s, i), h = hogerOm(s, i); if(!t || !h) continue;
+    ut.push({ t: t, h: h, tal: inne(t), bokst: (s.slice(t[0], t[1]).match(/[a-zåäö]/gi) || []) });
   }
-  return satt;
+  return (DELNINGAR[s] = ut);
+}
+// Spannet [a, b) ur mallen med de dragna talen insatta.
+function medTal(s, tl, vals, sp){
+  var u = s.slice(sp[0], sp[1]);
+  for(var k = tl.length - 1; k >= 0; k--){ var t = tl[k]; if(t.i >= sp[0] && t.i < sp[1]) u = u.slice(0, t.i - sp[0]) + talUt(vals[k]) + u.slice(t.i - sp[0] + t.n); }
+  return u;
+}
+function delaJamnt(m, tl, vals, X, B, rnd){
+  var s = m.uttryck, del = delningar(s, tl), min = NyaTal.delbarMinst;
+  for(var q = 0; q < del.length; q++){
+    var d = del[q], D;
+    try { D = konstAv(poly(medTal(s, tl, vals, d.h))); } catch(e){ return false; }
+    if(D === null || D !== Math.round(D)) continue;                       // nämnaren med bokstav eller decimaler
+    if(D === 0) return false;
+    if(d.tal.some(function(k){ return tl[k].dec; })) continue;           // täljaren med decimaler
+    var slot = d.tal.length ? d.tal[d.tal.length - 1] : null, xk = null;
+    if(slot === null){
+      if(X.x == null || d.bokst.length !== 1) continue;
+      xk = d.bokst[0].toLowerCase();
+      if(decAv(typeof X.x === 'object' ? X.x[xk] : X.x)) continue;
+    } else if(d.bokst.length && X.x != null && vardenAv(X.x).some(function(v){ return decAv(v); })) continue;
+    var koef = slot !== null && tl[slot].roll === 'koef';
+    var bb = slot !== null ? bandFor(B, tl[slot]) : B.roll.varde; if(!bb) return false;
+    var inteEtt = slot === null || tl[slot].roll !== 'konst' || tl[slot].vidMult;
+    var satt = function(v){ if(slot !== null) vals[slot] = v; else if(typeof X.x === 'object') X.x[xk] = v; else X.x = v; };
+    var kand = [];
+    for(var v = Math.ceil(bb[0]); v <= Math.floor(bb[1]); v++){
+      if(v === 0 || (inteEtt && v === 1)) continue;
+      satt(v);
+      var ok;
+      if(koef) ok = v % D === 0 && v >= min * Math.abs(D);
+      else {
+        var N = null;
+        try { var p = poly(medTal(s, tl, vals, d.t)); N = d.bokst.length ? (X.x == null ? null : varde(p, X.x)) : konstAv(p); } catch(e){}
+        ok = N !== null && N === Math.round(N) && N % D === 0 && Math.abs(N) >= min * Math.abs(D) && !(m.tak && Math.abs(N) > m.tak);
+      }
+      // En faktor i täljaren ("(a · b)/n") som är en multipel av nämnaren är minst dubbelt så stor.
+      if(ok) ok = d.tal.every(function(k){ return !tl[k].vidMult || vals[k] % D !== 0 || vals[k] >= min * Math.abs(D); });
+      if(ok) kand.push(v);
+    }
+    if(!kand.length) return false;
+    satt(kand[Math.floor(rnd() * kand.length)]);
+  }
+  return true;
 }
 function forsok(m, B, rnd, extra){
-  var tl = talIMall(m.uttryck), s = m.uttryck;
-  var satt = m.delbar ? delbaraTal(m, tl, B, rnd) : {};
-  if(!satt) return null;
-  for(var j = tl.length - 1; j >= 0; j--){
+  var tl = talIMall(m.uttryck), s = m.uttryck, vals = [];
+  for(var j = 0; j < tl.length; j++){
     var t = tl[j], bb = bandFor(B, t); if(!bb) return null;
-    var v = (j in satt) ? satt[j] : dra(rnd, bb[0], bb[1], t.dec, t.roll !== 'konst' || t.vidMult);
-    if(v === null) return null;
-    s = s.slice(0, t.i) + talUt(v) + s.slice(t.i + t.n);
+    vals[j] = dra(rnd, bb[0], bb[1], t.dec, t.roll !== 'konst' || t.vidMult);
+    if(vals[j] === null) return null;
   }
+  /* Insättningsvärdet: ett decimaltal förblir ett decimaltal med lika många decimaler (d1 R5: x = 3,5), ur bankens
+     band för decimalvärdena; x = 0 i mallen förblir 0 — att sätta in 0 är den uppgiftens poäng (d1 R3). */
+  var X = { x: null };
+  if(m.x != null){
+    var dx = function(v){ v = tal(v); if(v === 0) return 0; var d = decAv(v), bv = (d && B.roll['varde.' + d]) || B.roll.varde;
+      return dra(rnd, bv[0], bv[1], d, false); };
+    if(typeof m.x === 'object'){ X.x = {}; Object.keys(m.x).forEach(function(k){ X.x[k] = dx(m.x[k]); }); }
+    else X.x = dx(m.x);
+    if(vardenAv(X.x).some(function(v){ return v === null; })) return null;
+  }
+  if(NyaTal.delbar && !delaJamnt(m, tl, vals, X, B, rnd)) return null;   // nämnaren först, täljaren en multipel
+  for(var j2 = tl.length - 1; j2 >= 0; j2--) s = s.slice(0, tl[j2].i) + talUt(vals[j2]) + s.slice(tl[j2].i + tl[j2].n);
   var p, pm;
   try { p = poly(s); pm = poly(m.uttryck); } catch(e){ return null; }
   if(form(p) !== form(pm)) return null;                                               // samma svarsform
@@ -223,13 +273,7 @@ function forsok(m, B, rnd, extra){
   if(tp.some(function(v, k){ return (v > 0) !== (tm[k] > 0) || v === 0; })) return null;
   var ny = { uttryck: s, svar: svarAv(p) };
   if(m.x != null){
-    /* Insättningsvärdet: ett decimaltal förblir ett decimaltal med lika många decimaler (d1 R5: x = 3,5), ur bankens
-       band för decimalvärdena; x = 0 i mallen förblir 0 — att sätta in 0 är den uppgiftens poäng (d1 R3). */
-    var dx = function(v){ v = tal(v); if(v === 0) return 0; var d = decAv(v), bv = (d && B.roll['varde.' + d]) || B.roll.varde;
-      return dra(rnd, bv[0], bv[1], d, false); };
-    if(typeof m.x === 'object'){ ny.x = {}; Object.keys(m.x).forEach(function(k){ ny.x[k] = dx(m.x[k]); }); }
-    else ny.x = dx(m.x);
-    if(vardenAv(ny.x).some(function(v){ return v === null; })) return null;
+    ny.x = X.x;
     ny.vardeSvar = varde(p, ny.x);
     var vm = varde(pm, m.x), vn = ny.vardeSvar;
     // Samma tecken som mallens värde; är mallens värde 0 blir det nya 0 eller positivt. Ett heltal förblir ett heltal.
@@ -283,7 +327,9 @@ function medNasta(kalla){
 }
 
 var NyaTal = { poly: poly, svarAv: svarAv, form: form, talIMall: talIMall, band: band, medNasta: medNasta, varde: varde, talUt: talUt,
-  delbarMinst: 2 };   // DELBAR: en faktor som är en multipel av nämnaren är minst 2 · nämnaren (fuzzen sätter 1 vid --sabba lika)
+  // DIVISIONERNA (delaJamnt): regeln på/av (fuzzen stänger av den vid --sabba delbar) och minsta faktorn i nämnare
+  // (2: minst dubbelt så stor som nämnaren; fuzzen sätter 1 vid --sabba lika).
+  delbar: true, delbarMinst: 2 };
 if(typeof window !== 'undefined') window.NyaTal = NyaTal;
 if(typeof module !== 'undefined' && module.exports) module.exports = NyaTal;
 })();
