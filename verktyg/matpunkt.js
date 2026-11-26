@@ -78,17 +78,30 @@ const SKAL = [
    * `sida`. Nästa sida med kedjan får skälet utan att en sökväg skrivs för hand. En sida som laddar
    * motorn men ändå ger mätpunkter fäller som förut ("står kvar i SKAL"). */
   { verktyg: 'namnare-grind.js',  motor: 'ekvationer-balans/ekvationer-balans.js', bevis: 'ekvationer-balans/ekvationer-balans.js', skal: 'fri kedja: antalet rader är elevens val, så nämnaren "synliga svarsenheter" är rörlig med flit' },
-  { verktyg: 'flerruts-grind.js', motor: 'ekvationer-balans/ekvationer-balans.js', bevis: 'ekvationer-balans/ekvationer-balans.js', skal: 'fri kedja: ingen facit per rad att fylla ur — grinden fyller 0 och jämför mot ett facit som inte finns' }
+  { verktyg: 'flerruts-grind.js', motor: 'ekvationer-balans/ekvationer-balans.js', bevis: 'ekvationer-balans/ekvationer-balans.js', skal: 'fri kedja: ingen facit per rad att fylla ur — grinden fyller 0 och jämför mot ett facit som inte finns' },
+  /* MOMENTSIDORNA I NYTT FORMAT (Joachim 2026-11-26): momentsidan listar momenten, bladen och testen men har inga
+   * uppgifter själv — uppgifterna står på uppgiftssidan och i drillen, som mäts var för sig. Brytningens och
+   * notationens enhet (rad, ruta, uttryck) finns därför inte på sidan. Sidan i nytt format heter "<fil> @<vy>"
+   * (niva-las-upp.js), så raden träffar med `monster`; beviset är skalet, som måste stå i sidans källa. */
+  { verktyg: 'brytning-grind.js', monster: /-nyformat\/index\.html @\d+x\d+$/, bevis: 'js/motor/arbetsyta/momentsida.js', skal: 'inga uppgifter på momentsidan' },
+  { verktyg: 'notation-grind.js', monster: /-nyformat\/index\.html @\d+x\d+$/, bevis: 'js/motor/arbetsyta/momentsida.js', skal: 'inga uppgifter på momentsidan' }
 ];
 
 /* Träffar en SKAL- eller ETIKETT-rad sidan? Med `sida`: samma sökväg. Med `motor`: sidans källa
    laddar motorn. Källan läses en gång per sida. */
 const KALLA = {};
+// Filen bakom en sida: utan vyn (" @1366x768") och utan frågan ("?moment=…") — sidorna i nytt format.
+function filAv(sida){ return String(sida).replace(/ @\d+x\d+$/, '').split('?')[0]; }
 function kallaFor(sida){
-  if(!(sida in KALLA)) KALLA[sida] = fs.existsSync(path.join(ROOT, sida)) ? fs.readFileSync(path.join(ROOT, sida), 'utf8') : '';
-  return KALLA[sida];
+  const fil = filAv(sida);
+  if(!(fil in KALLA)) KALLA[fil] = fs.existsSync(path.join(ROOT, fil)) ? fs.readFileSync(path.join(ROOT, fil), 'utf8') : '';
+  return KALLA[fil];
 }
-function traffar(rad, sida){ return rad.sida ? rad.sida === sida : !!(rad.motor && kallaFor(sida).indexOf(rad.motor) >= 0); }
+/* `monster` (sidor i nytt format, där adressen bär frågan och vyn) prövas mot hela sidans namn. */
+function traffar(rad, sida){
+  if(rad.monster) return rad.monster.test(sida);
+  return rad.sida ? rad.sida === sida : !!(rad.motor && kallaFor(sida).indexOf(rad.motor) >= 0);
+}
 
 /* KÄNDA RÖDA MED ORSAK. En rad här gör INGENTING grönt — sidan räknas som brott precis som
    förut. Den enda skillnaden är att utskriften säger varför den är röd, och att granska() kan
@@ -109,7 +122,10 @@ const ETIKETT = [
      BESLUTAT för balansmetodens kedja (Joachim 2026-10-21): K-F gäller. Kedjan ritar sina grupper
      som .eq-grupp, och brytnings- och notationsgrinden mäter .eq-kort — raden för kedjan är borta.
      Problemlösningens rutnät (prob-uppg) är inte en del av det beslutet och står kvar. */
-  { sida: 'ak7/k3/d5-problemlosning/index.html',    etikett: 'väntar beslut', skal: 'egen rutnätsyta (prob-uppg) utan .ovn-sheet — K-F på rutnäten väntar på besked' }
+  { sida: 'ak7/k3/d5-problemlosning/index.html',    etikett: 'väntar beslut', skal: 'egen rutnätsyta (prob-uppg) utan .ovn-sheet — K-F på rutnäten väntar på besked' },
+  /* d5:s DRILLBANKER i nytt format (Joachim 2026-11-26: behåller "väntar beslut"): drillen ritar problemlösningens
+     uppgifter med samma rutnätsyta som d5 — samma beslut som raden ovan. */
+  { monster: /drill\.html\?bank=prob-ak7%3A[^ ]* @\d+x\d+$/, etikett: 'väntar beslut', skal: 'problemlösningens drillbanker: samma rutnätsyta (prob-uppg) utan bladkärnans rader — K-F på rutnäten väntar på besked' }
 ];
 
 /* Räckvidden, utskriven i stället för tyst utelämnad. V14 gäller grindar vars mätenhet är
@@ -166,7 +182,7 @@ function skapa(verktyg){
           return;
         }
         if(!u){ nollor.push(sida); return; }
-        const kalla = fs.existsSync(path.join(ROOT, sida)) ? fs.readFileSync(path.join(ROOT, sida), 'utf8') : '';
+        const kalla = kallaFor(sida);
         if(kalla.indexOf(u.bevis) < 0) gamla.push(sida + ': skälet säger "' + u.skal + '" men ' + u.bevis + ' finns inte i sidan');
         else undantagna.push(sida + ' — ' + u.skal);
       });
@@ -232,9 +248,9 @@ module.exports = { skapa, SKAL, ETIKETT, UTANFOR };
 
 if(require.main === module){
   console.log('V14 — skäl-listan (' + SKAL.length + ' rader):');
-  SKAL.forEach(s => console.log('  ' + s.verktyg.padEnd(18) + (s.sida || 'motor ' + s.motor) + '  [bevis: ' + s.bevis + ']  ' + s.skal));
+  SKAL.forEach(s => console.log('  ' + s.verktyg.padEnd(18) + (s.sida || (s.monster ? 'mönster ' + s.monster : 'motor ' + s.motor)) + '  [bevis: ' + s.bevis + ']  ' + s.skal));
   console.log('\nKända röda med orsak (' + ETIKETT.length + ' rader) — röda, inte gröna:');
-  ETIKETT.forEach(e => console.log('  [' + e.etikett + '] ' + (e.sida || 'motor ' + e.motor)));
+  ETIKETT.forEach(e => console.log('  [' + e.etikett + '] ' + (e.sida || (e.monster ? 'mönster ' + e.monster : 'motor ' + e.motor))));
   console.log('\nUtanför V14:s räckvidd:');
   Object.keys(UTANFOR).forEach(k => console.log('  ' + k.padEnd(18) + UTANFOR[k]));
 }

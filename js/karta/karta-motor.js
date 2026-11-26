@@ -202,18 +202,22 @@
         + (isLov && !status.gra && !kommer && !harKalla(node) ? ' nolink' : '');
       if(node.id != null) b.setAttribute('data-nodid', node.id);
       b.style.background = farg.bg; b.style.borderColor = farg.br; b.style.color = farg.fg;
-      // Utfällningsmarkör: EGEN symbol (▸ stängd / ▾ öppen) — ALDRIG ＋/★ som betyder breddning/fördjupning.
+      // Utfällningsmarkör: EGEN symbol (▸ stängd / ▾ öppen) — ALDRIG ＋/F som betyder breddning/fördjupning.
       var foldM = arGren ? '<span class="km-fold" aria-hidden="true">' + (utfalld ? '▾' : '▸') + '</span>' : '';
-      var rollM = node.roll === 'breddning' ? '＋' : node.roll === 'fordjupning' ? '★' : '';
+      /* FÖRDJUPNING = BADGEN F FRAMFÖR NAMNET (KONVENTIONER, horisont-badges: "bokstav bär"; Joachim 2026-11-26),
+         som i testlistan och vänsterspalten — inte ★. Breddning behåller ＋ efter namnet. */
+      var fordj = node.roll === 'fordjupning';
+      var rollM = node.roll === 'breddning' ? '＋' : '';
       var stodM = (node.arskursRelevans && node.arskursRelevans[PREF.arskurs] === 'stod') ? 'stöd' : '';
       var markM = stodM || rollM;
+      var fM = (fordj && !stodM && !status.gra && !kommer) ? '<span class="roll-f" title="fördjupning">F</span>' : '';
       var markTitle = stodM ? 'stöd – valbart stödspår' : node.roll;
       var orsak = status.gra ? '<span class="gra-orsak">' + (status.orsak === 'framtid' ? (config.orsakFramtid || 'framtid') : 'bortvalt') + '</span>' : '';
       var kommerFlagga = kommer ? '<span class="kommer-flagga" title="Inte byggt än – kommer senare">kommer</span>' : '';
       // Kart-etikett: kortare kartLabel om taxonomin bär en, annars nodens fulla namn
       // (självskattningens namn rörs inte). Tvåradsbrytning sköts av css:en, inte av kapning.
       var label = node.kartLabel || node.namn;
-      b.innerHTML = foldM + '<span class="txt">' + label + orsak + kommerFlagga + '</span>'
+      b.innerHTML = foldM + fM + '<span class="txt">' + label + orsak + kommerFlagga + '</span>'
         + (arGren && antal ? '<span class="km-count" title="' + antal + ' färdigheter i grenen">' + antal + '</span>' : '')
         + (markM && !status.gra && !kommer ? '<span class="roll' + (stodM ? ' stod' : '') + '" title="' + markTitle + '">' + markM + '</span>' : '')
         + (lankbar ? '<span class="km-out" aria-hidden="true" title="öppnar färdighetsträningen">↗</span>' : '');

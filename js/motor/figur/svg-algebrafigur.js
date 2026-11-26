@@ -217,15 +217,26 @@
      Bokens prisbilder är fotografier, och skannade bilder kommer inte in på sidan. Här ritas en
      lapp per vara i stället. Ett uttryck (x kr) är ett pris lika gärna som ett tal — det är hela
      poängen med uppgiften. */
+  /* LÄSBAR STORLEK OCH INGET ÖVERLAPP (Joachim 2026-11-26). Förr stod alla lappar på en rad: sex lappar var 818
+     enheter breda och krymptes till figurernas 300 px, så texten blev 5 px och namn och pris låg på varandra (d3
+     moment 4 Blad 4A/4B nr 4, Parenteser 6B nr 4, Test 4). Nu står lapparna i rader om högst TRE, jämnt fördelade
+     (4 → 2 + 2, 5 → 3 + 2, 6 → 3 + 3), och figuren ritas i sin egen storlek (max-width = viewBoxens bredd): texten
+     står i sina 13 och 16 px. En smalare yta krymper figuren som förut, men aldrig för att lapparna är många. */
   function prislappar(o){
     var varor = o.varor || [], n = varor.length;
-    var bw = 118, mellan = 18, w = n * bw + (n - 1) * mellan + 20, h = 86;
-    var s2 = svgStart(w, h, o.alt || ('Prislappar: ' + varor.map(function(v){ return v.namn + ' ' + v.pris; }).join(', ')));
+    var bw = 118, mellan = 18, lh = 54, radMellan = 14;
+    var rader = Math.max(1, Math.ceil(n / 3)), perRad = Math.ceil(n / rader);
+    var w = perRad * bw + (perRad - 1) * mellan + 20, h = 14 + rader * lh + (rader - 1) * radMellan + 18;
+    var s2 = svgStart(w, h, o.alt || ('Prislappar: ' + varor.map(function(v){ return v.namn + ' ' + v.pris; }).join(', ')))
+      .replace('<svg class="af-svg"', '<svg class="af-svg af-lappar" style="max-width:' + w + 'px"');
     varor.forEach(function(v, i){
-      var x = 10 + i * (bw + mellan);
-      s2 += '<rect class="af-lapp" x="' + x + '" y="14" width="' + bw + '" height="54" rx="7"/>'
-         +  '<text class="' + TXT + ' af-lapp-namn" x="' + (x + bw / 2) + '" y="36" text-anchor="middle">' + esc(v.namn) + '</text>'
-         +  '<text class="' + TXT + ' af-lapp-pris" x="' + (x + bw / 2) + '" y="58" text-anchor="middle">' + esc(v.pris) + '</text>';
+      var rad = Math.floor(i / perRad), iRad = i - rad * perRad;
+      var iDennaRad = Math.min(perRad, n - rad * perRad);                  // sista raden kan vara kortare: centreras
+      var x0 = (w - (iDennaRad * bw + (iDennaRad - 1) * mellan)) / 2;
+      var x = x0 + iRad * (bw + mellan), y = 14 + rad * (lh + radMellan);
+      s2 += '<rect class="af-lapp" x="' + x + '" y="' + y + '" width="' + bw + '" height="' + lh + '" rx="7"/>'
+         +  '<text class="' + TXT + ' af-lapp-namn" x="' + (x + bw / 2) + '" y="' + (y + 22) + '" text-anchor="middle">' + esc(v.namn) + '</text>'
+         +  '<text class="' + TXT + ' af-lapp-pris" x="' + (x + bw / 2) + '" y="' + (y + 44) + '" text-anchor="middle">' + esc(v.pris) + '</text>';
     });
     return s2 + undertext(o, w, h) + '</svg>';
   }

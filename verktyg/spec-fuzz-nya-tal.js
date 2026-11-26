@@ -12,10 +12,18 @@
      SVÅRARE   inget tal i svaret och inget beräknat värde är större (till beloppet) än bankens största
      MELLANLED kravet följer regeln (minus framför en parentes → obligatoriskt, annars frivilligt eller inget); facits
                led godkänns, och ett HOPSLAGET led (svaret i ledrutan) underkänns där ledet är obligatoriskt
-     NY        uppgiften är inte en av bankens och upprepar inte någon av de tio föregående
+     LED       prioKedjan (moment 2): facits led räknas om här (från vänster ett steg i taget, eller tecknen byts vid
+               − (−a) och + (−a)) och har uttryckets värde
+     EGEN      lövets egna talregler ur klartexten (k3-d3-metodtraning.md): N1 talen −15–25; N3 talet i rutan
+               −10–15; N5 faktorerna 2–9, vid division nämnaren och kvoten 2–9; F5/F6 divisionen går jämnt;
+               M5 värdet 0 eller positivt
+     NY        uppgiften (uttrycket och insättningsvärdet) är inte en av bankens och upprepar inte någon av de tio
+               föregående
      SLUT      drillen tar inte slut: varje nasta(i) ger ett blad
-   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form förstör de nya
-   uppgifterna efter mekanismen, och fuzzen ska då fälla med benets namn.
+   Raderna mäts efter typ: parentesraden (uttryck), förenkla-rutan (fraga), talrutan ("4 − 9 = __"), saknat tal
+   ("5 − __ = −3": uträkningen med svaret insatt), prioKedjan (vansterText och facitLed).
+   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form|led|egen förstör de
+   nya uppgifterna efter mekanismen, och fuzzen ska då fälla med benets namn.
    KÖR:  node verktyg/spec-fuzz-nya-tal.js [--n 300] [--lov P2] [--sabba …]     Exit 1 vid brott. Ingen nätväg. */
 'use strict';
 const path = require('path');
@@ -28,6 +36,8 @@ require(JS('motor/alg-brak.js')); require(JS('motor/mellanled-rattare.js'));
 window.SvgAlgebraFigur = new Proxy({}, { get: () => () => '<svg></svg>' });
 require(JS('motor/ovamer/nya-tal.js'));
 const AB = window.AlgBrak, ML = window.MellanledRattare, NT = window.NyaTal;
+// Bokstäverna som bankerna använder (som knappsatsen gör i webbläsaren: AlgBrak.bokstaver).
+AB.bokstaver('abnstvxyz');
 /* KÄLLORNA med räknelöv: modulen och hur den hämtar ett löv. En ny källa (t.ex. d1:s) läggs till här. */
 const KALLOR = [
   { id: 'k3d3', filer: ['motor/blad/blad-k3-d3-typer.js', 'motor/blad/blad-k3-d3-metod.js'], mod: () => window.BLAD_K3_D3_METOD }
@@ -59,6 +69,39 @@ function insatt(u, x){
     .replace(/[a-z]/gi, c => '(' + (vals ? tal(vals[c]) : tal(x)) + ')');
   return Function('return ' + t)();
 }
+// Talen med sitt tecken: ett minus tätt intill talet hör till talet.
+const tecknade = s => (String(s).match(/[−-]?\d+(?:,\d+)?/g) || []).map(t => tal(t.replace('−', '-')));
+const tUt = v => (v < 0 ? '−' : '') + String(Math.abs(v)).replace('.', ',');
+// Leden räknade här: från vänster ett steg i taget, eller teckenbytet.
+function egnaLed(u){
+  const s = String(u).replace(/-/g, '−');
+  if(/\(−/.test(s)) return [s.replace(/− \(−(\d+)\)/g, '+ $1').replace(/\+ \(−(\d+)\)/g, '− $1')];
+  const t = s.match(/^(−?\d+)((?: [+−] \d+)+)$/); if(!t) return null;
+  const par = [...t[2].matchAll(/ ([+−]) (\d+)/g)].map(x => [x[1], +x[2]]); let acc = tal(t[1].replace('−', '-')); const ut = [];
+  for(let k = 0; k < par.length - 1; k++){ acc += par[k][0] === '+' ? par[k][1] : -par[k][1]; ut.push(tUt(acc) + par.slice(k + 1).map(q => ' ' + q[0] + ' ' + q[1]).join('')); }
+  return ut;
+}
+const evalTal = u => Function('return ' + m(u).replace(/·/g, '*').replace(/,/g, '.').replace(/(\d)\s*\(/g, '$1*(').replace(/\)\s*\(/g, ')*('))();
+/* RADEN mätt efter typ → { U: uttrycket, S: svaret, x, vardeSvar, ruta: talet i rutan (saknat tal) }. */
+function las(rad){
+  if(rad.typ === 'parentes') return { U: rad.uttryck, S: rad.svar, x: rad.varde && rad.varde.x, vardeSvar: rad.varde && rad.varde.svar };
+  if(rad.typ === 'forenkla') return { U: rad.fraga, S: rad.svar };
+  if(rad.typ === 'prioKedja') return { U: rad.vansterText, S: tUt(rad.svar), led: rad.facitLed };
+  if(rad.typ === 'lucka'){
+    if(/ = __$/.test(rad.text)) return { U: rad.text.replace(/ = __$/, ''), S: tUt(rad.svar) };
+    const [v, h] = rad.text.split(' = '); return { U: v.replace('__', tUt(rad.svar)), S: h, ruta: rad.svar };
+  }
+  return null;
+}
+const EGEN = {
+  N1: L => tecknade(L.U).every(v => v >= -15 && v <= 25) || 'ett tal utanför −15–25',
+  N3: L => (L.ruta >= -10 && L.ruta <= 15) || 'talet i rutan ' + L.ruta + ' utanför −10–15',
+  N5: L => { const t = tecknade(L.U).map(Math.abs), i = v => v >= 2 && v <= 9;
+    return (/\//.test(L.U) ? i(t[1]) && t[0] % t[1] === 0 && i(t[0] / t[1]) : t.every(i)) || 'faktor, nämnare eller kvot utanför 2–9'; },
+  F5: L => !/,/.test(L.S) || 'divisionen går inte jämnt',
+  F6: L => !/,/.test(L.S) || 'divisionen går inte jämnt',
+  M5: L => L.vardeSvar >= 0 || 'värdet ' + L.vardeSvar + ' är negativt'
+};
 function ledText(u){ return ML.facitTermer(u).join(' + ').replace(/\+ -/g, '- '); }
 function minusForeParentes(u){ return ML.grupper(u).some(g => g.parentes && g.tecken === '-'); }
 
@@ -85,7 +128,9 @@ KALLOR.forEach(K => {
         maxVarde = Math.max(maxVarde, Math.abs(insatt(mm.uttryck, mm.x))); }
       talIText(NT.svarAv(NT.poly(mm.uttryck))).forEach(v => { maxSvar = Math.max(maxSvar, v); });
     });
-    const bank = new Set(M.mallar.map(mm => signatur(mm.uttryck) + '|' + m(mm.uttryck).replace(/\s+/g, '')));
+    const nyck = (u, x) => signatur(u) + '|' + m(u).replace(/\s+/g, '') + (x != null ? '|' + JSON.stringify(x) : '');
+    const bank = new Set(M.mallar.map(mm => nyck(mm.uttryck, mm.x)));
+    const bankNoll = M.mallar.some(mm => mm.x != null && Math.abs(insatt(mm.uttryck, mm.x)) < 1e-9);
     const sigs = M.mallar.map(mm => signatur(mm.uttryck));
     const senaste = [];
     let ok = 0;
@@ -94,14 +139,17 @@ KALLOR.forEach(K => {
       let inst = k.nasta(i);
       if(!inst){ brot('SLUT', id, i, 'nasta gav inget blad'); continue; }
       inst = JSON.parse(JSON.stringify(inst));
-      const g = inst.blad.grupper[0], rad = g.rader[0];
-      const u = rad.uttryck, svar = rad.svar, x = rad.varde && rad.varde.x, vardeSvar = rad.varde && rad.varde.svar;
+      const g = inst.blad.grupper[0], rad = g.rader[0], L = las(rad);
+      if(!L){ brot('FORM', id, i, 'okänd radtyp ' + rad.typ); continue; }
+      const x = L.x;
       // ── SABOTAGE (efter mekanismen) ──
-      if(SABBA === 'band' && i % 7 === 0){ rad.uttryck = u.replace(/\d+/, '97'); }
-      if(SABBA === 'ordning' && i % 7 === 0 && /[a-z].*[+-].*\d|[a-z].*[+-].*[a-z]/.test(svar)){ const t = m(svar).match(/[+-]?[^+-]+/g); rad.svar = (t.reverse().join(' + ')).replace(/\+\s*-/g, '- ').replace(/^\s*\+\s*/, '').replace(/\s+/g, ' ').trim(); }
+      if(SABBA === 'band' && i % 7 === 0){ L.U = L.U.replace(/\d+/, '97'); }
+      if(SABBA === 'ordning' && i % 7 === 0 && /[a-z].*[+-].*\d|[a-z].*[+-].*[a-z]/.test(L.S)){ const t = m(L.S).match(/[+-]?[^+-]+/g); L.S = (t.reverse().join(' + ')).replace(/\+\s*-/g, '- ').replace(/^\s*\+\s*/, '').replace(/\s+/g, ' ').trim(); }
       if(SABBA === 'mellanled' && rad.mellanled === 'kravt') rad.mellanled = 'frivilligt';
-      if(SABBA === 'form' && i % 7 === 0) rad.uttryck = u.replace(/\+/, '-');
-      const U = rad.uttryck, S = rad.svar;
+      if(SABBA === 'form' && i % 7 === 0) L.U = L.U.replace(/\+/, '-');
+      if(SABBA === 'led' && L.led) L.led = [L.S];
+      if(SABBA === 'egen' && EGEN[id]){ if(id === 'N3') L.ruta = 17; else if(id === 'M5') L.vardeSvar = -1; else if(/^F/.test(id)) L.S = L.S + ',5'; else L.U = L.U.replace(/\d+/, '41'); }
+      const U = L.U, S = L.S, vardeSvar = L.vardeSvar;
       let lyckat = true; const b = (ben, t) => { lyckat = false; brot(ben, id, i, t + '  [' + U + ' = ' + S + ']'); };
       // TALREGEL och BAND
       roller(U).forEach(t => {
@@ -113,13 +161,19 @@ KALLOR.forEach(K => {
         if(R.varde && (v < R.varde[0] || v > R.varde[1])) b('TALREGEL', 'värde ' + v);
         if(!bandB.varde || v < bandB.varde[0] || v > bandB.varde[1]) b('BAND', 'värde ' + v); }); }
       // FORM
-      const sig = signatur(U), mi = sigs.indexOf(sig);
-      if(mi < 0) b('FORM', 'ingen mall har formen ' + sig);
-      else if(svarsform(S) !== svarsform(NT.svarAv(NT.poly(M.mallar[mi].uttryck)))) b('FORM', 'svarsformen ' + svarsform(S) + ' ≠ mallens');
-      // FACIT
-      try { if(!AB.pointEqual(AB.parse(m(U).replace(/·/g, '*')), AB.parse(m(S)))) b('FACIT', 'svaret är inte uttrycket förenklat'); } catch(e){ b('FACIT', 'otolkbart: ' + e.message); }
-      const gp = AB.gradePoly(m(S), m(S), { tillatEtta: true });
-      if(gp.status !== 'ratt') b('FACIT', 'rättaren godkänner inte svaret (' + (gp.form || gp.status) + ')');
+      // Flera mallar kan ha samma form (−5 + 11 och −9 + 4): svarsformen ska vara någon av deras.
+      const sig = signatur(U), mis = sigs.map((x, j) => x === sig ? j : -1).filter(j => j >= 0);
+      if(!mis.length) b('FORM', 'ingen mall har formen ' + sig);
+      else if(!mis.some(j => svarsform(S) === svarsform(NT.svarAv(NT.poly(M.mallar[j].uttryck))))) b('FORM', 'svarsformen ' + svarsform(S) + ' ≠ mallarnas');
+      // FACIT (rena tal: värdet räknat här; uttryck: AlgBrak och rättaren)
+      if(!/[a-z]/i.test(U)){
+        let v; try { v = evalTal(U); } catch(e){ b('FACIT', 'otolkbart: ' + e.message); }
+        if(v !== undefined && Math.abs(v - tal(m(S))) > 1e-9) b('FACIT', 'värdet ' + v + ' ≠ svaret ' + S);
+      } else {
+        try { if(!AB.pointEqual(AB.parse(m(U).replace(/·/g, '*')), AB.parse(m(S)))) b('FACIT', 'svaret är inte uttrycket förenklat'); } catch(e){ b('FACIT', 'otolkbart: ' + e.message); }
+        const gp = AB.gradePoly(m(S), m(S), { tillatEtta: true });
+        if(gp.status !== 'ratt') b('FACIT', 'rättaren godkänner inte svaret (' + (gp.form || gp.status) + ')');
+      }
       /* ORDNINGEN mäts här, inte med rättaren: gradePoly(svar, svar) prövar inte ordningen när facit självt bryter
          regeln (mätt med --sabba ordning). §3: bokstavsordning, siffertermen sist; är den första variabeltermen
          negativ får svaret börja med en positiv term. */
@@ -132,7 +186,15 @@ KALLOR.forEach(K => {
       if(x != null && Math.abs(insatt(U, x) - vardeSvar) > 1e-9) b('FACIT', 'insättningen ' + insatt(U, x) + ' ≠ ' + vardeSvar);
       // SVÅRARE
       talIText(S).forEach(v => { if(v > maxSvar) b('SVÅRARE', 'talet ' + v + ' i svaret > bankens ' + maxSvar); });
-      if(x != null && (vardeSvar <= 0 || vardeSvar > maxVarde)) b('SVÅRARE', 'värdet ' + vardeSvar + ' (bankens största ' + maxVarde + ', ska vara positivt)');
+      if(x != null && (vardeSvar < 0 || (vardeSvar === 0 && !bankNoll) || vardeSvar > maxVarde)) b('SVÅRARE', 'värdet ' + vardeSvar + ' (bankens största ' + maxVarde + ', ska vara positivt)');
+      // LED (prioKedjan)
+      if(rad.typ === 'prioKedja'){
+        const egna = egnaLed(U);
+        if(!egna || JSON.stringify(egna) !== JSON.stringify(L.led)) b('LED', 'facits led ' + JSON.stringify(L.led) + ' ≠ ' + JSON.stringify(egna));
+        (L.led || []).forEach(l => { let v = NaN; try { v = evalTal(l); } catch(e){} if(!(Math.abs(v - evalTal(U)) < 1e-9)) b('LED', 'ledet ' + l + ' har inte uttryckets värde'); });
+      }
+      // EGEN (lövets egna talregler)
+      if(EGEN[id]){ const r = EGEN[id](Object.assign({}, L, { U: U, S: S, vardeSvar: vardeSvar })); if(r !== true) b('EGEN', r); }
       // MELLANLED
       if(rad.typ === 'parentes'){
         const forv = minusForeParentes(U) ? 'kravt' : (ML.kravAv(U) ? 'frivilligt' : 'nej');
@@ -143,7 +205,7 @@ KALLOR.forEach(K => {
         }
       }
       // NY
-      const nyckel = sig + '|' + m(U).replace(/\s+/g, '');
+      const nyckel = nyck(U, x);
       if(bank.has(nyckel)) b('NY', 'uppgiften är bankens');
       if(senaste.indexOf(nyckel) >= 0) b('NY', 'upprepning inom tio');
       senaste.push(nyckel); if(senaste.length > 10) senaste.shift();

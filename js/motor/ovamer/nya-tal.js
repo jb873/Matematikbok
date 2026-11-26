@@ -133,21 +133,24 @@ function band(mall){
   var b = {}, maxSvar = 0, maxVarde = 0;
   function in_(roll, v){ var x = b[roll] || (b[roll] = [Infinity, -Infinity]); x[0] = Math.min(x[0], v); x[1] = Math.max(x[1], v); }
   mall.mallar.forEach(function(m){
-    talIMall(m.uttryck).forEach(function(t){ in_(t.roll, t.v); });
+    talIMall(m.uttryck).forEach(function(t){ in_(t.roll, t.v); if(t.dec) in_(t.roll + '.' + t.dec, t.v); });
     vardenAv(m.x).forEach(function(v){ in_('varde', v); });
     var p = poly(m.uttryck);
     Object.keys(p).forEach(function(k){ maxSvar = Math.max(maxSvar, Math.abs(p[k])); });
     if(m.x != null) maxVarde = Math.max(maxVarde, Math.abs(varde(p, m.x)));
   });
   var r = mall.regler || {};
-  Object.keys(b).forEach(function(roll){ if(r[roll]){ b[roll][0] = Math.max(b[roll][0], r[roll][0]); b[roll][1] = Math.min(b[roll][1], r[roll][1]); } });
+  Object.keys(b).forEach(function(nyckel){ var roll = nyckel.split('.')[0];
+    if(r[roll]){ b[nyckel][0] = Math.max(b[nyckel][0], r[roll][0]); b[nyckel][1] = Math.min(b[nyckel][1], r[roll][1]); } });
   return { roll: b, maxSvar: maxSvar, maxVarde: maxVarde };
 }
+// Ett decimaltal förblir ett decimaltal med lika många decimaler (0,4 blir aldrig 2 eller 0,5 → 0,50).
 function dra(rnd, lo, hi, dec, inteEtt){
   var steg = Math.pow(10, -dec), a = Math.ceil(lo / steg - 1e-9), z = Math.floor(hi / steg + 1e-9);
   if(z < a) return null;
-  for(var f = 0; f < 20; f++){
-    var v = rund((a + Math.floor(rnd() * (z - a + 1))) * steg);
+  for(var f = 0; f < 40; f++){
+    var n = a + Math.floor(rnd() * (z - a + 1)), v = rund(n * steg);
+    if(dec > 0 && n % 10 === 0) continue;
     if(v !== 0 && !(inteEtt && v === 1)) return v;
   }
   return null;
@@ -157,7 +160,7 @@ function dra(rnd, lo, hi, dec, inteEtt){
 function forsok(m, B, rnd, extra){
   var tl = talIMall(m.uttryck), s = m.uttryck;
   for(var j = tl.length - 1; j >= 0; j--){
-    var t = tl[j], bb = B.roll[t.roll]; if(!bb) return null;
+    var t = tl[j], bb = (t.dec && B.roll[t.roll + '.' + t.dec]) || B.roll[t.roll]; if(!bb) return null;
     var v = dra(rnd, bb[0], bb[1], t.dec, t.roll !== 'konst');
     if(v === null) return null;
     s = s.slice(0, t.i) + talUt(v) + s.slice(t.i + t.n);
@@ -175,8 +178,10 @@ function forsok(m, B, rnd, extra){
     else ny.x = dra(rnd, bv[0], bv[1], 0, false);
     if(vardenAv(ny.x).some(function(v){ return v === null; })) return null;
     ny.vardeSvar = varde(p, ny.x);
-    var vm = varde(pm, m.x);
-    if(ny.vardeSvar === 0 || (ny.vardeSvar > 0) !== (vm > 0) || Math.abs(ny.vardeSvar) > B.maxVarde) return null;
+    var vm = varde(pm, m.x), vn = ny.vardeSvar;
+    // Samma tecken som mallens värde; är mallens värde 0 blir det nya 0 eller positivt. Ett heltal förblir ett heltal.
+    if(vm === 0 ? vn < 0 : (vn === 0 || (vn > 0) !== (vm > 0))) return null;
+    if(Math.abs(vn) > B.maxVarde || (vm === Math.round(vm) && vn !== Math.round(vn))) return null;
   }
   if(extra && extra(ny, m) === false) return null;                                     // lövets egen talregel
   return ny;
@@ -186,17 +191,19 @@ function forsok(m, B, rnd, extra){
 function medNasta(kalla){
   var M = kalla.mall; if(!M || !M.mallar || !M.mallar.length || !M.bygg) return kalla;
   var B = band(M), n = kalla.instanser.length, cache = {}, sett = {};
-  M.mallar.forEach(function(m){ sett[m.uttryck.replace(/\s+/g, '')] = 1; });
+  // En uppgift är densamma om uttrycket och insättningsvärdet är desamma (x + x + x + x när x = 8 och x = 5 är två).
+  function nyckel(x){ return x.uttryck.replace(/\s+/g, '') + (x.x != null ? '|' + JSON.stringify(x.x) : ''); }
+  M.mallar.forEach(function(m){ sett[nyckel(m)] = 1; });
   function ny(i){
     if(i in cache) return cache[i];
     var senaste = [];
-    for(var j = Math.max(n, i - 10); j < i; j++){ var f = ny(j); if(f) senaste.push(f.uttryck.replace(/\s+/g, '')); }
+    for(var j = Math.max(n, i - 10); j < i; j++){ var f = ny(j); if(f) senaste.push(nyckel(f)); }
     var rnd = slump(hash(String(M.ref) + ':' + i)), res = null;
     for(var k = 0; k < M.mallar.length && !res; k++){
       var m = M.mallar[(i - n + k) % M.mallar.length];
       for(var f2 = 0; f2 < 400 && !res; f2++){
         var x = forsok(m, B, rnd, M.extra);
-        if(x && !sett[x.uttryck.replace(/\s+/g, '')] && senaste.indexOf(x.uttryck.replace(/\s+/g, '')) < 0){ x.mall = (i - n + k) % M.mallar.length; res = x; }
+        if(x && !sett[nyckel(x)] && senaste.indexOf(nyckel(x)) < 0){ x.mall = (i - n + k) % M.mallar.length; res = x; }
       }
     }
     return (cache[i] = res);

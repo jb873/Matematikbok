@@ -25,12 +25,14 @@
      K-K  Svarets plats följer uppgiftens form: med likhetstecken står rutan direkt efter tecknet,
           utan tecken skrivs "Svar:" och rutans högerkant ligger vid radens. Luckor (.lucka) är
           delar av uttrycket, inte svar, och en flerrutsrad har inget enskilt svar att högerställa.
+          Rutan i meningen (luckmening, "Han är ▢ år."; Joachim 2026-11-26) är meningens lucka: rutan står
+          där, på samma rad och tätt intill orden före och efter — ingen "Svar:" (--sabba luckmening).
 
      K-L  Kedjan bryts inte vid Chromebook-bredd (Joachim 2026-10-26): en rad med flera led och
           likhetstecken mellan dem står på EN rad vid 1366 × 768 och 1536 × 864 — svaret hamnar aldrig
           på nästa rad. Mäts bara vid de bredderna, på sidor där telefonvyn hittade kedjor.
 
-   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar|kedja]
+   Kör:  node verktyg/brytning-grind.js [--sida d3] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar|kedja|luckmening]
          --sabba återskapar felet regeln finns för → benet MÅSTE fälla. Ett motprov som inte kan
          fälla bevisar ingenting.
 
@@ -73,6 +75,23 @@ const PROBE = `(function(){
     return Array.prototype.slice.call(r.getClientRects());
   }
   function radantal(el){ return el ? radrektanglar(el).length : 0; }
+  /* GRANNTEXTEN till en ruta (K-K, luckmeningen): närmaste syskon före (rikt −1) eller efter (+1) med synlig text,
+     utan att passera en annan ruta. { nod, text } eller null. */
+  function grannText(i, rikt){
+    for(var n = rikt < 0 ? i.previousSibling : i.nextSibling; n; n = rikt < 0 ? n.previousSibling : n.nextSibling){
+      if(n.nodeType === 1 && (n.matches('input') || n.querySelector('input'))) return null;
+      if(n.nodeType === 1 && n.classList.contains('ovn-label')) return null;
+      var s = n.nodeType === 3 ? n.nodeValue : (n.textContent || '');
+      if(s.trim()) return { nod: n, text: s };
+    }
+    return null;
+  }
+  // Radboxen närmast rutan: textens SISTA radbox före rutan, FÖRSTA efter.
+  function textRekt(nod, rikt){
+    var r = document.createRange(); r.selectNodeContents(nod);
+    var rs = Array.prototype.slice.call(r.getClientRects()).filter(function(x){ return x.width > 0; });
+    return rs.length ? (rikt < 0 ? rs[rs.length - 1] : rs[0]) : null;
+  }
 
   /* KONTRAST med alfa inräknad: en linje med alpha .55 är inte sin egen färg, den är sin färg
      BLANDAD med bakgrunden. Utan blandningen mäter provet en linje som inte finns på skärmen. */
@@ -187,6 +206,15 @@ const PROBE = `(function(){
       var l9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-label, .ak8-label'), synlig)[0];
       if(l9){ l9.style.fontFamily = 'Cinzel, serif'; l9.style.fontSize = '11px'; l9.style.color = 'rgb(122,110,101)';
         ut.noter.push('SABBA: gav bokstaven ett eget typsnitt och liten gra ton'); }
+    }
+    /* --sabba luckmening: slit rutan ur meningen — ordet efter rutan flyttas till en egen rad. BENET MÅSTE FALLA. */
+    if(SABBA === 'luckmening'){
+      var lm = Array.prototype.filter.call(sh.querySelectorAll('.ovn-rad, .ak8-rad'), function(r){
+        var i = r.querySelector('input.ovn-in'); return synlig(r) && i && grannText(i, 1) && grannText(i, -1) && !i.closest('.ovn-svarsrad');
+      })[0];
+      if(lm){ var lmE = grannText(lm.querySelector('input.ovn-in'), 1).nod;
+        if(lmE.nodeType === 1){ lmE.style.display = 'block'; lmE.style.flexBasis = '100%'; lmE.style.marginLeft = '0'; }
+        ut.noter.push('SABBA: flyttade ordet efter rutan till en egen rad (luckmeningen sliten)'); }
     }
     if(SABBA === 'svarsetikett'){
       var e9 = Array.prototype.filter.call(sh.querySelectorAll('.ovn-svar-etikett'), synlig)[0];
@@ -348,6 +376,23 @@ const PROBE = `(function(){
           }
         }
         return;                                          // ovriga K-K-ben galler inte har
+      }
+      /* LUCKMENING (K-K, Joachim 2026-11-26): rutan i meningen — "Han är ▢ år.", "v veckor har ▢ dagar." Samma
+         princip som "ritat streck → rutan på strecket": meningens lucka ÄR svarets plats, och "Svar:" gäller
+         inte. Fallet känns igen på meningen, inte på datan: text direkt före rutan som inte avslutar en mening
+         (. ? ! :) och text direkt efter rutan. Det som fälls är en ISÄRSLITEN luckmening: rutan står på samma
+         rad som orden intill, tätt efter ordet före och tätt före ordet efter. */
+      var foreL = grannText(ruta, -1), efterL = grannText(ruta, 1);
+      if(!par2 && foreL && efterL && !/[.?!:]\\s*$/.test(foreL.text)){
+        b.svarLucka = (b.svarLucka || 0) + 1;
+        var uL = ruta.getBoundingClientRect(), fL = textRekt(foreL.nod, -1), eL = textRekt(efterL.nod, 1);
+        var mitt = function(r){ return (r.top + r.bottom) / 2; }, halv = uL.height / 2;
+        if(fL && eL && (Math.abs(mitt(fL) - mitt(uL)) > halv || Math.abs(mitt(eL) - mitt(uL)) > halv
+            || uL.left - fL.right > 24 || eL.left - uL.right > 24))
+          b.brott.push('K-K LUCKMENING ISARSLITEN: "' + txt.slice(0, 34) + '" — rutan star inte i meningen ('
+            + Math.round(uL.left - fL.right) + ' px efter ordet fore, ' + Math.round(eL.left - uL.right) + ' px fore ordet efter, '
+            + Math.round(Math.max(Math.abs(mitt(fL) - mitt(uL)), Math.abs(mitt(eL) - mitt(uL)))) + ' px i hojd)');
+        return;
       }
       if(!par2 || !par2.querySelector('.ovn-svar-etikett')){
         b.brott.push('K-K FRITT SVAR UTAN "Svar:": "' + txt.slice(0, 34) + '"');
@@ -579,7 +624,7 @@ NY.jobb(Sidor.alla(), VY, args).forEach(j => {
     fel += b.brott.length;
     console.log((b.brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad
       + ': ' + b.rader + ' rader, ' + b.grupper + ' uppgifter, ' + b.rutor + ' rutor, '
-      + b.bokstaver + ' bokstäver, ' + b.svarMedLikhet + '=/' + b.svarFritt + ' fria svar' + (b.svarBild ? ' · ' + b.svarBild + ' bild-uppgifter' : '')
+      + b.bokstaver + ' bokstäver, ' + b.svarMedLikhet + '=/' + b.svarFritt + ' fria svar' + (b.svarBild ? ' · ' + b.svarBild + ' bild-uppgifter' : '') + (b.svarLucka ? ' · ' + b.svarLucka + ' luckmeningar' : '')
       + (b.brott.length ? '\n     ' + b.brott.slice(0, 4).join('\n     ')
          + (b.brott.length > 4 ? '\n     … och ' + (b.brott.length - 4) + ' till' : '') : ''));
   });
