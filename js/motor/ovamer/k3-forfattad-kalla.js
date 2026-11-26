@@ -85,6 +85,27 @@
       delkapitel: { namn: 'Förenkla uttryck', adress: 'ak7/k3/d3-forenkla-uttryck-nyformat/index.html', arskurs: 7, kapitel: 3 },
       knapprader: '.nf-yta .ovn-kontroll-rad',
       montering: 'nf-mount'
+    },
+    /* Kapitel 4 Procent, Del 1, metodträningens banker (js/motor/blad/blad-k4-d1-metod.js, Joachim 2026-11-26):
+       referens = lövet ('B1' … 'B7'). Ritas med bladkärnan och bladens byggstenar (blad-k4-d1-procent.js: formkedjan,
+       figurerna). B2–B6 har nya tal efter banken: mallen först, sedan lövets talregel (NyaTal.medTalregel, kroken nedan).
+       Mastery: kapitel 4:s store (mastery-k4.js). */
+    'k4d1': {
+      css: ['js/motor/blad/ak7-delkapitel-kanon.css', 'js/motor/blad/ak7-k1blad-kanon.css', 'js/motor/blad/karna-b-grund.css',
+            'js/motor/blad/ak8-blad-ui.css', 'js/motor/keypad.css'],
+      stil: ':root{--navy:#0f1e2e;--navy-mid:#1a3045;--blue:#1b4b8a;--blue-lt:#2560a8;--green:#2d6a4f;'
+          + "--body:'Source Serif 4',Georgia,serif;--c-rakna:#16a34a;--rod:#b23b2e;--rod-lt:#c0392b;--las:#9a9388;}"
+          + ".fk-drill{--mono:'Source Serif 4',Georgia,serif;}"
+          + '.fk-drill .fk-d1-blad{max-width:900px;margin:18px auto 0;padding:0 28px;}',
+      skript: ['js/mastery.js', 'js/mastery-k4.js', 'js/motor/blad/blad-karna-b.js', 'js/motor/figur/svg-andel.js',
+               'js/motor/figur/svg-tallinje.js', 'js/motor/ovamer/nya-tal.js', 'js/motor/blad/blad-k4-d1-procent.js',
+               'js/motor/blad/blad-k4-d1-metod.js'],
+      hamta: function(ref){ return window.BLAD_K4_D1_METOD && window.BLAD_K4_D1_METOD.drillKalla(ref); },
+      knappsats: function(){ return document.getElementById('ovn-keypad-shared'); },
+      krav: ['js/motor/alg-brak.js', 'js/motor/blad/ak8-blad-ui.js'],
+      delkapitel: { namn: 'Procent', adress: 'ak7/k4/d1-procent/index.html', arskurs: 7, kapitel: 4 },
+      knapprader: '.nf-yta .ovn-kontroll-rad',
+      montering: 'nf-mount'
     }
   };
   /* NYA TAL EFTER BANKEN (KONVENTIONER, METODTRÄNING; Joachim 2026-11-25): ett löv som bär `mall` (mallarna, lövets
@@ -93,7 +114,9 @@
      `mall` (valuppgifter, ringa in, tolka, teckna, tillämpning) serverar bara sina författade uppgifter. */
   Object.keys(KALLOR).forEach(function(id){
     var K = KALLOR[id], h = K.hamta;
-    K.hamta = function(ref){ var k = h(ref); return (k && k.mall && !k.nasta && window.NyaTal) ? window.NyaTal.medNasta(k) : k; };
+    // Ett löv vars mall bär talregel (procent, kapitel 4) får samma mekanism med lövets talregel (NyaTal.medTalregel).
+    K.hamta = function(ref){ var k = h(ref); return (k && k.mall && !k.nasta && window.NyaTal)
+      ? (k.mall.talregel ? window.NyaTal.medTalregel(k) : window.NyaTal.medNasta(k)) : k; };
   });
 
   function laddaCss(href){ var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); }

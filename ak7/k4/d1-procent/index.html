@@ -72,6 +72,8 @@
 <script src="../../../js/motor/figur/svg-andel.js"></script>
 <script src="../../../js/motor/figur/svg-tallinje.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-procent.js"></script>
+<script src="../../../js/motor/blad/blad-k4-d1-test.js"></script>
+<script src="../../../js/motor/blad/blad-k4-d1-metod.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -85,11 +87,15 @@ var M = window.Momentsida, el = M.el;
 var TAX = (window.K4_TAXONOMI && window.K4_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
 var BYTA = window.BLAD_K4_D1_PROCENT;
+/* METODTRÄNING och TEST (KONVENTIONER "Arbetssidan"): sidan lämnar bara datan — trädets löv med bankernas id
+   (blad-k4-d1-metod.js) och de författade testen (blad-k4-d1-test.js). Skalet (momentsida.js) bär resten. */
+var METOD = window.BLAD_K4_D1_METOD ? window.BLAD_K4_D1_METOD.trad() : null;
+var TESTER = window.BLAD_K4_D1_TEST ? window.BLAD_K4_D1_TEST.TESTER : [];
 if(window.Arbetsyta) window.Arbetsyta.retur();
 
 /* ── MOMENTEN (Joachim 2026-11-26): sju moment. 1–4 hör till sjuan (märket 7), 5–7 till åttan (märket F i sjuan).
-   Moment 1 har Blad 1–5 (variant A); moment 2–7 står som "Kommer senare". Föreläsningar, Metodträning, Dagens
-   träning och Test står som "Kommer senare" tills innehållet finns. ── */
+   Moment 1 har Blad 1–5 (varianterna A och B), Metodträningen (grenen Procent och byta form, B1–B7) och Test 1;
+   moment 2–7 står som "Kommer senare". Föreläsningar och Dagens träning står som "Kommer senare". ── */
 var MOMENT = [
   { titel: 'Procent och byta form', ar: 7, roll: 'karna', id: 'byta', bladen: BYTA ? BYTA.MOMENT.blad : [],
     niva: BYTA ? { prefix: BYTA.MOMENT.nivaPrefix, id: BYTA.MOMENT.nivaId } : null },
@@ -105,10 +111,10 @@ var scen = document.getElementById('scen-moment');
 
 function visaMoment(m){
   scen.innerHTML = '';
-  // Ordning och inträdesläge som referenssidan: Uppgifter ÖPPEN, Föreläsningar och Metodträning "Kommer senare".
+  // Ordning och inträdesläge som referenssidan: Uppgifter ÖPPEN, Föreläsningar "Kommer senare", Metodträning ihopfälld.
   var S1 = M.sektion(scen, 'Uppgifter');
   M.sektionKommer(scen, 'Föreläsningar');
-  M.metodtraning(scen, null);
+  var S3 = M.metodtraning(scen, METOD);
   // UPPGIFTER — ett blad per rad. SPÄRREN (NivaRad, §3): ett blad som inte är nått står med 🔒, utan länk.
   var l1 = el('div', 'nf-lista');
   m.bladen.forEach(function(b){
@@ -121,7 +127,7 @@ function visaMoment(m){
     l1.appendChild(a);
   });
   S1.body.appendChild(l1);
-  S1.satt(true);
+  S1.satt(true); if(S3) S3.satt(false);
 }
 
 var moment = MOMENT.map(function(m){
@@ -130,8 +136,8 @@ var moment = MOMENT.map(function(m){
            id: m.id, kommer: !!m.kommer, valj: m.kommer ? null : function(){ visaMoment(m); } };
 });
 
-// TEST: inga författade test än → skalet skriver "Kommer senare".
-M.montera({ vard: document.getElementById('navram'), rubrik: 'Procent', moment: moment, tester: [],
+// TEST: Joachims författade test (TESTER), listade av skalet och öppnade på uppgiftssidan (?test=<id>).
+M.montera({ vard: document.getElementById('navram'), rubrik: 'Procent', moment: moment, tester: TESTER,
   mina: [ { titel: 'Kunskapsläge', sub: '', vy: 'mv-kunskapslage' },
           { titel: 'Självskattning', sub: '', vy: 'mv-sjalvskattning' } ] });
 })();

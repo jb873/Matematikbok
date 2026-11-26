@@ -326,7 +326,61 @@ function medNasta(kalla){
   return kalla;
 }
 
-var NyaTal = { poly: poly, svarAv: svarAv, form: form, talIMall: talIMall, band: band, medNasta: medNasta, varde: varde, talUt: talUt,
+/* ── MED TALREGEL (Joachim 2026-11-26, procent kapitel 4): samma mekanism för löv vars talregler inte går att skriva som
+   band — "täljaren = k · nämnaren/100", listor med tillåtna täljare, procenttal. Mallarna är algebrafria (bråk och
+   procent, där "/" är ett bråkstreck och inte en division att räkna ut), så banden, svarsformen och "divisionen går
+   jämnt" ovan gäller inte. Lövet lämnar data:
+     mall = { ref, talregel: true, mallar: [m], bygg(ny, m) → blad, valbara?(ctx) → [mallindex] }
+     m.dra(rnd, ctx) → { nyckel, … } eller null — nya tal till mallen ENLIGT LÖVETS TALREGEL (lövets data-funktion)
+     m.fast = true — mallen har inga tal att variera (standardbråk eleven ska kunna utantill: 1/2, 1/3, 2/3); den
+                     återkommer med samma tal efter banken, och regeln om nya tal gäller den inte
+   Mekanismen (som medNasta): banken först; sedan väljs MALLEN FÖRST, med lika stor chans bland de valbara, och dess
+   talregel drar talen. En uppgift är ny: inte en av bankens och inte någon av de tio senaste (fasta mallar undantagna).
+   TIOTAL (Joachim 2026-11-26: "per blad" gäller varje tiotal nya uppgifter efter banken): ctx = { i, pos (0–9 i
+   tiotalet), tiotal: tiotalets tidigare uppgifter }; lövets valbara(ctx) kan begränsa mallarna och sätta ctx.krav,
+   som talregeln följer (t.ex. "minst en 0,0x per tiotal", "nivå 2 bara på plats 9 och 10").
+   Statistiken (statistik.val/drag/tomma/fast) läses av fuzzen. */
+function medTalregel(kalla){
+  var M = kalla.mall; if(!M || !M.mallar || !M.mallar.length || !M.bygg) return kalla;
+  var n = kalla.instanser.length, cache = {}, sett = {}, DRAG = 4000, L = M.mallar.length;
+  M.mallar.forEach(function(m){ if(m.nyckel) sett[m.nyckel] = 1; });
+  var S = kalla.statistik = { val: [], drag: [], tomma: [], fast: [] };
+  M.mallar.forEach(function(m){ S.val.push(0); S.drag.push(0); S.tomma.push(0); S.fast.push(!!m.fast); });
+  function ny(i){
+    if(i in cache) return cache[i];
+    var pos = (i - n) % 10, tiotal = [], senaste = [];
+    for(var j = i - pos; j < i; j++){ var t = ny(j); if(t) tiotal.push(t); }
+    for(var j2 = Math.max(n, i - 10); j2 < i; j2++){ var f = ny(j2); if(f) senaste.push(f.nyckel); }
+    var rnd = slump(hash(String(M.ref) + ':' + i)), ctx = { i: i, pos: pos, tiotal: tiotal, krav: null };
+    var valbara = M.valbara ? M.valbara(ctx) : null;
+    if(!valbara || !valbara.length){ valbara = []; for(var a = 0; a < L; a++) valbara.push(a); }
+    // Mallen först, med lika stor chans; ger den inget nytt tas en av de återstående, också den slumpad (inte nästa i
+    // bankens ordning — då fick mallen efter en smal mall alla dess reservval).
+    var kvar = valbara.slice(), res = null;
+    while(kvar.length && !res) res = dra1(kvar.splice(Math.floor(rnd() * kvar.length), 1)[0]);
+    function dra1(idx){
+      var m = M.mallar[idx]; S.val[idx]++;
+      for(var f2 = 0; f2 < DRAG; f2++){
+        S.drag[idx]++;
+        var x = m.dra(rnd, ctx);
+        if(x && (m.fast || (!sett[x.nyckel] && senaste.indexOf(x.nyckel) < 0))){ x.mall = idx; return x; }
+        if(m.fast) break;
+      }
+      S.tomma[idx]++;
+      return null;
+    }
+    return (cache[i] = res);
+  }
+  kalla.nyUppgift = ny;
+  kalla.nasta = function(i){
+    if(i < n) return kalla.instanser[i];
+    var x = ny(i); if(!x) return null;
+    return { bokstav: String(i + 1), blad: M.bygg(x, M.mallar[x.mall]), ny: x };
+  };
+  return kalla;
+}
+
+var NyaTal = { poly: poly, svarAv: svarAv, form: form, talIMall: talIMall, band: band, medNasta: medNasta, medTalregel: medTalregel, varde: varde, talUt: talUt,
   // DIVISIONERNA (delaJamnt): regeln på/av (fuzzen stänger av den vid --sabba delbar) och minsta faktorn i nämnare
   // (2: minst dubbelt så stor som nämnaren; fuzzen sätter 1 vid --sabba lika).
   delbar: true, delbarMinst: 2 };

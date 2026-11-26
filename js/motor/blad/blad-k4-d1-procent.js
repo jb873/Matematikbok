@@ -194,15 +194,126 @@ BLAD['5A'] = function(){ return medNod(FRAN, { titel: T.b5, dokument: dok('5A', 
               sant('60 % = 3/5', 'Sant'), sant('25 % = 1/25', 'Falskt') ])
 ] }); };
 
-/* MOMENTET: fem blad, variant A (B kommer senare och läggs till i samma blad). Spärren: NivaRad, krav 80 % rätta rutor
-   på bladet före; Blad 1 och 2 alltid öppna (KONVENTIONER §3). Bladens namn ur klartextens tabell. */
-var MOMENT = { titel: 'Procent och byta form', varianter: ['A'],
+/* ══ VARIANT B (Joachim 2026-11-26) — doc/innehall/k4-d1-procent-moment1-B.md, ordagrant: samma komponenter, samma
+   rättning och samma rubriker som A. Blad 1 nr 2: de gula rutorna är gröna (figurmodulens färg), som i A. Blad 2 nr 7 b
+   och d: bråkrutan godtar varje bråk med rätt värde (4/5 eller 8/10, 1/2 eller 5/10) — formrutan 'brak'. ══ */
+var RB = { b1n5: { rubrik: 'Ringa in alla tal som är lika mycket värda som 3/4.' }.rubrik };
+VAL['20/25:'] = ['A. 4/5', 'B. 5/4', 'C. 2/5']; VAL['6/24:'] = ['A. 1/6', 'B. 1/4', 'C. 1/3']; VAL['24/40:'] = ['A. 2/5', 'B. 3/4', 'C. 3/5'];
+// Hundradelskedjan ur procenttalet: "7/20 = 35/100 = 0,35 = 35 %" (p = 35), och procentkedjan "40 % = 40/100 = 2/5 = 0,4".
+function hp(b, p){ return hdp(b, p + '/100', p / 100, p); }
+function pk(p, e){ return hed(p + ' %', p + '/100', e, p / 100); }
+
+/* ── BLAD 1B — Samma andel i tre former ── */
+BLAD['1B'] = function(){ return medNod(TILL, { titel: T.b1, dokument: dok('1B', 'golv'), grupper: [
+  g(R.b1n1, [
+    kedja(null, [br('7/10'), dec(0.7), pro(70)], { svg: A.delStrip(10, upp(7)) }),
+    kedja(null, [br('3/4'), dec(0.75), pro(75)], { svg: A.delCirkel(4, [0, 1, 2]) }),
+    kedja(null, [br('4/5'), dec(0.8), pro(80)], { svg: A.delStrip(5, upp(4)) }),
+    kedja(null, [br('6/100'), dec(0.06), pro(6)], { svg: A.delRuta(10, 10, upp(6)) })
+  ]),
+  g(R.b1n2, [
+    { typ: 'svgfigur', svg: A.delRuta(10, 10, [{ antal: 3, farg: 'bla' }, { antal: 12, farg: 'rod' }, { antal: 25, farg: 'gron' }]) },
+    kedja(null, [br('3/100'), dec(0.03), pro(3)], { etikett: { etikett: 'blå:' }.etikett }),
+    kedja(null, [br('12/100'), dec(0.12), pro(12)], { etikett: { etikett: 'röda:' }.etikett }),
+    kedja(null, [br('25/100'), dec(0.25), pro(25)], { etikett: { etikett: 'gröna:' }.etikett }),
+    kedja(null, [br('60/100'), dec(0.6), pro(60)], { etikett: { etikett: 'vita:' }.etikett })
+  ]),
+  g(R.b1n3, [
+    { typ: 'svgfigur', svg: TL.linje({ min: 0, max: 1, steg: 0.2, rader: ['Bråkform', 'Decimalform', 'Procentform'] }) },
+    { typ: 'tabell', huvud: 'kolumn', matris: [
+      ['Bråkform', '1/5', '2/5', br('3/5'), '4/5', '5/5'],
+      ['Decimalform', dec(0.2), '0,4', '0,6', dec(0.8), '1'],
+      ['Procentform', '20 %', pro(40), '60 %', '80 %', pro(100)] ] }
+  ]),
+  g(R.b1n4, [
+    { typ: 'tabell', huvud: 'rad', matris: [
+      ['Procentform', 'Bråkform', 'Decimalform'],
+      ['75 %', '3/4', bok(dec(0.75), 'a')],
+      [bok(pro(60), 'b'), '3/5', '0,6'],
+      ['30 %', bok(br('3/10'), 'c'), '0,3'],
+      [bok(pro(90), 'd'), '9/10', bok(dec(0.9), 'e')],
+      ['7 %', bok(br('7/100'), 'f'), '0,07'] ] }
+  ]),
+  g(RB.b1n5, [
+    { typ: 'valruta', matte: true, flera: true, alt: ['0,75', '75/100', '7,5 %', '75 %', '0,34', '6/8', '3,4', '0,075'],
+      ratt: ['0,75', '75/100', '75 %', '6/8'] }
+  ]),
+  g(R.sant, [ sant('0,3 = 30 %', 'Sant'), sant('1/2 = 2 %', 'Falskt'), sant('0,08 = 80 %', 'Falskt'),
+              sant('3/4 = 75 %', 'Sant'), sant('1/10 = 10 %', 'Sant') ]),
+  g(R.b1n7, [
+    { typ: 'paraihop', matte: true, meningar: ['1) 1/10', '2) 60 %', '3) 75 %', '4) 1/4', '5) 80 %'],
+      alt: ['1', '2', '3', '4', '5'],
+      par: [ { fraga: 'A 3/5', ratt: '2' }, { fraga: 'B 10 %', ratt: '1' }, { fraga: 'C 0,25', ratt: '4' },
+             { fraga: 'D 8/10', ratt: '5' }, { fraga: 'E 3/4', ratt: '3' } ] }
+  ])
+] }); };
+
+/* ── BLAD 2B — Byta form med standardbråk ── */
+BLAD['2B'] = function(){ return medNod(TILL, { titel: T.b2, intro: I.b2, dokument: dok('2B', 'golv'), grupper: [
+  g(R.n10,  [ dp('6/10', 0.6, 60), dp('4/10', 0.4, 40), dp('8/10', 0.8, 80), dp('2/10', 0.2, 20) ]),
+  g(R.n100, [ dp('99/100', 0.99, 99), dp('5/100', 0.05, 5), dp('70/100', 0.7, 70), dp('12/100', 0.12, 12) ]),
+  g(R.n24,  [ dp('3/4', 0.75, 75), dp('1/2', 0.5, 50), dp('4/4', 1, 100), dp('1/4', 0.25, 25) ]),
+  g(R.n5,   [ dp('4/5', 0.8, 80), dp('2/5', 0.4, 40), dp('5/5', 1, 100), dp('3/5', 0.6, 60) ]),
+  g(R.n3,   [ kedja('2/3', [ca(dec(0.67)), pro(67)]), kedja('1/3', [ca(dec(0.33)), pro(33)]) ]),
+  g(R.bland,[ dp('3/5', 0.6, 60), dp('45/100', 0.45, 45), dp('3/4', 0.75, 75), kedja('1/3', [ca(dec(0.33)), pro(33)]),
+              dp('2/10', 0.2, 20), dp('2/4', 0.5, 50) ]),
+  g(R.linj, [ kedja('1/4', [dec(0.25), txt('25 %')]),
+              kedja(null, [br('4/5'), txt('0,8'), pro(80)]),
+              kedja('9/100', [dec(0.09), pro(9)]),
+              kedja(null, [br('1/2'), txt('0,5'), pro(50)]) ])
+] }); };
+
+/* ── BLAD 3B — Förenkla till enklaste form ── */
+BLAD['3B'] = function(){ return medNod(TILL, { titel: T.b3, intro: I.b3, dokument: dok('3B', 'mellan'), grupper: [
+  g(R.halv, [ edp('10/40', '1/4', 0.25, 25), edp('7/14', '1/2', 0.5, 50), edp('21/28', '3/4', 0.75, 75), edp('11/22', '1/2', 0.5, 50) ]),
+  g(R.femt, [ edp('4/20', '1/5', 0.2, 20), edp('9/15', '3/5', 0.6, 60), edp('16/20', '4/5', 0.8, 80), edp('14/35', '2/5', 0.4, 40) ]),
+  g(R.stor, [ edp('27/36', '3/4', 0.75, 75), edp('24/60', '2/5', 0.4, 40), edp('15/30', '1/2', 0.5, 50),
+              edp('13/52', '1/4', 0.25, 25), edp('36/45', '4/5', 0.8, 80), edp('45/75', '3/5', 0.6, 60) ]),
+  g(R.valj, [ valj('20/25:', 'A. 4/5'), valj('6/24:', 'B. 1/4'), valj('24/40:', 'C. 3/5') ])
+] }); };
+
+/* ── BLAD 4B — Förlänga och förkorta till hundradelar ── */
+BLAD['4B'] = function(){ return medNod(TILL, { titel: T.b4, intro: I.b4, dokument: dok('4B', 'mellan'), grupper: [
+  g(R.d20,  [ hp('3/20', 15), hp('9/20', 45), hp('11/20', 55), hp('17/20', 85) ]),
+  g(R.d25,  [ hp('8/25', 32), hp('14/25', 56), hp('21/25', 84), hp('23/25', 92) ]),
+  g(R.d50,  [ hp('31/50', 62), hp('23/50', 46), hp('19/50', 38), hp('7/50', 14) ]),
+  g(R.d200, [ hp('16/200', 8), hp('21/300', 7), hp('24/400', 6), hp('45/500', 9), hp('66/600', 11) ]),
+  g(R.d700, [ hp('56/700', 8), hp('32/800', 4), hp('99/900', 11), hp('33/1100', 3), hp('84/1200', 7) ]),
+  g(R.blandat, [ hp('3/25', 12), hp('35/700', 5), hp('13/50', 26), hp('48/800', 6), hp('9/25', 36), hp('108/1200', 9) ]),
+  g(R.tal,  [ hp('69/300', 23), hp('168/400', 42), hp('366/600', 61), hp('357/700', 51), hp('248/800', 31), hp('264/1200', 22) ])
+] }); };
+
+/* ── BLAD 5B — Från procent, och det hela är 100 % ── */
+BLAD['5B'] = function(){ return medNod(FRAN, { titel: T.b5, dokument: dok('5B', 'tak'), grupper: [
+  g(R.b5n1, [ pk(40, '2/5'), pk(70, '7/10'), pk(80, '4/5'), pk(25, '1/4') ]),
+  g(R.b5n2, [ pk(15, '3/20'), pk(12, '3/25'), pk(65, '13/20'), pk(2, '1/50') ]),
+  g(R.hela, [
+    rest({ fraga: '85 % av eleverna äter lunch i skolan. Hur många procent äter inte lunch i skolan?' }.fraga, 15),
+    rest({ fraga: '37 % av klassen spelar fotboll. Hur många procent spelar inte fotboll?' }.fraga, 63),
+    { typ: 'bild', svg: A.delRuta(10, 10, upp(46)), fraga: { fraga: 'Hur många procent är inte färgade?' }.fraga, svar: 54, enhet: ' %' },
+    rest({ fraga: '7/20 av godiset i påsen är grönt. Hur många procent är inte grönt?' }.fraga, 65)
+  ]),
+  g(R.kvar, [
+    rest({ fraga: 'I en påse godis är 15 % röda och 48 % gröna. Resten är gula. Hur många procent är gula?' }.fraga, 37),
+    rest({ fraga: 'Ali har cyklat 7/10 av sträckan. Hur många procent har han kvar att cykla?' }.fraga, 30)
+  ]),
+  g(R.sant, [ sant('0,9 = 9 %', 'Falskt'), sant('3/4 = 0,75 = 75 %', 'Sant'), sant('2 % = 0,02', 'Sant'),
+              sant('40 % = 2/5', 'Sant'), sant('20 % = 1/20', 'Falskt') ])
+] }); };
+
+/* MOMENTET: fem blad, varianterna A och B (Joachim 2026-11-26). Spärren: NivaRad, krav 80 % rätta rutor på bladet före;
+   Blad 1 och 2 alltid öppna (KONVENTIONER §3). Varianterna delar spärren (samma nivaId). Bladens namn ur klartextens tabell. */
+var MOMENT = { titel: 'Procent och byta form', varianter: ['A', 'B'],
   nivaPrefix: 'k4d1', nivaId: 'byta', nivaKrav: { andel: 0.8 },
   blad: [ { nr: 1, titel: T.b1 }, { nr: 2, titel: T.b2 }, { nr: 3, titel: T.b3 }, { nr: 4, titel: T.b4 }, { nr: 5, titel: T.b5 } ] };
 
 window.BLAD_K4_D1_PROCENT = {
   MOMENT: MOMENT,
   blad: function(id){ var f = BLAD[String(id || '').toUpperCase()]; return f ? f() : null; },
-  idn: function(){ return Object.keys(BLAD); }
+  idn: function(){ return Object.keys(BLAD); },
+  /* Bladens byggstenar och rubriker, delade med testet (blad-k4-d1-test.js) och metodträningen (blad-k4-d1-metod.js):
+     samma komponenter och samma rättning — ingen kopia. */
+  TYPER: { g: g, medNod: medNod, TILL: TILL, FRAN: FRAN, br: br, enk: enk, hun: hun, dec: dec, pro: pro, txt: txt, ca: ca,
+           kedja: kedja, upp: upp, sant: sant, rest: rest, dp: dp, edp: edp, hdp: hdp, hed: hed, hp: hp, pk: pk, R: R, I: I, T: T }
 };
 })();
