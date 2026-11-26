@@ -88,4 +88,96 @@ const nyttSnutt = `
   }
 `;
 
-module.exports = { snutt: snutt, stegSnutt: stegSnutt, nyttSnutt: nyttSnutt, NYTT_K: NYTT_K };
+/* SIDORNA I NYTT FORMAT (Joachim 2026-11-25): momentsidan, uppgiftssidan (alla moment, blad, varianter och test) och
+ * drillsidan. Deras steg är inte flikar på EN sida utan ADRESSER (?moment=&blad=, ?typ=&blad=, ?test=, ?blandade=,
+ * drill.html?bank=), och spärren (NivaRad) skickar ett låst blad till momentsidan. En grind som bara öppnade
+ * Sidor.alla() mätte därför uppgiftssidans förvalda blad och inget annat. EN upptäckare för alla grindar:
+ *
+ *     const NY = require('./niva-las-upp');
+ *     NY.jobb(Sidor.alla(), VY, args).forEach(j => {          // gamla sidor som förut + nytt format × NY_VYER
+ *       url = fileUrl(path.join(ROOT, j.fil)) + j.fraga;  vy = j.vy;  pre = PRE + (j.ny ? NY.nyPre : '');
+ *       ... j.sida är namnet i utskriften och i V14 (matpunkt) ...
+ *     });
+ *
+ * UPPTÄCKTEN GÅR ELEVENS VÄG, i webbläsaren: momentsidan öppnas med spärren upplåst, varje rad i vänsterspalten
+ * klickas (momenten, Test, d5:s nivåer och blandade) och varje länk till uppgiftssidan samlas; drillens banker är
+ * lövens bank-id, fångade där sidan lämnar dem till skalet (Momentsida.metodtraning). Ett nytt moment, blad, test
+ * eller löv mäts alltså utan att någon lista här ändras. Varianterna (Blad A/B) är flikar i växeln på uppgiftssidan
+ * och stegas av grindarnas egen flikstegning (.blad-nav-btn), inte som egna adresser.
+ *
+ * VYERNA: 1366 × 768 och 1536 × 864 (KONVENTIONER, uppgiftssidan). Gamla sidor mäts i grindens egen vy som förut.
+ * --nyformat: bara sidorna i nytt format. Ingen nätväg (file://). */
+const NY_VYER = ['1366x768', '1536x864'];
+/* Spärren upplåst med NivaRad:s egna nycklar (<prefix>_naddNiva<n>_<id>) för varje moment på sidan, skrivna när
+   NivaRad sätts — bladfilerna är då redan laddade, och sidans spärr har inte läst nycklarna än. Drillens banker
+   fångas ur Momentsida.metodtraning. */
+const nyPre = `
+(function(){
+  function lasUpp(){ Object.keys(window).forEach(function(k){
+    var M = /^BLAD_/.test(k) && window[k] && window[k].MOMENT; if(!M || !M.nivaPrefix) return;
+    for(var n = 2; n <= M.blad.length; n++) try { localStorage.setItem(M.nivaPrefix + '_naddNiva' + n + '_' + M.nivaId, '1'); } catch(e){} }); }
+  var nr; Object.defineProperty(window, 'NivaRad', { configurable: true, get: function(){ return nr; }, set: function(x){ nr = x; lasUpp(); } });
+  var ms; Object.defineProperty(window, 'Momentsida', { configurable: true, get: function(){ return ms; }, set: function(x){
+    ms = x;
+    if(x && x.metodtraning){ var o = x.metodtraning; x.metodtraning = function(scen, d){
+      try { ((d && d.kategorier) || []).forEach(function(k){ (k.lov || []).forEach(function(l){
+        if(l.bank) (window.__nfBanker = window.__nfBanker || []).push(l.bank); }); }); } catch(e){}
+      return o.apply(this, arguments); }; }
+  } });
+})();
+`;
+const UPPTACK = `(async function(){
+  var v = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  await v(2200);
+  var lankar = {};
+  function samla(){ Array.prototype.forEach.call(document.querySelectorAll('a[href]'), function(a){
+    var h = a.getAttribute('href'); if(/^uppgift\\.html\\?/.test(h)) lankar[h.replace(/[&?]retur=[^&]*/, '')] = 1; }); }
+  samla();
+  var rader = Array.prototype.filter.call(document.querySelectorAll('.nr-rad'), function(b){ return !b.disabled && b.getClientRects().length; });
+  for(var i = 0; i < rader.length; i++){ rader[i].click(); await v(350); samla(); }
+  return { lankar: Object.keys(lankar), banker: window.__nfBanker || [], fel: window.__fel || [] };
+})()`;
+let _cache = null;
+function nyformatSidor(){
+  if(_cache) return _cache;
+  const fs = require('fs'), path = require('path'), os = require('os'), { spawnSync } = require('child_process');
+  const ROOT = path.join(__dirname, '..');
+  const hitta = d => fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).reduce((u, e) => {
+    const r = d + '/' + e.name;
+    if(e.isDirectory() && !/^(Arkiv|\.)/.test(e.name)) return u.concat(hitta(r));
+    if(/-nyformat\/index\.html$/.test(r)) u.push(r);
+    return u; }, []);
+  const tmp = path.join(os.tmpdir(), 'nyformat-' + process.pid);
+  fs.writeFileSync(tmp + '-pre.js', nyPre); fs.writeFileSync(tmp + '-upptack.js', UPPTACK);
+  const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
+  const ut = [], banker = {};
+  ['ak7', 'ak8', 'ak9'].filter(a => fs.existsSync(path.join(ROOT, a))).forEach(a => hitta(a).sort().forEach(index => {
+    ut.push({ fil: index, fraga: '' });
+    let u = null;
+    for(let forsok = 0; forsok < 2 && !(u && u.lankar && u.lankar.length); forsok++){   // regel 9: en tappad fil körs om
+      const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, index)), tmp + '-upptack.js',
+        '--pre', tmp + '-pre.js', '--viewport', NY_VYER[0], '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
+      try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){ u = null; }
+    }
+    if(!u || !u.lankar || !u.lankar.length){ ut.push({ fil: index, fraga: '', upptacktFel: 'inga länkar till uppgiftssidan hittades' }); return; }
+    const dir = index.replace(/index\.html$/, '');
+    u.lankar.sort().forEach(h => ut.push({ fil: dir + 'uppgift.html', fraga: h.slice('uppgift.html'.length) }));
+    (u.banker || []).forEach(b => { banker[b] = 1; });
+  }));
+  Object.keys(banker).sort().forEach(b => ut.push({ fil: 'js/motor/arbetsyta/drill.html', fraga: '?bank=' + encodeURIComponent(b) }));
+  try { fs.unlinkSync(tmp + '-pre.js'); fs.unlinkSync(tmp + '-upptack.js'); } catch(e){}
+  return (_cache = ut);
+}
+// Grindens jobb: gamla sidor (utan dem i nytt format) i grindens vy, sedan nytt format × NY_VYER.
+function jobb(lista, vy, args){
+  const bara = (args || []).includes('--nyformat'), ny = /-nyformat\/|js\/motor\/arbetsyta\/drill\.html/;
+  const ut = bara ? [] : lista.filter(s => !ny.test(s)).map(s => ({ sida: s, fil: s, fraga: '', vy: vy, ny: false }));
+  nyformatSidor().forEach(s => NY_VYER.forEach(v => ut.push({ sida: s.fil + s.fraga + ' @' + v, fil: s.fil, fraga: s.fraga, vy: v, ny: true,
+    upptacktFel: s.upptacktFel })));
+  return ut;
+}
+
+module.exports = { snutt: snutt, stegSnutt: stegSnutt, nyttSnutt: nyttSnutt, NYTT_K: NYTT_K,
+                   NY_VYER: NY_VYER, nyPre: nyPre, nyformatSidor: nyformatSidor, jobb: jobb };
+
+if(require.main === module) nyformatSidor().forEach(s => console.log(s.fil + s.fraga + (s.upptacktFel ? '  ✗ ' + s.upptacktFel : '')));

@@ -49,6 +49,7 @@ const path = require('path'), fs = require('fs'), os = require('os'), { spawnSyn
 const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
+const NY = require('./niva-las-upp');                // sidorna i nytt format (jobb, nyPre)
 const MP = require('./matpunkt').skapa('notation-grind.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.alla())) process.exit(0);
@@ -402,21 +403,25 @@ let fel = 0, texter = 0, brak = 0, blad = 0, siffror = 0, rader = 0, blakMax = 0
 console.log('NOTATION-GRIND — K-G mellanrum kring räknetecken · K-I blandad form tätt ihop · K-L raka siffror'
   + (BREDD ? '  [' + BREDD + ']' : '') + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
 
-Sidor.alla().forEach(sida => {
+/* SIDORNA: Sidor.alla() som förut, och sidorna i NYTT FORMAT (momentsidan, uppgiftssidans alla moment, blad,
+   varianter och test, drillsidan) vid 1366 × 768 och 1536 × 864 — den delade upptäckaren i niva-las-upp.js (jobb). */
+NY.jobb(Sidor.alla(), BREDD, args).forEach(j => {
+  const sida = j.sida;
   if(BARA && sida.indexOf(BARA) < 0) return;
   MP.forsok(sida);
+  if(j.upptacktFel){ fel++; console.log('✗ ' + sida + ': ' + j.upptacktFel); }
   const tmp = path.join(os.tmpdir(), 'notation-' + process.pid + '.js');
   const pre = path.join(os.tmpdir(), 'notation-pre-' + process.pid + '.js');
-  fs.writeFileSync(tmp, PROBE); fs.writeFileSync(pre, PRE);
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp,
+  fs.writeFileSync(tmp, PROBE); fs.writeFileSync(pre, PRE + (j.ny ? NY.nyPre : ''));
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, j.fil)) + j.fraga, tmp,
     '--pre', pre, '--vanta-pa', 'blad', '--timeout', '240000', '--skarm']
-    .concat(BREDD ? ['--viewport', BREDD, '--size', BREDD] : []), { encoding: 'utf8', timeout: 300000 });
+    .concat(j.vy ? ['--viewport', j.vy, '--size', j.vy] : []), { encoding: 'utf8', timeout: 300000 });
   let ut = null; try { ut = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!ut){ fel++; console.log('✗ ' + sida + ': inget svar — ' + (r.stderr || '').trim().split('\n').pop()); return; }
   if(ut.onerr && ut.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + ut.onerr.join(' | ')); }
   (ut.noter || []).forEach(n => console.log('   ' + n));
   if(SPARA_BILD) (ut.bilder || []).forEach((b64, i) => {
-    const fil = path.join(path.resolve(SPARA_BILD), sida.replace(/\/index\.html$/, '').replace(/[\/.]/g, '-') + '-' + (i + 1) + '.png');
+    const fil = path.join(path.resolve(SPARA_BILD), sida.replace(/\/index\.html$/, '').replace(/[^\w-]+/g, '-') + '-' + (i + 1) + '.png');
     fs.mkdirSync(path.dirname(fil), { recursive: true }); fs.writeFileSync(fil, Buffer.from(b64, 'base64'));
     console.log('   skärmdump bakom bläckbrott: ' + fil);
   });

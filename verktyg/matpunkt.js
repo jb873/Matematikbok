@@ -155,7 +155,9 @@ function skapa(verktyg){
       let brott = 0;
       const nollor = [], undantagna = [], gamla = [];
 
-      forsokta.filter(s => bladsidor.has(s)).forEach(function(sida){
+      /* Sidorna i NYTT FORMAT (niva-las-upp.js, jobb) heter "<fil><fråga> @<vy>" och står inte i Sidor.alla() — utan
+         raden nedan gav en sådan sida noll mätpunkter tyst (mätt 2026-11-25: momentsidorna och d5 i brytningsgrinden). */
+      forsokta.filter(s => bladsidor.has(s) || / @\d+x\d+$/.test(s)).forEach(function(sida){
         const n = matt[sida] || 0;
         const u = skal.find(x => traffar(x, sida));
         if(n > 0){

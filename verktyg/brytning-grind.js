@@ -41,6 +41,7 @@ const ROOT = path.resolve(__dirname, '..');
 const Sidor = require('./sidor');
 const LAS_UPP = require('./niva-las-upp').snutt;   // nivåstegen upplåsta innan mätning
 const NYTT = require('./niva-las-upp').nyttSnutt;  // och varje steg också efter "Nytt blad" (k = 3)
+const NY = require('./niva-las-upp');                // sidorna i nytt format (jobb, nyPre)
 const MP = require('./matpunkt').skapa('brytning-grind.js');   // V14
 const args = process.argv.slice(2);
 if(Sidor.lista(args, Sidor.alla())) process.exit(0);
@@ -552,14 +553,19 @@ let fel = 0, matta = 0, rader = 0, grupper = 0, rutor = 0;
 console.log('BRYTNING-GRIND — K-D strukturerad brytning · K-E korta rutor som växer · K-F strecket mellan huvuduppgifter'
   + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
 
-Sidor.alla().forEach(sida => {
+/* SIDORNA: Sidor.alla() i telefonens vy som förut, och sidorna i NYTT FORMAT (momentsidan, uppgiftssidans alla
+   moment, blad, varianter och test, drillsidan) vid 1366 × 768 och 1536 × 864 — den delade upptäckaren i
+   niva-las-upp.js (jobb). Där räknas också K-L i samma körning: vyn ÄR redan Chromebookens. */
+NY.jobb(Sidor.alla(), VY, args).forEach(j => {
+  const sida = j.sida;
   if(BARA && sida.indexOf(BARA) < 0) return;
   MP.forsok(sida);
+  if(j.upptacktFel){ fel++; console.log('✗ ' + sida + ': ' + j.upptacktFel); }
   const tmp = path.join(os.tmpdir(), 'brytning-' + process.pid + '.js');
   const pre = path.join(os.tmpdir(), 'brytning-pre-' + process.pid + '.js');
-  fs.writeFileSync(tmp, PROBE); fs.writeFileSync(pre, PRE);
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp,
-    '--pre', pre, '--vanta-pa', 'blad', '--viewport', VY, '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
+  fs.writeFileSync(tmp, PROBE); fs.writeFileSync(pre, PRE + (j.ny ? NY.nyPre : ''));
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, j.fil)) + j.fraga, tmp,
+    '--pre', pre, '--vanta-pa', 'blad', '--viewport', j.vy, '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
   let ut = null; try { ut = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!ut){ fel++; console.log('✗ ' + sida + ': inget svar — ' + (r.stderr || '').trim().split('\n').pop()); return; }
   if(ut.onerr && ut.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + ut.onerr.join(' | ')); }
@@ -569,6 +575,7 @@ Sidor.alla().forEach(sida => {
     matta++; rader += b.rader; grupper += b.grupper; rutor += b.rutor;
     MP.varde(sida, b.blad, { rader: b.rader, grupper: b.grupper, rutor: b.rutor,
       bokstaver: b.bokstaver, svarMedLikhet: b.svarMedLikhet, svarFritt: b.svarFritt });
+    if(j.ny && (b.kl || []).length) b.brott = b.brott.concat(b.kl);   // nytt format: K-L i samma vy
     fel += b.brott.length;
     console.log((b.brott.length ? '✗ ' : '✓ ') + sida.replace(/\/index\.html$/, '') + ' · ' + b.blad
       + ': ' + b.rader + ' rader, ' + b.grupper + ' uppgifter, ' + b.rutor + ' rutor, '
@@ -579,7 +586,7 @@ Sidor.alla().forEach(sida => {
   // K-U VID CHROMEBOOK (Joachim 2026-10-08: skärmen som räknas, 1366 × 768 och 1536 × 864). Bara
   // sidor som laddar uppställningens yta — en läsning av filen — och bara K-U räknas här: övriga
   // ben mäts i grindens egen vy ovan (K-D syns bara där raderna bryter).
-  if(fs.readFileSync(path.join(ROOT, sida), 'utf8').indexOf('uppstallning-yta.js') >= 0){
+  if(!j.ny && fs.readFileSync(path.join(ROOT, sida), 'utf8').indexOf('uppstallning-yta.js') >= 0){
     ['1366x768', '1536x864'].forEach(vy => {
       const rc = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp,
         '--pre', pre, '--vanta-pa', 'blad', '--viewport', vy, '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });
@@ -595,7 +602,7 @@ Sidor.alla().forEach(sida => {
   }
   // K-L VID CHROMEBOOK: sidor där telefonvyn hittade kedjor mäts också vid 1366 och 1536, och där räknas
   // bara K-L (kedjan på en rad). Ett ben som bara mäter i telefonens vy ser aldrig felet.
-  if((ut.blad || []).some(b => b.kedjor)){
+  if(!j.ny && (ut.blad || []).some(b => b.kedjor)){
     ['1366x768', '1536x864'].forEach(vy => {
       const rc = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), tmp,
         '--pre', pre, '--vanta-pa', 'blad', '--viewport', vy, '--size', vy, '--timeout', '90000'], { encoding: 'utf8', timeout: 150000 });

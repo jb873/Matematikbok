@@ -42,6 +42,7 @@ const SABBA = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--sabba'));
 const BREDD = (i => i >= 0 ? args[i + 1] : null)(args.indexOf('--bredd'));
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/').replace(/ /g, '%20');
 const LAS_UPP = require('./niva-las-upp').snutt, STEG = require('./niva-las-upp').stegSnutt;
+const NY = require('./niva-las-upp');   // sidorna i nytt format (jobb, nyPre)
 
 const PROBE = `(function(){
   var SABBA = ${JSON.stringify(SABBA)};
@@ -304,12 +305,18 @@ let fel = 0, figurer = 0, ytor = 0, linjer = 0, texter = 0, sidorMedFigur = 0;
 console.log('FIGUR-GRIND — en figur utan formgivning är inte oformad, den är svart'
   + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
 
-Sidor.blad().forEach(sida => {
+/* SIDORNA: Sidor.blad() som förut, och sidorna i NYTT FORMAT (momentsidan, uppgiftssidans alla moment, blad,
+   varianter och test, drillsidan) vid 1366 × 768 och 1536 × 864 — den delade upptäckaren i niva-las-upp.js (jobb). */
+const NYPRE = path.join(os.tmpdir(), 'figurgrind-nypre-' + process.pid + '.js');
+fs.writeFileSync(NYPRE, NY.nyPre);
+NY.jobb(Sidor.blad(), BREDD, args).forEach(j => {
+  const sida = j.sida;
   if(BARA && sida.indexOf(BARA) < 0) return;
   MP.forsok(sida);
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
+  if(j.upptacktFel){ fel++; console.log('✗ ' + sida + ': ' + j.upptacktFel); }
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, j.fil)) + j.fraga, TMP,
     '--vanta-pa', 'blad', '--wait', '400', '--timeout', '60000']
-    .concat(BREDD ? ['--viewport', BREDD, '--size', BREDD] : []), { encoding: 'utf8', timeout: 120000 });
+    .concat(j.vy ? ['--viewport', j.vy, '--size', j.vy] : []).concat(j.ny ? ['--pre', NYPRE] : []), { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
   if(!u){ console.log('? ' + sida + ': inget svar'); return; }
@@ -331,7 +338,7 @@ Sidor.blad().forEach(sida => {
       + u.ytor + ' ytor · ' + u.linjer + ' linjer · ' + u.texter + ' texter)');
   }
 });
-try { fs.unlinkSync(TMP); } catch(e){}
+try { fs.unlinkSync(TMP); fs.unlinkSync(NYPRE); } catch(e){}
 
 fel += MP.granska();
 console.log('\n' + (fel ? '✗ FIGUR-GRIND RÖD (' + fel + ')' : '✓ FIGUR-GRIND GRÖN')
