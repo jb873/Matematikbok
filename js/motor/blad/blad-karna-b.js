@@ -2528,7 +2528,7 @@ function bygg_blad(rotEl, blad){
       var _loggNod = _grEl && _grEl.getAttribute('data-logg');
       // STORE-ROUTE: k1-taxonomin bor i window.Mastery, k3 (algebra) i window.MasteryK3. Utan route
       // hamnade algebra-evidensen i k1-storen. data-logg-store sätts av bladets data (grupp.loggStore).
-      var _store = (_grEl && _grEl.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
+      var _store = (_grEl && _grEl.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : (_grEl && _grEl.getAttribute('data-logg-store') === 'k4') ? window.MasteryK4 : window.Mastery;
       // MELLANLED LOGGAR INTE. Omskrivningscellen (data-oms) och förlängningens två led
       // (data-forlled, data-forlbrak) är steg i samma uppgift — svarsrutan bär loggen. Utan
       // undantaget ger en förlängningsuppgift fem evidenspunkter i stället för en.
@@ -2613,7 +2613,7 @@ function bygg_blad(rotEl, blad){
        — loggnings-grind.js fann det. Bara ett BESVARAT rutnät loggar, och bara första försöket. */
     function loggaGrid(grid, ok){
       var _gg = grid.closest('[data-logg]') || grid.closest('.ovn-grupp'), _ng = _gg && _gg.getAttribute('data-logg');
-      var _sg = (_gg && _gg.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
+      var _sg = (_gg && _gg.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : (_gg && _gg.getAttribute('data-logg-store') === 'k4') ? window.MasteryK4 : window.Mastery;
       if(_ng && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(grid, _sg, _ng, ok);
     }
     // Rätta valruta-grids (välj rätt uttryck, ev. flera rätta)
@@ -2738,7 +2738,7 @@ function bygg_blad(rotEl, blad){
         box.appendChild(fs2);
       }
       var _gr = box.closest('.ovn-grupp'), _nod = _gr && _gr.getAttribute('data-logg');
-      var _st = (_gr && _gr.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
+      var _st = (_gr && _gr.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : (_gr && _gr.getAttribute('data-logg-store') === 'k4') ? window.MasteryK4 : window.Mastery;
       if(_nod && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(box, _st, _nod, okS);
     });
 
@@ -2757,7 +2757,7 @@ function bygg_blad(rotEl, blad){
       if(res.ratt) ratt++;
       // Loggning ur bladets data (data-logg på raden eller gruppen), inte ur adressen.
       var _gu = box.closest('[data-logg]') || box.closest('.ovn-grupp'), _nu = _gu && _gu.getAttribute('data-logg');
-      var _su = (_gu && _gu.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : window.Mastery;
+      var _su = (_gu && _gu.getAttribute('data-logg-store') === 'k3') ? window.MasteryK3 : (_gu && _gu.getAttribute('data-logg-store') === 'k4') ? window.MasteryK4 : window.Mastery;
       if(_nu && window.AK8_UI && AK8_UI.loggaForstaForsoket) AK8_UI.loggaForstaForsoket(box, _su, _nu, res.ratt);
     });
 

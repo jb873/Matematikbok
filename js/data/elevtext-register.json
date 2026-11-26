@@ -2578,5 +2578,13 @@
   "titel | Förlänga och förkorta till hundradelar",
   "titel | Procent och byta form",
   "titel | Samma andel i tre former"
+ ],
+ "js/data/k4-taxonomi.js": [
+  "namn | Andelen",
+  "namn | Delen",
+  "namn | Det hela",
+  "namn | Från bråk och decimalform till procentform",
+  "namn | Från procentform till bråk och decimalform",
+  "namn | Procent"
  ]
 }
