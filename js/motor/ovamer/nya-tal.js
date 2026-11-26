@@ -164,12 +164,15 @@ function dra(rnd, lo, hi, dec, inteEtt){
 /* EN NY UPPGIFT ur mallen m. Ger { uttryck, svar, x, vardeSvar } eller null om försöket bryter mot reglerna. */
 function bandFor(B, t){ return (t.dec && B.roll[t.roll + '.' + t.dec]) || B.roll[t.roll]; }
 function sgd(a, b){ return b ? sgd(b, a % b) : a; }
-// En multipel av d i bandet [lo, hi] (aldrig 0 eller 1), eller null.
-function multipel(rnd, lo, hi, d){
+/* En multipel av d i bandet [lo, hi] (aldrig 0 eller 1), eller null. Är talet också en multipel av nämnaren n ska
+   det vara minst NyaTal.delbarMinst · n (Joachim 2026-11-26: "minst dubbelt så stor som nämnaren", som i banken:
+   12 = 3 · 4, 14 = 2 · 7) — aldrig lika med nämnaren. */
+function multipel(rnd, lo, hi, d, n){
   var a = Math.max(1, Math.ceil(lo / d)), z = Math.floor(hi / d), ut = [];
-  for(var k = a; k <= z; k++) if(k * d > 1) ut.push(k * d);
+  for(var k = a; k <= z; k++) if(k * d > 1 && !forLiten(k * d, n)) ut.push(k * d);
   return ut.length ? ut[Math.floor(rnd() * ut.length)] : null;
 }
+function forLiten(v, n){ return v % n === 0 && v < NyaTal.delbarMinst * n; }
 /* DELBAR (mallens egen talregel, Joachim 2026-11-26 — R1 "(5 · 12)/4 + (3 · 14)/7"): divisionen går alltid jämnt.
    Nämnaren väljs först och sedan en täljare som är en multipel av den: ett tal som täljare blir en multipel av
    nämnaren; en täljare "(a · b)" får a fritt och b som en multipel av nämnaren / sgd(a, nämnaren). Allt inom bandet.
@@ -188,13 +191,15 @@ function delbaraTal(m, tl, B, rnd){
       var inne = tl.map(function(x, k){ return k; }).filter(function(k){ return tl[k].i > start && tl[k].i < fore.length; });
       if(inne.length !== 2 || !/^\(\s*\d+\s*·\s*\d+\s*\)$/.test(fore.slice(start))) continue;   // bara "(a · b)"
       var ta = tl[inne[0]], tb = tl[inne[1]], ba = bandFor(B, ta), bb = bandFor(B, tb); if(!ba || !bb) return null;
-      var a = dra(rnd, ba[0], ba[1], 0, true); if(a === null) return null;
-      var b = multipel(rnd, bb[0], bb[1], d / sgd(a, d)); if(b === null) return null;
+      var a = dra(rnd, ba[0], ba[1], 0, true); if(a === null || forLiten(a, d)) return null;
+      // m.delbarMax (lövets tak för värdena, om det finns): a · b dras inte över det — kontrollen fäller dem ändå.
+      var hiB = m.delbarMax ? Math.min(bb[1], Math.floor(m.delbarMax / a)) : bb[1];
+      var b = multipel(rnd, bb[0], hiB, d / sgd(a, d), d); if(b === null) return null;
       satt[inne[0]] = a; satt[inne[1]] = b;
     } else {                                                                // täljaren är ett tal
       var k0 = j - 1; if(k0 < 0 || tl[k0].i + tl[k0].n !== fore.length) continue;
       var bt = bandFor(B, tl[k0]); if(!bt) return null;
-      var n = multipel(rnd, bt[0], bt[1], d); if(n === null) return null;
+      var n = multipel(rnd, bt[0], bt[1], d, d); if(n === null) return null;
       satt[k0] = n;
     }
   }
@@ -277,7 +282,8 @@ function medNasta(kalla){
   return kalla;
 }
 
-var NyaTal = { poly: poly, svarAv: svarAv, form: form, talIMall: talIMall, band: band, medNasta: medNasta, varde: varde, talUt: talUt };
+var NyaTal = { poly: poly, svarAv: svarAv, form: form, talIMall: talIMall, band: band, medNasta: medNasta, varde: varde, talUt: talUt,
+  delbarMinst: 2 };   // DELBAR: en faktor som är en multipel av nämnaren är minst 2 · nämnaren (fuzzen sätter 1 vid --sabba lika)
 if(typeof window !== 'undefined') window.NyaTal = NyaTal;
 if(typeof module !== 'undefined' && module.exports) module.exports = NyaTal;
 })();

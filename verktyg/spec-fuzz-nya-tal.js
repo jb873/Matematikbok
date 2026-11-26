@@ -21,7 +21,8 @@
      AVSKRIFT  avskriften är uttrycket med talen insatta (räknat här: 4x → 4 · 5) och har svarets värde; rubriken bär
                uttrycket ("Beräkna 4x + 3 när x = 5.")
      LED       lika många led som mallen, varje led har svarets värde och ett räknesteg mindre, sista ledet ett steg
-     EGEN      inget gånger eller delat med 1; svaret har högst mallens decimaler (divisionen går jämnt)
+     EGEN      inget gånger eller delat med 1; svaret har högst mallens decimaler (divisionen går jämnt); i "(a · b)/n"
+               är en faktor som är en multipel av nämnaren minst dubbelt så stor (aldrig lika med nämnaren)
      BANKEN    bankens egna avskrifter och led följer av samma räkning som de nya uppgifternas
      NY        uppgiften (uttrycket och insättningsvärdet) är inte en av bankens och upprepar inte någon av de tio
                föregående
@@ -30,7 +31,7 @@
                med lika stor chans (nya-tal.js); --mallar skriver ut hur ofta varje mall valdes
    Raderna mäts efter typ: parentesraden (uttryck), förenkla-rutan (fraga), talrutan ("4 − 9 = __"), saknat tal
    ("5 − __ = −3": uträkningen med svaret insatt), prioKedjan (vansterText och facitLed).
-   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form|led|egen|avskrift|mall|delbar förstör de
+   NEGATIV VERIFIERING (V2, V12 — samma läge som körningen): --sabba band|ordning|mellanled|form|led|egen|avskrift|mall|delbar|lika förstör de
    nya uppgifterna efter mekanismen, och fuzzen ska då fälla med benets namn.
    KÖR:  node verktyg/spec-fuzz-nya-tal.js [--n 300] [--lov P2] [--sabba …]     Exit 1 vid brott. Ingen nätväg. */
 'use strict';
@@ -130,6 +131,12 @@ const D1_EGEN = L => {
   if(ett) return 'gånger eller delat med 1 i "' + ett + '"';
   const aa = [L.avskrift].concat(L.led || []).find(t => (t.match(/\d+(?:,\d+)?\/\d+(?:,\d+)?/g) || []).some(q => q.split('/')[0] === q.split('/')[1]));
   if(aa) return 'bråket a/a i "' + aa + '"';
+  /* DELBAR (Joachim 2026-11-26): en faktor i täljaren "(a · b)/n" som är en multipel av nämnaren är minst dubbelt så
+     stor som nämnaren (som i banken: 12 = 3 · 4, 14 = 2 · 7) — en faktor lika med nämnaren fälls. */
+  for(const q of m(L.U).matchAll(/\((\d+) · (\d+)\)\s*\/\s*(\d+)/g)){
+    const n = +q[3], f = [+q[1], +q[2]].find(v => v % n === 0 && v < 2 * n);
+    if(f !== undefined) return 'faktorn ' + f + ' är lika med nämnaren i "' + q[0] + '"';
+  }
   const dec = (String(L.S).split(',')[1] || '').length;
   return dec <= (L.D || 0) || 'svaret ' + L.S + ' har fler decimaler än mallens (' + (L.D || 0) + ')';
 };
@@ -156,6 +163,8 @@ KALLOR.forEach(K => {
     if(SABBA === 'mall'){ const ex = M.extra, m0 = M.mallar[0]; M.extra = (ny, mm) => mm === m0 ? false : (ex ? ex(ny, mm) : true); }
     // --sabba delbar: mallarnas egna talregel tas bort (R1 "(5 · 12)/4 + (3 · 14)/7") — utan den ska MALL fälla.
     if(SABBA === 'delbar') M.mallar.forEach(mm => { delete mm.delbar; });
+    // --sabba lika: mekanismen får låta en faktor vara lika med nämnaren ("(3 · 8)/8") — benet EGEN måste fälla.
+    if(SABBA === 'lika') NT.delbarMinst = 1;
     /* BANKEN (d1): bankens egna avskrifter och led följer av samma räkning som de nya uppgifterna får — annars bygger
        mekanismen leden på ett annat sätt än Joachims facit. */
     if(MOD.rakna){

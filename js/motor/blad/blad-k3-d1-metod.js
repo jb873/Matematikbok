@@ -521,6 +521,8 @@ function drillKalla(ref){
     var mallar = uppg.map(function(x){ return mallAv(b, x); }).filter(Boolean), maxV = 0;
     mallar.forEach(function(m){ var r = ledAv(m.typ === 'prio' ? m.uttryck : avskriftAv(m.uttryck, m.x));
       m.svarV = r.svar; r.varden.forEach(function(x){ maxV = Math.max(maxV, x.v); }); });
+    // DELBAR: täljaren "(a · b)" dras högst till bankens största värde — samma tak som kontrollen, bara tidigare.
+    mallar.forEach(function(m){ if(m.delbar) m.delbarMax = maxV; });
     if(mallar.length) kalla.mall = { ref: 'k3d1:' + ref, mallar: mallar, regler: b.regler, extra: raknaExtra(maxV), bygg: byggRakna(b) };
   }
   return kalla;
