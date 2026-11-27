@@ -208,7 +208,7 @@ var BANK_A = {
               { k: 5, d: 700 }, { k: 7, d: 800 }, { k: 9, d: 900 }, { k: 6, d: 1100 }, { k: 9, d: 1200 } ] },
   A3: { namn: NAMN_A.A3, nod: ANDELEN, rad: radA3, dra: draA3,
     mallar: [ { a: 3, d: 4, k: 3 }, { a: 2, d: 5, k: 7 }, { a: 1, d: 4, k: 6 }, { a: 3, d: 4, k: 7 }, { a: 2, d: 5, k: 8 },
-              { a: 3, d: 4, k: 8 }, { a: 1, d: 4, k: 8 }, { a: 3, d: 5, k: 9 }, { a: 3, d: 4, k: 12 }, { a: 1, d: 2, k: 22 } ] },
+              { a: 3, d: 4, k: 8 }, { a: 1, d: 4, k: 8 }, { a: 3, d: 5, k: 9 }, { a: 3, d: 4, k: 12 }, { a: 1, d: 2, k: 13 } ] },   // nr 10: 13 av 26 (Joachim 2026-11-27, förr 22 av 44)
   A4: { namn: NAMN_A.A4, nod: ANDELEN, uppg: function(){ return [
     uA({ rubrik: 'I en grupp finns 14 flickor och 6 pojkar. Hur många procent av gruppen är pojkar?' }.rubrik, [ andel(null, 6, 20, '30/100') ]),
     uA({ rubrik: 'Ett lag spelade en säsong och vann 23 matcher, spelade oavgjort i 11 och förlorade 16. Hur många procent av matcherna vann laget?' }.rubrik, [ andel(null, 23, 50, '46/100') ]),

@@ -208,6 +208,8 @@ const PROBE = `(function(){
       nyttVarv(synligMount(), function(i){ mat(namn.slice(0, 16) + ' niv\\u00e5 ' + niva + ' nytt ' + i); });
     });
   });
+  // Rutor på sidan alls (en sida med bara valrutor har ingen yta att mäta — inget fel, men inget mått).
+  ut.inmatning = document.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio])').length;
   return ut;
 })()`;
 
@@ -218,20 +220,32 @@ let fel = 0, ytor = 0, knappar = 0, tryck = 0;
 const berorda = {};                                            // sidor med fel verkan, för rapporten
 console.log('KEYPAD-GRIND — keypaden är alltid helt upplåst\n');
 
-Sidor.blad().forEach(sida => {
+/* UPPGIFTSSIDORNA I NYTT FORMAT (Joachim 2026-11-27): hittade på skalet (verktyg/uppgiftssidor.js, delad med
+   uppgift-grind.js) — varje moment, blad, variant och test, med nivålåsen öppnade och elevens skärm (1366 × 768).
+   En sådan sida som inte ger någon yta, eller inget svar, fäller. De äldre sidorna vaktas av V14 (MP) som förut. */
+const US = require('./uppgiftssidor'), UPPG = US.sidor(), PRE_LAS = US.preLas('');
+let sidor = 0;
+Sidor.blad().concat(UPPG).forEach(sida => {
   if(BARA && sida.indexOf(BARA) < 0) return;
-  MP.forsok(sida);
-  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, sida)), TMP,
-    '--vanta-pa', 'blad', '--timeout', '60000'], { encoding: 'utf8', timeout: 120000 });
+  const ny = UPPG.indexOf(sida) >= 0, fil = sida.split('?')[0], fraga = sida.slice(fil.length);
+  if(!ny) MP.forsok(sida);
+  const r = spawnSync('node', [path.join(__dirname, 'cdp-kor.js'), fileUrl(path.join(ROOT, fil)) + fraga, TMP,
+    '--vanta-pa', 'blad', '--timeout', '60000'].concat(ny ? ['--pre', PRE_LAS, '--viewport', '1366x768'] : []), { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
-  if(!u){ console.log('? ' + sida + ': inget svar'); return; }
+  if(!u){ if(ny) fel++; console.log((ny ? '✗ ' : '? ') + sida + ': inget svar'); return; }
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + sida + ': JS-fel ' + u.onerr.slice(0, 2).join(' | ')); }
-  MP.rakna(sida, (u.ytor || []).length);
+  if(ny && !(u.ytor || []).length){
+    // Inga rutor alls (bara valrutor, som Delen Blad 6A): inget att mäta här — noteras, fäller inte. Rutor men ingen yta: fäller.
+    if(!u.inmatning){ console.log('· ' + sida + ' (inga rutor — knappsatsen mäts inte här)'); return; }
+    fel++; console.log('✗ ' + sida + ': ' + u.inmatning + ' rutor men ingen yta mätt'); return;
+  }
+  if(!ny) MP.rakna(sida, (u.ytor || []).length);
+  sidor++;
 
   (u.ytor || []).forEach(y => {
     ytor++; knappar += y.knappar; tryck += y.tryck || 0;
-    MP.varde(sida, y.yta, { rutor: y.rutor, knappar: y.knappar, lasta: y.lasta.length });
+    if(!ny) MP.varde(sida, y.yta, { rutor: y.rutor, knappar: y.knappar, lasta: y.lasta.length });
     if(y.verkan && y.verkan.length){
       fel += y.verkan.length; berorda[sida] = (berorda[sida] || 0) + y.verkan.length;
       console.log('✗ ' + sida.replace(/\/index\.html$/, '') + ' · ' + y.yta + ': ' + y.verkan.length
@@ -258,9 +272,11 @@ Sidor.blad().forEach(sida => {
       + ' av ' + y.knappar + ' knappar LÅSTA\n     ' + y.lasta.slice(0, 8).join(' · '));
   });
 });
-try { fs.unlinkSync(TMP); } catch(e){}
+try { fs.unlinkSync(TMP); fs.unlinkSync(PRE_LAS); } catch(e){}
 
 fel += MP.granska();
+// EN GRIND SOM INTE MÄTER NÅGOT ÄR INTE GRÖN (Joachim 2026-11-27): noll ytor — fel --sida, eller sidor som inte hittas.
+if(!ytor){ fel++; console.log('\n✗ inga ytor mätta' + (BARA ? ' för --sida ' + BARA : '') + ' — en grind som inte mäter något är inte grön'); }
 if(Object.keys(berorda).length) console.log('\nSidor med fel verkan: ' + Object.keys(berorda).length + '\n  '
   + Object.keys(berorda).map(s => s.replace(/\/index\.html$/, '') + ' (' + berorda[s] + ')').join('\n  '));
 console.log('\n' + (fel ? '✗ KEYPAD-GRIND RÖD (' + fel + ')' : '✓ KEYPAD-GRIND GRÖN')

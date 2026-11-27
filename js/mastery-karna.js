@@ -118,6 +118,12 @@
       var niva = (typeof window !== 'undefined' && window.__aktuellNiva) ? window.__aktuellNiva : null;
       var post = { ts: Date.now(), resultat: resultat };
       if(niva) post.niva = niva;
+      // LÖVBRYGGA (Joachim 2026-11-27, alternativ B): metodträningens drill sätter window.__aktuellLov = trädets löv-id
+      // (drill.html, ?lov=). Posten får lövet som ett FÄLT — ingen extra post, ingen ny nod, ingen ny store. Kartan,
+      // självskattningen och masteryState läser inte fältet; bara metodträningens träd (metodtrad.html) gör det.
+      // Bladen, testen och kartans drillar sätter inget löv → posten är som förr.
+      var lov = (typeof window !== 'undefined' && window.__aktuellLov) ? window.__aktuellLov : null;
+      if(lov) post.lov = lov;
       m[nodeId].push(post);
       sparMatris(m);
       markeraLard(nodeId);   // noden når/har nått över rött → sätt den persistenta har-varit-lärd-flaggan (en gång)

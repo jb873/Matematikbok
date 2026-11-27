@@ -153,7 +153,7 @@ Två rader stod här till 2026-10-01 och står inte kvar: *ny sida in i grindarn
 
 REFERENSSIDA: En ny momentsida byggs som d5-problemlosning-nyformat. Allt som skiljer sig är ett fel tills Joachim har godkänt skillnaden.
 METODTRÄNING: Rubriken under Föreläsningar fäller ut trädet. Trädet har kategorier och löv. Varje löv med författad bank är klickbart och öppnar drillen, och ett löv utan bank står utan länk. Funktionen bor i momentsida.js, och sidan lämnar bara löven och bankernas id.
-TEST: Test är Joachims författade test, listade på momentsidan och öppnade på uppgiftssidan (?test=<id>). Aldrig länkar till gamla test eller provbyggaren. Funktionen bor i momentsida.js. Finns inga författade test står Test med 'Kommer senare'.
+TEST: Test är Joachims författade test, listade på momentsidan och öppnade på uppgiftssidan (?test=<id>). Aldrig länkar till gamla test eller provbyggaren. Funktionen bor i momentsida.js. Finns inga författade test står Test med 'Kommer senare'. Testens namn i kapitel 4: "<momentet>, Test <n>" ("Procent och byta form, Test 1", "Andelen, Test 1"); listan förblir en lista. Joachim 2026-11-27.
 INNEHÅLL: Allt Joachim har författat ligger i doc/innehall/ innan det byggs. En order hänvisar till filen där, aldrig till en chatt.
 Joachim 2026-11-24.
 MOMENT OCH BLAD: Ett moment har Blad 1, 2, 3 … (var och ett i variant A och B), så många som stegringen kräver. Ett avsnitts stegring fördelas på bladen, inte på fler moment, så att vänsterspalten är kort också när åttans och nians fördjupning läggs till. Joachim 2026-11-24.
@@ -212,6 +212,15 @@ METODTRÄNING = färdighetsträningens träd (INTE platta chips)
 - Har inget löv en bank står Metodträning med 'Kommer senare', på samma sätt som Test. Joachim 2026-11-24.
 - NYA TAL EFTER BANKEN: I ett räknelöv är de författade uppgifterna mallar. Drillen serverar först banken i ordning. Därefter ger 'Nytt blad' en uppgift med samma form som en mall (samma antal termer, samma räknesätt, samma svarsform) och nya tal inom mallarnas band: talen håller sig inom lövets talregler och mellan bankens minsta och största. Aldrig svårare än banken; svårare = nästa författade nivå (takregeln). Valuppgifter, ringa in och löv där sammanhanget bär uppgiften (tolka, teckna, tillämpning) har bara författade uppgifter. Joachim 2026-11-25.
   - ANDRA INGÅNGEN, `NyaTal.medTalregel` (`js/motor/ovamer/nya-tal.js`): samma mekanism, för löv där talreglerna inte kan uttryckas som band (procent, bråk). Lövet lämnar en talregel per mall; mekanismen sköter resten: mallen väljs först med lika chans, banken kommer först, inga upprepningar, och en mall som inte ger något nytt byts slumpvis. Fasta mallar (som 1/2, 1/3, 2/3) får återkomma med samma tal. Regler "per blad" gäller per tiotal efter banken. Joachim 2026-11-27.
+- TRÄDETS FÄRG = ARBETET I LÖVETS DRILL. Varje försök i en drill får lövets id som ett FÄLT på samma post
+  (`{ ts, resultat, niva?, lov: 'nf-k4d1-A2' }`): ingen extra post, ingen ny nod, ingen ny store. Trädet färgar ett
+  löv efter de försök som bär dess lov-fält, i den store där lövets nod bor (k1, k3 eller k4 — prioriteringsregeln och
+  negativa tal läses från k1-storen), och färgerna följer kartans regler (storens `masteryState`). Bladens och testens
+  arbete färgar inte trädet; ett löv utan försök i drillen är ofärgat; försök sparade före regeln saknar fältet och
+  färgar inget löv. Kartan, självskattningen och bemästringen läser och räknar exakt som förut (fältet läses inte
+  där). Lövets id går från trädet till drillen i adressen (`drill.html?bank=…&lov=<löv-id>`); drillen sätter
+  `window.__aktuellLov`, och kärnan (`mastery-karna.js`, LÖVBRYGGAN) skriver fältet. Trädet: `metodtrad.html`
+  (`TRAD_MASTERY`). *Joachim 2026-11-27.*
 - INGET parallellt träd byggs — återanvänd komponenten (A1/Regel 0).
 
 UPPGIFTSSIDA (övningssida) — preciserad i sektionen **Uppgiftssidan (arbetsytan)** nedan

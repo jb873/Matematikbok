@@ -22,7 +22,9 @@ var RT = {
   n6: { rubrik: 'Skriv procenten i hundradelar, i enklaste form och i decimalform.' }.rubrik,
   n8: { rubrik: 'Välj rätt alternativ.' }.rubrik
 };
-var TITEL = { titel: 'Test 1' }.titel;
+/* TESTENS NAMN (Joachim 2026-11-27, gäller alla test i kapitel 4): "<momentet>, Test <n>" — listan på momentsidan
+   förblir en lista. */
+var TITEL = { titel: 'Procent och byta form, Test 1' }.titel, TITEL_ANDELEN = { titel: 'Andelen, Test 1' }.titel;
 var TEST = {};
 TEST.test1 = function(){ return { titel: TITEL, grupper: [
   // [Blad 1]
@@ -70,7 +72,7 @@ var RA = {
 TEST.andelen1 = function(){
   var AN = window.BLAD_K4_D1_ANDELEN && window.BLAD_K4_D1_ANDELEN.TYPER; if(!AN) return null;
   var andel = AN.andel, val = AN.val;
-  return Y.medNod(AN.ANDELEN, { titel: TITEL, grupper: [
+  return Y.medNod(AN.ANDELEN, { titel: TITEL_ANDELEN, grupper: [
     // [Blad 1]
     g(RA.hur, [ andel({ etikett: '41 av 50?' }.etikett, 41, 50, '82/100'), andel({ etikett: '12 av 400?' }.etikett, 12, 400, '3/100'),
                 andel({ etikett: '21 av 35?' }.etikett, 21, 35, '3/5') ]),
@@ -94,7 +96,7 @@ TEST.andelen1 = function(){
   ] });
 };
 
-var TESTER = [ { id: 'test1', titel: TITEL }, { id: 'andelen1', titel: TITEL } ];
+var TESTER = [ { id: 'test1', titel: TITEL }, { id: 'andelen1', titel: TITEL_ANDELEN } ];
 window.BLAD_K4_D1_TEST = {
   TESTER: TESTER,
   test: function(id){ var fn = TEST[String(id || '')]; return fn ? fn() : null; },

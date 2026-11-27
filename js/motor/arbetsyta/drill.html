@@ -74,6 +74,10 @@
 (function(){
   var ROT = '../../../', FK = window.ForfattadKalla, AY = window.Arbetsyta;
   var q = AY.retur();
+  /* LÖVET (Joachim 2026-11-27, alternativ B): trädet öppnar drillen med ?lov=<löv-id>, och varje försök här får lövet
+     som fält på sin post (mastery-karna.js, LÖVBRYGGAN). Trädet färgar lövet efter de försöken. Utan ?lov= som förut. */
+  var lov = q.get('lov');
+  if(lov && /^nf-[\w-]+$/.test(lov)) window.__aktuellLov = lov;
   if(!FK) return;
   var b = FK.delaBank(q.get('bank')), K = b.K;
   if(!K) return;

@@ -31,7 +31,7 @@
  *       --sabba rutor     tar bort den andra rutan i en skriv-och-förenkla → TVÅRUTOR måste fälla
  *       --sabba egenrad   lägger en bokstav på en egen rad                 → EGEN RAD måste fälla
  *
- * SIDORNA: delkapitlens sidor (Sidor.blad()) och UPPGIFTSSIDORNA i nytt format (…-nyformat/uppgift.html):
+ * SIDORNA: delkapitlens sidor (Sidor.blad()) och UPPGIFTSSIDORNA i nytt format (uppgift.html på skalet, verktyg/uppgiftssidor.js):
  * varje moment, blad och variant (?moment=…&blad=…) och varje författat test (?test=…), lästa ur sidans
  * egna datafiler. Låsta nivåer öppnas med NivaRad:s egen nyckel innan sidan ritas (omgivningen ställs in).
  * Exit 1 vid brott. Ingen nätväg, ingen fil ändras. */
@@ -235,41 +235,11 @@ const PROBE = `(function(){
 const TMP = path.join(os.tmpdir(), 'uppgiftgrind-' + process.pid + '.js');
 fs.writeFileSync(TMP, PROBE);
 
-/* UPPGIFTSSIDORNA I NYTT FORMAT: momenten och testen läses ur sidans egna datafiler (MOMENTEN-kartan och
-   BLAD_*_TEST.TESTER), så ett nytt blad eller test mäts utan att listan här ändras. */
-function uppgiftsSidor(){
-  const ut = [], vm = require('vm');
-  const hitta = d => fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).reduce((u, e) => {
-    const r = d + '/' + e.name;
-    if(e.isDirectory() && e.name !== 'Arkiv') return u.concat(hitta(r));
-    if(/-nyformat\/uppgift\.html$/.test(r)) u.push(r);
-    return u; }, []);
-  ['ak7', 'ak8', 'ak9'].filter(a => fs.existsSync(path.join(ROOT, a))).forEach(a => hitta(a).forEach(sida => {
-    const html = fs.readFileSync(path.join(ROOT, sida), 'utf8');
-    const karta = /MOMENTEN\s*=\s*\{([^}]*)\}/.exec(html);
-    const test = /window\.(BLAD_\w+_TEST)\b/.exec(html);
-    if(!karta && !test) return;
-    const ctx = {}; ctx.window = ctx; ctx.document = {}; vm.createContext(ctx);
-    (html.match(/<script src="[^"]*js\/motor\/blad\/blad-[^"]+\.js"/g) || []).forEach(t => {
-      const fil = path.resolve(path.dirname(path.join(ROOT, sida)), /src="([^"]+)"/.exec(t)[1]);
-      try { vm.runInContext(fs.readFileSync(fil, 'utf8'), ctx, { filename: fil }); } catch(e){}
-    });
-    (karta ? karta[1].match(/(\w+)\s*:\s*window\.(\w+)/g) || [] : []).forEach(par => {
-      const m = /(\w+)\s*:\s*window\.(\w+)/.exec(par), M = ctx[m[2]] && ctx[m[2]].MOMENT;
-      if(!M) return;
-      M.blad.filter(b => !b.kommer).forEach(b => (M.varianter || ['']).forEach(v =>
-        ut.push(sida + '?moment=' + m[1] + '&blad=' + b.nr + v)));
-    });
-    if(test && ctx[test[1]]) (ctx[test[1]].TESTER || []).forEach(t => ut.push(sida + '?test=' + t.id));
-  }));
-  return ut;
-}
-/* NivaRad:s nyckel <prefix>_naddNiva<n>_<id> för varje moment på sidan, satt innan sidans spärr läser den. */
-const PRE_LAS = path.join(os.tmpdir(), 'uppgiftgrind-pre-' + process.pid + '.js');
-fs.writeFileSync(PRE_LAS, "window.__BARA_EGENRAD = true; (function(){ var v; Object.defineProperty(window, 'NivaRad', { configurable: true,"
-  + " get: function(){ return v; }, set: function(x){ v = x; Object.keys(window).forEach(function(k){"
-  + " var M = /^BLAD_/.test(k) && window[k] && window[k].MOMENT; if(!M || !M.nivaPrefix) return;"
-  + " for(var n = 2; n <= M.blad.length; n++) try { localStorage.setItem(M.nivaPrefix + '_naddNiva' + n + '_' + M.nivaId, '1'); } catch(e){} }); } }); })();");
+/* UPPGIFTSSIDORNA I NYTT FORMAT: hittas på skalet (verktyg/uppgiftssidor.js, delad med keypad-grind.js) — varje
+   uppgift.html som laddar arbetsyta.js, med momenten och testen ur sidans egna datafiler. */
+const US = require('./uppgiftssidor');
+function uppgiftsSidor(){ return US.sidor(); }
+const PRE_LAS = US.preLas('window.__BARA_EGENRAD = true; ');
 
 /* VYPORTEN: elevens skärm, den smalare av de två mätstorlekarna (KONVENTIONER: 1366 × 768 och 1536 × 864). I
    cdp-kor:s standardfönster (900 px) bryts långa frågor bredvid knappsatsen, och EGEN RAD mätte då en skärm ingen har.
@@ -288,7 +258,8 @@ Sidor.blad().concat(UPPG).forEach(sida => {
     '--vanta-pa', 'blad', '--timeout', '60000', '--viewport', VY].concat(ny ? ['--pre', PRE_LAS] : []), { encoding: 'utf8', timeout: 120000 });
   let u = null;
   try { u = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch(e){}
-  if(!u){ console.log('? ' + sida + ': inget svar'); return; }
+  // Ingen mätning på en uppgiftssida i nytt format fäller (Joachim 2026-11-27); de äldre sidorna vaktas av V14 (MP).
+  if(!u){ if(ny) fel++; console.log((ny ? '✗ ' : '? ') + sida + ': inget svar'); return; }
   const namn = sida.replace(/\/index\.html$/, '');
   if(u.onerr && u.onerr.length){ fel++; console.log('✗ ' + namn + ': JS-fel ' + u.onerr.slice(0, 2).join(' | ')); }
 
@@ -308,6 +279,9 @@ Sidor.blad().concat(UPPG).forEach(sida => {
 try { fs.unlinkSync(TMP); fs.unlinkSync(PRE_LAS); } catch(e){}
 
 fel += MP.granska();
+/* EN GRIND SOM INTE MÄTER NÅGOT ÄR INTE GRÖN (Joachim 2026-11-27): noll mätta sidor — fel --sida, eller sidor som
+   grinden inte hittar — fäller. */
+if(!sidor){ fel++; console.log('\n✗ inga sidor mätta' + (BARA ? ' för --sida ' + BARA : '') + ' — en grind som inte mäter något är inte grön'); }
 console.log('\n' + (fel ? '✗ UPPGIFT-GRIND RÖD (' + fel + ')' : '✓ UPPGIFT-GRIND GRÖN')
   + ' · ' + sidor + ' sidor, ' + grupper + ' uppgifter');
 process.exit(fel ? 1 : 0);
