@@ -150,6 +150,8 @@ var MOMENT = { titel: 'Andelen', varianter: ['A'],
 
 window.BLAD_K4_D1_ANDELEN = {
   MOMENT: MOMENT,
+  // Svarsraden och valrutan för testet och metodträningen (blad-k4-d1-test.js, blad-k4-d1-metod.js): samma rad som bladen.
+  TYPER: { andel: andel, val: val, ANDELEN: ANDELEN },
   blad: function(id){ var f = BLAD[String(id || '').toUpperCase()]; return f ? f() : null; },
   idn: function(){ return Object.keys(BLAD); }
 };

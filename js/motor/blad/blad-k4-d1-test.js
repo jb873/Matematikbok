@@ -52,7 +52,49 @@ TEST.test1 = function(){ return { titel: TITEL, grupper: [
     val('0,08 =', ['A. 8 %', 'B. 80 %', 'C. 0,8 %'], 'A. 8 %') ])
 ] }; };
 
-var TESTER = [ { id: 'test1', titel: TITEL } ];
+/* ANDELEN, TEST 1 (moment 2, Joachim 2026-11-27). Källa: doc/innehall/k4-d1-procent-moment2-test1.md (facit
+   kontrollräknat), ordagrant; hakparentesen (bladet) står bara här i kommentarerna. Byggt som Test 1 i moment 1 med
+   Andelens komponenter (blad-k4-d1-andelen.js, TYPER): den fasta svarsraden "Andelen = ▢ = ▢ = ▢ = ▢ %" (exakt,
+   mellanled på värde, valfri decimalform, procent) och valrutan. Uppgift 6: två svarsrader och sedan valrutan;
+   uppgift 8: flerval med valrutan. Mastery: lövet Andelen (proc-andelen:rakna) i kapitel 4:s store. Bladfilen laddas
+   efter den här — svarsraden hämtas när testet byggs. */
+var RA = {
+  hur: { rubrik: 'Hur många procent är …' }.rubrik,
+  n2: { rubrik: 'På en skola går 700 elever. 49 av dem spelar i skolans orkester. Hur många procent av eleverna spelar i orkestern?' }.rubrik,
+  n3: { rubrik: 'I en klass finns 17 flickor och 8 pojkar. Hur många procent av eleverna är pojkar?' }.rubrik,
+  n4: { rubrik: 'Ella har 600 kr. Hon köper skor för 376 kr och en mössa för 200 kr. Hur många procent av pengarna har hon kvar?' }.rubrik,
+  n6: { rubrik: 'Alva gjorde mål på 15 av 20 straffar. Kim gjorde mål på 37 av 50 straffar.' }.rubrik,
+  n7: { rubrik: 'Ett lag spelade 25 matcher. Laget vann 9 matcher och spelade oavgjort i 4. Hur många procent av matcherna vann laget eller spelade oavgjort?' }.rubrik,
+  n8: { rubrik: 'I en grupp finns 10 pojkar och 15 flickor. Fyra elever räknade ut hur många procent av gruppen som är pojkar. Vem har räknat rätt?' }.rubrik
+};
+TEST.andelen1 = function(){
+  var AN = window.BLAD_K4_D1_ANDELEN && window.BLAD_K4_D1_ANDELEN.TYPER; if(!AN) return null;
+  var andel = AN.andel, val = AN.val;
+  return Y.medNod(AN.ANDELEN, { titel: TITEL, grupper: [
+    // [Blad 1]
+    g(RA.hur, [ andel({ etikett: '41 av 50?' }.etikett, 41, 50, '82/100'), andel({ etikett: '12 av 400?' }.etikett, 12, 400, '3/100'),
+                andel({ etikett: '21 av 35?' }.etikett, 21, 35, '3/5') ]),
+    // [Blad 2]
+    g(RA.n2, [ andel(null, 49, 700, '7/100') ]),
+    // [Blad 3]
+    g(RA.n3, [ andel(null, 8, 25, '32/100') ]),
+    // [Blad 4]
+    g(RA.n4, [ andel(null, 24, 600, '4/100') ]),
+    // [Blad 5]
+    g(RA.hur, [ andel({ etikett: '24 minuter av en timme?' }.etikett, 24, 60, '2/5'), andel({ etikett: '9 dm av 5 m?' }.etikett, 9, 50, '18/100') ]),
+    // [Blad 6]
+    g(RA.n6, [ andel({ etikett: 'Alva:' }.etikett, 15, 20, '3/4'), andel({ etikett: 'Kim:' }.etikett, 37, 50, '74/100'),
+               val(['A Alva', 'B Kim', 'C De var lika bra'], 'A Alva', { fraga: 'Vem var bäst?' }.fraga) ]),
+    // [Blad 4]
+    g(RA.n7, [ andel(null, 13, 25, '52/100') ]),
+    // [Blad 6, Blad 3]
+    g(RA.n8, [ val(['A Ida: Andelen = 10/15 = 2/3 ≈ 0,67 = 67 %', 'B Omar: Andelen = 10/25 = 10/100 = 10 %',
+                    'C Sara: Andelen = 10/25 = 40/100 = 40 %', 'D Leo: Andelen = 10 %, eftersom det är 10 pojkar.'],
+                   'C Sara: Andelen = 10/25 = 40/100 = 40 %') ])
+  ] });
+};
+
+var TESTER = [ { id: 'test1', titel: TITEL }, { id: 'andelen1', titel: TITEL } ];
 window.BLAD_K4_D1_TEST = {
   TESTER: TESTER,
   test: function(id){ var fn = TEST[String(id || '')]; return fn ? fn() : null; },

@@ -19,6 +19,10 @@ Varje punkt säger vad som brister, var det mättes och när.
   stapelns texter ("24 cm", "0 %", "100 %") prövas inte mot stapelns kanter. ETIKETT MOT ETIKETT fäller där (den fällde
   sträckans "40 %" mot "28 mm" innan radavståndet blev 24). Prövat 2026-11-27 (`verktyg/figur-grind.js`).
 
+- [ ] **Uppgifts- och knappsatsgrinden hittar inte procentsidan.** `verktyg/uppgift-grind.js` och
+  `verktyg/keypad-grind.js` letar uppgiftssidor efter namnet `…-nyformat/uppgift.html`; `ak7/k4/d1-procent` heter inte
+  så, och `--sida d1-procent` ger "0 sidor" (gröna utan mätning). Mätt 2026-11-27.
+
 ## Metodträningen
 
 - [ ] **Trädets löv får aldrig färg av elevens arbete.** `js/motor/arbetsyta/metodtrad.html` ritar trädet med
@@ -30,8 +34,20 @@ Varje punkt säger vad som brister, var det mättes och när.
   på proc-tillprocent, B6–B7 på proc-franprocent; k3 d1 T1–T6, K1–K7, R3–R6; k3 d3 F, S och M på alg-samla; d5:s
   varianter per typ), och ett försök bär inget löv-id — arbete på ett löv färgar då hela gruppen. k3 d1 R1–R2 och
   k3 d3 N1–N5 loggar i k1-storen.
+  2026-11-27, Andelen: grenen A1–A7 står också röd. Mätt på momentsidan med 12 rätta poster på proc-andelen:rakna i
+  k4-storen — alla 14 löv röda, "0 av 14 färdigheter befästa".
+- [ ] **Andelens innehåll: två frågor till Joachim.** (1) Ordern säger att A5 nr 5 ska ha en tabell, men i
+  `doc/innehall/k4-d1-procent-moment2-metodtraning.md` har bara A4 nr 5 en tabell; A5 nr 5 (hyllan med 32 platser) är
+  byggd utan tabell. (2) A3:s bank nr 10, 22/44 = 1/2, har k = 22 — utanför lövets talregel k = 2–15. Banken står
+  ordagrant; de nya talen följer talregeln (spec-fuzzen). 2026-11-27.
+- [ ] **Testlistan visar två "Test 1".** Andelens test heter "Test 1" som i innehållsfilen, och moment 1:s test heter
+  också "Test 1"; Test-vyn på momentsidan listar båda utan moment. 2026-11-27.
 
 ## Sidorna
+
+- [ ] **Låset ser inte frågorna i Andelen.** `js/motor/blad/blad-k4-d1-andelen.js` lägger 43 frågor och rubriker
+  genom hjälpfunktionen `q('…')` och frågetexterna före svarsraden som argument till `andel('9 av 20?', …)` — osynliga
+  för elevtext-låset (samma sak som i Delen före 2d6d69f). Mätt 2026-11-27.
 
 - [ ] **87 bokstäver ovanför rutor och 22 ovanför figurer.** 87 deluppgiftsbokstäver står ensamma ovanför en rad som
   börjar med en ruta, mest på sjuans k1-sidor; 22 står ovanför en figur i andra radtyper än K-C. Joachims beslut:

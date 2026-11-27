@@ -1,5 +1,6 @@
-/* blad-k4-d1-metod.js — METODTRÄNINGEN I PROCENT OCH BYTA FORM (åk 7, kapitel 4 Del 1, moment 1): grenen "Procent och
-   byta form" med löven B1–B7 (Joachim 2026-11-26).
+/* blad-k4-d1-metod.js — METODTRÄNINGEN I PROCENT (åk 7, kapitel 4 Del 1): grenen "Procent och byta form" (moment 1)
+   med löven B1–B7 (Joachim 2026-11-26), och grenen "Andelen" (moment 2) med löven A1–A7 (2026-11-27, se GRENEN
+   "ANDELEN" nedan).
    Källa: doc/innehall/k4-d1-procent-metodtraning.md — Joachims klartext (facit kontrollräknat), ordagrant: talreglerna
    överst i varje löv och 10 uppgifter som mallar. Hakparenteser finns inte i filen.
    Bladen ritas med bladkärnan och bladens byggstenar (blad-k4-d1-procent.js, TYPER: formkedjan, figurerna, svaret med
@@ -148,8 +149,144 @@ BANK.B5.mallar.forEach(function(m){ m.nyckel = (m.k * m.d / 100) + '/' + m.d; })
 BANK.B6.mallar.forEach(function(m){ m.nyckel = m.p + ' %'; m.c = klass(m.p); });
 var ORDNING = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7'];
 
-function bladAv(b, rad){
-  var gr = Y.g(b.rubrik, [rad]); gr.logg = b.nod; gr.loggStore = 'k4';
+/* ═══ GRENEN "ANDELEN" (moment 2, Joachim 2026-11-27): löven A1–A7 ═══════════════════════════════════════════════
+   Källa: doc/innehall/k4-d1-procent-moment2-metodtraning.md (facit kontrollräknat), ordagrant; hakparenteserna
+   (förlagan) står inte här. Svarsraden är bladens fasta rad (blad-k4-d1-andelen.js, TYPER.andel): Andelen = delen /
+   det hela (exakt) = mellanled (på värde) = decimalform (valfri) = procent. En uppgift per blad i drillen.
+   A1–A3 får NYA TAL EFTER BANKEN (NyaTal.medTalregel): mallen först, med lika stor chans; mallen bestämmer nämnaren
+   (A1, A2) eller enklaste formen (A3), och lövets talregel nedan drar talen. A4–A7 har bara författade uppgifter.
+   Mastery: alla sju löv loggar till lövet Andelen (proc-andelen:rakna) i kapitel 4:s store. */
+var NAMN_A = {
+  A1: { namn: 'Förlänga till hundradelar' }.namn,
+  A2: { namn: 'Förkorta till hundradelar' }.namn,
+  A3: { namn: 'Förenkla till enklaste form, sedan procent' }.namn,
+  A4: { namn: 'Det hela räknas ut först' }.namn,
+  A5: { namn: 'Delen läggs ihop eller är det som är kvar' }.namn,
+  A6: { namn: 'Byta enhet och tid' }.namn,
+  A7: { namn: 'Jämföra två andelar' }.namn
+};
+var GREN_A = { namn: 'Andelen' }.namn, ANDELEN = 'proc-andelen:rakna';
+var RA = { hur: { rubrik: 'Hur många procent är …' }.rubrik };
+// Svarsraden och valrutan ur Andelens bladfil (laddas före den här på momentsidan och i drillen).
+function AN(){ return window.BLAD_K4_D1_ANDELEN.TYPER; }
+function andel(fraga, del, hela, mellan){ return AN().andel(fraga, del, hela, mellan); }
+function valA(alt, ratt, fraga){ return AN().val(alt, ratt, fraga); }
+function uA(rubrik, rader){ return { rubrik: rubrik, rader: rader }; }
+// "x av y?" under "Hur många procent är …".
+function avRad(del, hela, mellan){ return uA(RA.hur, [ andel({ etikett: del + ' av ' + hela + '?' }.etikett, del, hela, mellan) ]); }
+
+/* ── TALREGLERNA (klartextens, överst i varje löv) ── */
+// A1: "Hur många procent är x av y?", y = 20, 25 eller 50; x < y utan gemensam faktor med y (går inte att förkorta,
+// står inte redan i hundradelar). Tillåtna x ur klartexten. Svar: x · (100/y) %.
+var A1_TAL = { 20: [3, 7, 9, 11, 13, 17, 19], 25: [2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 19, 21, 22, 23],
+               50: [3, 7, 9, 11, 13, 17, 19, 21, 23, 27, 29, 31, 33, 37, 39, 41, 43, 47, 49] };
+function radA1(x){ return avRad(x.a, x.d, rund(x.a * 100 / x.d) + '/100'); }
+function draA1(m){ return function(rnd){ var a = ur(rnd, A1_TAL[m.d]); return { a: a, d: m.d, nyckel: a + '/' + m.d }; }; }
+// A2: y = 200, 300, …, 900, 1100 eller 1200 (inte 1000); x = k · (y/100), k = 3–11 utom 10. Svaret är k %. Mallen
+// bestämmer nämnaren.
+var A2_K = [3, 4, 5, 6, 7, 8, 9, 11], A2_NAMN = [200, 300, 400, 500, 600, 700, 800, 900, 1100, 1200];
+function radA2(x){ return avRad(x.k * x.d / 100, x.d, x.k + '/100'); }
+function draA2(m){ return function(rnd){ var k = ur(rnd, A2_K); return { k: k, d: m.d, nyckel: (k * m.d / 100) + '/' + m.d }; }; }
+// A3: x/y = enklaste form · k; enklaste formens nämnare 2, 4 eller 5, k = 2–15; y högst 75 och aldrig 20, 25, 50
+// eller 100 (de hör till A1 och A2); k = 1 förekommer inte. Mallen bestämmer enklaste formens nämnare.
+var A3_INTE = [20, 25, 50, 100];
+function radA3(x){ return avRad(x.a * x.k, x.d * x.k, x.a + '/' + x.d); }
+function draA3(m){ return function(rnd){
+  var tal = []; for(var a = 1; a < m.d; a++) if(sgd(a, m.d) === 1) tal.push(a);
+  var ks = []; for(var k = 2; k <= 15; k++) if(m.d * k <= 75 && A3_INTE.indexOf(m.d * k) < 0) ks.push(k);
+  var a2 = ur(rnd, tal), k2 = ur(rnd, ks);
+  return { a: a2, d: m.d, k: k2, nyckel: (a2 * k2) + '/' + (m.d * k2) };
+}; }
+
+/* ── A4–A7: Joachims uppgifter (rubriken är uppgiftens text) ── */
+var BANK_A = {
+  A1: { namn: NAMN_A.A1, nod: ANDELEN, rad: radA1, dra: draA1,
+    mallar: [ { a: 19, d: 20 }, { a: 3, d: 25 }, { a: 14, d: 25 }, { a: 16, d: 25 }, { a: 23, d: 25 },
+              { a: 19, d: 25 }, { a: 21, d: 50 }, { a: 31, d: 50 }, { a: 43, d: 50 }, { a: 9, d: 50 } ] },
+  A2: { namn: NAMN_A.A2, nod: ANDELEN, rad: radA2, dra: draA2,
+    mallar: [ { k: 8, d: 200 }, { k: 8, d: 300 }, { k: 11, d: 400 }, { k: 3, d: 500 }, { k: 11, d: 600 },
+              { k: 5, d: 700 }, { k: 7, d: 800 }, { k: 9, d: 900 }, { k: 6, d: 1100 }, { k: 9, d: 1200 } ] },
+  A3: { namn: NAMN_A.A3, nod: ANDELEN, rad: radA3, dra: draA3,
+    mallar: [ { a: 3, d: 4, k: 3 }, { a: 2, d: 5, k: 7 }, { a: 1, d: 4, k: 6 }, { a: 3, d: 4, k: 7 }, { a: 2, d: 5, k: 8 },
+              { a: 3, d: 4, k: 8 }, { a: 1, d: 4, k: 8 }, { a: 3, d: 5, k: 9 }, { a: 3, d: 4, k: 12 }, { a: 1, d: 2, k: 22 } ] },
+  A4: { namn: NAMN_A.A4, nod: ANDELEN, uppg: function(){ return [
+    uA({ rubrik: 'I en grupp finns 14 flickor och 6 pojkar. Hur många procent av gruppen är pojkar?' }.rubrik, [ andel(null, 6, 20, '30/100') ]),
+    uA({ rubrik: 'Ett lag spelade en säsong och vann 23 matcher, spelade oavgjort i 11 och förlorade 16. Hur många procent av matcherna vann laget?' }.rubrik, [ andel(null, 23, 50, '46/100') ]),
+    uA({ rubrik: 'På en teater var 276 vuxna och 24 barn. Hur många procent av besökarna var barn?' }.rubrik, [ andel(null, 24, 300, '8/100') ]),
+    uA({ rubrik: 'I en påse finns 6 röda, 5 gröna, 5 gula och 4 blå godisbitar. Hur många procent av godisbitarna är blå?' }.rubrik, [ andel(null, 4, 20, '1/5') ]),
+    // Tabellen (befintlig tabellkomponent, som Blad 3A nr 5): klartextens "Antal husdjur 0 – 6 elever. 1 – 13 elever.
+    // 2 – 4 elever. 3 eller fler – 2 elever."
+    uA({ rubrik: 'Hur många procent av eleverna har ett husdjur?' }.rubrik, [
+      { typ: 'tabell', huvud: 'kolumn', matris: [
+        [{ etikett: 'Antal husdjur' }.etikett, '0', '1', '2', { etikett: '3 eller fler' }.etikett],
+        ['', { etikett: '6 elever' }.etikett, { etikett: '13 elever' }.etikett, { etikett: '4 elever' }.etikett, { etikett: '2 elever' }.etikett] ] },
+      andel(null, 13, 25, '52/100') ]),
+    uA({ rubrik: 'På en skola finns 455 elever och 45 vuxna. Hur många procent av alla på skolan är vuxna?' }.rubrik, [ andel(null, 45, 500, '9/100') ]),
+    uA({ rubrik: 'I en klubb finns 18 pojkar och 12 flickor. Hur många procent av medlemmarna är pojkar?' }.rubrik, [ andel(null, 18, 30, '3/5') ]),
+    uA({ rubrik: 'Under en säsong gjorde laget 15 mål och motståndarna 5 mål. Hur många procent av alla mål gjorde laget?' }.rubrik, [ andel(null, 15, 20, '3/4') ])
+  ]; } },
+  A5: { namn: NAMN_A.A5, nod: ANDELEN, uppg: function(){ return [
+    uA({ rubrik: 'I en klass med 25 elever har 5 elever en hund och 3 elever en katt. Ingen har både hund och katt. Hur många procent av eleverna har en hund eller en katt?' }.rubrik, [ andel(null, 8, 25, '32/100') ]),
+    uA({ rubrik: 'Liam har 900 kr. Han köper en jacka för 600 kr och en mössa för 237 kr. Hur många procent av pengarna har han kvar?' }.rubrik, [ andel(null, 63, 900, '7/100') ]),
+    uA({ rubrik: 'Ett lag spelade 50 matcher. De vann 21 och spelade oavgjort i 12. Resten förlorade de. Hur många procent av matcherna förlorade laget?' }.rubrik, [ andel(null, 17, 50, '34/100') ]),
+    uA({ rubrik: 'I en påse finns 20 kulor. 5 är röda, 9 är blå och resten är gula. Hur många procent av kulorna är röda eller blå?' }.rubrik, [ andel(null, 14, 20, '70/100') ]),
+    uA({ rubrik: 'En hylla har plats för 32 böcker. Där står 10 deckare och 14 fantasyböcker. Hur många procent av platserna är fyllda?' }.rubrik, [ andel(null, 24, 32, '3/4') ]),
+    uA({ rubrik: 'Ett bibliotek har 1 100 böcker i en hylla. 40 är serieböcker och 37 är ljudböcker. Hur många procent av böckerna är serieböcker eller ljudböcker?' }.rubrik, [ andel(null, 77, 1100, '7/100') ]),
+    uA({ rubrik: 'Ida har 800 kr. Hon köper en tröja för 300 kr och skor för 452 kr. Hur många procent av pengarna har hon kvar?' }.rubrik, [ andel(null, 48, 800, '6/100') ]),
+    uA({ rubrik: 'I en grupp med 16 elever spelar 6 fotboll och 2 innebandy. Resten simmar. Hur många procent av eleverna simmar?' }.rubrik, [ andel(null, 8, 16, '1/2') ])
+  ]; } },
+  A6: { namn: NAMN_A.A6, nod: ANDELEN, uppg: function(){
+    function en(t, del, hela, mellan){ return uA(RA.hur, [ andel(t, del, hela, mellan) ]); }
+    return [
+    en({ etikett: '36 minuter av en timme?' }.etikett, 36, 60, '3/5'),
+    en({ etikett: '48 minuter av en timme?' }.etikett, 48, 60, '4/5'),
+    en({ etikett: '90 minuter av 2 timmar?' }.etikett, 90, 120, '3/4'),
+    en({ etikett: '6 minuter av en halvtimme?' }.etikett, 6, 30, '1/5'),
+    en({ etikett: '11 dm av 5 m?' }.etikett, 11, 50, '22/100'),
+    en({ etikett: '3 dl av 5 liter?' }.etikett, 3, 50, '6/100'),
+    en({ etikett: '6 dl av 2,5 liter?' }.etikett, 6, 25, '24/100'),
+    en({ etikett: '27 cm av 9 m?' }.etikett, 27, 900, '3/100'),
+    en({ etikett: '66 cm av 6 m?' }.etikett, 66, 600, '11/100')
+  ]; } },
+  // A7: två eller tre svarsrader och sedan valrutan.
+  A7: { namn: NAMN_A.A7, nod: ANDELEN, uppg: function(){ return [
+    uA({ rubrik: 'Saga gjorde mål på 19 av 25 straffar. Omar gjorde mål på 15 av 20 straffar.' }.rubrik, [
+      andel({ etikett: 'Saga:' }.etikett, 19, 25, '76/100'), andel({ etikett: 'Omar:' }.etikett, 15, 20, '3/4'),
+      valA(['A Saga', 'B Omar', 'C De var lika bra'], 'A Saga', { fraga: 'Vem var bäst?' }.fraga) ]),
+    uA({ rubrik: 'I klass 7C äter 29 av 50 elever frukost hemma. I klass 7D äter 14 av 25 elever frukost hemma.' }.rubrik, [
+      andel({ etikett: '7C:' }.etikett, 29, 50, '58/100'), andel({ etikett: '7D:' }.etikett, 14, 25, '56/100'),
+      valA(['A 7C', 'B 7D', 'C Andelen är lika stor'], 'A 7C', { fraga: 'I vilken klass är andelen störst?' }.fraga) ]),
+    uA({ rubrik: 'Kim fick 42 av 50 poäng på ett prov och 168 av 200 poäng på ett annat.' }.rubrik, [
+      andel({ etikett: 'Prov 1:' }.etikett, 42, 50, '84/100'), andel({ etikett: 'Prov 2:' }.etikett, 168, 200, '84/100'),
+      valA(['A Prov 1', 'B Prov 2', 'C Lika bra på båda'], 'C Lika bra på båda', { fraga: 'På vilket prov lyckades Kim bäst?' }.fraga) ]),
+    uA({ rubrik: 'Vilken andel är störst?' }.rubrik, [
+      andel({ etikett: 'A: 30 av 200' }.etikett, 30, 200, '15/100'), andel({ etikett: 'B: 4 av 25' }.etikett, 4, 25, '16/100'),
+      andel({ etikett: 'C: 42 av 300' }.etikett, 42, 300, '14/100'),
+      valA(['A', 'B', 'C'], 'B', { fraga: 'Svar:' }.fraga) ]),
+    uA({ rubrik: 'På skola 1 cyklar 24 av 400 elever. På skola 2 cyklar 40 av 500 elever.' }.rubrik, [
+      andel({ etikett: 'Skola 1:' }.etikett, 24, 400, '6/100'), andel({ etikett: 'Skola 2:' }.etikett, 40, 500, '8/100'),
+      valA(['A Skola 1', 'B Skola 2', 'C Andelen är lika stor'], 'B Skola 2', { fraga: 'Var är andelen som cyklar störst?' }.fraga) ]),
+    uA({ rubrik: 'Lag A vann 9 av 12 matcher. Lag B vann 19 av 25 matcher.' }.rubrik, [
+      andel({ etikett: 'Lag A:' }.etikett, 9, 12, '3/4'), andel({ etikett: 'Lag B:' }.etikett, 19, 25, '76/100'),
+      valA(['A Lag A', 'B Lag B', 'C Lika stor andel'], 'B Lag B', { fraga: 'Vilket lag vann störst andel av matcherna?' }.fraga) ]),
+    uA({ rubrik: 'Vilken andel är minst?' }.rubrik, [
+      andel({ etikett: 'A: 21 av 28' }.etikett, 21, 28, '3/4'), andel({ etikett: 'B: 37 av 50' }.etikett, 37, 50, '74/100'),
+      andel({ etikett: 'C: 19 av 25' }.etikett, 19, 25, '76/100'),
+      valA(['A', 'B', 'C'], 'B', { fraga: 'Svar:' }.fraga) ]),
+    uA({ rubrik: 'Mira svarade rätt på 24 av 32 frågor. Leo svarade rätt på 15 av 20 frågor.' }.rubrik, [
+      andel({ etikett: 'Mira:' }.etikett, 24, 32, '3/4'), andel({ etikett: 'Leo:' }.etikett, 15, 20, '3/4'),
+      valA(['A Mira', 'B Leo', 'C Lika stor andel'], 'C Lika stor andel', { fraga: 'Vem svarade rätt på störst andel?' }.fraga) ])
+  ]; } }
+};
+BANK_A.A1.mallar.forEach(function(m){ m.nyckel = m.a + '/' + m.d; });
+BANK_A.A2.mallar.forEach(function(m){ m.nyckel = (m.k * m.d / 100) + '/' + m.d; });
+BANK_A.A3.mallar.forEach(function(m){ m.nyckel = (m.a * m.k) + '/' + (m.d * m.k); });
+var ORDNING_A = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7'];
+Object.keys(BANK_A).forEach(function(id){ BANK[id] = BANK_A[id]; });
+
+/* Ett blad i drillen: en uppgift. B-löven ger en rad (lövets rubrik); A-löven ger { rubrik, rader }. */
+function bladAv(b, u){
+  var gr = u && u.rader ? Y.g(u.rubrik, u.rader) : Y.g(b.rubrik, [u]); gr.logg = b.nod; gr.loggStore = 'k4';
   return { titel: b.namn, grupper: [gr] };
 }
 function bladBokstav(i){ return i < 26 ? String.fromCharCode(65 + i) : String(i + 1); }
@@ -189,17 +326,18 @@ function drillKalla(ref){
   return kalla;
 }
 
-/* TRÄDET (momentsidans Metodträning, ritat av KartaMotor i metodtrad.html): grenen "Procent och byta form", B1–B7. */
+/* TRÄDET (momentsidans Metodträning, ritat av KartaMotor i metodtrad.html): grenen "Procent och byta form", B1–B7,
+   och bredvid den grenen "Andelen", A1–A7 (2026-11-27). */
+function lovAv(id){ return { id: 'nf-k4d1-' + id, namn: BANK[id].namn, nod: BANK[id].nod, formaga: 'RAKNA', roll: 'karna', bank: 'k4d1:' + id }; }
 function trad(){
   return { rot: { id: 'nf-k4d1', namn: ROTNAMN }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
-    prefKey: 'k4.d1.nyformat.pref.v1', utfalld: ['nf-k4d1', 'nf-k4d1-byta'], rotNamn: ROTNAMN, orsakFramtid: 'åk 8',
-    kategorier: [ { id: 'nf-k4d1-byta', namn: GREN, roll: 'karna', lov: ORDNING.map(function(id){
-      return { id: 'nf-k4d1-' + id, namn: BANK[id].namn, nod: BANK[id].nod, formaga: 'RAKNA', roll: 'karna', bank: 'k4d1:' + id };
-    }) } ] };
+    prefKey: 'k4.d1.nyformat.pref.v1', utfalld: ['nf-k4d1', 'nf-k4d1-byta', 'nf-k4d1-andelen'], rotNamn: ROTNAMN, orsakFramtid: 'åk 8',
+    kategorier: [ { id: 'nf-k4d1-byta', namn: GREN, roll: 'karna', lov: ORDNING.map(lovAv) },
+                  { id: 'nf-k4d1-andelen', namn: GREN_A, roll: 'karna', lov: ORDNING_A.map(lovAv) } ] };
 }
 
-window.BLAD_K4_D1_METOD = { ORDNING: ORDNING, trad: trad, drillKalla: drillKalla,
+window.BLAD_K4_D1_METOD = { ORDNING: ORDNING, ORDNING_A: ORDNING_A, trad: trad, drillKalla: drillKalla,
   bank: function(id){ var b = BANK[id]; return b ? { id: id, namn: b.namn, nod: b.nod, mallar: b.mallar || null, uppg: uppgAv(b) } : null; },
   // För spec-fuzzen: talreglernas tabeller (fuzzen räknar själv; de här används bara för utskriften).
-  REGEL: { B2_TAL: B2_TAL, B4_TAL: B4_TAL, B5_NAMN: B5_NAMN } };
+  REGEL: { B2_TAL: B2_TAL, B4_TAL: B4_TAL, B5_NAMN: B5_NAMN, A1_TAL: A1_TAL, A2_K: A2_K, A2_NAMN: A2_NAMN } };
 })();
