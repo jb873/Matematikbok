@@ -162,6 +162,8 @@ var MOMENT = { titel: 'Det hela', varianter: ['A'],
 window.BLAD_K4_D1_HELA = {
   MOMENT: MOMENT,
   blad: function(id){ var b = BLAD[String(id || '').toUpperCase()]; return b ? b() : null; },
-  idn: function(){ return Object.keys(BLAD); }
+  idn: function(){ return Object.keys(BLAD); },
+  // Testet och metodträningen (H1–H7) bygger med samma svarsrad: den spegelvända stegraden, Resten-raden och valrutan.
+  TYPER: { h: h, rest: rest, val: val, fig: fig, E: E, HELA: HELA }
 };
 })();

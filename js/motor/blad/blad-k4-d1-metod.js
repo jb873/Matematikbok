@@ -1,6 +1,7 @@
 /* blad-k4-d1-metod.js — METODTRÄNINGEN I PROCENT (åk 7, kapitel 4 Del 1): grenen "Procent och byta form" (moment 1)
    med löven B1–B7 (Joachim 2026-11-26), grenen "Andelen" (moment 2) med löven A1–A7 och grenen "Delen" (moment 3)
-   med löven D1–D7 (2026-11-27, se GRENEN "ANDELEN" och GRENEN "DELEN" nedan).
+   med löven D1–D7 och grenen "Det hela" (moment 4) med löven H1–H7 (2026-11-27, se GRENEN "ANDELEN", GRENEN "DELEN"
+   och GRENEN "DET HELA" nedan).
    Källa: doc/innehall/k4-d1-procent-metodtraning.md — Joachims klartext (facit kontrollräknat), ordagrant: talreglerna
    överst i varje löv och 10 uppgifter som mallar. Hakparenteser finns inte i filen.
    Bladen ritas med bladkärnan och bladens byggstenar (blad-k4-d1-procent.js, TYPER: formkedjan, figurerna, svaret med
@@ -427,9 +428,146 @@ BANK_D.D3.mallar.forEach(function(m){ m.nyckel = m.p + ' % av ' + m.x; });
 var ORDNING_D = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'];
 Object.keys(BANK_D).forEach(function(id){ BANK[id] = BANK_D[id]; });
 
+/* ═══ GRENEN "DET HELA" (moment 4, Joachim 2026-11-27): löven H1–H7 ═══════════════════════════════════════════════
+   Källa: doc/innehall/k4-d1-procent-moment4-metodtraning.md (facit kontrollräknat), ordagrant; hakparenteserna står
+   inte här. Svarsraden är bladens SPEGELVÄNDA STEGRAD (blad-k4-d1-hela.js, TYPER.h): ▢ % = ▢ / ▢ % = ▢/▢ = ▢ /
+   100 % = ▢ · ▢ = ▢ — eleven väljer steget; det givna procenttalet / delningstalet = steget, steget · faktorn = 100;
+   mittraden får stå tom när procenttalet redan är ett steg. Facit visar klartextens enklaste väg. H5 har Resten-raden
+   (TYPER.rest). H1–H3 får NYA TAL EFTER BANKEN (NyaTal.medTalregel): mallen först, med lika stor chans; mallen
+   bestämmer procenttalets slag (H1), tiondelens slag (H2) eller procenttalet (H3), och lövets talregel nedan drar
+   talen. H4–H7 har bara författade uppgifter. Mastery: alla sju löv loggar till lövet Det hela (proc-hela:rakna) i
+   kapitel 4:s store. */
+var NAMN_H = {
+  H1: { namn: '1 %-steget' }.namn,
+  H2: { namn: '10 %-steget' }.namn,
+  H3: { namn: 'Procent som bråk' }.namn,
+  H4: { namn: 'Rabatten i kronor, ordinarie pris söks' }.namn,
+  H5: { namn: 'Delen är det som är kvar' }.namn,
+  H6: { namn: 'Figur och sträcka' }.namn,
+  H7: { namn: 'Jämföra och hitta felet' }.namn
+};
+var GREN_H = { namn: 'Det hela' }.namn, HELA = 'proc-hela:rakna';
+var RHL = { tecken: { rubrik: 'Vilket tecken ska stå i rutan: <, = eller >?' }.rubrik };
+// Den spegelvända stegraden, Resten-raden och valrutan ur Det helas bladfil; ringa in (flera rätt) med Delens valruta.
+function HT(){ return window.BLAD_K4_D1_HELA.TYPER; }
+function hh(fraga, procent, del, steg, enhet, enhetSvar){ return HT().h(fraga, procent, del, steg, enhet, enhetSvar); }
+function hRest(r){ return HT().rest(r); }
+function valH(alt, ratt, fraga){ return HT().val(alt, ratt, fraga); }
+function figH(svg){ return HT().fig(svg); }
+// En uppgift med gruppens meningar under rubriken (som Blad 6A nr 2).
+function uM(rubrik, rader, meningar){ return { rubrik: rubrik, rader: rader, meningar: meningar }; }
+// Uppgiften "p % är x kr. Hur mycket är 100 %?" — rubriken är frågan (som Blad 3A nr 9).
+function fragaH(p, x){ return { rubrik: p + ' % är ' + tusen(x) + ' kr. Hur mycket är 100 %?' }.rubrik; }
+
+/* ── TALREGLERNA (klartextens, överst i varje löv) ── */
+// H1: "p % är x kr. Hur mycket är 100 %?". p är 3, 6, 7, 8 eller 9, eller 11–19 — aldrig ett steg (1, 2, 4, 5, 10, 20,
+// 25, 50), mittraden används alltid. x = p · k, k heltal: p 3–9 → k = 3–12; p 11–19 → k = 2–6. 1 % = x/p = k.
+// Svar: 100 % = 100 · k. Mallen bestämmer procenttalets slag: ental (3–9) eller tonår (11–19).
+var H1_ENTAL = [3, 6, 7, 8, 9];
+function radH1(x){ return uA(fragaH(x.p, x.x), [ hh(null, x.p, x.x, 1, KR) ]); }
+function draH1(m){ return function(rnd){
+  var ton = m.p > 10, p = ton ? hel(rnd, 11, 19) : ur(rnd, H1_ENTAL), k = ton ? hel(rnd, 2, 6) : hel(rnd, 3, 12);
+  return { p: p, x: p * k, nyckel: p + ' % är ' + (p * k) };
+}; }
+// H2: p är 20, 30, 40, 60, 70, 80 eller 90 (50 % hör till H3). x = (p/10) · t, t heltal 3–70; 10 % = t. När t inte är
+// ett jämnt tiotal är t högst 25. Svar: 100 % = 10 · t. När p = 20 får mittraden stå tom (facit visar 10 %-vägen).
+// Mallen bestämmer t:s slag: ett jämnt tiotal (10–70) eller inte (3–25).
+var H2_P = [20, 30, 40, 60, 70, 80, 90], H2_SMA = [3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25];
+function radH2(x){ return uA(fragaH(x.p, x.x), [ hh(null, x.p, x.x, 10, KR) ]); }
+function draH2(m){ return function(rnd){
+  var tiotal = (m.x / (m.p / 10)) % 10 === 0, t = tiotal ? 10 * hel(rnd, 1, 7) : ur(rnd, H2_SMA), p = ur(rnd, H2_P);
+  return { p: p, x: p / 10 * t, nyckel: p + ' % är ' + (p / 10 * t) };
+}; }
+// H3: p är 25, 75, 20, 50, 40, 60 eller 80; steget är bråket (25 % = 1/4, 20 % = 1/5, 50 % = 1/2). 75 %: 25 % = x/3.
+// 40, 60 och 80 %: 20 % = x/2, x/3, x/4. 25, 20 och 50 %: mittraden tom, 100 % = 4 · x, 5 · x, 2 · x. x är delbart med
+// täljarens tal, så att steget är ett heltal. Steget är högst 60, eller ett jämnt tiotal. Mallen bestämmer procenttalet.
+// GRÄNSERNA som klartexten inte anger (frågan står i doc/KO.md): steget minst 3; som jämnt tiotal över 60 högst 120
+// (bankens största steg: 25 % är 120 kr).
+var H3_STEG = { 25: 25, 75: 25, 20: 20, 50: 50, 40: 20, 60: 20, 80: 20 }, H3_MIN = 3, H3_TIOTAL_MAX = 120;
+function radH3(x){ return uA(fragaH(x.p, x.x), [ hh(null, x.p, x.x, H3_STEG[x.p], KR) ]); }
+function draH3(m){ return function(rnd){
+  var n = m.p / H3_STEG[m.p], v = rnd() < 0.8 ? hel(rnd, H3_MIN, 60) : 10 * hel(rnd, 7, H3_TIOTAL_MAX / 10);
+  return { p: m.p, x: n * v, nyckel: m.p + ' % är ' + (n * v) };
+}; }
+
+/* ── H4–H7: Joachims uppgifter (rubriken är uppgiftens text) ── */
+function strackH(andel, text){
+  var AF = window.SvgAlgebraFigur; if(!AF) return '';
+  return AF.strackfigur({ helhet: '?', delar: [{ text: [andel + ' %', text], farg: 'bla', andel: andel }, { text: ' ', andel: 100 - andel }] });
+}
+var BANK_H = {
+  H1: { namn: NAMN_H.H1, nod: HELA, rad: radH1, dra: draH1,
+    mallar: [ { p: 7, x: 42 }, { p: 3, x: 36 }, { p: 6, x: 54 }, { p: 8, x: 56 }, { p: 9, x: 45 },
+              { p: 7, x: 84 }, { p: 3, x: 33 }, { p: 11, x: 44 }, { p: 13, x: 39 }, { p: 18, x: 54 } ] },
+  H2: { namn: NAMN_H.H2, nod: HELA, rad: radH2, dra: draH2,
+    mallar: [ { p: 30, x: 36 }, { p: 40, x: 64 }, { p: 70, x: 91 }, { p: 80, x: 120 }, { p: 90, x: 72 },
+              { p: 60, x: 150 }, { p: 20, x: 34 }, { p: 30, x: 210 }, { p: 40, x: 200 }, { p: 70, x: 420 } ] },
+  H3: { namn: NAMN_H.H3, nod: HELA, rad: radH3, dra: draH3,
+    mallar: [ { p: 75, x: 90 }, { p: 25, x: 45 }, { p: 20, x: 26 }, { p: 50, x: 55 }, { p: 40, x: 44 },
+              { p: 60, x: 75 }, { p: 80, x: 64 }, { p: 75, x: 21 }, { p: 25, x: 120 }, { p: 80, x: 200 } ] },
+  H4: { namn: NAMN_H.H4, nod: HELA, uppg: function(){ return [
+    uA({ rubrik: 'En cykel säljs med 30 % rabatt. Rabatten är 750 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 30, 750, 10, KR) ]),
+    uA({ rubrik: 'Ett par jeans säljs med 25 % rabatt. Rabatten är 95 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 25, 95, 25, KR) ]),
+    uA({ rubrik: 'Ett par hörlurar säljs med 15 % rabatt. Rabatten är 60 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 15, 60, 5, KR) ]),
+    uA({ rubrik: 'En ryggsäck säljs med 40 % rabatt. Rabatten är 180 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 40, 180, 10, KR) ]),
+    uA({ rubrik: 'Ett par skidor säljs med 35 % rabatt. Rabatten är 210 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 35, 210, 5, KR) ]),
+    uA({ rubrik: 'En mobil säljs med 8 % rabatt. Rabatten är 160 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 8, 160, 1, KR) ]),
+    uA({ rubrik: 'En klocka säljs med 50 % rabatt. Rabatten är 275 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 50, 275, 50, KR) ]),
+    uA({ rubrik: 'Ett tält säljs med 12 % rabatt. Rabatten är 96 kr. Vad är det ordinarie priset?' }.rubrik, [ hh(null, 12, 96, 4, KR) ])
+  ]; } },
+  // Delen är det som är kvar: stegraden och fjärde raden "Resten = ▢ − ▢ = ▢".
+  H5: { namn: NAMN_H.H5, nod: HELA, uppg: function(){ return [
+    uA({ rubrik: '20 % av eleverna i en klass har glasögon. Det är 7 elever. Hur många elever har inte glasögon?' }.rubrik, [ hRest(hh(null, 20, 7, 20, 'elever')) ]),
+    uA({ rubrik: 'Leo har läst 40 % av en bok. Det är 96 sidor. Hur många sidor har han kvar att läsa?' }.rubrik, [ hRest(hh(null, 40, 96, 10, 'sidor')) ]),
+    uA({ rubrik: '5 % av äggen i en leverans är trasiga. Det är 3 ägg. Hur många ägg är hela?' }.rubrik, [ hRest(hh(null, 5, 3, 5, 'ägg')) ]),
+    uA({ rubrik: 'Ella har sparat 75 % av priset på en cykel. Hon har sparat 270 kr. Hur mycket fattas?' }.rubrik, [ hRest(hh(null, 75, 270, 25, KR)) ]),
+    uA({ rubrik: '12 % av medlemmarna i en kör är tenorer. Det är 9 tenorer. Hur många medlemmar är inte tenorer?' }.rubrik, [ hRest(hh(null, 12, 9, 4, 'tenorer', 'medlemmar')) ]),
+    uA({ rubrik: '60 % av platserna på en buss är upptagna. Det är 33 platser. Hur många platser är lediga?' }.rubrik, [ hRest(hh(null, 60, 33, 20, 'platser')) ]),
+    uA({ rubrik: '35 % av eleverna på en skola cyklar till skolan. Det är 63 elever. Hur många elever cyklar inte?' }.rubrik, [ hRest(hh(null, 35, 63, 5, 'elever')) ]),
+    uA({ rubrik: 'Sam har betalat 90 % av en telefon. Han har betalat 2 700 kr. Hur mycket har han kvar att betala?' }.rubrik, [ hRest(hh(null, 90, 2700, 10, KR)) ])
+  ]; } },
+  // Figurerna: stapeln från 0 % till 100 % (delStrip med hel, text och skala), stapeln i lika delar (delStrip med text)
+  // och sträckan (strackfigur: den blå delen är procenttalet av sträckan, "?" över hela).
+  H6: { namn: NAMN_H.H6, nod: HELA, uppg: function(){ return [
+    uA({ rubrik: 'Hur lång är hela stapeln?' }.rubrik, [ figH(A.delStrip(10, [], { hel: 20, text: { etikett: '15 cm' }.etikett, skala: true })), hh(null, 20, 15, 20, 'cm') ]),
+    uA({ rubrik: 'Hur lång är hela stapeln?' }.rubrik, [ figH(A.delStrip(10, [], { hel: 60, text: { etikett: '48 m' }.etikett, skala: true })), hh(null, 60, 48, 20, 'm') ]),
+    uA({ rubrik: 'Hur stor är trädgården?' }.rubrik, [ figH(A.delStrip(10, [], { hel: 35, text: { etikett: 'Potatis, 21 m²' }.etikett, skala: true })), hh(null, 35, 21, 5, 'm²') ]),
+    uA({ rubrik: 'Hur mycket är hela stapeln värd?' }.rubrik, [ figH(A.delStrip(10, [0, 1, 2, 3, 4, 5, 6], { text: { etikett: '56 kr' }.etikett })), hh(null, 70, 56, 10, KR) ]),
+    uA({ rubrik: 'Hur mycket är hela stapeln?' }.rubrik, [ figH(A.delStrip(5, [0, 1], { text: { etikett: '18 liter' }.etikett })), hh(null, 40, 18, 20, 'liter') ]),
+    uA({ rubrik: 'Hur lång är hela sträckan?' }.rubrik, [ figH(strackH(25, { etikett: '13 mm' }.etikett)), hh(null, 25, 13, 25, 'mm') ]),
+    uA({ rubrik: 'Hur lång är hela sträckan?' }.rubrik, [ figH(strackH(15, { etikett: '27 mm' }.etikett)), hh(null, 15, 27, 5, 'mm') ]),
+    uA({ rubrik: 'Hur stor är tomten?' }.rubrik, [ figH(A.delStrip(10, [], { hel: 80, text: { etikett: 'Skog, 1 200 m²' }.etikett, skala: true })), hh(null, 80, 1200, 20, 'm²') ])
+  ]; } },
+  // Flerval och tecknet med valrutan; nr 2 med gruppens meningar; nr 8 ringa in (Delens valruta med flera rätt).
+  H7: { namn: NAMN_H.H7, nod: HELA, uppg: function(){ return [
+    uA({ rubrik: '20 % av ett tal är 14. Vilket är talet?' }.rubrik, [ valH(['A 2,8', 'B 28', 'C 70', 'D 280'], 'C 70') ]),
+    uM({ rubrik: '30 % av en summa är 21 kr. Två elever räknar ut hela summan.' }.rubrik,
+       [ valH(['A Ola', 'B Mia', 'C Båda'], 'A Ola', { fraga: 'Vem har räknat rätt?' }.fraga) ],
+       [ { fraga: 'Ola: 30 % = 21 kr, 10 % = 21/3 = 7 kr, 100 % = 10 · 7 = 70 kr' }.fraga,
+         { fraga: 'Mia: 30 % = 21 kr, 100 % = 30 · 21 = 630 kr' }.fraga ]),
+    uA({ rubrik: 'Vilket påstående stämmer?' }.rubrik, [
+      valH(['A Om 25 % är 30 kr är 100 % 120 kr.', 'B Om 10 % är 6 kr är 100 % 16 kr.', 'C Om 4 % är 8 kr är 100 % 32 kr.'], 'A Om 25 % är 30 kr är 100 % 120 kr.') ]),
+    uA({ rubrik: 'Vilket hela är störst?' }.rubrik, [ valH(['A 5 % är 7 kr', 'B 40 % är 60 kr', 'C 75 % är 105 kr'], 'B 40 % är 60 kr') ]),
+    uA({ rubrik: 'En jacka säljs med 60 % rabatt. Rabatten är 84 kr. Vad är det ordinarie priset?' }.rubrik, [
+      valH(['A 140 kr', 'B 144 kr', 'C 210 kr', 'D 56 kr'], 'A 140 kr') ]),
+    uA({ rubrik: '25 % av bollarna i en låda är röda. Det är 9 bollar. Hur många bollar är inte röda?' }.rubrik, [
+      valH(['A 36', 'B 27', 'C 34', 'D 225'], 'B 27') ]),
+    uA(RHL.tecken, [ valH(['<', '=', '>'], '=', { fraga: 'Talet där 20 % är 18  □  Talet där 30 % är 27' }.fraga) ]),
+    uA({ rubrik: 'Vilka påståenden stämmer? Ringa in alla som stämmer.' }.rubrik, [
+      valD(['A Om 50 % är 35 kr är 100 % 70 kr.', 'B Om 75 % är 33 kr är 100 % 44 kr.', 'C Om 20 % är 9 kr är 100 % 180 kr.'],
+           ['A Om 50 % är 35 kr är 100 % 70 kr.', 'B Om 75 % är 33 kr är 100 % 44 kr.'], null, true) ])
+  ]; } }
+};
+BANK_H.H1.mallar.forEach(function(m){ m.nyckel = m.p + ' % är ' + m.x; });
+BANK_H.H2.mallar.forEach(function(m){ m.nyckel = m.p + ' % är ' + m.x; });
+BANK_H.H3.mallar.forEach(function(m){ m.nyckel = m.p + ' % är ' + m.x; });
+var ORDNING_H = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7'];
+Object.keys(BANK_H).forEach(function(id){ BANK[id] = BANK_H[id]; });
+
 /* Ett blad i drillen: en uppgift. B-löven ger en rad (lövets rubrik); A-löven ger { rubrik, rader }. */
 function bladAv(b, u){
   var gr = u && u.rader ? Y.g(u.rubrik, u.rader) : Y.g(b.rubrik, [u]); gr.logg = b.nod; gr.loggStore = 'k4';
+  if(u && u.meningar) gr.meningar = u.meningar;   // gruppens meningar under rubriken (H7 nr 2)
   return { titel: b.namn, grupper: [gr] };
 }
 function bladBokstav(i){ return i < 26 ? String.fromCharCode(65 + i) : String(i + 1); }
@@ -470,18 +608,19 @@ function drillKalla(ref){
 }
 
 /* TRÄDET (momentsidans Metodträning, ritat av KartaMotor i metodtrad.html): grenen "Procent och byta form", B1–B7,
-   och efter den grenen "Andelen", A1–A7, och grenen "Delen", D1–D7 (2026-11-27). */
+   och efter den grenen "Andelen", A1–A7, grenen "Delen", D1–D7, och grenen "Det hela", H1–H7 (2026-11-27). */
 function lovAv(id){ return { id: 'nf-k4d1-' + id, namn: BANK[id].namn, nod: BANK[id].nod, formaga: 'RAKNA', roll: 'karna', bank: 'k4d1:' + id }; }
 function trad(){
   return { rot: { id: 'nf-k4d1', namn: ROTNAMN }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
-    prefKey: 'k4.d1.nyformat.pref.v1', utfalld: ['nf-k4d1', 'nf-k4d1-byta', 'nf-k4d1-andelen', 'nf-k4d1-delen'], rotNamn: ROTNAMN, orsakFramtid: 'åk 8',
+    prefKey: 'k4.d1.nyformat.pref.v1', utfalld: ['nf-k4d1', 'nf-k4d1-byta', 'nf-k4d1-andelen', 'nf-k4d1-delen', 'nf-k4d1-hela'], rotNamn: ROTNAMN, orsakFramtid: 'åk 8',
     kategorier: [ { id: 'nf-k4d1-byta', namn: GREN, roll: 'karna', lov: ORDNING.map(lovAv) },
                   { id: 'nf-k4d1-andelen', namn: GREN_A, roll: 'karna', lov: ORDNING_A.map(lovAv) },
-                  { id: 'nf-k4d1-delen', namn: GREN_D, roll: 'karna', lov: ORDNING_D.map(lovAv) } ] };
+                  { id: 'nf-k4d1-delen', namn: GREN_D, roll: 'karna', lov: ORDNING_D.map(lovAv) },
+                  { id: 'nf-k4d1-hela', namn: GREN_H, roll: 'karna', lov: ORDNING_H.map(lovAv) } ] };
 }
 
-window.BLAD_K4_D1_METOD = { ORDNING: ORDNING, ORDNING_A: ORDNING_A, ORDNING_D: ORDNING_D, trad: trad, drillKalla: drillKalla,
+window.BLAD_K4_D1_METOD = { ORDNING: ORDNING, ORDNING_A: ORDNING_A, ORDNING_D: ORDNING_D, ORDNING_H: ORDNING_H, trad: trad, drillKalla: drillKalla,
   bank: function(id){ var b = BANK[id]; return b ? { id: id, namn: b.namn, nod: b.nod, mallar: b.mallar || null, uppg: uppgAv(b) } : null; },
   // För spec-fuzzen: talreglernas tabeller (fuzzen räknar själv; de här används bara för utskriften).
-  REGEL: { B2_TAL: B2_TAL, B4_TAL: B4_TAL, B5_NAMN: B5_NAMN, A1_TAL: A1_TAL, A2_K: A2_K, A2_NAMN: A2_NAMN, D2_P: D2_P, D3_Q: D3_Q } };
+  REGEL: { B2_TAL: B2_TAL, B4_TAL: B4_TAL, B5_NAMN: B5_NAMN, A1_TAL: A1_TAL, A2_K: A2_K, A2_NAMN: A2_NAMN, D2_P: D2_P, D3_Q: D3_Q, H1_ENTAL: H1_ENTAL, H2_P: H2_P, H3_STEG: H3_STEG } };
 })();

@@ -46,6 +46,13 @@ Varje punkt säger vad som brister, var det mättes och när.
   i k3 d1 T6 med 10 uppgifter: blad 11 och 12 är blad 10). Fråga till Joachim: ska banken börja om, ska knappen
   försvinna, eller är det rätt som det är? Mätt 2026-11-27 (`js/motor/arbetsyta/drill.html`).
 
+- [ ] **Det helas H3: gränserna för steget.** Klartexten säger "Steget är högst 60, eller ett jämnt tiotal" men ger
+  ingen nedre gräns och ingen övre gräns för tiotalen. Byggt med steget 3–60, eller ett jämnt tiotal 70–120 (bankens
+  största steg är 120: "25 % är 120 kr"). Konstanterna `H3_MIN` och `H3_TIOTAL_MAX` i `blad-k4-d1-metod.js`;
+  fuzzen prövar samma gränser. Fråga till Joachim: stämmer gränserna? 2026-11-28.
+- [ ] **Stöddokumentet "Byta form": förslaget väntar på Joachims beslut.** Innehållet ligger i
+  `doc/innehall/k4-procent-stod-byta-form.md`; inget är byggt (punkt 4 i ordern 2026-11-27: stanna och föreslå).
+  Förslaget står i rapporten 2026-11-28.
 - [ ] **Delens metodträning: två frågor till Joachim.** (1) D3, 50 %: talregeln har ingen nedre gräns för x ("x högst
   1 200"), så de nya talen kan ge till exempel 50 % av 2 kr. Byggt som regeln står. (2) D5 nr 3 b och c: stegradens
   mittrad "4 % = 25/25 = ▢ elever" har svaret 1, och enheten efter rutan är "elever" (klartextens facit: "1 elev").

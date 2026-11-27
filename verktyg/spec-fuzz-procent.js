@@ -19,8 +19,9 @@
      BANKEN    (alla sju löv) bankens kedjor är Joachims facit i klartexten, uppgift för uppgift
    GRENEN ANDELEN (A1–A7, 2026-11-27): A1–A3 prövas på samma sätt (TALREGEL, FACIT, NY, MALL — se blocket längre ned),
    A4–A7 bara mot klartextens facit (BANKEN).
-   GRENEN DELEN (D1–D7, 2026-11-27): D1–D3 likadant med stegraden och bråkraden, D4–D7 mot klartextens facit (se
-   blocket längst ned).
+   GRENEN DELEN (D1–D7, 2026-11-27): D1–D3 likadant med stegraden och bråkraden, D4–D7 mot klartextens facit.
+   GRENEN DET HELA (H1–H7, 2026-11-27): H1–H3 likadant med den spegelvända stegraden, H4–H7 och Det hela, Test 1 mot
+   klartextens facit (se blocket längst ned).
    NEGATIV VERIFIERING: --sabba regel|facit|tiotal|bank förstör talregeln, facit, tiotalsregeln eller klartextens facit — fuzzen ska fälla med
    benets namn. KÖR: node verktyg/spec-fuzz-procent.js [--n 2000] [--lov B5] [--sabba …]   Exit 1 vid brott. Ingen nätväg. */
 'use strict';
@@ -30,7 +31,7 @@ const args = process.argv.slice(2), opt = n => { const i = args.indexOf(n); retu
 const N = parseInt(opt('--n') || '2000', 10), BARA = opt('--lov'), SABBA = opt('--sabba');
 global.window = global;
 ['motor/figur/svg-andel.js', 'motor/figur/svg-tallinje.js', 'motor/ovamer/nya-tal.js', 'motor/blad/blad-k4-d1-procent.js', 'motor/figur/svg-algebrafigur.js', 'motor/blad/blad-k4-d1-andelen.js', 'motor/blad/blad-k4-d1-delen.js',
- 'motor/blad/blad-k4-d1-metod.js'].forEach(f => require(JS(f)));
+ 'motor/blad/blad-k4-d1-hela.js', 'motor/blad/blad-k4-d1-metod.js', 'motor/blad/blad-k4-d1-test.js'].forEach(f => require(JS(f)));
 const NT = window.NyaTal, MET = window.BLAD_K4_D1_METOD;
 if(SABBA === 'regel') MET.REGEL.B4_TAL[20].push(5);          // 5/20 går att förkorta — TALREGEL ska fälla
 
@@ -124,7 +125,7 @@ function kedjaText(rad){
   return s;
 }
 
-console.log('SPEC-FUZZ PROCENT — ' + N + ' nya uppgifter per löv (B2–B6, A1–A3, D1–D3)' + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
+console.log('SPEC-FUZZ PROCENT — ' + N + ' nya uppgifter per löv (B2–B6, A1–A3, D1–D3, H1–H3)' + (SABBA ? '  [SABBA: ' + SABBA + ']' : '') + '\n');
 const FACIT = klartextFacit(), RAPPORT = [];
 if(SABBA === 'bank') FACIT.B4[0] = '9/20 = 45/100 = 0,45 = 46 %';   // klartexten säger annat än banken — BANKEN ska fälla
 MET.ORDNING.forEach(lov => {
@@ -421,6 +422,134 @@ if(SABBA === 'regel') MET.REGEL.D2_P.push(50);              // 50 % hör till D3
   });
   console.log((ok === N ? '✓ ' : '✗ ') + lov + ' — ' + ok + '/' + N + ' nya uppgifter håller (bank ' + n + ', ' + bank.mallar.length + ' mallar)');
 });
+/* ═══ GRENEN DET HELA (H1–H7, 2026-11-27) ═══════════════════════════════════════════════════════════════════════════
+   Svarsraden är den spegelvända stegraden: p % = del | s % = del/d = v | 100 % = f · v = svar (d = p/s, f = 100/s),
+   (mittraden tom) när procenttalet redan är ett steg; H5 med "Resten = svar − del = rest".
+   BANKEN: bankens rader mot klartextens facit (doc/innehall/k4-d1-procent-moment4-metodtraning.md), uppgift för uppgift;
+   valrutornas rätta svar mot facit (bokstaven, eller tecknet). TESTET: Det hela, Test 1 mot sin klartext på samma sätt.
+   H1–H3: N nya uppgifter per löv — TALREGEL (klartextens), FACIT (leden går jämnt, steget ur listan, frågan och
+   enheten), loggning till lövet Det hela i k4, NY och MALL som i Delen. */
+function klartextFacitH(fil){
+  const t = fs.readFileSync(path.join(ROOT, fil), 'utf8');
+  const blockAv = f => f.split(/^(?:\d+\. |\*\*\d+\*\*)/m).slice(1).map(blk => {
+    const ren = blk.replace(/\(även (?:[^()]|\([^)]*\))*\)/g, ''), kedjor = [];
+    // En kedja per deluppgift (a), b), c) i testets uppgift 1) eller en per uppgift.
+    ren.split(/^\s*-\s*[a-f]\)\s*/m).forEach(del => {
+      let x = /(\d+) % = (\d+) [^|]*\| (\d+) % = (\d+)\/(\d+) = (\d+) [^|]*\| 100 % = (\d+) · (\d+) = (\d+)/.exec(del), k = null;
+      if(x) k = { p: +x[1], del: +x[2], s: +x[3], d: +x[5], v: +x[6], f: +x[7], svar: +x[9] };
+      else if((x = /(\d+) % = (\d+) [^|(]*\(mittraden tom\) \| 100 % = (\d+) · (\d+) = (\d+)/.exec(del))) k = { p: +x[1], del: +x[2], s: +x[1], d: 1, v: +x[2], f: +x[3], svar: +x[5] };
+      if(!k) return;
+      const r = /Resten = (\d+) − (\d+) = (\d+)/.exec(del); if(r) k.rest = +r[3];
+      kedjor.push(k);
+    });
+    const m = /^\s*([<=>]|[A-D](?: och [A-D])*)[.\s]/.exec(ren.replace(/^\s*-\s*/, ''));
+    return { kedjor: kedjor, svar: m ? m[1].split(' och ') : [] };
+  });
+  if(/^## H1/m.test(t)){ const ut = {}; t.split(/^## /m).slice(1).forEach(del => { const f = del.split('**Facit**')[1]; if(f) ut[del.slice(0, 2)] = blockAv(f); }); return ut; }
+  return { test: blockAv(t.split(/^# Facit/m)[1]) };
+}
+function jamforH(namn, i, rader, doc){
+  const steg = rader.filter(r => r.typ === 'stegrad'), val = rader.filter(r => r.typ === 'valruta');
+  // Ett flerval utan stegrad: facit förklarar svaret med en kedja — bara bokstaven jämförs.
+  if(steg.length !== doc.kedjor.length && !(steg.length === 0 && val.length)) brot('BANKEN', namn, i + 1, steg.length + ' stegrader, klartexten ' + doc.kedjor.length);
+  steg.forEach((r, j) => {
+    const k = doc.kedjor[j]; if(!k) return;
+    if(!r.spegel){ brot('BANKEN', namn, i + 1, 'stegraden är inte spegelvänd'); return; }
+    const egen = { p: r.procent, del: r.del, s: r.steg, d: r.procent / r.steg, v: r.del * r.steg / r.procent, f: 100 / r.steg, svar: 100 * r.del / r.procent };
+    if(r.rest) egen.rest = egen.svar - r.del;
+    const olika = Object.keys(k).filter(n => egen[n] !== k[n]).concat(r.rest && k.rest === undefined ? ['rest (klartexten saknar Resten)'] : []);
+    if(olika.length) brot('BANKEN', namn, i + 1, 'stegraden ' + olika.map(n => n + ' ' + egen[n] + ' ≠ ' + k[n]).join(', '));
+  });
+  const ratt = [].concat.apply([], val.map(r => r.ratt.map(x => /^[<=>]$/.test(x) ? x : String(x)[0])));
+  if(ratt.join() !== doc.svar.join()) brot('BANKEN', namn, i + 1, 'valrutans svar ' + ratt.join(',') + ' ≠ klartextens ' + doc.svar.join(','));
+}
+function regelH(lov, r){
+  const p = r.procent, x = r.del;
+  if(lov === 'H1'){
+    const ental = [3, 6, 7, 8, 9].indexOf(p) >= 0, ton = p >= 11 && p <= 19;
+    if(!ental && !ton) return 'p ' + p;
+    if(x % p) return 'x ' + x + ' inte p · k';
+    const k = x / p;
+    if(ental && (k < 3 || k > 12)) return 'k ' + k + ' vid p ' + p;
+    if(ton && (k < 2 || k > 6)) return 'k ' + k + ' vid p ' + p;
+    if(r.steg !== 1) return 'steget ' + r.steg;
+    return null;
+  }
+  if(lov === 'H2'){
+    if([20, 30, 40, 60, 70, 80, 90].indexOf(p) < 0) return 'p ' + p;
+    const t = x / (p / 10); if(t !== Math.round(t)) return 'x ' + x + ' inte (p/10) · t';
+    if(t < 3 || t > 70) return 't ' + t;
+    if(t % 10 && t > 25) return 't ' + t + ' (inte tiotal, över 25)';
+    if(r.steg !== 10) return 'steget ' + r.steg;
+    return null;
+  }
+  if(lov === 'H3'){
+    const S = { 25: 25, 75: 25, 20: 20, 50: 50, 40: 20, 60: 20, 80: 20 }[p]; if(!S) return 'p ' + p;
+    if(r.steg !== S) return 'steget ' + r.steg + ' (ska vara ' + S + ' %)';
+    const n = p / S; if(x % n) return 'x ' + x + ' inte delbart med ' + n;
+    const v = x / n;
+    if(v > 60 && v % 10) return 'steget ' + v + ' (högst 60 eller ett jämnt tiotal)';
+    if(v < 3 || v > 120) return 'steget ' + v + ' utanför 3–120 (gränserna i KO.md)';
+    return null;
+  }
+  return 'okänt löv';
+}
+function facitH(rad, fraga){
+  const p = rad.procent, x = rad.del, s = rad.steg;
+  if(fraga !== p + ' % är ' + tusenD(x) + ' kr. Hur mycket är 100 %?') return 'frågan "' + fraga + '"';
+  if(rad.enhet !== 'kr' || !rad.spegel) return 'enheten ' + rad.enhet + ' / spegel ' + rad.spegel;
+  if(STEG_OK.indexOf(s) < 0) return 'steget ' + s + ' inte i listan';
+  const d = p / s, v = x * s / p, f = 100 / s;
+  if(d !== Math.round(d) || v !== Math.round(v) || f !== Math.round(f)) return 'leden går inte jämnt (' + p + ' %, ' + x + ', steget ' + s + ' %)';
+  return null;
+}
+const FACIT_H = klartextFacitH('doc/innehall/k4-d1-procent-moment4-metodtraning.md');
+if(SABBA === 'bank' && FACIT_H.H1) FACIT_H.H1[0].kedjor[0].svar = 601;     // klartexten säger annat än banken — BANKEN ska fälla
+if(SABBA === 'regel') MET.REGEL.H2_P.push(50);                              // 50 % hör till H3 — TALREGEL ska fälla (via draH2 nedan)
+(MET.ORDNING_H || []).forEach(lov => {
+  if(BARA && lov !== BARA) return;
+  const bank = MET.bank(lov);
+  bank.uppg.forEach((u, i) => {
+    const doc = FACIT_H[lov] && FACIT_H[lov][i];
+    if(!doc){ brot('BANKEN', lov, i + 1, 'klartexten saknar facit'); return; }
+    jamforH(lov, i, u.rader, doc);
+  });
+  if(!bank.mallar){ console.log('  · ' + lov + ' — bara författade uppgifter (' + bank.uppg.length + '), banken prövad'); return; }
+  const k = NT.medTalregel(MET.drillKalla(lov));
+  const n = k.instanser.length, nycklar = new Set(bank.mallar.map(m => m.nyckel)), senaste = [];
+  let ok = 0;
+  for(let i = n; i < n + N; i++){
+    const x = k.nasta(i);
+    if(!x){ brot('SLUT', lov, i, 'nasta gav inget blad'); continue; }
+    const gr = x.blad.grupper[0], rad = JSON.parse(JSON.stringify(gr.rader[0]));
+    if(SABBA === 'facit' && i % 9 === 0) rad.steg = 3;
+    const nyck = rad.procent + ' % är ' + rad.del;
+    let lyckat = true; const b = (ben, t) => { lyckat = false; brot(ben, lov, i, t + '  [' + gr.rubrik + ']'); };
+    const r = regelH(lov, rad); if(r) b('TALREGEL', r);
+    const f = facitH(rad, gr.rubrik); if(f) b('FACIT', f);
+    if(gr.logg !== 'proc-hela:rakna' || gr.loggStore !== 'k4') b('FACIT', 'loggar inte till lövet Det hela i k4');
+    if(nycklar.has(nyck)) b('NY', 'uppgiften är bankens');
+    if(senaste.indexOf(nyck) >= 0) b('NY', 'upprepning inom tio');
+    senaste.push(nyck); if(senaste.length > 10) senaste.shift();
+    if(lyckat) ok++;
+  }
+  const St = k.statistik;
+  St.val.forEach((v2, j) => {
+    if(!v2) brot('MALL', lov, j + 1, 'mallen "' + bank.mallar[j].nyckel + '" valdes aldrig');
+    RAPPORT.push(lov + ' mall ' + String(j + 1).padStart(2) + ' ' + String(bank.mallar[j].nyckel).padEnd(14) + ' vald ' + String(v2).padStart(4) + ', tomma ' + St.tomma[j]);
+  });
+  console.log((ok === N ? '✓ ' : '✗ ') + lov + ' — ' + ok + '/' + N + ' nya uppgifter håller (bank ' + n + ', ' + bank.mallar.length + ' mallar)');
+});
+// TESTET: Det hela, Test 1 mot sin klartext (uppgift 1 a–c är tre kedjor i samma uppgift).
+if(!BARA && window.BLAD_K4_D1_TEST){
+  const FT = klartextFacitH('doc/innehall/k4-d1-procent-moment4-test1.md').test, T = window.BLAD_K4_D1_TEST.test('hela1');
+  if(!T) brot('BANKEN', 'hela1', 0, 'testet byggs inte');
+  else {
+    T.grupper.forEach((gr, i) => { if(!FT[i]) brot('BANKEN', 'hela1', i + 1, 'klartexten saknar facit'); else jamforH('hela1', i, gr.rader, FT[i]); });
+    if(T.grupper.length !== FT.length) brot('BANKEN', 'hela1', 0, T.grupper.length + ' uppgifter, klartexten ' + FT.length);
+    console.log('  · Det hela, Test 1 — ' + T.grupper.length + ' uppgifter prövade mot klartexten');
+  }
+}
 if(args.includes('--mallar')){ console.log('\n  MALLARNA (valda, tomma val = mallen gav inget nytt och nästa mall togs):'); RAPPORT.forEach(t => console.log('      ' + t)); }
 Object.keys(brott).forEach(ben => { console.log('\n  ✗ ' + ben + ' (' + brott[ben].length + ')'); brott[ben].slice(0, 4).forEach(t => console.log('      ' + t)); });
 console.log('\n' + (fel ? '✗ SPEC-FUZZ PROCENT RÖD (' + fel + ')' : '✓ SPEC-FUZZ PROCENT GRÖN'));

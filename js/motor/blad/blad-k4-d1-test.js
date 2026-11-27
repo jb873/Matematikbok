@@ -1,4 +1,5 @@
-/* blad-k4-d1-test.js — TESTET I PROCENT OCH BYTA FORM (åk 7, kapitel 4 Del 1, moment 1): Test 1.
+/* blad-k4-d1-test.js — TESTEN I PROCENT (åk 7, kapitel 4 Del 1): Test 1 i moment 1 (Procent och byta form), 2 (Andelen),
+   3 (Delen) och 4 (Det hela); se varje test nedan.
    Källa: doc/innehall/k4-d1-procent-moment1-test1.md (Joachims test 2026-11-26, facit kontrollräknat). Uppgifter, tal och
    facit ordagrant; hakparentesen (vilket blad uppgiften liknar) står bara här i kommentarerna.
    Samma komponenter och samma rättning som bladen (blad-k4-d1-procent.js, TYPER): formkedjan, figurerna, svaret med
@@ -138,7 +139,49 @@ TEST.delen1 = function(){
   ] });
 };
 
-var TESTER = [ { id: 'test1', titel: TITEL }, { id: 'andelen1', titel: TITEL_ANDELEN }, { id: 'delen1', titel: TITEL_DELEN } ];
+/* DET HELA, TEST 1 (moment 4, Joachim 2026-11-27). Källa: doc/innehall/k4-d1-procent-moment4-test1.md (facit
+   kontrollräknat), ordagrant; hakparentesen (bladet) står bara här. Byggt som Delens test med Det helas komponenter
+   (blad-k4-d1-hela.js, TYPER): den spegelvända stegraden "▢ % = ▢ / ▢ % = ▢/▢ = ▢ / 100 % = ▢ · ▢ = ▢" (eleven väljer
+   steget; tom mittrad när procenttalet redan är ett steg), facit = klartextens enklaste väg. Uppgift 5: Resten-raden;
+   uppgift 6: stapeln (delStrip hel/text/skala); uppgift 7: tecknet med valrutan; uppgift 8: flerval. Mastery: lövet
+   Det hela (proc-hela:rakna) i kapitel 4:s store. */
+var TITEL_HELA = { titel: 'Det hela, Test 1' }.titel;
+var RH = {
+  hur: { rubrik: 'Hur mycket är 100 % om …' }.rubrik,
+  n2: { rubrik: '9 % av eleverna på en skola spelar i skolorkestern. Det är 27 elever. Hur många elever går på skolan?' }.rubrik,
+  n3: { rubrik: 'Emil har sprungit 60 % av ett lopp. Det är 9 km. Hur långt är loppet?' }.rubrik,
+  n4: { rubrik: 'En lampa säljs med 20 % rabatt. Rabatten är 46 kr. Vad är det ordinarie priset?' }.rubrik,
+  n5: { rubrik: '35 % av sidorna i en tidning är reklam. Det är 14 sidor. Hur många sidor är inte reklam?' }.rubrik,
+  n6: { rubrik: 'Hur lång är hela stapeln?' }.rubrik,
+  n7: { rubrik: 'Vilket tecken ska stå i rutan: <, = eller >?' }.rubrik,
+  n8: { rubrik: '30 % av eleverna i en klubb spelar fotboll. Det är 120 elever. Hur många elever spelar inte fotboll?' }.rubrik
+};
+TEST.hela1 = function(){
+  var H = window.BLAD_K4_D1_HELA && window.BLAD_K4_D1_HELA.TYPER, AN = window.SvgAndel; if(!H || !AN) return null;
+  var h = H.h, rest = H.rest, val = H.val, fig = H.fig, E = H.E;
+  return Y.medNod(H.HELA, { titel: TITEL_HELA, grupper: [
+    // [Blad 1]
+    g(RH.hur, [ h({ fraga: '7 % är 35 kr?' }.fraga, 7, 35, 1, E.kr), h({ fraga: '40 % är 88 kr?' }.fraga, 40, 88, 10, E.kr),
+                h({ fraga: '75 % är 48 kr?' }.fraga, 75, 48, 25, E.kr) ]),
+    // [Blad 2]
+    g(RH.n2, [ h(null, 9, 27, 1, E.elever) ]),
+    // [Blad 2]
+    g(RH.n3, [ h(null, 60, 9, 20, E.km) ]),
+    // [Blad 3] 20 % är ett steg: mittraden får stå tom.
+    g(RH.n4, [ h(null, 20, 46, 20, E.kr) ]),
+    // [Blad 4] Resten = 40 − 14 = 26 sidor.
+    g(RH.n5, [ rest(h(null, 35, 14, 5, E.sidor)) ]),
+    // [Blad 5] "(Figur: delStrip(10, [], { hel: 45, text: '36 m', skala: true }) …)"
+    g(RH.n6, [ fig(AN.delStrip(10, [], { hel: 45, text: { etikett: '36 m' }.etikett, skala: true })), h(null, 45, 36, 5, 'm') ]),
+    // [Blad 6]
+    g(RH.n7, [ val(['<', '=', '>'], '>', { fraga: 'Talet där 10 % är 13  □  Talet där 25 % är 32' }.fraga) ]),
+    // [Blad 6]
+    g(RH.n8, [ val(['A 36', 'B 180', 'C 280', 'D 400'], 'C 280') ])
+  ] });
+};
+
+var TESTER = [ { id: 'test1', titel: TITEL }, { id: 'andelen1', titel: TITEL_ANDELEN }, { id: 'delen1', titel: TITEL_DELEN },
+               { id: 'hela1', titel: TITEL_HELA } ];
 window.BLAD_K4_D1_TEST = {
   TESTER: TESTER,
   test: function(id){ var fn = TEST[String(id || '')]; return fn ? fn() : null; },

@@ -87,8 +87,8 @@
       montering: 'nf-mount'
     },
     /* Kapitel 4 Procent, Del 1, metodträningens banker (js/motor/blad/blad-k4-d1-metod.js, Joachim 2026-11-26):
-       referens = lövet ('B1' … 'B7', 'A1' … 'A7', 'D1' … 'D7'; Andelens svarsrad ur blad-k4-d1-andelen.js, Delens stegrad ur blad-k4-d1-delen.js). Ritas med bladkärnan och bladens byggstenar (blad-k4-d1-procent.js: formkedjan,
-       figurerna). B2–B6, A1–A3 och D1–D3 har nya tal efter banken: mallen först, sedan lövets talregel (NyaTal.medTalregel, kroken nedan).
+       referens = lövet ('B1' … 'B7', 'A1' … 'A7', 'D1' … 'D7', 'H1' … 'H7'; Andelens svarsrad ur blad-k4-d1-andelen.js, Delens stegrad ur blad-k4-d1-delen.js, Det helas spegelvända stegrad ur blad-k4-d1-hela.js). Ritas med bladkärnan och bladens byggstenar (blad-k4-d1-procent.js: formkedjan,
+       figurerna). B2–B6, A1–A3, D1–D3 och H1–H3 har nya tal efter banken: mallen först, sedan lövets talregel (NyaTal.medTalregel, kroken nedan).
        Mastery: kapitel 4:s store (mastery-k4.js). */
     'k4d1': {
       css: ['js/motor/blad/ak7-delkapitel-kanon.css', 'js/motor/blad/ak7-k1blad-kanon.css', 'js/motor/blad/karna-b-grund.css',
@@ -100,7 +100,7 @@
       skript: ['js/mastery.js', 'js/mastery-k4.js', 'js/motor/blad/blad-karna-b.js', 'js/motor/figur/svg-andel.js',
                'js/motor/figur/svg-tallinje.js', 'js/motor/ovamer/nya-tal.js', 'js/motor/blad/blad-k4-d1-procent.js',
                'js/motor/figur/svg-algebrafigur.js', 'js/motor/blad/blad-k4-d1-andelen.js', 'js/motor/blad/blad-k4-d1-delen.js',
-               'js/motor/blad/blad-k4-d1-metod.js'],
+               'js/motor/blad/blad-k4-d1-hela.js', 'js/motor/blad/blad-k4-d1-metod.js'],
       hamta: function(ref){ return window.BLAD_K4_D1_METOD && window.BLAD_K4_D1_METOD.drillKalla(ref); },
       knappsats: function(){ return document.getElementById('ovn-keypad-shared'); },
       krav: ['js/motor/alg-brak.js', 'js/motor/blad/ak8-blad-ui.js'],

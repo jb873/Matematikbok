@@ -194,6 +194,8 @@ Badgen härleds mot eleven:
   doc-år < elevens             → R (repetition)
 Badge framför namnet; bokstav bär, färg förstärker; ingen teckenförklaring.
 KRAV: taxonomin måste bära årskurs per nod (rollen finns redan).
+ETT MOMENT I TVÅ ÅRSKURSER: Ett moment som är F i en årskurs och kärna i nästa byggs en gång och används i båda. Det
+märks F i den lägre årskursen. (Joachim 2026-11-27)
 
 UPPGIFTER (blad)
 - Blad = nivå + ev. variant: "Blad 1A", "Blad 1B", "Blad 2" — utan mellanslag;
