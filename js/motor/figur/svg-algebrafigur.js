@@ -190,8 +190,14 @@
      lösa. Delarna står under; den del som saknar text är den sökta och ritas i avvikande färg.
      Delarnas bredd i bilden är schematisk: talen står i etiketterna, och figuren ska inte gå att
      mäta med linjal i stället för att räknas ut. */
+  /* BLÅ DEL OCH PROPORTIONELL LÄNGD (Joachim 2026-11-27, procent moment 4 Blad 5 nr 3). Per del: farg: 'bla' ritar
+     delen i paletten C_FILL (SvgAndel), andel ger delen proportionell längd (andel / summan av andelarna), och text får
+     vara en lista — raderna står under varandra. Utan de valen ritas figuren exakt som förut. */
+  var STRACK_FARG = { bla: 'C_FILL' };
   function strackfigur(o){
     var delar = o.delar || [], n = delar.length;
+    var nytt = delar.some(function(d){ return d.farg || d.andel != null || Array.isArray(d.text); });
+    if(nytt) return strackfigurMedAndel(o, delar, n);
     var w = 320, h = 104, x0 = 26, xs = w - 26, y = 62, bredd = (xs - x0) / Math.max(n, 1);
     // (d) TILLÄGG 2026-11-21: utan o.helhet ritas ingen helhetslinje ("x cm, 5 cm och x cm" — eleven tecknar
     // helheten själv). Med o.helhet ritas figuren exakt som förut.
@@ -209,6 +215,34 @@
          +  '<line class="af-matt" x1="' + b + '" y1="' + (y - 6) + '" x2="' + b + '" y2="' + (y + 6) + '"/>'
          +  '<text class="' + TXT + (sokt ? ' af-sokt-txt' : '') + '" x="' + ((a + b) / 2) + '" y="' + (y + 22) + '" text-anchor="middle">'
          +  esc(d.text || '?') + '</text>';
+    });
+    return s2 + undertext(o, w, h) + '</svg>';
+  }
+  function strackfigurMedAndel(o, delar, n){
+    var rader = Math.max.apply(null, delar.map(function(d){ return Array.isArray(d.text) ? d.text.length : 1; }).concat([1]));
+    var w = 320, h = 104 + 24 * (rader - 1), x0 = 26, xs = w - 26, y = 62;
+    var summa = delar.reduce(function(a, d){ return a + (d.andel != null ? d.andel : 1); }, 0);
+    var harHel = o.helhet != null && o.helhet !== '';
+    var s2 = svgStart(w, h, o.alt || (harHel ? ('Sträcka ' + o.helhet + ' delad i ' + n + ' delar') : ('Sträcka delad i ' + n + ' delar')));
+    if(harHel)
+    s2 += '<line class="af-matt" x1="' + x0 + '" y1="28" x2="' + xs + '" y2="28"/>'
+       +  '<line class="af-matt" x1="' + x0 + '" y1="22" x2="' + x0 + '" y2="34"/>'
+       +  '<line class="af-matt" x1="' + xs + '" y1="22" x2="' + xs + '" y2="34"/>'
+       +  '<text class="' + TXT + '" x="' + ((x0 + xs) / 2) + '" y="18" text-anchor="middle">' + esc(o.helhet) + '</text>';
+    var a = x0;
+    delar.forEach(function(d){
+      var b = a + (xs - x0) * (d.andel != null ? d.andel : 1) / summa, t = d.text;
+      var lista = Array.isArray(t) ? t : [t], sokt = !lista.join('');
+      var farg = d.farg && window.SvgAndel && window.SvgAndel[STRACK_FARG[d.farg]];
+      s2 += '<line class="af-del' + (sokt ? ' af-sokt' : '') + '"' + (farg ? ' style="stroke:' + farg + '"' : '')
+         +  ' x1="' + a.toFixed(1) + '" y1="' + y + '" x2="' + b.toFixed(1) + '" y2="' + y + '"/>'
+         +  '<line class="af-matt" x1="' + a.toFixed(1) + '" y1="' + (y - 6) + '" x2="' + a.toFixed(1) + '" y2="' + (y + 6) + '"/>'
+         +  '<line class="af-matt" x1="' + b.toFixed(1) + '" y1="' + (y - 6) + '" x2="' + b.toFixed(1) + '" y2="' + (y + 6) + '"/>';
+      lista.forEach(function(rad, k){
+        s2 += '<text class="' + TXT + (sokt ? ' af-sokt-txt' : '') + '" x="' + ((a + b) / 2).toFixed(1) + '" y="' + (y + 22 + 24 * k) + '" text-anchor="middle">'
+           +  esc(sokt ? '?' : rad) + '</text>';
+      });
+      a = b;
     });
     return s2 + undertext(o, w, h) + '</svg>';
   }

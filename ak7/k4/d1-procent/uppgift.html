@@ -82,6 +82,7 @@
 <script src="../../../js/motor/blad/blad-k4-d1-test.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-andelen.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-delen.js"></script>
+<script src="../../../js/motor/blad/blad-k4-d1-hela.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -93,7 +94,7 @@
 (function(){
   var AY = window.Arbetsyta;
   var q = AY.retur();
-  var MOMENTEN = { byta: window.BLAD_K4_D1_PROCENT, andelen: window.BLAD_K4_D1_ANDELEN, delen: window.BLAD_K4_D1_DELEN };
+  var MOMENTEN = { byta: window.BLAD_K4_D1_PROCENT, andelen: window.BLAD_K4_D1_ANDELEN, delen: window.BLAD_K4_D1_DELEN, hela: window.BLAD_K4_D1_HELA };
   var momentId = MOMENTEN[q.get('moment')] ? q.get('moment') : 'byta', DATA = MOMENTEN[momentId];
   // Tillbaka utan ?retur=: till momentsidan med DETTA moment öppet.
   if(!q.get('retur') && momentId !== 'byta') document.getElementById('nf-tillbaka').href = 'index.html?moment=' + momentId;

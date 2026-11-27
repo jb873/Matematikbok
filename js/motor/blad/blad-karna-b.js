@@ -368,8 +368,16 @@ function brakVardeOk(inp){
    ETT LED SOM BARA UPPREPAR TALET FÅR LÄMNAS TOMT (Joachim 2026-11-27): är steget redan det sökta procenttalet
    (25 % = 400/4 = 100) får tredje raden stå tom; raden rättas då utan den, som formkedjans valfria led, och svaret i
    andra raden bär evidensen. Ifylld rättas tredje raden som vanligt.
+   SPEGELVÄND (rad.spegel, Joachim 2026-11-27, moment 4 Det hela — samma radtyp, ingen ny):
+       ▢ % = ▢          ▢ % = ▢/▢ = ▢          100 % = ▢ · ▢ = ▢          (Resten = ▢ − ▢ = ▢ med rad.rest)
+     det givna procenttalet / delningstalet = steget, steget · faktorn = 100, och varje led har rätt värde. MITTRADEN
+     får stå tom när det givna procenttalet redan är ett steg (20 % = 5 → 100 % = 5 · 5); tredje raden rättas då mot
+     det steget. Tom mittrad när procenttalet inte är ett steg: rutorna räknas som obesvarade, och tredje radens led
+     saknar steg och underkänns. Den fjärde raden (rad.rest) rättas på värde: ▢ − ▢ är värt resten, och svaret är resten.
+     Data: { typ: 'stegrad', spegel: true, fraga?, procent, del, steg (facitvägen), enhet, enhetSvar?, rest?, enhetRest? }.
    BRÅKRADEN (rad.typ 'brakrad'): "25 % = ▢ , (▢ · 800)/▢ = ▢ · ▢ = ▢ kr" — bråket i enklaste form (formrutan
    'enklaste'), övriga led på värde. Data: { typ, fraga?, hela, procent, steg (facitvägen) | brak, enhet, enhetSvar? }. */
+var STEG_ORD = { resten: { text: 'Resten' }.text };   // fjärde radens ord (elevtext)
 var STEG_TILLATNA = [1, 2, 4, 5, 10, 20, 25, 50];   // går jämnt upp i 100 (stegens lista, Joachim 2026-11-27)
 function stegRund(v){ return Math.round(v * 1e6) / 1e6; }
 function stegVisa(v){ return String(stegRund(v)).replace('.', ','); }
@@ -401,6 +409,17 @@ function stegradHtml(rad){
       + '</div>';
     return ut;
   }
+  if(rad.spegel){
+    var D = rad.del, Hs = stegRund(100 * D / P), ss = rad.steg, vs = D * ss / P, Rr = stegRund(Hs - D);
+    return '<div class="ovn-stegrad" data-spegel="1" data-procent="' + P + '" data-del="' + D + '" data-svar="' + Hs + '"'
+      + (rad.rest ? ' data-rest="' + Rr + '"' : '') + ' style="flex-basis:100%;display:flex;flex-direction:column;gap:10px;">'
+      + led(pro(stegRuta('p', P)) + lik + enh(stegRuta('del', D), e1))
+      + led(pro(stegRuta('s', ss)) + lik + brak(stegRuta('h2', D), stegRuta('d', P / ss)) + lik + enh(stegRuta('v1', vs), e1))
+      + led(txt('100 %') + lik + stegRuta('f', 100 / ss) + txt('·') + stegRuta('v2', vs) + lik + enh(stegRuta('svar', Hs), e2))
+      + (rad.rest ? led(txt(STEG_ORD.resten) + lik + stegRuta('ra', Hs) + txt('−') + stegRuta('rb', D) + lik
+                        + enh(stegRuta('rc', Rr), rad.enhetRest || e2)) : '')
+      + '</div>';
+  }
   var s = rad.steg, v = H * s / 100;
   return '<div class="ovn-stegrad" data-hela="' + H + '" data-procent="' + P + '" data-svar="' + A + '"'
     + ' style="flex-basis:100%;display:flex;flex-direction:column;gap:10px;">'
@@ -413,19 +432,44 @@ function stegLas(sr){ var o = {}; sr.querySelectorAll('[data-steg]').forEach(fun
 function stegGiltigt(s, P){ return STEG_TILLATNA.indexOf(s) >= 0 && stegNara(P / s, Math.round(P / s)); }
 // Tredje raden får stå tom när steget (giltigt) redan är det sökta procenttalet. Sätts på raden före rättningen.
 function stegTredjeTom(sr){
-  if(sr.dataset.stegtyp === 'brak') return false;
+  if(sr.dataset.stegtyp === 'brak' || sr.dataset.spegel) return false;
   var P = +sr.dataset.procent, s = stegTal((sr.querySelector('[data-steg="s"]') || {}).value);
   if(!stegGiltigt(s, P) || !stegNara(s, P)) return false;
   return [].every.call(sr.querySelectorAll('[data-steg="p"],[data-steg="f"],[data-steg="v2"],[data-steg="svar"]'),
     function(i){ return String(i.value).trim() === ''; });
 }
-var STEG_TREDJE = { p: 1, f: 1, v2: 1, svar: 1 };
+var STEG_TREDJE = { p: 1, f: 1, v2: 1, svar: 1 }, STEG_MITT = { s: 1, h2: 1, d: 1, v1: 1 };
+// SPEGELVÄND: mittraden får stå tom när det givna procenttalet redan är ett steg.
+function stegMittTom(sr){
+  if(!sr.dataset.spegel) return false;
+  var P = +sr.dataset.procent;
+  return stegGiltigt(P, P) && [].every.call(sr.querySelectorAll('[data-steg="s"],[data-steg="h2"],[data-steg="d"],[data-steg="v1"]'),
+    function(i){ return String(i.value).trim() === ''; });
+}
 function stegOk(inp){
   var sr = inp.closest('.ovn-stegrad'), H = +sr.dataset.hela, P = +sr.dataset.procent, A = +sr.dataset.svar;
   var v = stegLas(sr), r = inp.dataset.steg;
   if(sr.dataset.stegtyp === 'brak'){
     if(r === 'ba' || r === 'bb') return v.bb !== 0 && stegNara(v.ba * H / v.bb, A);
     if(r === 'bc' || r === 'be') return stegNara(v.bc * v.be, A);
+    return stegNara(v.svar, A);
+  }
+  if(sr.dataset.spegel){
+    var D = +sr.dataset.del, tom2 = sr.dataset.tom2 === '1', ss = tom2 ? P : v.s, okS = stegGiltigt(ss, P), Rr = +sr.dataset.rest;
+    var visS = { d: P / ss, v1: D * ss / P, v2: D * ss / P, f: 100 / ss };
+    if(visS[r] !== undefined){
+      if(inp.dataset.visa0 === undefined) inp.dataset.visa0 = inp.dataset.visa;
+      inp.dataset.visa = okS ? stegVisa(visS[r]) : inp.dataset.visa0;
+    }
+    if(r === 'p') return stegNara(v.p, P);
+    if(r === 'del' || r === 'h2') return stegNara(v[r], D);
+    if(r === 's') return okS;
+    if(r === 'd') return okS && stegNara(v.d * ss, P);
+    if(r === 'v1' || r === 'v2') return okS && stegNara(v[r], D * ss / P);
+    if(r === 'f') return okS && stegNara(v.f * ss, 100);
+    // ▢ − ▢ på värde; står bara den ena ifylld prövas den mot det hela (ra) eller delen (rb).
+    if(r === 'ra' || r === 'rb') return isNaN(v.ra) || isNaN(v.rb) ? stegNara(v[r], r === 'ra' ? A : D) : stegNara(v.ra - v.rb, Rr);
+    if(r === 'rc') return stegNara(v.rc, Rr);
     return stegNara(v.svar, A);
   }
   var s = v.s, sOk = stegGiltigt(s, P);
@@ -447,6 +491,8 @@ function stegOk(inp){
 function stegLoggar(inp){
   var sr = inp.closest('.ovn-stegrad');
   if(!sr) return true;
+  if(sr.dataset.rest) return inp.dataset.steg === 'rc';      // det hela med rest: resten är svaret
+  if(sr.dataset.spegel) return inp.dataset.steg === 'svar';
   return inp.dataset.steg === 'svar' || (inp.dataset.steg === 'v1' && sr.dataset.tom3 === '1');
 }
 
@@ -918,6 +964,10 @@ function bladHTML(blad){
     /* RUBRIKEN får bråkregeln men INTE minusregeln: rubriker är fri text, och ett tankstreck
        som skiljer två satser ("Förenkla uttrycket – visa mellanled") ska inte bli ett minustecken. */
     html += '<div class="ovn-grupp-rubrik">' + (gi+1) + '. ' + brakUt(grupp.rubrik) + '</div>';
+    /* MENINGAR UNDER RUBRIKEN (TILLÄGG 2026-11-27, procent moment 4 Blad 6 nr 2 och 5): uppgiftens rader som står
+       under rubriken i klartexten ("Pella: …", "Jacka A: …"), en per rad, som matematik (bråken staplade) — samma
+       utseende som para ihops meningar. Utan grupp.meningar som förut. */
+    if(grupp.meningar) html += '<div class="ovn-text ovn-meningar" style="line-height:1.8;margin:2px 0 8px;">' + grupp.meningar.map(matteUt).join('<br>') + '</div>';
     // EN DELUPPGIFT = INGEN BOKSTAV. "a)" finns för att man ska kunna säga "tal 4 b"; har gruppen
     // bara en uppgift finns inget att skilja, och bokstaven blir en etikett utan funktion
     // (Joachims granskning 2026-10-04). Figurrader bär inget svar och räknas inte med.
@@ -2290,7 +2340,10 @@ function bygg_blad(rotEl, blad){
        nollställs per Kontrollera-tryck, eftersom den bor i passet. */
     var _forlFelRad = [];
     // STEGRADEN: tredje raden som bara upprepar talet och står tom rättas inte (stegTredjeTom).
-    rotEl.querySelectorAll('.ovn-stegrad').forEach(function(sr){ if(stegTredjeTom(sr)) sr.dataset.tom3 = '1'; else delete sr.dataset.tom3; });
+    rotEl.querySelectorAll('.ovn-stegrad').forEach(function(sr){
+      if(stegTredjeTom(sr)) sr.dataset.tom3 = '1'; else delete sr.dataset.tom3;
+      if(stegMittTom(sr)) sr.dataset.tom2 = '1'; else delete sr.dataset.tom2;
+    });
     aktivaInputs.forEach(function(inp){
       var rad = inp.parentElement;
       // Ta bort rutans EGNA tidigare fasit + markering (inte grannarnas — se egnaMarken)
@@ -2307,6 +2360,7 @@ function bygg_blad(rotEl, blad){
       if(inp.hidden || inp.closest('[hidden]')) return;
       if(inp.dataset.krav === 'frivilligt' && String(inp.value).trim() === '') return;
       if(STEG_TREDJE[inp.dataset.steg] && inp.closest('.ovn-stegrad').dataset.tom3 === '1') return;
+      if(STEG_MITT[inp.dataset.steg] && inp.closest('.ovn-stegrad').dataset.tom2 === '1') return;
       if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok, _besked = null;
       if(inp.dataset.steg !== undefined){

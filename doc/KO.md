@@ -13,6 +13,15 @@ Varje punkt säger vad som brister, var det mättes och när.
 - [ ] **Figurgrindens KONTRAST mäter inte tallinjens radnamn.** Benet mäter bara text inuti en ritad yta; radnamnen i
   tallinjen med tre rader (`SvgTallinje.linje` med `rader`, procent Blad 1 nr 3) står på sidans bakgrund, och
   `--sabba kontrast` blir grön där. 2026-11-26 (`verktyg/figur-grind.js`).
+- [ ] **Figurgrindens etikettben når inte staplarna och sträckan i Det hela.** `--sabba etikett` flyttar en text till en
+  polygons hörn, och staplarna (`delStrip`) och sträckan (`strackfigur`) har inga polygoner — sabotaget gör ingenting på
+  procent Det hela Blad 5A och 6A och grinden blir grön. ETIKETT MOT LINJE mäter bara texter med `af-matt`, så
+  stapelns texter ("24 cm", "0 %", "100 %") prövas inte mot stapelns kanter. ETIKETT MOT ETIKETT fäller där (den fällde
+  sträckans "40 %" mot "28 mm" innan radavståndet blev 24). Prövat 2026-11-27 (`verktyg/figur-grind.js`).
+- [ ] **Elevtext-låset ser inte frågorna i Delen.** `js/motor/blad/blad-k4-d1-delen.js` skriver frågorna och rubrikerna
+  genom hjälpfunktionerna `f('…')` (39) och `q('…')` (40); låset ser då bara en variabel. Registret har 10 poster för
+  filen, bara titlar och gruppnamn. Texten på sidan är Joachims ordagrant; det är bevakningen som saknas. Det hela skriver
+  samma text i `{ fraga: '…' }` och `{ rubrik: '…' }` och har 93 godkända poster. Mätt 2026-11-27 (`verktyg/elevtext-grind.js`).
 
 ## Metodträningen
 

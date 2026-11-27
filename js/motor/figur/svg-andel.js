@@ -36,7 +36,33 @@
   function delHexagon(fyllda){ var cx=60,cy=60,r=56,pts=[],s=''; for(var k=0;k<6;k++){var a=-Math.PI/2+k*Math.PI/3;pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);} for(var i=0;i<6;i++){var p=pts[i],q=pts[(i+1)%6];s+='<polygon points="'+cx+','+cy+' '+p[0].toFixed(1)+','+p[1].toFixed(1)+' '+q[0].toFixed(1)+','+q[1].toFixed(1)+'" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,120,120); }
   /* SMALARE DELAR (Joachim 2026-11-26, procent metodträning B7): opt.bredd ger delarnas bredd (20 delar à 23 px = 460 px).
      Utan opt som förut (46 px). */
-  function delStrip(n, fyllda, opt){ var b=(opt&&opt.bredd)||46,W=b*n,s=''; for(var i=0;i<n;i++){s+='<rect x="'+(i*b)+'" y="0" width="'+b+'" height="46" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,W,46); }
+  /* STAPEL MED TEXT (Joachim 2026-11-27, procent moment 4 Blad 5 och 6). Tre val; utan dem ritas stapeln som förut.
+     opt.hel = procenttalet: en odelad stapel (n · bredd lång) där den färgade delen är procenttalets bredd.
+     opt.text: texten ovanför den färgade delen ("24 cm"). opt.skala: "0 %" och "100 %" under ändarna och procenttalet
+     under den färgade delens slut. Färgerna och textstilen är modulens egna (ingen ny färg). */
+  function delStrip(n, fyllda, opt){ var b=(opt&&opt.bredd)||46,W=b*n,s='';
+    if(opt && (opt.hel != null || opt.text || opt.skala)) return stapelMedText(n, fyllda, opt, b, W);
+    for(var i=0;i<n;i++){s+='<rect x="'+(i*b)+'" y="0" width="'+b+'" height="46" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';} return svg(s,W,46); }
+  function stapelMedText(n, fyllda, opt, b, W){
+    var y = opt.text ? 26 : 0, H = 46, s = '', slut, pr, i;
+    function txt(x, ty, t, ank){ return '<text x="'+x.toFixed(1)+'" y="'+ty+'" text-anchor="'+ank+'" font-size="15" fill="'+C_LINE+'">'+t+'</text>'; }
+    if(opt.hel != null){
+      pr = opt.hel; slut = W * pr / 100;
+      s += '<rect x="0" y="'+y+'" width="'+W+'" height="'+H+'" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/>'
+        +  '<rect x="0" y="'+y+'" width="'+slut.toFixed(1)+'" height="'+H+'" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="2"/>';
+    } else {
+      for(i=0;i<n;i++){s+='<rect x="'+(i*b)+'" y="'+y+'" width="'+b+'" height="'+H+'" fill="'+(fyllOk(fyllda,i)?C_FILL:C_PAPER)+'" stroke="'+C_LINE+'" stroke-width="2"/>';}
+      slut = b * (Math.max.apply(null, fyllda.concat([-1])) + 1); pr = Math.round(100 * slut / W);
+    }
+    // Texten står mitt över den färgade delen; är den bredare än delen (uppskattat 7,5 px per tecken) börjar den vid 0.
+    if(opt.text) s += opt.text.length * 7.5 / 2 > slut / 2 ? txt(0, y - 8, opt.text, 'start') : txt(slut / 2, y - 8, opt.text, 'middle');
+    if(opt.skala){
+      var yt = y + H + 20;
+      [0, slut, W].forEach(function(x){ s += '<line x1="'+x.toFixed(1)+'" y1="'+(y+H)+'" x2="'+x.toFixed(1)+'" y2="'+(y+H+6)+'" stroke="'+C_LINE+'" stroke-width="2"/>'; });
+      s += txt(0, yt, '0 %', 'start') + txt(slut, yt, pr + ' %', 'middle') + txt(W, yt, '100 %', 'end');
+    }
+    return svg(s, W, y + H + (opt.skala ? 26 : 0));
+  }
   // Delad figur med OLIKA STORA delar
   function hackKvadrat(){ return svg('<rect x="0" y="0" width="120" height="120" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="2"/><polygon points="0,0 0,120 60,60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/>',120,120); }
   function olikStrip(){ return svg('<rect x="0" y="0" width="60" height="60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><rect x="60" y="0" width="60" height="60" fill="'+C_PAPER+'" stroke="'+C_LINE+'" stroke-width="2"/><rect x="120" y="0" width="120" height="60" fill="'+C_FILL+'" stroke="'+C_LINE+'" stroke-width="2"/>',240,60); }
