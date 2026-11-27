@@ -356,6 +356,99 @@ function brakVardeOk(inp){
   return Math.abs(k - Math.round(k)) < 1e-9 && Math.round(k) > 0;
 }
 
+/* STEGRADEN (TILLÄGG, Joachim 2026-11-27, procent åk7 moment 3 Delen — en utökning av flerled, beslut 2026-11-26).
+   Tre rader under varandra; eleven väljer steget själv:
+       100 % = ▢ kr
+       ▢ % = ▢/▢ = ▢ kr        (det hela delat med delningstalet, staplat)
+       ▢ % = ▢ · ▢ = ▢ kr
+   Rättningen gäller värdet och att leden hänger ihop: steget är 1, 5, 10, 20, 25 eller 50 % och går jämnt upp i det
+   sökta procenttalet, steget · delningstalet = 100, faktorn · steget = det sökta procenttalet, och varje led har rätt
+   värde. En ruta som beror på steget rättas mot elevens eget steg, och facit visar då den vägen.
+   ETT LED SOM BARA UPPREPAR TALET FÅR LÄMNAS TOMT (Joachim 2026-11-27): är steget redan det sökta procenttalet
+   (25 % = 400/4 = 100) får tredje raden stå tom; raden rättas då utan den, som formkedjans valfria led, och svaret i
+   andra raden bär evidensen. Ifylld rättas tredje raden som vanligt.
+   BRÅKRADEN (rad.typ 'brakrad'): "25 % = ▢ , (▢ · 800)/▢ = ▢ · ▢ = ▢ kr" — bråket i enklaste form (formrutan
+   'enklaste'), övriga led på värde. Data: { typ, fraga?, hela, procent, steg (facitvägen) | brak, enhet, enhetSvar? }. */
+var STEG_TILLATNA = [1, 5, 10, 20, 25, 50];
+function stegRund(v){ return Math.round(v * 1e6) / 1e6; }
+function stegVisa(v){ return String(stegRund(v)).replace('.', ','); }
+function stegTal(x){
+  var s = String(x == null ? '' : x).replace(/(\d)\s+(?=\d)/g, '$1').replace(/[−–]/g, '-').trim().replace(/\s*%$/, '');
+  return /^-?\d+(?:[.,]\d+)?$/.test(s) ? parseFloat(s.replace(',', '.')) : NaN;
+}
+function stegNara(a, b){ return !isNaN(a) && Math.abs(a - b) < 1e-9; }
+function stegRuta(roll, visa, klass){
+  return '<input class="ovn-in' + (klass ? ' ' + klass : '') + '" data-steg="' + roll + '" data-visa="' + stegVisa(visa)
+    + '" inputmode="decimal" autocomplete="off">';
+}
+function stegradHtml(rad){
+  var H = rad.hela, P = rad.procent, lik = '<span class="ovn-text" style="margin:0 3px;">=</span>';
+  function txt(t){ return '<span class="ovn-text ovn-num">' + t + '</span>'; }
+  function enh(ruta, e){ return e ? '<span class="ovn-enhetsruta">' + ruta + '<span class="ovn-text"> ' + e + '</span></span>' : ruta; }
+  function pro(ruta){ return '<span class="ovn-procentruta">' + ruta + '<span class="ovn-text"> %</span></span>'; }
+  function brak(t, n){ return '<span class="ovn-brak brak-svar-frak"><span class="ovn-brak-taljare" style="display:inline-flex;align-items:center;gap:4px;padding:0 4px 3px;">'
+    + t + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare" style="padding:3px 4px 0;">' + n + '</span></span>'; }
+  function led(c){ return '<div class="ovn-stegled" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;">' + c + '</div>'; }
+  var A = stegRund(H * P / 100), e1 = rad.enhet || '', e2 = rad.enhetSvar || e1, ut;
+  if(rad.typ === 'brakrad'){
+    var p = String(rad.brak).split('/'), t = +p[0], n = +p[1];
+    ut = '<div class="ovn-stegrad" data-stegtyp="brak" data-hela="' + H + '" data-procent="' + P + '" data-svar="' + A + '"'
+      + ' style="flex-basis:100%;display:flex;flex-direction:column;gap:10px;">'
+      + led(txt(P + ' %') + lik + formRuta({ form: 'enklaste', svar: rad.brak }) + txt(',')
+        + brak(stegRuta('ba', t) + txt('· ' + H), stegRuta('bb', n)) + lik
+        + stegRuta('bc', t) + txt('·') + stegRuta('be', H / n) + lik + enh(stegRuta('svar', A), e2))
+      + '</div>';
+    return ut;
+  }
+  var s = rad.steg, v = H * s / 100;
+  return '<div class="ovn-stegrad" data-hela="' + H + '" data-procent="' + P + '" data-svar="' + A + '"'
+    + ' style="flex-basis:100%;display:flex;flex-direction:column;gap:10px;">'
+    + led(txt('100 %') + lik + enh(stegRuta('hel', H), e1))
+    + led(pro(stegRuta('s', s)) + lik + brak(stegRuta('h2', H), stegRuta('d', 100 / s)) + lik + enh(stegRuta('v1', v), e1))
+    + led(pro(stegRuta('p', P)) + lik + stegRuta('f', P / s) + txt('·') + stegRuta('v2', v) + lik + enh(stegRuta('svar', A), e2))
+    + '</div>';
+}
+function stegLas(sr){ var o = {}; sr.querySelectorAll('[data-steg]').forEach(function(i){ o[i.dataset.steg] = stegTal(i.value); }); return o; }
+function stegGiltigt(s, P){ return STEG_TILLATNA.indexOf(s) >= 0 && stegNara(P / s, Math.round(P / s)); }
+// Tredje raden får stå tom när steget (giltigt) redan är det sökta procenttalet. Sätts på raden före rättningen.
+function stegTredjeTom(sr){
+  if(sr.dataset.stegtyp === 'brak') return false;
+  var P = +sr.dataset.procent, s = stegTal((sr.querySelector('[data-steg="s"]') || {}).value);
+  if(!stegGiltigt(s, P) || !stegNara(s, P)) return false;
+  return [].every.call(sr.querySelectorAll('[data-steg="p"],[data-steg="f"],[data-steg="v2"],[data-steg="svar"]'),
+    function(i){ return String(i.value).trim() === ''; });
+}
+var STEG_TREDJE = { p: 1, f: 1, v2: 1, svar: 1 };
+function stegOk(inp){
+  var sr = inp.closest('.ovn-stegrad'), H = +sr.dataset.hela, P = +sr.dataset.procent, A = +sr.dataset.svar;
+  var v = stegLas(sr), r = inp.dataset.steg;
+  if(sr.dataset.stegtyp === 'brak'){
+    if(r === 'ba' || r === 'bb') return v.bb !== 0 && stegNara(v.ba * H / v.bb, A);
+    if(r === 'bc' || r === 'be') return stegNara(v.bc * v.be, A);
+    return stegNara(v.svar, A);
+  }
+  var s = v.s, sOk = stegGiltigt(s, P);
+  // Facit följer elevens eget steg när det är giltigt; annars facitvägen (data-visa0 bevarar den).
+  var vis = { d: 100 / s, v1: H * s / 100, v2: H * s / 100, f: P / s };
+  if(vis[r] !== undefined){
+    if(inp.dataset.visa0 === undefined) inp.dataset.visa0 = inp.dataset.visa;
+    inp.dataset.visa = sOk ? stegVisa(vis[r]) : inp.dataset.visa0;
+  }
+  if(r === 'hel' || r === 'h2') return stegNara(v[r], H);
+  if(r === 's') return sOk;
+  if(r === 'd') return sOk && stegNara(v.d * s, 100);
+  if(r === 'v1' || r === 'v2') return sOk && stegNara(v[r], H * s / 100);
+  if(r === 'p') return stegNara(v.p, P);
+  if(r === 'f') return sOk && stegNara(v.f * s, P);
+  return stegNara(v.svar, A);
+}
+// En evidens per rad: svarsrutan — eller andra radens svar när tredje raden står tom. Bråkradens bråk loggar inte.
+function stegLoggar(inp){
+  var sr = inp.closest('.ovn-stegrad');
+  if(!sr) return true;
+  return inp.dataset.steg === 'svar' || (inp.dataset.steg === 'v1' && sr.dataset.tom3 === '1');
+}
+
 // GENVÄGEN I SKRIVA-RUTAN. Ska ett redan förenklat uttryck godtas där uppställningen var uppgiften?
 // 'godtas' = dagens läge, varje uttryck med rätt värde godkänns. 'underkanns' = ett uttryck med
 // lika få termer som facitet är slutsvaret, inte uppställningen, och faller.
@@ -1734,6 +1827,10 @@ function bladHTML(blad){
           html += '</div></div>';
         });
         html += '</div>';
+      } else if(rad.typ === 'stegrad' || rad.typ === 'brakrad'){
+        // STEGRADEN och BRÅKRADEN (2026-11-27, procent moment 3): frågan på bokstavens rad, sedan raderna (stegradHtml).
+        if(rad.fraga) html = fragaPaRaden(html, bokstav, matteUt(rad.fraga));
+        html += stegradHtml(rad);
       } else if(rad.typ === 'flerled' && (rad.led || []).some(function(l){ return l.form || l.text != null; })){
         /* FORMKEDJAN (TILLÄGG, Joachim 2026-11-26, procent åk7 moment 1): flerled med en FORM PER LED —
            "12/16 = 3/4 = 0,75 = 75 %". Varje led är en formruta (formRuta: bråk, enklaste form, hundradelar,
@@ -2191,6 +2288,8 @@ function bygg_blad(rotEl, blad){
        felande rutan får sitt besked. Listan håller de rader som redan fått sitt fel och
        nollställs per Kontrollera-tryck, eftersom den bor i passet. */
     var _forlFelRad = [];
+    // STEGRADEN: tredje raden som bara upprepar talet och står tom rättas inte (stegTredjeTom).
+    rotEl.querySelectorAll('.ovn-stegrad').forEach(function(sr){ if(stegTredjeTom(sr)) sr.dataset.tom3 = '1'; else delete sr.dataset.tom3; });
     aktivaInputs.forEach(function(inp){
       var rad = inp.parentElement;
       // Ta bort rutans EGNA tidigare fasit + markering (inte grannarnas — se egnaMarken)
@@ -2206,9 +2305,12 @@ function bygg_blad(rotEl, blad){
          63 av 71 i stället för 63 av 63. */
       if(inp.hidden || inp.closest('[hidden]')) return;
       if(inp.dataset.krav === 'frivilligt' && String(inp.value).trim() === '') return;
+      if(STEG_TREDJE[inp.dataset.steg] && inp.closest('.ovn-stegrad').dataset.tom3 === '1') return;
       if(String(inp.value).trim() === ''){ totalt++; return; }
       var ok, _besked = null;
-      if(inp.dataset.parentesmellan !== undefined){
+      if(inp.dataset.steg !== undefined){
+        ok = stegOk(inp);   // STEGRADEN (2026-11-27): värdet och att leden hänger ihop
+      } else if(inp.dataset.parentesmellan !== undefined){
         /* MELLANLEDET: termvis mot uttrycket, aldrig på värde — ett värdeprov hade godkänt
            slutsvaret skrivet här, och då är kravet tomt. Beskedet säger VAD som är fel. */
         var _rm = window.MellanledRattare
@@ -2542,6 +2644,7 @@ function bygg_blad(rotEl, blad){
          && inp.dataset.forlprod === undefined
          && inp.dataset.prioled === undefined            // kedjans led är steg, svarsrutan loggar
          && inp.dataset.brakdel !== 't'                  // staplat svar: EN evidens per bråk (nämnarrutan)
+         && stegLoggar(inp)                              // stegraden: en evidens per rad (svarsrutan)
          && String(inp.value).trim() !== ''
          && window.AK8_UI && AK8_UI.loggaForstaForsoket){
         AK8_UI.loggaForstaForsoket(inp, _store, _loggNod, ok);
@@ -2557,7 +2660,8 @@ function bygg_blad(rotEl, blad){
       } else {
         inp.classList.add('wrong','just-checked');
         var facit;
-        if(inp.dataset.oms !== undefined){ var _vt = rad.querySelector('.ovn-num'); facit = _vt ? skrivOm(_vt.textContent) : inp.dataset.oms.replace('.', ','); }
+        if(inp.dataset.steg !== undefined) facit = inp.dataset.visa;          // stegraden: elevens väg (stegOk)
+        else if(inp.dataset.oms !== undefined){ var _vt = rad.querySelector('.ovn-num'); facit = _vt ? skrivOm(_vt.textContent) : inp.dataset.oms.replace('.', ','); }
         else if(inp.dataset.uttryck !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.form !== undefined) facit = inp.dataset.visa;
         else if(inp.dataset.text !== undefined) facit = inp.dataset.visa;

@@ -74,6 +74,7 @@
 <script src="../../../js/motor/blad/blad-k4-d1-procent.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-test.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-andelen.js"></script>
+<script src="../../../js/motor/blad/blad-k4-d1-delen.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-metod.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/motor/navram/navram.js"></script>
@@ -87,7 +88,7 @@
 var M = window.Momentsida, el = M.el;
 var TAX = (window.K4_TAXONOMI && window.K4_TAXONOMI.noder) || [];
 var ELEVENS_AR = 7;
-var BYTA = window.BLAD_K4_D1_PROCENT, ANDEL = window.BLAD_K4_D1_ANDELEN;
+var BYTA = window.BLAD_K4_D1_PROCENT, ANDEL = window.BLAD_K4_D1_ANDELEN, DELEN = window.BLAD_K4_D1_DELEN;
 /* METODTRÄNING och TEST (KONVENTIONER "Arbetssidan"): sidan lämnar bara datan — trädets löv med bankernas id
    (blad-k4-d1-metod.js) och de författade testen (blad-k4-d1-test.js). Skalet (momentsida.js) bär resten. */
 var METOD = window.BLAD_K4_D1_METOD ? window.BLAD_K4_D1_METOD.trad() : null;
@@ -96,13 +97,14 @@ if(window.Arbetsyta) window.Arbetsyta.retur();
 
 /* ── MOMENTEN (Joachim 2026-11-26): sju moment. 1–4 hör till sjuan (märket 7), 5–7 till åttan (märket F i sjuan).
    Moment 1 har Blad 1–5 (varianterna A och B), Metodträningen (grenen Procent och byta form, B1–B7) och Test 1;
-   moment 2 Andelen har Blad 1–6 (variant A, 2026-11-26); moment 3–7 står som "Kommer senare". Föreläsningar och Dagens träning står som "Kommer senare". ── */
+   moment 2 Andelen har Blad 1–6 (variant A, 2026-11-26), moment 3 Delen Blad 1–6 (variant A, 2026-11-27); moment 4–7 står som "Kommer senare". Föreläsningar och Dagens träning står som "Kommer senare". ── */
 var MOMENT = [
   { titel: 'Procent och byta form', ar: 7, roll: 'karna', id: 'byta', bladen: BYTA ? BYTA.MOMENT.blad : [],
     niva: BYTA ? { prefix: BYTA.MOMENT.nivaPrefix, id: BYTA.MOMENT.nivaId } : null },
   { titel: 'Andelen', ar: 7, roll: 'karna', id: 'andelen', bladen: ANDEL ? ANDEL.MOMENT.blad : [],
     niva: ANDEL ? { prefix: ANDEL.MOMENT.nivaPrefix, id: ANDEL.MOMENT.nivaId } : null },
-  { titel: 'Delen', ar: 7, roll: 'karna', id: 'delen', kommer: true },
+  { titel: 'Delen', ar: 7, roll: 'karna', id: 'delen', bladen: DELEN ? DELEN.MOMENT.blad : [],
+    niva: DELEN ? { prefix: DELEN.MOMENT.nivaPrefix, id: DELEN.MOMENT.nivaId } : null },
   { titel: 'Det hela', ar: 7, roll: 'karna', id: 'hela', kommer: true },
   { titel: 'Andel, del och hela med miniräknare', ar: 7, roll: 'fordjupning', id: 'miniraknare', kommer: true },
   { titel: 'Förändring', ar: 7, roll: 'fordjupning', id: 'forandring', kommer: true },

@@ -7,10 +7,10 @@
         proc-tillprocent:rakna   Från bråk och decimalform till procentform   (moment 1, Blad 1–4)
         proc-franprocent:rakna   Från procentform till bråk och decimalform   (moment 1, Blad 5)
         proc-andelen:rakna       Andelen                                      (moment 2, Blad 1–6)
-        proc-delen:rakna         Delen                                        (moment 3 — inte byggt än)
+        proc-delen:rakna         Delen                                        (moment 3, Blad 1–6)
         proc-hela:rakna          Det hela                                     (moment 4 — inte byggt än)
       Löven utan innehåll än bär visning.kommer (plats utan innehåll — kartan visar dem som "kommer", inte som luckor,
-      och självskattningen visar dem inte). Andelen fick sitt innehåll 2026-11-26 (moment 2).
+      och självskattningen visar dem inte). Andelen fick sitt innehåll 2026-11-26 (moment 2), Delen 2026-11-27 (moment 3).
 
    ── BYTA FORM bor HÄR, inte i k2 (Joachim 2026-11-26): procentformen utökar bråkens byta form (k2 brak-byta), men
       noderna och evidensen hör till kapitel 4. De två byta form-löven bär en delatMed-HÄNVISNING till k2:s brak-byta —
@@ -53,7 +53,7 @@ window.K4_TAXONOMI = {
       "id": "proc-delen:rakna", "namn": "Delen", "parent": "proc", "niva": "lovnod",
       "arskursRelevans": { "ak7": "mal" }, "nivamodell": "nytt", "roll": "karna", "formaga": "RAKNA", "generator": null,
       "begrepp": "Hur stor är delen när andelen och det hela är kända?",
-      "visning": { "kommer": true }
+      "visning": null
     },
     {
       "id": "proc-hela:rakna", "namn": "Det hela", "parent": "proc", "niva": "lovnod",

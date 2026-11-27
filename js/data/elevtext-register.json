@@ -2660,5 +2660,17 @@
   "titel | Jämföra och hitta felet",
   "titel | Lästal",
   "vansterText | Andelen"
+ ],
+ "js/motor/blad/blad-k4-d1-delen.js": [
+  "intro | Hur mycket är …",
+  "rubrik | Blandat",
+  "rubrik | Procent som bråk",
+  "titel | \"p % av x\"",
+  "titel | Delen",
+  "titel | Det som är kvar",
+  "titel | Flera delar ur samma helhet",
+  "titel | Jämföra och sant eller falskt",
+  "titel | Lästal",
+  "titel | Rabatt i kronor, och figur eller sträcka"
  ]
 }
