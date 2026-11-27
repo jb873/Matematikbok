@@ -25,28 +25,28 @@ Notation: bråk skrivs [täljare | nämnare] och visas som ett riktigt bråk med
 
 # Test 1 – Samma variabel
 
-**1.** Skriv summan som ett kortare uttryck.   a) x + x + x + x = ___   b) y + y = ___   c) a + a + a + a + a = ___
+**1.** Skriv summan som ett kortare uttryck.   a) x + x + x + x = ___   b) y + y = ___   c) x + x + x + x + x = ___
 [S1 nr 1]
 
 **2.** Välj det uttryck som betyder samma sak.
 a) 3x:   A. 3 + x   B. x + x + x   C. 3 + 3 + 3
 b) 2y + y:   A. 3y   B. 2y   C. 3 + y
-c) 5a:   A. a + 5   B. 5 + 5 + 5 + 5 + 5   C. a + a + a + a + a
+c) 5x:   A. x + 5   B. 5 + 5 + 5 + 5 + 5   C. x + x + x + x + x
 [S1 nr 2]
 
-**3.** Förenkla.   a) 6x + 2x   b) 9y − 5y   c) 7a − a
+**3.** Förenkla.   a) 6x + 2x   b) 9y − 5y   c) 7x − x
 [S2 blad 1]
 
-**4.** Förenkla.   a) 2x + 4x + x   b) 10y − 3y − 2y   c) 4a − 4a
+**4.** Förenkla.   a) 2x + 4x + x   b) 10y − 3y − 2y   c) 4x − 4x
 [S2 blad 1 nr 3]
 
-**5.** Förenkla.   a) 3 · 4x   b) 6y · 3   c) [15a | 3]
+**5.** Förenkla.   a) 3 · 4x   b) 6y · 3   c) [15x | 3]
 [S2 blad 2]
 
 **6.** Välj det förenklade uttrycket.
 a) 5 · 2x:   A. 7x   B. 52x   C. 10x
 b) [12y | 4]:   A. 3y   B. 8y   C. 3
-c) 2a + 3a:   A. 6a   B. 5a   C. 5 + a
+c) 2x + 3x:   A. 6x   B. 5x   C. 5 + x
 [S2 blad 1–2 nr 4]
 
 **7.** Skriv ett uttryck för omkretsen och förenkla det.
@@ -92,28 +92,28 @@ b) 2 · 4y när y = 3
 
 # Test 3 – Siffertermer och två variabler
 
-**1.** Ringa in alla variabeltermer.   a) 6x + 9 + 2x   b) 4 + 7y − 2   c) 3a + 5 + a + 1
+**1.** Ringa in alla variabeltermer.   a) 6x + 9 + 2x   b) 4 + 7y − 2   c) 3x + 5 + x + 1
 [S4 blad 1 nr 1]
 
-**2.** Förenkla.   a) 4x + 6 + 3x + 2   b) 5a + 7 + a − 10   c) 9 + 2y − 14 + 4y
+**2.** Förenkla.   a) 4x + 6 + 3x + 2   b) 5x + 7 + x − 10   c) 9 + 2y − 14 + 4y
 [S4 blad 1–2]
 
-**3.** Förenkla.   a) 3x + 4y + 2x + y   b) 7a − 2b + a − 3b   c) y + 6x + 4y − 2y
+**3.** Förenkla.   a) 3x + 4y + 2x + y   b) 7x − 2y + x − 3y   c) y + 6x + 4y − 2y
 [S5 blad 1–2]
 
-**4.** Förenkla.   a) 2x + 3y + 5 + 4x − y − 8   b) 6 + 5a − 2b − a − 9   c) 8x − 3y − 2 − 5x + y + 7
+**4.** Förenkla.   a) 2x + 3y + 5 + 4x − y − 8   b) 6 + 5x − 2y − x − 9   c) 8x − 3y − 2 − 5x + y + 7
 [S6 blad 2]
 
 **5.** Välj det förenklade uttrycket.
 a) 4x + 2y + 3x + 5y:   A. 14xy   B. 7x + 7y   C. 7x + 3y
-b) 3a + 8 − 2a − 10:   A. a − 2   B. a + 18   C. 5a − 2
+b) 3x + 8 − 2x − 10:   A. x − 2   B. x + 18   C. 5x − 2
 c) 5x − 2y + 1 + x − 4y − 6:   A. 6x + 6y − 5   B. 6x − 2y − 5   C. 6x − 6y − 5
 [S4–S6 nr 4]
 
 **6.** (Figur: en rektangel med sidorna x + 4 cm och y cm.) Skriv ett uttryck för omkretsen och förenkla det: ___
 [S6 blad 1 nr 2]
 
-**7.** (Figur: en likbent triangel med sidorna 2a cm, 2a cm och b + 3 cm.) Skriv ett uttryck för omkretsen och förenkla det: ___
+**7.** (Figur: en likbent triangel med sidorna 2x cm, 2x cm och y + 3 cm.) Skriv ett uttryck för omkretsen och förenkla det: ___
 [S6 blad 1 nr 2]
 
 **8.** Förenkla uttrycket och beräkna sedan värdet när x = 3 och y = 2.
@@ -123,7 +123,7 @@ b) 3x + 7 + 2x − 9
 
 # Test 4 – Negativa termer och tillämpning
 
-**1.** Förenkla.   a) 4x − 9x   b) 2y − 3y − 6y   c) a − 9a + 2a
+**1.** Förenkla.   a) 4x − 9x   b) 2y − 3y − 6y   c) x − 9x + 2x
 [S7 blad 1 nr 1]
 
 **2.** Förenkla.   a) 3 + 2x − 7x   b) 6x − 2 − 8x − 5   c) 4x + 5y − 9x − 2y
@@ -134,7 +134,7 @@ b) 3x + 7 + 2x − 9
 
 **4.** Välj det förenklade uttrycket.
 a) 5x − 8x + 2:   A. 3x + 2   B. −3x + 2   C. −13x + 2
-b) 0,5a + 1,5a − 3:   A. 2a + 3   B. 1,5a − 3   C. 2a − 3
+b) 0,5x + 1,5x − 3:   A. 2x + 3   B. 1,5x − 3   C. 2x − 3
 c) 2y − 7y + 3x:   A. 3x − 5y   B. 3x + 5y   C. 5x − 3y
 [S7 nr 4]
 
@@ -160,24 +160,24 @@ b) 1,5x + 2 − 0,5x
 
 # Test 5 – Hela avsnittet, grund
 
-**1.** Skriv summan som ett kortare uttryck.   a) y + y + y = ___   b) x + x + x + x + x + x = ___   c) b + b = ___
+**1.** Skriv summan som ett kortare uttryck.   a) y + y + y = ___   b) x + x + x + x + x + x = ___   c) x + x = ___
 [S1 nr 1]
 
-**2.** Förenkla.   a) 8x + 3x   b) 12y − 7y   c) 4 · 3a
+**2.** Förenkla.   a) 8x + 3x   b) 12y − 7y   c) 4 · 3x
 [S2]
 
 **3.** Beräkna.   a) 4 − 10   b) −3 + 8   c) −5 − 4
 [S3 blad 1]
 
-**4.** Förenkla.   a) 2x + 5 + 3x + 1   b) 6y + 2 − 2y − 7   c) 4a + 9 − a
+**4.** Förenkla.   a) 2x + 5 + 3x + 1   b) 6y + 2 − 2y − 7   c) 4x + 9 − x
 [S4]
 
-**5.** Förenkla.   a) 2x + 4y + 3x + y   b) 3a + 2b + 4 + a + b + 1   c) 6x + 3y − 2x − y
+**5.** Förenkla.   a) 2x + 4y + 3x + y   b) 3x + 2y + 4 + x + y + 1   c) 6x + 3y − 2x − y
 [S5–S6]
 
 **6.** Välj det förenklade uttrycket.
 a) 3x + 2y + x:   A. 6xy   B. 4x + 2y   C. 3x + 3y
-b) 5 + 2a + 3 + a:   A. 3a + 8   B. 11a   C. 2a + 8
+b) 5 + 2x + 3 + x:   A. 3x + 8   B. 11x   C. 2x + 8
 c) 7y − 9y:   A. 2y   B. −16y   C. −2y
 [S5, S4, S7 nr 4]
 
@@ -193,16 +193,16 @@ b) [12x | 3]
 
 # Test 6 – Hela avsnittet, svår
 
-**1.** Förenkla.   a) [24x | 8]   b) 7y · 6   c) 3a + 4a − 7a
+**1.** Förenkla.   a) [24x | 8]   b) 7y · 6   c) 3x + 4x − 7x
 [S2 blad 1–2]
 
 **2.** Beräkna.   a) 12 − 19 + 4 − 6   b) −8 − (−11)   c) [−36 | −4]
 [S3 blad 2–3]
 
-**3.** Förenkla.   a) 7x − 4 − 2x + 9 − 5   b) 9 + 3y − 14 + y   c) 6a − 3 + 2a − 8 + 1
+**3.** Förenkla.   a) 7x − 4 − 2x + 9 − 5   b) 9 + 3y − 14 + y   c) 6x − 3 + 2x − 8 + 1
 [S4 blad 2]
 
-**4.** Förenkla.   a) 5x − 2y + 7 + 6x − 4y − 9   b) 3a + 6b − 8 − a − 9b + 2   c) 12y − 5x − 2y − 4x
+**4.** Förenkla.   a) 5x − 2y + 7 + 6x − 4y − 9   b) 3x + 6y − 8 − x − 9y + 2   c) 12y − 5x − 2y − 4x
 [S6 blad 2, S7 blad 1 nr 3]
 
 **5.** Förenkla.   a) 0,6x − 1,8x + 2,5   b) 3,5x + 8 − 2x + 0,5 − x   c) 2x − 7y + 3 − 5x + 4y
@@ -210,7 +210,7 @@ b) [12x | 3]
 
 **6.** Välj det förenklade uttrycket.
 a) 4x − y − 9x + 3y:   A. −5x + 2y   B. 5x + 2y   C. −5x − 4y
-b) 0,5a − 2 + 1,5a − 3:   A. 2a − 1   B. 2,5a − 5   C. 2a − 5
+b) 0,5x − 2 + 1,5x − 3:   A. 2x − 1   B. 2,5x − 5   C. 2x − 5
 c) 2y − 4 + 3x − 2y + 1:   A. 3x + 4y − 3   B. 3x − 3   C. 3x − 5
 [S6–S7 nr 4]
 
@@ -219,9 +219,9 @@ a) Skriv ett uttryck för omkretsen och förenkla det: ___
 b) Beräkna omkretsen när x = 2,5 och y = 4.
 [S8 blad 2 nr 1, 5]
 
-**8.** En vuxenbiljett kostar v kr och en barnbiljett b kr. Familjen Ek köper 2 vuxenbiljetter och 4 barnbiljetter. Familjen Lind köper 1 vuxenbiljett och 1 barnbiljett.
+**8.** En vuxenbiljett kostar x kr och en barnbiljett y kr. Familjen Ek köper 2 vuxenbiljetter och 4 barnbiljetter. Familjen Lind köper 1 vuxenbiljett och 1 barnbiljett.
 a) Skriv och förenkla ett uttryck för vad familjerna betalar tillsammans: ___
-b) Beräkna vad de betalar tillsammans när v = 110 och b = 70.
+b) Beräkna vad de betalar tillsammans när x = 110 och y = 70.
 [S8 blad 2B nr 3]
 
 # Facit
@@ -229,11 +229,11 @@ b) Beräkna vad de betalar tillsammans när v = 110 och b = 70.
 Likvärdiga svar godkänns, till exempel x för 1x och −x för −1x. När den första variabeltermen är negativ godkänns också formen som börjar med en positiv term. Vid beräkning visar facit det förenklade uttrycket och sedan insättningen med mellanled.
 
 ## Test 1
-1. a) 4x   b) 2y   c) 5a
+1. a) 4x   b) 2y   c) 5x
 2. a) B   b) A   c) C
-3. a) 8x   b) 4y   c) 6a
+3. a) 8x   b) 4y   c) 6x
 4. a) 7x   b) 5y   c) 0
-5. a) 12x   b) 18y   c) 5a
+5. a) 12x   b) 18y   c) 5x
 6. a) C   b) A   c) B
 7. a) a + a + a = 3a   b) 2x + 2x + 2x + 2x = 8x
 8. a) 7x; 7 · 5 = 35   b) 5y; 5 · 6 = 30
@@ -249,17 +249,17 @@ Likvärdiga svar godkänns, till exempel x för 1x och −x för −1x. När den
 8. a) 3x; 3 · 4 = 12   b) 8y; 8 · 3 = 24
 
 ## Test 3
-1. a) 6x och 2x   b) 7y   c) 3a och a
-2. a) 7x + 8   b) 6a − 3   c) 6y − 5
-3. a) 5x + 5y   b) 8a − 5b   c) 6x + 3y
-4. a) 6x + 2y − 3   b) 4a − 2b − 3   c) 3x − 2y + 5
+1. a) 6x och 2x   b) 7y   c) 3x och x
+2. a) 7x + 8   b) 6x − 3   c) 6y − 5
+3. a) 5x + 5y   b) 8x − 5y   c) 6x + 3y
+4. a) 6x + 2y − 3   b) 4x − 2y − 3   c) 3x − 2y + 5
 5. a) B   b) A   c) C
 6. x + 4 + y + x + 4 + y = 2x + 2y + 8
-7. 2a + 2a + b + 3 = 4a + b + 3
+7. 2x + 2x + y + 3 = 4x + y + 3
 8. a) 6x − y − 4; 6 · 3 − 2 − 4 = 18 − 2 − 4 = 12   b) 5x − 2; 5 · 3 − 2 = 15 − 2 = 13
 
 ## Test 4
-1. a) −5x   b) −7y   c) −6a
+1. a) −5x   b) −7y   c) −6x
 2. a) −5x + 3 eller 3 − 5x   b) −2x − 7   c) −5x + 3y eller 3y − 5x
 3. a) 1,3x   b) y + 3,5   c) −x + 4 eller 4 − x
 4. a) B   b) C   c) A
@@ -269,11 +269,11 @@ Likvärdiga svar godkänns, till exempel x för 1x och −x för −1x. När den
 8. a) −5x + 6 eller 6 − 5x; −5 · 4 + 6 = −20 + 6 = −14   b) x + 2; 4 + 2 = 6
 
 ## Test 5
-1. a) 3y   b) 6x   c) 2b
-2. a) 11x   b) 5y   c) 12a
+1. a) 3y   b) 6x   c) 2x
+2. a) 11x   b) 5y   c) 12x
 3. a) −6   b) 5   c) −9
-4. a) 5x + 6   b) 4y − 5   c) 3a + 9
-5. a) 5x + 5y   b) 4a + 3b + 5   c) 4x + 2y
+4. a) 5x + 6   b) 4y − 5   c) 3x + 9
+5. a) 5x + 5y   b) 4x + 3y + 5   c) 4x + 2y
 6. a) B   b) A   c) C
 7. a) x + 6 + x + 6 = 2x + 12   b) 2 · 4 + 12 = 8 + 12 = 20 cm
 8. a) 4x + 4; 4 · 5 + 4 = 20 + 4 = 24   b) 4x; 4 · 5 = 20
@@ -281,9 +281,9 @@ Likvärdiga svar godkänns, till exempel x för 1x och −x för −1x. När den
 ## Test 6
 1. a) 3x   b) 42y   c) 0
 2. a) 12 − 19 + 4 − 6 = −7 + 4 − 6 = −3 − 6 = −9   b) −8 − (−11) = −8 + 11 = 3   c) 9
-3. a) 5x   b) 4y − 5   c) 8a − 10
-4. a) 11x − 6y − 2   b) 2a − 3b − 6   c) −9x + 10y eller 10y − 9x
+3. a) 5x   b) 4y − 5   c) 8x − 10
+4. a) 11x − 6y − 2   b) 2x − 3y − 6   c) −9x + 10y eller 10y − 9x
 5. a) −1,2x + 2,5 eller 2,5 − 1,2x   b) 0,5x + 8,5   c) −3x − 3y + 3 eller 3 − 3x − 3y
 6. a) A   b) C   c) B
 7. a) 2x + 3 + y + 2 + 2x + 3 + y + 2 = 4x + 2y + 10   b) 4 · 2,5 + 2 · 4 + 10 = 10 + 8 + 10 = 28 cm
-8. a) 2v + 4b + v + b = 5b + 3v   b) 5 · 70 + 3 · 110 = 350 + 330 = 680 kr
+8. a) 2x + 4y + x + y = 5y + 3x   b) 5 · 70 + 3 · 110 = 350 + 330 = 680 kr

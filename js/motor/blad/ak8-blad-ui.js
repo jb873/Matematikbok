@@ -1006,6 +1006,56 @@
     return false;
   }
 
+  /* ── BRÅKKNAPPEN I EN VANLIG RUTA (Joachim 2026-11-27, KONVENTIONER "Divisionsknappen") ──
+     Knappen lägger in en STAPLAD bråkruta (täljare över nämnare) i rutan — inte tecknet "/". Den befintliga
+     staplade bråkrutan återanvänds (fracHTML, uttryckscellen .ak8-expr): rutan blir en uttryckscell med det som
+     stod i rutan, bråket och en ruta efter bråket. Den ursprungliga rutan står kvar, osynlig, och bär uttrycket
+     (bråket skrivet med "/", täljare och nämnare med flera termer inom parentes) — rättningen läser bråket som
+     division, och rutans facit, rättning och mastery är desamma som förut. Rätt och fel visas på cellen.
+     Inte i en ruta som redan är del av ett bråk eller en uttryckscell, en ruta för en siffra (maxlength) eller en
+     ordruta. "Börja om" tar bort cellen (brakRutorBort). */
+  function brakDel(x){ x = String(x).trim(); return /[+\-−–·*\/:\s]/.test(x.replace(/^[−-]\d+(?:[.,]\d+)?$/, '0')) ? '(' + x + ')' : x; }
+  function rutaUttryck(cell){
+    var s = '';
+    Array.prototype.forEach.call(cell.children, function(ch){
+      if(ch.classList.contains('ak8-exprtxt')) s += ch.value;
+      else if(ch.classList.contains('ovn-brak') && ch.querySelector('.ak8-frt')) s += brakDel(ch.querySelector('.ak8-frt').value) + '/' + brakDel(ch.querySelector('.ak8-frn').value);
+      else if(ch.classList.contains('ovn-kbrak') || ch.classList.contains('ak8-pot')){ var t = document.createElement('span'); t.appendChild(ch.cloneNode(true)); s += exprSerialize(t); }
+    });
+    return s;
+  }
+  function brakIRuta(inp){
+    if(!inp || inp.tagName !== 'INPUT' || inp.closest('.ovn-brak, .ak8-expr, .ovn-kbrak') || inp.getAttribute('maxlength')
+       || inp.hasAttribute('data-nokeypad') || inp.__brakCell) return null;
+    var cell = document.createElement('span');
+    cell.className = 'ak8-expr ovn-ruta-uttryck';
+    cell.innerHTML = txtHTML() + fracHTML() + txtHTML();
+    var fore = cell.firstChild; fore.value = inp.value;                  // det som stod i rutan står före bråket
+    inp.parentNode.insertBefore(cell, inp.nextSibling);
+    inp.__stilFore = inp.getAttribute('style') || '';
+    inp.style.cssText += ';position:absolute;opacity:0;width:1px;height:1px;min-width:0;padding:0;border:0;pointer-events:none;';
+    inp.setAttribute('tabindex', '-1');
+    inp.__brakCell = cell; cell.__barare = inp;
+    function synka(){ inp.value = rutaUttryck(cell); inp.dispatchEvent(new Event('input', { bubbles: true })); }
+    // Cellens rutor växer med innehållet (en bredd per tecken, minst två).
+    function vidd(r){ r.style.width = (Math.max(2, String(r.value).length) + 1.2) + 'ch'; }
+    cell.addEventListener('input', function(e){ if(e.target !== inp){ if(e.target.classList.contains('ak8-in')) vidd(e.target); synka(); } });
+    if(window.MutationObserver) new MutationObserver(function(){
+      ['correct', 'wrong'].forEach(function(c){ cell.classList.toggle(c, inp.classList.contains(c)); });
+    }).observe(inp, { attributes: true, attributeFilter: ['class'] });
+    cell.querySelectorAll('.ak8-in').forEach(vidd);
+    synka();
+    return cell.querySelector('.ak8-frt');
+  }
+  // "Börja om": cellerna bort, rutorna tillbaka som de var.
+  function brakRutorBort(rot){
+    (rot || document).querySelectorAll('.ovn-ruta-uttryck').forEach(function(cell){
+      var inp = cell.__barare;
+      if(inp){ inp.setAttribute('style', inp.__stilFore || ''); if(!inp.getAttribute('style')) inp.removeAttribute('style'); inp.removeAttribute('tabindex'); inp.__brakCell = null; }
+      cell.remove();
+    });
+  }
+
   // ── UNIVERSELL KEYPAD-BINDNING ──  för ytor UTAN ak8-widgets (öva-blad, prov, drillar, ovamer).
   // keypadHTML(...) monteras i mount; denna binder EN keypad som följer fokus, döljer sig för
   // ordsvars-rutor (data-nokeypad) och scrollar fram den aktiva rutan så den aldrig hamnar bakom
@@ -1047,6 +1097,8 @@
           var w = insertWidget(active, k);
           if(w){ active = w; w.focus(); var xp = w.closest('.ak8-expr'); if(xp) xp.querySelectorAll('.ak8-in').forEach(grow); return; }
         }
+        // Bråkknappen i en vanlig ruta: ett staplat bråk i rutan (brakIRuta), inte "/".
+        if(k === 'frac'){ var fb = brakIRuta(active); if(fb){ active = fb; fb.focus({ preventScroll: true }); return; } }
         if(k === 'back'){ active.__exp = null; active.value = active.value.slice(0, -1); }
         else if(ml && active.value.length >= ml){ /* rutan är full: inget skrivs, inte heller en exponent */ }
         else if(byggarKnapp(active, k)){ /* omhändertagen: exponent eller / */ }
@@ -1181,6 +1233,7 @@
     gruppAttr: gruppAttr,
     pNum: pNum, pInt: pInt, avTusental: avTusental, evalArith: evalArith, inTal: inTal, bindKeypad: bindKeypad,
     gruppRubrik: gruppRubrik, injLabel: injLabel, injLabelN: injLabelN, renderGrupp: renderGrupp, renderSheet: renderSheet, markeraRutor: markeraRutor,
+    brakIRuta: brakIRuta, brakRutorBort: brakRutorBort,
     grow: grow, EGET_MATT: EGET_MATT, vaxMedGolv: vaxMedGolv, loggaForstaForsoket: loggaForstaForsoket, autoSpace: autoSpace, ansCell: ansCell, potAnsCell: potAnsCell, cellRead: cellRead, exprSerialize: exprSerialize,
     komplexBrakHTML: komplexBrakHTML, komplexBrakCell: komplexBrakCell,
     ledPar: ledPar, smalaRutor: smalaRutor, mattextUt: mattextUt, svarsPlats: svarsPlats,

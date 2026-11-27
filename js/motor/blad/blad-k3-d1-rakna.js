@@ -38,17 +38,17 @@ var R = {
   x4:  { rubrik: 'Beräkna uttryckets värde när x = 4.' }.rubrik,
   x6:  { rubrik: 'Beräkna uttryckets värde när x = 6.' }.rubrik,
   y8:  { rubrik: 'Beräkna uttryckets värde när y = 8.' }.rubrik,
-  a2:  { rubrik: 'Beräkna uttrycket 2a + 7 när' }.rubrik,
+  a2:  { rubrik: 'Beräkna uttrycket 2x + 7 när' }.rubrik,
   x3:  { rubrik: 'Beräkna uttryckets värde när x = 3.' }.rubrik,
   x5:  { rubrik: 'Beräkna uttryckets värde när x = 5.' }.rubrik,
   x7:  { rubrik: 'Beräkna uttryckets värde när x = 7.' }.rubrik,
   y12: { rubrik: 'Beräkna uttryckets värde när y = 12.' }.rubrik,
-  b4:  { rubrik: 'Beräkna uttrycket 4b − 3 när' }.rubrik,
-  ab43:{ rubrik: 'Beräkna uttryckets värde när a = 4 och b = 3.' }.rubrik,
+  b4:  { rubrik: 'Beräkna uttrycket 4x − 3 när' }.rubrik,
+  ab43:{ rubrik: 'Beräkna uttryckets värde när x = 4 och y = 3.' }.rubrik,
   x25: { rubrik: 'Beräkna uttryckets värde när x = 2,5.' }.rubrik,
   x9:  { rubrik: 'Beräkna uttryckets värde när x = 9.' }.rubrik,
   xy52:{ rubrik: 'Beräkna uttryckets värde när x = 5 och y = 2.' }.rubrik,
-  ab64:{ rubrik: 'Beräkna uttryckets värde när a = 6 och b = 4.' }.rubrik,
+  ab64:{ rubrik: 'Beräkna uttryckets värde när x = 6 och y = 4.' }.rubrik,
   x15: { rubrik: 'Beräkna uttryckets värde när x = 1,5.' }.rubrik,
   x8:  { rubrik: 'Beräkna uttryckets värde när x = 8.' }.rubrik,
   xy63:{ rubrik: 'Beräkna uttryckets värde när x = 6 och y = 3.' }.rubrik,
@@ -63,8 +63,8 @@ BLAD['1A'] = function(){ return { titel: TITEL, intro: INTRO_1, dokument: dok('1
             sattIn('25 − 2x', '25 − 2 · 6', ['25 − 12'], 13) ]),
   g(R.y8, [ sattIn('y/2 + 3', '8/2 + 3', ['4 + 3'], 7), sattIn('30 − y/4', '30 − 8/4', ['30 − 2'], 28),
             sattIn('5 · (y − 3)', '5 · (8 − 3)', ['5 · 5'], 25) ]),
-  g(R.a2, [ sattIn('a = 3', '2 · 3 + 7', ['6 + 7'], 13), sattIn('a = 10', '2 · 10 + 7', ['20 + 7'], 27),
-            sattIn('a = 0', '2 · 0 + 7', ['0 + 7'], 7) ]),
+  g(R.a2, [ sattIn('x = 3', '2 · 3 + 7', ['6 + 7'], 13), sattIn('x = 10', '2 · 10 + 7', ['20 + 7'], 27),
+            sattIn('x = 0', '2 · 0 + 7', ['0 + 7'], 7) ]),
   g(R.x3, [ sattIn('6 + (2x + 5)', '6 + (2 · 3 + 5)', ['6 + (6 + 5)', '6 + 11'], 17),
             sattIn('(4x − 2) + 10', '(4 · 3 − 2) + 10', ['(12 − 2) + 10', '10 + 10'], 20),
             sattIn('20 − (x + 4)', '20 − (3 + 4)', ['20 − 7'], 13) ])
@@ -77,8 +77,8 @@ BLAD['1B'] = function(){ return { titel: TITEL, intro: INTRO_1, dokument: dok('1
             sattIn('40 − 4x', '40 − 4 · 7', ['40 − 28'], 12) ]),
   g(R.y12, [ sattIn('y/3 + 6', '12/3 + 6', ['4 + 6'], 10), sattIn('20 − y/4', '20 − 12/4', ['20 − 3'], 17),
              sattIn('2 · (y − 5)', '2 · (12 − 5)', ['2 · 7'], 14) ]),
-  g(R.b4, [ sattIn('b = 2', '4 · 2 − 3', ['8 − 3'], 5), sattIn('b = 5', '4 · 5 − 3', ['20 − 3'], 17),
-            sattIn('b = 10', '4 · 10 − 3', ['40 − 3'], 37) ]),
+  g(R.b4, [ sattIn('x = 2', '4 · 2 − 3', ['8 − 3'], 5), sattIn('x = 5', '4 · 5 − 3', ['20 − 3'], 17),
+            sattIn('x = 10', '4 · 10 − 3', ['40 − 3'], 37) ]),
   g(R.x4, [ sattIn('9 + (3x + 2)', '9 + (3 · 4 + 2)', ['9 + (12 + 2)', '9 + 14'], 23),
             sattIn('(5x − 6) + 8', '(5 · 4 − 6) + 8', ['(20 − 6) + 8', '14 + 8'], 22),
             sattIn('30 − (2x + 1)', '30 − (2 · 4 + 1)', ['30 − (8 + 1)', '30 − 9'], 21) ])
@@ -86,8 +86,8 @@ BLAD['1B'] = function(){ return { titel: TITEL, intro: INTRO_1, dokument: dok('1
 
 /* ── BLAD 2A ── */
 BLAD['2A'] = function(){ return { titel: TITEL, intro: INTRO_2, dokument: dok('2A', 'kärna', 'tak'), grupper: [
-  g(R.ab43, [ enOp('a + b', '4 + 3', 7), sattIn('2a + b', '2 · 4 + 3', ['8 + 3'], 11),
-              sattIn('5a − 2b', '5 · 4 − 2 · 3', ['20 − 6'], 14) ]),
+  g(R.ab43, [ enOp('x + y', '4 + 3', 7), sattIn('2x + y', '2 · 4 + 3', ['8 + 3'], 11),
+              sattIn('5x − 2y', '5 · 4 − 2 · 3', ['20 − 6'], 14) ]),
   g(R.x25, [ enOp('4x', '4 · 2,5', 10), sattIn('2x + 3', '2 · 2,5 + 3', ['5 + 3'], 8),
              sattIn('10 − 2x', '10 − 2 · 2,5', ['10 − 5'], 5) ]),
   g(R.x9, [ sattIn('x/3 + 2x', '9/3 + 2 · 9', ['3 + 18'], 21),
@@ -102,8 +102,8 @@ BLAD['2A'] = function(){ return { titel: TITEL, intro: INTRO_2, dokument: dok('2
 
 /* ── BLAD 2B ── */
 BLAD['2B'] = function(){ return { titel: TITEL, intro: INTRO_2, dokument: dok('2B', 'kärna', 'tak'), grupper: [
-  g(R.ab64, [ enOp('a − b', '6 − 4', 2), sattIn('3a + 2b', '3 · 6 + 2 · 4', ['18 + 8'], 26),
-              sattIn('4a − 3b', '4 · 6 − 3 · 4', ['24 − 12'], 12) ]),
+  g(R.ab64, [ enOp('x − y', '6 − 4', 2), sattIn('3x + 2y', '3 · 6 + 2 · 4', ['18 + 8'], 26),
+              sattIn('4x − 3y', '4 · 6 − 3 · 4', ['24 − 12'], 12) ]),
   g(R.x15, [ enOp('6x', '6 · 1,5', 9), sattIn('4x + 2', '4 · 1,5 + 2', ['6 + 2'], 8),
              sattIn('12 − 3x', '12 − 3 · 1,5', ['12 − 4,5'], 7.5) ]),
   g(R.x8, [ sattIn('x/4 + 3x', '8/4 + 3 · 8', ['2 + 24'], 26),

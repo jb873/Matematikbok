@@ -17,7 +17,7 @@ var BLAD = {};
 /* ═══ STEG 7 → Blad 1 och 2 ═══ */
 BLAD['1A'] = function(){ return { titel: 'Negativa x-termer', grupper: [
   // [kap 3.3 exempel b]
-  g(R.forenkla, [ f('3x − 5x', '-2x'), f('4y − 9y', '-5y', 'y'), f('2a − 9a', '-7a', 'a') ]),
+  g(R.forenkla, [ f('3x − 5x', '-2x'), f('4y − 9y', '-5y', 'y'), f('2x − 9x', '-7x', 'x') ]),
   // [H kap 8]
   g(R.forenkla, [ f('5 + 3x − 8x', '-5x + 5'), f('2x + 7 − 6x − 3', '-4x + 4'), f('9 − x − 4 − 2x', '-3x + 5') ]),
   // [C 79b, H kap 8 exempel 1–2]
@@ -28,7 +28,7 @@ BLAD['1A'] = function(){ return { titel: 'Negativa x-termer', grupper: [
   g(nar('x = 2'), [ fb('3x + 10 - 7x', '-4x + 10', 2, 2), fb('5 - x - 2x', '-3x + 5', 2, -1) ])
 ] }; };
 BLAD['1B'] = function(){ return { titel: 'Negativa x-termer', grupper: [
-  g(R.forenkla, [ f('6x − 10x', '-4x'), f('y − 8y', '-7y', 'y'), f('5a − 5a − 3a', '-3a', 'a') ]),
+  g(R.forenkla, [ f('6x − 10x', '-4x'), f('y − 8y', '-7y', 'y'), f('5x − 5x − 3x', '-3x', 'x') ]),
   g(R.forenkla, [ f('8 + 2x − 9x − 3', '-7x + 5'), f('4x − 6 − 7x + 1', '-3x - 5'), f('10 − 3x + 2 − 3x', '-6x + 12') ]),
   g(R.forenkla, [ f('3x − 4y − 8x + 6y', '-5x + 2y', 'xy'), f('−2x + 7y + x − 9y', '-x - 2y', 'xy'), f('5y + 6 − 3x − 2y − 8', '-3x + 3y - 2', 'xy') ]),
   g(R.valj, [ val('2x − 9x + 4:', ['−7x + 4', '7x + 4', '−11x + 4'], '−7x + 4'), val('y − 5y − 3y:', ['−9y', '−7y', '7y'], '−7y'), val('4x + 2y − 6x − 2y:', ['−2x + 4y', '10x', '−2x'], '−2x') ]),
@@ -36,19 +36,19 @@ BLAD['1B'] = function(){ return { titel: 'Negativa x-termer', grupper: [
 ] }; };
 BLAD['2A'] = function(){ return { titel: 'Decimaltal', grupper: [
   // [E 76b]
-  g(R.forenkla, [ f('0,5x + 0,3x', '0,8x'), f('1,5y + 2y', '3,5y', 'y'), f('2,4a − 0,4a', '2a', 'a') ]),
+  g(R.forenkla, [ f('0,5x + 0,3x', '0,8x'), f('1,5y + 2y', '3,5y', 'y'), f('2,4x − 0,4x', '2x', 'x') ]),
   // [E 76b, D 36d]
-  g(R.forenkla, [ f('0,5x + 0,3x + 5y − y', '0,8x + 4y', 'xy'), f('3,5x + 8 − 2x + 0,5 − x', '0,5x + 8,5'), f('1,2a + 3 + 0,8a − 1,5', '2a + 1,5', 'a') ]),
+  g(R.forenkla, [ f('0,5x + 0,3x + 5y − y', '0,8x + 4y', 'xy'), f('3,5x + 8 − 2x + 0,5 − x', '0,5x + 8,5'), f('1,2x + 3 + 0,8x − 1,5', '2x + 1,5', 'x') ]),
   // [D 36d, A 2113]
   g(R.forenkla, [ f('4,5x − 1,5x + 2', '3x + 2'), f('0,7y + 2,3 + 0,3y − 1,3', 'y + 1', 'y'), f('2,5x + y − 0,5x + 0,5y', '2x + 1,5y', 'xy') ]),
   // [E 76b]
   g(R.valj, [ val('0,6x + 0,4x:', ['x', '0,10x', '10x'], 'x'), val('2,5y − 0,5y + 3:', ['3y + 3', '2y + 3', '5y'], '2y + 3'),
-              val('1,5a + 2 + 0,5a + 1,5:', ['5,5a', '2,5a + 3', '2a + 3,5'], '2a + 3,5') ]),
+              val('1,5x + 2 + 0,5x + 1,5:', ['5,5x', '2,5x + 3', '2x + 3,5'], '2x + 3,5') ]),
   g(nar('x = 10'), [ fb('0,4x + 0,6x + 5', 'x + 5', 10, 15), fb('2,5x - 1,5x + 0,3x', '1,3x', 10, 13) ])
 ] }; };
 BLAD['2B'] = function(){ return { titel: 'Decimaltal och negativa x-termer', grupper: [
-  g(R.forenkla, [ f('0,3x − 0,8x', '-0,5x'), f('1,5y − 2,5y', '-y', 'y'), f('0,2a + 0,9a', '1,1a', 'a') ]),
-  g(R.forenkla, [ f('2,5x + 4 − 3x − 1,5', '-0,5x + 2,5'), f('0,5x + 0,2y − 1,5x + 0,8y', '-x + y', 'xy'), f('3,2 + 1,4a − 0,4a − 1,2', 'a + 2', 'a') ]),
+  g(R.forenkla, [ f('0,3x − 0,8x', '-0,5x'), f('1,5y − 2,5y', '-y', 'y'), f('0,2x + 0,9x', '1,1x', 'x') ]),
+  g(R.forenkla, [ f('2,5x + 4 − 3x − 1,5', '-0,5x + 2,5'), f('0,5x + 0,2y − 1,5x + 0,8y', '-x + y', 'xy'), f('3,2 + 1,4x − 0,4x − 1,2', 'x + 2', 'x') ]),
   g(R.forenkla, [ f('7,5x − 0,2y − 9 + 2,5x + 1,2y + 4', '10x + y - 5', 'xy'), f('0,5x − 2,5x + 3', '-2x + 3'), f('1,8y − 0,8y + 0,5x − x', '-0,5x + y', 'xy') ]),
   g(R.valj, [ val('0,4x − 1,4x:', ['−x', 'x', '−1,8x'], '−x'), val('2,5 + 0,5y − 1,5:', ['1,5y', '0,5y + 1', '0,5y + 4'], '0,5y + 1'),
               val('3x − 3,5x + 2:', ['0,5x + 2', '−6,5x + 2', '−0,5x + 2'], '−0,5x + 2') ]),
@@ -72,8 +72,8 @@ BLAD['3A'] = function(){ return { titel: 'Tillämpning', grupper: [
             skriv('två suddgummin:', 'x + x', '2x'), skriv('ett suddgummi och en penna:', 'x + x + 12', '2x + 12'),
             skriv('tre suddgummin, en penna och en linjal:', 'x + x + x + x + 12 + 27', '4x + 39') ]),
   // [C 80b]
-  g({ rubrik: 'Tre tal följer varandra. Det minsta talet är n.' }.rubrik, [
-    skriv(SUMMA, 'n + n + 1 + n + 2', '3n + 3', 'n'), berakna('Beräkna summan när n = 10.', '3n + 3', 10, 33, 'n') ]),
+  g({ rubrik: 'Tre tal följer varandra. Det minsta talet är x.' }.rubrik, [
+    skriv(SUMMA, 'x + x + 1 + x + 2', '3x + 3', 'x'), berakna('Beräkna summan när x = 10.', '3x + 3', 10, 33, 'x') ]),
   // [E 78a–b]
   g('', [ lador([['Låda', 'x kg'], ['Låda', '3x kg'], ['Låda', '10 kg'], ['Låda', '20 kg']]),
           flera(RINGA_VIKT, ['3x + 30', '4x + 30', '34x', '30 + 4x'], ['4x + 30', '30 + 4x']),
@@ -88,12 +88,12 @@ BLAD['3B'] = function(){ return { titel: 'Tillämpning', grupper: [
               { fraga: 'Skriv ett uttryck för hela sträckans längd och förenkla det:' }.fraga),
           berakna('Beräkna längden när x = 4.', '4x + 5', 4, 21, 'x', 'cm') ]),
   // [E 80]
-  g({ rubrik: 'En bulle kostar b kr och en kaffe kostar (b + 8) kr. Skriv och förenkla ett uttryck för priset för' }.rubrik, [
-    skriv('två bullar och en kaffe:', 'b + b + b + 8', '3b + 8', 'b'), skriv('en bulle och två kaffe:', 'b + b + 8 + b + 8', '3b + 16', 'b'),
-    berakna('Beräkna priset i b) när b = 12.', '3b + 16', 12, 52, 'b', 'kr') ]),
+  g({ rubrik: 'En bulle kostar x kr och en kaffe kostar (x + 8) kr. Skriv och förenkla ett uttryck för priset för' }.rubrik, [
+    skriv('två bullar och en kaffe:', 'x + x + x + 8', '3x + 8', 'x'), skriv('en bulle och två kaffe:', 'x + x + 8 + x + 8', '3x + 16', 'x'),
+    berakna('Beräkna priset i b) när x = 12.', '3x + 16', 12, 52, 'x', 'kr') ]),
   // [C 80b]
-  g({ rubrik: 'Tre jämna tal följer varandra. Det minsta talet är n.' }.rubrik, [
-    skriv(SUMMA, 'n + n + 2 + n + 4', '3n + 6', 'n'), berakna('Beräkna summan när n = 8.', '3n + 6', 8, 30, 'n') ]),
+  g({ rubrik: 'Tre jämna tal följer varandra. Det minsta talet är x.' }.rubrik, [
+    skriv(SUMMA, 'x + x + 2 + x + 4', '3x + 6', 'x'), berakna('Beräkna summan när x = 8.', '3x + 6', 8, 30, 'x') ]),
   // [E 78a, c]
   g('', [ lador([['Låda', '2x kg'], ['Låda', 'x kg'], ['Låda', '3x kg'], ['Låda', '15 kg']]),
           flera(RINGA_VIKT, ['6x + 15', '15 + 6x', '21x', '5x + 15'], ['6x + 15', '15 + 6x']),
@@ -107,11 +107,11 @@ BLAD['4A'] = function(){ return { titel: 'Tillämpning', grupper: [
   g('', [ omk(F().femhorning({ sidor: ['y cm', 'y cm', '2y cm', 'z cm', 'z cm'] }), ['y', 'y', '2y', 'z', 'z'], '4y + 2z', 'yz', OMK),
           berakna('Hur lång är omkretsen när y = 2 och z = 3?', '4y + 2z', { y: 2, z: 3 }, 14, 'yz', 'cm') ]),
   // [E 80]
-  g({ rubrik: 'Ett äpple kostar a kr och en banan kostar b kr.' }.rubrik, [
-    utt('Fyll i vad 3 äpplen och 2 bananer kostar:', '3a + 2b', 'ab'),
+  g({ rubrik: 'Ett äpple kostar x kr och en banan kostar y kr.' }.rubrik, [
+    utt('Fyll i vad 3 äpplen och 2 bananer kostar:', '3x + 2y', 'xy'),
     skriv('Ella köper 2 äpplen och 1 banan. Omar köper 1 äpple och 3 bananer. Skriv och förenkla ett uttryck för vad de betalar tillsammans:',
-          '2a + b + a + 3b', '3a + 4b', 'ab'),
-    berakna('Beräkna vad de betalar tillsammans när a = 5 och b = 4.', '3a + 4b', { a: 5, b: 4 }, 31, 'ab', 'kr') ]),
+          '2x + y + x + 3y', '3x + 4y', 'xy'),
+    berakna('Beräkna vad de betalar tillsammans när x = 5 och y = 4.', '3x + 4y', { x: 5, y: 4 }, 31, 'xy', 'kr') ]),
   // [E 78]
   g('', [ lador([['Blå låda', 'x kg'], ['Blå låda', 'x kg'], ['Röd låda', 'y kg'], ['Röd låda', 'y kg'], ['Röd låda', 'y kg'], ['Låda', '8 kg']]),
           skriv({ fraga: 'Skriv och förenkla ett uttryck för hur mycket lådorna väger tillsammans:' }.fraga, 'x + x + y + y + y + 8', '2x + 3y + 8', 'xy'),
@@ -128,19 +128,19 @@ BLAD['4B'] = function(){ return { titel: 'Tillämpning', grupper: [
   g('', [ omk(F().sidtriangel({ sidor: ['x + y cm', 'x cm', 'y + 5 cm'] }), ['x + y', 'x', 'y + 5'], '2x + 2y + 5', 'xy', OMK),
           berakna('Beräkna omkretsen när x = 6 och y = 4.', '2x + 2y + 5', { x: 6, y: 4 }, 25, 'xy', 'cm') ]),
   // [E 80]
-  g({ rubrik: 'En vuxenbiljett kostar v kr och en barnbiljett b kr.' }.rubrik, [
-    utt('Fyll i vad 2 vuxenbiljetter och 3 barnbiljetter kostar:', '2v + 3b', 'bv'),
+  g({ rubrik: 'En vuxenbiljett kostar x kr och en barnbiljett y kr.' }.rubrik, [
+    utt('Fyll i vad 2 vuxenbiljetter och 3 barnbiljetter kostar:', '2x + 3y', 'xy'),
     skriv('Familjen Ali köper 2 vuxenbiljetter och 3 barnbiljetter. Familjen Berg köper 1 vuxenbiljett och 2 barnbiljetter. Skriv och förenkla ett uttryck för vad familjerna betalar tillsammans:',
-          '2v + 3b + v + 2b', '5b + 3v', 'bv'),
-    berakna('Beräkna vad de betalar tillsammans när v = 120 och b = 80.', '3v + 5b', { v: 120, b: 80 }, 760, 'bv', 'kr') ]),
+          '2x + 3y + x + 2y', '3x + 5y', 'xy'),
+    berakna('Beräkna vad de betalar tillsammans när x = 120 och y = 80.', '3x + 5y', { x: 120, y: 80 }, 760, 'xy', 'kr') ]),
   // [E 78c]
   g('', [ lador([['Blå låda', '3x kg'], ['Blå låda', 'x kg'], ['Röd låda', 'y kg'], ['Röd låda', '2y kg'], ['Låda', '12 kg']]),
           skriv({ fraga: 'Skriv och förenkla ett uttryck för hur mycket lådorna väger tillsammans:' }.fraga, '3x + x + y + 2y + 12', '4x + 3y + 12', 'xy'),
           berakna('Hur mycket väger lådorna när x = 2,5 och y = 4?', '4x + 3y + 12', { x: '2,5', y: 4 }, 34, 'xy', 'kg') ]),
   // [E 80]
-  g({ rubrik: 'En stol kostar s kr. Ett bord kostar (4s + 50) kr.' }.rubrik, [
-    skriv('Skriv och förenkla ett uttryck för priset för ett bord och fyra stolar:', '4s + 50 + s + s + s + s', '8s + 50', 's'),
-    berakna('Beräkna priset när s = 300.', '8s + 50', 300, 2450, 's', 'kr') ])
+  g({ rubrik: 'En stol kostar x kr. Ett bord kostar (4x + 50) kr.' }.rubrik, [
+    skriv('Skriv och förenkla ett uttryck för priset för ett bord och fyra stolar:', '4x + 50 + x + x + x + x', '8x + 50', 'x'),
+    berakna('Beräkna priset när x = 300.', '8x + 50', 300, 2450, 'x', 'kr') ])
 ] }; };
 
 var MOMENT = { titel: 'Negativa termer och tillämpning', varianter: ['A', 'B'],

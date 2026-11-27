@@ -530,6 +530,122 @@ function insattningsFacit(uttryck, varde){
     return k && k !== '1' ? k + ' · ' + v : v;
   }));
 }
+/* INSÄTTNINGEN (Joachim 2026-11-27, KONVENTIONER "Insättning"): första ledet när eleven sätter in ett tal i ett
+   uttryck godkänns om det är VILKET LIKVÄRDIGT UTTRYCK SOM HELST med variabeln ersatt av talet — "2 · 4 + 7" och
+   "4 + 4 + 7" är båda rätt för 2x + 7 med x = 4. Prövningen: inga bokstäver kvar; tal i elevens led som har ett
+   variabelvärde byts tillbaka mot variabeln på alla sätt som går (varje förekomst för sig), och ledet godkänns om
+   något sätt ger ett uttryck likvärdigt med uttrycket (AlgBrak.pointEqual). "8 + 7" och "15" har inget tal att byta
+   tillbaka och underkänns — steget är då överhoppat. Värdena kommer ur raden (rad.x) eller ur facit-avskriften. */
+function insattTokens(s){
+  var ut = [], re = /\(\s*[-−–]\s*\d+(?:[.,]\d+)?\s*\)|\d+(?:[.,]\d+)?/g, m;
+  while((m = re.exec(String(s)))){
+    var v = parseFloat(m[0].replace(/[()\s]/g, '').replace(/[−–]/, '-').replace(',', '.'));
+    ut.push({ i: m.index, j: m.index + m[0].length, v: v });
+  }
+  return ut;
+}
+function insattBokstaver(uttryck){
+  var b = []; String(uttryck).replace(/[a-zåäö]/gi, function(c){ c = c.toLowerCase(); if(b.indexOf(c) < 0) b.push(c); return c; });
+  return b;
+}
+// Alla sätt att byta tokens mot en av sina möjliga bokstäver (eller låta dem stå); fn(sträng) → true avbryter.
+function insattVarianter(s, toks, fn){
+  var n = Math.min(toks.length, 12), val = [];
+  function steg(k){
+    if(k === n){
+      var t = String(s);
+      for(var q = n - 1; q >= 0; q--) if(val[q]) t = t.slice(0, toks[q].i) + val[q] + t.slice(toks[q].j);
+      return fn(t, val.slice(0, n));
+    }
+    var alt = [null].concat(toks[k].opt);
+    for(var a = 0; a < alt.length; a++){ val[k] = alt[a]; if(steg(k + 1)) return true; }
+    return false;
+  }
+  return steg(0);
+}
+function insattLikvardig(kand, mal){
+  var A = window.AlgBrak; if(!A) return false;
+  try { return A.pointEqual(A.parse(kand), mal); } catch(e){ return false; }
+}
+// Värdena ur facit-avskriften: "4 + 4 + 7" mot "x + x + 7" ger { x: 4 }. Null om ingen tilldelning ger uttrycket.
+function insattVardenUrFacit(facit, uttryck){
+  var A = window.AlgBrak, bok = insattBokstaver(uttryck); if(!A || !bok.length) return null;
+  if(A.bokstaver) A.bokstaver(bok);
+  var mal; try { mal = A.parse(uttryck); } catch(e){ return null; }
+  var toks = insattTokens(facit).map(function(t){ return { i: t.i, j: t.j, v: t.v, opt: bok }; }), svar = null;
+  insattVarianter(facit, toks, function(kand, val){
+    var v = {};
+    for(var k = 0; k < val.length; k++){
+      if(!val[k]) continue;
+      if(v[val[k]] !== undefined && Math.abs(v[val[k]] - toks[k].v) > 1e-9) return false;   // samma bokstav, olika tal
+      v[val[k]] = toks[k].v;
+    }
+    if(bok.some(function(b){ return v[b] === undefined; }) || !insattLikvardig(kand, mal)) return false;
+    svar = v; return true;
+  });
+  return svar;
+}
+// Elevens led: inga bokstäver; tal med ett variabelvärde byts tillbaka på alla sätt; likvärdigt med uttrycket?
+function insattGodkand(elev, uttryck, varden){
+  var A = window.AlgBrak; if(!A || !varden) return false;
+  if(/[a-zåäö]/i.test(String(elev))) return false;
+  var bok = Object.keys(varden); if(A.bokstaver) A.bokstaver(bok);
+  var mal; try { mal = A.parse(uttryck); } catch(e){ return false; }
+  var toks = insattTokens(elev).map(function(t){
+    return { i: t.i, j: t.j, v: t.v, opt: bok.filter(function(b){ return Math.abs(varden[b] - t.v) < 1e-9; }) };
+  }).filter(function(t){ return t.opt.length; });
+  if(!toks.length) return false;
+  return insattVarianter(elev, toks, function(kand){ return insattLikvardig(kand, mal); });
+}
+// Attributen på en insättningsruta: uttrycket med variabeln och värdena (JSON). Tomt om något saknas.
+function insattAttr(uttryck, varden){
+  if(!uttryck || !varden) return '';
+  return ' data-insatt-uttr="' + encodeURIComponent(uttryck) + '" data-insatt-x="' + encodeURIComponent(JSON.stringify(varden)) + '"';
+}
+// rad.x är ett tal (en variabel) eller en karta ({ x: 4, y: -2 }).
+function insattTal(t){ return typeof t === 'number' ? t : parseFloat(String(t).replace(/[−–]/, '-').replace(',', '.')); }   // '3,5' → 3.5
+function insattVardenAv(uttryck, x){
+  if(x && typeof x === 'object'){ var o = {}; Object.keys(x).forEach(function(k){ o[k] = insattTal(x[k]); }); return o; }
+  var bok = insattBokstaver(uttryck); if(bok.length !== 1 || x === undefined || x === null) return null;
+  var v = {}; v[bok[0]] = insattTal(x); return v;
+}
+window.BLAD_INSATT = { godkand: insattGodkand, vardenUrFacit: insattVardenUrFacit };   // för prober och fuzz
+
+/* VALRUTORNA (Joachim 2026-11-27, KONVENTIONER "Valrutorna"): alla alternativ står på EN rad. Får de inte plats står
+   de under varandra, ett per rad — aldrig fördelade två och en. Samma mönster som i samhällsboken. Mätt i sidan:
+   raden läggs ut på en rad; bryts den (knapparna på olika höjd) får den klassen valruta-stapel (en kolumn). Mäts om
+   när radens bredd ändras (ResizeObserver: fönstret, ett blad som visas) och när typsnitten har laddats. */
+// Regeln gäller det nya formatet (uppgiftssidorna i arbetsytan och drillarna); de äldre sidorna står kvar (KO.md).
+function valradGaller(el){ return !!(el && el.closest && el.closest('.nf-mount, .fk-d1-blad')); }
+function valradOrdna(rot){
+  ((rot || document).querySelectorAll ? (rot || document).querySelectorAll('.valruta-grid') : []).forEach(function(g){
+    if(!g.offsetParent || !valradGaller(g)) return;
+    var btn = [].filter.call(g.children, function(b){ return b.classList.contains('valruta-btn') && b.offsetParent !== null; });
+    g.classList.remove('valruta-stapel'); g.style.flexDirection = ''; g.style.alignItems = '';
+    if(btn.length < 2) return;
+    var t0 = btn[0].offsetTop;
+    if(btn.some(function(b){ return Math.abs(b.offsetTop - t0) > 2; })){
+      g.classList.add('valruta-stapel'); g.style.flexDirection = 'column'; g.style.alignItems = 'flex-start';   // också utan karna-b-grund.css
+    }
+  });
+}
+function valradKoppla(rotEl){
+  valradOrdna(rotEl);
+  if(rotEl.__valradRO || !window.ResizeObserver) return;
+  var bredd = -1;
+  rotEl.__valradRO = new ResizeObserver(function(){
+    var w = Math.round(rotEl.getBoundingClientRect().width);
+    if(w === bredd) return;          // bara bredden: att ställa raden under varandra ändrar höjden, inte bredden
+    bredd = w;
+    // Uppställningen ändrar höjden på det observerade elementet: den görs i nästa bildruta, utanför observatörens
+    // anrop — annars rapporterar webbläsaren "ResizeObserver loop completed with undelivered notifications".
+    (window.requestAnimationFrame || setTimeout)(function(){ valradOrdna(rotEl); });
+  });
+  rotEl.__valradRO.observe(rotEl);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ valradOrdna(rotEl); });
+}
+window.BLAD_VALRAD = { ordna: valradOrdna, galler: valradGaller };   // grindarna mäter efter samma uppställning som sidan gör
+
 window.BLAD_SKRIV_FORENKLAT = SKRIV_FORENKLAT;   // grindarna läser regeln i stället för att gissa
 
 // "+ led" / "− led", samma knappar i varje kedja.
@@ -1053,8 +1169,10 @@ function bladHTML(blad){
           html = fragaPaRaden(html, bokstav, '<span class="ovn-num">' + matteUt(rad.vansterText) + '</span>');
           html += '<div class="ovn-berakna">';
           var _pkAv = rad.avskrift, _pkacc = (_pkAv.accept || [_pkAv.visa]).join('|');
+          // INSÄTTNING (2026-11-27): har det tryckta uttrycket en bokstav rättas avskriften som en insättning.
+          var _pkIns = /[a-zåäö]/i.test(rad.vansterText || '') ? insattAttr(rad.vansterText, insattVardenUrFacit(_pkAv.visa, rad.vansterText)) : '';
           html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(_pkacc) + '" data-visa="' + _pkAv.visa
-            + '" inputmode="text" autocomplete="off" style="min-width:96px;">';
+            + '"' + _pkIns + ' inputmode="text" autocomplete="off" style="min-width:96px;">';
         } else {
           /* BOKSTAVEN PÅ UTTRYCKETS RAD (K-A, uppgiftssidan; Joachim 2026-11-25): kedjan är full bredd och
              bröts under bokstaven, som blev ensam ovanför uttrycket. Nu står bokstaven först i kedjan. Utan
@@ -1608,8 +1726,9 @@ function bladHTML(blad){
             + '"' + (rad.tillatEtta ? ' data-tillat-etta="1"' : '') + ' inputmode="text" autocomplete="off">';
           html += '<span class="ovn-text">=</span>';
           html += '<input class="ovn-in bred" data-insatt="' + encodeURIComponent(_bins)
-            + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + _bv.svar
-            + '" data-kp="uttryck" data-visa="' + _bins + '" inputmode="text" autocomplete="off">';
+            + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + _bv.svar + '"'
+            + insattAttr(rad.svar, insattVardenAv(rad.svar, _bx))
+            + ' data-kp="uttryck" data-visa="' + _bins + '" inputmode="text" autocomplete="off">';
           html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
           html += '<input class="ovn-in bred ovn-led-extra" data-mellanvarde="' + _bv.svar
             + '" data-kp="uttryck" data-visa="' + _bv.svar + '" inputmode="text" autocomplete="off" hidden>';
@@ -1914,8 +2033,10 @@ function bladHTML(blad){
           if(!rad.fraga && (rad.vansterHtml || rad.vansterText)) html = fragaPaRaden(html, bokstav, '<span class="ovn-num">' + (rad.vansterHtml || matteUt(rad.vansterText)) + '</span>');
           else if(rad.vansterHtml || rad.vansterText) html += '<span class="ovn-text ovn-num" style="flex-basis:100%;">' + (rad.vansterHtml || matteUt(rad.vansterText)) + '</span>';
           var _av = rad.avskrift, _avacc = (_av.accept || [_av.visa]).join('|');
+          // INSÄTTNING (2026-11-27): uttrycket med variabeln (rad.uttryck, annars raden före i gruppen) → rättas som insättning.
+          var _avU = rad.uttryck || rad.insattUttryck, _avIns = _avU ? insattAttr(_avU, insattVardenUrFacit(_av.visa, _avU)) : '';
           html += '<input class="ovn-in bred" data-form="' + encodeURIComponent(_avacc)
-            + '" data-visa="' + _av.visa + '" inputmode="text" autocomplete="off" style="min-width:96px;">';
+            + '" data-visa="' + _av.visa + '"' + _avIns + ' inputmode="text" autocomplete="off" style="min-width:96px;">';
         } else {
           html += '<span class="ovn-text ovn-num">' + (rad.vansterHtml || rad.vansterText) + '</span>';
         }
@@ -1991,8 +2112,9 @@ function bladHTML(blad){
         if(rad.fraga) html = fragaPaRaden(html, bokstav, brakUt(rad.fraga));
         html += '<div class="ovn-berakna">';
         html += '<input class="ovn-in bred" data-insatt="' + encodeURIComponent(_rb)
-          + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + rad.svar
-          + '" data-kp="uttryck" data-visa="' + _rb + '" inputmode="text" autocomplete="off">';
+          + '" data-insatt-vars="' + (rad.vars || 'x') + '" data-insatt-varde="' + rad.svar + '"'
+          + insattAttr(rad.uttryck, insattVardenAv(rad.uttryck, rad.x))
+          + ' data-kp="uttryck" data-visa="' + _rb + '" inputmode="text" autocomplete="off">';
         html += '<span class="ovn-text ovn-led-extra" hidden>=</span>';
         html += '<input class="ovn-in bred ovn-led-extra" data-mellanvarde="' + rad.svar
           + '" data-kp="uttryck" data-visa="' + rad.svar + '" inputmode="text" autocomplete="off" hidden>';
@@ -2148,7 +2270,18 @@ function bygg_blad(rotEl, blad){
     ritaNivaRad(rotEl);
     return;
   }
+  /* INSÄTTNINGEN (2026-11-27): en beräkningsrad med avskrift (flerled) utan eget uttryck får uttrycket med variabeln
+     ur raden före i gruppen ("Fyll i ett uttryck för omkretsen: x + x + 7" → "Beräkna omkretsen när x = 4"). */
+  ((blad && blad.grupper) || []).forEach(function(gr){
+    var forra = null;
+    (gr.rader || []).forEach(function(r){
+      if(!r) return;
+      if(r.typ === 'flerled' && r.avskrift && !r.uttryck && forra) r.insattUttryck = forra;
+      if(typeof r.svar === 'string' && /[a-zåäö]/i.test(r.svar)) forra = r.svar;
+    });
+  });
   rotEl.innerHTML = bladHTML(blad);
+  valradKoppla(rotEl);   // valrutorna: på en rad, eller under varandra (2026-11-27)
 
   // K-A: bort med bokstaven där gruppen bara har EN deluppgift. Mäts i den färdiga sidan, i
   // samma termer som vakten — kärnornas egna räkningar av "deluppgift" går isär.
@@ -2382,7 +2515,12 @@ function bygg_blad(rotEl, blad){
         var _ivars = new RegExp('[' + (inp.dataset.insattVars || 'x') + ']', 'i');
         var _iled = decodeURIComponent(inp.dataset.insatt);
         ok = !_ivars.test(inp.value) && !isNaN(_iv) && Math.abs(_iv - _imal) < 1e-9;
-        if(ok && window.AlgBrak && window.AlgBrak.termAntal){
+        if(inp.dataset.insattUttr !== undefined){
+          /* INSÄTTNINGEN (Joachim 2026-11-27): vilket likvärdigt uttryck som helst med variabeln ersatt av talet
+             ("4 + 4 + 7" och "2 · 4 + 7" för 2x + 7, x = 4) — ersätter regeln om lika många termer. */
+          try { ok = insattGodkand(inp.value, decodeURIComponent(inp.dataset.insattUttr), JSON.parse(decodeURIComponent(inp.dataset.insattX))); }
+          catch(e){ ok = false; }
+        } else if(ok && window.AlgBrak && window.AlgBrak.termAntal){
           try { ok = window.AlgBrak.termAntal(inp.value) === window.AlgBrak.termAntal(_iled); }
           catch(e){ /* otolkbart led: värdet har redan avgjort */ }
         }
@@ -2558,6 +2696,10 @@ function bygg_blad(rotEl, blad){
         // ...och inte heller delvis uträknat: en operation ur ett tecknat taluttryck får inte vara uträknad ("40 + 16").
         if(ok && utraknat(_uv, godk)) ok = false;
       } else if(inp.dataset.form !== undefined){
+        if(inp.dataset.insattUttr !== undefined){   // insättningen (2026-11-27): vilket likvärdigt uttryck som helst
+          try { ok = insattGodkand(inp.value, decodeURIComponent(inp.dataset.insattUttr), JSON.parse(decodeURIComponent(inp.dataset.insattX))); }
+          catch(e){ ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|')); }
+        } else
         ok = jamforForm(inp.value, decodeURIComponent(inp.dataset.form).split('|'));
       } else if(inp.dataset.text !== undefined){
         ok = jamforText(inp.value, decodeURIComponent(inp.dataset.text).split('|'));
@@ -3023,6 +3165,8 @@ function bygg_blad(rotEl, blad){
   });
 
   rotEl.querySelector('[data-action="reset"]').addEventListener('click', function(){
+    // Bråkknappens celler (ak8-blad-ui.js, brakIRuta) bort — rutorna tillbaka som de var (2026-11-27).
+    if(window.AK8_UI && AK8_UI.brakRutorBort) AK8_UI.brakRutorBort(rotEl);
     inputs.forEach(function(inp){
       inp.value = '';
       inp.classList.remove('correct','wrong','just-checked');

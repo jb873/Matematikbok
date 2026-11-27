@@ -30,25 +30,25 @@ Hakparenteser [förlaga] är interna och visas inte för eleven.
 1. Skriv summan som ett kortare uttryck.
 a) x + x + x = ___
 b) y + y + y + y + y = ___
-c) a + a = ___
+c) x + x = ___
 [E s. 138 teori, kap 3.3 teori]
 
 2. Välj det uttryck som betyder samma sak.
 a) 4x:   A. x + 4   B. x + x + x + x   C. 4 + 4 + 4 + 4
 b) 2y:   A. y + y   B. y + 2   C. 2 + 2
-c) 3b:   A. 3 + b   B. b + 3   C. b + b + b
+c) 3x:   A. 3 + x   B. x + 3   C. x + x + x
 [kap 3.3 teori]
 
 3. Förenkla uttrycket.
 a) x + x + 2x
 b) y + 2y
-c) 3a + a
+c) 3x + x
 [A 2092, E exempel]
 
 4. Fyll i ett uttryck för omkretsen och förenkla det.
 a) (Figur: en liksidig triangel där varje sida är a cm.) ___
-b) (Figur: en kvadrat där varje sida är s cm.) ___
-c) (Figur: en rektangel med sidorna b cm och h cm.) ___
+b) (Figur: en kvadrat där varje sida är x cm.) ___
+c) (Figur: en rektangel med sidorna x cm och y cm.) ___
 [kap 3.3 teori, 2.4 teori]
 
 5. a) Beräkna x + x + x när x = 6.
@@ -60,7 +60,7 @@ b) Förenkla först x + x + x och beräkna sedan värdet när x = 6.
 1. Skriv summan som ett kortare uttryck.
 a) z + z + z + z = ___
 b) x + x + x + x + x + x = ___
-c) b + b + b = ___
+c) x + x + x = ___
 [E s. 138 teori, kap 3.3 teori]
 
 2. Välj det uttryck som betyder samma sak.
@@ -71,7 +71,7 @@ c) y + 2y + y:   A. 4y   B. 3y   C. 2y + 2
 
 3. Förenkla uttrycket.
 a) 2x + x + x
-b) a + 3a + 2a
+b) x + 3x + 2x
 c) 4y + y
 [A 2092, E exempel]
 
@@ -92,13 +92,13 @@ Likvärdiga svar godkänns, till exempel 2h + 2b för 2b + 2h.
 Blad 1A
 1. a) 3x   b) 5y   c) 2a
 2. a) B   b) A   c) C
-3. a) 4x   b) 3y   c) 4a
+3. a) 4x   b) 3y   c) 4x
 4. a) a + a + a = 3a   b) s + s + s + s = 4s   c) b + h + b + h = 2b + 2h
 5. a) 6 + 6 + 6 = 18   b) 3x; 3 · 6 = 18
 
 Blad 1B
-1. a) 4z   b) 6x   c) 3b
+1. a) 4z   b) 6x   c) 3x
 2. a) C   b) B   c) A
-3. a) 4x   b) 6a   c) 5y
+3. a) 4x   b) 6x   c) 5y
 4. a) 2x + 2x + 2x = 6x   b) 2a + a + 2a + a = 6a   c) x + y + x + y = 2x + 2y
 5. a) 7 + 7 + 7 + 7 = 28   b) 4y; 4 · 7 = 28   (tillagt 2026-11-24, saknades i klartexten)

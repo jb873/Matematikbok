@@ -75,8 +75,8 @@ TEST.test2 = function(){ return { titel: 'Test 2',
       val('', ['14 · x − 100', '100 − 14 · x', '100 − x'], '100 − 14 · x') ]),
     // [teckna – T 1A nr 7, T 2A nr 4, 6]
     g(R.fyllUtt, TECKNA, [
-      utt('En vecka har 7 dagar. v veckor har', '7 · v', 'v', 'dagar.'),
-      utt('Ett tal är n. Nästa tal är', 'n + 1', 'n', '.'),
+      utt('En vecka har 7 dagar. x veckor har', '7 · x', 'x', 'dagar.'),
+      utt('Ett tal är x. Nästa tal är', 'x + 1', 'x', '.'),
       figur(F().strackfigur({ delar: [{ text: 'x cm' }, { text: '6 cm' }] })),
       utt('Hela sträckan är', 'x + 6', 'x', 'cm.') ]),
     // [tolka – T 2A nr 2]
@@ -118,8 +118,8 @@ TEST.test3 = function(){ return { titel: 'Test 3',
     // [beräkna – P 1B nr 4]
     g(R.rutan, PRIO, [ lucka('__ + 6 · 3 = 25', 7), lucka('3 · __ − 4 = 20', 8), lucka('__ · (4 + 1) = 45', 9) ]),
     // [beräkna – R 1B nr 1–3]
-    g('Beräkna uttryckets värde när a = 8.', BERAKNA, [
-      enOp('a − 3', '8 − 3', 5), sattIn('3a + 4', '3 · 8 + 4', ['24 + 4'], 28), sattIn('2 · (a + 2)', '2 · (8 + 2)', ['2 · 10'], 20) ]),
+    g('Beräkna uttryckets värde när x = 8.', BERAKNA, [
+      enOp('x − 3', '8 − 3', 5), sattIn('3x + 4', '3 · 8 + 4', ['24 + 4'], 28), sattIn('2 · (x + 2)', '2 · (8 + 2)', ['2 · 10'], 20) ]),
     // [teckna – T 2A nr 5]
     g(R.rutorna, TECKNA, [ tallinje(6, 2, 1, [[0, 'x − 2'], [4, 'x + 2'], [6, 'x + 4']]) ])
   ] }; };
@@ -151,13 +151,13 @@ TEST.test4 = function(){ return { titel: 'Test 4',
     // [beräkna – P 2A nr 3]
     g(R.likhet, PRIO, [ tecken('5 ___ 4 ___ 2 = 18', ['·', '−']), tecken('5 ___ 4 ___ 2 = 13', ['+', '·']), utt('3 + 6 · 4 − 2 = 34', '(3 + 6) · 4 − 2') ]),
     // [beräkna – R 2A nr 1, 5]
-    g('Beräkna uttryckets värde när a = 5 och b = 3.', BERAKNA, [
-      sattIn('3a + 2b', '3 · 5 + 2 · 3', ['15 + 6'], 21),
-      sattIn('4a − 3b', '4 · 5 − 3 · 3', ['20 − 9'], 11),
-      sattIn('(2a + 4) − (3b − 1)', '(2 · 5 + 4) − (3 · 3 − 1)', ['(10 + 4) − (9 − 1)', '14 − 8'], 6) ]),
+    g('Beräkna uttryckets värde när x = 5 och y = 3.', BERAKNA, [
+      sattIn('3x + 2y', '3 · 5 + 2 · 3', ['15 + 6'], 21),
+      sattIn('4x − 3y', '4 · 5 − 3 · 3', ['20 − 9'], 11),
+      sattIn('(2x + 4) − (3y − 1)', '(2 · 5 + 4) − (3 · 3 − 1)', ['(10 + 4) − (9 − 1)', '14 − 8'], 6) ]),
     // [teckna och beräkna – T 3B nr 8]
     g('Ett ljus är 24 cm långt. Det brinner ner 3 cm i timmen.', TECKNA, [
-      utt('Fyll i ett uttryck för ljusets längd efter t timmar:', '24 − 3 · t', 't'),
+      utt('Fyll i ett uttryck för ljusets längd efter x timmar:', '24 − 3 · x', 'x'),
       berakna('Hur långt är ljuset efter 5 timmar?', '24 − 3 · 5', ['24 − 15'], 9, 'cm') ])
   ] }; };
 
@@ -170,16 +170,16 @@ TEST.test5 = function(){ return { titel: 'Test 5',
     // [teckna – T 3B nr 6]
     g('Simon köper x mackor och y te och betalar med en 200-lapp. Fyll i ett uttryck för hur mycket han får tillbaka:', TECKNA, [ utt('', '200 − 28 · x − 12 · y', 'xy') ]),
     // [tolka – T 3B nr 3]
-    g('Mormor Inga är m år.', TOLKA, [
+    g('Mormor Inga är x år.', TOLKA, [
       paraIhop('Para ihop varje person med rätt mening. Svara med bokstav.',
                ['A. 4 år äldre än mormor', 'B. en femtedel så gammal som mormor', 'C. 25 år yngre än mormor', 'D. 22 år yngre än mormor'],
-               [['Mamma är (m − 25) år.', 'C'], ['Morfar är (m + 4) år.', 'A'], ['Barnbarnet är (m/5) år.', 'B'], ['Moster är (m − 22) år.', 'D']]),
+               [['Mamma är (x − 25) år.', 'C'], ['Morfar är (x + 4) år.', 'A'], ['Barnbarnet är (x/5) år.', 'B'], ['Moster är (x − 22) år.', 'D']]),
       lucka('__ år', 3, 'Hur mycket äldre är moster än mamma?') ]),
     // [tolka – T 3B nr 4]
     g('', TOLKA, [
-      figur(F().prislappar({ varor: [{ namn: 'Vuxenbiljett', pris: 'v kr' }, { namn: 'Barnbiljett', pris: 'b kr' }] })),
-      val('Vad kan uttrycket 3 · v + 2 · b betyda?', ['biljetter för 3 vuxna och 2 barn', 'biljetter för 2 vuxna och 3 barn', 'biljetter för 5 vuxna'], 'biljetter för 3 vuxna och 2 barn'),
-      val('Vad kan uttrycket 2 · b + v betyda?', ['biljetter för 1 vuxen och 2 barn', 'biljetter för 2 vuxna och 1 barn', 'biljetter för 3 barn'], 'biljetter för 1 vuxen och 2 barn') ]),
+      figur(F().prislappar({ varor: [{ namn: 'Vuxenbiljett', pris: 'x kr' }, { namn: 'Barnbiljett', pris: 'y kr' }] })),
+      val('Vad kan uttrycket 3 · x + 2 · y betyda?', ['biljetter för 3 vuxna och 2 barn', 'biljetter för 2 vuxna och 3 barn', 'biljetter för 5 vuxna'], 'biljetter för 3 vuxna och 2 barn'),
+      val('Vad kan uttrycket 2 · y + x betyda?', ['biljetter för 1 vuxen och 2 barn', 'biljetter för 2 vuxna och 1 barn', 'biljetter för 3 barn'], 'biljetter för 1 vuxen och 2 barn') ]),
     // [beräkna – P 2B nr 1, 2, 4]
     g(R.berakna, PRIO, [
       prio('6 · (5 − 2) + 21/7 − 4', ['6 · 3 + 3 − 4', '18 + 3 − 4'], 17),
@@ -197,7 +197,7 @@ TEST.test5 = function(){ return { titel: 'Test 5',
       figur(F().rektangel({ bredd: 'x + 3 cm', hojd: 'x cm' })),
       flera('Vilka uttryck visar omkretsen? Ringa in alla som stämmer.', ['x + x + 3 + x + x + 3', '4 · x + 6', 'x + x + 3', '2x + 3'],
             ['x + x + 3 + x + x + 3', '4 · x + 6']),
-      berakna('Beräkna omkretsen när x = 5 med uttrycket 4 · x + 6.', '4 · 5 + 6', ['20 + 6'], 26, 'cm') ])
+      berakna('Beräkna omkretsen när x = 5 med uttrycket 4 · x + 6.', '4 · 5 + 6', ['20 + 6'], 26, 'cm', '4 · x + 6') ])
   ] }; };
 
 /* ── TEST 6 ── */
@@ -210,9 +210,9 @@ TEST.test6 = function(){ return { titel: 'Test 6',
       berakna(BETALAR_HAN, '2 · 45 + 3 · 18 + 25', ['90 + 54 + 25'], 169, 'kr') ]),
     // [teckna – T 2B nr 6]
     g({ rubrik: 'Fyll i.' }.rubrik, TECKNA, [
-      talfoljd('Tre jämna tal följer varandra. Det minsta är n.', ['n', null, null], [null, 'n + 2', 'n + 4'], 'n'),
-      utt('u är ett udda tal. Nästa udda tal är', 'u + 2', 'u', '.'),
-      talfoljd('Tre tal följer varandra. Det största är n.', [null, null, 'n'], ['n − 2', 'n − 1', null], 'n') ]),
+      talfoljd('Tre jämna tal följer varandra. Det minsta är x.', ['x', null, null], [null, 'x + 2', 'x + 4'], 'x'),
+      utt('x är ett udda tal. Nästa udda tal är', 'x + 2', 'x', '.'),
+      talfoljd('Tre tal följer varandra. Det största är x.', [null, null, 'x'], ['x − 2', 'x − 1', null], 'x') ]),
     // [tolka – T 2A nr 3]
     g('Vera är x år. Hennes lillasyster Ines är (x − 6) år. Vilka tal kan x vara? Ringa in alla som är möjliga.', TOLKA, [ flerval([3, 5, 8, 14], [8, 14]) ]),
     // [teckna – T 2B nr 7]
@@ -238,7 +238,7 @@ TEST.test6 = function(){ return { titel: 'Test 6',
       sattIn('(x + 8)/3 + 2y', '(4 + 8)/3 + 2 · 1,5', ['12/3 + 3', '4 + 3'], 7) ]),
     // [teckna och beräkna – T 3A nr 8]
     g('Nora har 120 kr. Hon sparar 35 kr i veckan.', TECKNA, [
-      utt('Fyll i ett uttryck för hur mycket hon har efter v veckor:', '120 + 35 · v', 'v'),
+      utt('Fyll i ett uttryck för hur mycket hon har efter x veckor:', '120 + 35 · x', 'x'),
       berakna('Hur mycket har hon efter 8 veckor?', '120 + 35 · 8', ['120 + 280'], 400, 'kr') ])
   ] }; };
 

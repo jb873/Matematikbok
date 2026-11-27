@@ -18,9 +18,13 @@ function val(fraga, alt, ratt){ return { typ: 'valruta', fraga: fraga, alt: alt,
 function flera(fraga, alt, ratt){ return { typ: 'valruta', fraga: fraga, alt: alt, ratt: ratt, flera: true }; }
 function utt(fraga, svar, vars, efter){ var r = { typ: 'uttryck', fraga: fraga, svar: svar }; if(vars) r.vars = vars; if(efter !== undefined) r.efter = efter; return r; }
 // Beräkningen: eleven skriver av uttrycket med talet insatt (avskriftsrutan) och räknar i flera led; varje led på form.
-function berakna(fraga, avskrift, led, svar, enhet){
-  return { typ: 'flerled', logg: BERAKNA, fraga: fraga, avskrift: { visa: avskrift },
+// uttryck (valfritt): uttrycket med variabeln när det bara står i frågan — insättningen rättas mot det (2026-11-27);
+// annars tar kärnan uttrycket ur raden före i gruppen.
+function berakna(fraga, avskrift, led, svar, enhet, uttryck){
+  var r = { typ: 'flerled', logg: BERAKNA, fraga: fraga, avskrift: { visa: avskrift },
            led: led.map(function(l){ return { visa: l }; }).concat([{ svar: svar }]), enhet: enhet };
+  if(uttryck) r.uttryck = uttryck;
+  return r;
 }
 function figur(svg){ return { typ: 'svgfigur', svg: svg }; }
 function streck(n){ var s = []; for(var i = 0; i <= n; i++) s.push({ v: i }); return s; }
@@ -82,13 +86,13 @@ BLAD['1A'] = function(){ return { titel: 'Per styck och per gång', dokument: do
     ]),
     // [teckna – II 25]
     g('En vecka har 7 dagar. Fyll i ett uttryck.', TECKNA, [
-      utt('v veckor har', '7 · v', 'v', 'dagar.'),
-      utt('v veckor och 3 dagar är', '7 · v + 3', 'v', 'dagar.')
+      utt('x veckor har', '7 · x', 'x', 'dagar.'),
+      utt('x veckor och 3 dagar är', '7 · x + 3', 'x', 'dagar.')
     ]),
     // [teckna – HH 623]
     g('En höna har 2 ben och ett får har 4 ben. Fyll i ett uttryck för hur många ben det finns.', TECKNA, [
-      utt('h höns:', '2 · h', 'h'),
-      utt('f får:', '4 · f', 'f')
+      utt('x höns:', '2 · x', 'x'),
+      utt('x får:', '4 · x', 'x')
     ])
   ] }; };
 
@@ -129,8 +133,8 @@ BLAD['1B'] = function(){ return { titel: 'Per styck och per gång', dokument: do
     ]),
     // [teckna och beräkna – HH 607]
     g('Leo har 200 kr. Han sparar 60 kr i månaden.', TECKNA, [
-      utt('Fyll i ett uttryck för hur mycket han har efter m månader:', '200 + 60 · m', 'm'),
-      berakna('Hur mycket har han efter 5 månader? Skriv uttrycket med 5 i stället för m och räkna i flera led.',
+      utt('Fyll i ett uttryck för hur mycket han har efter x månader:', '200 + 60 · x', 'x'),
+      berakna('Hur mycket har han efter 5 månader? Skriv uttrycket med 5 i stället för x och räkna i flera led.',
               '200 + 60 · 5', ['200 + 300'], 500, 'kr')
     ])
   ] }; };
@@ -160,8 +164,8 @@ BLAD['2A'] = function(){ return { titel: 'Mer, mindre och delar', dokument: dok(
       tallinje(8, 3, 1, [[0, 'x − 3'], [5, 'x + 2'], [7, 'x + 4']])
     ]),
     // [teckna – HH 614]
-    g('Tre tal följer varandra. Det minsta talet är n. Fyll i de två andra talen.', TECKNA, [
-      { typ: 'talfoljd', termer: ['n', null, null], facit: [null, 'n + 1', 'n + 2'], uttryckSvar: true, fortsatt: false, vars: 'n' }
+    g('Tre tal följer varandra. Det minsta talet är x. Fyll i de två andra talen.', TECKNA, [
+      { typ: 'talfoljd', termer: ['x', null, null], facit: [null, 'x + 1', 'x + 2'], uttryckSvar: true, fortsatt: false, vars: 'x' }
     ]),
     // [teckna – GG 22, HH 604]
     g('Vera är x år. Fyll i uttrycken.', TECKNA, [
@@ -190,9 +194,9 @@ BLAD['2B'] = function(){ return { titel: 'Mer, mindre och delar', dokument: dok(
       val('', ['Sixten är 30 år.', 'Sixten är 30 år yngre än pappa.', 'Pappa är 30 år yngre än Sixten.'], 'Sixten är 30 år yngre än pappa.')
     ]),
     // [tolka – HH 615, 627]
-    g('Maja är m år och Hugo är h år. Maja är äldst.', TOLKA, [
-      val('Vad betyder m − h?', ['hur mycket äldre Maja är än Hugo', 'hur mycket äldre Hugo är än Maja', 'hur gamla de är tillsammans'], 'hur mycket äldre Maja är än Hugo'),
-      val('Vad betyder m + h?', ['hur mycket äldre Maja är än Hugo', 'hur gamla de är tillsammans', 'Majas ålder om h år'], 'hur gamla de är tillsammans')
+    g('Maja är x år och Hugo är y år. Maja är äldst.', TOLKA, [
+      val('Vad betyder x − y?', ['hur mycket äldre Maja är än Hugo', 'hur mycket äldre Hugo är än Maja', 'hur gamla de är tillsammans'], 'hur mycket äldre Maja är än Hugo'),
+      val('Vad betyder x + y?', ['hur mycket äldre Maja är än Hugo', 'hur gamla de är tillsammans', 'Majas ålder om y år'], 'hur gamla de är tillsammans')
     ]),
     // [teckna – CC 15]
     g('Vilket uttryck visar längden av delen med frågetecknet?', TECKNA, [
@@ -205,9 +209,9 @@ BLAD['2B'] = function(){ return { titel: 'Mer, mindre och delar', dokument: dok(
     ]),
     // [teckna – HH 614]
     g('Fyll i.', TECKNA, [
-      { typ: 'talfoljd', fraga: 'Tre jämna tal följer varandra. Det minsta är n.', termer: ['n', null, null], facit: [null, 'n + 2', 'n + 4'],
-        uttryckSvar: true, fortsatt: false, vars: 'n' },
-      utt('u är ett udda tal. Nästa udda tal är', 'u + 2', 'u', '.')
+      { typ: 'talfoljd', fraga: 'Tre jämna tal följer varandra. Det minsta är x.', termer: ['x', null, null], facit: [null, 'x + 2', 'x + 4'],
+        uttryckSvar: true, fortsatt: false, vars: 'x' },
+      utt('x är ett udda tal. Nästa udda tal är', 'x + 2', 'x', '.')
     ]),
     // [teckna – GG 22, HH 604]
     g('Pappa Erik är y år. Fyll i uttrycken.', TECKNA, [
@@ -222,7 +226,7 @@ BLAD['2B'] = function(){ return { titel: 'Mer, mindre och delar', dokument: dok(
       flera('Vilka uttryck visar rektangelns omkrets? Ringa in alla som stämmer.', ['x + x + 2 + x + x + 2', '4 · x + 4', 'x + x + 2', '2x + 2'],
             ['x + x + 2 + x + x + 2', '4 · x + 4']),
       berakna('Beräkna omkretsen när x = 8 med uttrycket 4 · x + 4. Skriv uttrycket med 8 i stället för x och räkna i flera led.',
-              '4 · 8 + 4', ['32 + 4'], 36, 'cm')
+              '4 · 8 + 4', ['32 + 4'], 36, 'cm', '4 · x + 4')
     ])
   ] }; };
 
@@ -243,13 +247,13 @@ BLAD['3A'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3A
       val('6 mer än y:', ['y − 6', '6 · y', 'y + 6'], 'y + 6')
     ]),
     // [tolka – GG intro, HH 609]
-    g('Farmor Greta är g år. Para ihop varje persons ålder med rätt mening. Svara med bokstav.', TOLKA, [
+    g('Farmor Greta är x år. Para ihop varje persons ålder med rätt mening. Svara med bokstav.', TOLKA, [
       paraIhop('', ['A. 3 år äldre än farmor', 'B. en sjättedel så gammal som farmor', 'C. 2 år yngre än farmor', 'D. 30 år yngre än farmor'],
-               [['Pappa Lars är (g − 30) år.', 'D'], ['Farfar Bo är (g + 3) år.', 'A'], ['Barnbarnet Elsa är (g/6) år.', 'B'], ['Gretas syster Ulla är (g − 2) år.', 'C']])
+               [['Pappa Lars är (x − 30) år.', 'D'], ['Farfar Bo är (x + 3) år.', 'A'], ['Barnbarnet Elsa är (x/6) år.', 'B'], ['Gretas syster Ulla är (x − 2) år.', 'C']])
     ]),
     // [tolka – II 30a]
-    g('Omar betalar (3a + 2b) kr. Vad köper han?', TOLKA, [
-      figur(F().prislappar({ varor: [{ namn: 'Äpple', pris: 'a kr' }, { namn: 'Banan', pris: 'b kr' }] })),
+    g('Omar betalar (3x + 2y) kr. Vad köper han?', TOLKA, [
+      figur(F().prislappar({ varor: [{ namn: 'Äpple', pris: 'x kr' }, { namn: 'Banan', pris: 'y kr' }] })),
       val('', ['3 äpplen och 2 bananer', '2 äpplen och 3 bananer', '5 äpplen'], '3 äpplen och 2 bananer')
     ]),
     // [teckna – CC 15]
@@ -263,15 +267,15 @@ BLAD['3A'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3A
     ]),
     // [teckna och beräkna – II 28]
     g('', TECKNA, [
-      figur(F().rektangel({ bredd: 's cm', hojd: '3 cm' })),
-      flera('Vilka uttryck visar rektangelns omkrets? Ringa in alla som stämmer.', ['s + 3 + s + 3', '2 · s + 6', 's + 3', '3s'], ['s + 3 + s + 3', '2 · s + 6']),
-      berakna('Beräkna omkretsen när s = 7 med uttrycket 2 · s + 6. Skriv uttrycket med 7 i stället för s och räkna i flera led.',
-              '2 · 7 + 6', ['14 + 6'], 20, 'cm')
+      figur(F().rektangel({ bredd: 'x cm', hojd: '3 cm' })),
+      flera('Vilka uttryck visar rektangelns omkrets? Ringa in alla som stämmer.', ['x + 3 + x + 3', '2 · x + 6', 'x + 3', '3x'], ['x + 3 + x + 3', '2 · x + 6']),
+      berakna('Beräkna omkretsen när x = 7 med uttrycket 2 · x + 6. Skriv uttrycket med 7 i stället för x och räkna i flera led.',
+              '2 · 7 + 6', ['14 + 6'], 20, 'cm', '2 · x + 6')
     ]),
     // [teckna och beräkna – HH 607]
     g('Nora har 150 kr. Hon sparar 40 kr i veckan.', TECKNA, [
-      utt('Fyll i ett uttryck för hur mycket hon har efter v veckor:', '150 + 40 · v', 'v'),
-      berakna('Hur mycket har hon efter 6 veckor? Skriv uttrycket med 6 i stället för v och räkna i flera led.',
+      utt('Fyll i ett uttryck för hur mycket hon har efter x veckor:', '150 + 40 · x', 'x'),
+      berakna('Hur mycket har hon efter 6 veckor? Skriv uttrycket med 6 i stället för x och räkna i flera led.',
               '150 + 40 · 6', ['150 + 240'], 390, 'kr')
     ])
   ] }; };
@@ -280,11 +284,11 @@ BLAD['3A'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3A
 BLAD['3B'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3B', 'breddning', 'tak'),
   grupper: [
     // [teckna – GG 14, 18]
-    g('Leo har n fotbollskort. Välj rätt uttryck.', TECKNA, [
-      val('Hans kompis har dubbelt så många som Leo:', ['n + 2', '2 · n', 'n/2'], '2 · n'),
-      val('Leo ger bort 4:', ['4 − n', 'n − 4', 'n + 4'], 'n − 4'),
-      val('Hans syster har 7 färre än Leo:', ['7 − n', 'n + 7', 'n − 7'], 'n − 7'),
-      val('Hans kusin har en fjärdedel så många som Leo:', ['n/4', '4n', 'n − 4'], 'n/4')
+    g('Leo har x fotbollskort. Välj rätt uttryck.', TECKNA, [
+      val('Hans kompis har dubbelt så många som Leo:', ['x + 2', '2 · x', 'x/2'], '2 · x'),
+      val('Leo ger bort 4:', ['4 − x', 'x − 4', 'x + 4'], 'x − 4'),
+      val('Hans syster har 7 färre än Leo:', ['7 − x', 'x + 7', 'x − 7'], 'x − 7'),
+      val('Hans kusin har en fjärdedel så många som Leo:', ['x/4', '4x', 'x − 4'], 'x/4')
     ]),
     // [teckna – HH 617, A2072]
     g('Välj rätt uttryck.', TECKNA, [
@@ -293,17 +297,17 @@ BLAD['3B'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3B
       val('5 mindre än en tredjedel av x:', ['x/3 − 5', '5 − x/3', 'x/5 − 3'], 'x/3 − 5')
     ]),
     // [tolka – GG intro, HH 609]
-    g('Mamma Karin är k år.', TOLKA, [
+    g('Mamma Karin är x år.', TOLKA, [
       paraIhop('Para ihop varje person med rätt mening. Svara med bokstav.',
                ['A. en tredjedel så gammal som mamma', 'B. 29 år yngre än mamma', 'C. 2 år äldre än mamma', 'D. 26 år äldre än mamma'],
-               [['Pappa är (k + 2) år.', 'C'], ['Mormor är (k + 26) år.', 'D'], ['Dottern är (k/3) år.', 'A'], ['Sonen är (k − 29) år.', 'B']]),
+               [['Pappa är (x + 2) år.', 'C'], ['Mormor är (x + 26) år.', 'D'], ['Dottern är (x/3) år.', 'A'], ['Sonen är (x − 29) år.', 'B']]),
       { typ: 'lucka', fraga: 'Hur mycket äldre är mormor än pappa?', text: '__ år', svar: 24 }
     ]),
     // [tolka – II 24, 30a, HH 615]
     g('', TOLKA, [
-      figur(F().prislappar({ varor: [{ namn: 'Vuxenbiljett', pris: 'v kr' }, { namn: 'Barnbiljett', pris: 'b kr' }] })),
-      val('Vad kan uttrycket 2 · v + 3 · b betyda?', ['biljetter för 2 vuxna och 3 barn', 'biljetter för 3 vuxna och 2 barn', 'biljetter för 5 vuxna'], 'biljetter för 2 vuxna och 3 barn'),
-      val('Vad betyder v − b?', ['hur mycket dyrare en vuxenbiljett är än en barnbiljett', 'hur mycket dyrare en barnbiljett är än en vuxenbiljett', 'priset för en vuxen och ett barn'],
+      figur(F().prislappar({ varor: [{ namn: 'Vuxenbiljett', pris: 'x kr' }, { namn: 'Barnbiljett', pris: 'y kr' }] })),
+      val('Vad kan uttrycket 2 · x + 3 · y betyda?', ['biljetter för 2 vuxna och 3 barn', 'biljetter för 3 vuxna och 2 barn', 'biljetter för 5 vuxna'], 'biljetter för 2 vuxna och 3 barn'),
+      val('Vad betyder x − y?', ['hur mycket dyrare en vuxenbiljett är än en barnbiljett', 'hur mycket dyrare en barnbiljett är än en vuxenbiljett', 'priset för en vuxen och ett barn'],
           'hur mycket dyrare en vuxenbiljett är än en barnbiljett')
     ]),
     // [teckna – II 19]
@@ -323,8 +327,8 @@ BLAD['3B'] = function(){ return { titel: 'Blandade uppgifter', dokument: dok('3B
     ]),
     // [teckna och beräkna – HH 607, H kap 5 A22b]
     g('Ett ljus är 30 cm långt. Det brinner ner 2 cm i timmen.', TECKNA, [
-      utt('Fyll i ett uttryck för ljusets längd efter t timmar:', '30 − 2 · t', 't'),
-      berakna('Hur långt är ljuset efter 8 timmar? Skriv uttrycket med 8 i stället för t och räkna i flera led.',
+      utt('Fyll i ett uttryck för ljusets längd efter x timmar:', '30 − 2 · x', 'x'),
+      berakna('Hur långt är ljuset efter 8 timmar? Skriv uttrycket med 8 i stället för x och räkna i flera led.',
               '30 − 2 · 8', ['30 − 16'], 14, 'cm')
     ])
   ] }; };

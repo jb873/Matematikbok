@@ -38,9 +38,13 @@ function paraIhop(fraga, meningar, par){
   return { typ: 'paraihop', fraga: fraga, meningar: meningar, alt: ABCD, par: par.map(function(x){ return { fraga: x[0], ratt: x[1] }; }) };
 }
 // Tolka-bladens beräkning (flerled med avskrift; b-delen loggar till beräkna).
-function berakna(fraga, avskrift, led, svar, enhet){
-  return { typ: 'flerled', logg: BERAKNA, fraga: fraga, avskrift: { visa: avskrift },
+// uttryck (valfritt): uttrycket med variabeln när det bara står i frågan — insättningen rättas mot det (2026-11-27);
+// annars tar kärnan uttrycket ur raden före i gruppen.
+function berakna(fraga, avskrift, led, svar, enhet, uttryck){
+  var r = { typ: 'flerled', logg: BERAKNA, fraga: fraga, avskrift: { visa: avskrift },
            led: led.map(function(l){ return { visa: l }; }).concat([{ svar: svar }]), enhet: enhet };
+  if(uttryck) r.uttryck = uttryck;
+  return r;
 }
 // Prioriteringsregelns beräkning: uttrycket står tryckt, eleven skriver av det och räknar i kedjan.
 function prio(uttryck, led, svar){

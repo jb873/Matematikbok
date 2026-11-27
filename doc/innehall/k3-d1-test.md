@@ -76,9 +76,9 @@ b) Hur mycket betalar han? Skriv av uttrycket och räkna i flera led.
 
 **3.** Fyll i uttrycken.
 
-a) En vecka har 7 dagar. v veckor har ___ dagar.
+a) En vecka har 7 dagar. x veckor har ___ dagar.
 
-b) Ett tal är n. Nästa tal är ___.
+b) Ett tal är x. Nästa tal är ___.
 
 c) (Figur: en sträcka med två delar, x cm och 6 cm.) Hela sträckan är ___ cm.
 
@@ -146,7 +146,7 @@ c) hälften av x:   2x    x − 2    x/2
 
 [beräkna – P 1B nr 4]
 
-**7.** Beräkna uttryckets värde när a = 8.   a) a − 3   b) 3a + 4   c) 2 · (a + 2)
+**7.** Beräkna uttryckets värde när x = 8.   a) x − 3   b) 3x + 4   c) 2 · (x + 2)
 
 [beräkna – R 1B nr 1–3]
 
@@ -201,13 +201,13 @@ a) 5 □ 4 □ 2 = 18   b) 5 □ 4 □ 2 = 13   c) 3 + 6 · 4 − 2 = 34
 
 [beräkna – P 2A nr 3]
 
-**7.** Beräkna uttryckets värde när a = 5 och b = 3.   a) 3a + 2b   b) 4a − 3b   c) (2a + 4) − (3b − 1)
+**7.** Beräkna uttryckets värde när x = 5 och y = 3.   a) 3x + 2y   b) 4x − 3y   c) (2x + 4) − (3y − 1)
 
 [beräkna – R 2A nr 1, 5]
 
 **8.** Ett ljus är 24 cm långt. Det brinner ner 3 cm i timmen.
 
-a) Fyll i ett uttryck för ljusets längd efter t timmar: ___
+a) Fyll i ett uttryck för ljusets längd efter x timmar: ___
 
 b) Hur långt är ljuset efter 5 timmar?
 
@@ -225,12 +225,12 @@ b) Hur långt är ljuset efter 5 timmar?
 
 [teckna – T 3B nr 6]
 
-**3.** Mormor Inga är m år.
+**3.** Mormor Inga är x år.
 
-- Mamma är (m − 25) år.
-- Morfar är (m + 4) år.
-- Barnbarnet är (m/5) år.
-- Moster är (m − 22) år.
+- Mamma är (x − 25) år.
+- Morfar är (x + 4) år.
+- Barnbarnet är (x/5) år.
+- Moster är (x − 22) år.
 
 a) Para ihop varje person med rätt mening. Svara med bokstav.
 
@@ -240,11 +240,11 @@ b) Hur mycket äldre är moster än mamma? ___ år
 
 [tolka – T 3B nr 3]
 
-**4.** (Figur: en vuxenbiljett med prislappen v kr och en barnbiljett med prislappen b kr.)
+**4.** (Figur: en vuxenbiljett med prislappen x kr och en barnbiljett med prislappen y kr.)
 
-a) Vad kan uttrycket 3 · v + 2 · b betyda?   A. biljetter för 3 vuxna och 2 barn   B. biljetter för 2 vuxna och 3 barn   C. biljetter för 5 vuxna
+a) Vad kan uttrycket 3 · x + 2 · y betyda?   A. biljetter för 3 vuxna och 2 barn   B. biljetter för 2 vuxna och 3 barn   C. biljetter för 5 vuxna
 
-b) Vad kan uttrycket 2 · b + v betyda?   A. biljetter för 1 vuxen och 2 barn   B. biljetter för 2 vuxna och 1 barn   C. biljetter för 3 barn
+b) Vad kan uttrycket 2 · y + x betyda?   A. biljetter för 1 vuxen och 2 barn   B. biljetter för 2 vuxna och 1 barn   C. biljetter för 3 barn
 
 [tolka – T 3B nr 4]
 
@@ -284,11 +284,11 @@ b) Hur mycket betalar han? Skriv av uttrycket och räkna i flera led.
 
 **2.** Fyll i.
 
-a) Tre jämna tal följer varandra. Det minsta är n.   n, ___, ___
+a) Tre jämna tal följer varandra. Det minsta är x.   x, ___, ___
 
-b) u är ett udda tal. Nästa udda tal är ___.
+b) x är ett udda tal. Nästa udda tal är ___.
 
-c) Tre tal följer varandra. Det största är n.   ___, ___, n
+c) Tre tal följer varandra. Det största är x.   ___, ___, x
 
 [teckna – T 2B nr 6]
 
@@ -328,7 +328,7 @@ c) [x | 3] + 5 har värdet 9.   x = 4    x = 12    x = 14
 
 **8.** Nora har 120 kr. Hon sparar 35 kr i veckan.
 
-a) Fyll i ett uttryck för hur mycket hon har efter v veckor: ___
+a) Fyll i ett uttryck för hur mycket hon har efter x veckor: ___
 
 b) Hur mycket har hon efter 8 veckor?
 
@@ -351,7 +351,7 @@ Likvärdiga och oförenklade uttryck godkänns. Beräkningar visar avskrift och 
 ## Test 2
 1. a) A   b) 2 · 18 + 10 = 36 + 10 = 46 kr
 2. B
-3. a) 7 · v   b) n + 1   c) x + 6
+3. a) 7 · x   b) x + 1   c) x + 6
 4. B
 5. a) 24 + 6 = 30   b) 25 − 20 = 5   c) 7 · 3 = 21
 6. a) 4 + 6 = 10   b) 9 + 3 = 12   c) [18 | 6] = 3
@@ -376,7 +376,7 @@ Likvärdiga och oförenklade uttryck godkänns. Beräkningar visar avskrift och 
 5. a) 4 · 9 + 4 = 36 + 4 = 40   b) 30 − 2 · 5 + 3 = 30 − 10 + 3 = 23   c) [36 | 6] = 6
 6. a) 5 · 4 − 2 = 18   b) 5 + 4 · 2 = 13   c) (3 + 6) · 4 − 2 = 36 − 2 = 34
 7. a) 3 · 5 + 2 · 3 = 15 + 6 = 21   b) 4 · 5 − 3 · 3 = 20 − 9 = 11   c) (2 · 5 + 4) − (3 · 3 − 1) = (10 + 4) − (9 − 1) = 14 − 8 = 6
-8. a) 24 − 3 · t   b) 24 − 3 · 5 = 24 − 15 = 9 cm
+8. a) 24 − 3 · x   b) 24 − 3 · 5 = 24 − 15 = 9 cm
 
 ## Test 5
 1. A
@@ -390,10 +390,10 @@ Likvärdiga och oförenklade uttryck godkänns. Beräkningar visar avskrift och 
 
 ## Test 6
 1. a) A   b) 2 · 45 + 3 · 18 + 25 = 90 + 54 + 25 = 169 kr
-2. a) n + 2, n + 4   b) u + 2   c) n − 2, n − 1
+2. a) x + 2, x + 4   b) x + 2   c) x − 2, x − 1
 3. 8 och 14
 4. a) y − 4   b) 2 · y   c) y/6   d) y − 4 + 7 eller y + 3
 5. a) 3 · 8 − 4 + 5 = 24 − 4 + 5 = 25   b) [48 | 8] = 6   c) 15 + 15 − 4,5 = 25,5
 6. a) x = 7   b) x = 8   c) x = 12
 7. a) 3 · 4 + 2 · 1,5 = 12 + 3 = 15   b) (5 · 4 − 3) − (2 · 1,5 + 4) = (20 − 3) − (3 + 4) = 17 − 7 = 10   c) [4 + 8 | 3] + 2 · 1,5 = [12 | 3] + 3 = 4 + 3 = 7
-8. a) 120 + 35 · v   b) 120 + 35 · 8 = 120 + 280 = 400 kr
+8. a) 120 + 35 · x   b) 120 + 35 · 8 = 120 + 280 = 400 kr

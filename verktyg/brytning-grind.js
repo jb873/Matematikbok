@@ -33,11 +33,15 @@
           Se matProb nedan för hur varje ben översätts (K-E mäts inte där: rutorna bär inget facit i sidan).
           Sabotagen streck, grupp, bokstavsstil, par och svarsetikett verkar också där.
 
+     K-V  Valrutorna står på EN rad; får de inte plats står de under varandra, ett per rad — aldrig två och en
+          (Joachim 2026-11-27). Mätt i varje vy: knapparna delas i linjer efter sin top; fler än en linje kräver en
+          knapp per linje. --sabba valrad stänger av uppställningen och bryter en valrad två och en.
+
      K-L  Kedjan bryts inte vid Chromebook-bredd (Joachim 2026-10-26): en rad med flera led och
           likhetstecken mellan dem står på EN rad vid 1366 × 768 och 1536 × 864 — svaret hamnar aldrig
           på nästa rad. Mäts bara vid de bredderna, på sidor där telefonvyn hittade kedjor.
 
-   Kör:  node verktyg/brytning-grind.js [--sida d3] [--alla] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar|kedja|luckmening]
+   Kör:  node verktyg/brytning-grind.js [--sida d3] [--alla] [--sabba streck|grupp|bred|par|bokstavsstil|svarsetikett|svarsplats|dubbeletikett|flerradsvar|kedja|luckmening|valrad]
          --sabba återskapar felet regeln finns för → benet MÅSTE fälla. Ett motprov som inte kan
          fälla bevisar ingenting.
 
@@ -729,6 +733,31 @@ const PROBE = `(function(){
       var barn = Array.prototype.filter.call(r.children, synlig).map(function(c){ return c.getBoundingClientRect(); });
       var topp = Math.max.apply(null, barn.map(function(x){ return x.top; })), botten = Math.min.apply(null, barn.map(function(x){ return x.bottom; }));
       if(topp >= botten) b.kl.push('K-L KEDJAN BRYTS: "' + kort(r.textContent).slice(0, 30) + '" ligger på flera rader — ledet och svaret ska stå på en rad');
+    });
+    // ── K-V: valrutorna står på en rad, eller under varandra (Joachim 2026-11-27) ─────────────────────
+    // Alla alternativ i en valruta står på EN rad; får de inte plats står de under varandra, ett per rad — aldrig
+    // fördelade två och en. Mätt så: knapparna delas i linjer efter sin top; finns fler än en linje ska varje linje
+    // ha exakt en knapp. Sidans egen uppställning (BLAD_VALRAD.ordna, ResizeObserver) körs först — grinden mäter
+    // direkt efter ett flikklick, innan sidans observatör hunnit. --sabba valrad: uppställningen under varandra
+    // stängs av och en valrad med minst tre alternativ görs så smal att den bryts två och en.
+    b.valrader = 0;
+    if(window.BLAD_VALRAD) window.BLAD_VALRAD.ordna(sh);
+    if(SABBA === 'valrad' && !ut.__valradSabbad){
+      var vs = document.createElement('style'); vs.textContent = '.valruta-grid{flex-direction:row !important;flex-wrap:wrap !important;}';
+      document.head.appendChild(vs);
+      var vg = Array.prototype.filter.call(sh.querySelectorAll('.valruta-grid'), function(g){ return synlig(g) && window.BLAD_VALRAD && window.BLAD_VALRAD.galler(g) && g.querySelectorAll('.valruta-btn').length >= 3; })[0];
+      if(vg){ var vb = vg.querySelectorAll('.valruta-btn'); vg.style.maxWidth = Math.ceil(vb[0].getBoundingClientRect().width + vb[1].getBoundingClientRect().width + 16) + 'px';
+              ut.__valradSabbad = true; ut.noter.push('SABBA: valraden "' + kort(vg.textContent).slice(0, 30) + '" bryts två och en'); }
+    }
+    Array.prototype.forEach.call(sh.querySelectorAll('.valruta-grid'), function(g){
+      if(!synlig(g) || !(window.BLAD_VALRAD && window.BLAD_VALRAD.galler(g))) return;   // regeln gäller det nya formatet
+      var knappar = Array.prototype.filter.call(g.querySelectorAll('.valruta-btn'), synlig);
+      if(knappar.length < 2) return;
+      b.valrader++;
+      var toppar = knappar.map(function(k){ return k.getBoundingClientRect().top; }).sort(function(x, y){ return x - y; }), antal = [];
+      toppar.forEach(function(t, i){ if(i && t - toppar[i - 1] <= 3) antal[antal.length - 1]++; else antal.push(1); });
+      if(antal.length > 1 && antal.some(function(n){ return n > 1; }))
+        b.brott.push('K-V VALRADEN BRYTS OJÄMNT: "' + kort(g.textContent).slice(0, 40) + '" står som ' + antal.join(' + ') + ' — en rad, eller ett alternativ per rad');
     });
     ut.blad.push(b);
   }

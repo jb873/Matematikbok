@@ -26,13 +26,13 @@ Talregler: En variabel, bara plus. Koefficienter 1–30, koefficienten 1 ingår 
 **1.** Skriv summan som ett kortare uttryck.   x + x + x + x + x = ___
 Facit: 5x
 
-**2.** Skriv summan som ett kortare uttryck.   b + b + b = ___
-Facit: 3b
+**2.** Skriv summan som ett kortare uttryck.   x + x + x = ___
+Facit: 3x
 
 **3.** Skriv summan som ett kortare uttryck.   y + y + y + y + y + y + y = ___
 Facit: 7y
 
-**4.** Välj det uttryck som betyder samma sak som 4a.   A. a + 4   B. 4 + 4 + 4 + 4   C. a + a + a + a
+**4.** Välj det uttryck som betyder samma sak som 4x.   A. x + 4   B. 4 + 4 + 4 + 4   C. x + x + x + x
 Facit: C
 
 **5.** Förenkla.   6x + 2x
@@ -44,13 +44,13 @@ Facit: 4y
 **7.** Förenkla.   30y + 20y
 Facit: 50y
 
-**8.** Förenkla.   b + 9b
-Facit: 10b
+**8.** Förenkla.   x + 9x
+Facit: 10x
 
 **9.** Välj det förenklade uttrycket.   7x + 2x:   A. 14x   B. 9x   C. 9 + x
 Facit: B
 
-**10.** Välj det förenklade uttrycket.   3a + a:   A. 4a   B. 3a   C. 4
+**10.** Välj det förenklade uttrycket.   3x + x:   A. 4x   B. 3x   C. 4
 Facit: A
 
 ## F2. Subtrahera termer av samma sort
@@ -71,19 +71,19 @@ Facit: 6z
 **4.** Förenkla.   14x − 6x
 Facit: 8x
 
-**5.** Förenkla.   30a − a
-Facit: 29a
+**5.** Förenkla.   30x − x
+Facit: 29x
 
 **6.** Förenkla.   50z − 15z
 Facit: 35z
 
-**7.** Förenkla.   7b − 7b
+**7.** Förenkla.   7x − 7x
 Facit: 0
 
 **8.** Förenkla.   18y − 9y
 Facit: 9y
 
-**9.** Välj det förenklade uttrycket.   15a − 5a:   A. 10   B. 20a   C. 10a
+**9.** Välj det förenklade uttrycket.   15x − 5x:   A. 10   B. 20x   C. 10x
 Facit: C
 
 **10.** Välj det förenklade uttrycket.   8y − y:   A. 7y   B. 8   C. 7
@@ -107,8 +107,8 @@ Facit: 3x
 **4.** Förenkla.   9y − 4y − 5y
 Facit: 0
 
-**5.** Förenkla.   8b − 3b + b
-Facit: 6b
+**5.** Förenkla.   8x − 3x + x
+Facit: 6x
 
 **6.** Förenkla.   3x + 6x − 2x
 Facit: 7x
@@ -116,8 +116,8 @@ Facit: 7x
 **7.** Förenkla.   4y + y + y − 3y
 Facit: 3y
 
-**8.** Förenkla.   12a − 5a − 2a
-Facit: 5a
+**8.** Förenkla.   12x − 5x − 2x
+Facit: 5x
 
 **9.** Välj det förenklade uttrycket.   3y + 6y − 4y:   A. 13y   B. 5   C. 5y
 Facit: C
@@ -182,14 +182,14 @@ Facit: y
 **5.** Förenkla.   [9x | 9]
 Facit: x
 
-**6.** Förenkla.   [21a | 3]
-Facit: 7a
+**6.** Förenkla.   [21x | 3]
+Facit: 7x
 
 **7.** Förenkla.   [24y | 4]
 Facit: 6y
 
-**8.** Förenkla.   [7b | 7]
-Facit: b
+**8.** Förenkla.   [7x | 7]
+Facit: x
 
 **9.** Välj det förenklade uttrycket.   [8y | 2]:   A. 4y   B. 6y   C. 4
 Facit: A
@@ -230,8 +230,8 @@ Facit: 4y; 4 · 7 = 28
 **9.** Förenkla uttrycket och beräkna sedan värdet när x = 8.   x + x + x + x
 Facit: 4x; 4 · 8 = 32
 
-**10.** Förenkla uttrycket och beräkna sedan värdet när a = 4.   9a − 2a − a
-Facit: 6a; 6 · 4 = 24
+**10.** Förenkla uttrycket och beräkna sedan värdet när x = 4.   9x − 2x − x
+Facit: 6x; 6 · 4 = 24
 
 # Moment 2 – Negativa tal
 
@@ -429,8 +429,8 @@ Facit: 8x
 **2.** Ringa in alla variabeltermer.   6 + 4y
 Facit: 4y
 
-**3.** Ringa in alla variabeltermer.   5a + 7 + 3a
-Facit: 5a och 3a
+**3.** Ringa in alla variabeltermer.   5x + 7 + 3x
+Facit: 5x och 3x
 
 **4.** Ringa in alla variabeltermer.   11 + 2z
 Facit: 2z
@@ -438,8 +438,8 @@ Facit: 2z
 **5.** Ringa in alla variabeltermer.   4x + 3 + x + 6
 Facit: 4x och x
 
-**6.** Ringa in alla variabeltermer.   10 + 9b + 2
-Facit: 9b
+**6.** Ringa in alla variabeltermer.   10 + 9x + 2
+Facit: 9x
 
 **7.** Ringa in alla variabeltermer.   7x + 4 + x
 Facit: 7x och x
@@ -453,8 +453,8 @@ Talregler: En variabel och siffertermer, bara plus. Koefficienter 1–8, siffert
 
 [S4 blad 1]
 
-**1.** Förenkla.   4a + 3a + 5
-Facit: 7a + 5
+**1.** Förenkla.   4x + 3x + 5
+Facit: 7x + 5
 
 **2.** Förenkla.   6x + x + 3 + 8
 Facit: 7x + 11
@@ -468,8 +468,8 @@ Facit: 13x + 17
 **5.** Förenkla.   7 + 2y + 4 + 3y
 Facit: 5y + 11
 
-**6.** Förenkla.   2a + 5 + 4a + a + 3
-Facit: 7a + 8
+**6.** Förenkla.   2x + 5 + 4x + x + 3
+Facit: 7x + 8
 
 **7.** Förenkla.   5x + 4 + 2x + 7
 Facit: 7x + 11
@@ -492,8 +492,8 @@ Talregler: En variabel och siffertermer. x-termen blir alltid positiv. Sifferter
 **1.** Förenkla.   6x + 7 − 3x − 7
 Facit: 3x
 
-**2.** Förenkla.   6a − 7 + a + 3
-Facit: 7a − 4
+**2.** Förenkla.   6x − 7 + x + 3
+Facit: 7x − 4
 
 **3.** Förenkla.   8y + 3 − 2y − 8
 Facit: 6y − 5
@@ -501,8 +501,8 @@ Facit: 6y − 5
 **4.** Förenkla.   12 + 4x − 17 + x
 Facit: 5x − 5
 
-**5.** Förenkla.   3a − 5 + 4a − 2
-Facit: 7a − 7
+**5.** Förenkla.   3x − 5 + 4x − 2
+Facit: 7x − 7
 
 **6.** Förenkla.   15 + 6x − 2 − 6x
 Facit: 13
@@ -510,13 +510,13 @@ Facit: 13
 **7.** Förenkla.   8x + 5 − 2x − 12
 Facit: 6x − 7
 
-**8.** Förenkla.   4a − 9 + a + 9
-Facit: 5a
+**8.** Förenkla.   4x − 9 + x + 9
+Facit: 5x
 
 **9.** Välj det förenklade uttrycket.   7 + 5y − 11:   A. 5y + 4   B. 5y − 4   C. y
 Facit: B
 
-**10.** Välj det förenklade uttrycket.   9a − 3 − 4a − 6:   A. 5a + 3   B. 13a − 9   C. 5a − 9
+**10.** Välj det förenklade uttrycket.   9x − 3 − 4x − 6:   A. 5x + 3   B. 13x − 9   C. 5x − 9
 Facit: C
 
 ## S4. Två variabler, positiva
@@ -528,11 +528,11 @@ Talregler: Två variabler, bara plus, inga siffertermer. Koefficienter 1–7. Sv
 **1.** Förenkla.   3x + 4y + 2x
 Facit: 5x + 4y
 
-**2.** Förenkla.   6a + 2b + a + 4b
-Facit: 7a + 6b
+**2.** Förenkla.   6x + 2y + x + 4y
+Facit: 7x + 6y
 
-**3.** Förenkla.   a + b + a + b + a + b
-Facit: 3a + 3b
+**3.** Förenkla.   x + y + x + y + x + y
+Facit: 3x + 3y
 
 **4.** Förenkla.   4x + y + 2x + 3y
 Facit: 6x + 4y
@@ -543,8 +543,8 @@ Facit: 9x + 3y
 **6.** Förenkla.   7x + 2y + x + 5y
 Facit: 8x + 7y
 
-**7.** Förenkla.   3b + 4a + 2b + 2a
-Facit: 6a + 5b
+**7.** Förenkla.   3y + 4x + 2y + 2x
+Facit: 6x + 5y
 
 **8.** Förenkla.   4y + 3x + 2y + x + y
 Facit: 4x + 7y
@@ -564,8 +564,8 @@ Talregler: Två variabler, inga siffertermer. x-termen blir alltid positiv. y-te
 **1.** Förenkla.   7x + 3y − 2x − 6y
 Facit: 5x − 3y
 
-**2.** Förenkla.   5a − 3b + a − 2b
-Facit: 6a − 5b
+**2.** Förenkla.   5x − 3y + x − 2y
+Facit: 6x − 5y
 
 **3.** Förenkla.   8x − 2x + y + 4y − 5x
 Facit: x + 5y
@@ -576,8 +576,8 @@ Facit: 5x
 **5.** Förenkla.   7x − 3y − 5x + 2y
 Facit: 2x − y
 
-**6.** Förenkla.   4a + 6b − 2a − 9b
-Facit: 2a − 3b
+**6.** Förenkla.   4x + 6y − 2x − 9y
+Facit: 2x − 3y
 
 **7.** Förenkla.   2x − y + 5x − 3y
 Facit: 7x − 4y
@@ -600,8 +600,8 @@ Talregler: Två variabler och siffertermer. x-termen blir alltid positiv. y-term
 **1.** Förenkla.   5x + 3y + 2 + 2x + y + 6
 Facit: 7x + 4y + 8
 
-**2.** Förenkla.   7 + 2a + 4b + a + 3
-Facit: 3a + 4b + 10
+**2.** Förenkla.   7 + 2x + 4y + x + 3
+Facit: 3x + 4y + 10
 
 **3.** Förenkla.   4y + 5x + 9 − 2y − 4
 Facit: 5x + 2y + 5
@@ -615,8 +615,8 @@ Facit: 5x + 3y − 6
 **6.** Förenkla.   5x − 2y + 8 + x − y − 12
 Facit: 6x − 3y − 4
 
-**7.** Förenkla.   9a − 2b − 3 − 4a − b + 6
-Facit: 5a − 3b + 3
+**7.** Förenkla.   9x − 2y − 3 − 4x − y + 6
+Facit: 5x − 3y + 3
 
 **8.** Förenkla.   3x + 2y − 2 + 2x − 5y − 4 + x
 Facit: 6x − 3y − 6
@@ -624,7 +624,7 @@ Facit: 6x − 3y − 6
 **9.** Välj det förenklade uttrycket.   7x + 3y − 6 − 2x − 5y + 2:   A. 5x + 3y − 4   B. 9x − 2y − 8   C. 5x − 2y − 4
 Facit: C
 
-**10.** Välj det förenklade uttrycket.   4a − 3 + 3b − a − 4b:   A. 3a − b − 3   B. 3a + b − 3   C. 5a − b + 3
+**10.** Välj det förenklade uttrycket.   4x − 3 + 3y − x − 4y:   A. 3x − y − 3   B. 3x + y − 3   C. 5x − y + 3
 Facit: A
 
 # Moment 4 – Negativa termer och tillämpning
@@ -641,8 +641,8 @@ Facit: −4x
 **2.** Förenkla.   5y − 8y
 Facit: −3y
 
-**3.** Förenkla.   3a − 10a
-Facit: −7a
+**3.** Förenkla.   3x − 10x
+Facit: −7x
 
 **4.** Förenkla.   4 + 2x − 9x
 Facit: −7x + 4 eller 4 − 7x
@@ -674,8 +674,8 @@ Talregler: Decimaltal som koefficienter och siffertermer, med en eller två deci
 **1.** Förenkla.   0,4x + 0,5x
 Facit: 0,9x
 
-**2.** Förenkla.   3,6a − 0,6a
-Facit: 3a
+**2.** Förenkla.   3,6x − 0,6x
+Facit: 3x
 
 **3.** Förenkla.   0,3x + 0,4x + 6y − 2y
 Facit: 0,7x + 4y
@@ -683,8 +683,8 @@ Facit: 0,7x + 4y
 **4.** Förenkla.   4,5x + 6 − 3x + 0,5 − x
 Facit: 0,5x + 6,5
 
-**5.** Förenkla.   1,4a + 2 − 0,6a − 0,5
-Facit: 0,8a + 1,5
+**5.** Förenkla.   1,4x + 2 − 0,6x − 0,5
+Facit: 0,8x + 1,5
 
 **6.** Förenkla.   5,5x − 2,5x + 3
 Facit: 3x + 3
@@ -719,9 +719,9 @@ Facit: x + x + 7 = 2x + 7
 Skriv ett uttryck för omkretsen och förenkla det: ___
 Facit: 3x + 2 + 3x + 2 = 6x + 4
 
-**4.** (Figur: en kvadrat där varje sida är 3a cm.)
+**4.** (Figur: en kvadrat där varje sida är 3x cm.)
 Skriv ett uttryck för omkretsen och förenkla det: ___
-Facit: 3a + 3a + 3a + 3a = 12a
+Facit: 3x + 3x + 3x + 3x = 12x
 
 **5.** (Figur: en rektangel med sidorna x cm och x + 3 cm.)
 a) Skriv ett uttryck för omkretsen och förenkla det: ___
@@ -778,40 +778,40 @@ Facit: a) 3x + x + 2x + 12 = 6x + 12   b) 6 · 0,5 + 12 = 3 + 12 = 15 kg
 **4.** (Figur: ett suddgummi med prislappen x kr, en penna med prislappen x + 10 kr och en linjal med prislappen 24 kr.) Skriv och förenkla ett uttryck för priset för två suddgummin, en penna och en linjal.   ___
 Facit: x + x + x + 10 + 24 = 3x + 34
 
-**5.** En bulle kostar b kr och en kaffe kostar (b + 6) kr. Skriv och förenkla ett uttryck för priset för två bullar och en kaffe.
+**5.** En bulle kostar x kr och en kaffe kostar (x + 6) kr. Skriv och förenkla ett uttryck för priset för två bullar och en kaffe.
 a) ___
-b) Beräkna priset när b = 10.
-Facit: a) b + b + b + 6 = 3b + 6   b) 3 · 10 + 6 = 30 + 6 = 36 kr
+b) Beräkna priset när x = 10.
+Facit: a) x + x + x + 6 = 3x + 6   b) 3 · 10 + 6 = 30 + 6 = 36 kr
 
-**6.** Tre tal följer varandra. Det minsta talet är n. Skriv och förenkla ett uttryck för summan av de tre talen.
+**6.** Tre tal följer varandra. Det minsta talet är x. Skriv och förenkla ett uttryck för summan av de tre talen.
 a) ___
-b) Beräkna summan när n = 12.
-Facit: a) n + n + 1 + n + 2 = 3n + 3   b) 3 · 12 + 3 = 36 + 3 = 39
+b) Beräkna summan när x = 12.
+Facit: a) x + x + 1 + x + 2 = 3x + 3   b) 3 · 12 + 3 = 36 + 3 = 39
 
-**7.** Tre jämna tal följer varandra. Det minsta talet är n. Skriv och förenkla ett uttryck för summan av de tre talen.
+**7.** Tre jämna tal följer varandra. Det minsta talet är x. Skriv och förenkla ett uttryck för summan av de tre talen.
 a) ___
-b) Beräkna summan när n = 6.
-Facit: a) n + n + 2 + n + 4 = 3n + 6   b) 3 · 6 + 6 = 18 + 6 = 24
+b) Beräkna summan när x = 6.
+Facit: a) x + x + 2 + x + 4 = 3x + 6   b) 3 · 6 + 6 = 18 + 6 = 24
 
-**8.** Ett äpple kostar a kr och en banan b kr. Ella köper 3 äpplen och 1 banan. Omar köper 1 äpple och 2 bananer. Skriv och förenkla ett uttryck för vad de betalar tillsammans.
+**8.** Ett äpple kostar x kr och en banan y kr. Ella köper 3 äpplen och 1 banan. Omar köper 1 äpple och 2 bananer. Skriv och förenkla ett uttryck för vad de betalar tillsammans.
 a) ___
-b) Beräkna vad de betalar när a = 6 och b = 5.
-Facit: a) 3a + b + a + 2b = 4a + 3b   b) 4 · 6 + 3 · 5 = 24 + 15 = 39 kr
+b) Beräkna vad de betalar när x = 6 och y = 5.
+Facit: a) 3x + y + x + 2y = 4x + 3y   b) 4 · 6 + 3 · 5 = 24 + 15 = 39 kr
 
 **9.** (Figur: två blå lådor som väger x kg var, två röda lådor som väger y kg var och en låda som väger 10 kg.) Skriv och förenkla ett uttryck för hur mycket lådorna väger tillsammans.
 a) ___
 b) Hur mycket väger lådorna när x = 5 och y = 7?
 Facit: a) x + x + y + y + 10 = 2x + 2y + 10   b) 2 · 5 + 2 · 7 + 10 = 10 + 14 + 10 = 34 kg
 
-**10.** En vuxenbiljett kostar v kr och en barnbiljett b kr. Familjen Ek köper 3 vuxenbiljetter och 2 barnbiljetter. Familjen Lind köper 1 vuxenbiljett och 1 barnbiljett. Skriv och förenkla ett uttryck för vad familjerna betalar tillsammans.
+**10.** En vuxenbiljett kostar x kr och en barnbiljett y kr. Familjen Ek köper 3 vuxenbiljetter och 2 barnbiljetter. Familjen Lind köper 1 vuxenbiljett och 1 barnbiljett. Skriv och förenkla ett uttryck för vad familjerna betalar tillsammans.
 a) ___
-b) Beräkna vad de betalar när v = 100 och b = 60.
-Facit: a) 3v + 2b + v + b = 3b + 4v   b) 3 · 60 + 4 · 100 = 180 + 400 = 580 kr
+b) Beräkna vad de betalar när x = 100 och y = 60.
+Facit: a) 3x + 2y + x + y = 3y + 4x   b) 3 · 60 + 4 · 100 = 180 + 400 = 580 kr
 
-**11.** En stol kostar s kr och ett bord kostar (3s + 80) kr. Skriv och förenkla ett uttryck för priset för ett bord och tre stolar.
+**11.** En stol kostar x kr och ett bord kostar (3x + 80) kr. Skriv och förenkla ett uttryck för priset för ett bord och tre stolar.
 a) ___
-b) Beräkna priset när s = 250.
-Facit: a) 3s + 80 + s + s + s = 6s + 80   b) 6 · 250 + 80 = 1500 + 80 = 1580 kr
+b) Beräkna priset när x = 250.
+Facit: a) 3x + 80 + x + x + x = 6x + 80   b) 6 · 250 + 80 = 1500 + 80 = 1580 kr
 
 ## M5. Förenkla först och beräkna sedan
 
@@ -825,8 +825,8 @@ Facit: 5x + y − 5; 5 · 3 + 2 − 5 = 15 + 2 − 5 = 12
 **2.** Förenkla uttrycket och beräkna sedan värdet när x = 2 och y = 5.   6x − 2y + 1 + x + y − 4
 Facit: 7x − y − 3; 7 · 2 − 5 − 3 = 14 − 5 − 3 = 6
 
-**3.** Förenkla uttrycket och beräkna sedan värdet när a = 5 och b = 3.   5a − 3b − 2 + a + b + 4
-Facit: 6a − 2b + 2; 6 · 5 − 2 · 3 + 2 = 30 − 6 + 2 = 26
+**3.** Förenkla uttrycket och beräkna sedan värdet när x = 5 och y = 3.   5x − 3y − 2 + x + y + 4
+Facit: 6x − 2y + 2; 6 · 5 − 2 · 3 + 2 = 30 − 6 + 2 = 26
 
 **4.** Förenkla uttrycket och beräkna sedan värdet när x = 2.   2x + 9 − 6x
 Facit: −4x + 9 eller 9 − 4x; −4 · 2 + 9 = −8 + 9 = 1

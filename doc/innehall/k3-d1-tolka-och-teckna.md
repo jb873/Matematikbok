@@ -87,17 +87,17 @@ C. en smörgås och x saft
 
 **7.** En vecka har 7 dagar. Fyll i ett uttryck.
 
-a) v veckor har \_\_\_ dagar.
+a) x veckor har \_\_\_ dagar.
 
-b) v veckor och 3 dagar är \_\_\_ dagar.
+b) x veckor och 3 dagar är \_\_\_ dagar.
 
 [teckna – II 25]
 
 **8.** En höna har 2 ben och ett får har 4 ben. Fyll i ett uttryck för hur många ben det finns.
 
-a) h höns: \_\_\_
+a) x höns: \_\_\_
 
-b) f får: \_\_\_
+b) x får: \_\_\_
 
 [teckna – HH 623]
 
@@ -177,9 +177,9 @@ C. 15 glassar och 12 läsk
 
 **8.** Leo har 200 kr. Han sparar 60 kr i månaden.
 
-a) Fyll i ett uttryck för hur mycket han har efter m månader: \_\_\_
+a) Fyll i ett uttryck för hur mycket han har efter x månader: \_\_\_
 
-b) Hur mycket har han efter 5 månader? Skriv uttrycket med 5 i stället för m och räkna i flera led. Börja med multiplikationen.
+b) Hur mycket har han efter 5 månader? Skriv uttrycket med 5 i stället för x och räkna i flera led. Börja med multiplikationen.
 
 [teckna och beräkna – HH 607]
 
@@ -225,9 +225,9 @@ C. 5x
 
 [teckna – II 19]
 
-**6.** Tre tal följer varandra. Det minsta talet är n. Fyll i de två andra talen.
+**6.** Tre tal följer varandra. Det minsta talet är x. Fyll i de två andra talen.
 
-n, \_\_\_, \_\_\_
+x, \_\_\_, \_\_\_
 
 [teckna – HH 614]
 
@@ -269,9 +269,9 @@ C. Pappa är 30 år yngre än Sixten.
 
 [tolka – GG intro, HH 609]
 
-**3.** Maja är m år och Hugo är h år. Maja är äldst.
+**3.** Maja är x år och Hugo är y år. Maja är äldst.
 
-a) Vad betyder m − h?
+a) Vad betyder x − y?
 
 A. hur mycket äldre Maja är än Hugo
 
@@ -279,13 +279,13 @@ B. hur mycket äldre Hugo är än Maja
 
 C. hur gamla de är tillsammans
 
-b) Vad betyder m + h?
+b) Vad betyder x + y?
 
 A. hur mycket äldre Maja är än Hugo
 
 B. hur gamla de är tillsammans
 
-C. Majas ålder om h år
+C. Majas ålder om y år
 
 [tolka – HH 615, 627]
 
@@ -305,9 +305,9 @@ C. 20 − x
 
 **6.** Fyll i.
 
-a) Tre jämna tal följer varandra. Det minsta är n.   n, \_\_\_, \_\_\_
+a) Tre jämna tal följer varandra. Det minsta är x.   x, \_\_\_, \_\_\_
 
-b) u är ett udda tal. Nästa udda tal är \_\_\_.
+b) x är ett udda tal. Nästa udda tal är \_\_\_.
 
 [teckna – HH 614]
 
@@ -357,12 +357,12 @@ c) 6 mer än y:   y − 6    6 · y    y + 6
 
 [teckna – HH 617, GG 15]
 
-**3.** Farmor Greta är g år. Para ihop varje persons ålder med rätt mening. Svara med bokstav.
+**3.** Farmor Greta är x år. Para ihop varje persons ålder med rätt mening. Svara med bokstav.
 
-- Pappa Lars är (g − 30) år.
-- Farfar Bo är (g + 3) år.
-- Barnbarnet Elsa är (g/6) år.
-- Gretas syster Ulla är (g − 2) år.
+- Pappa Lars är (x − 30) år.
+- Farfar Bo är (x + 3) år.
+- Barnbarnet Elsa är (x/6) år.
+- Gretas syster Ulla är (x − 2) år.
 
 A. 3 år äldre än farmor
 
@@ -374,7 +374,7 @@ D. 30 år yngre än farmor
 
 [tolka – GG intro, HH 609]
 
-**4.** (Figur: ett äpple med prislappen a kr och en banan med prislappen b kr.) Omar betalar (3a + 2b) kr. Vad köper han?
+**4.** (Figur: ett äpple med prislappen x kr och en banan med prislappen y kr.) Omar betalar (3x + 2y) kr. Vad köper han?
 
 A. 3 äpplen och 2 bananer
 
@@ -400,35 +400,35 @@ C. x − 30
 
 [teckna – mall 10, 12c]
 
-**7.** (Figur: en rektangel med sidorna s cm och 3 cm.)
+**7.** (Figur: en rektangel med sidorna x cm och 3 cm.)
 
 a) Vilka uttryck visar rektangelns omkrets? Ringa in alla som stämmer.
 
-s + 3 + s + 3    2 · s + 6    s + 3    3s
+x + 3 + x + 3    2 · x + 6    x + 3    3x
 
-b) Beräkna omkretsen när s = 7 med uttrycket 2 · s + 6. Skriv uttrycket med 7 i stället för s och räkna i flera led. Börja med multiplikationen.
+b) Beräkna omkretsen när x = 7 med uttrycket 2 · x + 6. Skriv uttrycket med 7 i stället för x och räkna i flera led. Börja med multiplikationen.
 
 [teckna och beräkna – II 28]
 
 **8.** Nora har 150 kr. Hon sparar 40 kr i veckan.
 
-a) Fyll i ett uttryck för hur mycket hon har efter v veckor: \_\_\_
+a) Fyll i ett uttryck för hur mycket hon har efter x veckor: \_\_\_
 
-b) Hur mycket har hon efter 6 veckor? Skriv uttrycket med 6 i stället för v och räkna i flera led. Börja med multiplikationen.
+b) Hur mycket har hon efter 6 veckor? Skriv uttrycket med 6 i stället för x och räkna i flera led. Börja med multiplikationen.
 
 [teckna och beräkna – HH 607]
 
 # Blad 3B – Blandade uppgifter
 
-**1.** Leo har n fotbollskort. Välj rätt uttryck.
+**1.** Leo har x fotbollskort. Välj rätt uttryck.
 
-a) Hans kompis har dubbelt så många som Leo:   n + 2    2 · n    n/2
+a) Hans kompis har dubbelt så många som Leo:   x + 2    2 · x    x/2
 
-b) Leo ger bort 4:   4 − n    n − 4    n + 4
+b) Leo ger bort 4:   4 − x    x − 4    x + 4
 
-c) Hans syster har 7 färre än Leo:   7 − n    n + 7    n − 7
+c) Hans syster har 7 färre än Leo:   7 − x    x + 7    x − 7
 
-d) Hans kusin har en fjärdedel så många som Leo:   n/4    4n    n − 4
+d) Hans kusin har en fjärdedel så många som Leo:   x/4    4x    x − 4
 
 [teckna – GG 14, 18]
 
@@ -442,12 +442,12 @@ c) 5 mindre än en tredjedel av x:   x/3 − 5    5 − x/3    x/5 − 3
 
 [teckna – HH 617, A2072]
 
-**3.** Mamma Karin är k år.
+**3.** Mamma Karin är x år.
 
-- Pappa är (k + 2) år.
-- Mormor är (k + 26) år.
-- Dottern är (k/3) år.
-- Sonen är (k − 29) år.
+- Pappa är (x + 2) år.
+- Mormor är (x + 26) år.
+- Dottern är (x/3) år.
+- Sonen är (x − 29) år.
 
 a) Para ihop varje person med rätt mening. Svara med bokstav.
 
@@ -463,9 +463,9 @@ b) Hur mycket äldre är mormor än pappa? \_\_\_ år
 
 [tolka – GG intro, HH 609]
 
-**4.** (Figur: en vuxenbiljett med prislappen v kr och en barnbiljett med prislappen b kr.)
+**4.** (Figur: en vuxenbiljett med prislappen x kr och en barnbiljett med prislappen y kr.)
 
-a) Vad kan uttrycket 2 · v + 3 · b betyda?
+a) Vad kan uttrycket 2 · x + 3 · y betyda?
 
 A. biljetter för 2 vuxna och 3 barn
 
@@ -473,7 +473,7 @@ B. biljetter för 3 vuxna och 2 barn
 
 C. biljetter för 5 vuxna
 
-b) Vad betyder v − b?
+b) Vad betyder x − y?
 
 A. hur mycket dyrare en vuxenbiljett är än en barnbiljett
 
@@ -503,9 +503,9 @@ b) Beräkna omkretsen när x = 6 med uttrycket 4 · x + 8. Skriv uttrycket med 6
 
 **8.** Ett ljus är 30 cm långt. Det brinner ner 2 cm i timmen.
 
-a) Fyll i ett uttryck för ljusets längd efter t timmar: \_\_\_
+a) Fyll i ett uttryck för ljusets längd efter x timmar: \_\_\_
 
-b) Hur långt är ljuset efter 8 timmar? Skriv uttrycket med 8 i stället för t och räkna i flera led. Börja med multiplikationen.
+b) Hur långt är ljuset efter 8 timmar? Skriv uttrycket med 8 i stället för x och räkna i flera led. Börja med multiplikationen.
 
 [teckna och beräkna – HH 607, H kap 5 A22b]
 
@@ -521,8 +521,8 @@ Likvärdiga uttryck godkänns överallt, till exempel 10x för 10 · x, och ofö
 | 4 | B | A |
 | 5 | A | A |
 | 6 | 100 − 10 · x | B |
-| 7 | a) 7 · v   b) 7 · v + 3 | 200 − 18 · x |
-| 8 | a) 2 · h   b) 4 · f | a) 200 + 60 · m   b) 200 + 60 · 5 = 200 + 300 = 500 kr |
+| 7 | a) 7 · x   b) 7 · x + 3 | 200 − 18 · x |
+| 8 | a) 2 · x   b) 4 · x | a) 200 + 60 · x   b) 200 + 60 · 5 = 200 + 300 = 500 kr |
 
 | Uppg. | Blad 2A | Blad 2B |
 | --- | --- | --- |
@@ -531,20 +531,20 @@ Likvärdiga uttryck godkänns överallt, till exempel 10x för 10 · x, och ofö
 | 3 | 9 och 12 | a) A   b) B |
 | 4 | B | C |
 | 5 | x − 3, x + 2, x + 4 | x − 2, x + 6, x + 10 |
-| 6 | n + 1, n + 2 | a) n + 2, n + 4   b) u + 2 |
+| 6 | x + 1, x + 2 | a) x + 2, x + 4   b) x + 2 |
 | 7 | a) x + 3   b) x − 5   c) x + 29 | a) y − 3   b) 2 · y   c) y/4   d) y − 3 + 6 eller y + 3 |
 | 8 | a) x + x + 7 (= 2x + 7)   b) 4 + 4 + 7 = 15 cm | a) x + x + 2 + x + x + 2 och 4 · x + 4   b) 4 · 8 + 4 = 32 + 4 = 36 cm |
 
 | Uppg. | Blad 3A | Blad 3B |
 | --- | --- | --- |
-| 1 | a) x + 8   b) 3 · x   c) x − 5   d) x/2 | a) 2 · n   b) n − 4   c) n − 7   d) n/4 |
+| 1 | a) x + 8   b) 3 · x   c) x − 5   d) x/2 | a) 2 · x   b) x − 4   c) x − 7   d) x/4 |
 | 2 | a) y − 6   b) 6 · y   c) y + 6 | a) 50 − x   b) 2 · x + 3   c) x/3 − 5 |
 | 3 | Lars D, Bo A, Elsa B, Ulla C | a) pappa C, mormor D, dottern A, sonen B   b) 24 år |
 | 4 | A | a) A   b) A |
 | 5 | B | x − 5, x + 15, x + 20 |
 | 6 | 500 − 95 · x | 200 − 20 · x − 12 · y |
-| 7 | a) s + 3 + s + 3 och 2 · s + 6   b) 2 · 7 + 6 = 14 + 6 = 20 cm | a) x + x + 4 + x + x + 4 (= 4x + 8)   b) 4 · 6 + 8 = 24 + 8 = 32 cm |
-| 8 | a) 150 + 40 · v   b) 150 + 40 · 6 = 150 + 240 = 390 kr | a) 30 − 2 · t   b) 30 − 2 · 8 = 30 − 16 = 14 cm |
+| 7 | a) x + 3 + x + 3 och 2 · x + 6   b) 2 · 7 + 6 = 14 + 6 = 20 cm | a) x + x + 4 + x + x + 4 (= 4x + 8)   b) 4 · 6 + 8 = 24 + 8 = 32 cm |
+| 8 | a) 150 + 40 · x   b) 150 + 40 · 6 = 150 + 240 = 390 kr | a) 30 − 2 · x   b) 30 − 2 · 8 = 30 − 16 = 14 cm |
 
 ```
 

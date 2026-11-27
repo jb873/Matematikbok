@@ -44,18 +44,18 @@ var BLAD = {};
 /* ── BLAD 1A ── */
 BLAD['1A'] = function(){ return { titel: 'Upprepad addition', grupper: [
   // [E s. 138 teori, kap 3.3 teori]
-  g(R.summan, [ forenkla('x + x + x', '3x', 'x'), forenkla('y + y + y + y + y', '5y', 'y'), forenkla('a + a', '2a', 'a') ]),
+  g(R.summan, [ forenkla('x + x + x', '3x', 'x'), forenkla('y + y + y + y + y', '5y', 'y'), forenkla('x + x', '2x', 'x') ]),
   // [kap 3.3 teori]
   g(R.valj, [ val('4x:', ['x + 4', 'x + x + x + x', '4 + 4 + 4 + 4'], 'x + x + x + x'),
               val('2y:', ['y + y', 'y + 2', '2 + 2'], 'y + y'),
-              val('3b:', ['3 + b', 'b + 3', 'b + b + b'], 'b + b + b') ]),
+              val('3x:', ['3 + x', 'x + 3', 'x + x + x'], 'x + x + x') ]),
   // [A 2092, E exempel]
-  g(R.forenkla, [ forenkla('x + x + 2x', '4x', 'x'), forenkla('y + 2y', '3y', 'y'), forenkla('3a + a', '4a', 'a') ]),
+  g(R.forenkla, [ forenkla('x + x + 2x', '4x', 'x'), forenkla('y + 2y', '3y', 'y'), forenkla('3x + x', '4x', 'x') ]),
   // [kap 3.3 teori, 2.4 teori]
   g(R.omkrets, [
-    omkrets(F().triangel({ ben: 'a cm', bas: 'a cm', liksidig: true }), ['a', 'a', 'a'], '3a', 'a'),
-    omkrets(F().rektangel({ bredd: 's cm', hojd: 's cm', kvadrat: true }), ['s', 's', 's', 's'], '4s', 's'),
-    omkrets(F().rektangel({ bredd: 'b cm', hojd: 'h cm' }), ['b', 'h', 'b', 'h'], '2b + 2h', 'bh') ]),
+    omkrets(F().triangel({ ben: 'x cm', bas: 'x cm', liksidig: true }), ['x', 'x', 'x'], '3x', 'x'),
+    omkrets(F().rektangel({ bredd: 'x cm', hojd: 'x cm', kvadrat: true }), ['x', 'x', 'x', 'x'], '4x', 'x'),
+    omkrets(F().rektangel({ bredd: 'x cm', hojd: 'y cm' }), ['x', 'y', 'x', 'y'], '2x + 2y', 'xy') ]),
   // [E 79]
   g('', [ berakna('Beräkna x + x + x när x = 6.', 'x + x + x', 6, 18, 'x'),
           forenklaBerakna('Förenkla först x + x + x och beräkna sedan värdet när x = 6.', 'x + x + x', '3x', 6, 18, 'x') ])
@@ -64,17 +64,17 @@ BLAD['1A'] = function(){ return { titel: 'Upprepad addition', grupper: [
 /* ── BLAD 1B ── */
 BLAD['1B'] = function(){ return { titel: 'Upprepad addition', grupper: [
   // [E s. 138 teori, kap 3.3 teori]
-  g(R.summan, [ forenkla('z + z + z + z', '4z', 'z'), forenkla('x + x + x + x + x + x', '6x', 'x'), forenkla('b + b + b', '3b', 'b') ]),
+  g(R.summan, [ forenkla('z + z + z + z', '4z', 'z'), forenkla('x + x + x + x + x + x', '6x', 'x'), forenkla('x + x + x', '3x', 'x') ]),
   // [kap 3.3 teori, E exempel]
   g(R.valj, [ val('5y:', ['y + 5', '5 + 5 + 5 + 5 + 5', 'y + y + y + y + y'], 'y + y + y + y + y'),
               val('3x + x:', ['3x', '4x', '4 + x'], '4x'),
               val('y + 2y + y:', ['4y', '3y', '2y + 2'], '4y') ]),
   // [A 2092, E exempel]
-  g(R.forenkla, [ forenkla('2x + x + x', '4x', 'x'), forenkla('a + 3a + 2a', '6a', 'a'), forenkla('4y + y', '5y', 'y') ]),
+  g(R.forenkla, [ forenkla('2x + x + x', '4x', 'x'), forenkla('x + 3x + 2x', '6x', 'x'), forenkla('4y + y', '5y', 'y') ]),
   // [kap 3.3 teori, 2.4 teori, C 60]
   g(R.omkrets, [
     omkrets(F().triangel({ ben: '2x cm', bas: '2x cm', liksidig: true }), ['2x', '2x', '2x'], '6x', 'x'),
-    omkrets(F().rektangel({ bredd: '2a cm', hojd: 'a cm' }), ['2a', 'a', '2a', 'a'], '6a', 'a'),
+    omkrets(F().rektangel({ bredd: '2x cm', hojd: 'x cm' }), ['2x', 'x', '2x', 'x'], '6x', 'x'),
     omkrets(F().rektangel({ bredd: 'x cm', hojd: 'y cm' }), ['x', 'y', 'x', 'y'], '2x + 2y', 'xy') ]),
   // [E 79]
   g('', [ berakna('Beräkna y + y + y + y när y = 7.', 'y + y + y + y', 7, 28, 'y'),
@@ -93,13 +93,13 @@ function beraknaRubrik(v, t){ return { rubrik: 'Förenkla först och beräkna se
 /* ── BLAD 2A – plus och minus (klartextens Blad 1A) ── */
 BLAD['2A'] = function(){ return { titel: 'Plus och minus', grupper: [
   // [E 65a–b, C 58a]
-  g(R2.forenkla, [ forenkla('5x + 3x', '8x', 'x'), forenkla('4y + y', '5y', 'y'), forenkla('7a + 2a', '9a', 'a') ]),
+  g(R2.forenkla, [ forenkla('5x + 3x', '8x', 'x'), forenkla('4y + y', '5y', 'y'), forenkla('7x + 2x', '9x', 'x') ]),
   // [E 65e–g, C 58c]
   g(R2.forenkla, [ forenkla('9x − 4x', '5x', 'x'), forenkla('10y − y', '9y', 'y'), forenkla('8z − 2z', '6z', 'z') ]),
   // [E 65d, h, A 2093b]
   g(R2.forenkla, [ forenkla('3x + 2x + x', '6x', 'x'), forenkla('6y − 2y + y', '5y', 'y'), forenkla('x − x', '0', 'x') ]),
   // [E 76]
-  g(R2.valj, [ val('3x + 5x:', ['8x', '15x', '8 + x'], '8x'), val('12a − 4a:', ['8', '8a', '16a'], '8a'), val('6y − y:', ['6', '5', '5y'], '5y') ]),
+  g(R2.valj, [ val('3x + 5x:', ['8x', '15x', '8 + x'], '8x'), val('12x − 4x:', ['8', '8x', '16x'], '8x'), val('6y − y:', ['6', '5', '5y'], '5y') ]),
   // [E 79]
   g(beraknaRubrik('x', 4), [ forenklaBerakna('', '2x + 5x', '7x', 4, 28, 'x'), forenklaBerakna('', '9x - 3x', '6x', 4, 24, 'x') ])
 ] }; };
@@ -109,11 +109,11 @@ BLAD['2B'] = function(){ return { titel: 'Plus och minus', grupper: [
   // [E 65f]
   g(R2.forenkla, [ forenkla('12x + 9x', '21x', 'x'), forenkla('25y + 15y', '40y', 'y'), forenkla('100z − 25z', '75z', 'z') ]),
   // [E 65c, e, g]
-  g(R2.forenkla, [ forenkla('11x − 4x', '7x', 'x'), forenkla('3y + 19y', '22y', 'y'), forenkla('20a − a', '19a', 'a') ]),
+  g(R2.forenkla, [ forenkla('11x − 4x', '7x', 'x'), forenkla('3y + 19y', '22y', 'y'), forenkla('20x − x', '19x', 'x') ]),
   // [E 65, A 2093]
-  g(R2.forenkla, [ forenkla('4x + 3x − 2x', '5x', 'x'), forenkla('8y − 3y − 5y', '0', 'y'), forenkla('a + 6a − 4a', '3a', 'a') ]),
+  g(R2.forenkla, [ forenkla('4x + 3x − 2x', '5x', 'x'), forenkla('8y − 3y − 5y', '0', 'y'), forenkla('x + 6x − 4x', '3x', 'x') ]),
   // [E 76]
-  g(R2.valj, [ val('9b − 2b + b:', ['6b', '7b', '8b'], '8b'), val('15x − 15x:', ['0', 'x', '30x'], '0'), val('2y + 7y − 3y:', ['12y', '6y', '6'], '6y') ]),
+  g(R2.valj, [ val('9x − 2x + x:', ['6x', '7x', '8x'], '8x'), val('15x − 15x:', ['0', 'x', '30x'], '0'), val('2y + 7y − 3y:', ['12y', '6y', '6'], '6y') ]),
   // [E 79]
   g(beraknaRubrik('y', 5), [ forenklaBerakna('', '6y + 4y - 3y', '7y', 5, 35, 'y'), forenklaBerakna('', '12y - 7y', '5y', 5, 25, 'y') ])
 ] }; };
@@ -121,11 +121,11 @@ BLAD['2B'] = function(){ return { titel: 'Plus och minus', grupper: [
 /* ── BLAD 3A – gånger och delat (klartextens Blad 2A) ── */
 BLAD['3A'] = function(){ return { titel: 'Gånger och delat', grupper: [
   // [E 66a–b]
-  g(R2.forenkla, [ forenkla('2 · 3y', '6y', 'y'), forenkla('4 · 5x', '20x', 'x'), forenkla('3 · 2a', '6a', 'a') ]),
+  g(R2.forenkla, [ forenkla('2 · 3y', '6y', 'y'), forenkla('4 · 5x', '20x', 'x'), forenkla('3 · 2x', '6x', 'x') ]),
   // [E 66c, exempel b]
-  g(R2.forenkla, [ forenkla('5y · 3', '15y', 'y'), forenkla('2x · 4', '8x', 'x'), forenkla('7a · 2', '14a', 'a') ]),
+  g(R2.forenkla, [ forenkla('5y · 3', '15y', 'y'), forenkla('2x · 4', '8x', 'x'), forenkla('7x · 2', '14x', 'x') ]),
   // [E 66e–f, exempel c]
-  g(R2.forenkla, [ forenkla('8x/2', '4x', 'x'), forenkla('12y/3', '4y', 'y'), forenkla('10a/5', '2a', 'a') ]),
+  g(R2.forenkla, [ forenkla('8x/2', '4x', 'x'), forenkla('12y/3', '4y', 'y'), forenkla('10x/5', '2x', 'x') ]),
   // [E 66, E 76]
   g(R2.valj, [ val('4 · 2x:', ['6x', '8x', '42x'], '8x'), val('6y/2:', ['3y', '4y', '3'], '3y'), val('3x · 5:', ['8x', '35x', '15x'], '15x') ]),
   // [E 79]
@@ -135,13 +135,13 @@ BLAD['3A'] = function(){ return { titel: 'Gånger och delat', grupper: [
 /* ── BLAD 3B – gånger och delat (klartextens Blad 2B) ── */
 BLAD['3B'] = function(){ return { titel: 'Gånger och delat', grupper: [
   // [E 66a–b]
-  g(R2.forenkla, [ forenkla('6 · 4x', '24x', 'x'), forenkla('10 · 6y', '60y', 'y'), forenkla('8 · 3a', '24a', 'a') ]),
+  g(R2.forenkla, [ forenkla('6 · 4x', '24x', 'x'), forenkla('10 · 6y', '60y', 'y'), forenkla('8 · 3x', '24x', 'x') ]),
   // [E 66c]
   g(R2.forenkla, [ forenkla('9y · 4', '36y', 'y'), forenkla('2y · 6', '12y', 'y'), forenkla('5x · 5', '25x', 'x') ]),
   // [E 66e, g, h]
   g(R2.forenkla, [ forenkla('24x/6', '4x', 'x'), forenkla('2y/2', 'y', 'y'), forenkla('8x/8', 'x', 'x') ]),
   // [E 66, E 76]
-  g(R2.valj, [ val('18a/3:', ['6', '15a', '6a'], '6a'), val('3 · 4y:', ['7y', '12y', '34y'], '12y'), val('5x/5:', ['x', '5', '0'], 'x') ]),
+  g(R2.valj, [ val('18x/3:', ['6', '15x', '6x'], '6x'), val('3 · 4y:', ['7y', '12y', '34y'], '12y'), val('5x/5:', ['x', '5', '0'], 'x') ]),
   // [E 79]
   g(beraknaRubrik('y', 4), [ forenklaBerakna('', '3 · 5y', '15y', 4, 60, 'y'), forenklaBerakna('', '16y/8', '2y', 4, 8, 'y') ])
 ] }; };

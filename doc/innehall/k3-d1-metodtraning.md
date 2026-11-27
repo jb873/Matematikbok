@@ -94,14 +94,14 @@ B. antalet glassar man kan köpa för 100 kr
 C. hur mycket man får tillbaka när man köper x glassar och betalar med en 100-lapp
 Facit: C
 
-**4.** En biobiljett kostar b kr. Vad betyder 4 · b?
+**4.** En biobiljett kostar x kr. Vad betyder 4 · x?
 A. priset för en biljett
 B. priset för 4 biljetter
 C. antalet biljetter
 Facit: B
 
-**5.** En taxiresa kostar 50 kr i start och 15 kr per kilometer. Vad kan uttrycket 50 + 15 · k betyda?
-A. priset för en resa på k kilometer
+**5.** En taxiresa kostar 50 kr i start och 15 kr per kilometer. Vad kan uttrycket 50 + 15 · x betyda?
+A. priset för en resa på x kilometer
 B. priset för en resa på 15 kilometer
 C. hur många kilometer resan är
 Facit: A
@@ -130,9 +130,9 @@ B. en pizza och x läsk
 C. 70 pizzor och 15 läsk
 Facit: B
 
-**10.** En vecka har 7 dagar. Vad kan uttrycket 7 · v + 2 betyda?
-A. antalet dagar på v veckor och 2 dagar
-B. antalet veckor på v dagar
+**10.** En vecka har 7 dagar. Vad kan uttrycket 7 · x + 2 betyda?
+A. antalet dagar på x veckor och 2 dagar
+B. antalet veckor på x dagar
 C. antalet dagar på 2 veckor
 Facit: A
 
@@ -162,31 +162,31 @@ B. x korvar och 10 dricka
 C. 20 korvar och x dricka
 Facit: A
 
-**5.** (Figur: en vuxenbiljett med prislappen v kr och en barnbiljett med prislappen b kr.) Vad kan uttrycket 2 · v + 3 · b betyda?
+**5.** (Figur: en vuxenbiljett med prislappen x kr och en barnbiljett med prislappen y kr.) Vad kan uttrycket 2 · x + 3 · y betyda?
 A. biljetter för 3 vuxna och 2 barn
 B. biljetter för 2 vuxna och 3 barn
 C. biljetter för 5 vuxna
 Facit: B
 
-**6.** (Figur: en vuxenbiljett med prislappen v kr och en barnbiljett med prislappen b kr.) Vad kan uttrycket v + 4 · b betyda?
+**6.** (Figur: en vuxenbiljett med prislappen x kr och en barnbiljett med prislappen y kr.) Vad kan uttrycket x + 4 · y betyda?
 A. biljetter för 4 vuxna och 1 barn
 B. biljetter för 5 barn
 C. biljetter för 1 vuxen och 4 barn
 Facit: C
 
-**7.** (Figur: ett äpple med prislappen a kr och en banan med prislappen b kr.) Vad kan uttrycket 3a + 3b betyda?
+**7.** (Figur: ett äpple med prislappen x kr och en banan med prislappen y kr.) Vad kan uttrycket 3x + 3y betyda?
 A. lika många äpplen som bananer, 3 av varje
 B. 3 äpplen och 1 banan
 C. 6 äpplen
 Facit: A
 
-**8.** (Figur: ett äpple med prislappen a kr och en banan med prislappen b kr.) Vad kan uttrycket 5a + 2b betyda?
+**8.** (Figur: ett äpple med prislappen x kr och en banan med prislappen y kr.) Vad kan uttrycket 5x + 2y betyda?
 A. 2 äpplen och 5 bananer
 B. 5 äpplen och 2 bananer
 C. 7 bananer
 Facit: B
 
-**9.** En penna kostar p kr och ett block k kr. Vad kan uttrycket 100 − 2 · p − k betyda?
+**9.** En penna kostar x kr och ett block y kr. Vad kan uttrycket 100 − 2 · x − y betyda?
 A. priset för 2 pennor och ett block
 B. hur mycket man får tillbaka när man köper ett block och 2 pennor och betalar med en 100-lapp
 C. hur mycket man får tillbaka när man köper 2 block och en penna och betalar med en 100-lapp
@@ -212,19 +212,19 @@ B. Sonen är 32 år.
 C. Pappa är 32 år yngre än sonen.
 Facit: A
 
-**3.** Maja är m år och Hugo är h år. Maja är äldst. Vad betyder m − h?
+**3.** Maja är x år och Hugo är y år. Maja är äldst. Vad betyder x − y?
 A. hur gamla de är tillsammans
 B. hur mycket äldre Maja är än Hugo
 C. hur mycket äldre Hugo är än Maja
 Facit: B
 
-**4.** Maja är m år och Hugo är h år. Vad betyder m + h?
+**4.** Maja är x år och Hugo är y år. Vad betyder x + y?
 A. hur gamla de är tillsammans
 B. hur mycket äldre Maja är än Hugo
-C. Majas ålder om h år
+C. Majas ålder om y år
 Facit: A
 
-**5.** Farmor är f år. Barnbarnet Elin är [f | 7] år. Vad betyder [f | 7]?
+**5.** Farmor är x år. Barnbarnet Elin är [x | 7] år. Vad betyder [x | 7]?
 A. Elin är 7 år yngre än farmor.
 B. Elin är en sjundedel så gammal som farmor.
 C. Farmor är 7 år.
@@ -236,19 +236,19 @@ B. Mamma är 3 år.
 C. Mamma är tre gånger så gammal som Lisa.
 Facit: C
 
-**7.** Ali är a cm lång. Bo är (a − 8) cm lång. Vad betyder a − 8?
+**7.** Ali är x cm lång. Bo är (x − 8) cm lång. Vad betyder x − 8?
 A. Bo är 8 cm kortare än Ali.
 B. Bo är 8 cm längre än Ali.
 C. Bo är 8 cm lång.
 Facit: A
 
-**8.** I en klass finns p pojkar och f flickor. Vad betyder p + f?
+**8.** I en klass finns x pojkar och y flickor. Vad betyder x + y?
 A. hur många fler pojkar än flickor det finns
 B. hur många elever det finns i klassen
 C. hur många flickor det finns
 Facit: B
 
-**9.** Leo har k kr. Sam har (k + 50) kr. Vad betyder k + 50?
+**9.** Leo har x kr. Sam har (x + 50) kr. Vad betyder x + 50?
 A. Sam har 50 kr.
 B. Sam har 50 kr mindre än Leo.
 C. Sam har 50 kr mer än Leo.
@@ -264,11 +264,11 @@ Facit: A
 
 Para ihop varje person med rätt mening. Svara med bokstav.
 
-**1.** Mormor är m år.
-- Mamma är (m − 26) år.
-- Morfar är (m + 2) år.
-- Barnbarnet är [m | 6] år.
-- Moster är (m − 21) år.
+**1.** Mormor är x år.
+- Mamma är (x − 26) år.
+- Morfar är (x + 2) år.
+- Barnbarnet är [x | 6] år.
+- Moster är (x − 21) år.
 
 A. 2 år äldre än mormor
 B. en sjättedel så gammal som mormor
@@ -276,11 +276,11 @@ C. 26 år yngre än mormor
 D. 21 år yngre än mormor
 Facit: mamma C, morfar A, barnbarnet B, moster D
 
-**2.** Pappa är p år.
-- Farfar är (p + 30) år.
-- Dottern är [p | 4] år.
-- Mamma är (p − 3) år.
-- Sonen är (p − 28) år.
+**2.** Pappa är x år.
+- Farfar är (x + 30) år.
+- Dottern är [x | 4] år.
+- Mamma är (x − 3) år.
+- Sonen är (x − 28) år.
 
 A. 3 år yngre än pappa
 B. 30 år äldre än pappa
@@ -288,11 +288,11 @@ C. 28 år yngre än pappa
 D. en fjärdedel så gammal som pappa
 Facit: farfar B, dottern D, mamma A, sonen C
 
-**3.** Läraren Anna är a år.
-- Kollegan Bo är (a + 11) år.
-- Eleven Sam är (a − 36) år.
-- Rektorn är (a + 15) år.
-- Praktikanten är (a − 9) år.
+**3.** Läraren Anna är x år.
+- Kollegan Bo är (x + 11) år.
+- Eleven Sam är (x − 36) år.
+- Rektorn är (x + 15) år.
+- Praktikanten är (x − 9) år.
 
 A. 9 år yngre än Anna
 B. 15 år äldre än Anna
@@ -300,11 +300,11 @@ C. 36 år yngre än Anna
 D. 11 år äldre än Anna
 Facit: Bo D, Sam C, rektorn B, praktikanten A
 
-**4.** Ella har e kr.
-- Sam har (e + 40) kr.
-- Ida har (2 · e) kr.
-- Leo har (e − 15) kr.
-- Mo har [e | 2] kr.
+**4.** Ella har x kr.
+- Sam har (x + 40) kr.
+- Ida har (2 · x) kr.
+- Leo har (x − 15) kr.
+- Mo har [x | 2] kr.
 
 A. hälften så mycket som Ella
 B. 15 kr mindre än Ella
@@ -312,11 +312,11 @@ C. dubbelt så mycket som Ella
 D. 40 kr mer än Ella
 Facit: Sam D, Ida C, Leo B, Mo A
 
-**5.** Hugo är h cm lång.
-- Pappa är (h + 45) cm.
-- Lillasyster är (h − 30) cm.
-- Hunden är [h | 3] cm.
-- Brodern är (h + 6) cm.
+**5.** Hugo är x cm lång.
+- Pappa är (x + 45) cm.
+- Lillasyster är (x − 30) cm.
+- Hunden är [x | 3] cm.
+- Brodern är (x + 6) cm.
 
 A. 6 cm längre än Hugo
 B. en tredjedel så lång som Hugo
@@ -324,11 +324,11 @@ C. 45 cm längre än Hugo
 D. 30 cm kortare än Hugo
 Facit: pappa C, lillasyster D, hunden B, brodern A
 
-**6.** Farmor Greta är g år.
-- Farfar är (g + 5) år.
-- Pappa är (g − 29) år.
-- Barnbarnet är [g | 8] år.
-- Gretas bror är (g − 4) år.
+**6.** Farmor Greta är x år.
+- Farfar är (x + 5) år.
+- Pappa är (x − 29) år.
+- Barnbarnet är [x | 8] år.
+- Gretas bror är (x − 4) år.
 
 A. 4 år yngre än Greta
 B. 29 år yngre än Greta
@@ -336,11 +336,11 @@ C. 5 år äldre än Greta
 D. en åttondel så gammal som Greta
 Facit: farfar C, pappa B, barnbarnet D, brodern A
 
-**7.** Kalle har k kulor.
-- Ali har (k + 12) kulor.
-- Bea har (3 · k) kulor.
-- Cem har (k − 7) kulor.
-- Dina har [k | 4] kulor.
+**7.** Kalle har x kulor.
+- Ali har (x + 12) kulor.
+- Bea har (3 · x) kulor.
+- Cem har (x − 7) kulor.
+- Dina har [x | 4] kulor.
 
 A. en fjärdedel så många som Kalle
 B. 7 färre än Kalle
@@ -348,11 +348,11 @@ C. tre gånger så många som Kalle
 D. 12 fler än Kalle
 Facit: Ali D, Bea C, Cem B, Dina A
 
-**8.** Mamma Lena är k år.
-- Pappa är (k + 3) år.
-- Mormor är (k + 24) år.
-- Dottern är [k | 5] år.
-- Sonen är (k − 30) år.
+**8.** Mamma Lena är x år.
+- Pappa är (x + 3) år.
+- Mormor är (x + 24) år.
+- Dottern är [x | 5] år.
+- Sonen är (x − 30) år.
 
 A. 30 år yngre än mamma
 B. en femtedel så gammal som mamma
@@ -409,8 +409,8 @@ Facit: y − 9
 **3.** Välj rätt uttryck: y mindre än 40.   y − 40    40 − y    40 + y
 Facit: 40 − y
 
-**4.** Välj rätt uttryck: 5 gånger så mycket som n.   n + 5    5 · n    [n | 5]
-Facit: 5 · n
+**4.** Välj rätt uttryck: 5 gånger så mycket som x.   x + 5    5 · x    [x | 5]
+Facit: 5 · x
 
 **5.** Välj rätt uttryck: en tredjedel av x.   3x    x − 3    [x | 3]
 Facit: [x | 3]
@@ -421,14 +421,14 @@ Facit: x + 25
 **7.** Ella har x kr. Hon handlar för 18 kr. Fyll i hur mycket hon har kvar: ___
 Facit: x − 18
 
-**8.** Ett tal är a. Fyll i ett uttryck för ett tal som är dubbelt så stort: ___
-Facit: 2 · a
+**8.** Ett tal är x. Fyll i ett uttryck för ett tal som är dubbelt så stort: ___
+Facit: 2 · x
 
 **9.** x äpplen delas lika mellan 4 personer. Fyll i hur många var och en får: ___
 Facit: [x | 4]
 
-**10.** Ett tal är n. Fyll i ett uttryck för ett tal som är 10 mindre: ___
-Facit: n − 10
+**10.** Ett tal är x. Fyll i ett uttryck för ett tal som är 10 mindre: ___
+Facit: x − 10
 
 **11.** Välj rätt uttryck: 3 mer än dubbelt så mycket som x.   2 · x + 3    3 · x + 2    x + 2 + 3
 Facit: 2 · x + 3
@@ -441,11 +441,11 @@ Facit: [x | 2] − 7
 **1.** En glass kostar 14 kr. Fyll i vad x glassar kostar: ___
 Facit: 14 · x
 
-**2.** En bussresa kostar 25 kr. Vilket uttryck visar vad r resor kostar?   25 + r    25 · r    r − 25
-Facit: 25 · r
+**2.** En bussresa kostar 25 kr. Vilket uttryck visar vad x resor kostar?   25 + x    25 · x    x − 25
+Facit: 25 · x
 
-**3.** Ett äpple kostar a kr. Fyll i vad 6 äpplen kostar: ___
-Facit: 6 · a
+**3.** Ett äpple kostar x kr. Fyll i vad 6 äpplen kostar: ___
+Facit: 6 · x
 
 **4.** En bulle kostar 12 kr och en kaffe 20 kr. Fyll i vad x bullar och ett kaffe kostar: ___
 Facit: 12 · x + 20
@@ -459,11 +459,11 @@ Facit: 500 − 80 · x
 **7.** En korv kostar 20 kr och en dricka 10 kr. Fyll i vad x korvar och y dricka kostar: ___
 Facit: 20 · x + 10 · y
 
-**8.** En glass kostar g kr och en läsk l kr. Fyll i vad 2 glassar och 3 läsk kostar: ___
-Facit: 2 · g + 3 · l
+**8.** En glass kostar x kr och en läsk y kr. Fyll i vad 2 glassar och 3 läsk kostar: ___
+Facit: 2 · x + 3 · y
 
-**9.** En vuxenbiljett kostar 120 kr och en barnbiljett 60 kr. Fyll i vad 2 vuxenbiljetter och b barnbiljetter kostar: ___
-Facit: 2 · 120 + 60 · b
+**9.** En vuxenbiljett kostar 120 kr och en barnbiljett 60 kr. Fyll i vad 2 vuxenbiljetter och x barnbiljetter kostar: ___
+Facit: 2 · 120 + 60 · x
 
 **10.** En pizza kostar 70 kr och en läsk 15 kr. Familjen köper x pizzor och lika många läsk. Vilket uttryck visar vad det kostar?   70 · x + 15 · x    70 + 15 · x    85 + x
 Facit: 70 · x + 15 · x
@@ -473,39 +473,39 @@ Facit: 200 − 8 · x − 25 · y
 
 ## K3. Start plus förändring
 
-**1.** Nora har 150 kr. Hon sparar 30 kr i veckan. Fyll i hur mycket hon har efter v veckor: ___
-Facit: 150 + 30 · v
+**1.** Nora har 150 kr. Hon sparar 30 kr i veckan. Fyll i hur mycket hon har efter x veckor: ___
+Facit: 150 + 30 · x
 
-**2.** Ett ljus är 20 cm långt. Det brinner ner 2 cm i timmen. Fyll i ljusets längd efter t timmar: ___
-Facit: 20 − 2 · t
+**2.** Ett ljus är 20 cm långt. Det brinner ner 2 cm i timmen. Fyll i ljusets längd efter x timmar: ___
+Facit: 20 − 2 · x
 
-**3.** En tunna innehåller 80 liter vatten. Det rinner ut 5 liter i minuten. Vilket uttryck visar hur mycket vatten som finns kvar efter m minuter?   80 + 5 · m    80 − 5 · m    5 · m − 80
-Facit: 80 − 5 · m
+**3.** En tunna innehåller 80 liter vatten. Det rinner ut 5 liter i minuten. Vilket uttryck visar hur mycket vatten som finns kvar efter x minuter?   80 + 5 · x    80 − 5 · x    5 · x − 80
+Facit: 80 − 5 · x
 
-**4.** En taxiresa kostar 45 kr i start och 12 kr per kilometer. Fyll i vad en resa på k kilometer kostar: ___
-Facit: 45 + 12 · k
+**4.** En taxiresa kostar 45 kr i start och 12 kr per kilometer. Fyll i vad en resa på x kilometer kostar: ___
+Facit: 45 + 12 · x
 
-**5.** Ett år har 12 månader. Fyll i hur många månader a år och 5 månader är: ___
-Facit: 12 · a + 5
+**5.** Ett år har 12 månader. Fyll i hur många månader x år och 5 månader är: ___
+Facit: 12 · x + 5
 
-**6.** En timme har 60 minuter. Fyll i hur många minuter t timmar och 15 minuter är: ___
-Facit: 60 · t + 15
+**6.** En timme har 60 minuter. Fyll i hur många minuter x timmar och 15 minuter är: ___
+Facit: 60 · x + 15
 
-**7.** Ett gymkort kostar 200 kr i avgift och sedan 50 kr per besök. Fyll i vad b besök kostar: ___
-Facit: 200 + 50 · b
+**7.** Ett gymkort kostar 200 kr i avgift och sedan 50 kr per besök. Fyll i vad x besök kostar: ___
+Facit: 200 + 50 · x
 
 **8.** Ett presentkort är värt 500 kr. Ett biobesök kostar 90 kr. Fyll i hur mycket som finns kvar på kortet efter x biobesök: ___
 Facit: 500 − 90 · x
 
 **9.** En växt är 12 cm hög. Den växer 3 cm i veckan.
-a) Fyll i växtens höjd efter v veckor: ___
-b) Hur hög är växten efter 5 veckor? Skriv uttrycket med 5 i stället för v och räkna i flera led. Börja med multiplikationen.
-Facit: a) 12 + 3 · v   b) 12 + 3 · 5 = 12 + 15 = 27 cm
+a) Fyll i växtens höjd efter x veckor: ___
+b) Hur hög är växten efter 5 veckor? Skriv uttrycket med 5 i stället för x och räkna i flera led. Börja med multiplikationen.
+Facit: a) 12 + 3 · x   b) 12 + 3 · 5 = 12 + 15 = 27 cm
 
 **10.** Ett ljus är 30 cm långt. Det brinner ner 3 cm i timmen.
-a) Fyll i ljusets längd efter t timmar: ___
-b) Hur långt är ljuset efter 4 timmar? Skriv uttrycket med 4 i stället för t och räkna i flera led. Börja med multiplikationen.
-Facit: a) 30 − 3 · t   b) 30 − 3 · 4 = 30 − 12 = 18 cm
+a) Fyll i ljusets längd efter x timmar: ___
+b) Hur långt är ljuset efter 4 timmar? Skriv uttrycket med 4 i stället för x och räkna i flera led. Börja med multiplikationen.
+Facit: a) 30 − 3 · x   b) 30 − 3 · 4 = 30 − 12 = 18 cm
 
 ## K4. Ålder i flera led
 
@@ -519,10 +519,10 @@ a) Max är 3 år äldre än Vera. Han är ___ år.
 b) Kusinen är 6 år yngre än Max. Hon är ___ år.
 Facit: a) x + 3   b) x + 3 − 6 eller x − 3
 
-**3.** Mormor är m år. Fyll i.
+**3.** Mormor är x år. Fyll i.
 a) Morfar är 4 år äldre än mormor. Han är ___ år.
 b) Morfars bror är 7 år yngre än morfar. Han är ___ år.
-Facit: a) m + 4   b) m + 4 − 7 eller m − 3
+Facit: a) x + 4   b) x + 4 − 7 eller x − 3
 
 **4.** Lisa är x år. Fyll i.
 a) Storasyster är dubbelt så gammal som Lisa. Hon är ___ år.
@@ -534,20 +534,20 @@ a) Farfar är 28 år äldre än pappa. Han är ___ år.
 b) Farmor är 2 år yngre än farfar. Hon är ___ år.
 Facit: a) y + 28   b) y + 28 − 2 eller y + 26
 
-**6.** Hugo är h år. Fyll i.
+**6.** Hugo är x år. Fyll i.
 a) Brodern är 4 år yngre än Hugo. Han är ___ år.
 b) Hunden är 9 år yngre än brodern. Den är ___ år.
-Facit: a) h − 4   b) h − 4 − 9 eller h − 13
+Facit: a) x − 4   b) x − 4 − 9 eller x − 13
 
-**7.** Mamma är k år. Fyll i.
+**7.** Mamma är x år. Fyll i.
 a) Pappa är 1 år äldre än mamma. Han är ___ år.
 b) Faster är 6 år yngre än pappa. Hon är ___ år.
-Facit: a) k + 1   b) k + 1 − 6 eller k − 5
+Facit: a) x + 1   b) x + 1 − 6 eller x − 5
 
-**8.** Sam är s år. Fyll i.
+**8.** Sam är x år. Fyll i.
 a) Mamma är tre gånger så gammal som Sam. Hon är ___ år.
 b) Pappa är 2 år äldre än mamma. Han är ___ år.
-Facit: a) 3 · s   b) 3 · s + 2
+Facit: a) 3 · x   b) 3 · x + 2
 
 **9.** Ida är x år. Fyll i.
 a) Kusinen är 5 år äldre än Ida. Hon är ___ år.
@@ -593,35 +593,35 @@ Facit: x − 10, x + 20, x + 40
 
 ## K6. Tal i följd, jämna och udda
 
-**1.** Tre tal följer varandra. Det minsta är n. Fyll i de två andra.   n, ___, ___
-Facit: n + 1, n + 2
+**1.** Tre tal följer varandra. Det minsta är x. Fyll i de två andra.   x, ___, ___
+Facit: x + 1, x + 2
 
-**2.** Fyra tal följer varandra. Det minsta är n. Fyll i de tre andra.   n, ___, ___, ___
-Facit: n + 1, n + 2, n + 3
+**2.** Fyra tal följer varandra. Det minsta är x. Fyll i de tre andra.   x, ___, ___, ___
+Facit: x + 1, x + 2, x + 3
 
-**3.** Tre jämna tal följer varandra. Det minsta är n. Fyll i de två andra.   n, ___, ___
-Facit: n + 2, n + 4
+**3.** Tre jämna tal följer varandra. Det minsta är x. Fyll i de två andra.   x, ___, ___
+Facit: x + 2, x + 4
 
-**4.** u är ett udda tal. Fyll i nästa udda tal: ___
-Facit: u + 2
+**4.** x är ett udda tal. Fyll i nästa udda tal: ___
+Facit: x + 2
 
-**5.** Tre udda tal följer varandra. Det minsta är u. Fyll i de två andra.   u, ___, ___
-Facit: u + 2, u + 4
+**5.** Tre udda tal följer varandra. Det minsta är x. Fyll i de två andra.   x, ___, ___
+Facit: x + 2, x + 4
 
-**6.** Ett tal är n. Fyll i talet som kommer direkt före n: ___
-Facit: n − 1
+**6.** Ett tal är x. Fyll i talet som kommer direkt före x: ___
+Facit: x − 1
 
-**7.** j är ett jämnt tal. Fyll i det jämna talet som kommer direkt före j: ___
-Facit: j − 2
+**7.** x är ett jämnt tal. Fyll i det jämna talet som kommer direkt före x: ___
+Facit: x − 2
 
-**8.** n är ett jämnt tal. Vilket uttryck visar nästa jämna tal?   n + 1    n + 2    2n
-Facit: n + 2
+**8.** x är ett jämnt tal. Vilket uttryck visar nästa jämna tal?   x + 1    x + 2    2x
+Facit: x + 2
 
-**9.** Ett tal är n. Vilket uttryck visar talet som kommer direkt efter?   n − 1    n + 1    n + 2
-Facit: n + 1
+**9.** Ett tal är x. Vilket uttryck visar talet som kommer direkt efter?   x − 1    x + 1    x + 2
+Facit: x + 1
 
-**10.** Tre tal följer varandra. Det minsta är a. Fyll i de två andra.   a, ___, ___
-Facit: a + 1, a + 2
+**10.** Tre tal följer varandra. Det minsta är x. Fyll i de två andra.   x, ___, ___
+Facit: x + 1, x + 2
 
 ## K7. Omkrets
 
@@ -631,8 +631,8 @@ Facit: x + x + 6 (= 2x + 6)
 **2.** (Figur: en rektangel med sidorna x cm och 5 cm.) Fyll i ett uttryck för omkretsen: ___
 Facit: x + 5 + x + 5 (= 2x + 10)
 
-**3.** (Figur: en kvadrat där varje sida är s cm.) Fyll i ett uttryck för omkretsen: ___
-Facit: s + s + s + s (= 4 · s)
+**3.** (Figur: en kvadrat där varje sida är x cm.) Fyll i ett uttryck för omkretsen: ___
+Facit: x + x + x + x (= 4 · x)
 
 **4.** (Figur: en liksidig triangel där varje sida är a cm.) Fyll i ett uttryck för omkretsen: ___
 Facit: a + a + a (= 3 · a)
@@ -646,10 +646,10 @@ Facit: x + x + 1 + x + x + 1 och 4 · x + 2
 **7.** (Figur: en rektangel med sidorna x cm och x + 5 cm.) Fyll i ett uttryck för omkretsen: ___
 Facit: x + x + 5 + x + x + 5 (= 4x + 10)
 
-**8.** (Figur: en rektangel med sidorna s cm och 4 cm.)
+**8.** (Figur: en rektangel med sidorna x cm och 4 cm.)
 a) Fyll i ett uttryck för omkretsen: ___
-b) Beräkna omkretsen när s = 6 med uttrycket 2 · s + 8. Skriv uttrycket med 6 i stället för s och räkna i flera led. Börja med multiplikationen.
-Facit: a) s + 4 + s + 4 (= 2s + 8)   b) 2 · 6 + 8 = 12 + 8 = 20 cm
+b) Beräkna omkretsen när x = 6 med uttrycket 2 · x + 8. Skriv uttrycket med 6 i stället för x och räkna i flera led. Börja med multiplikationen.
+Facit: a) x + 4 + x + 4 (= 2x + 8)   b) 2 · 6 + 8 = 12 + 8 = 20 cm
 
 **9.** (Figur: en likbent triangel med sidorna x cm, x cm och 9 cm.)
 a) Fyll i ett uttryck för omkretsen: ___
@@ -768,13 +768,13 @@ Facit: 4 · 5 + 3 = 20 + 3 = 23
 **5.** Beräkna 6y − 8 när y = 4. Börja med multiplikationen.
 Facit: 6 · 4 − 8 = 24 − 8 = 16
 
-**6.** Beräkna 30 − 3a när a = 7. Börja med multiplikationen.
+**6.** Beräkna 30 − 3x när x = 7. Börja med multiplikationen.
 Facit: 30 − 3 · 7 = 30 − 21 = 9
 
 **7.** Beräkna 5 + 2x när x = 9. Börja med multiplikationen.
 Facit: 5 + 2 · 9 = 5 + 18 = 23
 
-**8.** Beräkna 7b − 12 när b = 3. Börja med multiplikationen.
+**8.** Beräkna 7x − 12 när x = 3. Börja med multiplikationen.
 Facit: 7 · 3 − 12 = 21 − 12 = 9
 
 **9.** Beräkna 100 − 8x när x = 6. Börja med multiplikationen.
@@ -783,10 +783,10 @@ Facit: 100 − 8 · 6 = 100 − 48 = 52
 **10.** Beräkna 2x + 7 när x = 0.
 Facit: 2 · 0 + 7 = 0 + 7 = 7
 
-**11.** Beräkna 9n + 1 när n = 4. Börja med multiplikationen.
+**11.** Beräkna 9x + 1 när x = 4. Börja med multiplikationen.
 Facit: 9 · 4 + 1 = 36 + 1 = 37
 
-**12.** Beräkna 50 − 5m när m = 8. Börja med multiplikationen.
+**12.** Beräkna 50 − 5x när x = 8. Börja med multiplikationen.
 Facit: 50 − 5 · 8 = 50 − 40 = 10
 
 ## R4. Sätt in med bråk och parentes
@@ -808,7 +808,7 @@ Facit: 3 · (5 + 2) = 3 · 7 = 21
 **5.** Beräkna 4 · (y − 3) när y = 9.
 Facit: 4 · (9 − 3) = 4 · 6 = 24
 
-**6.** Beräkna 2 · (a + 5) − 4 när a = 3.
+**6.** Beräkna 2 · (x + 5) − 4 när x = 3.
 Facit: 2 · (3 + 5) − 4 = 2 · 8 − 4 = 16 − 4 = 12
 
 **7.** Beräkna 6 + (2x + 1) när x = 4. Räkna först ut parentesen.
@@ -833,19 +833,19 @@ Facit: 5 · (6 − 4) + [6 | 2] = 5 · 2 + 3 = 10 + 3 = 13
 
 Skriv av uttrycket, sätt in talen och räkna i flera led.
 
-**1.** Beräkna a + b när a = 6 och b = 9.
+**1.** Beräkna x + y när x = 6 och y = 9.
 Facit: 6 + 9 = 15
 
-**2.** Beräkna 3a + b när a = 4 och b = 5.
+**2.** Beräkna 3x + y när x = 4 och y = 5.
 Facit: 3 · 4 + 5 = 12 + 5 = 17
 
-**3.** Beräkna 2a − b när a = 7 och b = 3.
+**3.** Beräkna 2x − y när x = 7 och y = 3.
 Facit: 2 · 7 − 3 = 14 − 3 = 11
 
-**4.** Beräkna 4a + 3b när a = 2 och b = 5.
+**4.** Beräkna 4x + 3y när x = 2 och y = 5.
 Facit: 4 · 2 + 3 · 5 = 8 + 15 = 23
 
-**5.** Beräkna 5a − 2b när a = 6 och b = 4.
+**5.** Beräkna 5x − 2y när x = 6 och y = 4.
 Facit: 5 · 6 − 2 · 4 = 30 − 8 = 22
 
 **6.** Beräkna 2x när x = 3,5.
@@ -857,7 +857,7 @@ Facit: 4 · 2,5 + 1 = 10 + 1 = 11
 **8.** Beräkna 10 − 3x när x = 1,5.
 Facit: 10 − 3 · 1,5 = 10 − 4,5 = 5,5
 
-**9.** Beräkna 3a + 2b när a = 1,5 och b = 4.
+**9.** Beräkna 3x + 2y när x = 1,5 och y = 4.
 Facit: 3 · 1,5 + 2 · 4 = 4,5 + 8 = 12,5
 
 **10.** Beräkna 6x − 2y när x = 2,5 och y = 3.
@@ -866,7 +866,7 @@ Facit: 6 · 2,5 − 2 · 3 = 15 − 6 = 9
 **11.** Beräkna (2x + 3) + (y − 1) när x = 4 och y = 6. Räkna först ut parenteserna.
 Facit: (2 · 4 + 3) + (6 − 1) = (8 + 3) + 5 = 11 + 5 = 16
 
-**12.** Beräkna (3a − 4) − (2b + 1) när a = 6 och b = 2. Räkna först ut parenteserna.
+**12.** Beräkna (3x − 4) − (2y + 1) när x = 6 och y = 2. Räkna först ut parenteserna.
 Facit: (3 · 6 − 4) − (2 · 2 + 1) = (18 − 4) − (4 + 1) = 14 − 5 = 9
 
 ## R6. Vilket x ger värdet?

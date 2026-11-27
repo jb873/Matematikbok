@@ -16,7 +16,7 @@ BLAD 1A — Skriv av uttrycket, sätt in talet och räkna i flera led.
 2. Beräkna uttryckets värde när x = 6. Börja med multiplikationen.
    a) 3x + 5  b) 4x − 7  c) 25 − 2x
 3. Beräkna uttryckets värde när y = 8.  a) [y | 2] + 3  b) 30 − [y | 4]  c) 5 · (y − 3)
-4. Beräkna uttrycket 2a + 7 när  a) a = 3  b) a = 10  c) a = 0
+4. Beräkna uttrycket 2x + 7 när  a) x = 3  b) x = 10  c) x = 0
 5. Beräkna uttryckets värde när x = 3. Räkna först ut parentesen.
    a) 6 + (2x + 5)  b) (4x − 2) + 10  c) 20 − (x + 4)
 Facit:
@@ -33,7 +33,7 @@ BLAD 1B — Skriv av uttrycket, sätt in talet och räkna i flera led.
 2. Beräkna uttryckets värde när x = 7. Börja med multiplikationen.
    a) 3x + 5  b) 6x − 9  c) 40 − 4x
 3. Beräkna uttryckets värde när y = 12.  a) [y | 3] + 6  b) 20 − [y | 4]  c) 2 · (y − 5)
-4. Beräkna uttrycket 4b − 3 när  a) b = 2  b) b = 5  c) b = 10
+4. Beräkna uttrycket 4x − 3 när  a) x = 2  b) x = 5  c) x = 10
 5. Beräkna uttryckets värde när x = 4. Räkna först ut parentesen.
    a) 9 + (3x + 2)  b) (5x − 6) + 8  c) 30 − (2x + 1)
 Facit:
@@ -46,7 +46,7 @@ Facit:
    c) 30 − (2 · 4 + 1) = 30 − (8 + 1) = 30 − 9 = 21
 
 BLAD 2A — Skriv av uttrycket, sätt in talen och räkna i flera led.
-1. Beräkna uttryckets värde när a = 4 och b = 3.  a) a + b  b) 2a + b  c) 5a − 2b
+1. Beräkna uttryckets värde när x = 4 och y = 3.  a) x + y  b) 2x + y  c) 5x − 2y
 2. Beräkna uttryckets värde när x = 2,5.  a) 4x  b) 2x + 3  c) 10 − 2x
 3. Beräkna uttryckets värde när x = 9.  a) [x | 3] + 2x  b) 3 · (x + 1) − 5  c) [x + 6 | 5] + x
 4. Vilket värde på x ger uttrycket rätt värde? Välj.
@@ -66,7 +66,7 @@ Facit:
    c) 40 − (5 + 3 · 2) = 40 − (5 + 6) = 40 − 11 = 29
 
 BLAD 2B — Skriv av uttrycket, sätt in talen och räkna i flera led.
-1. Beräkna uttryckets värde när a = 6 och b = 4.  a) a − b  b) 3a + 2b  c) 4a − 3b
+1. Beräkna uttryckets värde när x = 6 och y = 4.  a) x − y  b) 3x + 2y  c) 4x − 3y
 2. Beräkna uttryckets värde när x = 1,5.  a) 6x  b) 4x + 2  c) 12 − 3x
 3. Beräkna uttryckets värde när x = 8.  a) [x | 4] + 3x  b) 2 · (x − 3) + 7  c) [x + 12 | 4] − 2
 4. Vilket värde på x ger uttrycket rätt värde? Välj.

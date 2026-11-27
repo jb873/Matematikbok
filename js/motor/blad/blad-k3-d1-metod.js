@@ -18,8 +18,8 @@ var val = T.val, flera = T.flera, flerval = T.flerval, utt = T.utt, talfoljd = T
 // En uppgift: rubrik (uppgiftstexten), rader, ev. prislista (varor).
 function u(rubrik, rader, varor){ return { rubrik: rubrik, rader: rader, varor: varor || null }; }
 function v1(rubrik, alt, ratt, varor){ return u(rubrik, [val('', alt, ratt)], varor); }
-function biljetter(){ return figur(F().prislappar({ varor: [{ namn: 'Vuxenbiljett', pris: 'v kr' }, { namn: 'Barnbiljett', pris: 'b kr' }] })); }
-function frukt(){ return figur(F().prislappar({ varor: [{ namn: 'Äpple', pris: 'a kr' }, { namn: 'Banan', pris: 'b kr' }] })); }
+function biljetter(){ return figur(F().prislappar({ varor: [{ namn: 'Vuxenbiljett', pris: 'x kr' }, { namn: 'Barnbiljett', pris: 'y kr' }] })); }
+function frukt(){ return figur(F().prislappar({ varor: [{ namn: 'Äpple', pris: 'x kr' }, { namn: 'Banan', pris: 'y kr' }] })); }
 var PARA = { rubrik: 'Para ihop varje person med rätt mening. Svara med bokstav.' }.rubrik;
 function para(rubrik, meningar, par){ return u(rubrik, [paraIhop('', meningar, par)]); }
 function ringa(rubrik, tal, ratt){ return u(rubrik, [flerval(tal, ratt)]); }
@@ -64,17 +64,17 @@ BANK.T2 = { kat: 'T', namn: 'Tolka ett uttryck med en variabel', nod: TOLKA, upp
   v1('En glass kostar 16 kr. Vad kan uttrycket 100 − 16 · x betyda?',
      ['priset för x glassar', 'antalet glassar man kan köpa för 100 kr', 'hur mycket man får tillbaka när man köper x glassar och betalar med en 100-lapp'],
      'hur mycket man får tillbaka när man köper x glassar och betalar med en 100-lapp'),
-  v1('En biobiljett kostar b kr. Vad betyder 4 · b?', ['priset för en biljett', 'priset för 4 biljetter', 'antalet biljetter'], 'priset för 4 biljetter'),
-  v1('En taxiresa kostar 50 kr i start och 15 kr per kilometer. Vad kan uttrycket 50 + 15 · k betyda?',
-     ['priset för en resa på k kilometer', 'priset för en resa på 15 kilometer', 'hur många kilometer resan är'], 'priset för en resa på k kilometer'),
+  v1('En biobiljett kostar x kr. Vad betyder 4 · x?', ['priset för en biljett', 'priset för 4 biljetter', 'antalet biljetter'], 'priset för 4 biljetter'),
+  v1('En taxiresa kostar 50 kr i start och 15 kr per kilometer. Vad kan uttrycket 50 + 15 · x betyda?',
+     ['priset för en resa på x kilometer', 'priset för en resa på 15 kilometer', 'hur många kilometer resan är'], 'priset för en resa på x kilometer'),
   v1('Elsa har x kr. Vad betyder x − 35?', ['hur mycket hon har om hon får 35 kr till', 'hur mycket hon har kvar när hon har handlat för 35 kr', '35 gånger så mycket som hon har'],
      'hur mycket hon har kvar när hon har handlat för 35 kr'),
   v1('En ask innehåller x pennor. Vad betyder 6 · x?', ['antalet pennor i 6 askar', 'antalet pennor när man har tagit bort 6', 'antalet pennor i varje ask'], 'antalet pennor i 6 askar'),
   v1('Leo har x kort och delar dem lika med sin bror. Vad betyder x/2?', ['hur många kort de har tillsammans', '2 kort fler än Leo har', 'hur många kort var och en får'],
      'hur många kort var och en får'),
   v1('En pizza kostar 70 kr och en läsk 15 kr. Vad kan uttrycket 70 + x · 15 betyda?', ['x pizzor och en läsk', 'en pizza och x läsk', '70 pizzor och 15 läsk'], 'en pizza och x läsk'),
-  v1('En vecka har 7 dagar. Vad kan uttrycket 7 · v + 2 betyda?', ['antalet dagar på v veckor och 2 dagar', 'antalet veckor på v dagar', 'antalet dagar på 2 veckor'],
-     'antalet dagar på v veckor och 2 dagar')
+  v1('En vecka har 7 dagar. Vad kan uttrycket 7 · x + 2 betyda?', ['antalet dagar på x veckor och 2 dagar', 'antalet veckor på x dagar', 'antalet dagar på 2 veckor'],
+     'antalet dagar på x veckor och 2 dagar')
 ]; } };
 
 BANK.T3 = { kat: 'T', namn: 'Tolka ett uttryck med två variabler och "lika många"', nod: TOLKA, uppg: function(){ return [
@@ -82,11 +82,11 @@ BANK.T3 = { kat: 'T', namn: 'Tolka ett uttryck med två variabler och "lika mån
   v1('En glass kostar 15 kr och en läsk 12 kr. Vad kan uttrycket x · 12 + y · 15 betyda?', ['x läsk och y glassar', 'x glassar och y läsk', '12 läsk och 15 glassar'], 'x läsk och y glassar'),
   v1('En glass kostar 15 kr och en läsk 12 kr. Vad kan uttrycket x · 15 + x · 12 betyda?', ['x glassar och 12 läsk', '15 glassar och 12 läsk', 'lika många glassar som läsk'], 'lika många glassar som läsk'),
   v1('En korv kostar 20 kr och en dricka 10 kr. Vad kan uttrycket x · 20 + x · 10 betyda?', ['lika många korvar som dricka', 'x korvar och 10 dricka', '20 korvar och x dricka'], 'lika många korvar som dricka'),
-  u('Vad kan uttrycket 2 · v + 3 · b betyda?', [biljetter(), val('', ['biljetter för 3 vuxna och 2 barn', 'biljetter för 2 vuxna och 3 barn', 'biljetter för 5 vuxna'], 'biljetter för 2 vuxna och 3 barn')]),
-  u('Vad kan uttrycket v + 4 · b betyda?', [biljetter(), val('', ['biljetter för 4 vuxna och 1 barn', 'biljetter för 5 barn', 'biljetter för 1 vuxen och 4 barn'], 'biljetter för 1 vuxen och 4 barn')]),
-  u('Vad kan uttrycket 3a + 3b betyda?', [frukt(), val('', ['lika många äpplen som bananer, 3 av varje', '3 äpplen och 1 banan', '6 äpplen'], 'lika många äpplen som bananer, 3 av varje')]),
-  u('Vad kan uttrycket 5a + 2b betyda?', [frukt(), val('', ['2 äpplen och 5 bananer', '5 äpplen och 2 bananer', '7 bananer'], '5 äpplen och 2 bananer')]),
-  v1('En penna kostar p kr och ett block k kr. Vad kan uttrycket 100 − 2 · p − k betyda?',
+  u('Vad kan uttrycket 2 · x + 3 · y betyda?', [biljetter(), val('', ['biljetter för 3 vuxna och 2 barn', 'biljetter för 2 vuxna och 3 barn', 'biljetter för 5 vuxna'], 'biljetter för 2 vuxna och 3 barn')]),
+  u('Vad kan uttrycket x + 4 · y betyda?', [biljetter(), val('', ['biljetter för 4 vuxna och 1 barn', 'biljetter för 5 barn', 'biljetter för 1 vuxen och 4 barn'], 'biljetter för 1 vuxen och 4 barn')]),
+  u('Vad kan uttrycket 3x + 3y betyda?', [frukt(), val('', ['lika många äpplen som bananer, 3 av varje', '3 äpplen och 1 banan', '6 äpplen'], 'lika många äpplen som bananer, 3 av varje')]),
+  u('Vad kan uttrycket 5x + 2y betyda?', [frukt(), val('', ['2 äpplen och 5 bananer', '5 äpplen och 2 bananer', '7 bananer'], '5 äpplen och 2 bananer')]),
+  v1('En penna kostar x kr och ett block y kr. Vad kan uttrycket 100 − 2 · x − y betyda?',
      ['priset för 2 pennor och ett block', 'hur mycket man får tillbaka när man köper ett block och 2 pennor och betalar med en 100-lapp',
       'hur mycket man får tillbaka när man köper 2 block och en penna och betalar med en 100-lapp'],
      'hur mycket man får tillbaka när man köper ett block och 2 pennor och betalar med en 100-lapp'),
@@ -96,34 +96,34 @@ BANK.T3 = { kat: 'T', namn: 'Tolka ett uttryck med två variabler och "lika mån
 BANK.T4 = { kat: 'T', namn: 'Tolka jämförelser', nod: TOLKA, uppg: function(){ return [
   v1('Vera är x år. Hennes bror Max är (x + 4) år. Vad betyder x + 4?', ['Max är 4 år.', 'Max är 4 år yngre än Vera.', 'Max är 4 år äldre än Vera.'], 'Max är 4 år äldre än Vera.'),
   v1('Pappa är y år. Sonen är (y − 32) år. Vad betyder y − 32?', ['Sonen är 32 år yngre än pappa.', 'Sonen är 32 år.', 'Pappa är 32 år yngre än sonen.'], 'Sonen är 32 år yngre än pappa.'),
-  v1('Maja är m år och Hugo är h år. Maja är äldst. Vad betyder m − h?', ['hur gamla de är tillsammans', 'hur mycket äldre Maja är än Hugo', 'hur mycket äldre Hugo är än Maja'], 'hur mycket äldre Maja är än Hugo'),
-  v1('Maja är m år och Hugo är h år. Vad betyder m + h?', ['hur gamla de är tillsammans', 'hur mycket äldre Maja är än Hugo', 'Majas ålder om h år'], 'hur gamla de är tillsammans'),
-  v1('Farmor är f år. Barnbarnet Elin är f/7 år. Vad betyder f/7?', ['Elin är 7 år yngre än farmor.', 'Elin är en sjundedel så gammal som farmor.', 'Farmor är 7 år.'], 'Elin är en sjundedel så gammal som farmor.'),
+  v1('Maja är x år och Hugo är y år. Maja är äldst. Vad betyder x − y?', ['hur gamla de är tillsammans', 'hur mycket äldre Maja är än Hugo', 'hur mycket äldre Hugo är än Maja'], 'hur mycket äldre Maja är än Hugo'),
+  v1('Maja är x år och Hugo är y år. Vad betyder x + y?', ['hur gamla de är tillsammans', 'hur mycket äldre Maja är än Hugo', 'Majas ålder om y år'], 'hur gamla de är tillsammans'),
+  v1('Farmor är x år. Barnbarnet Elin är x/7 år. Vad betyder x/7?', ['Elin är 7 år yngre än farmor.', 'Elin är en sjundedel så gammal som farmor.', 'Farmor är 7 år.'], 'Elin är en sjundedel så gammal som farmor.'),
   v1('Lisa är x år. Hennes mamma är (3 · x) år. Vad betyder 3 · x?', ['Mamma är 3 år äldre än Lisa.', 'Mamma är 3 år.', 'Mamma är tre gånger så gammal som Lisa.'], 'Mamma är tre gånger så gammal som Lisa.'),
-  v1('Ali är a cm lång. Bo är (a − 8) cm lång. Vad betyder a − 8?', ['Bo är 8 cm kortare än Ali.', 'Bo är 8 cm längre än Ali.', 'Bo är 8 cm lång.'], 'Bo är 8 cm kortare än Ali.'),
-  v1('I en klass finns p pojkar och f flickor. Vad betyder p + f?', ['hur många fler pojkar än flickor det finns', 'hur många elever det finns i klassen', 'hur många flickor det finns'],
+  v1('Ali är x cm lång. Bo är (x − 8) cm lång. Vad betyder x − 8?', ['Bo är 8 cm kortare än Ali.', 'Bo är 8 cm längre än Ali.', 'Bo är 8 cm lång.'], 'Bo är 8 cm kortare än Ali.'),
+  v1('I en klass finns x pojkar och y flickor. Vad betyder x + y?', ['hur många fler pojkar än flickor det finns', 'hur många elever det finns i klassen', 'hur många flickor det finns'],
      'hur många elever det finns i klassen'),
-  v1('Leo har k kr. Sam har (k + 50) kr. Vad betyder k + 50?', ['Sam har 50 kr.', 'Sam har 50 kr mindre än Leo.', 'Sam har 50 kr mer än Leo.'], 'Sam har 50 kr mer än Leo.'),
+  v1('Leo har x kr. Sam har (x + 50) kr. Vad betyder x + 50?', ['Sam har 50 kr.', 'Sam har 50 kr mindre än Leo.', 'Sam har 50 kr mer än Leo.'], 'Sam har 50 kr mer än Leo.'),
   v1('Ella är x år. Vad betyder x + 5?', ['Ellas ålder om 5 år', 'Ellas ålder för 5 år sedan', '5 gånger Ellas ålder'], 'Ellas ålder om 5 år')
 ]; } };
 
 BANK.T5 = { kat: 'T', namn: 'Para ihop flera uttryck med meningar', nod: TOLKA, intro: PARA, uppg: function(){ return [
-  para('Mormor är m år.', ['A. 2 år äldre än mormor', 'B. en sjättedel så gammal som mormor', 'C. 26 år yngre än mormor', 'D. 21 år yngre än mormor'],
-       [['Mamma är (m − 26) år.', 'C'], ['Morfar är (m + 2) år.', 'A'], ['Barnbarnet är m/6 år.', 'B'], ['Moster är (m − 21) år.', 'D']]),
-  para('Pappa är p år.', ['A. 3 år yngre än pappa', 'B. 30 år äldre än pappa', 'C. 28 år yngre än pappa', 'D. en fjärdedel så gammal som pappa'],
-       [['Farfar är (p + 30) år.', 'B'], ['Dottern är p/4 år.', 'D'], ['Mamma är (p − 3) år.', 'A'], ['Sonen är (p − 28) år.', 'C']]),
-  para('Läraren Anna är a år.', ['A. 9 år yngre än Anna', 'B. 15 år äldre än Anna', 'C. 36 år yngre än Anna', 'D. 11 år äldre än Anna'],
-       [['Kollegan Bo är (a + 11) år.', 'D'], ['Eleven Sam är (a − 36) år.', 'C'], ['Rektorn är (a + 15) år.', 'B'], ['Praktikanten är (a − 9) år.', 'A']]),
-  para('Ella har e kr.', ['A. hälften så mycket som Ella', 'B. 15 kr mindre än Ella', 'C. dubbelt så mycket som Ella', 'D. 40 kr mer än Ella'],
-       [['Sam har (e + 40) kr.', 'D'], ['Ida har (2 · e) kr.', 'C'], ['Leo har (e − 15) kr.', 'B'], ['Mo har e/2 kr.', 'A']]),
-  para('Hugo är h cm lång.', ['A. 6 cm längre än Hugo', 'B. en tredjedel så lång som Hugo', 'C. 45 cm längre än Hugo', 'D. 30 cm kortare än Hugo'],
-       [['Pappa är (h + 45) cm.', 'C'], ['Lillasyster är (h − 30) cm.', 'D'], ['Hunden är h/3 cm.', 'B'], ['Brodern är (h + 6) cm.', 'A']]),
-  para('Farmor Greta är g år.', ['A. 4 år yngre än Greta', 'B. 29 år yngre än Greta', 'C. 5 år äldre än Greta', 'D. en åttondel så gammal som Greta'],
-       [['Farfar är (g + 5) år.', 'C'], ['Pappa är (g − 29) år.', 'B'], ['Barnbarnet är g/8 år.', 'D'], ['Gretas bror är (g − 4) år.', 'A']]),
-  para('Kalle har k kulor.', ['A. en fjärdedel så många som Kalle', 'B. 7 färre än Kalle', 'C. tre gånger så många som Kalle', 'D. 12 fler än Kalle'],
-       [['Ali har (k + 12) kulor.', 'D'], ['Bea har (3 · k) kulor.', 'C'], ['Cem har (k − 7) kulor.', 'B'], ['Dina har k/4 kulor.', 'A']]),
-  para('Mamma Lena är k år.', ['A. 30 år yngre än mamma', 'B. en femtedel så gammal som mamma', 'C. 3 år äldre än mamma', 'D. 24 år äldre än mamma'],
-       [['Pappa är (k + 3) år.', 'C'], ['Mormor är (k + 24) år.', 'D'], ['Dottern är k/5 år.', 'B'], ['Sonen är (k − 30) år.', 'A']])
+  para('Mormor är x år.', ['A. 2 år äldre än mormor', 'B. en sjättedel så gammal som mormor', 'C. 26 år yngre än mormor', 'D. 21 år yngre än mormor'],
+       [['Mamma är (x − 26) år.', 'C'], ['Morfar är (x + 2) år.', 'A'], ['Barnbarnet är x/6 år.', 'B'], ['Moster är (x − 21) år.', 'D']]),
+  para('Pappa är x år.', ['A. 3 år yngre än pappa', 'B. 30 år äldre än pappa', 'C. 28 år yngre än pappa', 'D. en fjärdedel så gammal som pappa'],
+       [['Farfar är (x + 30) år.', 'B'], ['Dottern är x/4 år.', 'D'], ['Mamma är (x − 3) år.', 'A'], ['Sonen är (x − 28) år.', 'C']]),
+  para('Läraren Anna är x år.', ['A. 9 år yngre än Anna', 'B. 15 år äldre än Anna', 'C. 36 år yngre än Anna', 'D. 11 år äldre än Anna'],
+       [['Kollegan Bo är (x + 11) år.', 'D'], ['Eleven Sam är (x − 36) år.', 'C'], ['Rektorn är (x + 15) år.', 'B'], ['Praktikanten är (x − 9) år.', 'A']]),
+  para('Ella har x kr.', ['A. hälften så mycket som Ella', 'B. 15 kr mindre än Ella', 'C. dubbelt så mycket som Ella', 'D. 40 kr mer än Ella'],
+       [['Sam har (x + 40) kr.', 'D'], ['Ida har (2 · x) kr.', 'C'], ['Leo har (x − 15) kr.', 'B'], ['Mo har x/2 kr.', 'A']]),
+  para('Hugo är x cm lång.', ['A. 6 cm längre än Hugo', 'B. en tredjedel så lång som Hugo', 'C. 45 cm längre än Hugo', 'D. 30 cm kortare än Hugo'],
+       [['Pappa är (x + 45) cm.', 'C'], ['Lillasyster är (x − 30) cm.', 'D'], ['Hunden är x/3 cm.', 'B'], ['Brodern är (x + 6) cm.', 'A']]),
+  para('Farmor Greta är x år.', ['A. 4 år yngre än Greta', 'B. 29 år yngre än Greta', 'C. 5 år äldre än Greta', 'D. en åttondel så gammal som Greta'],
+       [['Farfar är (x + 5) år.', 'C'], ['Pappa är (x − 29) år.', 'B'], ['Barnbarnet är x/8 år.', 'D'], ['Gretas bror är (x − 4) år.', 'A']]),
+  para('Kalle har x kulor.', ['A. en fjärdedel så många som Kalle', 'B. 7 färre än Kalle', 'C. tre gånger så många som Kalle', 'D. 12 fler än Kalle'],
+       [['Ali har (x + 12) kulor.', 'D'], ['Bea har (3 · x) kulor.', 'C'], ['Cem har (x − 7) kulor.', 'B'], ['Dina har x/4 kulor.', 'A']]),
+  para('Mamma Lena är x år.', ['A. 30 år yngre än mamma', 'B. en femtedel så gammal som mamma', 'C. 3 år äldre än mamma', 'D. 24 år äldre än mamma'],
+       [['Pappa är (x + 3) år.', 'C'], ['Mormor är (x + 24) år.', 'D'], ['Dottern är x/5 år.', 'B'], ['Sonen är (x − 30) år.', 'A']])
 ]; } };
 
 BANK.T6 = { kat: 'T', namn: 'Vilka värden kan x ha?', nod: TOLKA, intro: { intro: 'Ringa in alla tal som är möjliga.' }.intro, uppg: function(){ return [
@@ -144,59 +144,59 @@ BANK.K1 = { kat: 'K', namn: 'Mer, mindre, gånger och delar', nod: TECKNA, uppg:
   velj('6 mer än x.', ['x + 6', '6x', 'x − 6'], 'x + 6'),
   velj('9 mindre än y.', ['9 − y', 'y − 9', 'y + 9'], 'y − 9'),
   velj('y mindre än 40.', ['y − 40', '40 − y', '40 + y'], '40 − y'),
-  velj('5 gånger så mycket som n.', ['n + 5', '5 · n', 'n/5'], '5 · n'),
+  velj('5 gånger så mycket som x.', ['x + 5', '5 · x', 'x/5'], '5 · x'),
   velj('en tredjedel av x.', ['3x', 'x − 3', 'x/3'], 'x/3'),
   u('Ella har x kr. Hon får 25 kr till. Fyll i hur mycket hon har nu:', [utt('', 'x + 25', 'x')]),
   u('Ella har x kr. Hon handlar för 18 kr. Fyll i hur mycket hon har kvar:', [utt('', 'x − 18', 'x')]),
-  u('Ett tal är a. Fyll i ett uttryck för ett tal som är dubbelt så stort:', [utt('', '2 · a', 'a')]),
+  u('Ett tal är x. Fyll i ett uttryck för ett tal som är dubbelt så stort:', [utt('', '2 · x', 'x')]),
   u('x äpplen delas lika mellan 4 personer. Fyll i hur många var och en får:', [utt('', 'x/4', 'x')]),
-  u('Ett tal är n. Fyll i ett uttryck för ett tal som är 10 mindre:', [utt('', 'n − 10', 'n')]),
+  u('Ett tal är x. Fyll i ett uttryck för ett tal som är 10 mindre:', [utt('', 'x − 10', 'x')]),
   velj('3 mer än dubbelt så mycket som x.', ['2 · x + 3', '3 · x + 2', 'x + 2 + 3'], '2 · x + 3'),
   velj('7 mindre än hälften av x.', ['x/2 − 7', '7 − x/2', 'x/7 − 2'], 'x/2 − 7')
 ]; } };
 
 BANK.K2 = { kat: 'K', namn: 'Per styck och växel', nod: TECKNA, uppg: function(){ return [
   u('En glass kostar 14 kr. Fyll i vad x glassar kostar:', [utt('', '14 · x', 'x')]),
-  v1('En bussresa kostar 25 kr. Vilket uttryck visar vad r resor kostar?', ['25 + r', '25 · r', 'r − 25'], '25 · r'),
-  u('Ett äpple kostar a kr. Fyll i vad 6 äpplen kostar:', [utt('', '6 · a', 'a')]),
+  v1('En bussresa kostar 25 kr. Vilket uttryck visar vad x resor kostar?', ['25 + x', '25 · x', 'x − 25'], '25 · x'),
+  u('Ett äpple kostar x kr. Fyll i vad 6 äpplen kostar:', [utt('', '6 · x', 'x')]),
   u('En bulle kostar 12 kr och en kaffe 20 kr. Fyll i vad x bullar och ett kaffe kostar:', [utt('', '12 · x + 20', 'x')]),
   v1('Leo köper x läsk för 12 kr styck och betalar med en 100-lapp. Vilket uttryck visar hur mycket han får tillbaka?', ['12 · x − 100', '100 − 12 · x', '100 − x'], '100 − 12 · x'),
   u('En bok kostar 80 kr. Sara köper x böcker och betalar med en 500-lapp. Fyll i hur mycket hon får tillbaka:', [utt('', '500 − 80 · x', 'x')]),
   u('En korv kostar 20 kr och en dricka 10 kr. Fyll i vad x korvar och y dricka kostar:', [utt('', '20 · x + 10 · y', 'xy')]),
-  u('En glass kostar g kr och en läsk l kr. Fyll i vad 2 glassar och 3 läsk kostar:', [utt('', '2 · g + 3 · l', 'gl')]),
-  u('En vuxenbiljett kostar 120 kr och en barnbiljett 60 kr. Fyll i vad 2 vuxenbiljetter och b barnbiljetter kostar:', [utt('', '2 · 120 + 60 · b', 'b')]),
+  u('En glass kostar x kr och en läsk y kr. Fyll i vad 2 glassar och 3 läsk kostar:', [utt('', '2 · x + 3 · y', 'xy')]),
+  u('En vuxenbiljett kostar 120 kr och en barnbiljett 60 kr. Fyll i vad 2 vuxenbiljetter och x barnbiljetter kostar:', [utt('', '2 · 120 + 60 · x', 'x')]),
   v1('En pizza kostar 70 kr och en läsk 15 kr. Familjen köper x pizzor och lika många läsk. Vilket uttryck visar vad det kostar?', ['70 · x + 15 · x', '70 + 15 · x', '85 + x'], '70 · x + 15 · x'),
   u('En penna kostar 8 kr och ett block 25 kr. Mo köper x pennor och y block och betalar med en 200-lapp. Fyll i hur mycket hon får tillbaka:', [utt('', '200 − 8 · x − 25 · y', 'xy')])
 ]; } };
 
 BANK.K3 = { kat: 'K', namn: 'Start plus förändring', nod: TECKNA, uppg: function(){ return [
-  u('Nora har 150 kr. Hon sparar 30 kr i veckan. Fyll i hur mycket hon har efter v veckor:', [utt('', '150 + 30 · v', 'v')]),
-  u('Ett ljus är 20 cm långt. Det brinner ner 2 cm i timmen. Fyll i ljusets längd efter t timmar:', [utt('', '20 − 2 · t', 't')]),
-  v1('En tunna innehåller 80 liter vatten. Det rinner ut 5 liter i minuten. Vilket uttryck visar hur mycket vatten som finns kvar efter m minuter?',
-     ['80 + 5 · m', '80 − 5 · m', '5 · m − 80'], '80 − 5 · m'),
-  u('En taxiresa kostar 45 kr i start och 12 kr per kilometer. Fyll i vad en resa på k kilometer kostar:', [utt('', '45 + 12 · k', 'k')]),
-  u('Ett år har 12 månader. Fyll i hur många månader a år och 5 månader är:', [utt('', '12 · a + 5', 'a')]),
-  u('En timme har 60 minuter. Fyll i hur många minuter t timmar och 15 minuter är:', [utt('', '60 · t + 15', 't')]),
-  u('Ett gymkort kostar 200 kr i avgift och sedan 50 kr per besök. Fyll i vad b besök kostar:', [utt('', '200 + 50 · b', 'b')]),
+  u('Nora har 150 kr. Hon sparar 30 kr i veckan. Fyll i hur mycket hon har efter x veckor:', [utt('', '150 + 30 · x', 'x')]),
+  u('Ett ljus är 20 cm långt. Det brinner ner 2 cm i timmen. Fyll i ljusets längd efter x timmar:', [utt('', '20 − 2 · x', 'x')]),
+  v1('En tunna innehåller 80 liter vatten. Det rinner ut 5 liter i minuten. Vilket uttryck visar hur mycket vatten som finns kvar efter x minuter?',
+     ['80 + 5 · x', '80 − 5 · x', '5 · x − 80'], '80 − 5 · x'),
+  u('En taxiresa kostar 45 kr i start och 12 kr per kilometer. Fyll i vad en resa på x kilometer kostar:', [utt('', '45 + 12 · x', 'x')]),
+  u('Ett år har 12 månader. Fyll i hur många månader x år och 5 månader är:', [utt('', '12 · x + 5', 'x')]),
+  u('En timme har 60 minuter. Fyll i hur många minuter x timmar och 15 minuter är:', [utt('', '60 · x + 15', 'x')]),
+  u('Ett gymkort kostar 200 kr i avgift och sedan 50 kr per besök. Fyll i vad x besök kostar:', [utt('', '200 + 50 · x', 'x')]),
   u('Ett presentkort är värt 500 kr. Ett biobesök kostar 90 kr. Fyll i hur mycket som finns kvar på kortet efter x biobesök:', [utt('', '500 − 90 · x', 'x')]),
   u('En växt är 12 cm hög. Den växer 3 cm i veckan.', [
-    utt('Fyll i växtens höjd efter v veckor:', '12 + 3 · v', 'v'),
-    berakna('Hur hög är växten efter 5 veckor? Skriv uttrycket med 5 i stället för v och räkna i flera led. Börja med multiplikationen.', '12 + 3 · 5', ['12 + 15'], 27, 'cm')]),
+    utt('Fyll i växtens höjd efter x veckor:', '12 + 3 · x', 'x'),
+    berakna('Hur hög är växten efter 5 veckor? Skriv uttrycket med 5 i stället för x och räkna i flera led. Börja med multiplikationen.', '12 + 3 · 5', ['12 + 15'], 27, 'cm')]),
   u('Ett ljus är 30 cm långt. Det brinner ner 3 cm i timmen.', [
-    utt('Fyll i ljusets längd efter t timmar:', '30 − 3 · t', 't'),
-    berakna('Hur långt är ljuset efter 4 timmar? Skriv uttrycket med 4 i stället för t och räkna i flera led. Börja med multiplikationen.', '30 − 3 · 4', ['30 − 12'], 18, 'cm')])
+    utt('Fyll i ljusets längd efter x timmar:', '30 − 3 · x', 'x'),
+    berakna('Hur långt är ljuset efter 4 timmar? Skriv uttrycket med 4 i stället för x och räkna i flera led. Börja med multiplikationen.', '30 − 3 · 4', ['30 − 12'], 18, 'cm')])
 ]; } };
 
 function alder(rubrik, a, b){ return u(rubrik, [utt(a[0], a[1], a[2], a[3] || 'år.'), utt(b[0], b[1], b[2], b[3] || 'år.')]); }
 BANK.K4 = { kat: 'K', namn: 'Ålder i flera led', nod: TECKNA, uppg: function(){ return [
   alder('Pappa är y år. Fyll i.', ['Mamma är 2 år yngre än pappa. Hon är', 'y − 2', 'y'], ['Moster är 5 år äldre än mamma. Hon är', 'y − 2 + 5', 'y']),
   alder('Vera är x år. Fyll i.', ['Max är 3 år äldre än Vera. Han är', 'x + 3', 'x'], ['Kusinen är 6 år yngre än Max. Hon är', 'x + 3 − 6', 'x']),
-  alder('Mormor är m år. Fyll i.', ['Morfar är 4 år äldre än mormor. Han är', 'm + 4', 'm'], ['Morfars bror är 7 år yngre än morfar. Han är', 'm + 4 − 7', 'm']),
+  alder('Mormor är x år. Fyll i.', ['Morfar är 4 år äldre än mormor. Han är', 'x + 4', 'x'], ['Morfars bror är 7 år yngre än morfar. Han är', 'x + 4 − 7', 'x']),
   alder('Lisa är x år. Fyll i.', ['Storasyster är dubbelt så gammal som Lisa. Hon är', '2 · x', 'x'], ['Kusinen är 3 år äldre än storasyster. Hon är', '2 · x + 3', 'x']),
   alder('Pappa är y år. Fyll i.', ['Farfar är 28 år äldre än pappa. Han är', 'y + 28', 'y'], ['Farmor är 2 år yngre än farfar. Hon är', 'y + 28 − 2', 'y']),
-  alder('Hugo är h år. Fyll i.', ['Brodern är 4 år yngre än Hugo. Han är', 'h − 4', 'h'], ['Hunden är 9 år yngre än brodern. Den är', 'h − 4 − 9', 'h']),
-  alder('Mamma är k år. Fyll i.', ['Pappa är 1 år äldre än mamma. Han är', 'k + 1', 'k'], ['Faster är 6 år yngre än pappa. Hon är', 'k + 1 − 6', 'k']),
-  alder('Sam är s år. Fyll i.', ['Mamma är tre gånger så gammal som Sam. Hon är', '3 · s', 's'], ['Pappa är 2 år äldre än mamma. Han är', '3 · s + 2', 's']),
+  alder('Hugo är x år. Fyll i.', ['Brodern är 4 år yngre än Hugo. Han är', 'x − 4', 'x'], ['Hunden är 9 år yngre än brodern. Den är', 'x − 4 − 9', 'x']),
+  alder('Mamma är x år. Fyll i.', ['Pappa är 1 år äldre än mamma. Han är', 'x + 1', 'x'], ['Faster är 6 år yngre än pappa. Hon är', 'x + 1 − 6', 'x']),
+  alder('Sam är x år. Fyll i.', ['Mamma är tre gånger så gammal som Sam. Hon är', '3 · x', 'x'], ['Pappa är 2 år äldre än mamma. Han är', '3 · x + 2', 'x']),
   alder('Ida är x år. Fyll i.', ['Kusinen är 5 år äldre än Ida. Hon är', 'x + 5', 'x'], ['Kusinens mamma är 25 år äldre än kusinen. Hon är', 'x + 5 + 25', 'x']),
   alder('Pappa är y år. Fyll i.', ['Dottern är en fjärdedel så gammal som pappa. Hon är', 'y/4', 'y'], ['Sonen är 3 år äldre än dottern. Han är', 'y/4 + 3', 'y'])
 ]; } };
@@ -216,34 +216,34 @@ BANK.K5 = { kat: 'K', namn: 'Sträckor och tallinje', nod: TECKNA, uppg: functio
 ]; } };
 
 BANK.K6 = { kat: 'K', namn: 'Tal i följd, jämna och udda', nod: TECKNA, uppg: function(){ return [
-  u('Tre tal följer varandra. Det minsta är n. Fyll i de två andra.', [talfoljd('', ['n', null, null], [null, 'n + 1', 'n + 2'], 'n')]),
-  u('Fyra tal följer varandra. Det minsta är n. Fyll i de tre andra.', [talfoljd('', ['n', null, null, null], [null, 'n + 1', 'n + 2', 'n + 3'], 'n')]),
-  u('Tre jämna tal följer varandra. Det minsta är n. Fyll i de två andra.', [talfoljd('', ['n', null, null], [null, 'n + 2', 'n + 4'], 'n')]),
-  u('u är ett udda tal. Fyll i nästa udda tal:', [utt('', 'u + 2', 'u')]),
-  u('Tre udda tal följer varandra. Det minsta är u. Fyll i de två andra.', [talfoljd('', ['u', null, null], [null, 'u + 2', 'u + 4'], 'u')]),
-  u('Ett tal är n. Fyll i talet som kommer direkt före n:', [utt('', 'n − 1', 'n')]),
-  u('j är ett jämnt tal. Fyll i det jämna talet som kommer direkt före j:', [utt('', 'j − 2', 'j')]),
-  v1('n är ett jämnt tal. Vilket uttryck visar nästa jämna tal?', ['n + 1', 'n + 2', '2n'], 'n + 2'),
-  v1('Ett tal är n. Vilket uttryck visar talet som kommer direkt efter?', ['n − 1', 'n + 1', 'n + 2'], 'n + 1'),
-  u('Tre tal följer varandra. Det minsta är a. Fyll i de två andra.', [talfoljd('', ['a', null, null], [null, 'a + 1', 'a + 2'], 'a')])
+  u('Tre tal följer varandra. Det minsta är x. Fyll i de två andra.', [talfoljd('', ['x', null, null], [null, 'x + 1', 'x + 2'], 'x')]),
+  u('Fyra tal följer varandra. Det minsta är x. Fyll i de tre andra.', [talfoljd('', ['x', null, null, null], [null, 'x + 1', 'x + 2', 'x + 3'], 'x')]),
+  u('Tre jämna tal följer varandra. Det minsta är x. Fyll i de två andra.', [talfoljd('', ['x', null, null], [null, 'x + 2', 'x + 4'], 'x')]),
+  u('x är ett udda tal. Fyll i nästa udda tal:', [utt('', 'x + 2', 'x')]),
+  u('Tre udda tal följer varandra. Det minsta är x. Fyll i de två andra.', [talfoljd('', ['x', null, null], [null, 'x + 2', 'x + 4'], 'x')]),
+  u('Ett tal är x. Fyll i talet som kommer direkt före x:', [utt('', 'x − 1', 'x')]),
+  u('x är ett jämnt tal. Fyll i det jämna talet som kommer direkt före x:', [utt('', 'x − 2', 'x')]),
+  v1('x är ett jämnt tal. Vilket uttryck visar nästa jämna tal?', ['x + 1', 'x + 2', '2x'], 'x + 2'),
+  v1('Ett tal är x. Vilket uttryck visar talet som kommer direkt efter?', ['x − 1', 'x + 1', 'x + 2'], 'x + 1'),
+  u('Tre tal följer varandra. Det minsta är x. Fyll i de två andra.', [talfoljd('', ['x', null, null], [null, 'x + 1', 'x + 2'], 'x')])
 ]; } };
 
 BANK.K7 = { kat: 'K', namn: 'Omkrets', nod: TECKNA, uppg: function(){ return [
   u('', [figur(F().triangel({ ben: 'x cm', bas: '6 cm' })), utt(OMKRETSEN, 'x + x + 6', 'x')]),
   u('', [figur(F().rektangel({ bredd: 'x cm', hojd: '5 cm' })), utt(OMKRETSEN, 'x + 5 + x + 5', 'x')]),
-  u('', [figur(F().rektangel({ bredd: 's cm', hojd: 's cm', kvadrat: true })), utt(OMKRETSEN, 's + s + s + s', 's')]),
-  u('', [figur(F().triangel({ ben: 'a cm', bas: 'a cm', liksidig: true })), utt(OMKRETSEN, 'a + a + a', 'a')]),
+  u('', [figur(F().rektangel({ bredd: 'x cm', hojd: 'x cm', kvadrat: true })), utt(OMKRETSEN, 'x + x + x + x', 'x')]),
+  u('', [figur(F().triangel({ ben: 'x cm', bas: 'x cm', liksidig: true })), utt(OMKRETSEN, 'x + x + x', 'x')]),
   u('', [figur(F().sidtriangel({ sidor: ['x cm', 'x + 2 cm', '7 cm'] })), utt(OMKRETSEN, 'x + x + 2 + 7', 'x')]),
   u('', [figur(F().rektangel({ bredd: 'x + 1 cm', hojd: 'x cm' })),
          flera('Vilka uttryck visar omkretsen? Ringa in alla som stämmer.', ['x + x + 1 + x + x + 1', '4 · x + 2', 'x + x + 1', '2x + 1'], ['x + x + 1 + x + x + 1', '4 · x + 2'])]),
   u('', [figur(F().rektangel({ bredd: 'x + 5 cm', hojd: 'x cm' })), utt(OMKRETSEN, 'x + x + 5 + x + x + 5', 'x')]),
-  u('', [figur(F().rektangel({ bredd: 's cm', hojd: '4 cm' })), utt(OMKRETSEN, 's + 4 + s + 4', 's'),
-         berakna('Beräkna omkretsen när s = 6 med uttrycket 2 · s + 8. Skriv uttrycket med 6 i stället för s och räkna i flera led. Börja med multiplikationen.', '2 · 6 + 8', ['12 + 8'], 20, 'cm')]),
+  u('', [figur(F().rektangel({ bredd: 'x cm', hojd: '4 cm' })), utt(OMKRETSEN, 'x + 4 + x + 4', 'x'),
+         berakna('Beräkna omkretsen när x = 6 med uttrycket 2 · x + 8. Skriv uttrycket med 6 i stället för x och räkna i flera led. Börja med multiplikationen.', '2 · 6 + 8', ['12 + 8'], 20, 'cm')]),
   u('', [figur(F().triangel({ ben: 'x cm', bas: '9 cm' })), utt(OMKRETSEN, 'x + x + 9', 'x'),
          berakna('Beräkna omkretsen när x = 5. Skriv uttrycket med 5 i stället för x och räkna i flera led.', '5 + 5 + 9', [], 19, 'cm')]),
   u('', [figur(F().rektangel({ bredd: 'x + 3 cm', hojd: 'x cm' })),
          flera('Vilka uttryck visar omkretsen? Ringa in alla som stämmer.', ['4 · x + 6', '2x + 3', 'x + x + 3 + x + x + 3', '4x + 3'], ['4 · x + 6', 'x + x + 3 + x + x + 3']),
-         berakna('Beräkna omkretsen när x = 4 med uttrycket 4 · x + 6. Skriv uttrycket med 4 i stället för x och räkna i flera led. Börja med multiplikationen.', '4 · 4 + 6', ['16 + 6'], 22, 'cm')])
+         berakna('Beräkna omkretsen när x = 4 med uttrycket 4 · x + 6. Skriv uttrycket med 4 i stället för x och räkna i flera led. Börja med multiplikationen.', '4 · 4 + 6', ['16 + 6'], 22, 'cm', '4 · x + 6')])
 ]; } };
 
 /* ═════════ RÄKNA ═════════ */
@@ -273,13 +273,13 @@ BANK.R3 = { kat: 'R', namn: 'Sätt in en variabel', nod: BERAKNA, intro: SATT_IN
   u('Beräkna 25 − x när x = 9.', [enOp('25 − x', '25 − 9', 16)]),
   u('Beräkna 4x + 3 när x = 5. Börja med multiplikationen.', [sattIn('4x + 3', '4 · 5 + 3', ['20 + 3'], 23)]),
   u('Beräkna 6y − 8 när y = 4. Börja med multiplikationen.', [sattIn('6y − 8', '6 · 4 − 8', ['24 − 8'], 16)]),
-  u('Beräkna 30 − 3a när a = 7. Börja med multiplikationen.', [sattIn('30 − 3a', '30 − 3 · 7', ['30 − 21'], 9)]),
+  u('Beräkna 30 − 3x när x = 7. Börja med multiplikationen.', [sattIn('30 − 3x', '30 − 3 · 7', ['30 − 21'], 9)]),
   u('Beräkna 5 + 2x när x = 9. Börja med multiplikationen.', [sattIn('5 + 2x', '5 + 2 · 9', ['5 + 18'], 23)]),
-  u('Beräkna 7b − 12 när b = 3. Börja med multiplikationen.', [sattIn('7b − 12', '7 · 3 − 12', ['21 − 12'], 9)]),
+  u('Beräkna 7x − 12 när x = 3. Börja med multiplikationen.', [sattIn('7x − 12', '7 · 3 − 12', ['21 − 12'], 9)]),
   u('Beräkna 100 − 8x när x = 6. Börja med multiplikationen.', [sattIn('100 − 8x', '100 − 8 · 6', ['100 − 48'], 52)]),
   u('Beräkna 2x + 7 när x = 0.', [sattIn('2x + 7', '2 · 0 + 7', ['0 + 7'], 7)]),
-  u('Beräkna 9n + 1 när n = 4. Börja med multiplikationen.', [sattIn('9n + 1', '9 · 4 + 1', ['36 + 1'], 37)]),
-  u('Beräkna 50 − 5m när m = 8. Börja med multiplikationen.', [sattIn('50 − 5m', '50 − 5 · 8', ['50 − 40'], 10)])
+  u('Beräkna 9x + 1 när x = 4. Börja med multiplikationen.', [sattIn('9x + 1', '9 · 4 + 1', ['36 + 1'], 37)]),
+  u('Beräkna 50 − 5x när x = 8. Börja med multiplikationen.', [sattIn('50 − 5x', '50 − 5 · 8', ['50 − 40'], 10)])
 ]; } };
 
 BANK.R4 = { kat: 'R', namn: 'Sätt in med bråk och parentes', nod: BERAKNA, intro: SATT_IN, uppg: function(){ return [
@@ -288,7 +288,7 @@ BANK.R4 = { kat: 'R', namn: 'Sätt in med bråk och parentes', nod: BERAKNA, int
   u('Beräkna (x + 4)/2 när x = 6.', [sattIn('(x + 4)/2', '(6 + 4)/2', ['10/2'], 5)]),
   u('Beräkna 3 · (x + 2) när x = 5.', [sattIn('3 · (x + 2)', '3 · (5 + 2)', ['3 · 7'], 21)]),
   u('Beräkna 4 · (y − 3) när y = 9.', [sattIn('4 · (y − 3)', '4 · (9 − 3)', ['4 · 6'], 24)]),
-  u('Beräkna 2 · (a + 5) − 4 när a = 3.', [sattIn('2 · (a + 5) − 4', '2 · (3 + 5) − 4', ['2 · 8 − 4', '16 − 4'], 12)]),
+  u('Beräkna 2 · (x + 5) − 4 när x = 3.', [sattIn('2 · (x + 5) − 4', '2 · (3 + 5) − 4', ['2 · 8 − 4', '16 − 4'], 12)]),
   u('Beräkna 6 + (2x + 1) när x = 4. Räkna först ut parentesen.', [sattIn('6 + (2x + 1)', '6 + (2 · 4 + 1)', ['6 + (8 + 1)', '6 + 9'], 15)]),
   u('Beräkna 30 − (x + 6) när x = 9. Räkna först ut parentesen.', [sattIn('30 − (x + 6)', '30 − (9 + 6)', ['30 − 15'], 15)]),
   u('Beräkna x/4 + 2x när x = 8.', [sattIn('x/4 + 2x', '8/4 + 2 · 8', ['2 + 16'], 18)]),
@@ -298,18 +298,18 @@ BANK.R4 = { kat: 'R', namn: 'Sätt in med bråk och parentes', nod: BERAKNA, int
 ]; } };
 
 BANK.R5 = { kat: 'R', namn: 'Sätt in två variabler och decimaltal', nod: BERAKNA, intro: SATT_IN_TALEN, uppg: function(){ return [
-  u('Beräkna a + b när a = 6 och b = 9.', [enOp('a + b', '6 + 9', 15)]),
-  u('Beräkna 3a + b när a = 4 och b = 5.', [sattIn('3a + b', '3 · 4 + 5', ['12 + 5'], 17)]),
-  u('Beräkna 2a − b när a = 7 och b = 3.', [sattIn('2a − b', '2 · 7 − 3', ['14 − 3'], 11)]),
-  u('Beräkna 4a + 3b när a = 2 och b = 5.', [sattIn('4a + 3b', '4 · 2 + 3 · 5', ['8 + 15'], 23)]),
-  u('Beräkna 5a − 2b när a = 6 och b = 4.', [sattIn('5a − 2b', '5 · 6 − 2 · 4', ['30 − 8'], 22)]),
+  u('Beräkna x + y när x = 6 och y = 9.', [enOp('x + y', '6 + 9', 15)]),
+  u('Beräkna 3x + y när x = 4 och y = 5.', [sattIn('3x + y', '3 · 4 + 5', ['12 + 5'], 17)]),
+  u('Beräkna 2x − y när x = 7 och y = 3.', [sattIn('2x − y', '2 · 7 − 3', ['14 − 3'], 11)]),
+  u('Beräkna 4x + 3y när x = 2 och y = 5.', [sattIn('4x + 3y', '4 · 2 + 3 · 5', ['8 + 15'], 23)]),
+  u('Beräkna 5x − 2y när x = 6 och y = 4.', [sattIn('5x − 2y', '5 · 6 − 2 · 4', ['30 − 8'], 22)]),
   u('Beräkna 2x när x = 3,5.', [enOp('2x', '2 · 3,5', 7)]),
   u('Beräkna 4x + 1 när x = 2,5.', [sattIn('4x + 1', '4 · 2,5 + 1', ['10 + 1'], 11)]),
   u('Beräkna 10 − 3x när x = 1,5.', [sattIn('10 − 3x', '10 − 3 · 1,5', ['10 − 4,5'], 5.5)]),
-  u('Beräkna 3a + 2b när a = 1,5 och b = 4.', [sattIn('3a + 2b', '3 · 1,5 + 2 · 4', ['4,5 + 8'], 12.5)]),
+  u('Beräkna 3x + 2y när x = 1,5 och y = 4.', [sattIn('3x + 2y', '3 · 1,5 + 2 · 4', ['4,5 + 8'], 12.5)]),
   u('Beräkna 6x − 2y när x = 2,5 och y = 3.', [sattIn('6x − 2y', '6 · 2,5 − 2 · 3', ['15 − 6'], 9)]),
   u('Beräkna (2x + 3) + (y − 1) när x = 4 och y = 6. Räkna först ut parenteserna.', [sattIn('(2x + 3) + (y − 1)', '(2 · 4 + 3) + (6 − 1)', ['(8 + 3) + 5', '11 + 5'], 16)]),
-  u('Beräkna (3a − 4) − (2b + 1) när a = 6 och b = 2. Räkna först ut parenteserna.', [sattIn('(3a − 4) − (2b + 1)', '(3 · 6 − 4) − (2 · 2 + 1)', ['(18 − 4) − (4 + 1)', '14 − 5'], 9)])
+  u('Beräkna (3x − 4) − (2y + 1) när x = 6 och y = 2. Räkna först ut parenteserna.', [sattIn('(3x − 4) − (2y + 1)', '(3 · 6 − 4) − (2 · 2 + 1)', ['(18 − 4) − (4 + 1)', '14 − 5'], 9)])
 ]; } };
 
 function xv(rubrik, alt, ratt){ return u(rubrik, [val('', alt, ratt)]); }
