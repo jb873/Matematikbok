@@ -18,10 +18,6 @@ Varje punkt säger vad som brister, var det mättes och när.
   procent Det hela Blad 5A och 6A och grinden blir grön. ETIKETT MOT LINJE mäter bara texter med `af-matt`, så
   stapelns texter ("24 cm", "0 %", "100 %") prövas inte mot stapelns kanter. ETIKETT MOT ETIKETT fäller där (den fällde
   sträckans "40 %" mot "28 mm" innan radavståndet blev 24). Prövat 2026-11-27 (`verktyg/figur-grind.js`).
-- [ ] **Elevtext-låset ser inte frågorna i Delen.** `js/motor/blad/blad-k4-d1-delen.js` skriver frågorna och rubrikerna
-  genom hjälpfunktionerna `f('…')` (39) och `q('…')` (40); låset ser då bara en variabel. Registret har 10 poster för
-  filen, bara titlar och gruppnamn. Texten på sidan är Joachims ordagrant; det är bevakningen som saknas. Det hela skriver
-  samma text i `{ fraga: '…' }` och `{ rubrik: '…' }` och har 93 godkända poster. Mätt 2026-11-27 (`verktyg/elevtext-grind.js`).
 
 ## Metodträningen
 
@@ -30,6 +26,10 @@ Varje punkt säger vad som brister, var det mättes och när.
   Drillerna loggar på taxonomins noder (`alg-…`, `proc-…`), och kapitel 4 i k4-storen. Löven står därför röda vad
   eleven än gör — i k3 och k4. Mätt i koden 2026-11-26 (`karta-motor.js`: `matris[node.id]`; lövets `nod` läses inte).
   Joachim 2026-11-27: tas i en egen order efter moment 3.
+  Order 2026-11-27: trädet läser samma store och id som drillerna. Stannat på en fråga: flera löv delar nod (k4 B1–B5
+  på proc-tillprocent, B6–B7 på proc-franprocent; k3 d1 T1–T6, K1–K7, R3–R6; k3 d3 F, S och M på alg-samla; d5:s
+  varianter per typ), och ett försök bär inget löv-id — arbete på ett löv färgar då hela gruppen. k3 d1 R1–R2 och
+  k3 d3 N1–N5 loggar i k1-storen.
 
 ## Sidorna
 
