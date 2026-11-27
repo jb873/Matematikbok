@@ -20,6 +20,7 @@ Varje punkt säger vad som brister, var det mättes och när.
   KartaMotor och k3-storen (`MasteryK3`), och kartan läser evidensen på trädets egna löv-id (`nf-d3-P1`, `nf-k4d1-B2`).
   Drillerna loggar på taxonomins noder (`alg-…`, `proc-…`), och kapitel 4 i k4-storen. Löven står därför röda vad
   eleven än gör — i k3 och k4. Mätt i koden 2026-11-26 (`karta-motor.js`: `matris[node.id]`; lövets `nod` läses inte).
+  Joachim 2026-11-27: tas i en egen order efter moment 3.
 
 ## Sidorna
 

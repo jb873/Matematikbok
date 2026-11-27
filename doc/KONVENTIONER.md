@@ -208,6 +208,7 @@ METODTRÄNING = färdighetsträningens träd (INTE platta chips)
   *Joachim 2026-11-22.*
 - Har inget löv en bank står Metodträning med 'Kommer senare', på samma sätt som Test. Joachim 2026-11-24.
 - NYA TAL EFTER BANKEN: I ett räknelöv är de författade uppgifterna mallar. Drillen serverar först banken i ordning. Därefter ger 'Nytt blad' en uppgift med samma form som en mall (samma antal termer, samma räknesätt, samma svarsform) och nya tal inom mallarnas band: talen håller sig inom lövets talregler och mellan bankens minsta och största. Aldrig svårare än banken; svårare = nästa författade nivå (takregeln). Valuppgifter, ringa in och löv där sammanhanget bär uppgiften (tolka, teckna, tillämpning) har bara författade uppgifter. Joachim 2026-11-25.
+  - ANDRA INGÅNGEN, `NyaTal.medTalregel` (`js/motor/ovamer/nya-tal.js`): samma mekanism, för löv där talreglerna inte kan uttryckas som band (procent, bråk). Lövet lämnar en talregel per mall; mekanismen sköter resten: mallen väljs först med lika chans, banken kommer först, inga upprepningar, och en mall som inte ger något nytt byts slumpvis. Fasta mallar (som 1/2, 1/3, 2/3) får återkomma med samma tal. Regler "per blad" gäller per tiotal efter banken. Joachim 2026-11-27.
 - INGET parallellt träd byggs — återanvänd komponenten (A1/Regel 0).
 
 UPPGIFTSSIDA (övningssida) — preciserad i sektionen **Uppgiftssidan (arbetsytan)** nedan
