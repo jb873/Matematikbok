@@ -22,12 +22,6 @@ Varje punkt säger vad som brister, var det mättes och när.
   eleven än gör — i k3 och k4. Mätt i koden 2026-11-26 (`karta-motor.js`: `matris[node.id]`; lövets `nod` läses inte).
   Joachim 2026-11-27: tas i en egen order efter moment 3.
 
-## Delen (moment 3)
-
-- [ ] **Stegens lista är tolkad.** Rättningen godtar steget 1, 5, 10, 20, 25 eller 50 % och bara när det går jämnt upp i
-  det sökta procenttalet (20 % för 75 % underkänns, fast 3,75 · 20 = 75). Ordern listar stegen men säger inte om
-  faktorn måste vara ett heltal. `blad-karna-b.js` (`STEG_TILLATNA`, `stegGiltigt`), 2026-11-27.
-
 ## Sidorna
 
 - [ ] **87 bokstäver ovanför rutor och 22 ovanför figurer.** 87 deluppgiftsbokstäver står ensamma ovanför en rad som

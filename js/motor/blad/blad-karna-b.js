@@ -361,15 +361,16 @@ function brakVardeOk(inp){
        100 % = ▢ kr
        ▢ % = ▢/▢ = ▢ kr        (det hela delat med delningstalet, staplat)
        ▢ % = ▢ · ▢ = ▢ kr
-   Rättningen gäller värdet och att leden hänger ihop: steget är 1, 5, 10, 20, 25 eller 50 % och går jämnt upp i det
-   sökta procenttalet, steget · delningstalet = 100, faktorn · steget = det sökta procenttalet, och varje led har rätt
+   Rättningen gäller värdet och att leden hänger ihop: STEGENS LISTA (Joachim 2026-11-27) — steget går jämnt upp i 100
+   och i det givna procenttalet: 1, 2, 4, 5, 10, 20, 25 eller 50 %, och faktorn är alltid ett heltal (20 % för 75 %
+   underkänns); steget · delningstalet = 100, faktorn · steget = det sökta procenttalet, och varje led har rätt
    värde. En ruta som beror på steget rättas mot elevens eget steg, och facit visar då den vägen.
    ETT LED SOM BARA UPPREPAR TALET FÅR LÄMNAS TOMT (Joachim 2026-11-27): är steget redan det sökta procenttalet
    (25 % = 400/4 = 100) får tredje raden stå tom; raden rättas då utan den, som formkedjans valfria led, och svaret i
    andra raden bär evidensen. Ifylld rättas tredje raden som vanligt.
    BRÅKRADEN (rad.typ 'brakrad'): "25 % = ▢ , (▢ · 800)/▢ = ▢ · ▢ = ▢ kr" — bråket i enklaste form (formrutan
    'enklaste'), övriga led på värde. Data: { typ, fraga?, hela, procent, steg (facitvägen) | brak, enhet, enhetSvar? }. */
-var STEG_TILLATNA = [1, 5, 10, 20, 25, 50];
+var STEG_TILLATNA = [1, 2, 4, 5, 10, 20, 25, 50];   // går jämnt upp i 100 (stegens lista, Joachim 2026-11-27)
 function stegRund(v){ return Math.round(v * 1e6) / 1e6; }
 function stegVisa(v){ return String(stegRund(v)).replace('.', ','); }
 function stegTal(x){
