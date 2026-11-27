@@ -58,8 +58,11 @@
     if(opt.text) s += opt.text.length * 7.5 / 2 > slut / 2 ? txt(0, y - 8, opt.text, 'start') : txt(slut / 2, y - 8, opt.text, 'middle');
     if(opt.skala){
       var yt = y + H + 20;
-      [0, slut, W].forEach(function(x){ s += '<line x1="'+x.toFixed(1)+'" y1="'+(y+H)+'" x2="'+x.toFixed(1)+'" y2="'+(y+H+6)+'" stroke="'+C_LINE+'" stroke-width="2"/>'; });
-      s += txt(0, yt, '0 %', 'start') + txt(slut, yt, pr + ' %', 'middle') + txt(W, yt, '100 %', 'end');
+      // Mittstrecket och procenttalet bara när den färgade delen slutar inne i stapeln: är hela stapeln färgad (hel: 100,
+      // "hela stapeln är 320 cm", procent moment 3 D6) eller ingen del, står bara 0 % och 100 % (Joachim 2026-11-27).
+      var mitt = slut > 0 && slut < W;
+      (mitt ? [0, slut, W] : [0, W]).forEach(function(x){ s += '<line x1="'+x.toFixed(1)+'" y1="'+(y+H)+'" x2="'+x.toFixed(1)+'" y2="'+(y+H+6)+'" stroke="'+C_LINE+'" stroke-width="2"/>'; });
+      s += txt(0, yt, '0 %', 'start') + (mitt ? txt(slut, yt, pr + ' %', 'middle') : '') + txt(W, yt, '100 %', 'end');
     }
     return svg(s, W, y + H + (opt.skala ? 26 : 0));
   }

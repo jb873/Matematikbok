@@ -1,6 +1,6 @@
 /* blad-k4-d1-metod.js — METODTRÄNINGEN I PROCENT (åk 7, kapitel 4 Del 1): grenen "Procent och byta form" (moment 1)
-   med löven B1–B7 (Joachim 2026-11-26), och grenen "Andelen" (moment 2) med löven A1–A7 (2026-11-27, se GRENEN
-   "ANDELEN" nedan).
+   med löven B1–B7 (Joachim 2026-11-26), grenen "Andelen" (moment 2) med löven A1–A7 och grenen "Delen" (moment 3)
+   med löven D1–D7 (2026-11-27, se GRENEN "ANDELEN" och GRENEN "DELEN" nedan).
    Källa: doc/innehall/k4-d1-procent-metodtraning.md — Joachims klartext (facit kontrollräknat), ordagrant: talreglerna
    överst i varje löv och 10 uppgifter som mallar. Hakparenteser finns inte i filen.
    Bladen ritas med bladkärnan och bladens byggstenar (blad-k4-d1-procent.js, TYPER: formkedjan, figurerna, svaret med
@@ -284,6 +284,149 @@ BANK_A.A3.mallar.forEach(function(m){ m.nyckel = (m.a * m.k) + '/' + (m.d * m.k)
 var ORDNING_A = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7'];
 Object.keys(BANK_A).forEach(function(id){ BANK[id] = BANK_A[id]; });
 
+/* ═══ GRENEN "DELEN" (moment 3, Joachim 2026-11-27): löven D1–D7 ═══════════════════════════════════════════════════
+   Källa: doc/innehall/k4-d1-procent-moment3-metodtraning.md (facit kontrollräknat), ordagrant; hakparenteserna står
+   inte här. Svarsraden är bladens STEGRAD (blad-k4-d1-delen.js, TYPER.st): 100 % = ▢ · ▢ % = ▢/▢ = ▢ · ▢ % = ▢ · ▢ = ▢
+   — eleven väljer steget, leden rättas på värde och på att de hänger ihop; facit visar klartextens enklaste väg. D3
+   har BRÅKRADEN (TYPER.br). D1–D3 får NYA TAL EFTER BANKEN (NyaTal.medTalregel): mallen först, med lika stor chans;
+   mallen bestämmer procenttalets slag (D1, D2) eller procenttalet (D3), och lövets talregel nedan drar talen. D4–D7 har
+   bara författade uppgifter. Mastery: alla sju löv loggar till lövet Delen (proc-delen:rakna) i kapitel 4:s store. */
+var NAMN_D = {
+  D1: { namn: '1 %-steget' }.namn,
+  D2: { namn: '10 %-steget' }.namn,
+  D3: { namn: 'Procent som bråk' }.namn,
+  D4: { namn: 'Det som är kvar' }.namn,
+  D5: { namn: 'Flera delar ur samma helhet' }.namn,
+  D6: { namn: 'Rabatt i kronor, och figur eller sträcka' }.namn,
+  D7: { namn: 'Jämföra' }.namn
+};
+var GREN_D = { namn: 'Delen' }.namn, DELEN = 'proc-delen:rakna';
+var RDL = { hur: { rubrik: 'Hur mycket är …' }.rubrik, tecken: { rubrik: 'Vilket tecken ska stå i rutan: <, = eller >?' }.rubrik };
+// Stegraden, bråkraden och valrutan ur Delens bladfil (laddas före den här).
+function DT(){ return window.BLAD_K4_D1_DELEN.TYPER; }
+function st(fraga, hela, procent, steg, enhet){ return DT().st(fraga, hela, procent, steg, enhet); }
+function brD(fraga, hela, procent, brak, enhet){ return DT().br(fraga, hela, procent, brak, enhet); }
+function valD(alt, ratt, fraga, flera){ return DT().val(alt, ratt, fraga, flera); }
+// Talet i frågan som i klartexten: tusental med mellanslag ("1 100 kr").
+function tusen(n){ return n >= 1000 ? String(n).replace(/\B(?=(\d{3})+$)/g, ' ') : String(n); }
+var KR = 'kr';
+
+/* ── TALREGLERNA (klartextens, överst i varje löv) ── */
+// D1: "Hur mycket är p % av H kr?". H = 200, 300, …, 1200, inte 1000; 1 % = H/100 = k, heltal 2–12 (inte 10).
+// p = 2–9 när k = 2–12, eller p = 11–19 när k = 2–5. p är aldrig 1, 10, 20, 25 eller 50. Svar: p · k.
+// Mallen bestämmer procenttalets slag: ental (p 2–9) eller tonår (p 11–19).
+function radD1(x){ return uA(RDL.hur, [ st({ fraga: x.p + ' % av ' + tusen(x.H) + ' kr?' }.fraga, x.H, x.p, 1, KR) ]); }
+function draD1(m){ return function(rnd){
+  var ton = m.p > 10, k = ton ? hel(rnd, 2, 5) : ur(rnd, [2, 3, 4, 5, 6, 7, 8, 9, 11, 12]);
+  var p = ton ? hel(rnd, 11, 19) : hel(rnd, 2, 9);
+  return { p: p, H: 100 * k, nyckel: p + ' % av ' + (100 * k) };
+}; }
+// D2: p = 20, 30, 40, 60, 70, 80 eller 90 (inte 50); H delbart med 10, 10 % = H/10 = t. Är t ett jämnt tiotal
+// (20, 30, …, 120) får p vara vilket som helst av talen; annars är t = 3–25 och p högst 60 %. (t = 10 är ett jämnt
+// tiotal utanför listan och kommer inte.) Mallen bestämmer t:s slag. Svar: (p/10) · t.
+var D2_P = [20, 30, 40, 60, 70, 80, 90];
+function radD2(x){ return uA(RDL.hur, [ st({ fraga: x.p + ' % av ' + tusen(x.H) + ' kr?' }.fraga, x.H, x.p, 10, KR) ]); }
+function draD2(m){ return function(rnd){
+  var t, p;
+  if(m.H % 100 === 0 && m.H >= 200){ t = 10 * hel(rnd, 2, 12); p = ur(rnd, D2_P); }
+  else { t = ur(rnd, [3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25]); p = ur(rnd, [20, 30, 40, 60]); }
+  return { p: p, H: 10 * t, nyckel: p + ' % av ' + (10 * t) };
+}; }
+// D3: p = 25, 75, 20 eller 50 (25 % = 1/4, 75 % = 3/4, 20 % = 1/5, 50 % = 1/2); x delbart med nämnaren. 25 % och
+// 75 %: x/4 = 10–300. 20 %: x/5 = 5–240. 50 %: x högst 1 200. x/nämnaren är högst 50, eller ett jämnt tiotal
+// (tillägg 2026-11-27). Mallen bestämmer procenttalet. Svar: täljaren · (x/nämnaren).
+var D3_BRAK = { 25: '1/4', 75: '3/4', 20: '1/5', 50: '1/2' }, D3_Q = { 25: [10, 300], 75: [10, 300], 20: [5, 240], 50: [1, 600] };
+function radD3(x){ return uA(RDL.hur, [ brD({ fraga: x.p + ' % av ' + tusen(x.x) + ' kr?' }.fraga, x.x, x.p, D3_BRAK[x.p], KR) ]); }
+function draD3(m){ return function(rnd){
+  var b = D3_Q[m.p], n = +D3_BRAK[m.p].split('/')[1], q = hel(rnd, b[0], b[1]);
+  if(q > 50 && q % 10 !== 0) return null;                 // tillägget: högst 50 eller ett jämnt tiotal
+  return { p: m.p, x: n * q, nyckel: m.p + ' % av ' + (n * q) };
+}; }
+
+/* ── D4–D7: Joachims uppgifter (rubriken är uppgiftens text) ── */
+var BANK_D = {
+  D1: { namn: NAMN_D.D1, nod: DELEN, rad: radD1, dra: draD1,
+    mallar: [ { p: 4, H: 700 }, { p: 3, H: 1100 }, { p: 8, H: 500 }, { p: 9, H: 300 }, { p: 6, H: 1200 },
+              { p: 2, H: 900 }, { p: 7, H: 800 }, { p: 12, H: 400 }, { p: 15, H: 300 }, { p: 13, H: 500 } ] },
+  D2: { namn: NAMN_D.D2, nod: DELEN, rad: radD2, dra: draD2,
+    mallar: [ { p: 30, H: 250 }, { p: 40, H: 80 }, { p: 70, H: 600 }, { p: 90, H: 200 }, { p: 60, H: 150 },
+              { p: 20, H: 180 }, { p: 80, H: 300 }, { p: 40, H: 1200 }, { p: 30, H: 70 }, { p: 60, H: 1100 } ] },
+  D3: { namn: NAMN_D.D3, nod: DELEN, rad: radD3, dra: draD3,
+    mallar: [ { p: 75, x: 240 }, { p: 25, x: 360 }, { p: 20, x: 550 }, { p: 50, x: 640 }, { p: 75, x: 1000 },
+              { p: 20, x: 85 }, { p: 25, x: 140 }, { p: 75, x: 160 }, { p: 50, x: 760 }, { p: 20, x: 1200 } ] },
+  // Det som är kvar: eleven räknar först 100 % − p; stegraden har det som är kvar (som Blad 3A).
+  D4: { namn: NAMN_D.D4, nod: DELEN, uppg: function(){ return [
+    uA({ rubrik: 'En bok har 300 sidor. Alva har läst 30 % av boken. Hur många sidor har hon kvar att läsa?' }.rubrik, [ st(null, 300, 70, 10, 'sidor') ]),
+    uA({ rubrik: 'På en skola går 800 elever. 15 % av eleverna åker buss. Hur många elever åker inte buss?' }.rubrik, [ st(null, 800, 85, 1, 'elever') ]),
+    uA({ rubrik: 'En cykel kostar 2 000 kr. Noah betalar 25 % kontant. Hur mycket har han kvar att betala?' }.rubrik, [ st(null, 2000, 75, 25, KR) ]),
+    uA({ rubrik: 'En leverans innehåller 600 lampor. 4 % av lamporna är trasiga. Hur många lampor är hela?' }.rubrik, [ st(null, 600, 96, 1, 'lampor') ]),
+    uA({ rubrik: 'En konsertsal har 450 platser. 60 % av platserna är sålda. Hur många platser är lediga?' }.rubrik, [ st(null, 450, 40, 10, 'platser') ]),
+    uA({ rubrik: 'Ella har 1 200 kr. Hon använder 35 % av pengarna. Hur mycket har hon kvar?' }.rubrik, [ st(null, 1200, 65, 5, KR) ]),
+    uA({ rubrik: 'En godispåse väger 250 g. 80 % är choklad och resten är lakrits. Hur många gram lakrits finns i påsen?' }.rubrik, [ st(null, 250, 20, 10, 'g') ]),
+    uA({ rubrik: 'Liam har 900 kr. Han använder 40 % av pengarna till en jacka. Hur mycket har han kvar?' }.rubrik, [ st(null, 900, 60, 10, KR) ])
+  ]; } },
+  D5: { namn: NAMN_D.D5, nod: DELEN, uppg: function(){ return [
+    uA({ rubrik: 'Ett äpple väger 300 g. 85 % av äpplet är vatten och 10 % är socker.' }.rubrik, [
+      st({ fraga: 'Hur många gram vatten finns i äpplet?' }.fraga, 300, 85, 1, 'g'),
+      st({ fraga: 'Hur många gram socker finns i äpplet?' }.fraga, 300, 10, 10, 'g'),
+      st({ fraga: 'Hur många gram är varken vatten eller socker?' }.fraga, 300, 5, 5, 'g') ]),
+    uA({ rubrik: 'En match är 90 minuter lång. Det blå laget hade bollen 60 % av tiden och det gröna laget 40 %.' }.rubrik, [
+      st({ fraga: 'Hur många minuter hade det blå laget bollen?' }.fraga, 90, 60, 10, 'min'),
+      st({ fraga: 'Hur många minuter hade det gröna laget bollen?' }.fraga, 90, 40, 10, 'min') ]),
+    uA({ rubrik: 'En klass har 25 elever. 20 % av eleverna cyklar till skolan, 36 % går och resten åker buss.' }.rubrik, [
+      st({ fraga: 'Hur många elever cyklar?' }.fraga, 25, 20, 20, 'elever'),
+      st({ fraga: 'Hur många elever går?' }.fraga, 25, 36, 4, 'elever'),
+      st({ fraga: 'Hur många elever åker buss?' }.fraga, 25, 44, 4, 'elever') ]),
+    uA({ rubrik: 'En godispåse väger 400 g. 25 % är lakrits, 35 % är geléhjärtan och resten är choklad.' }.rubrik, [
+      st({ fraga: 'Hur många gram lakrits finns i påsen?' }.fraga, 400, 25, 25, 'g'),
+      st({ fraga: 'Hur många gram geléhjärtan finns i påsen?' }.fraga, 400, 35, 1, 'g'),
+      st({ fraga: 'Hur många gram choklad finns i påsen?' }.fraga, 400, 40, 10, 'g') ]),
+    uA({ rubrik: 'Ett lag gjorde 60 mål under en säsong. Emma gjorde 15 % av målen och Liam gjorde 30 %.' }.rubrik, [
+      st({ fraga: 'Hur många mål gjorde Emma?' }.fraga, 60, 15, 5, 'mål'),
+      st({ fraga: 'Hur många mål gjorde Liam?' }.fraga, 60, 30, 10, 'mål'),
+      st({ fraga: 'Hur många mål gjorde Emma och Liam tillsammans?' }.fraga, 60, 45, 5, 'mål') ])
+  ]; } },
+  // Figurerna: sträckan (strackfigur), rutnätet med 20 rutor (delRuta 4 · 5, kvadratiska) och stapeln från 0 % till
+  // 100 % (delStrip med hel, text och skala — hela stapeln är det hela).
+  D6: { namn: NAMN_D.D6, nod: DELEN, uppg: function(){ var AF = window.SvgAlgebraFigur; return [
+    uA({ rubrik: 'En jacka kostar 1 600 kr. Rabatten är 25 %. Hur många kronor är rabatten?' }.rubrik, [ st(null, 1600, 25, 25, KR) ]),
+    uA({ rubrik: 'Ett par skor kostar 550 kr. Rabatten är 20 %. Hur många kronor är rabatten?' }.rubrik, [ st(null, 550, 20, 10, KR) ]),
+    uA({ rubrik: 'Ett spel kostar 350 kr. Rabatten är 30 %. Hur många kronor är rabatten?' }.rubrik, [ st(null, 350, 30, 10, KR) ]),
+    uA({ rubrik: 'En cykel kostar 3 200 kr. Rabatten är 15 %. Hur många kronor är rabatten?' }.rubrik, [ st(null, 3200, 15, 5, KR) ]),
+    uA({ rubrik: 'Hur lång är 35 % av sträckan?' }.rubrik, [
+      { typ: 'svgfigur', svg: AF ? AF.strackfigur({ delar: [{ text: { etikett: '80 mm' }.etikett }], alt: 'En sträcka som är 80 mm lång' }) : '' },
+      st(null, 80, 35, 5, 'mm') ]),
+    uA({ rubrik: 'Hur många rutor är 45 % av rutnätet?' }.rubrik, [ { typ: 'svgfigur', svg: A.delRuta(4, 5, [], { kvadrat: true }) },
+      st(null, 20, 45, 5, 'rutor') ]),
+    uA({ rubrik: 'En tank rymmer 50 liter. Den är fylld till 70 %. Hur många liter finns i tanken?' }.rubrik, [ st(null, 50, 70, 10, 'liter') ]),
+    uA({ rubrik: 'Hur lång är 75 % av stapeln?' }.rubrik, [
+      { typ: 'svgfigur', svg: A.delStrip(10, [], { hel: 100, text: { etikett: '320 cm' }.etikett, skala: true }) },
+      st(null, 320, 75, 25, 'cm') ])
+  ]; } },
+  // Tecknet och flervalet med valrutan; nr 4 ringa in (valrutan med flera rätt).
+  D7: { namn: NAMN_D.D7, nod: DELEN, uppg: function(){ var T3 = ['<', '=', '>']; return [
+    uA(RDL.tecken, [ valD(T3, '=', { fraga: '20 % av 50  □  50 % av 20' }.fraga), valD(T3, '>', { fraga: '25 % av 120  □  40 % av 70' }.fraga),
+                     valD(T3, '<', { fraga: '10 % av 70  □  70 % av 20' }.fraga) ]),
+    uA({ rubrik: 'Vilket är störst?' }.rubrik, [ valD(['A 25 % av 56', 'B 40 % av 40', 'C 5 % av 300'], 'B 40 % av 40') ]),
+    uA({ rubrik: 'Ett par byxor kostar 400 kr. Vilken rabatt är störst?' }.rubrik, [
+      valD(['A 20 % rabatt', 'B 75 kr i rabatt', 'C 1/4 av priset i rabatt'], 'C 1/4 av priset i rabatt') ]),
+    uA({ rubrik: 'Vilka påståenden stämmer? Ringa in alla som stämmer.' }.rubrik, [
+      valD(['A 10 % av 800 är 80.', 'B 50 % av 36 är 72.', 'C 25 % av 120 är lika mycket som 20 % av 150.', 'D 1 % av 600 är 60.'],
+           ['A 10 % av 800 är 80.', 'C 25 % av 120 är lika mycket som 20 % av 150.'], null, true) ]),
+    uA({ rubrik: 'Vilket är minst?' }.rubrik, [ valD(['A 30 % av 200', 'B 60 % av 90', 'C 75 % av 80'], 'B 60 % av 90') ]),
+    uA({ rubrik: 'Butik A ger 30 % rabatt på en jacka som kostar 600 kr. Butik B ger 20 % rabatt på en jacka som kostar 800 kr. I vilken butik är rabatten störst i kronor?' }.rubrik, [
+      valD(['A Butik A', 'B Butik B', 'C Rabatten är lika stor'], 'A Butik A') ]),
+    uA(RDL.tecken, [ valD(T3, '=', { fraga: '5 % av 400  □  4 % av 500' }.fraga) ]),
+    uA({ rubrik: 'Ida får 15 % av 600 kr. Omar får 40 % av 250 kr. Vem får mest?' }.rubrik, [
+      valD(['A Ida', 'B Omar', 'C De får lika mycket'], 'B Omar') ])
+  ]; } }
+};
+BANK_D.D1.mallar.forEach(function(m){ m.nyckel = m.p + ' % av ' + m.H; });
+BANK_D.D2.mallar.forEach(function(m){ m.nyckel = m.p + ' % av ' + m.H; });
+BANK_D.D3.mallar.forEach(function(m){ m.nyckel = m.p + ' % av ' + m.x; });
+var ORDNING_D = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'];
+Object.keys(BANK_D).forEach(function(id){ BANK[id] = BANK_D[id]; });
+
 /* Ett blad i drillen: en uppgift. B-löven ger en rad (lövets rubrik); A-löven ger { rubrik, rader }. */
 function bladAv(b, u){
   var gr = u && u.rader ? Y.g(u.rubrik, u.rader) : Y.g(b.rubrik, [u]); gr.logg = b.nod; gr.loggStore = 'k4';
@@ -327,17 +470,18 @@ function drillKalla(ref){
 }
 
 /* TRÄDET (momentsidans Metodträning, ritat av KartaMotor i metodtrad.html): grenen "Procent och byta form", B1–B7,
-   och bredvid den grenen "Andelen", A1–A7 (2026-11-27). */
+   och efter den grenen "Andelen", A1–A7, och grenen "Delen", D1–D7 (2026-11-27). */
 function lovAv(id){ return { id: 'nf-k4d1-' + id, namn: BANK[id].namn, nod: BANK[id].nod, formaga: 'RAKNA', roll: 'karna', bank: 'k4d1:' + id }; }
 function trad(){
   return { rot: { id: 'nf-k4d1', namn: ROTNAMN }, arskursRelevans: { ak7: 'mal' }, arskurs: 'ak7',
-    prefKey: 'k4.d1.nyformat.pref.v1', utfalld: ['nf-k4d1', 'nf-k4d1-byta', 'nf-k4d1-andelen'], rotNamn: ROTNAMN, orsakFramtid: 'åk 8',
+    prefKey: 'k4.d1.nyformat.pref.v1', utfalld: ['nf-k4d1', 'nf-k4d1-byta', 'nf-k4d1-andelen', 'nf-k4d1-delen'], rotNamn: ROTNAMN, orsakFramtid: 'åk 8',
     kategorier: [ { id: 'nf-k4d1-byta', namn: GREN, roll: 'karna', lov: ORDNING.map(lovAv) },
-                  { id: 'nf-k4d1-andelen', namn: GREN_A, roll: 'karna', lov: ORDNING_A.map(lovAv) } ] };
+                  { id: 'nf-k4d1-andelen', namn: GREN_A, roll: 'karna', lov: ORDNING_A.map(lovAv) },
+                  { id: 'nf-k4d1-delen', namn: GREN_D, roll: 'karna', lov: ORDNING_D.map(lovAv) } ] };
 }
 
-window.BLAD_K4_D1_METOD = { ORDNING: ORDNING, ORDNING_A: ORDNING_A, trad: trad, drillKalla: drillKalla,
+window.BLAD_K4_D1_METOD = { ORDNING: ORDNING, ORDNING_A: ORDNING_A, ORDNING_D: ORDNING_D, trad: trad, drillKalla: drillKalla,
   bank: function(id){ var b = BANK[id]; return b ? { id: id, namn: b.namn, nod: b.nod, mallar: b.mallar || null, uppg: uppgAv(b) } : null; },
   // För spec-fuzzen: talreglernas tabeller (fuzzen räknar själv; de här används bara för utskriften).
-  REGEL: { B2_TAL: B2_TAL, B4_TAL: B4_TAL, B5_NAMN: B5_NAMN, A1_TAL: A1_TAL, A2_K: A2_K, A2_NAMN: A2_NAMN } };
+  REGEL: { B2_TAL: B2_TAL, B4_TAL: B4_TAL, B5_NAMN: B5_NAMN, A1_TAL: A1_TAL, A2_K: A2_K, A2_NAMN: A2_NAMN, D2_P: D2_P, D3_Q: D3_Q } };
 })();

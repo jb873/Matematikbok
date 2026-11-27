@@ -7,6 +7,8 @@ Varje punkt säger vad som brister, var det mättes och när.
 
 ## Grindarna
 
+- [ ] **Figurgrinden mäter inte drillernas figurer.** Grinden läser uppgiftssidorna och testen, inte drill.html —
+  metodträningens figurer (procent D6: sträckan, rutnätet, stapeln med `hel: 100`) mäts bara av röken. 2026-11-27.
 - [ ] **Uppgiftsgrindens `--sabba bokstav` kraschar proben.** Sabotaget läser variabeln `grupper`, som inte finns i
   proben (`verktyg/uppgift-grind.js`, rad 96) — sidan ger "inget svar" i stället för att BOKSTAV fäller. På de äldre
   sidorna blev det "?" och grinden grön; på uppgiftssidorna i nytt format fäller grinden nu på "inget svar". Benet
@@ -22,6 +24,13 @@ Varje punkt säger vad som brister, var det mättes och när.
   procent Det hela Blad 5A och 6A och grinden blir grön. ETIKETT MOT LINJE mäter bara texter med `af-matt`, så
   stapelns texter ("24 cm", "0 %", "100 %") prövas inte mot stapelns kanter. ETIKETT MOT ETIKETT fäller där (den fällde
   sträckans "40 %" mot "28 mm" innan radavståndet blev 24). Prövat 2026-11-27 (`verktyg/figur-grind.js`).
+
+## Metodträningen
+
+- [ ] **Delens metodträning: två frågor till Joachim.** (1) D3, 50 %: talregeln har ingen nedre gräns för x ("x högst
+  1 200"), så de nya talen kan ge till exempel 50 % av 2 kr. Byggt som regeln står. (2) D5 nr 3 b och c: stegradens
+  mittrad "4 % = 25/25 = ▢ elever" har svaret 1, och enheten efter rutan är "elever" (klartextens facit: "1 elev").
+  Raden har en enhet för hela raden. 2026-11-27.
 
 ## Sidorna
 

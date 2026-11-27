@@ -161,6 +161,9 @@ var MOMENT = { titel: 'Delen', varianter: ['A'],
 
 window.BLAD_K4_D1_DELEN = {
   MOMENT: MOMENT,
+  // Stegraden, bråkraden, valrutan och enheterna för testet och metodträningen (blad-k4-d1-test.js,
+  // blad-k4-d1-metod.js): samma rader som bladen.
+  TYPER: { st: st, br: br, val: val, E: E, DELEN: DELEN },
   blad: function(id){ var b = BLAD[String(id || '').toUpperCase()]; return b ? b() : null; },
   idn: function(){ return Object.keys(BLAD); }
 };

@@ -96,7 +96,49 @@ TEST.andelen1 = function(){
   ] });
 };
 
-var TESTER = [ { id: 'test1', titel: TITEL }, { id: 'andelen1', titel: TITEL_ANDELEN } ];
+/* DELEN, TEST 1 (moment 3, Joachim 2026-11-27). Källa: doc/innehall/k4-d1-procent-moment3-test1.md (facit
+   kontrollräknat), ordagrant; hakparentesen (bladet) står bara här. Byggt som Andelens test med Delens komponenter
+   (blad-k4-d1-delen.js, TYPER): stegraden "100 % = ▢ · ▢ % = ▢/▢ = ▢ · ▢ % = ▢ · ▢ = ▢" (eleven väljer steget; tom
+   tredje rad när steget redan är procenttalet), facit = klartextens enklaste väg. Uppgift 6: sträckan (strackfigur);
+   uppgift 7: tecknet med valrutan; uppgift 8: flerval. Mastery: lövet Delen (proc-delen:rakna) i kapitel 4:s store. */
+var TITEL_DELEN = { titel: 'Delen, Test 1' }.titel;
+var RD = {
+  hur: { rubrik: 'Hur mycket är …' }.rubrik,
+  n2: { rubrik: 'På en skola går 900 elever. 4 % av eleverna spelar schack. Hur många elever spelar schack?' }.rubrik,
+  n3: { rubrik: 'En bok har 360 sidor. Sara har läst 25 % av boken. Hur många sidor har hon kvar att läsa?' }.rubrik,
+  n4: { rubrik: 'Ett päron väger 150 g. 84 % av päronet är vatten och 10 % är socker.' }.rubrik,
+  n5: { rubrik: 'En mössa kostar 240 kr. Rabatten är 35 %. Hur många kronor är rabatten?' }.rubrik,
+  n6: { rubrik: 'Hur lång är 65 % av sträckan?' }.rubrik,
+  n7: { rubrik: 'Vilket tecken ska stå i rutan: <, = eller >?' }.rubrik,
+  n8: { rubrik: 'Ett par skor kostar 400 kr. Rabatten är 20 %. Hur många kronor är rabatten?' }.rubrik
+};
+TEST.delen1 = function(){
+  var D = window.BLAD_K4_D1_DELEN && window.BLAD_K4_D1_DELEN.TYPER, AF = window.SvgAlgebraFigur; if(!D) return null;
+  var st = D.st, val = D.val, E = D.E;
+  return Y.medNod(D.DELEN, { titel: TITEL_DELEN, grupper: [
+    // [Blad 1]
+    g(RD.hur, [ st({ fraga: '6 % av 700 kr?' }.fraga, 700, 6, 1, E.kr), st({ fraga: '80 % av 450 kr?' }.fraga, 450, 80, 10, E.kr),
+                st({ fraga: '75 % av 280 kr?' }.fraga, 280, 75, 25, E.kr) ]),
+    // [Blad 2]
+    g(RD.n2, [ st(null, 900, 4, 1, E.elever) ]),
+    // [Blad 3] Kvar: 100 % − 25 % = 75 %.
+    g(RD.n3, [ st(null, 360, 75, 25, E.sidor) ]),
+    // [Blad 4]
+    g(RD.n4, [ st({ fraga: 'Hur många gram socker finns i päronet?' }.fraga, 150, 10, 10, E.g),
+               st({ fraga: 'Hur många gram vatten finns i päronet?' }.fraga, 150, 84, 4, E.g) ]),
+    // [Blad 5]
+    g(RD.n5, [ st(null, 240, 35, 5, E.kr) ]),
+    // [Blad 5] "(Figur: en sträcka som är 40 mm lång.)"
+    g(RD.n6, [ { typ: 'svgfigur', svg: AF ? AF.strackfigur({ delar: [{ text: { etikett: '40 mm' }.etikett }], alt: 'En sträcka som är 40 mm lång' }) : '' },
+               st(null, 40, 65, 5, E.mm) ]),
+    // [Blad 6]
+    g(RD.n7, [ val(['<', '=', '>'], '=', { fraga: '20 % av 90  □  30 % av 60' }.fraga) ]),
+    // [Blad 6]
+    g(RD.n8, [ val(['A 20 kr', 'B 24 kr', 'C 80 kr', 'D 320 kr'], 'C 80 kr') ])
+  ] });
+};
+
+var TESTER = [ { id: 'test1', titel: TITEL }, { id: 'andelen1', titel: TITEL_ANDELEN }, { id: 'delen1', titel: TITEL_DELEN } ];
 window.BLAD_K4_D1_TEST = {
   TESTER: TESTER,
   test: function(id){ var fn = TEST[String(id || '')]; return fn ? fn() : null; },
