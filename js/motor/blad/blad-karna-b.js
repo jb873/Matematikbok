@@ -376,7 +376,14 @@ function brakVardeOk(inp){
      saknar steg och underkänns. Den fjärde raden (rad.rest) rättas på värde: ▢ − ▢ är värt resten, och svaret är resten.
      Data: { typ: 'stegrad', spegel: true, fraga?, procent, del, steg (facitvägen), enhet, enhetSvar?, rest?, enhetRest? }.
    BRÅKRADEN (rad.typ 'brakrad'): "25 % = ▢ , (▢ · 800)/▢ = ▢ · ▢ = ▢ kr" — bråket i enklaste form (formrutan
-   'enklaste'), övriga led på värde. Data: { typ, fraga?, hela, procent, steg (facitvägen) | brak, enhet, enhetSvar? }. */
+   'enklaste'), övriga led på värde. Data: { typ, fraga?, hela, procent, steg (facitvägen) | brak, enhet, enhetSvar? }.
+   TVÅSTEG (rad.helheter + rad.kombo, Joachim 2026-11-28, procent moment 3 Blad 6 — samma radtyp, ingen ny): en stegrad
+   per helhet, var och en med sin etikett ovanför när de är två ("7A:", "7B:"), och sist KOMBINATIONSRADEN
+       ▢ + ▢ = ▢ elever          (eller ▢ − ▢ = ▢ enligt facit)
+     rättad på värde, som Resten-raden: ▢ + ▢ (▢ − ▢) är värt svaret, och svaret är rätt; står bara den ena rutan
+     ifylld prövas den mot sitt facit (vid + mot vilken som helst av de två termerna). Helheternas stegrader rättas som
+     vanligt. Evidensen (loggningen) är kombinationsradens svar — uppgiftens svar, som restens.
+     Data: { typ: 'stegrad', helheter: [{ etikett?, hela, procent, steg, enhet, enhetSvar? }], kombo: { tecken: '+'|'−', a, b, enhet } }. */
 var STEG_ORD = { resten: { text: 'Resten' }.text };   // fjärde radens ord (elevtext)
 var STEG_TILLATNA = [1, 2, 4, 5, 10, 20, 25, 50];   // går jämnt upp i 100 (stegens lista, Joachim 2026-11-27)
 function stegRund(v){ return Math.round(v * 1e6) / 1e6; }
@@ -399,6 +406,20 @@ function stegradHtml(rad){
     + t + '</span><span class="ovn-brak-strecket"></span><span class="ovn-brak-namnare" style="padding:3px 4px 0;">' + n + '</span></span>'; }
   function led(c){ return '<div class="ovn-stegled" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;">' + c + '</div>'; }
   var A = stegRund(H * P / 100), e1 = rad.enhet || '', e2 = rad.enhetSvar || e1, ut;
+  if(rad.helheter){
+    var K = rad.kombo, Ks = stegRund(K.tecken === '+' ? K.a + K.b : K.a - K.b);
+    ut = '<div class="ovn-tvasteg" style="flex-basis:100%;display:flex;flex-direction:column;gap:16px;">';
+    rad.helheter.forEach(function(h){
+      ut += '<div style="display:flex;flex-direction:column;gap:10px;">'
+        + (h.etikett ? '<span class="ovn-text ovn-steg-etikett">' + h.etikett + '</span>' : '')
+        + stegradHtml({ typ: 'stegrad', hela: h.hela, procent: h.procent, steg: h.steg, enhet: h.enhet, enhetSvar: h.enhetSvar })
+        + '</div>';
+    });
+    return ut + '<div class="ovn-stegrad" data-kombo="' + (K.tecken === '+' ? '+' : '-') + '" data-ka="' + K.a + '" data-kb="' + K.b
+      + '" data-svar="' + Ks + '" style="flex-basis:100%;display:flex;flex-direction:column;gap:10px;">'
+      + led(stegRuta('ka', K.a) + txt(K.tecken === '+' ? '+' : '−') + stegRuta('kb', K.b) + lik + enh(stegRuta('kc', Ks), K.enhet || ''))
+      + '</div></div>';
+  }
   if(rad.typ === 'brakrad'){
     var p = String(rad.brak).split('/'), t = +p[0], n = +p[1];
     ut = '<div class="ovn-stegrad" data-stegtyp="brak" data-hela="' + H + '" data-procent="' + P + '" data-svar="' + A + '"'
@@ -449,6 +470,15 @@ function stegMittTom(sr){
 function stegOk(inp){
   var sr = inp.closest('.ovn-stegrad'), H = +sr.dataset.hela, P = +sr.dataset.procent, A = +sr.dataset.svar;
   var v = stegLas(sr), r = inp.dataset.steg;
+  if(sr.dataset.kombo){
+    // TVÅSTEG: kombinationsraden på värde (som Resten-raden).
+    var ka = +sr.dataset.ka, kb = +sr.dataset.kb, plus = sr.dataset.kombo === '+';
+    if(r === 'ka' || r === 'kb'){
+      if(isNaN(v.ka) || isNaN(v.kb)) return plus ? stegNara(v[r], ka) || stegNara(v[r], kb) : stegNara(v[r], r === 'ka' ? ka : kb);
+      return stegNara(plus ? v.ka + v.kb : v.ka - v.kb, A);
+    }
+    return stegNara(v.kc, A);
+  }
   if(sr.dataset.stegtyp === 'brak'){
     if(r === 'ba' || r === 'bb') return v.bb !== 0 && stegNara(v.ba * H / v.bb, A);
     if(r === 'bc' || r === 'be') return stegNara(v.bc * v.be, A);
@@ -491,6 +521,7 @@ function stegOk(inp){
 function stegLoggar(inp){
   var sr = inp.closest('.ovn-stegrad');
   if(!sr) return true;
+  if(sr.closest('.ovn-tvasteg')) return inp.dataset.steg === 'kc';   // tvåsteg: kombinationsradens svar är svaret
   if(sr.dataset.rest) return inp.dataset.steg === 'rc';      // det hela med rest: resten är svaret
   if(sr.dataset.spegel) return inp.dataset.steg === 'svar';
   return inp.dataset.steg === 'svar' || (inp.dataset.steg === 'v1' && sr.dataset.tom3 === '1');
@@ -779,6 +810,11 @@ function sidSumma(sidor){
 // inget att skilja den från. Funktionen finns för att regeln ska gälla varje radtyp, också de som
 // skrivs i morgon — förr stod utskriften på tjugo ställen.
 function lbl(b){ return b ? '<span class="ovn-label">' + b + ')</span>' : ''; }
+/* EN TABELL UTAN RUTOR bär inget svar (Joachim 2026-11-28, procent moment 3 Blad 6 nr 9: "Månadspeng – Liam 400 kr,
+   Ida 300 kr") — den hör till uppgiften som en figur och tar ingen bokstav. Med en formruta i matrisen: som förut. */
+function tabellUtanRuta(r){
+  return r.typ === 'tabell' && !!r.matris && !r.matris.some(function(rr){ return rr.some(function(c){ return c && typeof c === 'object'; }); });
+}
 /* FRÅGAN PÅ EGEN RAD — MED BOKSTAVEN (KONVENTIONER: "a) b) bara vid deluppgifter, också de på raden"; Joachim
    2026-11-21). Rader vars fråga står på en egen rad ovanför rutorna (talföljd, beräkningsraden med avskrift, lucka,
    berakna) lade frågan i en ruta med full bredd — bokstaven blev ensam på raden ovanför. Nu står bokstaven och
@@ -1087,7 +1123,7 @@ function bladHTML(blad){
     // EN DELUPPGIFT = INGEN BOKSTAV. "a)" finns för att man ska kunna säga "tal 4 b"; har gruppen
     // bara en uppgift finns inget att skilja, och bokstaven blir en etikett utan funktion
     // (Joachims granskning 2026-10-04). Figurrader bär inget svar och räknas inte med.
-    var _delar = grupp.rader.filter(function(r){ return r.typ !== 'figur' && r.typ !== 'svgfigur'; }).length;
+    var _delar = grupp.rader.filter(function(r){ return r.typ !== 'figur' && r.typ !== 'svgfigur' && !tabellUtanRuta(r); }).length;
     grupp.rader.forEach(function(rad){
       var _radStart = html.length;
       radHTML(rad);
@@ -1478,7 +1514,7 @@ function bladHTML(blad){
          en text (matematik, bråk staplas) eller en formruta { form, svar, bokstav? } — samma ruta som formkedjan.
          rad.huvud = 'rad' (första raden är rubriker) eller 'kolumn' (första kolumnen). Utan matris: som förut. */
       if(rad.typ === 'tabell' && rad.matris){
-        html += '<div class="ovn-rad ovn-tabellrad" data-rad="' + radNummer + '">' + lbl(bokstav);
+        html += '<div class="ovn-rad ovn-tabellrad" data-rad="' + radNummer + '">' + (tabellUtanRuta(rad) ? '' : lbl(bokstav));
         html += '<table class="monster-tabell ovn-formtabell"><tbody>';
         rad.matris.forEach(function(rr, ri){
           html += '<tr>' + rr.map(function(c, ci){

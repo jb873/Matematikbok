@@ -146,7 +146,7 @@ body.nf-stod .ovn-intro{ font-size:21px; line-height:1.8; color:var(--ink); }
   /* SPÄRREN (NivaRad, KONVENTIONER §3): en direktlänk till ett låst blad öppnar inte bladet — den skickar till
      momentsidan (dit Tillbaka leder), där eleven ser låset i sitt sammanhang. */
   if(NR && MO.nivaPrefix && !NR.nadd(MO.nivaPrefix, MO.nivaId, info.nr)){ location.replace(document.getElementById('nf-tillbaka').href); return; }
-  document.title = 'Matematik · Procent · ' + MO.titel + ' · ' + info.titel;
+  document.title = 'Matematik · Procent · ' + MO.titel + (info.titel ? ' · ' + info.titel : ' · Blad ' + info.nr);
   // Bara en variant än: ingen växel (bokstaven bara vid flera varianter, K-A). B läggs till i datan → växeln syns.
   if(MO.varianter.length < 2) nav.hidden = true;
   AY.vaxel({ nav: nav, yta: yta, varianter: MO.varianter, start: start,

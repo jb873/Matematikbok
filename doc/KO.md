@@ -25,6 +25,10 @@ Varje punkt säger vad som brister, var det mättes och när.
   stapelns texter ("24 cm", "0 %", "100 %") prövas inte mot stapelns kanter. ETIKETT MOT ETIKETT fäller där (den fällde
   sträckans "40 %" mot "28 mm" innan radavståndet blev 24). Prövat 2026-11-27 (`verktyg/figur-grind.js`).
 
+- [ ] **Loggningsgrinden mäter inte procentsidorna.** Omfånget är plugg till prov (k1 d10) och kedjesidorna
+  (`verktyg/loggnings-grind.js`); kapitel 4:s store (MasteryK4) och uppgiftssidorna i nytt format mäts inte där.
+  Procentbladens loggning mäts bara av röken (evidens per blad; med loggningen avstängd blir den 0). Mätt 2026-11-28
+  på Delen Blad 1–7.
 - [ ] **Sidlist-grinden är röd med 13 brott.** Uppgiftssidorna i nytt format (k3 d1, d3, d5 och procent) står utanför
   `kontroll-svep.js`, `yt-kontrakt.js` och `smalruta-svep.js` (V9: "ingen sida växer utanför mätningen"). Samma 13 på
   HEAD fadf77d, före 2026-11-27 års justeringar. Mätt 2026-11-27 (`verktyg/sidlist-grind.js`).
@@ -39,7 +43,7 @@ Varje punkt säger vad som brister, var det mättes och när.
 ## Sidorna
 
 - [ ] **MOMENT OCH BLAD (KONVENTIONER, Joachim 2026-11-28): lästal med rubriker som avslöjar typen.** Procent moment
-  2–4 sorteras om i en senare order och står inte här. Övriga blad i nytt format, mätta 2026-11-28 (bladens rubrik
+  2 och 4 sorteras om i en senare order och står inte här (moment 3 Delen är omsorterat, version 2, 2026-11-28). Övriga blad i nytt format, mätta 2026-11-28 (bladens rubrik
   och uppgifternas rubriker, uppgiftssidan vid 1366 × 768):
   - k3 d1 Tolka och teckna uttryck: Blad 1A/1B "Per styck och per gång" och Blad 2A/2B "Mer, mindre och delar" (bladets
     rubrik; uppgifterna är lästal). Blad 3 "Blandade uppgifter" namnger ingen typ.
@@ -51,10 +55,12 @@ Varje punkt säger vad som brister, var det mättes och när.
   - k3 d3 Parenteser Blad 6 och Negativa termer och tillämpning Blad 3–4: bladets rubrik "Tillämpning" säger att det
     är lästal men inte vilken sort. Fråga till Joachim: räknas den?
 - [ ] **MOMENT OCH BLAD: bladtitlar på momentsidan.** Bladen ska heta bara "Blad 1", "Blad 2" … Titlar står i dag på
-  k3 d1 Tolka och teckna uttryck (Blad 1–3), k3 d5 Problemlösning (Blad 1–6) och procent moment 1–4. k3 d1
+  k3 d1 Tolka och teckna uttryck (Blad 1–3), k3 d5 Problemlösning (Blad 1–6) och procent moment 1, 2 och 4
+  (Delen har inga sedan 2026-11-28). k3 d1
   Prioriteringsregeln och Räkna med uttryck och k3 d3 har inga titlar. Mätt 2026-11-28.
 - [ ] **MOMENT OCH BLAD: blad med en enda uppgiftstyp.** Regeln "inget blad har en enda uppgiftstyp" gäller
-  stegringens blad; k3 d5 Blad 1–5 och procent moment 2–4 (före omsorteringen) är byggda per typ. Inte mätt blad för
+  stegringens blad; k3 d5 Blad 1–5 och procent moment 2 och 4 (före omsorteringen) är byggda per typ; Delen är
+  omsorterad (2026-11-28). Inte mätt blad för
   blad i k3 d1 och d3. 2026-11-28.
 
 - [ ] **87 bokstäver ovanför rutor och 22 ovanför figurer.** 87 deluppgiftsbokstäver står ensamma ovanför en rad som
