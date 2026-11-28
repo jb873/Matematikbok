@@ -162,6 +162,12 @@ INNEHÅLL: Allt Joachim har författat ligger i doc/innehall/ innan det byggs. E
 UPPGIFTSFILERNA: Varje uppgiftsfil börjar med en analys av de inscannade böckerna (uppgiftstyp, förlagor, antal, format) och en täckningstabell (varje typ finns i ett blad eller är struken med skäl). Varje uppgift har sin förlaga i hakparentesen. '[författad]' bara för typer som saknas i böckerna, med skäl i täckningstabellen. Joachim 2026-11-28.
 Joachim 2026-11-24.
 MOMENT OCH BLAD: Ett moment har Blad 1, 2, 3 … (var och ett i variant A och B), så många som stegringen kräver. Ett avsnitts stegring fördelas på bladen, inte på fler moment, så att vänsterspalten är kort också när åttans och nians fördjupning läggs till. Joachim 2026-11-24.
+Bladen i ett moment är en stegring. Hur stegringen ser ut bestäms för varje moment i planen och godkänns av Joachim innan uppgifterna skrivs (till exempel från metod till lästal, eller från enklare till svårare uttryck utan lästal).
+Inom varje blad blandas uppgifterna; inget blad har en enda uppgiftstyp. Uppdelningen per uppgiftstyp hör till metodträningen.
+På momentsidan heter bladen bara 'Blad 1', 'Blad 2' … utan titel.
+Rubriker på uppgifterna: i metodbladens sorterade start får rubriken namnge metoden. I lästal står aldrig någon rubrik som talar om vilken sorts uppgift det är; eleven ska själv se typen när den läser uppgiften.
+Ett direktiv som avviker från ett beslut i KONVENTIONER ska säga det uttryckligen och vänta på Joachims godkännande.
+Joachim 2026-11-28. (Sidorna är inte ombyggda än; vilka blad som bryter mot regeln står i doc/KO.md.)
 
 Pilot: algebra åk7 + procent åk8/9. Ombyggnad av delade delkapitel-skal.js
 verifieras av delkapitel-grind.js innan elever lutar sig mot det.

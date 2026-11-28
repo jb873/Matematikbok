@@ -38,6 +38,25 @@ Varje punkt säger vad som brister, var det mättes och när.
 
 ## Sidorna
 
+- [ ] **MOMENT OCH BLAD (KONVENTIONER, Joachim 2026-11-28): lästal med rubriker som avslöjar typen.** Procent moment
+  2–4 sorteras om i en senare order och står inte här. Övriga blad i nytt format, mätta 2026-11-28 (bladens rubrik
+  och uppgifternas rubriker, uppgiftssidan vid 1366 × 768):
+  - k3 d1 Tolka och teckna uttryck: Blad 1A/1B "Per styck och per gång" och Blad 2A/2B "Mer, mindre och delar" (bladets
+    rubrik; uppgifterna är lästal). Blad 3 "Blandade uppgifter" namnger ingen typ.
+  - k3 d5 Problemlösning: Blad 1–5, rubriken är typen ("Problemlösning följa instruktion", "… tal som följer
+    varandra", "… flera personer och saker", "… omkrets", "… vinklar"), och varje blad har en enda typ. Blandade
+    uppgifter har ingen typrubrik. KONVENTIONER "Uppgiftssidan (arbetsytan)" säger i dag "Rubriken är typen" — de två
+    reglerna står mot varandra.
+  - Procent moment 1 Blad 5A/5B: uppgift 3 "Det hela är 100 %" och 4 "Det som är kvar" är lästal med typrubrik.
+  - k3 d3 Parenteser Blad 6 och Negativa termer och tillämpning Blad 3–4: bladets rubrik "Tillämpning" säger att det
+    är lästal men inte vilken sort. Fråga till Joachim: räknas den?
+- [ ] **MOMENT OCH BLAD: bladtitlar på momentsidan.** Bladen ska heta bara "Blad 1", "Blad 2" … Titlar står i dag på
+  k3 d1 Tolka och teckna uttryck (Blad 1–3), k3 d5 Problemlösning (Blad 1–6) och procent moment 1–4. k3 d1
+  Prioriteringsregeln och Räkna med uttryck och k3 d3 har inga titlar. Mätt 2026-11-28.
+- [ ] **MOMENT OCH BLAD: blad med en enda uppgiftstyp.** Regeln "inget blad har en enda uppgiftstyp" gäller
+  stegringens blad; k3 d5 Blad 1–5 och procent moment 2–4 (före omsorteringen) är byggda per typ. Inte mätt blad för
+  blad i k3 d1 och d3. 2026-11-28.
+
 - [ ] **87 bokstäver ovanför rutor och 22 ovanför figurer.** 87 deluppgiftsbokstäver står ensamma ovanför en rad som
   börjar med en ruta, mest på sjuans k1-sidor; 22 står ovanför en figur i andra radtyper än K-C. Joachims beslut:
   kvar, fälls inte. (Uppgift-grindens EGEN RAD.)
