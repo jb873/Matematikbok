@@ -29,30 +29,8 @@ Varje punkt säger vad som brister, var det mättes och när.
   `kontroll-svep.js`, `yt-kontrakt.js` och `smalruta-svep.js` (V9: "ingen sida växer utanför mätningen"). Samma 13 på
   HEAD fadf77d, före 2026-11-27 års justeringar. Mätt 2026-11-27 (`verktyg/sidlist-grind.js`).
 
-## Valrutorna
-
-- [ ] **Regeln för valrutorna gäller bara det nya formatet.** En rad, eller en per rad (KONVENTIONER "Valrutorna"),
-  gäller uppgiftssidorna i arbetsytan och drillarna (`.nf-mount`, `.fk-d1-blad`). På de äldre sidorna står
-  valrutorna kvar som förut — på `ak7/k1/d1-positionssystem` finns valrader med 12 tal som blev en kolumn med 12 rutor
-  och fällde notationsgrinden (K-L). Fråga till Joachim: ska de äldre sidorna också följa regeln, och ska en lång
-  talrad (8–12 tal) då stå en per rad? 2026-11-27.
-- [ ] **Divisionsknappen: snedstrecket "/" finns kvar i knappsatsen.** Bråkknappen (staplat bråk) lägger in en
-  bråkruta; operatorknappen "/" skriver fortfarande tecknet. Rutor med `maxlength` och `data-nokeypad`, och rutor
-  som redan står i ett bråk, får ingen bråkruta. 2026-11-27.
-
 ## Metodträningen
 
-- [ ] **"Nytt blad" efter bankens sista uppgift gör ingenting.** Knappen står kvar, men samma uppgift visas igen (mätt
-  i k3 d1 T6 med 10 uppgifter: blad 11 och 12 är blad 10). Fråga till Joachim: ska banken börja om, ska knappen
-  försvinna, eller är det rätt som det är? Mätt 2026-11-27 (`js/motor/arbetsyta/drill.html`).
-
-- [ ] **Det helas H3: gränserna för steget.** Klartexten säger "Steget är högst 60, eller ett jämnt tiotal" men ger
-  ingen nedre gräns och ingen övre gräns för tiotalen. Byggt med steget 3–60, eller ett jämnt tiotal 70–120 (bankens
-  största steg är 120: "25 % är 120 kr"). Konstanterna `H3_MIN` och `H3_TIOTAL_MAX` i `blad-k4-d1-metod.js`;
-  fuzzen prövar samma gränser. Fråga till Joachim: stämmer gränserna? 2026-11-28.
-- [ ] **Stöddokumentet "Byta form": förslaget väntar på Joachims beslut.** Innehållet ligger i
-  `doc/innehall/k4-procent-stod-byta-form.md`; inget är byggt (punkt 4 i ordern 2026-11-27: stanna och föreslå).
-  Förslaget står i rapporten 2026-11-28.
 - [ ] **Delens metodträning: två frågor till Joachim.** (1) D3, 50 %: talregeln har ingen nedre gräns för x ("x högst
   1 200"), så de nya talen kan ge till exempel 50 % av 2 kr. Byggt som regeln står. (2) D5 nr 3 b och c: stegradens
   mittrad "4 % = 25/25 = ▢ elever" har svaret 1, och enheten efter rutan är "elever" (klartextens facit: "1 elev").

@@ -36,6 +36,10 @@
 }
 
 /* Skalets formgivning (arbetsytan): js/motor/arbetsyta/arbetsyta.css. Bladkärnans: karna-b-grund.css. */
+/* STÖDDOKUMENTET (?stod=, Joachim 2026-11-28): inga rutor, så inga kontrollknappar och ingen knappsats. */
+body.nf-stod .ovn-kontroll-rad, body.nf-stod .ovn-sammanf, body.nf-stod #ovn-keypad-shared{ display:none !important; }
+/* Inledningen i samma storlek och färg som meningarna under rubrikerna (bråket i den står staplat). */
+body.nf-stod .ovn-intro{ font-size:21px; line-height:1.8; color:var(--ink); }
 </style>
 </head>
 <body>
@@ -83,6 +87,7 @@
 <script src="../../../js/motor/blad/blad-k4-d1-andelen.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-delen.js"></script>
 <script src="../../../js/motor/blad/blad-k4-d1-hela.js"></script>
+<script src="../../../js/motor/blad/blad-k4-stod.js"></script>
 <script src="../../../js/motor/blad/nivarad.js"></script>
 <script src="../../../js/data/forelasningar.js"></script>
 <script src="../../../js/motor/arbetsyta/arbetsyta.js"></script>
@@ -117,6 +122,20 @@
       } });
     var kpT = document.getElementById('ovn-keypad-shared');
     if(kpT) AY.placera({ keypad: kpT, knapprader: '.nf-yta .ovn-kontroll-rad' });
+    return;
+  }
+  /* STÖDDOKUMENTET (?stod=byta-form, Joachim 2026-11-28): Joachims text (blad-k4-stod.js), ett blad utan växel och
+     utan rutor — kontrollknapparna och knappsatsen döljs (body.nf-stod). Tillbaka: momentet man kom från (?moment=),
+     eller ?retur= från åk 8 och 9. */
+  var STODEN = window.BLAD_K4_STOD, sb = q.get('stod') && STODEN ? STODEN.blad(q.get('stod')) : null;
+  if(sb){
+    nav.hidden = true;
+    document.body.classList.add('nf-stod');
+    document.title = 'Matematik · Procent · ' + sb.titel;
+    AY.vaxel({ nav: nav, yta: yta, varianter: [''], start: '',
+      id: function(){ return 'sheet-stod-' + q.get('stod'); }, etikett: function(){ return sb.titel; },
+      rita: function(mnt){ window.bygg_blad(mnt, sb); },
+      vidVisa: function(){ window.NF_BLAD = 'stod-' + q.get('stod'); } });
     return;
   }
   var MO = DATA.MOMENT, NR = window.NivaRad;

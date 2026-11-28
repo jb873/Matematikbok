@@ -480,9 +480,8 @@ function draH2(m){ return function(rnd){
 }; }
 // H3: p är 25, 75, 20, 50, 40, 60 eller 80; steget är bråket (25 % = 1/4, 20 % = 1/5, 50 % = 1/2). 75 %: 25 % = x/3.
 // 40, 60 och 80 %: 20 % = x/2, x/3, x/4. 25, 20 och 50 %: mittraden tom, 100 % = 4 · x, 5 · x, 2 · x. x är delbart med
-// täljarens tal, så att steget är ett heltal. Steget är högst 60, eller ett jämnt tiotal. Mallen bestämmer procenttalet.
-// GRÄNSERNA som klartexten inte anger (frågan står i doc/KO.md): steget minst 3; som jämnt tiotal över 60 högst 120
-// (bankens största steg: 25 % är 120 kr).
+// täljarens tal, så att steget är ett heltal. Steget är 3–60, eller ett jämnt tiotal 70–120 (Joachim 2026-11-28).
+// Mallen bestämmer procenttalet.
 var H3_STEG = { 25: 25, 75: 25, 20: 20, 50: 50, 40: 20, 60: 20, 80: 20 }, H3_MIN = 3, H3_TIOTAL_MAX = 120;
 function radH3(x){ return uA(fragaH(x.p, x.x), [ hh(null, x.p, x.x, H3_STEG[x.p], KR) ]); }
 function draH3(m){ return function(rnd){

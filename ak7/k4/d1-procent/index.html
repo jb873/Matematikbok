@@ -114,6 +114,8 @@ var MOMENT = [
 ];
 
 var scen = document.getElementById('scen-moment');
+// ELEVTEXT som fält (elevtext-låset ser fältnamnen): länken "Stöd: Byta form" (Joachim 2026-11-28).
+var STOD_TEXT = { nr: { etikett: 'Stöd:' }, namn: { etikett: 'Byta form' } };
 
 function visaMoment(m){
   scen.innerHTML = '';
@@ -123,6 +125,12 @@ function visaMoment(m){
   var S3 = M.metodtraning(scen, METOD);
   // UPPGIFTER — ett blad per rad. SPÄRREN (NivaRad, §3): ett blad som inte är nått står med 🔒, utan länk.
   var l1 = el('div', 'nf-lista');
+  // STÖDDOKUMENTET "Byta form" (Joachim 2026-11-28): första raden i alla fyra momenten, aldrig låst. Uppgiftssidan
+  // ?stod=byta-form; ?moment= så att Tillbaka leder till momentet.
+  var stod = el('a', 'nf-blad nf-stod-lank');
+  stod.href = 'uppgift.html?stod=byta-form' + (m.id !== 'byta' ? '&moment=' + m.id : '');
+  stod.appendChild(el('span', 'nf-nr', STOD_TEXT.nr.etikett)); stod.appendChild(el('span', null, STOD_TEXT.namn.etikett));
+  l1.appendChild(stod);
   m.bladen.forEach(function(b){
     var oppet = !window.NivaRad || !m.niva || window.NivaRad.nadd(m.niva.prefix, m.niva.id, b.nr);
     var a = el(oppet && !b.kommer ? 'a' : 'span', 'nf-blad' + (b.kommer ? ' is-kommer' : oppet ? '' : ' is-locked'));

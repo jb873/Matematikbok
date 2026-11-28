@@ -1,4 +1,4 @@
-<!-- KÄLLA: författarchatten, 2026-11-27. Kontrollräknad av ramverkschatten: alla svar stämmer. ÄNDRINGAR (ramverkschatten): H3 nr 4 "50 % är 85 kr" bröt lövets egen talregel (steget högst 60 eller jämnt tiotal) och är bytt mot "50 % är 55 kr" (facit 110 kr). H6 nr 7: "gröna" → "blå" (strackfigur har bara blått som färgval). PLACERING: doc/innehall/k4-d1-procent-moment4-metodtraning.md -->
+<!-- KÄLLA: författarchatten, 2026-11-27. Kontrollräknad av ramverkschatten: alla svar stämmer. ÄNDRINGAR (ramverkschatten): H3 nr 4 "50 % är 85 kr" bröt lövets egen talregel (steget högst 60 eller jämnt tiotal) och är bytt mot "50 % är 55 kr" (facit 110 kr). H6 nr 7: "gröna" → "blå" (strackfigur har bara blått som färgval). ÄNDRING (Joachim 2026-11-28): H3:s gränser för steget, "3–60, eller ett jämnt tiotal 70–120". PLACERING: doc/innehall/k4-d1-procent-moment4-metodtraning.md -->
 
 # Procent åk 7 – metodträning, grenen "Det hela"
 
@@ -124,7 +124,7 @@ ____ % = ____ / ____ = ____
   - 40 %, 60 % och 80 %: 20 % = x/2, x/3 eller x/4, och 100 % = 5 · steget.
   - 25 %, 20 % och 50 %: mittraden tom. 100 % = 4 · x, 5 · x eller 2 · x.
 - x är delbart med täljarens tal (3, 2, 3 eller 4), så att steget är ett heltal.
-- Steget är högst 60, eller ett jämnt tiotal.
+- Steget är 3–60, eller ett jämnt tiotal 70–120.
 
 1. 75 % är 90 kr. Hur mycket är 100 %?
 2. 25 % är 45 kr. Hur mycket är 100 %?

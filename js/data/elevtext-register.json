@@ -2510,6 +2510,9 @@
   "titel | {Procent}"
  ],
  "ak7/k4/d1-procent/index.html": [
+  "etikett | Byta form",
+  "etikett | Stöd:",
+  "namn | {}Byta form",
   "rubrik | Procent",
   "titel | Andel, del och hela med miniräknare",
   "titel | Andelen",
@@ -3139,5 +3142,15 @@
   "titel | Jämföra och hitta felet",
   "titel | Lästal",
   "titel | Rabatten i kronor"
+ ],
+ "js/motor/blad/blad-k4-stod.js": [
+  "etikett | Exempel",
+  "exempel | {}Exempel",
+  "intro | Ett tal kan skrivas på tre sätt: i bråkform, i decimalform och i procentform. Procent betyder hundradelar, så 35 % är detsamma som 35/100.",
+  "rubrik | Byta mellan former",
+  "rubrik | Förkorta till enklaste form",
+  "rubrik | Förkorta till hundradelar",
+  "rubrik | Förlänga till hundradelar",
+  "titel | Byta form"
  ]
 }

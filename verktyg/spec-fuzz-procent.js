@@ -489,7 +489,7 @@ function regelH(lov, r){
     const n = p / S; if(x % n) return 'x ' + x + ' inte delbart med ' + n;
     const v = x / n;
     if(v > 60 && v % 10) return 'steget ' + v + ' (högst 60 eller ett jämnt tiotal)';
-    if(v < 3 || v > 120) return 'steget ' + v + ' utanför 3–120 (gränserna i KO.md)';
+    if(v < 3 || v > 120) return 'steget ' + v + ' utanför 3–60 och 70–120';
     return null;
   }
   return 'okänt löv';
